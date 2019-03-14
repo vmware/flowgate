@@ -210,11 +210,39 @@ public class SycnRealTimeDataJobTest {
    public void testGenerateValueUnits() {
       List<PowerStripsRealtimeValue> values = getPowerStripsRealtimeValue().getBody().getValue();
       HashMap<AdvanceSettingType, String> advanceSettingMap = new HashMap<AdvanceSettingType, String>();
-      advanceSettingMap.put(AdvanceSettingType.DateFormat, "yyyy-MM-dd'T'HH:mm:ss'Z'");
+      advanceSettingMap.put(AdvanceSettingType.DateFormat, NlyteDataService.DateFormat);
       advanceSettingMap.put(AdvanceSettingType.TimeZone, "GMT");
+      advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, "%");
+      advanceSettingMap.put(AdvanceSettingType.PDU_AMPS_UNIT, "A");
+      advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, "KW");
+      advanceSettingMap.put(AdvanceSettingType.PDU_VOLT_UNIT, "V");
+      advanceSettingMap.put(AdvanceSettingType.TEMPERATURE_UNIT, "C");
       List<ValueUnit> valueunits = nlyteDataService.generateValueUnits(values,advanceSettingMap);
       TestCase.assertEquals(3, valueunits.size());
       TestCase.assertEquals(1537454125000l, valueunits.get(0).getTime());
+      TestCase.assertEquals(20.0, valueunits.get(0).getValueNum());
+      TestCase.assertEquals(20.0, valueunits.get(1).getValueNum());
+      TestCase.assertEquals(120.0, valueunits.get(2).getValueNum());
+      
+   }
+   
+   @Test
+   public void testGenerateValueUnits2() {
+      List<PowerStripsRealtimeValue> values = getPowerStripsRealtimeValue1().getBody().getValue();
+      HashMap<AdvanceSettingType, String> advanceSettingMap = new HashMap<AdvanceSettingType, String>();
+      advanceSettingMap.put(AdvanceSettingType.DateFormat, NlyteDataService.DateFormat);
+      advanceSettingMap.put(AdvanceSettingType.TimeZone, "GMT");
+      advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, "%");
+      advanceSettingMap.put(AdvanceSettingType.PDU_AMPS_UNIT, "A");
+      advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, "KW");
+      advanceSettingMap.put(AdvanceSettingType.PDU_VOLT_UNIT, "V");
+      advanceSettingMap.put(AdvanceSettingType.TEMPERATURE_UNIT, "C");
+      List<ValueUnit> valueunits = nlyteDataService.generateValueUnits(values,advanceSettingMap);
+      TestCase.assertEquals(3, valueunits.size());
+      TestCase.assertEquals(1537454125000l, valueunits.get(0).getTime());
+      TestCase.assertEquals(20.0, valueunits.get(0).getValueNum());
+      TestCase.assertEquals(20.0, valueunits.get(1).getValueNum());
+      TestCase.assertEquals(120.0, valueunits.get(2).getValueNum());
       
    }
 
@@ -231,7 +259,7 @@ public class SycnRealTimeDataJobTest {
       Asset asset = createAsset();
       asset.setId("5x4ff46982db22e1b040e0f2");
       HashMap<AdvanceSettingType, String> advanceSettingMap = new HashMap<AdvanceSettingType, String>();
-      advanceSettingMap.put(AdvanceSettingType.DateFormat, "yyyy-MM-dd'T'HH:mm:ss'Z'");
+      advanceSettingMap.put(AdvanceSettingType.DateFormat, NlyteDataService.DateFormat);
       advanceSettingMap.put(AdvanceSettingType.TimeZone, "GMT");
       RealTimeData data =  nlyteDataService.generateRealTimeData(asset, nlyteAPIClient,advanceSettingMap);
       TestCase.assertEquals("5x4ff46982db22e1b040e0f2", data.getAssetID());
@@ -250,7 +278,7 @@ public class SycnRealTimeDataJobTest {
 
    public ResponseEntity<FacilitySoftwareConfig []> getFacilitySoftwareByType(){
       HashMap<AdvanceSettingType, String> advanceSettingMap = new HashMap<AdvanceSettingType, String>();
-      advanceSettingMap.put(AdvanceSettingType.DateFormat, "yyyy-MM-dd'T'HH:mm:ss'Z'");
+      advanceSettingMap.put(AdvanceSettingType.DateFormat, NlyteDataService.DateFormat);
       advanceSettingMap.put(AdvanceSettingType.TimeZone, "GMT");
       FacilitySoftwareConfig []configs = new FacilitySoftwareConfig[1];
       configs[0] = new FacilitySoftwareConfig();
@@ -293,6 +321,30 @@ public class SycnRealTimeDataJobTest {
       current.setName("RealtimeLoad");
       current.setUnit("Amps");
       current.setValue(20);
+      current.setRecordedDateTime("2018-09-20T14:35:25Z");
+      value.add(current);
+      PowerStripsRealtimeValue voltage = new PowerStripsRealtimeValue();
+      voltage.setName("RealtimeVoltage");
+      voltage.setUnit("Volts");
+      voltage.setValue(120);
+      voltage.setRecordedDateTime("2018-09-20T14:35:25Z");
+      value.add(voltage);
+      pduvalue.setValue(value);
+      return new ResponseEntity<JsonResultForPDURealtimeValue>(pduvalue,HttpStatus.OK);
+   }
+   
+   public ResponseEntity<JsonResultForPDURealtimeValue> getPowerStripsRealtimeValue1(){
+      JsonResultForPDURealtimeValue pduvalue = new JsonResultForPDURealtimeValue();
+      List<PowerStripsRealtimeValue> value = new ArrayList<PowerStripsRealtimeValue>();
+      PowerStripsRealtimeValue power = new PowerStripsRealtimeValue();
+      power.setName("RealtimePower");
+      power.setValue(20);
+      power.setRecordedDateTime("2018-09-20T14:35:25Z");
+      value.add(power);
+      PowerStripsRealtimeValue current = new PowerStripsRealtimeValue();
+      current.setName("RealtimeLoad");
+      current.setValue(20);
+      current.setUnit("");
       current.setRecordedDateTime("2018-09-20T14:35:25Z");
       value.add(current);
       PowerStripsRealtimeValue voltage = new PowerStripsRealtimeValue();

@@ -5,6 +5,7 @@
 package com.vmware.wormhole.nlyteworker.scheduler.job;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +28,10 @@ import com.vmware.wormhole.common.AssetCategory;
 import com.vmware.wormhole.common.exception.WormholeException;
 import com.vmware.wormhole.common.model.Asset;
 import com.vmware.wormhole.common.model.FacilitySoftwareConfig;
-import com.vmware.wormhole.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.wormhole.common.model.RealTimeData;
 import com.vmware.wormhole.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.wormhole.common.model.ValueUnit;
+import com.vmware.wormhole.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.wormhole.common.model.ValueUnit.MetricUnit;
 import com.vmware.wormhole.common.model.ValueUnit.ValueType;
 import com.vmware.wormhole.common.model.redis.message.AsyncService;
@@ -55,7 +55,7 @@ import com.vmware.wormhole.nlyteworker.scheduler.job.common.HandleAssetUtil;
 @Service
 public class NlyteDataService implements AsyncService {
    private static final Logger logger = LoggerFactory.getLogger(NlyteDataService.class);
-
+   
    @Autowired
    private WormholeAPIClient restClient;
 
@@ -68,11 +68,11 @@ public class NlyteDataService implements AsyncService {
    @Autowired
    private ServiceKeyConfig serviceKeyConfig;
    private ObjectMapper mapper = new ObjectMapper();
-   private static final String DateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+   public static final String DateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
    public static final String RealtimeLoad = "RealtimeLoad";
    public static final String RealtimePower = "RealtimePower";
    public static final String RealtimeVoltage = "RealtimeVoltage";
-   public static Map<String,ValueType> sensorValueTypeMap =
+   public static Map<String,ValueType> sensorValueTypeMap = 
          new HashMap<String,ValueType>();
    public static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
    static {
@@ -85,7 +85,7 @@ public class NlyteDataService implements AsyncService {
       sensorType = Collections.unmodifiableList(sensorType);
       sensorValueTypeMap = Collections.unmodifiableMap(sensorValueTypeMap);
    }
-
+   
    @Override
    public void executeAsync(EventMessage message) {
       if (message.getType() != EventType.Nlyte) {
@@ -208,7 +208,8 @@ public class NlyteDataService implements AsyncService {
       List<Asset> newServersNeedToSave = generateNewAsset(nlyte.getId(), nlyteAssets, locationMap,
             manufacturerMap, materialMap,AssetCategory.Server);
       restClient.saveAssets(newServersNeedToSave);
-
+      logger.info("Finish sync the servers data for: " + nlyte.getName());
+      
       HashMap<Integer, Material> pduMaterialMap = new HashMap<Integer, Material>();
       nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.PDU);
       List<Material> powerStripMaterials =
@@ -217,10 +218,11 @@ public class NlyteDataService implements AsyncService {
          material.setMaterialType(AssetCategory.PDU);
          pduMaterialMap.put(material.getMaterialID(), material);
       }
-      List<Asset> newPDUsNeedToSave = generateNewAsset(nlyte.getId(), nlyteAssets, locationMap,
+      List<Asset> newPDUsNeedToSave = generateNewAsset(nlyte.getId(), nlyteAssets, locationMap, 
             manufacturerMap, pduMaterialMap,AssetCategory.PDU);
       restClient.saveAssets(newPDUsNeedToSave);
-
+      logger.info("Finish sync the pdus data for: " + nlyte.getName());
+      
       HashMap<Integer, Material> cabinetMaterialMap = new HashMap<Integer, Material>();
       nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Cabinet);
       List<Material> cabinetMaterials =
@@ -232,6 +234,20 @@ public class NlyteDataService implements AsyncService {
       List<Asset> newCabinetsNeedToSave = generateNewAsset(nlyte.getId(), nlyteAssets, locationMap,
             manufacturerMap, cabinetMaterialMap,AssetCategory.Cabinet);
       restClient.saveAssets(newCabinetsNeedToSave);
+      logger.info("Finish sync the cabinets data for: " + nlyte.getName());
+      
+      HashMap<Integer, Material> networkMaterialMap = new HashMap<Integer, Material>();
+      nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Networks);
+      List<Material> networkMaterials =
+            nlyteAPIclient.getMaterials(true, HandleAssetUtil.networkMaterials);
+      for (Material material : networkMaterials) {
+         material.setMaterialType(AssetCategory.Networks);
+         networkMaterialMap.put(material.getMaterialID(), material);
+      }
+      List<Asset> newNetworkersNeedToSave = generateNewAsset(nlyte.getId(), nlyteAssets, locationMap,
+            manufacturerMap, networkMaterialMap,AssetCategory.Networks);
+      restClient.saveAssets(newNetworkersNeedToSave);
+      logger.info("Finish sync the networks data for: " + nlyte.getName());
    }
 
    public List<Asset> generateNewAsset(String nlyteSource, List<NlyteAsset> nlyteAssets,
@@ -244,7 +260,7 @@ public class NlyteDataService implements AsyncService {
       if(result != null) {
          oldAssetsFromWormhole =  Arrays.asList(result.getBody());
       }
-
+      
       Map<String, Asset> assetsFromWormholeMap = assetUtil.generateAssetsMap(oldAssetsFromWormhole);
       List<Asset> newAssetsFromNlyte = assetUtil.getAssetsFromNlyte(nlyteSource, nlyteAssets,
             locationMap, materialMap, manufacturerMap);
@@ -308,12 +324,33 @@ public class NlyteDataService implements AsyncService {
             }
          }
       }
-      if(advanceSettingMap.get(AdvanceSettingType.DateFormat) == null) {
+      String dateformat = advanceSettingMap.get(AdvanceSettingType.DateFormat);
+      if(dateformat == null || dateformat.trim().isEmpty()) {
          advanceSettingMap.put(AdvanceSettingType.DateFormat, DateFormat);
       }
+	  if(advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT) == null || 
+			  advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT).isEmpty()) {
+	     advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, MetricUnit.PERCENT.toString());
+	  }
+	  if(advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT) == null || 
+			  advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT).isEmpty()) {
+	     advanceSettingMap.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
+	  }
+	  if(advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT) == null ||
+			  advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT).isEmpty()) {
+	     advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
+	  }
+	  if(advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT) == null || 
+			  advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT).isEmpty()) {
+	     advanceSettingMap.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.V.toString());
+	  }
+	  if(advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT) == null || 
+			  advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT).isEmpty() ) {
+	     advanceSettingMap.put(AdvanceSettingType.TEMPERATURE_UNIT, MetricUnit.C.toString());
+	  }
       return advanceSettingMap;
    }
-
+   
    public List<RealTimeData> getRealTimeDatas(NlyteAPIClient nlyteAPIclient,
          FacilitySoftwareConfig facilitySoftwareConfig, Set<String> assetIds) {
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
@@ -381,6 +418,10 @@ public class NlyteDataService implements AsyncService {
       long currenttime = System.currentTimeMillis();
       String dateFormat = advanceSettingMap.get(AdvanceSettingType.DateFormat);
       String timezone = advanceSettingMap.get(AdvanceSettingType.TimeZone);
+      String current = advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT);
+      String power = advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT);
+      String voltage = advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT);
+      
       for (PowerStripsRealtimeValue value : values) {
          String valueDateTime = value.getRecordedDateTime();
          long recordedTime = WormholeDateFormat.getLongTime(valueDateTime,dateFormat,timezone);
@@ -391,34 +432,53 @@ public class NlyteDataService implements AsyncService {
          if(sensorValueTypeMap.containsKey(value.getName())) {
             ValueUnit valueunit = new ValueUnit();
             valueunit.setKey(sensorValueTypeMap.get(value.getName()));
-            valueunit.setUnit(value.getUnit());
-            String a = String.valueOf(value.getValue());
+            
+            String unit = value.getUnit();
 
-            MetricUnit targetUnit = null;
+            MetricUnit targetUnit = null, sourceUnit = null;
             switch(sensorValueTypeMap.get(value.getName())) {
                 case PDU_RealtimeLoad:
+                	if(unit != null && !unit.isEmpty())
+                    {
+                		sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
+                    }else {
+                    	sourceUnit = MetricUnit.valueOf(current.toUpperCase());
+                    }
                     targetUnit = MetricUnit.A;
                     break;
                 case PDU_RealtimePower:
+                	if(unit != null && !unit.isEmpty())
+                    {
+                		sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
+                    }else {
+                    	sourceUnit = MetricUnit.valueOf(power.toUpperCase());
+                    }
                     targetUnit = MetricUnit.KW;
                     break;
                 case PDU_RealtimeVoltage:
+                	if(unit != null && !unit.isEmpty())
+                    {
+                		sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
+                    }else {
+                    	sourceUnit = MetricUnit.valueOf(voltage.toUpperCase());
+                    }
                     targetUnit = MetricUnit.V;
                     break;
                 default:
                     break;
             }
+            valueunit.setUnit(targetUnit.toString());
             try {
-                valueunit.setValueNum(Double.parseDouble(valueunit.translateUnit(String.valueOf(value.getValue()), MetricUnit.valueOf(value.getUnit().toUpperCase()), targetUnit)));
-           } catch (WormholeException e) {
+                valueunit.setValueNum(Double.parseDouble(valueunit.translateUnit(String.valueOf(value.getValue()), sourceUnit, targetUnit)));
+            } catch (WormholeException e) {
                logger.error("Cannot translate Unit", e);
-           }
+            }
             valueunit.setTime(recordedTime);
             valueunits.add(valueunit);
          }else {
             continue;
          }
-
+         
       }
       return valueunits;
    }
@@ -444,5 +504,16 @@ public class NlyteDataService implements AsyncService {
       }
       saveAssetForMappedData(nlyte.getId(), nlyteAssets, locationMap, pduMaterialMap,
             manufacturerMap, AssetCategory.PDU);
+      
+      HashMap<Integer, Material> networksMaterialMap = new HashMap<Integer, Material>();
+      nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Networks);
+      List<Material> networkMaterials =
+            nlyteAPIclient.getMaterials(true, HandleAssetUtil.networkMaterials);
+      for (Material material : networkMaterials) {
+         material.setMaterialType(AssetCategory.Networks);
+         networksMaterialMap.put(material.getMaterialID(), material);
+      }
+      saveAssetForMappedData(nlyte.getId(), nlyteAssets, locationMap, networksMaterialMap,
+            manufacturerMap, AssetCategory.Networks);
    }
 }
