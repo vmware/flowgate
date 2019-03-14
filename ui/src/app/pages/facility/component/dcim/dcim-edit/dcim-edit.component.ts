@@ -42,7 +42,12 @@ export class DcimEditComponent implements OnInit {
     verifyCert:"true",
     advanceSetting:{
       DateFormat:"",
-      TimeZone:""
+      TimeZone:"",
+      PDU_POWER_UNIT:"",
+      PDU_AMPS_UNIT:"",
+      PDU_VOLT_UNIT:"",
+      TEMPERATURE_UNIT:"",
+      HUMIDITY_UNIT:""
     }
   }
   read = "";/** This property is to change the read-only attribute of the password input box*/
@@ -64,7 +69,12 @@ export class DcimEditComponent implements OnInit {
   save(){
       this.advanceSetting = JSON.stringify({
         "DateFormat":this.dcimConfig.advanceSetting.DateFormat,
-        "TimeZone":this.dcimConfig.advanceSetting.TimeZone
+        "TimeZone":this.dcimConfig.advanceSetting.TimeZone,
+        "PDU_POWER_UNIT":this.dcimConfig.advanceSetting.PDU_POWER_UNIT,
+        "PDU_AMPS_UNIT":this.dcimConfig.advanceSetting.PDU_AMPS_UNIT,
+        "PDU_VOLT_UNIT":this.dcimConfig.advanceSetting.PDU_VOLT_UNIT,
+        "TEMPERATURE_UNIT":this.dcimConfig.advanceSetting.TEMPERATURE_UNIT,
+        "HUMIDITY_UNIT":this.dcimConfig.advanceSetting.HUMIDITY_UNIT
       });
   
       this.read = "readonly";
@@ -128,6 +138,17 @@ export class DcimEditComponent implements OnInit {
           if(data.status == 200){
             if(data.json != null){
               this.dcimConfig = data.json();
+              if(data.json().advanceSetting == null){
+                this.dcimConfig.advanceSetting = {
+                  DateFormat:"",
+                  TimeZone:"",
+                  PDU_POWER_UNIT:"KW",
+                  PDU_AMPS_UNIT:"A",
+                  PDU_VOLT_UNIT:"V",
+                  TEMPERATURE_UNIT:"C",
+                  HUMIDITY_UNIT:"%"
+                }
+              }
               this.checked =  data.json().verifyCert;
               if(this.checked == false){
                 this.dcimConfig.verifyCert = "false";
