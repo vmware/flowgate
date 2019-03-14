@@ -39,7 +39,12 @@ export class DcimAddComponent implements OnInit {
     verifyCert:"true",
     advanceSetting:{
       DateFormat:"",
-      TimeZone:""
+      TimeZone:"",
+      PDU_POWER_UNIT:"KW",
+      PDU_AMPS_UNIT:"A",
+      PDU_VOLT_UNIT:"V",
+      TEMPERATURE_UNIT:"C",
+      HUMIDITY_UNIT:"%"
     }
   }
   read = "";/** This property is to change the read-only attribute of the password input box*/
@@ -63,7 +68,12 @@ export class DcimAddComponent implements OnInit {
      
       this.advanceSetting = JSON.stringify({
         "DateFormat":this.dcimConfig.advanceSetting.DateFormat,
-        "TimeZone":this.dcimConfig.advanceSetting.TimeZone
+        "TimeZone":this.dcimConfig.advanceSetting.TimeZone,
+        "PDU_POWER_UNIT":this.dcimConfig.advanceSetting.PDU_POWER_UNIT,
+        "PDU_AMPS_UNIT":this.dcimConfig.advanceSetting.PDU_AMPS_UNIT,
+        "PDU_VOLT_UNIT":this.dcimConfig.advanceSetting.PDU_VOLT_UNIT,
+        "TEMPERATURE_UNIT":this.dcimConfig.advanceSetting.TEMPERATURE_UNIT,
+        "HUMIDITY_UNIT":this.dcimConfig.advanceSetting.HUMIDITY_UNIT
       });
 
       this.read = "readonly";
@@ -77,7 +87,6 @@ export class DcimAddComponent implements OnInit {
           }
         },
         error=>{
-          console.info(error)
           if(error.status == 400 && error.json().errors[0] == "Invalid SSL Certificate"){
             this.loading = false;
             this.verify = true;

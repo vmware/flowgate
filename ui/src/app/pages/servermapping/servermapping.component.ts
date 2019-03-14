@@ -18,7 +18,7 @@ export class ServermappingComponent implements OnInit {
   constructor(private service:ServermappingService,private router: Router, private route: ActivatedRoute) { }
   modal="";
   basic=false;
-
+  clrAlertClosed:boolean = true;
   currentPage:number = 1;
   totalPage:number = 1;
   pageSize:string = '5';
@@ -158,6 +158,10 @@ export class ServermappingComponent implements OnInit {
     this.opend = true;
     this.getAssets();
   }
+  deleteServerMapping(id){
+    this.serverMappingId = id;
+    this.basic = true;
+  }
   search(){
     this.pageSizeAsset = 5;
     this.currentPageAsset = 1;
@@ -209,6 +213,25 @@ export class ServermappingComponent implements OnInit {
 
   ngOnInit() {
     this.getServerConfigs();
+  }
+
+  cancel(){
+    this.basic = false;
+    this.serverMappingId = "";
+  }
+  confirm(){
+    this.service.deleteServerMapping(this.serverMappingId).subscribe(data=>{
+      
+      if(data.status == 200){
+        this.basic = false;
+        this.getServerMappings();
+      }else{
+        this.basic = false;
+      }
+    },
+    error=>{
+      this.basic = false;
+    })
   }
 
 }

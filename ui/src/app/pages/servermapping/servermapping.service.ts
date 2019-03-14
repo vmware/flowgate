@@ -66,4 +66,10 @@ export class ServermappingService {
     
     return this.http.put(""+this.API_URL+"/v1/assets/mapping", body,this.options).map((res)=>res)
   }
+  deleteServerMapping(id){
+    let header = new Headers({ 'Content-Type': 'application/json' });
+    header.append("Authorization",'Bearer ' + this.auth.getToken());
+    this.options = new RequestOptions({ headers: header });
+    return this.http.delete(""+this.API_URL+"/v1/assets/mapping/"+id,this.options).map((res)=>res)
+  }
 }

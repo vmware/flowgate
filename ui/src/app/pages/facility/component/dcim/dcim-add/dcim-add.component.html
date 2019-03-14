@@ -162,6 +162,78 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             <span class="tooltip-content">This will set the data timezone to a specific timezone. Leave it as blank unless you understanding the affect of the changes.</span>
                         </a>
                     </div>
+                    <div class="form-group" *ngIf="commonAdvanceSettingShow">
+                        <label>Power Unit</label>
+                            <div class="select" style="width:184px; ">
+                                <select [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.advanceSetting.PDU_POWER_UNIT" > 
+                                        <option value="" >Please Select </option>
+                                        <option value="MW" >MW</option>
+                                        <option value='W' >W</option>
+                                        <option value='KW'>KW</option>
+                                </select>
+                            </div>
+                        <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg tooltip-right">
+                            <clr-icon shape="info-circle" size="24"></clr-icon>
+                            <span class="tooltip-content">This will set the unit of power. Leave it as default value unless you understanding the affect of the changes.</span>
+                        </a>
+                    </div>
+                    <div class="form-group" *ngIf="commonAdvanceSettingShow">
+                        <label>Current Unit</label>
+                            <div class="select" style="width:184px; ">
+                                <select [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.advanceSetting.PDU_AMPS_UNIT" > 
+                                        <option value="" >Please Select </option>
+                                        <option value="MA" >MA</option>
+                                        <option value='A' >A</option>
+                                        <option value='KA' >KA</option>
+                                </select>
+                            </div>
+                        <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg tooltip-right">
+                            <clr-icon shape="info-circle" size="24"></clr-icon>
+                            <span class="tooltip-content">This will set the unit of current. Leave it as default value unless you understanding the affect of the changes.</span>
+                        </a>
+                    </div>
+                    <div class="form-group" *ngIf="commonAdvanceSettingShow">
+                        <label>Voltage Unit</label>
+                            <div class="select" style="width:184px; ">
+                                <select [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.advanceSetting.PDU_VOLT_UNIT" > 
+                                        <option value="" >Please Select </option>
+                                        <option value="MV" >MV</option>
+                                        <option value='V' >V</option>
+                                        <option value='KV' >KV</option>
+                                </select>
+                            </div>
+                        <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg tooltip-right">
+                            <clr-icon shape="info-circle" size="24"></clr-icon>
+                            <span class="tooltip-content">This will set the unit of voltage. Leave it as default value unless you understanding the affect of the changes.</span>
+                        </a>
+                    </div>
+                    <div class="form-group" *ngIf="commonAdvanceSettingShow">
+                        <label>Temperature Unit</label>
+                            <div class="select" style="width:184px; ">
+                                <select [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.advanceSetting.TEMPERATURE_UNIT" > 
+                                        <option value="" >Please Select </option>
+                                        <option value="C" >C</option>
+                                        <option value='F' >F</option>
+                                </select>
+                            </div>
+                        <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg tooltip-right">
+                            <clr-icon shape="info-circle" size="24"></clr-icon>
+                            <span class="tooltip-content">This will set the unit of temperature. Leave it as default value unless you understanding the affect of the changes.</span>
+                        </a>
+                    </div>
+                    <div class="form-group" *ngIf="commonAdvanceSettingShow">
+                        <label>Humidity Unit</label>
+                            <div class="select" style="width:184px; ">
+                                <select [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.advanceSetting.HUMIDITY_UNIT" > 
+                                        <option value="" >Please Select </option>
+                                        <option value="%" >%</option>
+                                </select>
+                            </div>
+                        <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg tooltip-right">
+                            <clr-icon shape="info-circle" size="24"></clr-icon>
+                            <span class="tooltip-content">This will set the unit of humidity. Leave it as default value unless you understanding the affect of the changes.</span>
+                        </a>
+                    </div>
                     <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="DcimForm.form.invalid">Submit</button>
                     <button type="button" class="btn btn-primary" on-click ="cancel()">Cancel</button>         
                 </section>

@@ -58,6 +58,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 <clr-dg-cell>{{serverMapping.asset}}</clr-dg-cell>
                 <clr-dg-cell><button class="btn btn-outline" on-click="updateAssetID(serverMapping.id)">Mapping assetID</button>
                                 <button class="btn btn-outline">Mapping sensor</button>
+                                <button class="btn btn-outline" on-click="deleteServerMapping(serverMapping.id)">Delete</button>
                 </clr-dg-cell>
                 
         </clr-dg-row>
@@ -130,5 +131,15 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="cancelAsset()">Cancel</button>
             <button type="button" class="btn btn-primary" (click)="confirmAsset(selectedAsset.id)">Ok</button>
+        </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
+        <h3 class="modal-title">Delete Mapping</h3>
+        <div class="modal-body">
+                <p>Are you sure to delete the mapping item?</p>
+        </div>
+        <div class="modal-footer">
+                <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="confirm()">Ok</button>
         </div>
 </clr-modal>
