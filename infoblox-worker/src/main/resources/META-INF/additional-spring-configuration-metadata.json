@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "redis.topic",
+    "type": "java.lang.String",
+    "description": "Redis topic name"
+  },
+  {
+    "name": "asyncservice.corepool.size",
+    "type": "java.lang.Integer",
+    "description": "A description for 'asynservice.corepool.size'"
+  },
+  {
+    "name": "asyncservice.queue.capacity",
+    "type": "java.lang.Integer",
+    "description": "A description for 'asyncservice.queue.capacity'"
+  },
+  {
+    "name": "asyncservice.maxpool.size",
+    "type": "java.lang.Integer",
+    "description": "A description for 'asyncservice.maxpool.size'"
+  }
+]}

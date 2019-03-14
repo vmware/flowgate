@@ -1,0 +1,29 @@
+<!-- Copyright 2019 VMware, Inc.
+SPDX-License-Identifier: BSD-2-Clause -->
+<div class="login-wrapper">
+  <form class="login" action ="">
+      <label class="title">
+          <h3 class="welcome">Welcome to</h3>
+          Wormhole
+      </label>
+     
+      <div class="login-group">
+          <input class="username" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.username" type="text" id="login_username" placeholder="Username"/>
+          <input class="password" [ngModelOptions]="{standalone: true}" [(ngModel)]="user.password" type="password" id="login_password" placeholder="Password"/>
+          <div class="checkbox">
+              <input type="checkbox" id="rememberme"/>
+              <label for="rememberme">
+                  Remember me
+              </label>
+          </div>
+          
+          <div *ngIf="tips" class="error active">
+              {{textContent}}
+              
+          </div>
+          <button type="submit" on-click="toLogin()" class="btn btn-primary"  >login</button>
+          <!-- <a href="javascript://" class="signup">Sign up for a Company ID</a> -->
+      </div>
+  </form>
+</div>
+

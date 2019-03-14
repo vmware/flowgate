@@ -1,0 +1,240 @@
+<!-- Copyright 2019 VMware, Inc.
+SPDX-License-Identifier: BSD-2-Clause -->
+<button class="btn btn-primary btn-icon" style="margin-right: 12px" (click)="toAddrole()" *appHasPrivilege=addrole>
+  <clr-icon shape="plus">
+    </clr-icon>
+    <font style="vertical-align: inherit;">
+      <font style="vertical-align: inherit;"  >Create a role</font>
+     </font>
+</button>
+<clr-datagrid>
+
+ <clr-dg-column>RoleName</clr-dg-column>
+ <clr-dg-column>Privilege</clr-dg-column>
+ <clr-dg-placeholder>We couldn't find any roles!</clr-dg-placeholder>
+
+<clr-dg-row *ngFor="let role of roles">
+   <clr-dg-action-overflow>
+
+       <button class="action-item" [disabled]="checkadmin(role.roleName)" (click)="onEdit(role.id,role.roleName,role.privilegeNames)" *appHasPrivilege=updaterole>Edit</button>
+       <button class="action-item" [disabled]="checkadmin(role.roleName)" (click)="onDelete(role.id)" *appHasPrivilege=deleterole>Delete</button>
+   </clr-dg-action-overflow>
+     <clr-dg-cell>{{role.roleName}}</clr-dg-cell>
+     <clr-dg-cell><button class="btn btn-sm" style="margin: 0px;" (click)="showprivilege(role.privilegeNames)">show more</button></clr-dg-cell>
+</clr-dg-row>
+
+
+<clr-dg-footer *ngIf="roles.length>0">
+       <!-- <clr-dg-pagination #pagination [clrDgPageSize]="1"> -->
+         <ul class="pagination">
+             <li style="padding-top: 5px;"><div class="select">
+               <select id="selects_1" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;setInfo()">
+                 <option>5</option>
+                 <option>10</option>
+                 <option>20</option>
+                 <option>50</option>
+             </select></div>
+           </li>
+              <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
+              <li class="pagination-current">{{currentPage}}/{{totalPage}}</li>
+              <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button></li>
+          </ul>
+       <!-- </clr-dg-pagination> -->
+</clr-dg-footer>
+</clr-datagrid>
+
+ <clr-modal [(clrModalOpen)]="updateprivilege">
+    <h3 class="modal-title">Owned Privileges</h3>
+    <div class="modal-body">
+        
+        <div class="row">
+            <div class="col-lg-1 col-md-12 col-sm-12 col-xs-12">
+
+            </div>
+            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12">
+                <clr-datagrid >
+                    <clr-dg-column>Privilege</clr-dg-column>
+                    <clr-dg-placeholder>We couldn't find any privileges!</clr-dg-placeholder>
+                    
+                    <clr-dg-row  *ngFor="let item1 of rolePrivilege">              
+                   
+                        <clr-dg-cell>{{item1}}</clr-dg-cell>
+                    </clr-dg-row>
+                </clr-datagrid>
+            </div> 
+            <div class="col-lg-1 col-md-12 col-sm-12 col-xs-12">
+
+                </div>
+        </div>
+    </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
+   <h3 class="modal-title">Operation tips</h3>
+   <div class="modal-body">
+       <clr-alert [(clrAlertClosed)] = "deleteOptionTipClosed"  [clrAlertType]="'alert-danger'" >
+           <div class="alert-item">
+               <span class="alert-text">
+                   Operation failed.
+               </span>
+           </div>
+       </clr-alert>
+       <p>Are you sure you want to delete this data? This action is permenant and cannot be recovered.</p>
+   </div>
+   <div class="modal-footer">
+       <button type="button" class="btn btn-outline" (click)="canceldelete()">Cancel</button>
+       <button type="button" class="btn btn-primary" (click)="confirmdelete()">Ok</button>
+   </div>
+</clr-modal>
+
+<clr-wizard #wizardxl [(clrWizardOpen)]="editwizardOpen">
+    <clr-wizard-title>Update {{role.roleName}}</clr-wizard-title>
+
+    <clr-wizard-button [type]="'cancel'" (click)="cancleUpdate()">Cancel</clr-wizard-button>
+    <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
+    <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
+    <clr-wizard-button [type]="'finish'" (click)="save()" disabled >Finish</clr-wizard-button>
+
+    <clr-wizard-page>
+        <ng-template clrPageTitle>Privileges</ng-template>
+        
+        <div class="row">
+        
+            <div class="col-md-5 col-sm-12 col-xs-12">
+                <clr-datagrid style="width: 102%;" [(clrDgSelected)]="systemprivilegeselected">
+                    <clr-dg-column >Available privileges</clr-dg-column>
+                    <clr-dg-placeholder>We couldn't find any privileges!</clr-dg-placeholder>
+                    
+                    <clr-dg-row  *ngFor="let item of systemPrivileges" [clrDgItem]="item">               
+                        <clr-dg-cell style="padding-left: 0px;">{{item}}</clr-dg-cell>
+                    </clr-dg-row>
+                </clr-datagrid>
+            </div>
+                <div class="col-lg-1 col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
+                <clr-icon (click)="addprivilege()" style="position: fixed;top:47%;" class="is-highlight" shape="angle-double right" size="25"></clr-icon>
+                <clr-icon (click)="reduceprivilege()" style="position: fixed;top:53%;" class="is-highlight" shape="angle-double left" size="25"></clr-icon>
+            </div> 
+            <div class="col-md-5 col-sm-12 col-xs-12">
+                <clr-datagrid  [(clrDgSelected)]="roleprivilegeselected">
+                    <clr-dg-column >Owned Privileges</clr-dg-column>
+                    <clr-dg-placeholder>We couldn't find any privileges!</clr-dg-placeholder>
+                    
+                    <clr-dg-row  *ngFor="let item1 of rolePrivilege" [clrDgItem]="item1">              
+                    
+                        <clr-dg-cell>{{item1}}</clr-dg-cell>
+                    </clr-dg-row>
+                </clr-datagrid>
+            </div>
+            
+        </div>
+    </clr-wizard-page>
+
+    <clr-wizard-page
+    [clrWizardPageNextDisabled]="!formPageOne.valid">
+        
+        <ng-template clrPageTitle>Other information</ng-template>
+        <form #formPageOne="ngForm">
+            <section class="form-block">
+                    <div class="form-group">
+                            <label class="required" for="roleName">RoleName</label>       
+                            <label for="roleName"
+                                aria-haspopup="true"
+                                role="tooltip"
+                                class="tooltip tooltip-validation tooltip-md"
+                                [class.invalid]="rolenameInput.invalid && (rolenameInput.dirty || rolenameInput.touched)">
+                                <input type="text" id="roleName" placeholder="RoleName"
+                                    required
+                                    name="rolename"
+                                    [(ngModel)]="role.roleName"
+                                    #rolenameInput="ngModel">
+                                <span class="tooltip-content tooltip-bottom-right">
+                                    RoleName is Required.
+                                </span>
+                            </label>
+                            </div>
+            </section>
+        </form>
+    </clr-wizard-page>
+    
+</clr-wizard>
+
+<clr-wizard #addwizard [(clrWizardOpen)]="addwizardOpen">
+    <clr-wizard-title>Create a Role</clr-wizard-title>
+
+    <clr-wizard-button [type]="'cancel'" (click)="cancleUpdate()">Close</clr-wizard-button>
+    <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
+    <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
+    <clr-wizard-button [type]="'finish'" >Finish</clr-wizard-button>
+
+    <clr-wizard-page [clrWizardPageNextDisabled]="rolePrivilege.length == 0">
+        <ng-template clrPageTitle>Privileges</ng-template>
+        
+        <div class="row">
+        
+            <div class="col-md-5 col-sm-12 col-xs-12">
+                <clr-datagrid style="width: 102%;" [(clrDgSelected)]="systemprivilegeselected">
+                    <clr-dg-column >Unowned Privilege</clr-dg-column>
+                    <clr-dg-placeholder>We couldn't find any privileges!</clr-dg-placeholder>
+                    
+                    <clr-dg-row  *ngFor="let item of systemPrivileges" [clrDgItem]="item">               
+                        <clr-dg-cell style="padding-left: 0px;">{{item}}</clr-dg-cell>
+                    </clr-dg-row>
+                </clr-datagrid>
+            </div>
+                <div class="col-lg-1 col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
+                <clr-icon (click)="addprivilege()" style="position: fixed;top:47%;" class="is-highlight" shape="angle-double right" size="25"></clr-icon>
+                <clr-icon (click)="reduceprivilege()" style="position: fixed;top:53%;" class="is-highlight" shape="angle-double left" size="25"></clr-icon>
+            </div> 
+            <div class="col-md-5 col-sm-12 col-xs-12">
+                <clr-datagrid  [(clrDgSelected)]="roleprivilegeselected">
+                    <clr-dg-column >Owned Privilege</clr-dg-column>
+                    <clr-dg-placeholder>Please select at least one privilege!</clr-dg-placeholder>
+                    
+                    <clr-dg-row  *ngFor="let item1 of rolePrivilege" [clrDgItem]="item1">              
+                    
+                        <clr-dg-cell>{{item1}}</clr-dg-cell>
+                    </clr-dg-row>
+                </clr-datagrid>
+            </div>
+            
+        </div>
+    </clr-wizard-page>
+
+    <clr-wizard-page 
+    clrWizardPagePreventDefault="true"
+    (clrWizardPageOnCommit)="onCommit()"
+    (clrWizardPageOnCancel)="doCancel()"
+    [clrWizardPageNextDisabled]="!formPageOne.valid">
+        <ng-template clrPageTitle>RoleName</ng-template>
+        <div class="spinner" *ngIf="loadingFlag">
+                Loading...
+        </div>
+        <clr-alert *ngIf="errorFlag" [clrAlertType]="'alert-danger'">
+            <div class="alert-item">
+                {{errorMessage}}
+            </div>
+        </clr-alert>
+        <form #formPageOne="ngForm">
+            <section class="form-block">
+                    <div class="form-group">
+                            <label class="required" for="roleName">RoleName</label>       
+                            <label for="roleName"
+                                aria-haspopup="true"
+                                role="tooltip"
+                                class="tooltip tooltip-validation tooltip-md"
+                                [class.invalid]="rolenameInput.invalid && (rolenameInput.dirty || rolenameInput.touched)">
+                                <input type="text" id="roleName" placeholder="RoleName"
+                                    required
+                                    name="rolename"
+                                    [(ngModel)]="role.roleName"
+                                    #rolenameInput="ngModel">
+                                <span class="tooltip-content tooltip-bottom-right">
+                                    RoleName is Required.
+                                </span>
+                            </label>
+                            </div>
+            </section>
+        </form>
+    </clr-wizard-page>
+    
+</clr-wizard>

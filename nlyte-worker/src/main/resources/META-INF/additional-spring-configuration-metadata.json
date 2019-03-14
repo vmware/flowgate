@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "apiserver.url",
+    "type": "java.lang.String",
+    "description": "Serving the server address of RestApi"
+  },
+  {
+    "name": "wormhole.apiclient.socket.timeout",
+    "type": "java.lang.String",
+    "description": "wormhole apiclient socket timeout"
+  }
+]}

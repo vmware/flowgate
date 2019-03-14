@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "asset.realtimedata.limit.duration",
+    "type": "java.lang.String",
+    "description": "The time duration that allow api to query the realtime data."
+  },
+  {
+    "name": "api.cross.allowedOrigin",
+    "type": "java.util.List",
+    "description": "A description for 'api.cross.allowedOrigin'"
+  },
+  {
+    "name": "api.cross.allowedMethod",
+    "type": "java.util.List",
+    "description": "A description for 'api.cross.allowedMethod'"
+  },
+  {
+    "name": "api.cross.allowedHeader",
+    "type": "java.util.List",
+    "description": "A description for 'api.cross.allowedHeader'"
+  }
+]}

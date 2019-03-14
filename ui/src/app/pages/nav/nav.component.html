@@ -1,0 +1,127 @@
+<!-- Copyright 2019 VMware, Inc.
+SPDX-License-Identifier: BSD-2-Clause -->
+<clr-main-container>
+    <header class="header-4">
+      <div class="branding">
+          <a href="..." class="nav-link">
+              <clr-icon shape="vm-bug"></clr-icon>
+              <span class="title">Wormhole</span>
+          </a>
+      </div>
+      <div class="header-actions">
+          <clr-dropdown>
+              <button class="nav-text" clrDropdownTrigger>
+                  {{username}}
+                  <clr-icon shape="caret down"></clr-icon>
+              </button>
+              <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
+                <!-- <a href="..." clrDropdownItem>Preferences</a> -->
+               <a on-click="logout()" clrDropdownItem>Log out</a>
+               <a on-click="userprofile()" clrDropdownItem>User Profile</a>
+               <a href="/apidoc/index.html" clrDropdownItem>Api Doc</a>
+              </clr-dropdown-menu>
+          </clr-dropdown>
+      </div>
+    </header>
+<div class="content-container">
+  <div class="content-area">
+    <router-outlet></router-outlet> 
+  </div>
+  <clr-vertical-nav [clrVerticalNavCollapsible]="demoCollapsible">
+          <clr-vertical-nav-group *appHasPrivilege=user
+                  routerLinkActive="active">
+              <clr-icon shape="user" clrVerticalNavIcon></clr-icon>
+              User
+              <clr-vertical-nav-group-children>
+                  <a clrVerticalNavLink 
+                     routerLink="/ui/nav/user/user-list"
+                     routerLinkActive="active" *appHasPrivilege=userManagement>
+                      UserManagement
+                  </a>
+                  <a clrVerticalNavLink
+                     routerLink="/ui/nav/user/role-list"
+                     routerLinkActive="active" *appHasPrivilege=roleManagement>
+                      RoleManagement
+                  </a>
+
+              </clr-vertical-nav-group-children>
+          </clr-vertical-nav-group>
+          <clr-vertical-nav-group *appHasPrivilege=sddc
+                  routerLinkActive="active">
+              <clr-icon shape="rack-server" clrVerticalNavIcon></clr-icon>
+              SDDC SoftWare
+              <clr-vertical-nav-group-children>
+                  <a clrVerticalNavLink 
+                     routerLink="/ui/nav/sddc/vmware"
+                     routerLinkActive="active">
+                     VMware
+                  </a>
+                  <a clrVerticalNavLink 
+                     routerLink="./fire/charizard"
+                     routerLinkActive="active">
+                     Azure
+                  </a>
+                  <a clrVerticalNavLink 
+                     routerLink="./fire/charizard"
+                     routerLinkActive="active">
+                     OpenStack
+                  </a>
+              </clr-vertical-nav-group-children>
+          </clr-vertical-nav-group>
+          <clr-vertical-nav-group *appHasPrivilege=servermapping
+                  routerLinkActive="active">
+              <clr-icon shape="host" clrVerticalNavIcon></clr-icon>
+              Server Mapping
+              <clr-vertical-nav-group-children>
+                  <a clrVerticalNavLink
+                     routerLink="/ui/nav/server-mapping"
+                     routerLinkActive="active">
+                     Server Mapping
+                  </a>
+                
+              </clr-vertical-nav-group-children>
+          </clr-vertical-nav-group>
+          <clr-vertical-nav-group *appHasPrivilege=facility
+                  routerLinkActive="active">
+              <clr-icon shape="host" clrVerticalNavIcon></clr-icon>
+              Facility
+              <clr-vertical-nav-group-children>
+                  <a clrVerticalNavLink 
+                     routerLink="/ui/nav/facility/dcim"
+                     routerLinkActive="active">
+                     DCIM
+                  </a>
+                  <a clrVerticalNavLink
+                    routerLink="/ui/nav/facility/cmdb"
+                    routerLinkActive="active">
+                     CMDB
+                  </a> 
+                  <a clrVerticalNavLink
+                    routerLink="/ui/nav/facility/providers"
+                    routerLinkActive="active">
+                    Other Providers
+                </a> 
+              </clr-vertical-nav-group-children>
+          </clr-vertical-nav-group>
+          <clr-vertical-nav-group *appHasPrivilege=setting
+                  routerLinkActive="active">
+              <clr-icon shape="cog" clrVerticalNavIcon></clr-icon>
+              Setting
+              <clr-vertical-nav-group-children>
+                <a clrVerticalNavLink
+                routerLink="/ui/nav/setting/sensorsetting-list" *appHasPrivilege=sensorsetting
+                routerLinkActive="active">
+                Sensorsetting
+             </a>
+             <a clrVerticalNavLink
+               routerLink="/ui/nav/setting/job-trigger" *appHasPrivilege=systemSetting
+               routerLinkActive="active">
+               System Setting
+            </a>
+                
+              </clr-vertical-nav-group-children>
+          </clr-vertical-nav-group>
+          
+      </clr-vertical-nav>
+</div> 
+</clr-main-container> 

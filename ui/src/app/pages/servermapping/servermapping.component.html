@@ -1,0 +1,134 @@
+<!-- Copyright 2019 VMware, Inc.
+SPDX-License-Identifier: BSD-2-Clause -->
+<form>
+    <label> Content for ServerMapping</label>          
+    <div class="form-group">
+            <label for="selects_3" >ServerType</label>
+            <div class="select" style="margin-left: -135px;">
+                <select id="selects_2" [ngModelOptions]="{standalone: true}"  [(ngModel)]="serverconfig.type" on-change="changeType()" > 
+                    <option value="VRO" >VRO</option>
+                    <option value="VCENTER">VCENTER</option>
+                </select>
+            </div>
+            <label for="selects_3">Server</label>
+            <div class="select">
+                <select id="selects_3" [ngModelOptions]="{standalone: true}"  [(ngModel)]="serverconfig.id" on-change="change()" > 
+                    <option value="">Please Select</option>
+                    <option value="{{serverconfig.id}}" *ngFor="let serverconfig of serverconfigs">{{serverconfig.name}}</option>
+                </select>
+            </div>
+        </div>
+</form>
+
+<clr-datagrid>
+
+        <clr-dg-column >
+                <ng-container *clrDgHideableColumn="{hidden: vrohid}">
+                        Host Name(VRO)
+                </ng-container>
+        </clr-dg-column>
+       
+        <clr-dg-column>
+                <ng-container *clrDgHideableColumn="{hidden: vrohid}">
+                        VroVMEntityObjectID
+                </ng-container>
+        </clr-dg-column>
+        
+        <clr-dg-column>
+                <ng-container *clrDgHideableColumn="{hidden: hid}">
+                        VcHostName
+                </ng-container>
+        </clr-dg-column>
+        <clr-dg-column>
+                <ng-container *clrDgHideableColumn="{hidden: hid}">
+                        VcMobID
+                </ng-container>
+        </clr-dg-column>
+       
+        <clr-dg-column>Asset</clr-dg-column>
+        <clr-dg-column>Operation</clr-dg-column>
+        <clr-dg-placeholder>{{nulltips}}</clr-dg-placeholder>
+
+       
+        <clr-dg-row *ngFor="let serverMapping of serverMappings">
+                <clr-dg-cell>{{serverMapping.vroResourceName}}</clr-dg-cell>
+                <clr-dg-cell>{{serverMapping.vroVMEntityObjectID}}</clr-dg-cell>
+                <clr-dg-cell>{{serverMapping.vcHostName}}</clr-dg-cell>
+                <clr-dg-cell>{{serverMapping.vcMobID}}</clr-dg-cell>
+                <clr-dg-cell>{{serverMapping.asset}}</clr-dg-cell>
+                <clr-dg-cell><button class="btn btn-outline" on-click="updateAssetID(serverMapping.id)">Mapping assetID</button>
+                                <button class="btn btn-outline">Mapping sensor</button>
+                </clr-dg-cell>
+                
+        </clr-dg-row>
+       
+      
+       <clr-dg-footer *ngIf="serverMappings.length>0">
+                <ul class="pagination">
+                    <li style="padding-top: 5px;"><div class="select">
+                      <select id="selects_1" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;setInfo()">
+                        <option>5</option>
+                        <option>10</option>
+                        <option>20</option>
+                        <option>50</option>
+                    </select></div>
+                  </li>
+                     <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
+                     <li class="pagination-current">{{currentPage}}/{{totalPage}}</li>
+                     <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button></li>
+                 </ul>
+       </clr-dg-footer>
+</clr-datagrid>
+
+<clr-modal [(clrModalOpen)]="opend" [clrModalStaticBackdrop]="false" [clrModalSize]="'lg'" [clrModalClosable]="false">
+        <h3 class="modal-title">Select Assets</h3>
+       
+        <div class="modal-body">
+                <div class="form-group">
+                        <table>
+                                <tr>
+                                   <td><input type="text" id="formFields_9" placeholder="assetName" [(ngModel)]="keywords" size="35"></td>
+                                   <td style=""><button class="btn btn-sm" (click)="search();" >Search</button></td>
+                                </tr>
+                        </table>                
+                </div>
+                <clr-datagrid [(clrDgSingleSelected)]="selectedAsset" [clDgRowSelection]="true">
+                        <clr-dg-column>AssetName</clr-dg-column>
+                        <clr-dg-column>AssetSource</clr-dg-column>
+                        <clr-dg-column>Serialnumber</clr-dg-column>
+                        <clr-dg-column>Tag</clr-dg-column>
+                        <clr-dg-column>Manufacturer</clr-dg-column>
+                        <clr-dg-column>Model</clr-dg-column>
+                        <clr-dg-column>Location</clr-dg-column>
+                        <clr-dg-column>CabinetName</clr-dg-column>
+                        <clr-dg-column>CabinetUnitPosition</clr-dg-column>
+                        <clr-dg-column>Pdus</clr-dg-column>
+                        <clr-dg-placeholder>We couldn't find any assets!</clr-dg-placeholder>
+
+                       <clr-dg-row *clrDgItems="let asset of assets" [clrDgItem]="asset">
+                            <clr-dg-cell>{{asset.assetName}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.assetSource}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.serialnumber}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.tag}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.manufacturer}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.model}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.region}},{{asset.country}},{{asset.city}},{{asset.building}},{{asset.floor}},{{asset.room}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.cabinetName}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.cabinetUnitPosition}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.pdus}}</clr-dg-cell>
+                       </clr-dg-row>
+                      
+                       <clr-dg-footer>
+                                <ul class="pagination">
+                                     <li ><button class="pagination-previous" type="button" on-click="previousAsset()" ></button></li>
+                                     <li class="pagination-current">{{currentPageAsset}}/{{totalPageAsset}}</li>
+                                     <li> <button class="pagination-next" type="button" disabled="{{disabledAsset}}" on-click="nextAsset()"></button></li>
+                                 </ul>
+                       </clr-dg-footer>
+                </clr-datagrid>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" (click)="cancelAsset()">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="confirmAsset(selectedAsset.id)">Ok</button>
+        </div>
+</clr-modal>

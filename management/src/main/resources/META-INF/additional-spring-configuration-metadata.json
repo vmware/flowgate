@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "apiserver.url",
+    "type": "java.lang.String",
+    "description": "A description for 'apiserver.url'"
+  },
+  {
+    "name": "management.cross.allowedOrigin",
+    "type": "java.util.List",
+    "description": "A description for 'cross.allowedOrigin'"
+  },
+  {
+    "name": "management.cross.allowedMethod",
+    "type": "java.util.List",
+    "description": "A description for 'management.cross.allowedMethod'"
+  },
+  {
+    "name": "management.cross.allowedHeader",
+    "type": "java.util.List",
+    "description": "A description for 'management.cross.allowedHeader'"
+  }
+]}

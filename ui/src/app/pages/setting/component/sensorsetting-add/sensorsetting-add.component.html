@@ -1,0 +1,66 @@
+<!-- Copyright 2019 VMware, Inc.
+SPDX-License-Identifier: BSD-2-Clause -->
+<form>
+  <section class="form-block">
+      <label> Content for Sensorsetting</label>          
+      <div class="form-group row">
+        <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+            <label for="gForm_1">Type</label>
+        </div>
+        <div class="col-lg-4 col-md-8 col-sm-12 col-xs-12">
+            <div class="select form-control">
+                <select id="gForm_1" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.type" > 
+                    <option value="FRONTPANELTEMP" >FRONTPANELTEMP</option>
+                    <option value="BACKPANELTEMP">BACKPANELTEMP</option>
+                    <option value="PDU">PDU</option>
+                    <option value="HUMIDITY">HUMIDITY</option>
+                </select>
+            </div>
+        </div>
+    </div>
+      <div class="form-group row">
+          <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+              <label for="gForm_2">MinNum</label>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+              <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.minNum"  id="gForm_2"  placeholder="minNum" size="45"/>
+          </div>
+      </div>
+      <div class="form-group row">
+          <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+              <label for="gForm_3">MaxNum</label>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+              <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.maxNum"  id="gForm_3" placeholder="maxNum" size="45"/>
+          </div>
+      </div>
+      <div class="form-group row">
+          <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+              <label for="gForm_4">MinValue</label>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+              <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.minValue"  id="gForm_4" placeholder="minValue" size="45"/>
+          </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+            <label for="gForm_5">MaxValue</label>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+            <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.maxValue"  id="gForm_5" placeholder="maxValue" size="45"/>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" on-click="save()">Submit</button>
+      <button type="button" class="btn btn-primary">Cancel</button>
+  </section>
+</form>
+<clr-modal [(clrModalOpen)]="modalIsOpen" [clrModalStaticBackdrop]="true">
+    <h3 class="modal-title">Operation tips</h3>
+    <div class="modal-body">
+       
+        <p>{{operationTip}}</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="confirm()">Ok</button>
+    </div>
+</clr-modal>
