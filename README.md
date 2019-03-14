@@ -1,6 +1,6 @@
 
 
-# flowgate
+# Flowgate
 
 ## Overview
 
@@ -24,9 +24,10 @@
 
 ## Contributing
 
-The flowgate project team welcomes contributions from the community. If you wish to contribute code and you have not
+The Flowgate project team welcomes contributions from the community. If you wish to contribute code and you have not
 signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any
 questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq). For more detailed information,
 refer to [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
+[LICENSE.txt](License)
