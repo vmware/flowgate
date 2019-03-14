@@ -1,0 +1,79 @@
+<!-- Copyright 2019 VMware, Inc.
+SPDX-License-Identifier: BSD-2-Clause -->
+<button class="btn btn-primary btn-icon" style="margin-right: 12px" (click)="toEditvmwareConfig()" *appHasPrivilege=addsddc>
+  <clr-icon shape="plus">
+    </clr-icon>
+    <font style="vertical-align: inherit;">
+      <font style="vertical-align: inherit;"  >Add New Integration</font>
+     </font>
+</button>
+<clr-alert [clrAlertType]="alertType" (clrAlertClosedChange)="close()" [clrAlertClosed]= "alertclose">
+    <div class="alert-item">
+        <span class="alert-text">
+            {{alertcontent}}
+        </span>
+    </div>
+  </clr-alert>
+<clr-datagrid>
+
+ <clr-dg-column>Type</clr-dg-column>
+ <clr-dg-column>ServerUrl</clr-dg-column>
+ <clr-dg-column>Name</clr-dg-column>
+ <clr-dg-column>Description</clr-dg-column>
+ <clr-dg-column>LoginUserName</clr-dg-column>
+ <clr-dg-column>VerifyCert</clr-dg-column>
+
+ <clr-dg-placeholder>We couldn't find any SDDCSoftWares!</clr-dg-placeholder>
+
+
+<clr-dg-row *ngFor="let vmwareConfig of vmwareConfigs">
+   <clr-dg-action-overflow>
+       <button class="action-item" (click)="onEdit(vmwareConfig.id)" *appHasPrivilege=updatesddc>Edit</button>
+       <button class="action-item" (click)="onDelete(vmwareConfig.id)" *appHasPrivilege=deletesddc>Delete</button>
+       <button class="action-item" (click)="syncData(vmwareConfig.id,vmwareConfig.ServerUrl)">SyncData</button>
+   </clr-dg-action-overflow>
+     <clr-dg-cell>{{vmwareConfig.type}}</clr-dg-cell>
+     <clr-dg-cell>{{vmwareConfig.serverURL}}</clr-dg-cell>
+     <clr-dg-cell>{{vmwareConfig.name}}</clr-dg-cell>
+     <clr-dg-cell>{{vmwareConfig.description}}</clr-dg-cell>    
+     <clr-dg-cell>{{vmwareConfig.userName}}</clr-dg-cell>
+     <clr-dg-cell>{{vmwareConfig.verifyCert}}</clr-dg-cell>
+     
+</clr-dg-row>
+
+
+<clr-dg-footer *ngIf="vmwareConfigs.length>0">
+       <!-- <clr-dg-pagination #pagination [clrDgPageSize]="1"> -->
+         <ul class="pagination">
+             <li style="padding-top: 5px;"><div class="select">
+               <select id="selects_1" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;setInfo()">
+                 <option>5</option>
+                 <option>10</option>
+                 <option>20</option>
+                 <option>50</option>
+             </select></div>
+           </li>
+              <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
+              <li class="pagination-current">{{currentPage}}/{{totalPage}}</li>
+              <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button></li>
+          </ul>
+       <!-- </clr-dg-pagination> -->
+</clr-dg-footer>
+</clr-datagrid>
+<clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
+   <h3 class="modal-title">Operation tips</h3>
+   <div class="modal-body">
+       <clr-alert [(clrAlertClosed)] = "clrAlertClosed"  [clrAlertType]="'alert-danger'" (clrAlertClosedChange)="onClose()">
+           <div class="alert-item">
+               <span class="alert-text">
+                   Operation error
+               </span>
+           </div>
+       </clr-alert>
+       <p>Are you sure you want to delete this data? This action is permenant and cannot be recovered.</p>
+   </div>
+   <div class="modal-footer">
+       <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+       <button type="button" class="btn btn-primary" (click)="confirm()">Ok</button>
+   </div>
+</clr-modal>

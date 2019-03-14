@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "managementserver.url",
+    "type": "java.lang.String",
+    "description": "The management server url'"
+  },
+  {
+    "name": "apiserver.url",
+    "type": "java.lang.String",
+    "description": "The API server url'"
+  }
+]}

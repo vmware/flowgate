@@ -1,0 +1,1538 @@
+= Wormhole API Guide
+Wormhoel;
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+[[overview]]
+= Overview
+
+[[overview-http-verbs]]
+== HTTP verbs
+
+Wormhole API tries to adhere as closely as possible to standard HTTP and REST conventions in its
+use of HTTP verbs.
+
+|===
+| Verb | Usage
+
+| `GET`
+| Used to retrieve a resource
+
+| `POST`
+| Used to create a new resource
+
+| `PATCH`
+| Used to update an existing resource, including partial updates
+
+| `DELETE`
+| Used to delete an existing resource
+|===
+
+Wormhole API tries to adhere as closely as possible to standard HTTP and REST conventions in its
+use of HTTP status codes.
+
+|===
+| Status code | Usage
+
+| `200 OK`
+| The request completed successfully
+
+| `201 Created`
+| A new resource has been created successfully. The resource's URI is available from the response's
+`Location` header
+
+| `204 No Content`
+| An update to an existing resource has been applied successfully
+
+| `400 Bad Request`
+| The request was malformed. The response body will include an error providing further information
+
+| `404 Not Found`
+| The requested resource did not exist
+|===
+
+[[resources]]
+= Resources
+
+[[resources-asset]]
+== /v1/assets
+
+The Asset provides the entry point into the service.
+
+[[resources-assets-get]]
+=== getAssetByID
+
+A `GET` request is used to access the Asset read.
+
+==== Request structure
+
+include::{snippets}/assets-get-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-get-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-get-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-get-example/response-fields.adoc[]
+
+[[resources-assets-getAssetByName]]
+=== getAssetByName
+
+A `GET` request is used to access the Asset read by name.
+
+==== Request structure
+
+include::{snippets}/assets-getAssetByName-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getAssetByName-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getAssetByName-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getAssetByName-example/response-fields.adoc[]
+
+[[resources-assets-getBySourceAndType]]
+=== getAssetsBySourceAndType
+
+A `GET` request is used to access the Asset read by source and type.
+
+==== Request structure
+
+include::{snippets}/assets-getBySourceAndType-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getBySourceAndType-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getBySourceAndType-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getBySourceAndType-example/response-fields.adoc[]
+
+[[resources-assets-getByType]]
+=== getAssetsByType
+
+A `GET` request is used to access the Asset read by type.
+
+==== Request structure
+
+include::{snippets}/assets-getByType-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getByType-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getByType-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getByType-example/response-fields.adoc[]
+
+[[resources-assets-getMapped]]
+=== getAssetsMapped
+
+A `GET` request is used to access the Asset read mapped.
+
+==== Request structure
+
+include::{snippets}/assets-getMapped-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getMapped-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getMapped-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getMapped-example/response-fields.adoc[]
+
+[[resources-assets-findServersWithoutPDUInfo]]
+=== findAssetsWithoutPDUInformation
+
+A `GET` request is used to get Assets List without PDU Information.
+
+==== Request structure
+
+include::{snippets}/assets-findServersWithoutPDUInfo-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-findServersWithoutPDUInfo-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-findServersWithoutPDUInfo-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-findServersWithoutPDUInfo-example/response-fields.adoc[]
+
+[[resources-assets-getByAssetNameAndTagLik]]
+=== getAssetByAssetNameAndTagLik
+
+A `GET` request is used to access the Asset read by assetName and tagLik.
+
+==== Request structure
+
+include::{snippets}/assets-getByAssetNameAndTagLik-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getByAssetNameAndTagLik-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getByAssetNameAndTagLik-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getByAssetNameAndTagLik-example/response-fields.adoc[]
+
+[[resources-assets-getByAssetNameAndTagLikAndKeywords]]
+=== getAssetByAssetNameAndTagLikAndKeywords
+
+A `GET` request is used to access the Asset read by assetName and tagLik and keywords.
+
+==== Request structure
+
+include::{snippets}/assets-getByAssetNameAndTagLikAndKeywords-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getByAssetNameAndTagLikAndKeywords-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getByAssetNameAndTagLikAndKeywords-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getByAssetNameAndTagLikAndKeywords-example/response-fields.adoc[]
+
+[[resources-assets-getPageMappingsByVROPSId]]
+=== getServerMappingByVROpsIDwithPagenation
+
+A `GET` request is used to access the ServerMapping read Page by VropsID.
+
+==== Request structure
+
+include::{snippets}/assets-getPageMappingsByVROPSId-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getPageMappingsByVROPSId-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getPageMappingsByVROPSId-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getPageMappingsByVROPSId-example/response-fields.adoc[]
+
+[[resources-assets-getPageMappingsByVCId]]
+=== getServerMapingByvCenterIDWithPagenation
+
+A `GET` request is used to access the ServerMapping read Page by VCID.
+
+==== Request structure
+
+include::{snippets}/assets-getPageMappingsByVCId-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getPageMappingsByVCId-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getPageMappingsByVCId-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getPageMappingsByVCId-example/response-fields.adoc[]
+
+[[resources-assets-getMappingsByVropsId]]
+=== getServerMappingsByVropsId
+
+A `GET` request is used to access the ServerMapping read by VropsId.
+
+==== Request structure
+
+include::{snippets}/assets-getMappingsByVropsId-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getMappingsByVropsId-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getMappingsByVropsId-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getMappingsByVropsId-example/response-fields.adoc[]
+
+[[resources-assets-getMappingsByVCId]]
+=== getServerMappingsByVCId
+
+A `GET` request is used to access the ServerMapping read by VCId.
+
+==== Request structure
+
+include::{snippets}/assets-getMappingsByVCId-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getMappingsByVCId-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getMappingsByVCId-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getMappingsByVCId-example/response-fields.adoc[]
+
+[[resources-assets-getHostNameByIP]]
+=== getAssetNameIPMappingByIP
+
+A `GET` request is used to access the assetIPMapping GET HostName By IP.
+
+==== Request structure
+
+include::{snippets}/assets-getHostNameByIP-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getHostNameByIP-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getHostNameByIP-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getHostNameByIP-example/response-fields.adoc[]
+
+[[resources-assets-getUnmappedServers]]
+=== getUnmappedServers
+
+A `GET` request is used to access the ServerMapping GET Unmapped Servers.
+
+==== Request structure
+
+include::{snippets}/assets-getUnmappedServers-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getUnmappedServers-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getUnmappedServers-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getUnmappedServers-example/response-fields.adoc[]
+
+[[resources-assets-getAssetsByVCId]]
+=== getMappedAssetsByvCenterID
+
+A `GET` request is used to access the assert read by VCId.
+
+==== Request structure
+
+include::{snippets}/assets-getAssetsByVCId-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getAssetsByVCId-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getAssetsByVCId-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getAssetsByVCId-example/response-fields.adoc[]
+
+[[resources-assets-getAssetsByVROPSId]]
+=== getMappedAssetsByVROpsID
+
+A `GET` request is used to access the assets read by VropsId.
+
+==== Request structure
+
+include::{snippets}/assets-getAssetsByVROPSId-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getAssetsByVROPSId-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getAssetsByVROPSId-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getAssetsByVROPSId-example/response-fields.adoc[]
+
+[[resources-assets-getServerSensorData]]
+=== getServerSensorData
+
+A `GET` request is used to access the assets get Sensor Data.
+
+==== Request structure
+
+include::{snippets}/assets-getServerSensorData-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getServerSensorData-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getServerSensorData-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getServerSensorData-example/response-fields.adoc[]
+
+[[resources-asset-post]]
+=== createAsset
+
+A `POST` request is used to access the Asset create.
+
+==== Request structure
+
+include::{snippets}/assets-create-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-create-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-create-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/assets-create-example/request-fields.adoc[]
+
+[[resources-asset-createHostNameIPMapping]]
+=== createAssetNameIPMapping
+
+A `POST` request is used to access the create HostName IP Mapping.
+
+==== Request structure
+
+include::{snippets}/assets-createHostNameIPMapping-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-createHostNameIPMapping-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-createHostNameIPMapping-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/assets-createHostNameIPMapping-example/request-fields.adoc[]
+
+[[resources-asset-createBatch]]
+=== batchCreateAssets
+
+A `POST` request is used to access the Asset batch create.
+
+==== Request structure
+
+include::{snippets}/assets-createBatch-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-createBatch-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-createBatch-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/assets-createBatch-example/request-fields.adoc[]
+
+[[resources-asset-realTimeDatabatchCreation]]
+=== batchCreateAssetRealTimData
+
+A `POST` request is used to access RealTimeData Batch Creation.
+
+==== Request structure
+
+include::{snippets}/assets-realTimeDatabatchCreation-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-realTimeDatabatchCreation-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-realTimeDatabatchCreation-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/assets-realTimeDatabatchCreation-example/request-fields.adoc[]
+
+[[resources-asset-insertRealtimeData]]
+=== insertAssetRealTimeData
+
+A `POST` request is used to access insert realtime data.
+
+==== Request structure
+
+include::{snippets}/assets-insertRealtimeData-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-insertRealtimeData-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-insertRealtimeData-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/assets-insertRealtimeData-example/request-fields.adoc[]
+
+[[resources-asset-put]]
+=== updateAsset
+
+A `PUT` request is used to access the Asset update.
+
+==== Request structure
+
+include::{snippets}/assets-update-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-update-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-update-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/assets-update-example/request-fields.adoc[]
+
+[[resources-asset-updateServerMapping]]
+=== updateAssetServerMapping
+
+A `PUT` request is used to access the ServerMapping update.
+
+==== Request structure
+
+include::{snippets}/assets-updateServerMapping-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-updateServerMapping-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-updateServerMapping-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/assets-updateServerMapping-example/request-fields.adoc[]
+
+[[resources-asset-deleteServerMapping]]
+=== deleteAssetServerMapping
+
+A `DELETE` request is used to access the ServerMapping delete.
+
+==== Request structure
+
+include::{snippets}/assets-deleteServerMapping-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-deleteServerMapping-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-deleteServerMapping-example/curl-request.adoc[]
+
+
+[[resources-asset-mergeServerMapping]]
+=== mergeAssetServerMappingByMappingID
+
+A `PUT` request is used to access the merge two ServerMapping.
+
+==== Request structure
+
+include::{snippets}/assets-mergeServerMapping-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-mergeServerMapping-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-mergeServerMapping-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/assets-mergeServerMapping-example/request-fields.adoc[]
+
+
+[[resources-asset-delete]]
+=== deleteAssetByID
+
+A `DELETE` request is used to access the Asset delete.
+
+==== Request structure
+
+include::{snippets}/assets-delete-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-delete-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-delete-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/assets-delete-example/request-fields.adoc[]
+
+
+[[resources-facilitySoftware]]
+== /v1/facilitysoftware
+
+The facilitySoftware provides the entry point into the service.
+
+[[resources-facilitySoftware-get]]
+=== getFacilitySoftwaresWithPagenation
+
+A `GET` request is used to access the facilitySoftware read.
+
+==== Request structure
+
+include::{snippets}/facilitySoftware-query-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilitySoftware-query-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilitySoftware-query-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/facilitySoftware-query-example/request-fields.adoc[]
+
+[[resources-facilitySoftware-getFacilitySoftwareConfigByType]]
+=== getFacilitySoftwaresByType
+
+A `GET` request is used to access the facilitySoftware read By Type.
+
+==== Request structure
+
+include::{snippets}/facilitySoftware-getFacilitySoftwareConfigByType-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilitySoftware-getFacilitySoftwareConfigByType-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilitySoftware-getFacilitySoftwareConfigByType-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/facilitySoftware-getFacilitySoftwareConfigByType-example/response-fields.adoc[]
+
+[[resources-facilitySoftware-post]]
+=== createFacilitySoftware
+
+A `POST` request is used to access the facilitySoftware create.
+
+==== Request structure
+
+include::{snippets}/facilitySoftware-create-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilitySoftware-create-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilitySoftware-create-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/facilitySoftware-create-example/request-fields.adoc[]
+
+[[resources-facilitySoftware-syncFacilityServerData]]
+=== syncFacilityServerData
+
+A `POST` request is used to access the facilitySoftware sync Facility ServerData.
+
+==== Request structure
+
+include::{snippets}/facilitySoftware-syncFacilityServerData-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilitySoftware-syncFacilityServerData-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilitySoftware-syncFacilityServerData-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/facilitySoftware-syncFacilityServerData-example/request-fields.adoc[]
+
+[[resources-facilitySoftware-put]]
+=== updateFacilitySoftware
+
+A `PUT` request is used to access the facilitySoftware update.
+
+==== Request structure
+
+include::{snippets}/facilitySoftware-update-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilitySoftware-update-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilitySoftware-update-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/facilitySoftware-update-example/request-fields.adoc[]
+
+
+[[resources-facilitySoftware-delete]]
+=== deleteFacilitySoftwareByID
+
+A `DELETE` request is used to access the facilitySoftware delete.
+
+==== Request structure
+
+include::{snippets}/facilitySoftware-delete-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilitySoftware-delete-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilitySoftware-delete-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/facilitySoftware-delete-example/request-fields.adoc[]
+
+
+[[resources-SDDCSoftware]]
+== /v1/sddc
+
+The SDDCSoftware provides the entry point into the service.
+
+[[resources-SDDCSoftware-get]]
+=== getSDDCSoftwareWithPagenation
+
+A `GET` request is used to access the SDDCSoftware read.
+
+==== Request structure
+
+include::{snippets}/SDDCSoftware-query-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SDDCSoftware-query-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SDDCSoftware-query-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/SDDCSoftware-query-example/response-fields.adoc[]
+
+[[resources-SDDCSoftware-getByType]]
+=== getSDDCSoftwareByType
+
+A `GET` request is used to access the SDDCSoftware by type.
+
+==== Request structure
+
+include::{snippets}/SDDCSoftware-queryByType-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SDDCSoftware-queryByType-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SDDCSoftware-queryByType-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/SDDCSoftware-queryByType-example/response-fields.adoc[]
+
+[[resources-SDDCSoftware-getVROServerConfigs]]
+=== getVROpsServers
+
+A `GET` request is used to access the SDDCSoftware GET VroServer Configs.
+
+==== Request structure
+
+include::{snippets}/SDDCSoftware-getVROServerConfigs-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SDDCSoftware-getVROServerConfigs-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SDDCSoftware-getVROServerConfigs-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/SDDCSoftware-getVROServerConfigs-example/response-fields.adoc[]
+
+[[resources-SDDCSoftware-getVCServerConfigs]]
+=== getVCenterServers
+
+A `GET` request is used to access the SDDCSoftware GET VCServer Configs.
+
+==== Request structure
+
+include::{snippets}/SDDCSoftware-getVCServerConfigs-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SDDCSoftware-getVCServerConfigs-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SDDCSoftware-getVCServerConfigs-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/SDDCSoftware-getVCServerConfigs-example/response-fields.adoc[]
+
+[[resources-SDDCSoftware-getVROServerConfigsByUser]]
+=== getVROpsServersByUser
+
+A `GET` request is used to access the SDDCSoftware GET VroServer Configs By User.
+
+==== Request structure
+
+include::{snippets}/SDDCSoftware-getVROServerConfigsByUser-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SDDCSoftware-getVROServerConfigsByUser-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SDDCSoftware-getVROServerConfigsByUser-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/SDDCSoftware-getVROServerConfigsByUser-example/response-fields.adoc[]
+
+[[resources-SDDCSoftware-post]]
+=== createSDDCServer
+
+A `POST` request is used to access the SDDCSoftware create.
+
+==== Request structure
+
+include::{snippets}/SDDCSoftware-create-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SDDCSoftware-create-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SDDCSoftware-create-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/SDDCSoftware-create-example/request-fields.adoc[]
+
+[[resources-syncSDDCServerData-post]]
+=== syncSDDCServerData
+
+A `POST` request is used to access the SDDCSoftware sync SDDCServerData.
+
+==== Request structure
+
+include::{snippets}/SDDCSoftware-syncSDDCServerData-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SDDCSoftware-syncSDDCServerData-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SDDCSoftware-syncSDDCServerData-example/curl-request.adoc[]
+
+[[resources-SDDCSoftware-put]]
+=== updateSDDCServer
+
+A `PUT` request is used to access the SDDCSoftware update.
+
+==== Request structure
+
+include::{snippets}/SDDCSoftware-update-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SDDCSoftware-update-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SDDCSoftware-update-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/SDDCSoftware-update-example/request-fields.adoc[]
+
+
+[[resources-SDDCSoftware-delete]]
+=== deleteSDDCServerByID
+
+A `DELETE` request is used to access the SDDCSoftware delete.
+
+==== Request structure
+
+include::{snippets}/SDDCSoftware-delete-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SDDCSoftware-delete-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SDDCSoftware-delete-example/curl-request.adoc[]
+
+
+[[resources-sensorSetting]]
+== /v1/sensors
+
+The sensorSetting provides the entry point into the service.
+
+[[resources-sensorSetting-queryByPage]]
+=== getSensorSettingWithPagenation
+
+A `GET` request is used to access the sensorSetting read by Page.
+
+==== Request structure
+
+include::{snippets}/sensorSetting-queryByPage-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/sensorSetting-queryByPage-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/sensorSetting-queryByPage-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/sensorSetting-queryByPage-example/request-fields.adoc[]
+
+[[resources-sensorSetting-querySetting]]
+=== getSensorSettings
+
+A `GET` request is used to access the sensorSetting read Setting.
+
+==== Request structure
+
+include::{snippets}/sensorSetting-querySetting-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/sensorSetting-querySetting-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/sensorSetting-querySetting-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/sensorSetting-querySetting-example/response-fields.adoc[]
+
+[[resources-sensorSetting-post]]
+=== createSensorSetting
+
+A `POST` request is used to access the sensorSetting create.
+
+==== Request structure
+
+include::{snippets}/sensorSetting-create-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/sensorSetting-create-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/sensorSetting-create-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/sensorSetting-create-example/request-fields.adoc[]
+
+[[resources-sensorSetting-put]]
+=== updateSensorSetting
+
+A `PUT` request is used to access the sensorSetting update.
+
+==== Request structure
+
+include::{snippets}/sensorSetting-update-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/sensorSetting-update-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/sensorSetting-update-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/sensorSetting-update-example/request-fields.adoc[]
+
+
+[[resources-sensorSetting-delete]]
+=== deleteSensorSettingByID
+
+A `DELETE` request is used to access the sensorSetting delete.
+
+==== Request structure
+
+include::{snippets}/sensorSetting-delete-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/sensorSetting-delete-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/sensorSetting-delete-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/sensorSetting-delete-example/request-fields.adoc[]
+
+
+== /v1/jobs
+
+The API provides the entry point into the service.
+
+[[resources-JobsController-MergeServerMapping]]
+=== mergeServerMapping
+
+A `POST` request is used to access the JobsController Merge ServerMapping.
+
+==== Request structure
+
+include::{snippets}/JobsController-startFullMappingAggregation-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/JobsController-startFullMappingAggregation-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/JobsController-startFullMappingAggregation-example/curl-request.adoc[]
+
+[[resources-JobsController-generatePduServerMapping]]
+=== generatePduServerMapping
+
+A `POST` request is used to access the JobsController for PDU Server Mapping.
+
+==== Request structure
+
+include::{snippets}/JobsController-generateServerPDUMapping-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/JobsController-generateServerPDUMapping-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/JobsController-generateServerPDUMapping-example/curl-request.adoc[]
+
+[[resources-JobsController-syncHostnameByIp]]
+=== syncHostnameByIp
+
+A `POST` request is used to access the JobsController sync Hostname By Ip.
+
+==== Request structure
+
+include::{snippets}/JobsController-syncHostnameByIp-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/JobsController-syncHostnameByIp-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/JobsController-syncHostnameByIp-example/curl-request.adoc[]
+
+
+[[resources-JobsController-getVROJobs]]
+=== getVROJobs
+
+A `GET` request is used to access the JobsController GET VROJobs.
+
+==== Request structure
+
+include::{snippets}/JobsController-getVROJobs-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/JobsController-getVROJobs-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/JobsController-getVROJobs-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/JobsController-getVROJobs-example/response-fields.adoc[]
+
+[[resources-JobsController-getVCJobs]]
+=== getVCJobs
+
+A `GET` request is used to access the JobsController GET VROJobs.
+
+==== Request structure
+
+include::{snippets}/JobsController-getVCJobs-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/JobsController-getVCJobs-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/JobsController-getVCJobs-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/JobsController-getVCJobs-example/response-fields.adoc[]
+
+
+[[resources-JobsController-getJobsByType]]
+=== getJobsByType
+
+A `GET` request is used to access the JobsController GET Jobs By Type.
+
+==== Request structure
+
+include::{snippets}/JobsController-getJobsByType-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/JobsController-getJobsByType-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/JobsController-getJobsByType-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/JobsController-getJobsByType-example/response-fields.adoc[]
+
+
+== /v1/auth
+
+The API provides the entry point into the service.
+
+[[resources-AuthController-createRole]]
+=== createRole
+
+A `POST` request is used to access the AuthController for create Role.
+
+==== Request structure
+
+include::{snippets}/AuthController-createRole-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-createRole-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-createRole-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/AuthController-createRole-example/request-fields.adoc[]
+
+[[resources-AuthController-updateRole]]
+=== updateRole
+
+A `PUT` request is used to access the AuthController Update Role.
+
+==== Request structure
+
+include::{snippets}/AuthController-updateRole-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-updateRole-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-updateRole-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/AuthController-updateRole-example/request-fields.adoc[]
+
+[[resources-AuthController-deleteRole]]
+=== deleteRoleById
+
+A `DELETE` request is used to access the AuthController delete Role.
+
+==== Request structure
+
+include::{snippets}/AuthController-deleteRole-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-deleteRole-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-deleteRole-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/AuthController-deleteRole-example/request-fields.adoc[]
+
+[[resources-AuthController-readRoleNames]]
+=== getAllRoleNames
+
+A `GET` request is used to access the AuthController GET All RoleNames.
+
+==== Request structure
+
+include::{snippets}/AuthController-readRoleNames-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-readRoleNames-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-readRoleNames-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/AuthController-readRoleNames-example/response-fields.adoc[]
+
+[[resources-AuthController-readRoleByPage]]
+=== getRolesWithPagenation
+
+A `GET` request is used to access the AuthController GET Roles By Page.
+
+==== Request structure
+
+include::{snippets}/AuthController-readRoleByPage-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-readRoleByPage-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-readRoleByPage-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/AuthController-readRoleByPage-example/request-fields.adoc[]
+
+
+[[resources-AuthController-readOneRoleById]]
+=== getRoleById
+
+A `GET` request is used to access the AuthController GET One Role By Id.
+
+==== Request structure
+
+include::{snippets}/AuthController-readOneRoleById-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-readOneRoleById-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-readOneRoleById-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/AuthController-readOneRoleById-example/response-fields.adoc[]
+
+[[resources-AuthController-createUser]]
+=== createUser
+
+A `POST` request is used to access the AuthController for create User.
+
+==== Request structure
+
+include::{snippets}/AuthController-createUser-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-createUser-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-createUser-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/AuthController-createUser-example/request-fields.adoc[]
+
+[[resources-AuthController-deleteUser]]
+=== deleteUser
+
+A `DELETE` request is used to access the AuthController delete User.
+
+==== Request structure
+
+include::{snippets}/AuthController-deleteUser-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-deleteUser-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-deleteUser-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/AuthController-deleteUser-example/request-fields.adoc[]
+
+[[resources-AuthController-updateUser]]
+=== updateUser
+
+A `PUT` request is used to access the AuthController Update User.
+
+==== Request structure
+
+include::{snippets}/AuthController-updateUser-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-updateUser-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-updateUser-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/AuthController-updateUser-example/request-fields.adoc[]
+
+[[resources-AuthController-readOneUserById]]
+=== getUserById
+
+A `GET` request is used to access the AuthController GET One User By Id.
+
+==== Request structure
+
+include::{snippets}/AuthController-readOneUserById-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-readOneUserById-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-readOneUserById-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/AuthController-readOneUserById-example/response-fields.adoc[]
+
+[[resources-AuthController-readOneUserByUserName]]
+=== getUserByUserName
+
+A `GET` request is used to access the AuthController GET One User By User Name.
+
+==== Request structure
+
+include::{snippets}/AuthController-readOneUserByUserName-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-readOneUserByUserName-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-readOneUserByUserName-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/AuthController-readOneUserByUserName-example/response-fields.adoc[]
+
+[[resources-AuthController-readUsersByPage]]
+=== getUsersWithPagenation
+
+A `GET` request is used to access the AuthController GET Users By Page.
+
+==== Request structure
+
+include::{snippets}/AuthController-readUsersByPage-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-readUsersByPage-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-readUsersByPage-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/AuthController-readUsersByPage-example/request-fields.adoc[]
+
+[[resources-AuthController-readAllUsers]]
+=== getAllUsers
+
+A `GET` request is used to access the AuthController GET All Users.
+
+==== Request structure
+
+include::{snippets}/AuthController-readAllUsers-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-readAllUsers-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-readAllUsers-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/AuthController-readAllUsers-example/response-fields.adoc[]
+
+[[resources-AuthController-CreateAccessToken]]
+=== createAccessToken
+
+A `POST` request is used to access the AuthController for create AccessToken.
+
+==== Request structure
+
+include::{snippets}/AuthController-CreateAccessToken-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-CreateAccessToken-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-CreateAccessToken-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/AuthController-CreateAccessToken-example/request-fields.adoc[]
+
+[[resources-AuthController-RefreshAccessToken]]
+=== refreshAccessToken
+
+A `POST` request is used to access the AuthController for Refresh AccessToken.
+
+==== Request structure
+
+include::{snippets}/AuthController-RefreshAccessToken-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-RefreshAccessToken-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-RefreshAccessToken-example/curl-request.adoc[]
+
+
+[[resources-AuthController-UserLogin]]
+=== login
+
+A `POST` request is used to access the AuthController for create User.
+
+==== Request structure
+
+include::{snippets}/AuthController-UserLogin-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-UserLogin-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-UserLogin-example/curl-request.adoc[]
+
+==== Request Fields
+include::{snippets}/AuthController-UserLogin-example/request-fields.adoc[]
+
+[[resources-AuthController-UserLogout]]
+=== logout
+
+A `GET` request is used to access the AuthController User Logout.
+
+==== Request structure
+
+include::{snippets}/AuthController-UserLogout-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/AuthController-UserLogout-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/AuthController-UserLogout-example/curl-request.adoc[]
+

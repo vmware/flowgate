@@ -1,0 +1,162 @@
+<!-- Copyright 2019 VMware, Inc.
+SPDX-License-Identifier: BSD-2-Clause -->
+<form #userForm="ngForm" >
+        <section class="form-block">
+                <label> Content for User</label> 
+            <div class="form-group">
+              <label class="required" for="empuserName">UserName</label>       
+              <label for="empuserName"
+                  aria-haspopup="true"
+                  role="tooltip"
+                  class="tooltip tooltip-validation tooltip-md"
+                  [class.invalid]="userNameInput.invalid && (userNameInput.dirty || userNameInput.touched)">
+                  <input type="text" id="empuserName" placeholder="Enter UserName"
+                      required
+                      disabled
+                      name="userName"
+                      [(ngModel)]="user.username"
+                      #userNameInput="ngModel">
+                  <span class="tooltip-content">
+                      UserName is Required.
+                  </span>
+              </label>
+            </div>
+            <div class="form-group" style="margin-bottom: 0px;">
+              <label class="required"  for="empemail">Email</label>
+              <label for="empemail"
+                  aria-haspopup="true"
+                  role="tooltip"
+                  class="tooltip tooltip-validation tooltip-md"
+                  [class.invalid]="emailInput.invalid && (emailInput.dirty || emailInput.touched)">
+                  <input type="text" id="empemail" placeholder="Enter Email"
+                      required
+                      name="email"
+                      [(ngModel)]="user.email"
+                      #emailInput="ngModel">
+                  <span class="tooltip-content">
+                      E-mail is Required.
+                  </span>
+              </label>
+            </div>
+            <form style="margin-top: 0px;">
+                <section class="form-block" style="margin-top: 0px;">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <label for="password"
+                            aria-haspopup="true"
+                            role="tooltip"
+                            class="tooltip tooltip-validation tooltip-md"
+                            [class.invalid]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">
+                            <input type="password" id="password" placeholder="Password"
+                                required
+                                pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,20}$"
+                                name="password"
+                                [(ngModel)]="user.password"
+                                #passwordInput="ngModel"
+                                >
+                            <span class="tooltip-content">
+                                Password should be 8-20 characters long with at least 1 uppercase, 1 lowercase and 1 number.
+                            </span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <label for="confirmPassword"
+                            aria-haspopup="true"
+                            role="tooltip"
+                            class="tooltip tooltip-validation tooltip-md"
+                            [class.invalid]="getValidationState()">
+                            <input type="password" id="confirmPassword" placeholder="Confirm Password"
+                                required
+                                pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,20}$"
+                                name="confirmPassword"
+                                [(ngModel)]="user.rpassword"
+                                #confirmPasswordInput="ngModel"
+                                (input)='handleValidation("confirmPassword", false)' 
+                            (blur)='handleValidation("confirmPassword", true)'
+                            >
+                            <span class="tooltip-content">
+                                Password do not match.
+                            </span>
+                        </label>
+                        
+                    </div>
+                </section>
+                    
+              </form>
+            <!-- <div class="form-group">
+              <label  for="emppassword">Password</label>
+              <label for="emppassword"
+                  aria-haspopup="true"
+                  role="tooltip"
+                  class="tooltip tooltip-validation tooltip-md"
+                  [class.invalid]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">
+                  <input type="password" id="emppassword" placeholder="Enter Password"
+                      required
+                      name="password"
+                      [(ngModel)]="user.password"
+                      #passwordInput="ngModel">
+                   <span class="tooltip-content">
+                      Password is Required.
+                  </span> 
+              </label>
+            </div> 
+           <div class="form-group">
+                  <label  for="empRpassword">Repeat Password</label>
+                  <label for="empRpassword"
+                      aria-haspopup="true"
+                      role="tooltip"
+                      class="tooltip tooltip-validation tooltip-md"
+                      [class.invalid]="RpasswordInput.invalid && (RpasswordInput.dirty || RpasswordInput.touched)">
+                      <input type="password" id="empRpassword" placeholder="Enter Repeat password"
+                          required
+                          name="Rpassword"
+                          [(ngModel)]="user.rpassword"
+                          #RpasswordInput="ngModel">
+                       <span class="tooltip-content">
+                              Repeat Password is Required.
+                      </span>
+                       
+                  </label>
+              </div>       -->
+            
+            <!-- <div class="form-group ">
+                <label class="required" for="gForm_3">Role</label>
+                    <div class="select" style="width:184px; ">
+                        <select id="gForm_5" [ngModelOptions]="{standalone: true}"  [(ngModel)]="user.roleName" > 
+                            <option value="user" >user</option>
+                            <option value="admin">admin</option>
+                            <option value="apiUser">apiUser</option>
+                        </select>
+                    </div>
+            </div> -->
+
+            <div class="form-group" style="width: 420px;">
+                <label class="required" >Roles</label>
+                <div style="width: 180px;height: 150px;overflow: auto;">
+                    <clr-checkbox *ngFor="let role of roles"
+                    [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="role.enable" 
+                    [clrInline]="true"
+                    (change)="addrole(role.roleName,role.enable)" style="margin-right: 5px;">
+                        {{role.roleName}}
+                    </clr-checkbox>
+                </div>          
+            </div>  
+            <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="userForm.form.invalid">Submit</button>
+            <!-- <button type="button" class="btn btn-primary" on-click="reset()">Reset</button> -->
+            <button type="button" class="btn btn-primary" on-click="back()">Back</button>
+        </section>
+      </form>
+    
+      
+    <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
+        <h3 class="modal-title">Operation tips</h3>
+        <div class="modal-body">
+            <p>{{modal}}</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" (click)="close()">Close</button>
+            <button type="button" class="btn btn-primary" (click)="back()">Back List</button>
+        </div>
+    </clr-modal>

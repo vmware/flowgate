@@ -1,0 +1,511 @@
+/**
+ * Copyright 2019 VMware, Inc.
+ * SPDX-License-Identifier: BSD-2-Clause
+*/
+package com.vmware.wormhole.vroworker.scheduler.job;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vmware.ops.api.model.property.PropertyContent;
+import com.vmware.ops.api.model.property.PropertyContents;
+import com.vmware.ops.api.model.resource.ResourceDto;
+import com.vmware.ops.api.model.resource.ResourceIdentifier;
+import com.vmware.ops.api.model.stat.StatContent;
+import com.vmware.ops.api.model.stat.StatContents;
+import com.vmware.wormhole.client.WormholeAPIClient;
+import com.vmware.wormhole.common.model.Asset;
+import com.vmware.wormhole.common.model.AssetIPMapping;
+import com.vmware.wormhole.common.model.SDDCSoftwareConfig;
+import com.vmware.wormhole.common.model.ServerMapping;
+import com.vmware.wormhole.common.model.ServerSensorData;
+import com.vmware.wormhole.common.model.ServerSensorData.ServerSensorType;
+import com.vmware.wormhole.common.model.redis.message.AsyncService;
+import com.vmware.wormhole.common.model.redis.message.EventMessage;
+import com.vmware.wormhole.common.model.redis.message.EventType;
+import com.vmware.wormhole.common.model.redis.message.EventUser;
+import com.vmware.wormhole.common.model.redis.message.MessagePublisher;
+import com.vmware.wormhole.common.model.redis.message.impl.EventMessageImpl;
+import com.vmware.wormhole.common.model.redis.message.impl.EventMessageUtil;
+import com.vmware.wormhole.common.utils.IPAddressUtil;
+import com.vmware.wormhole.vroworker.config.ServiceKeyConfig;
+import com.vmware.wormhole.vroworker.vro.AlertClient;
+import com.vmware.wormhole.vroworker.vro.MetricClient;
+import com.vmware.wormhole.vroworker.vro.VROConfig;
+import com.vmware.wormhole.vroworker.vro.VROConsts;
+
+@Service
+public class VROAsyncJob implements AsyncService {
+
+   private static final Logger logger = LoggerFactory.getLogger(VROAsyncJob.class);
+   @Autowired
+   private WormholeAPIClient restClient;
+   @Autowired
+   private ServiceKeyConfig serviceKeyConfig;
+   @Autowired
+   private MessagePublisher publisher;
+
+   @Autowired
+   private StringRedisTemplate template;
+
+   private ObjectMapper mapper = new ObjectMapper();
+
+   private static final Map<String, String> methodPropertyMapping;
+   private static final Map<ServerSensorType, String> sensorMetricMapping;
+   private static final int HTTP_NOTFOUND = 404;
+   static {
+      Map<String, String> kvMap = new HashMap<String, String>();
+      kvMap.put("region", VROConsts.LOCATION_REGION);
+      kvMap.put("country", VROConsts.LOCATION_COUNTRY);
+      kvMap.put("city", VROConsts.LOCATION_CITY);
+      kvMap.put("building", VROConsts.LOCATION_BUILDING);
+      kvMap.put("floor", VROConsts.LOCATION_FLOOR);
+      kvMap.put("room", VROConsts.LOCATION_ROOM);
+      kvMap.put("row", VROConsts.LOCATION_ROW);
+      kvMap.put("col", VROConsts.LOCATION_COL);
+      kvMap.put("cabinetName", VROConsts.LOCATION_CABINET);
+      kvMap.put("cabinetUnitPosition", VROConsts.LOCATION_CABINET_NUMBER);
+      methodPropertyMapping = Collections.unmodifiableMap(kvMap);
+
+      Map<ServerSensorType, String> smMap = new HashMap<ServerSensorType, String>();
+      smMap.put(ServerSensorType.BACKPANELTEMP, VROConsts.ENVRIONMENT_BACK_TEMPERATURE_METRIC);
+      smMap.put(ServerSensorType.FRONTPANELTEMP, VROConsts.ENVRIONMENT_FRONT_TEMPERATURE_METRIC);
+      smMap.put(ServerSensorType.HUMIDITY, VROConsts.ENVRIONMENT_HUMIDITY_METRIC);
+      smMap.put(ServerSensorType.PDU_RealtimeLoad, VROConsts.ENVRIONMENT_PDU_AMPS_METRIC);
+      smMap.put(ServerSensorType.PDU_RealtimeVoltage, VROConsts.ENVRIONMENT_PDU_VOLTS_METRIC);
+      smMap.put(ServerSensorType.PDU_RealtimePower, VROConsts.ENVRIONMENT_PDU_POWER_METRIC);
+      smMap.put(ServerSensorType.PDU_RealtimeLoadPercent, VROConsts.ENVRIONMENT_PDU_AMPS_LOAD_METRIC);
+
+      sensorMetricMapping = Collections.unmodifiableMap(smMap);
+   }
+   private static int executionCount = 0;
+   private static HashMap<String,Long> latencyFactorMap = new HashMap<String,Long>();
+   private static HashMap<String,Long> lastUpdateTimeMap = new HashMap<String, Long>();
+
+   private static final String EntityName = "VMEntityName";
+   private static final String VMEntityObjectID = "VMEntityObjectID";
+   private static final String VMEntityVCID = "VMEntityVCID";
+   private static long FIVE_MINUTES = 60 * 5 * 1000;
+
+   @Override
+   @Async("asyncServiceExecutor")
+   public void executeAsync(EventMessage message) {
+      if (message.getType() != EventType.VROps) {
+         logger.warn("Drop none VROps message " + message.getType());
+         return;
+      }
+      //TO, this should be comment out since it may contain vc password.
+      logger.info("message received");
+      Set<EventUser> users = message.getTarget().getUsers();
+
+      for (EventUser command : users) {
+         logger.info(command.getId());
+         switch (command.getId()) {
+         case EventMessageUtil.VRO_SyncData:
+            String messageString = null;
+            while ((messageString =
+                  template.opsForList().rightPop(EventMessageUtil.vroJobList)) != null) {
+               EventMessage payloadMessage = null;
+               try {
+                  payloadMessage = mapper.readValue(messageString, EventMessageImpl.class);
+               } catch (IOException e) {
+                  logger.error("Cannot process message", e);
+               }
+               if (payloadMessage == null) {
+                  continue;
+               }
+               SDDCSoftwareConfig vroInfo = null;
+               try {
+                  vroInfo = mapper.readValue(payloadMessage.getContent(), SDDCSoftwareConfig.class);
+               } catch (IOException e) {
+                  logger.error("Cannot process message", e);
+               }
+               if (null == vroInfo) {
+                  continue;
+               }
+               for (EventUser payloadCommand : payloadMessage.getTarget().getUsers()) {
+                  switch (payloadCommand.getId()) {
+                  case EventMessageUtil.VRO_SyncMetricData:
+                     syncVROMetricData(vroInfo);
+                     logger.info("Finish Sync Metric data for " + vroInfo.getName());
+                     break;
+                  case EventMessageUtil.VRO_SyncMetricPropertyAndAlert:
+                     syncVROMetricPropertyAlertDefinition(vroInfo);
+                     logger.info("Finish Sync customer attributes and alerts for " + vroInfo.getName());
+                     break;
+                  default:
+                     break;
+                  }
+               }
+            }
+            break;
+         case EventMessageUtil.VRO_SyncMetricData:
+            SDDCSoftwareConfig vro = null;
+            try {
+               vro = mapper.readValue(message.getContent(), SDDCSoftwareConfig.class);
+            } catch (IOException e1) {
+               // TODO Auto-generated catch block
+               logger.error("Failed to convert message", e1);
+            }
+            if (vro != null) {
+               syncVROMetricData(vro);
+               logger.info("Finish Sync Metric data for " + vro.getName());
+            }
+            break;
+         case EventMessageUtil.VRO_SyncMetricPropertyAndAlert:
+            SDDCSoftwareConfig vroInfo = null;
+            try {
+               vroInfo = mapper.readValue(message.getContent(), SDDCSoftwareConfig.class);
+            } catch (IOException e1) {
+               // TODO Auto-generated catch block
+               logger.error("Failed to convert message", e1);
+            }
+            if (vroInfo != null) {
+               syncVROMetricPropertyAlertDefinition(vroInfo);
+               logger.info("Finish Sync customer attributes and alerts for " + vroInfo.getName());
+            }
+            break;
+         default:
+            logger.warn("Unknown command, ignore it: " + command.getId());
+            break;
+         }
+      }
+   }
+
+   private void syncVROMetricData(SDDCSoftwareConfig config) {
+      VROConfig vro = new VROConfig(config);
+      long currentTime = System.currentTimeMillis();
+      MetricClient metricClient = new MetricClient(vro, publisher);
+      List<ResourceDto> hosts = metricClient.getHostSystemsResources();
+      //read all host/asset maaping from apiserver
+      Map<String, Asset> assetDictionary = new HashMap<String, Asset>();
+      try {
+         restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+         Asset[] servers = restClient.getAssetsByVRO(vro.getId()).getBody();
+         for (Asset server : servers) {
+            assetDictionary.put(server.getId(), server);
+         }
+      } catch (HttpClientErrorException clientError) {
+         if (clientError.getRawStatusCode() != HTTP_NOTFOUND) {
+            throw clientError;
+         }
+      }
+      ServerMapping[] mappings = null;
+      try {
+         mappings = restClient.getServerMappingsByVRO(vro.getId()).getBody();
+      } catch (HttpClientErrorException clientError) {
+         if (clientError.getRawStatusCode() != HTTP_NOTFOUND) {
+            throw clientError;
+         }
+         mappings = new ServerMapping[0];
+      }
+      HashMap<String, ServerMapping> entityNameDictionary = new HashMap<String, ServerMapping>();
+      HashMap<String, ServerMapping> objectIDDictionary = new HashMap<String, ServerMapping>();
+      //HashMap<String, ServerMapping> vcIDDictionary = new HashMap<String, ServerMapping>();
+
+
+      for (ServerMapping mapping : mappings) {
+         entityNameDictionary.put(mapping.getVroVMEntityName(), mapping);
+         objectIDDictionary.put(mapping.getVroVMEntityObjectID(), mapping);
+         //vcIDDictionary.put(mapping.getVroVMEntityVCID(), mapping);
+      }
+      List<ServerMapping> validMapping = new ArrayList<ServerMapping>();
+      for (ResourceDto host : hosts) {
+         //There are several things that can be used as a identifier of a host.
+         //the first is the Name
+         //beside that there are three other identifier
+         //VMEntityName -- 10.112.113.160
+         //VMEntityObjectID  host-81  the mobID of the host.
+         //VMEntityVCID  this is the uuid of the vc object.
+         //currently we only add new servers and don't delete servers
+
+         List<ResourceIdentifier> identifiers = host.getResourceKey().getResourceIdentifiers();
+         boolean newHost = true;
+         String entityName = "";
+         String objectID = "";
+         String vcID = "";
+         ServerMapping refer = null;
+         for (ResourceIdentifier identifier : identifiers) {
+            if (!newHost) {
+               break;
+            }
+            switch (identifier.getIdentifierType().getName()) {
+            case EntityName:
+               entityName = identifier.getValue();
+               if (entityNameDictionary.containsKey(entityName)) {
+                  newHost = false;
+                  refer = entityNameDictionary.get(entityName);
+               }
+               break;
+            case VMEntityObjectID:
+               objectID = identifier.getValue();
+               if (objectIDDictionary.containsKey(objectID)) {
+                  newHost = false;
+                  refer = objectIDDictionary.get(objectID);
+               }
+               break;
+            case VMEntityVCID:
+               vcID = identifier.getValue();
+               break;
+            default:
+               break;
+            }
+         }
+         if (newHost) {
+            //try to notify the other system.
+            String ipaddress = IPAddressUtil.getIPAddress(entityName);
+            if (null != ipaddress) {
+               publisher.publish(null, ipaddress);
+               ipaddress = entityName;
+            }
+            ServerMapping newMapping = new ServerMapping();
+            newMapping.setVroID(vro.getId());
+            newMapping.setVroResourceName(host.getResourceKey().getName());
+            newMapping.setVroVMEntityName(entityName);
+            newMapping.setVroVMEntityObjectID(objectID);
+            newMapping.setVroVMEntityVCID(vcID);
+            newMapping.setVroResourceID(host.getIdentifier().toString());
+            AssetIPMapping[] ipMappings = restClient.getHostnameIPMappingByIP(ipaddress).getBody();
+            if (null != ipMappings && ipMappings.length > 0) {
+               //update the mapping
+               String assetName = ipMappings[0].getAssetname();
+               Asset asset = restClient.getAssetByName(assetName).getBody();
+               if (asset != null) {
+                  newMapping.setAsset(asset.getId());
+               }
+            }
+            restClient.saveServerMapping(newMapping);
+            validMapping.add(newMapping);
+         } else {
+            if (refer.getAsset() == null) {
+               String ipaddress = IPAddressUtil.getIPAddress(refer.getVroVMEntityName());
+               AssetIPMapping[] ipMappings =
+                     restClient.getHostnameIPMappingByIP(ipaddress).getBody();
+               if (null != ipMappings && ipMappings.length > 0) {
+                  //update the mapping
+                  String assetName = ipMappings[0].getAssetname();
+                  Asset asset = restClient.getAssetByName(assetName).getBody();
+                  if (asset != null) {
+                     refer.setAsset(asset.getId());
+                     restClient.saveServerMapping(refer);
+                     validMapping.add(refer);
+                  }
+               }else {
+                  if (null != ipaddress) {
+                     logger.info("Notify Infoblox to query the assetname");
+                     publisher.publish(null, ipaddress);
+                  }
+               }
+            } else {
+               validMapping.add(refer);
+            }
+         }
+      }
+
+      //Now we get all our valid mappings we need to extract the data for each exsi and push data.
+      //         Map<SensorType, String> metricMapping = new HashMap<SensorType, String>();
+      //         metricMapping.put(SensorType.BACKPANELTEMP, VROConsts.ENVRIONMENT_BACK_TEMPERATURE_METRIC);
+      //         metricMapping.put(SensorType.FRONTPANELTEMP,
+      //               VROConsts.ENVRIONMENT_FRONT_TEMPERATURE_METRIC);
+      //         metricMapping.put(SensorType.PDU, VROConsts.ENVRIONMENT_POWER_METRIC);
+
+      //         Set<String> validAssetIDs =
+      //               validMapping.stream().map(ServerMapping::getAssetID).collect(Collectors.toSet());
+      if(validMapping.isEmpty()) {
+         logger.info("No Mapping find.Sync nothing for this execution.");
+         return;
+      }
+      Long latencyFactor = latencyFactorMap.get(config.getServerURL());
+      if(latencyFactor == null) {
+         latencyFactor = 24L;
+      }
+      Long lastUpdateTimeStamp = lastUpdateTimeMap.get(config.getServerURL());
+
+      if(lastUpdateTimeStamp == null) {
+         lastUpdateTimeStamp = currentTime - FIVE_MINUTES * latencyFactor;
+      }
+      boolean hasNewData = false;
+      logger.info(String.format("Start prepare data.%s, lastUpdateTime:%s, latencyFactor:%s",
+            executionCount, lastUpdateTimeStamp, latencyFactor));
+      for (ServerMapping mapping : validMapping) {
+         if (mapping.getAsset() != null) {
+            ServerSensorData[] sensorDatas = restClient
+                  .getServerRelatedSensorDataByServerID(mapping.getAsset(), lastUpdateTimeStamp,
+                        FIVE_MINUTES * latencyFactor)
+                  .getBody();
+            StatContents contents = new StatContents();
+            StatContent frontTemp = new StatContent();
+            List<Double> frontValues = new ArrayList<Double>();
+            List<Long> frontTimes = new ArrayList<Long>();
+            StatContent backTemp = new StatContent();
+            List<Double> backValues = new ArrayList<Double>();
+            List<Long> backTimes = new ArrayList<Long>();
+            StatContent pduAMPSValue = new StatContent();
+            List<Double> pduAMPSValues = new ArrayList<Double>();
+            List<Long> pduAMPSTimes = new ArrayList<Long>();
+            StatContent pduRealtimeVoltage = new StatContent();
+            List<Double> voltageValues = new ArrayList<Double>();
+            List<Long> voltageTimes = new ArrayList<Long>();
+            StatContent pduRealtimePower = new StatContent();
+            List<Double> powerValues = new ArrayList<Double>();
+            List<Long> powerTimes = new ArrayList<Long>();
+            StatContent humidityPercent = new StatContent();
+            List<Double> humidityValues = new ArrayList<Double>();
+            List<Long> humidityTimes = new ArrayList<Long>();
+
+            for (ServerSensorData data : sensorDatas) {
+               if(data.getTimeStamp() > lastUpdateTimeStamp) {
+                  lastUpdateTimeStamp = data.getTimeStamp();
+                  hasNewData = true;
+               }
+               switch (data.getType()) {
+               case BACKPANELTEMP:
+                  backValues.add(data.getValueNum());
+                  backTimes.add(data.getTimeStamp());
+                  break;
+               case FRONTPANELTEMP:
+                  frontValues.add(data.getValueNum());
+                  frontTimes.add(data.getTimeStamp());
+                  break;
+               case PDU_RealtimeLoad://need to more detail.
+                  pduAMPSValues.add(data.getValueNum());
+                  pduAMPSTimes.add(data.getTimeStamp());
+                  break;
+               case PDU_RealtimeVoltage:
+                  voltageValues.add(data.getValueNum());
+                  voltageTimes.add(data.getTimeStamp());
+                  break;
+               case PDU_RealtimePower:
+                  powerValues.add(data.getValueNum());
+                  powerTimes.add(data.getTimeStamp());
+                  break;
+               case HUMIDITY:
+                  humidityValues.add(data.getValueNum());
+                  humidityTimes.add(data.getTimeStamp());
+                  break;
+               default:
+                  break;
+               }
+            }
+            if (!frontValues.isEmpty()) {
+               frontTemp.setStatKey(VROConsts.ENVRIONMENT_FRONT_TEMPERATURE_METRIC);
+               frontTemp.setData(frontValues.stream().mapToDouble(Double::valueOf).toArray());
+               frontTemp.setTimestamps(frontTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(frontTemp);
+            }
+            if (!backValues.isEmpty()) {
+               backTemp.setStatKey(VROConsts.ENVRIONMENT_BACK_TEMPERATURE_METRIC);
+               backTemp.setData(backValues.stream().mapToDouble(Double::valueOf).toArray());
+               backTemp.setTimestamps(backTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(backTemp);
+            }
+            if (!pduAMPSValues.isEmpty()) {
+               pduAMPSValue.setStatKey(VROConsts.ENVRIONMENT_PDU_AMPS_METRIC);
+               pduAMPSValue.setData(pduAMPSValues.stream().mapToDouble(Double::valueOf).toArray());
+               pduAMPSValue.setTimestamps(pduAMPSTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(pduAMPSValue);
+            }
+            if (!voltageValues.isEmpty()) {
+               pduRealtimeVoltage.setStatKey(VROConsts.ENVRIONMENT_PDU_VOLTS_METRIC);
+               pduRealtimeVoltage
+                     .setData(voltageValues.stream().mapToDouble(Double::valueOf).toArray());
+               pduRealtimeVoltage
+                     .setTimestamps(voltageTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(pduRealtimeVoltage);
+            }
+            if (!powerValues.isEmpty()) {
+               pduRealtimePower.setStatKey(VROConsts.ENVRIONMENT_PDU_POWER_METRIC);
+               pduRealtimePower
+                     .setData(powerValues.stream().mapToDouble(Double::valueOf).toArray());
+               pduRealtimePower
+                     .setTimestamps(powerTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(pduRealtimePower);
+            }
+            if (!humidityValues.isEmpty()) {
+               humidityPercent.setStatKey(VROConsts.ENVRIONMENT_HUMIDITY_METRIC);
+               humidityPercent
+                     .setData(humidityValues.stream().mapToDouble(Double::valueOf).toArray());
+               humidityPercent
+                     .setTimestamps(humidityTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(humidityPercent);
+            }
+
+            if (!contents.getStatContents().isEmpty()) {
+               logger.info("Push data to VRO: "+config.getServerURL());
+               metricClient.addStats(null, UUID.fromString(mapping.getVroResourceID()), contents,
+                     false);
+            }
+            //UPDATE THE PROPERTIES
+            if (executionCount % 1000 == 0) {
+               PropertyContents propertyContents = new PropertyContents();
+               packagingPropertyContent(assetDictionary.get(mapping.getAsset()),
+                     propertyContents);
+               metricClient.addProperties(null, UUID.fromString(mapping.getVroResourceID()),
+                     propertyContents);
+            }
+         }
+      }
+      if(hasNewData) {
+         Long factor = (currentTime-lastUpdateTimeStamp)/FIVE_MINUTES+1;
+         if(factor > 24) {
+            factor = 24L;
+         }else if(factor < 0) {
+            factor = 1L;
+         }
+         latencyFactorMap.put(config.getServerURL(), factor);
+         if(lastUpdateTimeStamp > currentTime) {
+            lastUpdateTimeStamp = currentTime;
+         }
+         lastUpdateTimeMap.put(config.getServerURL(), lastUpdateTimeStamp);
+      }else {
+         latencyFactor =latencyFactor+1;
+         if(latencyFactor > 24) {
+            latencyFactor =24L;
+         }
+         latencyFactorMap.put(config.getServerURL(), latencyFactor);
+      }
+      executionCount++;
+      logger.info("Finished Sync metric data for VRO: "+config.getServerURL());
+   }
+
+   private void packagingPropertyContent(Asset asset, PropertyContents contents) {
+      long currenttime = System.currentTimeMillis();
+      BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(asset);
+      for (String key : methodPropertyMapping.keySet()) {
+         PropertyContent content = new PropertyContent();
+         content.setStatKey(methodPropertyMapping.get(key));
+         content.setValues(new String[] { String.valueOf(wrapper.getPropertyValue(key)) });
+         content.setTimestamps(new long[] { currenttime });
+         contents.addPropertyContent(content);
+      }
+
+   }
+
+   private void syncVROMetricPropertyAlertDefinition(SDDCSoftwareConfig config) {
+      VROConfig vroConf = new VROConfig(config);
+      MetricClient metricClient = new MetricClient(vroConf, publisher);
+      metricClient.checkPredefinedMetricsandProperties();
+      AlertClient alertClient = new AlertClient(vroConf);
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      alertClient.setRestClient(restClient);
+      alertClient.run();
+   }
+
+}

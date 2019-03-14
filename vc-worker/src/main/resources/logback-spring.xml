@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2019 VMware, Inc.
+SPDX-License-Identifier: BSD-2-Clause -->
+  
+<configuration scan="false" scanPeriod="30" debug="false">  
+    <include resource="org/springframework/boot/logging/logback/base.xml" />  
+ 	<appender name="fileInfoLog"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>/log/vc-worker-info.log</File>
+		<!-- TimeBasedRollingPolicy -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>/log/vc-worker-info.%d{yyyy-MM-dd}.gz</FileNamePattern>
+			<!-- <maxFileSize>1kb</maxFileSize>  -->   
+       		<maxHistory>30</maxHistory>  
+			<totalSizeCap>3GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>%d [%thread] %-5level %logger{36} %line - %msg%n</pattern>
+		</encoder>
+	</appender> 
+ 	<appender name="fileErrorLog"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>/log/vc-worker-error.log</File>
+		 <filter class="ch.qos.logback.classic.filter.LevelFilter"> 
+			 <level>ERROR</level> 
+			 <onMatch>ACCEPT</onMatch> 
+			 <onMismatch>DENY</onMismatch> 
+		 </filter>
+		<!-- TimeBasedRollingPolicy -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>/log/vc-worker-error.%d{yyyy-MM-dd}.gz</FileNamePattern>
+			<!-- <maxFileSize>1kb</maxFileSize>  -->   
+       		<maxHistory>30</maxHistory>  
+			<totalSizeCap>3GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<charset>UTF-8</charset>
+			<pattern>%d [%thread] %-5level %logger{36} %line - %msg%n</pattern>
+		</encoder>
+	</appender> 	
+    
+    <root level="INFO">  
+        <appender-ref ref="CONSOLE" />  
+        <appender-ref ref="fileInfoLog"/> 
+    </root>
+</configuration>  

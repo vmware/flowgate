@@ -1,0 +1,94 @@
+<!-- Copyright 2019 VMware, Inc.
+SPDX-License-Identifier: BSD-2-Clause -->
+  <clr-alert [clrAlertType]="alertType" (clrAlertClosedChange)="close()" [clrAlertClosed]= "alertclose">
+    <div class="alert-item">
+        <span class="alert-text">
+            {{alertcontent}}
+        </span>
+    </div>
+  </clr-alert>
+    
+    
+  <clr-tabs>
+        <clr-tab *appHasPrivilege=syncData>
+            <button clrTabLink>SyncData</button>
+            <clr-tab-content *clrIfActive>
+                <div class="row">
+                    <div class="col-md-10">
+                        <h5>Sync Data</h5>
+                        <clr-datagrid>
+        
+                            <clr-dg-column>Job</clr-dg-column>
+                            <clr-dg-column>Description</clr-dg-column>
+                            <clr-dg-column>Option</clr-dg-column>
+                            
+                            <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+                            
+                            
+                            <clr-dg-row>
+                            
+                                <clr-dg-cell style="margin-top: 0.5%;font-size: 14px;line-height: 20px;">Aggregate Server Mappings job</clr-dg-cell>
+                                <clr-dg-cell style="margin-top: 0.5%;word-wrap: break-word;font-size: 14px;line-height: 20px;
+                                word-break: normal;">Manually trigger the aggregate Server mapping jobs.
+                                    It will merge mappings between different SDDC systems and Facility system into one item.
+                                    The merge strategy is try it's best to merge. 
+                                    This job will also triggered automatically daily.</clr-dg-cell>
+                                <clr-dg-cell >
+                                <button style="margin:0px;" [clrLoading]="serverMapping" class="btn btn-info-outline" (click)="trigger('job1')">Trigger</button>
+                                </clr-dg-cell>
+                                
+                            </clr-dg-row>
+                            <clr-dg-row>
+                            
+                                <clr-dg-cell style="margin-top: 0.5%;font-size: 14px;line-height: 20px;">Trigger aggregate PDUs and Server Mapping job</clr-dg-cell>
+                                <clr-dg-cell style="margin-top: 0.5%;word-wrap: break-word;font-size: 14px;line-height: 20px;
+                                word-break: normal;">Manually Trigger the aggregate PDUs and Server mapping job.
+                                    It will try to find out the possible PDUs that a server is connected to. 
+                                    The job will automatically executed by daily.</clr-dg-cell>
+                                <clr-dg-cell >
+                                <button style="margin:0px;" [clrLoading]="pduMapping" class="btn btn-info-outline" (click)="trigger('job2')">Trigger</button>
+                                </clr-dg-cell>
+                                
+                            </clr-dg-row>
+                        
+                            </clr-datagrid>
+                    </div>
+                </div>
+            </clr-tab-content>
+        </clr-tab>
+        
+            <clr-tab *appHasPrivilege=syncUnMappedServers>
+                <button clrTabLink>Unmapped Servers</button>
+                <clr-tab-content *clrIfActive>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <button [clrLoading]="serverloading" class="btn btn-info-outline "  (click)="getunmappedservers()" style="margin-top:10px;" >
+                                Pull Unmapped Servers       
+                            </button>
+                        
+                            <clr-datagrid *ngIf="unmappedservershow">
+                                
+                                <clr-dg-column>server</clr-dg-column>
+                                
+                                <clr-dg-placeholder>We couldn't find any unmapped server!</clr-dg-placeholder>
+                                
+                                
+                                <clr-dg-row *ngFor="let item of servers">
+                                
+                                    <clr-dg-cell >{{item}}</clr-dg-cell>
+                                    
+                                    
+                                </clr-dg-row>
+                            
+                                </clr-datagrid>
+                        </div>
+                    </div>
+                </clr-tab-content>
+            </clr-tab>
+            <clr-tab>
+                <button clrTabLink>TODO</button>
+                <clr-tab-content *clrIfActive>
+                    
+                </clr-tab-content>
+            </clr-tab>
+    </clr-tabs>
