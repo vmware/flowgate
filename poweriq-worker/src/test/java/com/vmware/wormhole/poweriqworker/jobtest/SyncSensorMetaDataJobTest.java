@@ -393,6 +393,11 @@ public class SyncSensorMetaDataJobTest {
             new HashMap<AdvanceSettingType, String>();
       advanceSettingMap.put(AdvanceSettingType.DateFormat, "yyyy/MM/dd HH:mm:ss Z");
       advanceSettingMap.put(AdvanceSettingType.TimeZone, "GMT");
+      advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, "%");
+      advanceSettingMap.put(AdvanceSettingType.TEMPERATURE_UNIT, "C");
+      advanceSettingMap.put(AdvanceSettingType.PDU_AMPS_UNIT, "A");
+      advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, "KW");
+      advanceSettingMap.put(AdvanceSettingType.PDU_VOLT_UNIT, "V");
       return advanceSettingMap;
    }
    
