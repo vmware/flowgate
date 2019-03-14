@@ -25,4 +25,6 @@ public class WormholeConstant {
    public static String SENSOR_SOURCE_SPLIT_FLAG = "_";
    
    public static String SENSOR_SPILIT_FLAG = ",";
+   
+   public static String DEVICE_PORT_FOR_SERVER = "DEVICE_PORT_FOR_SERVER";
 }
