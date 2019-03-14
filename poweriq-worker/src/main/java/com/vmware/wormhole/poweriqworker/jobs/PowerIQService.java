@@ -570,9 +570,11 @@ public class PowerIQService implements AsyncService {
             assetToUpdate.setSerialnumber(asset.getSerialnumber());
             HashMap<String, String> justificationfields = assetToUpdate.getJustificationfields();
             justificationfields.put(Pdu_ID, asset.getJustificationfields().get(Pdu_ID));
-            justificationfields.put(Sensor_ID, asset.getJustificationfields().get(asset.getJustificationfields().get(Pdu_ID)));
+            justificationfields.put(Sensor_ID, asset.getJustificationfields().get(Sensor_ID));
+            asset.setLastupdate(new Date().getTime());
             assets.add(assetToUpdate);
          } else {
+            asset.setCreated(new Date().getTime());
             assets.add(asset);
          }
       }
@@ -608,24 +610,30 @@ public class PowerIQService implements AsyncService {
             }
          }
       }
-      if(advanceSettingMap.get(AdvanceSettingType.DateFormat) == null) {
+      String dateformat = advanceSettingMap.get(AdvanceSettingType.DateFormat);
+      if(dateformat == null || dateformat.trim().isEmpty()) {
          advanceSettingMap.put(AdvanceSettingType.DateFormat, DateFormat);
       }
-      if(advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT) == null) {
-          advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, MetricUnit.PERCENT.toString());
-      }
-      if(advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT) == null) {
-          advanceSettingMap.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
-      }
-      if(advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT) == null) {
-          advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
-      }
-      if(advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT) == null) {
-          advanceSettingMap.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.V.toString());
-      }
-      if(advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT) == null) {
-          advanceSettingMap.put(AdvanceSettingType.TEMPERATURE_UNIT, MetricUnit.C.toString());
-      }
+      if(advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT) == null || 
+			  advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT).isEmpty()) {
+	     advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, MetricUnit.PERCENT.toString());
+	  }
+	  if(advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT) == null || 
+			  advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT).isEmpty()) {
+	     advanceSettingMap.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
+	  }
+	  if(advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT) == null ||
+			  advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT).isEmpty()) {
+	     advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
+	  }
+	  if(advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT) == null || 
+			  advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT).isEmpty()) {
+	     advanceSettingMap.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.V.toString());
+	  }
+	  if(advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT) == null || 
+			  advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT).isEmpty() ) {
+	     advanceSettingMap.put(AdvanceSettingType.TEMPERATURE_UNIT, MetricUnit.C.toString());
+	  }
       return advanceSettingMap;
    }
 
@@ -718,6 +726,7 @@ public class PowerIQService implements AsyncService {
       String PDU_VOLT_UNIT = advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT);
       String TEMPERATURE_UNIT = advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT);
       String HUMIDITY_UNIT = advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT);
+
       try {
          for (InletReading inletReading : pdu.getReading().getInletReadings()) {
             time = inletReading.getReadingTime();
@@ -725,9 +734,10 @@ public class PowerIQService implements AsyncService {
             current += inletReading.getCurrent();
             power += inletReading.getApparentPower();
          }
+         
          long valueTime = WormholeDateFormat.getLongTime(time,dateFormat,timezone);
          if (valueTime == -1) {
-            logger.error("Failed to translate the time string: " + time);
+            logger.error("Failed to translate the time string: " + time+".And the dateformat is "+dateFormat);
             return values;
          }
          ValueUnit voltageValue = new ValueUnit();
@@ -826,6 +836,9 @@ public class PowerIQService implements AsyncService {
       List<RealTimeData> realtimeDatas = new ArrayList<RealTimeData>();
       String dateFormat = advanceSetting.get(AdvanceSettingType.DateFormat);
       String timezone = advanceSetting.get(AdvanceSettingType.TimeZone);
+      String temperature = advanceSetting.get(AdvanceSettingType.TEMPERATURE_UNIT);
+      String humidity = advanceSetting.get(AdvanceSettingType.HUMIDITY_UNIT);
+      
       for(String assetId:assetIds) {
          Asset asset = restClient.getAssetByID(assetId).getBody();
          if(asset == null) {
@@ -842,33 +855,56 @@ public class PowerIQService implements AsyncService {
          String valueDateTime = reading.getReadingTime();
          long recordedTime = WormholeDateFormat.getLongTime(valueDateTime,dateFormat,timezone);
          if (recordedTime == -1) {
-            logger.error("Failed to translate the time string: " + valueDateTime);
+            logger.error("Failed to translate the time string: " + valueDateTime+".And the dateformat is "+dateFormat);
             continue;
          }
          List<ValueUnit> values = new ArrayList<ValueUnit>();
          ValueUnit value = new ValueUnit();
          value.setTime(recordedTime);
-         value.setUnit(reading.getUom());
          value.setKey(sensorValueType.get(sensor.getType()));
          
+         String unit = reading.getUom();
          MetricUnit sourceUnit = null, targetUnit = null;
          switch(sensorValueType.get(sensor.getType())) {
              case HUMIDITY:
-                 sourceUnit = MetricUnit.PERCENT;
+            	 if(unit != null && !unit.isEmpty()) {
+            		 if(unit.equals("%")) {
+            			 sourceUnit = MetricUnit.PERCENT;
+            		 }else {
+            			 sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
+            		 }
+            	 }else {
+            		 if(humidity.equals("%")) {
+            			 sourceUnit = MetricUnit.PERCENT;
+            		 }else {
+            			 sourceUnit = MetricUnit.valueOf(humidity.toUpperCase());
+            		 }
+            		 
+            	 }
                  targetUnit = MetricUnit.PERCENT;
                  break;
              case TEMP:
-                 sourceUnit = MetricUnit.valueOf(reading.getUom().toUpperCase());
+            	 if(unit != null && !unit.isEmpty()) {
+            		 sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
+            	 }else {
+            		 sourceUnit = MetricUnit.valueOf(temperature.toUpperCase());
+            	 }
                  targetUnit = MetricUnit.C;
                  break;
              default:
                  break;
          }
+         
          try {
             value.setValueNum(Double.parseDouble(value.translateUnit(String.valueOf(reading.getValue()), sourceUnit, targetUnit)));
         } catch (WormholeException e) {
             logger.error("Cannot translate Unit", e);
         }
+         if(targetUnit.toString().equals(MetricUnit.PERCENT.toString())) {
+        	 value.setUnit("%");
+         }else {
+        	 value.setUnit(targetUnit.toString());
+         }
          
          values.add(value);
          realTimeData.setAssetID(assetId);

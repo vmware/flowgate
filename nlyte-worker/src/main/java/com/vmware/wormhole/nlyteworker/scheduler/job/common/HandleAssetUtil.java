@@ -10,8 +10,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.vmware.wormhole.common.AssetCategory;
+import com.vmware.wormhole.common.AssetStatus;
 import com.vmware.wormhole.common.AssetSubCategory;
 import com.vmware.wormhole.common.MountingSide;
+import com.vmware.wormhole.common.NetworkMapping;
+import com.vmware.wormhole.common.PduMapping;
 import com.vmware.wormhole.common.model.Asset;
 import com.vmware.wormhole.nlyteworker.model.LocationGroup;
 import com.vmware.wormhole.nlyteworker.model.Manufacturer;
@@ -32,6 +35,7 @@ public class HandleAssetUtil {
    public static final int standardServerMaterial = 2;
    public static final int powerStripMaterial = 3;
    public static final int cabinetMaterials = 4;
+   public static final int networkMaterials = 5;
    /**
     *   
     * @return
@@ -142,6 +146,10 @@ public class HandleAssetUtil {
          asset = supplementLocation(asset,nlyteAsset.getLocationGroupID(),locationMap);
          asset = supplementMaterial(asset,nlyteAsset.getMaterialID(),manufacturerMap,materialMap);
          asset.setAssetSource(nlyteSource);
+         AssetStatus status = new AssetStatus();
+         status.setNetworkMapping(NetworkMapping.UNMAPPED);
+         status.setPduMapping(PduMapping.UNMAPPED);
+         asset.setStatus(status);
          UMounting uMounting = nlyteAsset.getuMounting();
          if(uMounting!=null) {
             asset.setCabinetUnitPosition(uMounting.getCabinetUNumber());
@@ -175,7 +183,7 @@ public class HandleAssetUtil {
                           HashMap<Integer,LocationGroup> locationMap) {
       LocationGroup locationGroup = locationMap.get(locationGroupID);
       if(locationGroup == null) {
-         return null;
+         return asset;
       }
       while(locationGroup.getParentLocationGroupID() != null) {
          switch (locationGroup.getLocationGroupType()) {
@@ -213,7 +221,7 @@ public class HandleAssetUtil {
                                     HashMap<Integer,Material> materialMap) {
       Material material = materialMap.get(materialID);
       if(material == null) {
-         return null;
+         return asset;
       }
       Manufacturer manufacturer = manufacturerMap.get(material.getManufacturerID());
       asset.setManufacturer(manufacturer.getDetail());

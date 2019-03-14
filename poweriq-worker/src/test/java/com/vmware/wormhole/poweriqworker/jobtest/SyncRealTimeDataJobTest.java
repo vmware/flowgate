@@ -113,7 +113,7 @@ public class SyncRealTimeDataJobTest {
       reading.setInletReadings(inletReadings);
       pdu.setReading(reading);
       HashMap<AdvanceSettingType,String> advanceSetting = createAdvanceSettingMap();
-      advanceSetting.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
+      advanceSetting.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.W.toString());
       advanceSetting.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.KV.toString());
       advanceSetting.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
       List<ValueUnit> valueUnits = powerIQService.getValueUnits(pdu, advanceSetting);
@@ -126,7 +126,7 @@ public class SyncRealTimeDataJobTest {
             TestCase.assertEquals(2.4, valueUnit.getValueNum());
             continue;
          case PDU_RealtimePower:
-            TestCase.assertEquals(40.0, valueUnit.getValueNum());
+            TestCase.assertEquals(0.04, valueUnit.getValueNum());
             continue;
          default:
             break;

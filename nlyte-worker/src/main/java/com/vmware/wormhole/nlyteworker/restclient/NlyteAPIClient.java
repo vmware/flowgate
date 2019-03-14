@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -15,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.vmware.wormhole.client.RestTemplateBuilder;
@@ -35,7 +38,7 @@ import com.vmware.wormhole.nlyteworker.scheduler.job.common.HandleAssetUtil;
 
 @Service
 public class NlyteAPIClient {
-
+   private static final Logger logger = LoggerFactory.getLogger(NlyteAPIClient.class);
    private static final String GetManufacturersURL = "/nlyte/integration/api/odata/manufacturers";
    private static final String GetServerAssetsURL = "/nlyte/integration/api/odata/Servers?$expand=UMounting";
    private static final String GetCabinetsURL = "/nlyte/integration/api/odata/Cabinets";
@@ -47,6 +50,8 @@ public class NlyteAPIClient {
    private static final String GetPowerStripMaterialsURL = "/nlyte/integration/api/odata/PowerStripMaterials";
    private static final String AuthenticateBasicURL = "/nlyte/integration/api/odata/auth/AuthenticateBasic";
    private static final String GetPowerStripRealtimeValue = "/nlyte/integration/api/odata/PowerStrips(%s)/GetRealtimeValues";
+   private static final String GetNetworksURL = "/nlyte/integration/api/odata/Networks";
+   private static final String GetNetworkMaterialsURL = "/nlyte/integration/api/odata/NetworkMaterials";
    protected String nlyteServiceEndpoint;
 
    protected String username;
@@ -203,6 +208,9 @@ public class NlyteAPIClient {
       case HandleAssetUtil.cabinetMaterials:
          getMaterialsURL = getNlyteServiceEndpoint() + GetCabinetMaterialsURL;
          break;
+      case HandleAssetUtil.networkMaterials:
+         getMaterialsURL = getNlyteServiceEndpoint() + GetNetworkMaterialsURL;
+         break;
       default:
          throw new NlyteWorkerException(
                "category should be 'Blade' or 'Standard' for server matreial");
@@ -218,8 +226,13 @@ public class NlyteAPIClient {
       while (materialResult.getOdatanextLink() != null
             && !materialResult.getOdatanextLink().equals("")) {
          nextPageMaterials = new LinkedList<Material>();
-         materialResult = this.restTemplate.exchange(materialResult.getOdatanextLink(),
-               HttpMethod.GET, getDefaultEntity(), JsonResultForMaterial.class).getBody();
+         try {
+            materialResult = this.restTemplate.exchange(materialResult.getOdatanextLink(),
+                  HttpMethod.GET, getDefaultEntity(), JsonResultForMaterial.class).getBody();
+         }catch(HttpServerErrorException e) {
+            logger.error("Internal Server Error.The url is "+materialResult.getOdatanextLink());
+            break;
+         }
          nextPageMaterials = materialResult.getValue();
          materials.addAll(nextPageMaterials);
       }
@@ -238,6 +251,9 @@ public class NlyteAPIClient {
          break;
       case Cabinet:
          getAssetsUrl = getNlyteServiceEndpoint() + GetCabinetsURL;
+         break;
+      case Networks:
+         getAssetsUrl = getNlyteServiceEndpoint() + GetNetworksURL;
          break;
       default:
          throw new NlyteWorkerException("no such assets of the category ");
