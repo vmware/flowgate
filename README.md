@@ -1,7 +1,6 @@
-
-
 # Flowgate
-
+FlowGate purpose is to enable facility awareness in SDDC and make IT operations management and automation better on high availability, cost saving and improved sustainability, with more information on power, cooling, environment (e.g. humidity, temperature) and security.
+<img alt="FlowGate" src="docs/images/FlowGate.png">
 ## Overview
 
 ## Try it out
