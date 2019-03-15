@@ -199,6 +199,22 @@ public class FacilitySoftwareController {
             logger.error("Failed to send out message", e);
          }
          break;
+      case Labsdb:
+         try {
+            logger.info(String.format(
+                  "Notify %s worker to start sync data, job queue:%s, notifytopic:%s",
+                  server.getType(), EventMessageUtil.labsdbJobList, EventMessageUtil.LabsdbTopic));
+            template.opsForList().leftPushAll(EventMessageUtil.labsdbJobList,
+                  EventMessageUtil.generateFacilityMessageListByType(EventType.Labsdb,
+                        EventMessageUtil.Labsdb_SyncAllWireMapData,
+                        new FacilitySoftwareConfig[] { server }));
+            publisher.publish(EventMessageUtil.LabsdbTopic,
+                  EventMessageUtil.generateFacilityNotifyMessage(EventType.Labsdb));
+            logger.info("Notify message sent out.");
+         } catch (IOException e) {
+            logger.error("Failed to send out message", e);
+         }
+         break;
       default:
          break;
       }

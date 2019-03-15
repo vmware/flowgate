@@ -132,18 +132,26 @@ public class AssetController {
       List<String> assetIDs =
             serverMappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
       List<Asset> assets = assetRepository.findByIDs(assetIDs);
-      Set<String> pduAssetIDs = new HashSet<String>();
+      Set<String> assetids = new HashSet<String>();
       if (category.equals(AssetCategory.Server)) {
          return assets;
-      } else if (category.equals(AssetCategory.PDU)) {
-         for (Asset asset : assets) {
-            if (asset.getPdus() != null) {
-               pduAssetIDs.addAll(asset.getPdus());
+      } else {
+         if (category.equals(AssetCategory.PDU)) {
+            for (Asset asset : assets) {
+               if (asset.getPdus() != null) {
+                  assetids.addAll(asset.getPdus());
+               }
+            }
+         } else if (category.equals(AssetCategory.Networks)) {
+            for (Asset asset : assets) {
+               if (asset.getSwitches() != null) {
+                  assetids.addAll(asset.getSwitches());
+               }
             }
          }
-         if(!pduAssetIDs.isEmpty()) {
-         assets = assetRepository.findByIDs(new ArrayList<String>(pduAssetIDs));
-         }else {
+         if (!assetids.isEmpty()) {
+            assets = assetRepository.findByIDs(new ArrayList<String>(assetids));
+         } else {
             assets = new ArrayList<Asset>();
          }
       }
@@ -167,14 +175,14 @@ public class AssetController {
          pageSize = WormholeConstant.maxPageSize;
       }
       PageRequest pageable = new PageRequest(pageNumber - 1, pageSize);
-      Page<Asset> assets = assetRepository.findByAssetNameLikeAndCategoryOrTagLikeAndCategory(keyWords,
-            AssetCategory.Server, keyWords, AssetCategory.Server, pageable);
-      HashMap<String,String> assetSourceIDAndAssetSourceNameMap = new HashMap<String,String>();
-      for(Asset asset:assets.getContent()) {
+      Page<Asset> assets = assetRepository.findByAssetNameLikeAndCategoryOrTagLikeAndCategory(
+            keyWords, AssetCategory.Server, keyWords, AssetCategory.Server, pageable);
+      HashMap<String, String> assetSourceIDAndAssetSourceNameMap = new HashMap<String, String>();
+      for (Asset asset : assets.getContent()) {
          String assetSourceID = asset.getAssetSource();
-         if(assetSourceID != null) {
+         if (assetSourceID != null) {
             String assetSourceName = assetSourceIDAndAssetSourceNameMap.get(assetSourceID);
-            if(assetSourceName == null) {
+            if (assetSourceName == null) {
                assetSourceName = facilityRepository.findOne(assetSourceID).getName();
                assetSourceIDAndAssetSourceNameMap.put(assetSourceID, assetSourceName);
             }
@@ -186,8 +194,8 @@ public class AssetController {
 
    /**
     *
-    * @return Server list that don't have PDU information. It only Include the servers that create mapping
-    * between SDDC system and Wormhole.
+    * @return Server list that don't have PDU information. It only Include the servers that create
+    *         mapping between SDDC system and Wormhole.
     */
    @RequestMapping(value = "/pdusisnull", method = RequestMethod.GET)
    public List<Asset> findServersWithoutPDUInfo() {
@@ -208,7 +216,7 @@ public class AssetController {
    /**
     *
     * @return Server list that have PDU information. It only Include the servers that create mapping
-    * between SDDC system and Wormhole.
+    *         between SDDC system and Wormhole.
     */
    @RequestMapping(value = "/pdusisnotnull", method = RequestMethod.GET)
    public List<Asset> findServersWithPDUInfo() {
@@ -224,6 +232,7 @@ public class AssetController {
       }
       return result;
    }
+
    //Update
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -490,7 +499,7 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/{id}", method = RequestMethod.DELETE)
    public void deleteServerMapping(@PathVariable String id) {
-       serverMappingRepository.delete(id);
+      serverMappingRepository.delete(id);
    }
 
    @ResponseStatus(HttpStatus.OK)
@@ -529,7 +538,8 @@ public class AssetController {
       ServerMapping example = new ServerMapping();
       example.setVroID(vropsID);
       PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
-      Page<ServerMapping> mappings = serverMappingRepository.findAll(Example.of(example), pageRequest);
+      Page<ServerMapping> mappings =
+            serverMappingRepository.findAll(Example.of(example), pageRequest);
       return replaceAssetIDwithAssetName(mappings);
    }
 
@@ -547,21 +557,22 @@ public class AssetController {
       ServerMapping example = new ServerMapping();
       example.setVcID(vcID);
       PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
-      Page<ServerMapping> mappings = serverMappingRepository.findAll(Example.of(example), pageRequest);
+      Page<ServerMapping> mappings =
+            serverMappingRepository.findAll(Example.of(example), pageRequest);
       return replaceAssetIDwithAssetName(mappings);
    }
 
-   private Page<ServerMapping> replaceAssetIDwithAssetName(Page<ServerMapping> mappings){
-      Map<String,ServerMapping> serverMappings = new HashMap<String,ServerMapping>();
-      for(ServerMapping mapping :mappings.getContent()) {
+   private Page<ServerMapping> replaceAssetIDwithAssetName(Page<ServerMapping> mappings) {
+      Map<String, ServerMapping> serverMappings = new HashMap<String, ServerMapping>();
+      for (ServerMapping mapping : mappings.getContent()) {
          String asset = mapping.getAsset();
-         if(asset != null) {
+         if (asset != null) {
             serverMappings.put(mapping.getAsset(), mapping);
          }
       }
       List<String> assetIds = new ArrayList<String>(serverMappings.keySet());
       List<Asset> assets = assetRepository.findByIDs(assetIds);
-      for(Asset asset:assets) {
+      for (Asset asset : assets) {
          serverMappings.get(asset.getId()).setAsset(asset.getAssetName());
       }
       return mappings;
