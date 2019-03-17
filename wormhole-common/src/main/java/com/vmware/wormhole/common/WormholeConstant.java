@@ -22,9 +22,11 @@ public class WormholeConstant {
    
    public static String SENSOR_ID_FROM_POWERIQ = "SENSOR_ID_FROM_POWERIQ";
    
-   public static String SENSOR_SOURCE_SPLIT_FLAG = "_";
+   public static String SEPARATOR = "_FIELDSPLIT_";
    
-   public static String SENSOR_SPILIT_FLAG = ",";
+   public static String SPILIT_FLAG = ",";
    
-   public static String DEVICE_PORT_FOR_SERVER = "DEVICE_PORT_FOR_SERVER";
+   public static String PDU_PORT_FOR_SERVER = "DEVICE_PORT_FOR_SERVER";
+   
+   public static String NETWORK_PORT_FOR_SERVER = "NETWORK_PORT_FOR_SERVER";
 }
