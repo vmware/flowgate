@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -178,6 +180,7 @@ public class PowerIQService implements AsyncService {
                   case EventMessageUtil.PowerIQ_SyncRealtimeData:
                      logger.info("Sync realtime data for " + powerIQinfo.getName());
                      syncRealtimeData(powerIQinfo);
+                     syncSensorRealtimeData(powerIQinfo);
                      logger.info("Finish sync realtime data for " + powerIQinfo.getName());
                      break;
                   default:
@@ -210,6 +213,7 @@ public class PowerIQService implements AsyncService {
             }
             if (powerIQInfo != null) {
                syncRealtimeData(powerIQInfo);
+               syncSensorRealtimeData(powerIQInfo);
             }
             break;
          default:
@@ -372,6 +376,7 @@ public class PowerIQService implements AsyncService {
          Map<Integer, Pdu> pduMap = getPduMap(client);
          for (Sensor sensor : sensors) {
             Asset asset = null;
+            HashMap<String, String> justificationfieldsForSensor = new HashMap<String, String>();
             if (sensor.getPduId() != null && !pduMap.isEmpty()) {
                asset = new Asset();
                Pdu pdu = pduMap.get(sensor.getPduId());
@@ -386,18 +391,23 @@ public class PowerIQService implements AsyncService {
                   asset.setCity(pduAsset.getCity());
                   asset.setCountry(pduAsset.getCountry());
                   asset.setRegion(pduAsset.getRegion());
+                  //Record the pdu_assetId for the sensor.
+                  justificationfieldsForSensor.put(WormholeConstant.PDU_ASSET_ID, pduAsset.getId());
+                  //Record the sensorId and sensor source for the pdu.
+                  pduAsset = aggregatorSensorIdAndSourceForPdu(pduAsset,sensor,assetSource);
+                  assets.add(pduAsset);
                }
             } else {
                asset = fillLocation(sensor, racksMap, rowsMap, aislesMap, roomsMap, floorsMap,
                      dataCentersMap);
             }
-            HashMap<String, String> justificationfields = new HashMap<String, String>();
+            //the pduId and sensorId are form the powerIQ system.
             if(sensor.getPduId() != null) {
-               justificationfields.put(Pdu_ID, sensor.getPduId().toString());
+               justificationfieldsForSensor.put(Pdu_ID, sensor.getPduId().toString());
             }
-            justificationfields.put(Sensor_ID, sensor.getId()+"");
+            justificationfieldsForSensor.put(Sensor_ID, sensor.getId()+"");
             asset.setAssetName(sensor.getName());
-            asset.setJustificationfields(justificationfields);
+            asset.setJustificationfields(justificationfieldsForSensor);
             asset.setSerialnumber(sensor.getSerialNumber());
             asset.setAssetSource(assetSource);
             asset.setCategory(AssetCategory.Sensors);
@@ -408,6 +418,30 @@ public class PowerIQService implements AsyncService {
          logger.error("Faild to get Sensor metadata:", e);
       }
       return assets;
+   }
+   
+   //Record the sensorId and sensor source for the pdu.
+   public Asset aggregatorSensorIdAndSourceForPdu(Asset pduAsset,Sensor sensor,String sensorSource) {
+      HashMap<String, String> justificationfields = pduAsset.getJustificationfields();
+      if(justificationfields == null) {
+         justificationfields = new HashMap<String, String>();
+         justificationfields.put(subCategoryMap.get(sensor.getType()).toString(), 
+               sensor.getId()+WormholeConstant.SENSOR_SOURCE_SPLIT_FLAG+sensorSource);
+      }else {
+         String sensorIdAndSource = justificationfields.get(subCategoryMap.get(sensor.getType()).toString());
+         if(sensorIdAndSource != null) {
+            String [] existedSensor = sensorIdAndSource.split(WormholeConstant.SENSOR_SPILIT_FLAG);
+            Set<String> sensorIdAndSourceSet = new HashSet<String>();
+            Collections.addAll(sensorIdAndSourceSet, existedSensor);
+            sensorIdAndSourceSet.add(sensor.getId()+WormholeConstant.SENSOR_SOURCE_SPLIT_FLAG+sensorSource);
+            sensorIdAndSource =  String.join(WormholeConstant.SENSOR_SPILIT_FLAG, sensorIdAndSourceSet);;
+         }else {
+            sensorIdAndSource = sensor.getId()+WormholeConstant.SENSOR_SOURCE_SPLIT_FLAG+sensorSource;
+         }
+         justificationfields.put(subCategoryMap.get(sensor.getType()).toString(), sensorIdAndSource);
+      }
+      pduAsset.setJustificationfields(justificationfields);
+      return pduAsset;
    }
 
    public List<Sensor> getSensors(PowerIQAPIClient client) {
@@ -571,7 +605,8 @@ public class PowerIQService implements AsyncService {
             HashMap<String, String> justificationfields = assetToUpdate.getJustificationfields();
             justificationfields.put(Pdu_ID, asset.getJustificationfields().get(Pdu_ID));
             justificationfields.put(Sensor_ID, asset.getJustificationfields().get(Sensor_ID));
-            asset.setLastupdate(new Date().getTime());
+            assetToUpdate.setJustificationfields(justificationfields);
+            assetToUpdate.setLastupdate(new Date().getTime());
             assets.add(assetToUpdate);
          } else {
             asset.setCreated(new Date().getTime());
