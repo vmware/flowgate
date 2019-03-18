@@ -97,6 +97,8 @@ public class ServerValidationService {
             break;
          case OtherDCIM:
             break;
+         case Labsdb:
+            break;
          case OtherCMDB:
             break;
          default:
