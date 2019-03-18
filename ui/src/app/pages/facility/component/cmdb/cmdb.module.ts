@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { PagesModule } from '../../../pages.module';
 import { routing } from './cmdb.routing';
 import { ClarityModule } from '@clr/angular';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule,FormsModule } from '@angular/forms';
 import { CmdbComponent } from './cmdb.component';
 import { CmdbAddComponent } from './cmdb-add/cmdb-add.component';
 import { CmdbEditComponent } from './cmdb-edit/cmdb-edit.component';
@@ -19,6 +19,7 @@ import { DcimService } from '../dcim/dcim.service';
     routing,
     ClarityModule,
     FormsModule,
+    ReactiveFormsModule,
     PagesModule
   ],
   declarations: [CmdbComponent,CmdbAddComponent,CmdbEditComponent,CmdbListComponent],

@@ -18,14 +18,14 @@ export class CmdbListComponent implements OnInit {
 
   constructor(private http:Http,private service:DcimService,private router: Router, private route: ActivatedRoute) { }
  
-  dcimConfigs = [];
+  cmdbConfigs = [];
   currentPage:number = 1;
   totalPage:number = 1;
-  pageSize:string = '5';
+  pageSize:string = '20';
   info:string='';
   disabled:String="";
   basic:boolean = false;
-  dcimConfigId:string = '';
+  cmdbConfigId:string = '';
   clrAlertClosed:boolean = true;
 
 
@@ -61,13 +61,13 @@ export class CmdbListComponent implements OnInit {
 	    return year+month+date;
 	}
   getVmareConfigdatas(currentPage,pageSize){
-    this.dcimConfigs = [];
+    this.cmdbConfigs = [];
     this.service.getDcimConfigData(currentPage,pageSize).subscribe(
       (data)=>{if(data.status == 200){
-            var types:string[]=["InfoBlox","OtherCMDB"]; 
+            var types:string[]=["InfoBlox","OtherCMDB","Labsdb"]; 
             data.json().content.forEach(element=>{
               if(types.indexOf(element.type) != -1){
-                this.dcimConfigs.push(element);
+                this.cmdbConfigs.push(element);
               }
             })
             this.currentPage = data.json().number+1;
@@ -84,11 +84,11 @@ export class CmdbListComponent implements OnInit {
     this.router.navigate(["/ui/nav/facility/cmdb/cmdb-add"]);
   }
   onEdit(id){
-    window.sessionStorage.setItem("editdcimconfigid",id);
+    window.sessionStorage.setItem("editcmdbconfigid",id);
     this.router.navigateByUrl("/ui/nav/facility/cmdb/cmdb-edit");
   }
   confirm(){
-    this.service.deleteDcimConfig(this.dcimConfigId).subscribe(data=>{
+    this.service.deleteDcimConfig(this.cmdbConfigId).subscribe(data=>{
       
       if(data.status == 200){
         this.basic = false;
@@ -106,11 +106,11 @@ export class CmdbListComponent implements OnInit {
   }
   cancel(){
     this.basic = false;
-    this.dcimConfigId = "";
+    this.cmdbConfigId = "";
   }
   onDelete(id){
     this.basic = true;
-    this.dcimConfigId = id;
+    this.cmdbConfigId = id;
   
   }
   close(){

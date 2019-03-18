@@ -8,6 +8,7 @@ import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { DcimService } from '../../dcim/dcim.service';
+import {FormGroup, FormControl, Validators} from "@angular/forms";
 @Component({
   selector: 'app-cmdb-edit',
   templateUrl: './cmdb-edit.component.html',
@@ -16,7 +17,13 @@ import { DcimService } from '../../dcim/dcim.service';
 export class CmdbEditComponent implements OnInit {
 
   constructor(private service:DcimService,private router:Router,private activedRoute:ActivatedRoute) { }
-
+  cmdbForm = new FormGroup({
+    cmdbtype:new FormControl({value:'',disabled: true},Validators.required),
+    serverIPInput:new FormControl({value:'',disabled: true},Validators.required),
+    serverName:new FormControl('',Validators.required),
+    userName:new FormControl('',Validators.required),
+    passwordInput:new FormControl('',Validators.required)
+  });
   userId:string="";
   loading:boolean = false;
   operatingModals:boolean = false;
@@ -26,7 +33,7 @@ export class CmdbEditComponent implements OnInit {
   checked:boolean;
   yes:boolean = false;
   no:boolean = true;
-  dcimConfig={
+  cmdbConfig={
     id:"",
     type:"",
     name:"",
@@ -38,12 +45,20 @@ export class CmdbEditComponent implements OnInit {
   }
   read = "";/** This property is to change the read-only attribute of the password input box*/
   
-  
+  checkIsLabsDB(){
+    if(this.cmdbConfig.type == "Labsdb"){
+      this.cmdbForm.setControl("userName",new FormControl('',Validators.nullValidator));
+      this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.nullValidator));
+    }else{
+      this.cmdbForm.setControl("userName",new FormControl('',Validators.required));
+      this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.required));
+    }
+  }
   save(){
       this.read = "readonly";
       this.loading = true;
-      this.service.updateDcimConfig(this.dcimConfig.id,this.dcimConfig.type,this.dcimConfig.name,this.dcimConfig.description,this.dcimConfig.userName,
-        this.dcimConfig.password,this.dcimConfig.serverURL,this.dcimConfig.verifyCert,null).subscribe(
+      this.service.updateDcimConfig(this.cmdbConfig.id,this.cmdbConfig.type,this.cmdbConfig.name,this.cmdbConfig.description,this.cmdbConfig.userName,
+        this.cmdbConfig.password,this.cmdbConfig.serverURL,this.cmdbConfig.verifyCert,null).subscribe(
         (data)=>{
           if(data.status == 200){
             this.loading = false;
@@ -77,7 +92,7 @@ export class CmdbEditComponent implements OnInit {
     this.ignoreCertificatesModals = false;
     this.read = "";
     if(this.verify){
-      this.dcimConfig.verifyCert = "false";
+      this.cmdbConfig.verifyCert = "false";
       this.save();
     }
   }
@@ -93,21 +108,21 @@ export class CmdbEditComponent implements OnInit {
     this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
   }
   ngOnInit() {
-    this.dcimConfig.id = window.sessionStorage.getItem("editdcimconfigid");
+    this.cmdbConfig.id = window.sessionStorage.getItem("editcmdbconfigid");
 
-    if(this.dcimConfig.id != null && this.dcimConfig.id != ""){
-      this.service.getDcimConfig(this.dcimConfig.id).subscribe(
+    if(this.cmdbConfig.id != null && this.cmdbConfig.id != ""){
+      this.service.getDcimConfig(this.cmdbConfig.id).subscribe(
         (data)=>{
           if(data.status == 200){
             if(data.json != null){
-              this.dcimConfig = data.json();
+              this.cmdbConfig = data.json();
               this.checked =  data.json().verifyCert;
               if(this.checked == false){
-                this.dcimConfig.verifyCert = "false";
+                this.cmdbConfig.verifyCert = "false";
               }else{
-                this.dcimConfig.verifyCert = "true";
+                this.cmdbConfig.verifyCert = "true";
               }
-           
+              this.checkIsLabsDB();
             }
           }
         }

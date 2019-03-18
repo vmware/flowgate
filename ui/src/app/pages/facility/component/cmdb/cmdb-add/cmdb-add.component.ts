@@ -8,7 +8,7 @@ import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { DcimService } from '../../dcim/dcim.service';
-
+import {FormGroup, FormControl, Validators} from "@angular/forms";
 @Component({
   selector: 'app-cmdb-add',
   templateUrl: './cmdb-add.component.html',
@@ -18,7 +18,14 @@ export class CmdbAddComponent implements OnInit {
 
   constructor(private service:DcimService,private router:Router,private activedRoute:ActivatedRoute) { }
 
- 
+
+  cmdbForm = new FormGroup({
+    serverIPInput:new FormControl('',Validators.required),
+    serverName:new FormControl('',Validators.required),
+    userName:new FormControl('',Validators.required),
+    passwordInput:new FormControl('',Validators.required)
+  });
+
   loading:boolean = false;
   operatingModals:boolean = false;
   ignoreCertificatesModals:boolean = false;
@@ -26,7 +33,7 @@ export class CmdbAddComponent implements OnInit {
   verify:boolean = false;
   yes:boolean = false;
   no:boolean = true;
-  dcimConfig={
+  cmdbConfig={
     type:"",
     name:"",
     description:"",
@@ -38,6 +45,16 @@ export class CmdbAddComponent implements OnInit {
   read = "";/** This property is to change the read-only attribute of the password input box*/
   advanceSetting:string = "";
   
+  checkIsLabsDB(){
+    if(this.cmdbConfig.type == "Labsdb"){
+      this.cmdbForm.setControl("userName",new FormControl('',Validators.nullValidator));
+      this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.nullValidator));
+    }else{
+      this.cmdbForm.setControl("userName",new FormControl('',Validators.required));
+      this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.required));
+    }
+  }
+
   save(){
     this.advanceSetting = JSON.stringify({
       "DateFormat":"",
@@ -45,8 +62,8 @@ export class CmdbAddComponent implements OnInit {
     });
       this.read = "readonly";
       this.loading = true;
-      this.service.AddDcimConfig(this.dcimConfig.type,this.dcimConfig.name,this.dcimConfig.description,this.dcimConfig.userName,
-        this.dcimConfig.password,this.dcimConfig.serverURL,this.dcimConfig.verifyCert,this.advanceSetting).subscribe(
+      this.service.AddDcimConfig(this.cmdbConfig.type,this.cmdbConfig.name,this.cmdbConfig.description,this.cmdbConfig.userName,
+        this.cmdbConfig.password,this.cmdbConfig.serverURL,this.cmdbConfig.verifyCert,this.advanceSetting).subscribe(
         (data)=>{
           if(data.status == 201){
             this.loading = false;
@@ -80,7 +97,7 @@ export class CmdbAddComponent implements OnInit {
     this.ignoreCertificatesModals = false;
     this.read = "";
     if(this.verify){
-      this.dcimConfig.verifyCert = "false";
+      this.cmdbConfig.verifyCert = "false";
       this.save();
     }
   }
