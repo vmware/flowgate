@@ -259,6 +259,7 @@ public class HandleAssetUtil {
             exsitingAsset.setCategory(asset.getCategory());
             exsitingAsset.setSubCategory(asset.getSubCategory());
             exsitingAsset.setLastupdate(System.currentTimeMillis());
+            exsitingAsset.setMountingSide(asset.getMountingSide());
             updateAsset.add(exsitingAsset);
          }else {
             resultAsset.add(asset);
