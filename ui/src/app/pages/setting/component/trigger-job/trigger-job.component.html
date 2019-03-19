@@ -50,6 +50,17 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 </clr-dg-cell>
                                 
                             </clr-dg-row>
+
+                            <clr-dg-row>
+                            
+                                <clr-dg-cell style="margin-top: 0.5%;font-size: 14px;line-height: 20px;">Sync server and sensors mapping</clr-dg-cell>
+                                <clr-dg-cell style="margin-top: 0.5%;word-wrap: break-word;font-size: 14px;line-height: 20px;
+                                word-break: normal;">Sync the server and sensors mapping for all the servers in the system.</clr-dg-cell>
+                                <clr-dg-cell >
+                                <button style="margin:0px;" [clrLoading]="temphumidityMapping" class="btn btn-info-outline" (click)="trigger('job3')">Trigger</button>
+                                </clr-dg-cell>
+                                
+                            </clr-dg-row>
                         
                             </clr-datagrid>
                     </div>
