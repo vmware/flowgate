@@ -24,6 +24,7 @@ public class SDDCSoftwareConfig implements Serializable {
    private SoftwareType type;
    private String userId;
    private boolean verifyCert;
+   private IntegrationStatus integrationStatus;
 
    public enum SoftwareType {
       VRO, VCENTER, OTHERS
@@ -117,6 +118,14 @@ public class SDDCSoftwareConfig implements Serializable {
 
    public void setDescription(String description) {
       this.description = description;
+   }
+
+   public IntegrationStatus getIntegrationStatus() {
+      return integrationStatus;
+   }
+
+   public void setIntegrationStatus(IntegrationStatus integrationStatus) {
+      this.integrationStatus = integrationStatus;
    }
 
 }
