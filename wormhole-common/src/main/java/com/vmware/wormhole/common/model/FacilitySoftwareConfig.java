@@ -28,6 +28,7 @@ public class FacilitySoftwareConfig implements Serializable {
    private SoftwareType type;
    private String userId;
    private boolean verifyCert;
+   private IntegrationStatus integrationStatus;
    private HashMap<AdvanceSettingType,String> advanceSetting;
 
    public enum SoftwareType {
@@ -127,6 +128,14 @@ public class FacilitySoftwareConfig implements Serializable {
 
    public void setDescription(String description) {
       this.description = description;
+   }
+   
+   public IntegrationStatus getIntegrationStatus() {
+      return integrationStatus;
+   }
+
+   public void setIntegrationStatus(IntegrationStatus integrationStatus) {
+      this.integrationStatus = integrationStatus;
    }
 
    public HashMap<AdvanceSettingType, String> getAdvanceSetting() {
