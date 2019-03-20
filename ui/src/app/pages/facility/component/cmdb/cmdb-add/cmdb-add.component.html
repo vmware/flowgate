@@ -1,136 +1,132 @@
 <!-- Copyright 2019 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause -->
-<form #DcimForm="ngForm">
-  <section class="form-block">
-      <label> Content for INTEGRATION</label>
-            <div class="form-group ">
-                <label class="required" for="gForm_3">Type</label>
-                    <div class="select" style="width:184px; ">
-                        <select id="gForm_5" [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.type" >                          
-                                <option value="InfoBlox">InfoBlox</option>
-                                <option value="OtherCMDB">OtherCMDB</option>
-                        </select>
-                    </div>
-            </div>
-
-            <div class="form-group">
-                <label class="required" for="empserverIP">Server Ip</label>       
-                <label for="empserverIP"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-md"
-                    [class.invalid]="serverIPInput.invalid && (serverIPInput.dirty || serverIPInput.touched)">
-                    <input type="url" id="empserverIP" placeholder="Enter Server Ip" autocomplete="off"
-                        required
-                        name="serverIP"
-                        [(ngModel)]="dcimConfig.serverURL"
-                        #serverIPInput="ngModel">
-                    <span class="tooltip-content">
-                            Server Ip is Required.
-                    </span>
-                </label>
-            </div>
-            
-            <div class="form-group">
-                <label class="required" for="empserverName">Name</label>       
-                <label for="empserverName"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-md"
-                    [class.invalid]="serverNameInput.invalid && (serverNameInput.dirty || serverNameInput.touched)">
-                    <input type="text" id="empserverName" placeholder="Enter Name" autocomplete="off"
-                        required
-                        name="serverName"
-                        [(ngModel)]="dcimConfig.name"
-                        #serverNameInput="ngModel">
-                    <span class="tooltip-content">
-                             Name is Required.
-                    </span>
-                </label>
-            </div>
-            <div class="form-group" >
-                <label for="gForm_1">Description</label>
-                <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.description" id="gForm_6" placeholder="Description" size="45"/>
-            </div>  
-            <div class="form-group">
-                    <label class="required" for="empuserName">UserName</label>       
-                    <label for="empuserName"
-                        aria-haspopup="true"
-                        role="tooltip"
-                        class="tooltip tooltip-validation tooltip-md"
-                        [class.invalid]="userNameInput.invalid && (userNameInput.dirty || userNameInput.touched)">
-                        <input type="text"  tabindex="-1" style="width: 1px; height: 1px; position: absolute; border: 0px; padding: 0px;">
-                        <input type="text" id="empuserName" placeholder="Enter UserName" autocomplete="off"
-                            required
-                            name="userName"
-                            [(ngModel)]="dcimConfig.userName"
-                            #userNameInput="ngModel">
-                        <span class="tooltip-content">
-                            UserName is Required.
-                        </span>
-                    </label>
-                </div>
-            <div class="form-group">
-                <label class="required"  for="emppassword">Password</label>
-                <label for="emppassword"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-md"
-                    [class.invalid]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">
-                    <input type="password" name="password" id="emppassword" placeholder="Enter Password" autocomplete="off" [readonly]="read"
-                        required
-                        [(ngModel)]="dcimConfig.password"
-                        #passwordInput="ngModel">
-                    <span class="tooltip-content">
-                        Password is Required.
-                    </span>
-                </label>
-            </div>
-            <div class="form-group">
-                    <label>VerifyCert</label>
-                    
-                    <div class="radio-inline">
-                        <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}" id="checkrads_11" value="true" [(ngModel)]="dcimConfig.verifyCert">
-                        <label for="checkrads_11">Yes</label>
-                    </div>
-                    <div class="radio-inline">
-                        <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}"  id="checkrads_12" value="false" [(ngModel)]="dcimConfig.verifyCert">
-                        <label for="checkrads_12">No</label>
-                    </div>
-                </div>
-            <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="DcimForm.form.invalid">Submit</button>
-            <button type="button" class="btn btn-primary" on-click ="cancel()">Cancel</button>
-  </section>
-</form>
-<clr-modal [(clrModalOpen)]="operatingModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
-        <h3 class="modal-title">Operation tips</h3>
-        <div class="modal-body">
-            <p>{{tip}}</p>
-        </div>
-        <div class="modal-footer">
-            
-            <button type="button" class="btn btn-primary" (click)="No()">Yes</button>
-        </div>
-</clr-modal>
-<clr-modal [(clrModalOpen)]="ignoreCertificatesModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
-        <h3 class="modal-title">Operation tips</h3>
-        <div class="modal-body">
-            <p>{{tip}}</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline" (click)="No()">No</button> 
-            <button type="button" class="btn btn-primary" (click)="Yes()">Yes</button>
-        </div>
-</clr-modal>
-<div *ngIf="loading" >
-        <div id="mask" style="position:fixed;top:0;left:0;height:100%;width:100%;background:rgba(0, 0, 0, 0.4);z-index:198910170;">
-            <div style="position:relative;width:100%;height:100%;">
-                <div style="width:150px;height:150px;background:#ffffff;border-radius:5px;text-align:center;position:absolute;top:50%;left:50%;margin-left:-75px;margin-top:-75px;">
-                    <img src="/images/loading.gif" style="width:120px;height:120px;"/>
-                    <div id="mask-text" style="text-align:center;font-size:16px;height:30px;color:#0c0c0c;">
-                        Loading...
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<form class="form" [formGroup]="cmdbForm">
+    <section class="form-block">
+        <label> Content for INTEGRATION</label>
+              <div class="form-group ">
+                  <label class="required" for="gForm_3">Type</label>
+                      <div class="select" style="width:184px; ">
+                          <select id="gForm_5" [ngModelOptions]="{standalone: true}"  [(ngModel)]="cmdbConfig.type" (ngModelChange)="cmdbConfig.type=$event;checkIsLabsDB()">                          
+                                  <option value="InfoBlox">InfoBlox</option>
+                                  <option value="Labsdb">Labsdb</option>
+                                  <option value="OtherCMDB">OtherCMDB</option>
+                          </select>
+                      </div>
+              </div>
+  
+              <div class="form-group">
+                  <label class="required" for="empserverIP">Server Ip</label>       
+                  <label for="empserverIP"
+                      aria-haspopup="true"
+                      role="tooltip"
+                      class="tooltip tooltip-validation tooltip-md"
+                      [class.invalid]="cmdbForm.get('serverIPInput').invalid && (cmdbForm.get('serverIPInput').dirty || cmdbForm.get('serverIPInput').touched)">
+                      <input type="url" id="empserverIP" placeholder="Enter Server Ip" autocomplete="off"     
+                          formControlName="serverIPInput"
+                          [(ngModel)]="cmdbConfig.serverURL">
+                      <span class="tooltip-content">
+                              Server Ip is Required.
+                      </span>
+                  </label>
+              </div>
+              
+             <div class="form-group">
+                  <label class="required" for="empserverName">Name</label>       
+                  <label for="empserverName"
+                      aria-haspopup="true"
+                      role="tooltip"
+                      class="tooltip tooltip-validation tooltip-md"
+                      [class.invalid]="cmdbForm.get('serverName').invalid && (cmdbForm.get('serverName').dirty || cmdbForm.get('serverName').touched)">
+                      <input type="text" id="empserverName" placeholder="Enter Name" autocomplete="off" 
+                          formControlName="serverName"
+                          [(ngModel)]="cmdbConfig.name">
+                      <span class="tooltip-content">
+                               Name is Required.
+                      </span>
+                  </label>
+              </div>
+              <div class="form-group" >
+                  <label for="gForm_1">Description</label>
+                  <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="cmdbConfig.description" id="gForm_6" placeholder="Description" size="45"/>
+              </div>  
+              <div class="form-group">
+                      <label class="required" for="empuserName">UserName</label>       
+                      <label for="empuserName"
+                          aria-haspopup="true"
+                          role="tooltip"
+                          class="tooltip tooltip-validation tooltip-md"
+                          [class.invalid]="cmdbForm.get('userName').invalid && (cmdbForm.get('userName').dirty || cmdbForm.get('userName').touched)">
+                          <input type="text" name="userName" tabindex="-1" style="width: 0px; height: 0px; position: absolute; border: 0px; padding: 0px;">
+                          <input type="text" id="empuserName" placeholder="Enter UserName" autocomplete="off"                      
+                              formControlName="userName"
+                              [(ngModel)]="cmdbConfig.userName">
+                          <span class="tooltip-content">
+                              UserName is Required.
+                          </span>
+                      </label>
+                  </div>
+              <div class="form-group">
+                  <label class="required"  for="emppassword">Password</label>
+                  <label for="emppassword"
+                      aria-haspopup="true"
+                      role="tooltip"
+                      class="tooltip tooltip-validation tooltip-md"
+                      [class.invalid]="cmdbForm.get('passwordInput').invalid && (cmdbForm.get('passwordInput').dirty || cmdbForm.get('passwordInput').touched)">
+                      <input type="password" name="password" tabindex="-1" style="width: 0px; height: 0px; position: absolute; border: 0px; padding: 0px;">
+                      <input type="password" id="emppassword" placeholder="Enter Password" autocomplete="off" [readonly]="read"
+                          formControlName="passwordInput"
+                          [(ngModel)]="cmdbConfig.password">
+                      <span class="tooltip-content">
+                          Password is Required.
+                      </span>
+                  </label>
+              </div>
+              <div class="form-group">
+                      <label>VerifyCert</label>
+                      
+                      <div class="radio-inline">
+                          <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}" id="checkrads_11" value="true" [(ngModel)]="cmdbConfig.verifyCert">
+                          <label for="checkrads_11">Yes</label>
+                      </div>
+                      <div class="radio-inline">
+                          <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}"  id="checkrads_12" value="false" [(ngModel)]="cmdbConfig.verifyCert">
+                          <label for="checkrads_12">No</label>
+                      </div>
+                  </div> 
+              <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="cmdbForm.invalid">Submit</button>
+              <button type="button" class="btn btn-primary" on-click ="cancel()">Cancel</button>
+    </section>
+  </form>
+  
+  <clr-modal [(clrModalOpen)]="operatingModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
+          <h3 class="modal-title">Operation tips</h3>
+          <div class="modal-body">
+              <p>{{tip}}</p>
+          </div>
+          <div class="modal-footer">
+              
+              <button type="button" class="btn btn-primary" (click)="No()">Yes</button>
+          </div>
+  </clr-modal>
+  <clr-modal [(clrModalOpen)]="ignoreCertificatesModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
+          <h3 class="modal-title">Operation tips</h3>
+          <div class="modal-body">
+              <p>{{tip}}</p>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-outline" (click)="No()">No</button> 
+              <button type="button" class="btn btn-primary" (click)="Yes()">Yes</button>
+          </div>
+  </clr-modal>
+  <div *ngIf="loading" >
+          <div id="mask" style="position:fixed;top:0;left:0;height:100%;width:100%;background:rgba(0, 0, 0, 0.4);z-index:198910170;">
+              <div style="position:relative;width:100%;height:100%;">
+                  <div style="width:150px;height:150px;background:#ffffff;border-radius:5px;text-align:center;position:absolute;top:50%;left:50%;margin-left:-75px;margin-top:-75px;">
+                      <img src="/images/loading.gif" style="width:120px;height:120px;"/>
+                      <div id="mask-text" style="text-align:center;font-size:16px;height:30px;color:#0c0c0c;">
+                          Loading...
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
