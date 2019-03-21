@@ -5,7 +5,6 @@
 package com.vmware.wormhole.nlyteworker.scheduler.job;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.wormhole.client.WormholeAPIClient;
@@ -28,6 +28,7 @@ import com.vmware.wormhole.common.AssetCategory;
 import com.vmware.wormhole.common.exception.WormholeException;
 import com.vmware.wormhole.common.model.Asset;
 import com.vmware.wormhole.common.model.FacilitySoftwareConfig;
+import com.vmware.wormhole.common.model.IntegrationStatus;
 import com.vmware.wormhole.common.model.RealTimeData;
 import com.vmware.wormhole.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.wormhole.common.model.ValueUnit;
@@ -95,6 +96,7 @@ public class NlyteDataService implements AsyncService {
       //TO, this should be comment out since it may contain vc password.
       logger.info("message received");
       Set<EventUser> users = message.getTarget().getUsers();
+      //IntegrationStatus integrationStatus = null;
       for (EventUser command : users) {
          logger.info(command.getId());
          switch (command.getId()) {
@@ -122,60 +124,15 @@ public class NlyteDataService implements AsyncService {
                if (null == nlyte) {
                   continue;
                }
-
+               if(!isIntegrationActive(nlyte)) {
+                  continue;
+               }
                for (EventUser payloadCommand : payloadMessage.getTarget().getUsers()) {
-                  switch (payloadCommand.getId()) {
-                  case EventMessageUtil.NLYTE_SyncAllAssets:
-                     logger.info("Sync all assets data for: " + nlyte.getName());
-                     SyncAlldata(nlyte);
-                     logger.info("Finish sync all assets data for: " + nlyte.getName());
-                     break;
-                  case EventMessageUtil.NLYTE_SyncRealtimeData:
-                     logger.info("Sync realtime data for " + nlyte.getName());
-                     syncRealtimeData(nlyte);
-                     logger.info("Finish sync data for " + nlyte.getName());
-                     break;
-                  case EventMessageUtil.NLYTE_SyncMappedAssetData:
-                     logger.info("Sync mapped data for " + nlyte.getName());
-
-                     logger.info("Finish sync mapped data for " + nlyte.getName());
-                  default:
-                     break;
-                  }
+                  executeJob(payloadCommand.getId(),nlyte);
                }
             }
             break;
-         case EventMessageUtil.NLYTE_SyncAllAssets:
-            FacilitySoftwareConfig nlyteServer = null;
-            try {
-               nlyteServer = mapper.readValue(message.getContent(), FacilitySoftwareConfig.class);
-            } catch (IOException e1) {
-               // TODO Auto-generated catch block
-               logger.error("Failed to convert message", e1);
-            }
-            if (nlyteServer != null) {
-               logger.info("2-Sync all assets data for: " + nlyteServer.getName());
-               SyncAlldata(nlyteServer);
-               logger.info("2-Finish sync all assets data for: " + nlyteServer.getName());
-            }
-            //TODO send message to notify UI if needed.or notify a task system that this job is done.
-            //now we do nothing.
-            break;
-         case EventMessageUtil.NLYTE_SyncRealtimeData:
-            FacilitySoftwareConfig nlyte = null;
-            try {
-               nlyte = mapper.readValue(message.getContent(), FacilitySoftwareConfig.class);
-            } catch (IOException e) {
-               // TODO Auto-generated catch block
-               logger.info("Failed to convert message", e);
-            }
-            if (nlyte != null) {
-               logger.info("2-Sync realtime data for " + nlyte.getName());
-               syncRealtimeData(nlyte);
-               logger.info("2-Finish sync data for " + nlyte.getName());
-            }
-            break;
-         case EventMessageUtil.NLYTE_SyncMappedAssetData:
+         default:
             FacilitySoftwareConfig nlyteInfo = null;
             try {
                nlyteInfo = mapper.readValue(message.getContent(), FacilitySoftwareConfig.class);
@@ -184,23 +141,68 @@ public class NlyteDataService implements AsyncService {
                logger.info("Failed to convert message", e);
             }
             if (nlyteInfo != null) {
-               logger.info("2-Sync mapped data for " + nlyteInfo.getName());
-               syncMappedData(nlyteInfo);
-               logger.info("2-Finish sync mapped data for " + nlyteInfo.getName());
+               executeJob(EventMessageUtil.NLYTE_SyncMappedAssetData,nlyteInfo);
             }
-            break;
-         default:
-            logger.warn("Not supported command");
             break;
          }
       }
    }
 
+   private boolean isIntegrationActive(FacilitySoftwareConfig config) {
+      IntegrationStatus integrationStatus = config.getIntegrationStatus();
+      if(integrationStatus != null && integrationStatus.getStatus()!=null &&
+            !IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus())) {
+         return false;
+      }
+      return true;
+   }
+   
+   private void executeJob(String commonId,FacilitySoftwareConfig nlyte) {
+      if(!isIntegrationActive(nlyte)) {
+         return;
+      }
+      switch (commonId) {
+      case EventMessageUtil.NLYTE_SyncAllAssets:
+         logger.info("Sync all assets data for: " + nlyte.getName());
+         SyncAlldata(nlyte);
+         logger.info("Finish sync all assets data for: " + nlyte.getName());
+         break;
+      case EventMessageUtil.NLYTE_SyncRealtimeData:
+         logger.info("Sync realtime data for " + nlyte.getName());
+         syncRealtimeData(nlyte);
+         logger.info("Finish sync data for " + nlyte.getName());
+         break;
+      case EventMessageUtil.NLYTE_SyncMappedAssetData:
+         logger.info("Sync mapped data for " + nlyte.getName());
+         syncMappedData(nlyte);
+         logger.info("Finish sync mapped data for " + nlyte.getName());
+      default:
+         logger.warn("Not supported command");
+         break;
+      }
+   }
+   
+   private void updateIntegrationStatus(FacilitySoftwareConfig nlyte,String message) {
+      IntegrationStatus integrationStatus = nlyte.getIntegrationStatus();
+      integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+      integrationStatus.setDetail(message);
+      nlyte.setIntegrationStatus(integrationStatus);
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      restClient.updateFacility(nlyte);
+   }
+   
    private void SyncAlldata(FacilitySoftwareConfig nlyte) {
       NlyteAPIClient nlyteAPIclient = createClient(nlyte);
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       HandleAssetUtil assetUtil = new HandleAssetUtil();
-      List<NlyteAsset> nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Server);
+      List<NlyteAsset> nlyteAssets = null;
+      try {
+         nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Server);
+      }catch(HttpClientErrorException e) {
+         logger.error("Failed to query data from Nlyte", e);
+         updateIntegrationStatus(nlyte,e.getMessage());
+         return;
+      }
       HashMap<Integer, LocationGroup> locationMap = assetUtil.initLocationGroupMap(nlyteAPIclient);
       HashMap<Integer, Manufacturer> manufacturerMap =
             assetUtil.initManufacturersMap(nlyteAPIclient);
@@ -359,7 +361,14 @@ public class NlyteDataService implements AsyncService {
          if (asset == null || !facilitySoftwareConfig.getId().equals(asset.getAssetSource())) {
             continue;
          }
-         RealTimeData realTimeData = generateRealTimeData(asset, nlyteAPIclient,getAdvanceSetting(facilitySoftwareConfig));
+         RealTimeData realTimeData = null;
+         try {
+            realTimeData = generateRealTimeData(asset, nlyteAPIclient,getAdvanceSetting(facilitySoftwareConfig));
+         }catch(HttpClientErrorException e) {
+            logger.error("Failed to query data from Nlyte", e);
+            updateIntegrationStatus(facilitySoftwareConfig,e.getMessage());
+            return null;
+         }
          if(realTimeData == null) {
             continue;
          }
@@ -486,7 +495,14 @@ public class NlyteDataService implements AsyncService {
    private void syncMappedData(FacilitySoftwareConfig nlyte) {
       NlyteAPIClient nlyteAPIclient = new NlyteAPIClient(nlyte);
       HandleAssetUtil assetUtil = new HandleAssetUtil();
-      List<NlyteAsset> nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Server);
+      List<NlyteAsset> nlyteAssets = null;
+      try {
+         nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Server);
+      }catch(HttpClientErrorException e) {
+         logger.error("Failed to query data from Nlyte", e);
+         updateIntegrationStatus(nlyte,e.getMessage());
+         return;
+      }
       HashMap<Integer, LocationGroup> locationMap = assetUtil.initLocationGroupMap(nlyteAPIclient);
       HashMap<Integer, Material> materialMap = assetUtil.initMaterialsMap(nlyteAPIclient);
       HashMap<Integer, Manufacturer> manufacturerMap =

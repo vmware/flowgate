@@ -16,8 +16,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,8 +42,6 @@ import junit.framework.TestCase;
 @SpringBootTest
 @ActiveProfiles("test")
 public class SyncRealTimeDataJobTest {
-
-   private static final Logger logger = LoggerFactory.getLogger(SyncRealTimeDataJobTest.class);
 
    @Mock
    private WormholeAPIClient wormholeAPIClient;
@@ -234,7 +230,8 @@ public class SyncRealTimeDataJobTest {
 
    @Test
    public void testGetPdusMap() {
-      Map<String, Pdu> pdusmap = powerIQService.getPdusMapWithNameKey(powerIQAPIClient);
+      List<Pdu> pdus =  getPdus();
+      Map<String, Pdu> pdusmap = powerIQService.getPdusMapWithNameKey(pdus);
       TestCase.assertEquals(true, pdusmap.containsKey("pdu-1"));
       TestCase.assertEquals(true, pdusmap.containsKey("pek-wor-pdu-02"));
    }

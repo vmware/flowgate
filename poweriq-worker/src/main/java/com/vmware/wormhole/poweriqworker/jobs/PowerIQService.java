@@ -5,8 +5,6 @@
 package com.vmware.wormhole.poweriqworker.jobs;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,15 +15,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeSet;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.wormhole.client.WormholeAPIClient;
@@ -36,6 +32,7 @@ import com.vmware.wormhole.common.WormholeConstant;
 import com.vmware.wormhole.common.exception.WormholeException;
 import com.vmware.wormhole.common.model.Asset;
 import com.vmware.wormhole.common.model.FacilitySoftwareConfig;
+import com.vmware.wormhole.common.model.IntegrationStatus;
 import com.vmware.wormhole.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.wormhole.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.wormhole.common.model.ServerSensorData.ServerSensorType;
@@ -72,9 +69,6 @@ public class PowerIQService implements AsyncService {
 
    @Autowired
    private WormholeAPIClient restClient;
-
-   @Autowired
-   private MessagePublisher publisher;
 
    @Autowired
    private StringRedisTemplate template;
@@ -169,27 +163,15 @@ public class PowerIQService implements AsyncService {
                if (null == powerIQinfo) {
                   continue;
                }
-
+               if(!isIntegrationActive(powerIQinfo)) {
+                  continue;
+               }
                for (EventUser payloadCommand : payloadMessage.getTarget().getUsers()) {
-                  switch (payloadCommand.getId()) {
-                  case EventMessageUtil.PowerIQ_SyncSensorMetaData:
-                     logger.info("Sync Sensor metadata " + powerIQinfo.getName());
-                     syncSensorMetaData(powerIQinfo);
-                     logger.info("Finish sync Sensor metadata " + powerIQinfo.getName());
-                     break;
-                  case EventMessageUtil.PowerIQ_SyncRealtimeData:
-                     logger.info("Sync realtime data for " + powerIQinfo.getName());
-                     syncRealtimeData(powerIQinfo);
-                     syncSensorRealtimeData(powerIQinfo);
-                     logger.info("Finish sync realtime data for " + powerIQinfo.getName());
-                     break;
-                  default:
-                     break;
-                  }
+                  executeJob(payloadCommand.getId(),powerIQinfo);
                }
             }
             break;
-         case EventMessageUtil.PowerIQ_SyncSensorMetaData:
+         default:
             FacilitySoftwareConfig powerIQ = null;
             try {
                powerIQ = mapper.readValue(message.getContent(), FacilitySoftwareConfig.class);
@@ -198,35 +180,65 @@ public class PowerIQService implements AsyncService {
                logger.error("Failed to convert message", e1);
             }
             if (powerIQ != null) {
-               syncSensorMetaData(powerIQ);
+               executeJob(command.getId(),powerIQ);
             }
-            //TODO send message to notify UI if needed.or notify a task system that this job is done.
-            //now we do nothing.
-            break;
-         case EventMessageUtil.PowerIQ_SyncRealtimeData:
-            FacilitySoftwareConfig powerIQInfo = null;
-            try {
-               powerIQInfo = mapper.readValue(message.getContent(), FacilitySoftwareConfig.class);
-            } catch (IOException e) {
-               // TODO Auto-generated catch block
-               logger.info("Failed to convert message", e);
-            }
-            if (powerIQInfo != null) {
-               syncRealtimeData(powerIQInfo);
-               syncSensorRealtimeData(powerIQInfo);
-            }
-            break;
-         default:
-            logger.warn("Not supported command");
             break;
          }
       }
+   }
+   //logger.error("Failed to query data from Nlyte", e);
+   private boolean isIntegrationActive(FacilitySoftwareConfig config) {
+      IntegrationStatus integrationStatus = config.getIntegrationStatus();
+      if(integrationStatus != null && integrationStatus.getStatus()!=null &&
+            !IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus())) {
+         return false;
+      }
+      return true;
+   }
+   
+   private void executeJob(String commonId,FacilitySoftwareConfig powerIQ) {
+      if(!isIntegrationActive(powerIQ)) {
+         return;
+      }
+      switch (commonId) {
+      case EventMessageUtil.PowerIQ_SyncSensorMetaData:
+         logger.info("Sync Sensor metadata " + powerIQ.getName());
+         syncSensorMetaData(powerIQ);
+         logger.info("Finish sync Sensor metadata for: " + powerIQ.getName());
+         break;
+      case EventMessageUtil.PowerIQ_SyncRealtimeData:
+         logger.info("Sync realtime data for " + powerIQ.getName());
+         syncRealtimeData(powerIQ);
+         syncSensorRealtimeData(powerIQ);
+         logger.info("Finish sync realtime data for " + powerIQ.getName());
+         break;
+      default:
+         logger.warn("Not supported command");
+         break;
+      }
+   }
+   
+   private void updateIntegrationStatus(FacilitySoftwareConfig powerIQ,String message) {
+      IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
+      integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+      integrationStatus.setDetail(message);
+      powerIQ.setIntegrationStatus(integrationStatus);
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      restClient.updateFacility(powerIQ);
    }
 
    public void syncSensorMetaData(FacilitySoftwareConfig powerIQ) {
       PowerIQAPIClient client = createClient(powerIQ);
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      List<Asset> sensorsFromPower = getSensorMetaData(client, powerIQ.getId());
+      List<Asset> sensorsFromPower = null;
+      try {
+         sensorsFromPower = getSensorMetaData(client, powerIQ.getId());
+      }catch(HttpClientErrorException e) {
+         logger.error("Failed to query data from PowerIQ", e);
+         updateIntegrationStatus(powerIQ,e.getMessage());
+         return;
+      }
+      
       if (sensorsFromPower.isEmpty()) {
          return;
       }
@@ -426,17 +438,17 @@ public class PowerIQService implements AsyncService {
       if(justificationfields == null) {
          justificationfields = new HashMap<String, String>();
          justificationfields.put(subCategoryMap.get(sensor.getType()).toString(), 
-               sensor.getId()+WormholeConstant.SENSOR_SOURCE_SPLIT_FLAG+sensorSource);
+               sensor.getId()+WormholeConstant.SEPARATOR+sensorSource);
       }else {
          String sensorIdAndSource = justificationfields.get(subCategoryMap.get(sensor.getType()).toString());
          if(sensorIdAndSource != null) {
-            String [] existedSensor = sensorIdAndSource.split(WormholeConstant.SENSOR_SPILIT_FLAG);
+            String [] existedSensor = sensorIdAndSource.split(WormholeConstant.SPILIT_FLAG);
             Set<String> sensorIdAndSourceSet = new HashSet<String>();
             Collections.addAll(sensorIdAndSourceSet, existedSensor);
-            sensorIdAndSourceSet.add(sensor.getId()+WormholeConstant.SENSOR_SOURCE_SPLIT_FLAG+sensorSource);
-            sensorIdAndSource =  String.join(WormholeConstant.SENSOR_SPILIT_FLAG, sensorIdAndSourceSet);;
+            sensorIdAndSourceSet.add(sensor.getId()+WormholeConstant.SEPARATOR+sensorSource);
+            sensorIdAndSource =  String.join(WormholeConstant.SPILIT_FLAG, sensorIdAndSourceSet);;
          }else {
-            sensorIdAndSource = sensor.getId()+WormholeConstant.SENSOR_SOURCE_SPLIT_FLAG+sensorSource;
+            sensorIdAndSource = sensor.getId()+WormholeConstant.SEPARATOR+sensorSource;
          }
          justificationfields.put(subCategoryMap.get(sensor.getType()).toString(), sensorIdAndSource);
       }
@@ -626,8 +638,16 @@ public class PowerIQService implements AsyncService {
          return;
       }
       PowerIQAPIClient client = createClient(powerIQ);
-      Map<String, Pdu> pdusMap = getPdusMapWithNameKey(client);//Map<pduName.lowcase,pdu>
-      Map<String, Pdu> matchedPdus = getMatchedPdus(pdusMap, allMappedPdus);//Map<pduId,pdu>
+      List<Pdu> pdus = null;
+      try {
+         pdus = client.getPdus();
+      }catch(HttpClientErrorException e) {
+         logger.error("Failed to query data from PowerIQ", e);
+         updateIntegrationStatus(powerIQ,e.getMessage());
+         return;
+      }
+      Map<String, Pdu> pdusMap  = getPdusMapWithNameKey(pdus);//Map<pduName.lowcase,pdu>
+      Map<String, Pdu> matchedPdus = getMatchedPdus(pdusMap, allMappedPdus);//Map<pduAssetId,pdu>
       List<RealTimeData> realTimeDatas = getRealTimeDatas(matchedPdus,getAdvanceSetting(powerIQ));
       if (!realTimeDatas.isEmpty()) {
          restClient.saveRealTimeData(realTimeDatas);
@@ -676,19 +696,12 @@ public class PowerIQService implements AsyncService {
       return new PowerIQAPIClient(poweriq);
    }
 
-   public Map<String, Pdu> getPdusMapWithNameKey(PowerIQAPIClient client) {
+   public Map<String, Pdu> getPdusMapWithNameKey(List<Pdu> pdus) {
       Map<String, Pdu> pdusMap = new HashMap<String, Pdu>();
-      try {
-         List<Pdu> pdus = client.getPdus();
-         for (Pdu pdu : pdus) {
-            if (pdu.getName() != null) {
-               pdusMap.put(pdu.getName().toLowerCase(), pdu);
-            }
+      for (Pdu pdu : pdus) {
+         if (pdu.getName() != null) {
+            pdusMap.put(pdu.getName().toLowerCase(), pdu);
          }
-      } catch (Exception e) {
-         logger.error(
-               "An exception occurred in the method of getPdusMap from SyncPowerIQRealTimeDataJob",
-               e);
       }
       return pdusMap;
    }
@@ -832,8 +845,11 @@ public class PowerIQService implements AsyncService {
       if (assetIds.isEmpty()) {
          return;
       }
-      realTimeDatas = getSensorRealTimeData(createClient(powerIQ), getAdvanceSetting(powerIQ), assetIds);
+      realTimeDatas = getSensorRealTimeData(powerIQ, assetIds);
       logger.info("Received new Sensor data, data item size is:" + realTimeDatas.size());
+      if(realTimeDatas.isEmpty()) {
+         return;
+      }
       restClient.saveRealTimeData(realTimeDatas);
    }
    
@@ -866,14 +882,14 @@ public class PowerIQService implements AsyncService {
       return assetIds;
    }
    
-   public List<RealTimeData> getSensorRealTimeData(PowerIQAPIClient powerIQAPIClient,
-         HashMap<AdvanceSettingType, String> advanceSetting,Set<String> assetIds){
+   public List<RealTimeData> getSensorRealTimeData(FacilitySoftwareConfig powerIQ,Set<String> assetIds){
+      HashMap<AdvanceSettingType, String> advanceSetting = getAdvanceSetting(powerIQ);
       List<RealTimeData> realtimeDatas = new ArrayList<RealTimeData>();
       String dateFormat = advanceSetting.get(AdvanceSettingType.DateFormat);
       String timezone = advanceSetting.get(AdvanceSettingType.TimeZone);
       String temperature = advanceSetting.get(AdvanceSettingType.TEMPERATURE_UNIT);
       String humidity = advanceSetting.get(AdvanceSettingType.HUMIDITY_UNIT);
-      
+      PowerIQAPIClient powerIQAPIClient = createClient(powerIQ);
       for(String assetId:assetIds) {
          Asset asset = restClient.getAssetByID(assetId).getBody();
          if(asset == null) {
@@ -881,7 +897,15 @@ public class PowerIQService implements AsyncService {
          }
          HashMap<String,String> sensorExtraInfo = asset.getJustificationfields();
          String sensorId =  sensorExtraInfo.get(Sensor_ID);
-         Sensor sensor = powerIQAPIClient.getSensorById(sensorId);
+         Sensor sensor = null;
+         try {
+            sensor = powerIQAPIClient.getSensorById(sensorId);
+         }catch(HttpClientErrorException e) {
+            logger.error("Failed to query data from PowerIQ", e);
+            updateIntegrationStatus(powerIQ,e.getMessage());
+            break;
+         }
+         //Sensor sensor = powerIQAPIClient.getSensorById(sensorId);
          SensorReading reading = sensor.getReading();
          if(reading == null) {
             continue;
