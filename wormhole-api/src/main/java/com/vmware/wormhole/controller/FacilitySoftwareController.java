@@ -145,6 +145,7 @@ public class FacilitySoftwareController {
          old.setPassword(config.getPassword());
          old.setVerifyCert(config.isVerifyCert());
          old.setAdvanceSetting(config.getAdvanceSetting());
+         old.setIntegrationStatus(config.getIntegrationStatus());
          serverValidationService.validateFacilityServer(config);
          repository.save(old);
       } catch (Exception e) {

@@ -56,6 +56,7 @@ public class WormholeAPIClient extends RestClientBase {
 
    private static final String RealTimeDatasURL = "/v1/assets/sensordata/batchoperation";
    private static final String GetFacilitySoftwareById = "/v1/facilitysoftware/%s";
+   private static final String UpdateFacilitySoftwareStatus = "/v1/facilitysoftware";
 
    private static final String GetHostNameByIP = "/v1/assets/mapping/hostnameip/ip/%s";
    private static final String HostNameIPMapping = "/v1/assets/mapping/hostnameip";
@@ -266,6 +267,13 @@ public class WormholeAPIClient extends RestClientBase {
       return this.restTemplate.exchange(
             getAPIServiceEndpoint() + String.format(GetFacilitySoftwareById, id), HttpMethod.GET,
             getDefaultEntity(), FacilitySoftwareConfig.class);
+   }
+   
+   public ResponseEntity<Void> updateFacility(FacilitySoftwareConfig config) {
+      HttpEntity<Object> postEntity =
+            new HttpEntity<Object>(config, RestTemplateBuilder.getDefaultHeader());
+      return this.restTemplate.exchange(getAPIServiceEndpoint() + UpdateFacilitySoftwareStatus, HttpMethod.PUT,
+            postEntity, Void.class);
    }
 
    public ResponseEntity<Asset[]> getMappedAsset(AssetCategory category) {

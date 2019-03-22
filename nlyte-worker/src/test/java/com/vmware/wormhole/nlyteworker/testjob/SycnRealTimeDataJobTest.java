@@ -87,16 +87,6 @@ public class SycnRealTimeDataJobTest {
       Mockito.doReturn(nlyteAPIClient).when(nlyteDataService).createClient(any(FacilitySoftwareConfig.class));
    
       nlyteDataService.syncRealtimeData(getFacilitySoftwareByType().getBody().clone()[0]);
-//      try {
-//         nlyteDataService.execute(null);
-//      } catch (JobExecutionException e) {
-//         // TODO Auto-generated catch block
-//         logger.error("Test nlyteDataService get an exception ",e);
-//         TestCase.fail();
-//      } catch(NullPointerException e) {
-//         logger.error("Test nlyteDataService get an exception ",e);
-//         TestCase.fail();
-//      }
    }
    
    @Test

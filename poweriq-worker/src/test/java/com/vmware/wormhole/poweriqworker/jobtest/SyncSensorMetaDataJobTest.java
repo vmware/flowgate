@@ -4,6 +4,8 @@
 */
 package com.vmware.wormhole.poweriqworker.jobtest;
 
+import static org.mockito.Matchers.any;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,8 +20,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,12 +58,13 @@ public class SyncSensorMetaDataJobTest {
    @Mock
    private WormholeAPIClient wormholeAPIClient;
 
+   
    @Mock
    private PowerIQAPIClient powerIQAPIClient;
-
+   
    @Spy
    @InjectMocks
-   private PowerIQService powerIQService;
+   private PowerIQService powerIQService = new PowerIQService();
 
    @Before
    public void before() {
@@ -72,7 +73,7 @@ public class SyncSensorMetaDataJobTest {
             .thenReturn(getFacilitySoftwareByType(SoftwareType.PowerIQ));
       Mockito.when(this.wormholeAPIClient.getAssetsBySourceAndType("l9i8728d55368540fcba1692",
             AssetCategory.Sensors)).thenReturn(getAssets(AssetCategory.Sensors));
-
+      Mockito.doReturn(powerIQAPIClient).when(powerIQService).createClient(any(FacilitySoftwareConfig.class));
    }
 
    @Test
@@ -119,7 +120,7 @@ public class SyncSensorMetaDataJobTest {
       Map<String, Asset> assetMap =
             powerIQService.getAssetsFromWormhole("l9i8728d55368540fcba1692");
       List<Asset> assetsFromPowerIQ = createAssets();
-      assetsFromPowerIQ.get(0).setJustificationfields(new HashMap());
+      assetsFromPowerIQ.get(0).setJustificationfields(new HashMap<String,String>());
       List<Asset> asset = powerIQService.filterAsset(assetMap, assetsFromPowerIQ);
       TestCase.assertEquals(0, asset.size());
    }
@@ -257,7 +258,7 @@ public class SyncSensorMetaDataJobTest {
          }else if("pek-wor-pdu-02".equals(asset.getAssetName())) {
             TestCase.assertEquals(AssetCategory.PDU, asset.getCategory());
             String sensorIdAndSource = asset.getJustificationfields().get(AssetSubCategory.Temperature.toString());
-            TestCase.assertEquals("7878_po09imkhdplbvf540fwusy67n", sensorIdAndSource);
+            TestCase.assertEquals("7878"+WormholeConstant.SEPARATOR+"po09imkhdplbvf540fwusy67n", sensorIdAndSource);
          }
          else {
             TestCase.assertEquals("TemperatureSensor01", asset.getAssetName());
@@ -290,9 +291,9 @@ public class SyncSensorMetaDataJobTest {
       Mockito.when(this.powerIQAPIClient.getSensorById("6566")).thenReturn(sensor);
       Set<String> assetIds = new HashSet<String>();
       assetIds.add("123o89qw4jjasd0");
-   
+      
       List<RealTimeData> realTimeDatas =
-            powerIQService.getSensorRealTimeData(powerIQAPIClient, createAdvanceSettingMap(), assetIds);
+            powerIQService.getSensorRealTimeData(createFacility(), assetIds);
       for (RealTimeData realtimeData : realTimeDatas) {
          TestCase.assertEquals("123o89qw4jjasd0", realtimeData.getAssetID());
          TestCase.assertEquals(1550111474000l, realtimeData.getTime());
@@ -321,7 +322,7 @@ public class SyncSensorMetaDataJobTest {
       Set<String> assetIds = new HashSet<String>();
       assetIds.add("123o89qw4jjasd0");
       List<RealTimeData> realTimeDatas =
-            powerIQService.getSensorRealTimeData(powerIQAPIClient, createAdvanceSettingMap(), assetIds);
+            powerIQService.getSensorRealTimeData(createFacility(), assetIds);
       TestCase.assertEquals(0, realTimeDatas.size());
 
    }
@@ -370,7 +371,7 @@ public class SyncSensorMetaDataJobTest {
       assetIds.add("123o89qw4jjasd0");
       assetIds.add("123o89qw4jjasd1");
       List<RealTimeData> realTimeDatas =
-            powerIQService.getSensorRealTimeData(powerIQAPIClient, createAdvanceSettingMap(), assetIds);
+            powerIQService.getSensorRealTimeData(createFacility(), assetIds);
       TestCase.assertEquals((double)(100-32)*5/9, realTimeDatas.get(0).getValues().get(0).getValueNum());
       TestCase.assertEquals((double)100, realTimeDatas.get(1).getValues().get(0).getValueNum());
 
@@ -391,7 +392,7 @@ public class SyncSensorMetaDataJobTest {
       sensor.setType(PowerIQService.HumiditySensor);
       String source = "l9i8728d55368540fcba1692";
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(sensor.getId()+WormholeConstant.SENSOR_SOURCE_SPLIT_FLAG+source,
+      TestCase.assertEquals(sensor.getId()+WormholeConstant.SEPARATOR+source,
             pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
    }
 
@@ -399,14 +400,14 @@ public class SyncSensorMetaDataJobTest {
    public void testAggregatorSensorIdAndSourceForPdu1() {
       Asset pdu = createAsset1();
       HashMap<String, String> justificationfields = new HashMap<String,String>();
-      justificationfields.put(AssetSubCategory.Humidity.toString(), "509_l9i8728d55368540fcba1692");
+      justificationfields.put(AssetSubCategory.Humidity.toString(), "509"+WormholeConstant.SEPARATOR+"l9i8728d55368540fcba1692");
       pdu.setJustificationfields(justificationfields);
       Sensor sensor = new Sensor();
       sensor.setId(509);
       sensor.setType(PowerIQService.HumiditySensor);
       String source = "l9i8728d55368540fcba1692";
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(sensor.getId()+WormholeConstant.SENSOR_SOURCE_SPLIT_FLAG+source,
+      TestCase.assertEquals(sensor.getId()+WormholeConstant.SEPARATOR+source,
             pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
    }
    
@@ -414,14 +415,15 @@ public class SyncSensorMetaDataJobTest {
    public void testAggregatorSensorIdAndSourceForPdu2() {
       Asset pdu = createAsset1();
       HashMap<String, String> justificationfields = new HashMap<String,String>();
-      justificationfields.put(AssetSubCategory.Humidity.toString(), "509_l9i8728d55368540fcba1692,606_l9i8728d55368540fcba1692");
+      String filed = "509"+WormholeConstant.SEPARATOR+"l9i8728d55368540fcba1692,606"+WormholeConstant.SEPARATOR+"l9i8728d55368540fcba1692";
+      justificationfields.put(AssetSubCategory.Humidity.toString(), filed);
       pdu.setJustificationfields(justificationfields);
       Sensor sensor = new Sensor();
       sensor.setId(610);
       sensor.setType(PowerIQService.HumiditySensor);
       String source = "l9i8728d55368540fcba1692";
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals("509_l9i8728d55368540fcba1692,606_l9i8728d55368540fcba1692"+WormholeConstant.SENSOR_SPILIT_FLAG+sensor.getId()+WormholeConstant.SENSOR_SOURCE_SPLIT_FLAG+source,
+      TestCase.assertEquals(filed+WormholeConstant.SPILIT_FLAG+sensor.getId()+WormholeConstant.SEPARATOR+source,
             pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
    }
    
@@ -436,7 +438,7 @@ public class SyncSensorMetaDataJobTest {
       sensor.setType(PowerIQService.HumiditySensor);
       String source = "l9i8728d55368540fcba1692";
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(sensor.getId()+WormholeConstant.SENSOR_SOURCE_SPLIT_FLAG+source,
+      TestCase.assertEquals(sensor.getId()+WormholeConstant.SEPARATOR+source,
             pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
    }
    
@@ -451,6 +453,12 @@ public class SyncSensorMetaDataJobTest {
       advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, "KW");
       advanceSettingMap.put(AdvanceSettingType.PDU_VOLT_UNIT, "V");
       return advanceSettingMap;
+   }
+   
+   FacilitySoftwareConfig createFacility() {
+      FacilitySoftwareConfig config = new FacilitySoftwareConfig();
+      config.setAdvanceSetting(createAdvanceSettingMap());
+      return config;
    }
    
    List<Pdu> getPdus() {
