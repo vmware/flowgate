@@ -35,6 +35,7 @@ export class TriggerJobComponent implements OnInit {
  
   serverMapping:boolean=false;
   pduMapping:boolean=false;
+  temphumidityMapping:boolean=false;
 
   alertclose:boolean = true;
   alertType:string = "";
@@ -76,7 +77,7 @@ export class TriggerJobComponent implements OnInit {
             },5000);
         }
       )
-    }else if(jobname = "job2"){
+    }else if(jobname == "job2"){
       this.pduMapping = true;
       this.service.mergePduServerMapping().subscribe(
         (data)=>{
@@ -99,6 +100,37 @@ export class TriggerJobComponent implements OnInit {
           }
         },error=>{
           this.pduMapping = false;
+          this.alertType = "alert-danger";
+            this.alertcontent = "Trigger Failed";
+            this.alertclose = false;
+            setTimeout(() => {
+              this.alertclose = true  
+            },5000);
+        }
+      )
+    }else if(jobname == "job3"){
+      this.temphumidityMapping = true;
+      this.service.fullSyncTempAndHumiditySensors(true).subscribe(
+        (data)=>{
+          if(data.status == 201){
+            this.temphumidityMapping = false;
+            this.alertType = "alert-success";
+            this.alertcontent = "Trigger Success";
+            this.alertclose = false;
+            setTimeout(() => {
+              this.alertclose = true  
+            },2000);
+          }else{
+            this.temphumidityMapping = false;
+            this.alertType = "alert-danger";
+            this.alertcontent = "Trigger Failed";
+            this.alertclose = false;
+            setTimeout(() => {
+              this.alertclose = true  
+            },5000);
+          }
+        },error=>{
+          this.temphumidityMapping = false;
           this.alertType = "alert-danger";
             this.alertcontent = "Trigger Failed";
             this.alertclose = false;
