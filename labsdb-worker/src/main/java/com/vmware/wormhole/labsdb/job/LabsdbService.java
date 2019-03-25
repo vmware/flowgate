@@ -93,26 +93,15 @@ public class LabsdbService implements AsyncService{
                if (null == labsdb) {
                   continue;
                }
-
+               if(!labsdb.checkIsActive()) {
+                  continue;
+               }
                for (EventUser payloadCommand : payloadMessage.getTarget().getUsers()) {
-                  switch (payloadCommand.getId()) {
-                  case EventMessageUtil.Labsdb_SyncAllWireMapData:
-                     logger.info("Full Sync for:"+ labsdb.getName());
-                     syncWiremapData(labsdb,true);
-                     logger.info("Full sync finished.");
-                     break;
-                  case EventMessageUtil.Labsdb_SyncUnMappedAssetWiremapData:
-                     logger.info("Incremental sync for " + labsdb.getName());
-                     syncWiremapData(labsdb,false);
-                     logger.info("Incremental sync finished." );
-                     break;
-                  default:
-                     break;
-                  }
+                  excuteJob(payloadCommand.getId(),labsdb);
                }
             }
             break;
-         case EventMessageUtil.Labsdb_SyncAllWireMapData:
+         default:
             FacilitySoftwareConfig labsdb = null;
             try {
                labsdb = mapper.readValue(message.getContent(), FacilitySoftwareConfig.class);
@@ -121,35 +110,36 @@ public class LabsdbService implements AsyncService{
                logger.error("Failed to convert message", e1);
             }
             if (labsdb != null) {
-               logger.info("Full Sync for: " + labsdb.getName());
-               syncWiremapData(labsdb,true);
-               logger.info("Finish full sync.");
+               excuteJob(command.getId(),labsdb);
             }
-            //TODO send message to notify UI if needed.or notify a task system that this job is done.
-            break;
-         case EventMessageUtil.Labsdb_SyncUnMappedAssetWiremapData:
-            FacilitySoftwareConfig labsdbServer = null;
-            try {
-               labsdbServer = mapper.readValue(message.getContent(), FacilitySoftwareConfig.class);
-            } catch (IOException e) {
-               // TODO Auto-generated catch block
-               logger.info("Failed to convert message", e);
-            }
-            if (labsdbServer != null) {
-               logger.info("Incremental data sync for " + labsdbServer.getName());
-               syncWiremapData(labsdbServer,false);
-               logger.info("Incremental data sync finished for server: " + labsdbServer.getName());
-            }
-            break;
-         default:
-            logger.warn("Unknown command");
             break;
          }
       }
    }
    
+   public void excuteJob(String commanId,FacilitySoftwareConfig labsdb) {
+      if(!labsdb.checkIsActive()) {
+         return;
+      }
+      switch (commanId) {
+      case EventMessageUtil.Labsdb_SyncAllWireMapData:
+         logger.info("Full Sync for:"+ labsdb.getName());
+         syncWiremapData(labsdb,true);
+         logger.info("Full sync finished.");
+         break;
+      case EventMessageUtil.Labsdb_SyncUnMappedAssetWiremapData:
+         logger.info("Incremental sync for " + labsdb.getName());
+         syncWiremapData(labsdb,false);
+         logger.info("Incremental sync finished." );
+         break;
+      default:
+         logger.warn("Unknown command");
+         break;
+      }
+   }
    
    public void syncWiremapData(FacilitySoftwareConfig config,boolean isAll) {
+      wormholeApiClient.setServiceKey(serviceKeyConfig.getServiceKey());
       ResponseEntity<Asset[]> result = wormholeApiClient.getAssetsByType(AssetCategory.Server);
       if(result == null || result.getBody() == null) {
          return;
@@ -165,7 +155,6 @@ public class LabsdbService implements AsyncService{
       if(assetsOfMappedWiremap == null) {
          return;
       }
-      wormholeApiClient.setServiceKey(serviceKeyConfig.getServiceKey());
       wormholeApiClient.saveAssets(assetsOfMappedWiremap);
    }
    
@@ -185,16 +174,16 @@ public class LabsdbService implements AsyncService{
          if(result == null || result.getBody() == null) {
             continue;
          }
-         List<String> pduIDList = null;
-         List<String> networkIDList = null;
+         Set<String> pduIDList = null;
+         Set<String> networkIDList = null;
          try {
             parser.parse(new ByteArrayInputStream(result.getBody().getBytes()), handler);
             List<EndDevice> devices = handler.getEndDevices();//Get all the devices connected to the server 
             if(devices == null || devices.isEmpty()) {
                continue;
             }
-            pduIDList = new ArrayList<String>();
-            networkIDList = new ArrayList<String>();
+            pduIDList = new HashSet<String>();
+            networkIDList = new HashSet<String>();
             HashMap<String,String> justficationfields = asset.getJustificationfields();
             String pduPortString = null;
             String networkPortString = null;
@@ -254,11 +243,11 @@ public class LabsdbService implements AsyncService{
          }
          if(!pduIDList.isEmpty()) {
             status.setPduMapping(PduMapping.MAPPEDBYLABSDB);
-            asset.setPdus(pduIDList);
+            asset.setPdus(new ArrayList<String>(pduIDList));
          }
          if(!networkIDList.isEmpty()) {
             status.setNetworkMapping(NetworkMapping.MAPPEDBYLABSDB);
-            asset.setSwitches(networkIDList);
+            asset.setSwitches(new ArrayList<String>(networkIDList));
          }
          asset.setStatus(status);
       }

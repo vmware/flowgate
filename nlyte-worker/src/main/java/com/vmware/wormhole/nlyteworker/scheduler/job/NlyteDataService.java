@@ -124,7 +124,7 @@ public class NlyteDataService implements AsyncService {
                if (null == nlyte) {
                   continue;
                }
-               if(!isIntegrationActive(nlyte)) {
+               if(!nlyte.checkIsActive()) {
                   continue;
                }
                for (EventUser payloadCommand : payloadMessage.getTarget().getUsers()) {
@@ -148,17 +148,8 @@ public class NlyteDataService implements AsyncService {
       }
    }
 
-   private boolean isIntegrationActive(FacilitySoftwareConfig config) {
-      IntegrationStatus integrationStatus = config.getIntegrationStatus();
-      if(integrationStatus != null && integrationStatus.getStatus()!=null &&
-            !IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus())) {
-         return false;
-      }
-      return true;
-   }
-   
    private void executeJob(String commonId,FacilitySoftwareConfig nlyte) {
-      if(!isIntegrationActive(nlyte)) {
+      if(!nlyte.checkIsActive()) {
          return;
       }
       switch (commonId) {

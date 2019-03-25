@@ -74,6 +74,14 @@ public class FacilitySoftwareConfig implements Serializable {
       }
    }
 
+   public boolean checkIsActive() {
+      if(this.integrationStatus != null && this.integrationStatus.getStatus()!=null &&
+            !IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus())) {
+         return false;
+      }
+      return true;
+   }
+   
    public String getServerURL() {
       return serverURL;
    }
