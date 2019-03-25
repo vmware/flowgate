@@ -163,7 +163,7 @@ public class PowerIQService implements AsyncService {
                if (null == powerIQinfo) {
                   continue;
                }
-               if(!isIntegrationActive(powerIQinfo)) {
+               if(!powerIQinfo.checkIsActive()) {
                   continue;
                }
                for (EventUser payloadCommand : payloadMessage.getTarget().getUsers()) {
@@ -186,18 +186,9 @@ public class PowerIQService implements AsyncService {
          }
       }
    }
-   //logger.error("Failed to query data from Nlyte", e);
-   private boolean isIntegrationActive(FacilitySoftwareConfig config) {
-      IntegrationStatus integrationStatus = config.getIntegrationStatus();
-      if(integrationStatus != null && integrationStatus.getStatus()!=null &&
-            !IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus())) {
-         return false;
-      }
-      return true;
-   }
    
    private void executeJob(String commonId,FacilitySoftwareConfig powerIQ) {
-      if(!isIntegrationActive(powerIQ)) {
+      if(!powerIQ.checkIsActive()) {
          return;
       }
       switch (commonId) {
