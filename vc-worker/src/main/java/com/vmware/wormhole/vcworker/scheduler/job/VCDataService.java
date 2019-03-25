@@ -6,6 +6,7 @@ package com.vmware.wormhole.vcworker.scheduler.job;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
@@ -24,12 +26,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
+import com.ctc.wstx.util.StringUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.cis.tagging.CategoryModel;
 import com.vmware.cis.tagging.CategoryModel.Cardinality;
 import com.vmware.cis.tagging.TagModel;
 import com.vmware.vim.binding.vim.HostSystem;
 import com.vmware.wormhole.client.WormholeAPIClient;
+import com.vmware.wormhole.common.WormholeConstant;
 import com.vmware.wormhole.common.model.Asset;
 import com.vmware.wormhole.common.model.AssetIPMapping;
 import com.vmware.wormhole.common.model.SDDCSoftwareConfig;
@@ -68,14 +72,14 @@ public class VCDataService implements AsyncService {
    @Override
    @Async("asyncServiceExecutor")
    public void executeAsync(EventMessage message) {
-      //when receive message, will do the related jobs
-      //sync customer attribute.
-      //update the value.
+      // when receive message, will do the related jobs
+      // sync customer attribute.
+      // update the value.
       if (message.getType() != EventType.VCenter) {
          logger.warn("Drop none vcenter message " + message.getType());
          return;
       }
-      //TO, this should be comment out since it may contain vc password.
+      // TO, this should be comment out since it may contain vc password.
       logger.info("message received");
       Set<EventUser> users = message.getTarget().getUsers();
 
@@ -83,7 +87,7 @@ public class VCDataService implements AsyncService {
          logger.info(command.getId());
          switch (command.getId()) {
          case EventMessageUtil.VCENTER_SyncData:
-            //it will sync all the data depend on the type in the vcjoblist.
+            // it will sync all the data depend on the type in the vcjoblist.
             String messageString = null;
             while ((messageString =
                   template.opsForList().rightPop(EventMessageUtil.vcJobList)) != null) {
@@ -133,8 +137,9 @@ public class VCDataService implements AsyncService {
             if (vc != null) {
                syncCustomAttributes(vc);
             }
-            //TODO send message to notify UI if needed.or notify a task system that this job is done.
-            //now we do nothing.
+            // TODO send message to notify UI if needed.or notify a task system that this
+            // job is done.
+            // now we do nothing.
             break;
          case EventMessageUtil.VCENTER_SyncCustomerAttrsData:
             SDDCSoftwareConfig vcInfo = null;
@@ -156,16 +161,16 @@ public class VCDataService implements AsyncService {
    }
 
    private void syncCustomAttributes(SDDCSoftwareConfig vc) {
-      //TODO need to allow only update 1 vcenter instead of all the vcenter.
+      // TODO need to allow only update 1 vcenter instead of all the vcenter.
       try (VsphereClient vsphereClient =
             VsphereClient.connect(String.format(VCConstants.SDKURL, vc.getServerURL()),
                   vc.getUserName(), vc.getPassword(), !vc.isVerifyCert());) {
          for (String key : VCConstants.hostCustomAttrMapping.values()) {
             vsphereClient.createCustomAttribute(key, VCConstants.HOSTSYSTEM);
          }
-         //Add the PDU information;
+         // Add the PDU information;
          vsphereClient.createCustomAttribute(VCConstants.ASSET_PDUs, VCConstants.HOSTSYSTEM);
-         //Add host switch information;
+         // Add host switch information;
          vsphereClient.createCustomAttribute(VCConstants.ASSET_SWITCHs, VCConstants.HOSTSYSTEM);
       } catch (Exception e) {
          logger.error("Failed to sync the host metadata to VC ", e);
@@ -218,20 +223,20 @@ public class VCDataService implements AsyncService {
             if (mobIdDictionary.containsKey(mobId)) {
                ServerMapping serverMapping = mobIdDictionary.get(mobId);
                if (!serverMapping.getVcHostName().equals(hostName)) {
-                  //need to update the hostname.
+                  // need to update the hostname.
                   serverMapping.setVcHostName(hostName);
                   restClient.saveServerMapping(serverMapping);
                }
                if (serverMapping.getAsset() != null) {
                   validMapping.add(serverMapping);
                } else {
-                  //check the hostNameIP mapping
+                  // check the hostNameIP mapping
                   String ipaddress = IPAddressUtil.getIPAddress(hostName);
                   if (null != ipaddress) {
                      AssetIPMapping[] ipMappings =
                            restClient.getHostnameIPMappingByIP(ipaddress).getBody();
                      if (null != ipMappings && ipMappings.length > 0) {
-                        //update the mapping
+                        // update the mapping
                         String assetName = ipMappings[0].getAssetname();
                         Asset asset = restClient.getAssetByName(assetName).getBody();
                         if (asset != null) {
@@ -239,8 +244,8 @@ public class VCDataService implements AsyncService {
                            restClient.saveServerMapping(serverMapping);
                            validMapping.add(serverMapping);
                         }
-                     }else {//seems we don't have the ip hostname mapping. Notify infoblox to check the ip
-                        logger.info("Notify infoblox to check ip: "+ipaddress);
+                     } else {// seems we don't have the ip hostname mapping. Notify infoblox to check the ip
+                        logger.info("Notify infoblox to check ip: " + ipaddress);
                         publisher.publish(null, ipaddress);
                      }
                   }
@@ -254,14 +259,14 @@ public class VCDataService implements AsyncService {
                newMapping.setVcInstanceUUID(vsphereClient.getVCUUID());
                String ipaddress = IPAddressUtil.getIPAddress(hostName);
                logger.info(String.format("hostName %s, ipaddress: %s", hostName, ipaddress));
-               //publish message to queue.
+               // publish message to queue.
                if (null != ipaddress) {
                   logger.info("Notify infoblox");
                   publisher.publish(null, hostName);
                   AssetIPMapping[] ipMappings =
                         restClient.getHostnameIPMappingByIP(ipaddress).getBody();
                   if (null != ipMappings && ipMappings.length > 0) {
-                     //update the mapping
+                     // update the mapping
                      String assetName = ipMappings[0].getAssetname();
                      Asset asset = restClient.getAssetByName(assetName).getBody();
                      if (asset != null) {
@@ -272,7 +277,7 @@ public class VCDataService implements AsyncService {
                restClient.saveServerMapping(newMapping);
             }
          }
-         //feed meta data to VC.
+         // feed meta data to VC.
          Asset[] assets = restClient.getAssetsByVCID(vcInfo.getId()).getBody();
          Map<String, Asset> assetDictionary = new HashMap<String, Asset>();
          for (Asset asset : assets) {
@@ -297,21 +302,66 @@ public class VCDataService implements AsyncService {
             host.setCustomValue(VCConstants.hostCustomAttrMapping.get(key),
                   String.valueOf(wrapper.getPropertyValue(key)));
          }
+         Map<String, String> idNamePortMapping = new HashMap<String, String>();
          if (asset.getPdus() != null) {
+            // check pdu and port
             List<String> pduNameList = new ArrayList<String>();
             for (String pduid : asset.getPdus()) {
-               Asset pduAsset = restClient.getAssetByID(pduid).getBody();
-               if (pduAsset != null) {
-                  pduNameList.add(pduAsset.getAssetName());
+               if (idNamePortMapping.containsKey(pduid)) {
+                  pduNameList.add(idNamePortMapping.get(pduid));
+               } else {
+                  Asset pduAsset = restClient.getAssetByID(pduid).getBody();
+                  if (pduAsset != null) {
+                     pduNameList.add(pduAsset.getAssetName());
+                  }
                }
             }
             host.setCustomValue(VCConstants.ASSET_PDUs, String.join(",", pduNameList));
          }
          if (asset.getSwitches() != null) {
-            host.setCustomValue(VCConstants.ASSET_SERIALNUMBER,
-                  String.join(",", asset.getSwitches()));
+            List<String> switchNameList = new ArrayList<String>();
+            for (String switchID : asset.getSwitches()) {
+               if (idNamePortMapping.containsKey(switchID)) {
+                  switchNameList.add(idNamePortMapping.get(switchID));
+               } else {
+                  Asset switchAsset = restClient.getAssetByID(switchID).getBody();
+                  if (switchAsset != null) {
+                     switchNameList.add(switchAsset.getAssetName());
+                  }
+               }
+            }
+            host.setCustomValue(VCConstants.ASSET_SERIALNUMBER, String.join(",", switchNameList));
          }
       }
+   }
+
+   public Map<String, String> getPDUSwitchIDNamePortMapping(Asset asset) {
+      Map<String, String> result = new HashMap<String, String>();
+      Map<String, String> enhanceFields = asset.getJustificationfields();
+      if (null != enhanceFields) {
+         String allPduPortString = enhanceFields.get(WormholeConstant.PDU_PORT_FOR_SERVER);
+         List<String> devicePorts = new ArrayList<String>();
+         if (!StringUtils.isEmpty(allPduPortString)) {
+            devicePorts = Arrays.asList(allPduPortString.split(WormholeConstant.SPILIT_FLAG));
+         }
+
+         String allSwitchPortString = enhanceFields.get(WormholeConstant.NETWORK_PORT_FOR_SERVER);
+         if (!StringUtils.isEmpty(allSwitchPortString)) {
+            devicePorts
+                  .addAll(Arrays.asList(allSwitchPortString.split(WormholeConstant.SPILIT_FLAG)));
+         }
+
+         for (String devicePortString : devicePorts) {
+            // startport_FIELDSPLIT_endDeviceName_FIELDSPLIT_endport_FIELDSPLIT_endDeviceAssetID
+            // item[0] start port
+            // item[1] device name
+            // item[2] end port
+            // itme[3] assetid
+            String items[] = devicePortString.split(WormholeConstant.SEPARATOR);
+            result.put(items[3], items[1] + ":" + items[2]);
+         }
+      }
+      return result;
    }
 
    private void validClusterHostsLocationAntiaffinity(SDDCSoftwareConfig vcInfo,
@@ -342,7 +392,7 @@ public class VCDataService implements AsyncService {
             }
             for (String local : assetsByLocation.keySet()) {
                if (assetsByLocation.get(local).size() > 1) {
-                  //now we need to tag the hosts
+                  // now we need to tag the hosts
                   needTagHost.addAll(assetsByLocation.get(local));
                }
             }
