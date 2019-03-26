@@ -172,7 +172,10 @@ public class AssetControllerTest {
                   fieldWithPath("pdus")
                         .description("Possible PDUs that this server connected with"),
                   fieldWithPath("switches")
-                        .description("Physical switch that this host connected with"))))
+                        .description("Physical switchs that this host connected with"),
+                  fieldWithPath("status")
+                        .description("This is a collection of states, including the state of the asset, "
+                              + "the state of the pdu mapping, and the state of the switch mapping."))))
             .andReturn().getResponse().getHeader("Location");
       assetRepository.delete("temporary_id");
    }
@@ -313,7 +316,7 @@ public class AssetControllerTest {
             fieldWithPath("created").description("When this asset was created"),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
-                  .description("Physical switch that this host connected with") };
+                  .description("Physical switchs that this host connected with") };
       this.mockMvc
             .perform(post("/v1/assets/batchoperation").contentType(MediaType.APPLICATION_JSON_VALUE)
                   .content(objectMapper.writeValueAsString(assets)))
@@ -419,7 +422,7 @@ public class AssetControllerTest {
             fieldWithPath("created").description("When this asset was created"),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
-                  .description("Physical switch that this host connected with") };
+                  .description("Physical switchs that this host connected with") };
 
       this.mockMvc
             .perform(get(
@@ -495,7 +498,7 @@ public class AssetControllerTest {
             fieldWithPath("created").description("When this asset was created"),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
-                  .description("Physical switch that this host connected with") };
+                  .description("Physical switchs that this host connected with") };
 
       this.mockMvc.perform(get("/v1/assets/type/" + asset.getCategory())).andExpect(status().isOk())
             .andDo(document("assets-getByType-example",
@@ -572,7 +575,7 @@ public class AssetControllerTest {
             fieldWithPath("created").description("When this asset was created"),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
-                  .description("Physical switch that this host connected with") };
+                  .description("Physical switchs that this host connected with") };
 
       this.mockMvc.perform(get("/v1/assets/vrops/" + mapping.getVroID())).andExpect(status().isOk())
             .andDo(document("assets-getAssetsByVROPSId-example",
@@ -774,7 +777,7 @@ public class AssetControllerTest {
             fieldWithPath("created").description("When this asset was created"),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
-                  .description("Physical switch that this host connected with") };
+                  .description("Physical switchs that this host connected with") };
       this.mockMvc.perform(get("/v1/assets/mappedasset/category/" + asset.getCategory()))
             .andDo(document("assets-getMapped-example",
                   responseFields(fieldWithPath("[]").description("An array of asserts"))
@@ -862,7 +865,7 @@ public class AssetControllerTest {
             fieldWithPath("created").description("When this asset was created"),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
-                  .description("Physical switch that this host connected with") };
+                  .description("Physical switchs that this host connected with") };
       this.mockMvc.perform(get("/v1/assets/vc/" + mapping.getVcID()))
             .andDo(document("assets-getAssetsByVCId-example",
                   responseFields(fieldWithPath("[]").description("An array of asserts"))
@@ -1020,7 +1023,7 @@ public class AssetControllerTest {
             fieldWithPath("created").description("When this asset was created"),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
-                  .description("Physical switch that this host connected with") };
+                  .description("Physical switchs that this host connected with") };
       this.mockMvc.perform(get("/v1/assets/pdusisnull"))
             .andDo(document("assets-findServersWithoutPDUInfo-example",
                   responseFields(fieldWithPath("[]").description("An array of asserts"))
@@ -1111,7 +1114,7 @@ public class AssetControllerTest {
             fieldWithPath("created").description("When this asset was created"),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
-                  .description("Physical switch that this host connected with") };
+                  .description("Physical switchs that this host connected with") };
       this.mockMvc.perform(get("/v1/assets/pdusisnotnull"))
             .andExpect(jsonPath("$[0].assetNumber", is(12345)))
             .andExpect(jsonPath("$[0].assetName", is("pek-wor-server-02")))
@@ -1294,7 +1297,10 @@ public class AssetControllerTest {
                   fieldWithPath("pdus")
                         .description("Possible PDUs that this server connected with"),
                   fieldWithPath("switches")
-                        .description("Physical switch that this host connected with"))));
+                        .description("Physical switchs that this host connected with"),
+                  fieldWithPath("status")
+                        .description("This is a collection of states, including the state of the asset, "
+                              + "the state of the pdu mapping, and the state of the switch mapping."))));
 
       assetRepository.delete(asset.getId());
    }
@@ -1373,7 +1379,10 @@ public class AssetControllerTest {
                   fieldWithPath("pdus")
                         .description("Possible PDUs that this server connected with"),
                   fieldWithPath("switches")
-                        .description("Physical switch that this host connected with"))));
+                        .description("Physical switchs that this host connected with"),
+                  fieldWithPath("status")
+                        .description("This is a collection of states, including the state of the asset, "
+                              + "the state of the pdu mapping, and the state of the switch mapping."))));
 
       assetRepository.delete(asset.getId());
    }
@@ -1450,7 +1459,10 @@ public class AssetControllerTest {
                   fieldWithPath("pdus")
                         .description("Possible PDUs that this server connected with"),
                   fieldWithPath("switches")
-                        .description("Physical switch that this host connected with"))));
+                        .description("Physical switchs that this host connected with"),
+                  fieldWithPath("status")
+                        .description("This is a collection of states, including the state of the asset, "
+                              + "the state of the pdu mapping, and the state of the switch mapping."))));
 
       assetRepository.delete(asset.getId());
    }

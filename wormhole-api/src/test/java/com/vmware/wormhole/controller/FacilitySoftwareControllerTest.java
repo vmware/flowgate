@@ -130,7 +130,8 @@ public class FacilitySoftwareControllerTest {
                   fieldWithPath("userId").description(""),
                   fieldWithPath("verifyCert").description(
                         "Whether to verify the certificate when accessing the serverURL."),
-                  fieldWithPath("advanceSetting").description(""))))
+                  fieldWithPath("advanceSetting").description(""),
+                  fieldWithPath("integrationStatus").description("The status of integration."))))
             .andReturn();
       if (result.getResolvedException() != null) {
          throw result.getResolvedException();
@@ -226,7 +227,8 @@ public class FacilitySoftwareControllerTest {
                            .type(AssetSubCategory.class).optional(),
                      fieldWithPath("userId").description(""),
                      fieldWithPath("verifyCert").description("Whether to verify the certificate when accessing the serverURL."),
-                     fieldWithPath("advanceSetting").description(""))));
+                     fieldWithPath("advanceSetting").description(""),
+                     fieldWithPath("integrationStatus").description("The status of integration."))));
       } catch (Exception e) {
          TestCase.fail();
       }
@@ -264,7 +266,8 @@ public class FacilitySoftwareControllerTest {
                      fieldWithPath("userId").description(""),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
-                     fieldWithPath("advanceSetting").description(""))));
+                     fieldWithPath("advanceSetting").description(""),
+                     fieldWithPath("integrationStatus").description("The status of integration."))));
       } catch (Exception e) {
          TestCase.fail();
       }

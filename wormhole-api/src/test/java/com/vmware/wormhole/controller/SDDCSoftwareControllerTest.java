@@ -132,7 +132,8 @@ public class SDDCSoftwareControllerTest {
                            .type(SoftwareType.class).optional(),
                      fieldWithPath("userId").description(""),
                      fieldWithPath("verifyCert").description(
-                           "Whether to verify the certificate when accessing the serverURL."))))
+                           "Whether to verify the certificate when accessing the serverURL."),
+                     fieldWithPath("integrationStatus").description("The status of integration."))))
                .andReturn();
          TestCase.assertEquals(201, result.getResponse().getStatus());
       } catch (Exception e) {
@@ -204,7 +205,8 @@ public class SDDCSoftwareControllerTest {
                            .type(SoftwareType.class).optional(),
                      fieldWithPath("userId").description(""),
                      fieldWithPath("verifyCert").description(
-                           "Whether to verify the certificate when accessing the serverURL."))))
+                           "Whether to verify the certificate when accessing the serverURL."),
+                     fieldWithPath("integrationStatus").description("The status of integration."))))
                .andReturn();
          if (result.getResolvedException() != null) {
             throw result.getResolvedException();
@@ -329,7 +331,7 @@ public class SDDCSoftwareControllerTest {
                   .string(equalTo("[{\"id\":\"1\",\"name\":\"test server\",\"description\":null,"
                         + "\"userName\":\"administrator@vsphere.local\","
                         + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VCENTER\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false}]")))
+                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null}]")))
             .andDo(document("SDDCSoftware-queryByType-example", 
                     responseFields(
                     fieldWithPath("[]").description("An array of SDDCSoftwareConfig.")
@@ -375,10 +377,10 @@ public class SDDCSoftwareControllerTest {
             .andExpect(content().string(equalTo("[{\"id\":\"1\",\"name\":\"test server\",\"description\":null,"
                         + "\"userName\":\"administrator@vsphere.local\","
                         + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VRO\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false},{\"id\":\"2\",\"name\":\"test server\",\"description\":null,"
+                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null},{\"id\":\"2\",\"name\":\"test server\",\"description\":null,"
                         + "\"userName\":\"administrator@vsphere.local\","
                         + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VRO\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false}]")))
+                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null}]")))
             .andDo(document("SDDCSoftware-getVROServerConfigs-example", responseFields(
                     fieldWithPath("[]").description("An array of asserts"))
                     .andWithPrefix("[].", fieldpath)));
@@ -423,10 +425,10 @@ public class SDDCSoftwareControllerTest {
             .andExpect(content().string(equalTo("[{\"id\":\"1\",\"name\":\"test server\",\"description\":null,"
                         + "\"userName\":\"administrator@vsphere.local\","
                         + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VRO\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false},{\"id\":\"2\",\"name\":\"test server\",\"description\":null,"
+                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null},{\"id\":\"2\",\"name\":\"test server\",\"description\":null,"
                         + "\"userName\":\"administrator@vsphere.local\","
                         + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VRO\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false}]")))
+                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null}]")))
             .andDo(document("SDDCSoftware-getVROServerConfigsByUser-example", responseFields(
                     fieldWithPath("[]").description("An array of asserts"))
                     .andWithPrefix("[].", fieldpath)));
@@ -470,10 +472,10 @@ public class SDDCSoftwareControllerTest {
             .andExpect(content().string(equalTo("[{\"id\":\"1\",\"name\":\"test server\",\"description\":null,"
                         + "\"userName\":\"administrator@vsphere.local\","
                         + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VCENTER\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false},{\"id\":\"2\",\"name\":\"test server\",\"description\":null,"
+                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null},{\"id\":\"2\",\"name\":\"test server\",\"description\":null,"
                         + "\"userName\":\"administrator@vsphere.local\","
                         + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VCENTER\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false}]")))
+                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null}]")))
             .andDo(document("SDDCSoftware-getVCServerConfigs-example", responseFields(
                     fieldWithPath("[]").description("An array of asserts"))
                     .andWithPrefix("[].", fieldpath)));
