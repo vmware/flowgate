@@ -4,6 +4,7 @@
 */
 import { Component, OnInit } from '@angular/core';
 import { SettingService } from '../../setting.service';
+import { NodeLogger } from '@angular/core/src/view';
 
 
 @Component({
@@ -39,6 +40,31 @@ export class TriggerJobComponent implements OnInit {
   alertclose:boolean = true;
   alertType:string = "";
   alertcontent:string = "";
+  systemDetail:boolean = false;
+  serverDetail:boolean = false;
+  sensorDetail:boolean = false;
+  assetsNum:Number = 0;
+  facilitySystemNum:Number = 0;
+  categoryIsServerNum:Number = 0;
+  categoryIsPduNum:Number = 0;
+  categoryIsCabinetNum:Number = 0;
+  categoryIsSwitchNum:Number = 0;
+  categoryIsSensorNum:Number = 0;
+  categoryIsUpsNum:Number = 0;
+  userNum:Number = 0;
+  sddcServerNum:Number = 0;
+  sddcIntegrationNum:Number = 0;
+  sddcIntegrationVcNum:Number = 0;
+  sddcIntegrationVroNum:Number = 0;
+  subCategoryIsHumidity:Number = 0;
+  subCategoryIsTemperature:Number = 0;
+  subCategoryIsAirFlow:Number = 0;
+  subCategoryIsSmoke:Number = 0;
+  subCategoryIsWater:Number = 0;
+  dashBoardSystemNlyteDetail = [];
+  dashBoardSystemPowerIqDetail = [];
+  dashBoardSystemSddcServerVcDetail = [];
+  dashBoardSystemSddcServerVroDetail = [];
 
   close(){
     this.alertclose = true
@@ -110,6 +136,26 @@ export class TriggerJobComponent implements OnInit {
     }
   }
 
+  showSystemDetail(){
+    this.systemDetail = true;
+  }
+  systemConfirm(){
+    this.systemDetail = false;
+  }
+
+  showServerDetail(){
+    this.serverDetail = true;
+  }
+  serverConfirm(){
+    this.serverDetail = false;
+  }
+  showSensorDetail(){
+    this.sensorDetail = true;
+  }
+  sensorConfirm(){
+    this.sensorDetail = false;
+  }
+  
   getunmappedservers(){
     this.serverloading = true;
     this.unmappedservershow = false;
@@ -118,7 +164,6 @@ export class TriggerJobComponent implements OnInit {
       this.service.getUnmappedserver().subscribe(
         (data)=>{
           if(data.status == 200){
-           
             this.servers = data.json();
             this.serverloading = false;
           }
@@ -127,8 +172,42 @@ export class TriggerJobComponent implements OnInit {
     },2000);
 
   }
+  getFirstPageData(){
+    this.service.getFirstPageDataServer().subscribe(
+      (data)=>{
+        if(data.status == 200){
+          this.assetsNum = data.json().assetsNum;
+          this.facilitySystemNum = data.json().facilitySystemNum;
+          this.categoryIsServerNum = data.json().categoryIsServerNum;
+          this.categoryIsPduNum = data.json().categoryIsPduNum;
+          this.categoryIsCabinetNum = data.json().categoryIsCabinetNum;
+          this.categoryIsSwitchNum = data.json().categoryIsSwitchNum;
+          this.categoryIsSensorNum  = data.json().categoryIsSensorNum;
+          this.categoryIsUpsNum  = data.json().categoryIsUpsNum;
+          this.userNum  = data.json().userNum;
+          this.sddcServerNum  = data.json().sddcServerNum;
+          this.sddcIntegrationNum  = data.json().sddcIntegrationNum;
+          this.sddcIntegrationVcNum  = data.json().sddcIntegrationVcNum;
+          this.sddcIntegrationVroNum  = data.json().sddcIntegrationVroNum;
+          this.subCategoryIsAirFlow = data.json().subCategoryIsAirFlow;
+          this.subCategoryIsHumidity = data.json().subCategoryIsHumidity;
+          this.subCategoryIsSmoke = data.json().subCategoryIsSmoke;
+          this.subCategoryIsTemperature = data.json().subCategoryIsTemperature;
+          this.subCategoryIsWater = data.json().subCategoryIsWater;
+          this.dashBoardSystemNlyteDetail = data.json().dashBoardSystemNlyteDetail;
+          this.dashBoardSystemPowerIqDetail = data.json().dashBoardSystemPowerIqDetail;
+          this.dashBoardSystemSddcServerVcDetail = data.json().dashBoardSystemSddcServerVcDetail;
+          this.dashBoardSystemSddcServerVroDetail = data.json().dashBoardSystemSddcServerVroDetail;
+        }
+      }
+    )
+  }
 
+  getAllDataWhenClickTab(){
+    this.getFirstPageData();
+  }
   ngOnInit() {
+    this.getFirstPageData();
   }
 
 }

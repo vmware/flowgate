@@ -8,8 +8,279 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </div>
   </clr-alert>
     
-    
+  <style>
+        h5{
+            color: #fdb951;
+            font-size: 25px;
+            margin-bottom: -13px; 
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .card {
+            box-shadow: 0 0 0 0 #d7d7d7;
+            border-radius: .125rem;
+            border: 1px solid #d7d7d770;
+            height: 113%;
+        }
+        .btn{
+            max-width: 1000px;
+        }
+        .bigFont{
+            color:#25cfec; 
+            font-size: 60px;
+            margin: auto;
+            padding-top: 20%;
+        }
+        .smallFont{
+            color:#be7aca; 
+            font-size: 31px;
+            margin:auto;
+            margin-top:6%;
+        }
+        .bigTitle{
+            color:#9A9A9A; 
+            font-size: 22px;
+            margin-left: 6%;
+            margin-top: 5%;
+        }
+        .smallTitle{
+            margin: auto;
+            margin-top:10%;
+            color:#9A9A9A; 
+            font-size: 25px;
+        }
+        .modalBigTitle{
+            margin: auto;
+            font-size: 20px;
+            color: #9a9a9a;
+            margin-top: 10px;
+        }
+        .modalBigFont{
+            margin: auto;
+            color: #a7a7a7;
+        }
+        .modalSmallTitle{
+            padding-top: 9px;
+            margin: auto;
+            font-size: 19px;
+            color: #25cfec;
+        }
+        .modalSmallFont{
+            margin: auto;
+            color: #bdbdbd;
+        }
+        .integrationTitle{
+            margin: auto;
+            font-size: 22px;
+            margin-top: 22%;
+            color: #9a9a9a;
+        }
+        .integrationFont{
+            margin: auto;
+            padding-top: 39px;
+            font-size: 55px;
+            color: #acffbe;
+        }
+        .integrationSmallTitle{
+            color: #9a9a9a;
+            font-size: 22px;
+            margin: auto;
+            margin-top: 30px;
+        }
+        .integrationSmallFont{
+            padding-top: 34px;
+            font-size: 50px;
+            margin: auto;
+            color: #acffbe;
+        }
+        .modalServerDetailSmallTitle{
+            padding-left: 50px;
+            position: absolute;
+            font-size: 30px;
+            margin: auto;
+            margin-top: 20px;
+            color: #a0a0a0;
+        }
+        .modalServerDetailSmallFont{
+            font-size: 34px;
+            margin: auto;
+            position: absolute;
+            margin-top: 21px;
+            color: #25cfec;
+        }
+        .sensorCard{
+            border-radius: 7%;
+            border: 1px solid #dedede42;
+            height: 140%;
+        }
+        .sensorCard .modalBigTitle{
+            margin-top: 37px;
+            font-size: 36px;
+        }
+        .sensorCard .modalBigFont{
+            color: #ffa5e7;
+            margin-top: 45px;
+            font-size: 70px;
+        }
+        .systemDetailFont{
+            font-size: 20px;
+            color: #25cfec;
+        }
+        .systemDetailTitle{
+            font-size:18px; 
+            color:#969494;
+        }
+        .systemDetailSubTitle{
+            font-size: 14px;
+            color:#c3c2c2;
+        }
+  </style>  
   <clr-tabs>
+        <clr-tab>
+            <button clrTabLink (click)="getFirstPageData()">Integration Summary</button>
+            <clr-tab-content *clrIfActive="true">
+                <h5>FACILITY</h5>
+                <div class="row" style="height:43%;max-height: 200px;">
+                    <div class="col-lg-3 col-sm-3 col-3">
+                        <div class="card" style="height:110%;">
+                            <div class="row">
+                                <span class="bigTitle">ASSETS</span>
+                            </div>
+                            <div class="row">
+                                <span class="bigFont">{{assetsNum}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-3 col-3">
+                        <div class="card btn" style="height:110%;" (click)="showSystemDetail()">
+                            <div class="row">
+                                <span class="bigTitle">SYSTEM</span>
+                            </div>
+                            <div class="row">
+                                <span class="bigFont">{{facilitySystemNum}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-6">
+                        <div class="card" style="height:110%;">
+                            <div class="row" style="margin: auto;">
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="row">
+                                        <span class="smallTitle">SERVER</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="smallFont">{{categoryIsServerNum}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="row">
+                                        <span class="smallTitle">PDU</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="smallFont">{{categoryIsPduNum}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="row">
+                                        <span class="smallTitle">CABINET</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="smallFont">{{categoryIsCabinetNum}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin: auto;padding-top: 4%;">
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="row">
+                                        <span class="smallTitle">SWITCH</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="smallFont">{{categoryIsSwitchNum}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="card btn" style="border:0px;" (click)="showSensorDetail()">
+                                        <div class="row">
+                                            <span class="smallTitle" style="margin-top:-6px;">SENSORS</span>
+                                        </div>
+                                        <div class="row">
+                                            <span class="smallFont">{{categoryIsSensorNum}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="row">
+                                        <span class="smallTitle">UPS</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="smallFont">{{categoryIsUpsNum}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h5 style="margin-top:8%;">SDDC</h5>
+                <div class="row">
+                    <div class="col-lg-3 col-sm-3 col-3">
+                        <div class="card">
+                            <div class="row">
+                                <span class="bigTitle">USERS</span>
+                            </div>
+                            <div class="row">
+                                <span class="bigFont">{{userNum}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-3 col-3">
+                        <div class="card btn" (click)="showServerDetail()">
+                            <div class="row">
+                                <span class="bigTitle">SERVER</span>
+                            </div>
+                            <div class="row">
+                                <span class="bigFont">{{sddcServerNum}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-6">
+                        <div class="card">
+                            <div class="row">
+                                <div class="col-lg-6 col-sm-6 col-6">
+                                    <div class="row">
+                                        <span class="integrationTitle">INTEGRATION</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="integrationFont">{{sddcIntegrationNum}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-6 col-6">
+                                    <div class="row">
+                                        <div class="col-lg-12 col-sm-12 col-12">
+                                            <div class="row">
+                                                <span class="integrationSmallTitle">VC</span>
+                                            </div>
+                                            <div class="row">
+                                                <span class="integrationSmallFont">{{sddcIntegrationVcNum}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-sm-12 col-12">
+                                            <div class="row">
+                                                <span class="integrationSmallTitle">VRO</span>
+                                            </div>
+                                            <div class="row">
+                                                <span class="integrationSmallFont">{{sddcIntegrationVroNum}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </clr-tab-content>
+        </clr-tab>
         <clr-tab *appHasPrivilege=syncData>
             <button clrTabLink>SyncData</button>
             <clr-tab-content *clrIfActive>
@@ -92,3 +363,231 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </clr-tab-content>
             </clr-tab>
     </clr-tabs>
+
+<clr-modal [(clrModalOpen)]="systemDetail" [clrModalStaticBackdrop]="true" [clrModalSize]="'xl'">
+    <h3 class="modal-title">System Detail</h3>
+    <div class="modal-body" style="height: 600px;">
+        <div class="row">
+            <div class="col-md-12 trigger-job-text-center">
+                <clr-tree-node>
+                    Nlyte
+                    <ng-template [clrIfExpanded]="true">
+                        <clr-tree-node>
+                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                                <clr-datagrid>
+                                    <clr-dg-column style="min-width: 17rem;">Host</clr-dg-column>
+                                    <clr-dg-column>SERVER</clr-dg-column>
+                                    <clr-dg-column>PDU</clr-dg-column>
+                                    <clr-dg-column>CABINET</clr-dg-column>
+                                    <clr-dg-column>SWITCH</clr-dg-column>
+                                    <clr-dg-column>SENSORS</clr-dg-column>
+                                    <clr-dg-column>UPS</clr-dg-column>
+
+                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+
+                                    <clr-dg-row *ngFor="let nlyte of dashBoardSystemNlyteDetail"> 
+                                        <clr-dg-cell style="min-width: 17rem;text-align: center;">
+                                            <span class="systemDetailTitle">{{nlyte.nlyteName}}</span>
+                                            <br>
+                                            <span class="systemDetailSubTitle">{{nlyte.nlyteUrl}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.categoryIsServerNum}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.categoryIsPduNum}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.categoryIsCabinetNum}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.categoryIsSwitchNum}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.categoryIsSensorNum}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.categoryIsUpsNum}}</span>
+                                        </clr-dg-cell>
+                                    </clr-dg-row>
+                                </clr-datagrid>
+                            </div>
+                        </clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+                <clr-tree-node>
+                    PowerIQ
+                    <ng-template [clrIfExpanded]="false">
+                        <clr-tree-node>
+                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                                <clr-datagrid>
+                                    <clr-dg-column>Host</clr-dg-column>
+                                    <clr-dg-column>SENSOR</clr-dg-column>
+
+                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+
+                                    <clr-dg-row *ngFor="let PowerIQ of dashBoardSystemPowerIqDetail"> 
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailTitle">{{PowerIQ.poweriqName}}</span>
+                                            <br>
+                                            <span class="systemDetailSubTitle">{{PowerIQ.poweriqUrl}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{PowerIQ.poweriqSensor}}</span>
+                                        </clr-dg-cell>
+                                    </clr-dg-row>
+                                </clr-datagrid>
+                            </div>
+                        </clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+                <clr-tree-node>
+                    Infoblox
+                    <ng-template [clrIfExpanded]="false">
+                        <clr-tree-node>NO DATA.</clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+                <clr-tree-node>
+                    LabsDB
+                    <ng-template [clrIfExpanded]="false">
+                        <clr-tree-node>NO DATA.</clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+            </div>
+        </div>
+        
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="systemConfirm()">Ok</button>
+    </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="serverDetail" [clrModalStaticBackdrop]="true" [clrModalSize]="'xl'">
+    <h3 class="modal-title">Server Detail</h3>
+    <div class="modal-body" style="height: 600px;">
+        <div class="row">
+            <div class="col-md-12 trigger-job-text-center">
+                <clr-tree-node>
+                    VC
+                    <ng-template [clrIfExpanded]="true">
+                        <clr-tree-node>
+                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                                <clr-datagrid>
+                                    <clr-dg-column>Host</clr-dg-column>
+                                    <clr-dg-column>Number</clr-dg-column>
+
+                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+
+                                    <clr-dg-row *ngFor="let vc of dashBoardSystemSddcServerVcDetail"> 
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailTitle">{{vc.sddcName}}</span>
+                                            <br>
+                                            <span class="systemDetailSubTitle">{{vc.sddcUrl}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{vc.num}}</span>
+                                        </clr-dg-cell>
+                                    </clr-dg-row>
+                                </clr-datagrid>
+                            </div>
+                        </clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+                <clr-tree-node>
+                    VRO
+                    <ng-template [clrIfExpanded]="false">
+                        <clr-tree-node>
+                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                                <clr-datagrid>
+                                    <clr-dg-column>Host</clr-dg-column>
+                                    <clr-dg-column>Number</clr-dg-column>
+
+                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+
+                                    <clr-dg-row *ngFor="let vro of dashBoardSystemSddcServerVroDetail"> 
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailTitle">{{vro.sddcName}}</span>
+                                            <br>
+                                            <span class="systemDetailSubTitle">{{vro.sddcUrl}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{vro.num}}</span>
+                                        </clr-dg-cell>
+                                    </clr-dg-row>
+                                </clr-datagrid>
+                            </div>
+                        </clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="serverConfirm()">Ok</button>
+    </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="sensorDetail" [clrModalStaticBackdrop]="true" [clrModalSize]="'lg'">
+    <h3 class="modal-title">Sensor Detail</h3>
+    <div class="modal-body" style="height: 500px;">
+        <div class="row" style="margin:auto; ">
+            <div class="col-lg-4 col-sm-4 col-4">
+                <div class="card sensorCard" >
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigTitle">Humidity</span>
+                    </div>
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigFont">{{subCategoryIsHumidity}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-4 col-4">
+                <div class="card sensorCard">
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigTitle">Temperature</span>
+                    </div>
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigFont">{{subCategoryIsTemperature}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-4 col-4">
+                <div class="card sensorCard">
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigTitle">AirFlow</span>
+                    </div>
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigFont">{{subCategoryIsAirFlow}}</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        <div class="row" style="margin:auto; padding-top: 100px;">
+            <div class="col-lg-4 col-sm-4 col-4">
+                <div class="card sensorCard">
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigTitle">Smoke</span>
+                    </div>
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigFont">{{subCategoryIsSmoke}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-4 col-4">
+                <div class="card sensorCard">
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigTitle">Water</span>
+                    </div>
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigFont">{{subCategoryIsWater}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-4 col-4">
+                
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="sensorConfirm()">Ok</button>
+    </div>
+</clr-modal>

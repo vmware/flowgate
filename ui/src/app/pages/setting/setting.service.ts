@@ -95,4 +95,11 @@ export class SettingService {
       return this.http.get(""+this.API_URL+"/v1/assets/mapping/unmappedservers",this.options)
       .map((res)=>res)
     }
+
+    getFirstPageDataServer(){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      return this.http.get(""+this.API_URL+"/v1/dashboard/alldashboarddata",this.options).map((res)=>res)
+    }
 }

@@ -1,1 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
+.trigger-job-text-center .datagrid .datagrid-column .datagrid-column-title, .datagrid .datagrid-head .datagrid-row-actions .datagrid-column-title {
+    text-align: center;
+    color: #ff9a9a;
+    font-size: 16px;
+}

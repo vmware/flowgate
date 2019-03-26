@@ -38,9 +38,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vmware.wormhole.common.AssetCategory;
+import com.vmware.wormhole.common.AssetSubCategory;
 import com.vmware.wormhole.common.WormholeConstant;
 import com.vmware.wormhole.common.model.Asset;
 import com.vmware.wormhole.common.model.AssetIPMapping;
+import com.vmware.wormhole.common.model.DashBoardData;
 import com.vmware.wormhole.common.model.RealTimeData;
 import com.vmware.wormhole.common.model.ServerMapping;
 import com.vmware.wormhole.common.model.ServerSensorData;
@@ -99,11 +101,6 @@ public class AssetController {
    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
    public Asset read(@PathVariable String id) {
       return assetRepository.findOne(id);
-   }
-
-   @RequestMapping(value = "/name/{name}", method = RequestMethod.GET)
-   public Asset getAssetByName(@PathVariable String name) {
-      return assetRepository.findOneByAssetName(name);
    }
 
    // Read Asset by source and type
