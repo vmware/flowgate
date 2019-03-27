@@ -7,34 +7,26 @@ FlowGate is an open source vendor-neutral project to enable facility awareness i
 * More and more workloads move into off prime colos or clouds where infrastructure are managed via outsourcing, making more gaps.
 * Sound IT operations management and automation decisions may not be the best choice if not consider power, cooling or environmental constrains. 
 ## Features
-* Support multiple DCIM and CMDB system integration. 
+* **Built-in adapter for multiple DCIM and CMDB system integration.** 
   - Nlyte 
   - PowerIQ 
   - Infoblox 
-  - labsdb
+  - Labsdb
   - IBIS(TODO)
   - Pulse IoT Center (TODO)
   - Open for other facility system integration.
-* Support push data to multiple IT stack system.
+* **Built-in adapter for multiple IT stack systems**
   - vCenter Server
   - vRealise Operation Manager
-  - Open for other SDDC solution integration.More systems will coming soon.
-* UI based Integration proccess
-* Role based access control
-* RestAPI support
-## Try it out
+  - Open for other IT stack integration. More systems will coming soon.
+* **UI based Integration proccess**  One click integration. 
+* **Role based access control** API level access control support. 
+* **RestAPI support** Provide unified facility information querying services. APIs for all operations and data query make it easy to integrate with other systems.
+## Get Start
+**System requirements
+Linux System Docker 17.06(or above) and Docker-compose 2.0(or above)
 
-### Prerequisites
-
-* Prereq 1
-* Prereq 2
-* Prereq 3
-
-### Build & Run
-
-1. Step 1
-2. Step 2
-3. Step 3
+Steps (TODO)
 
 ## Documentation
 
