@@ -17,4 +17,15 @@ import { CmdbListComponent } from './component/cmdb/cmdb-list/cmdb-list.componen
   ],
   declarations: [FacilityComponent]
 })
-export class FacilityModule { }
+export class FacilityModule { 
+  public id;
+  public type;
+  public name;
+  public description;
+  public userName;
+  public password;
+  public serverURL;
+  public verifyCert;
+  public advanceSetting;
+  public integrationStatus;
+}

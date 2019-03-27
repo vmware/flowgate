@@ -8,6 +8,7 @@ import { error } from 'util';
 import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import { DcimService } from '../dcim.service';
+import { FacilityModule } from '../../../facility.module';
 @Component({
   selector: 'app-dcim-list',
   templateUrl: './dcim-list.component.html',
@@ -20,7 +21,7 @@ export class DcimListComponent implements OnInit {
   dcimConfigs = [];
   currentPage:number = 1;
   totalPage:number = 1;
-  pageSize:string = '5';
+  pageSize:string = '20';
   info:string='';
   disabled:String="";
   basic:boolean = false;
@@ -35,6 +36,92 @@ export class DcimListComponent implements OnInit {
   alertclose:boolean = true;
   alertType:string = "";
   alertcontent:string = "";
+
+  updateStatusAlertclose:boolean = true;
+  updateStatusAlertType:string = "";
+  updateStatusAlertcontent:string = "";
+  
+  //for integrationStatus alert message
+  isStatusErrorMsgAlertClose:boolean=true;
+  editStatusDcimId:string = "";
+  statusErrorMsg = "";
+  operationDcim ={};
+  dcimModule:FacilityModule = new FacilityModule();
+  checkStatus(element:any):any{
+    var status = {
+      "status":"ACTIVE",
+      "detail":""
+    };
+    if(element.integrationStatus == null){
+      element.integrationStatus = status;
+    }
+    return element;
+  }
+  showErrorMsg(dcim:any){
+    this.isStatusErrorMsgAlertClose = false;
+    this.statusErrorMsg = "The server "+dcim.name+" has an error:"+dcim.integrationStatus.detail
+    this.editStatusDcimId = dcim.id;
+    this.operationDcim = dcim;
+  }
+  statusMsgAlertClose(){
+    this.isStatusErrorMsgAlertClose = true;
+    this.editStatusDcimId = "";
+    this.operationDcim = {};
+  }
+  fixError(){
+    window.sessionStorage.setItem("editdcimconfigid",this.editStatusDcimId);
+    this.router.navigateByUrl("/ui/nav/facility/dcim/dcim-edit");
+  }
+  updateStatusResultClose(){
+    this.updateStatusAlertclose = true;
+  }
+  updateDcimStatus(dcim:FacilityModule){
+    var updateDcim:FacilityModule = new FacilityModule();
+    updateDcim.id = dcim.id;
+    updateDcim.type = dcim.type;
+    updateDcim.description = dcim.description
+    updateDcim.name = dcim.name;
+    updateDcim.userName = dcim.userName;
+    updateDcim.password = dcim.password;
+    updateDcim.serverURL = dcim.serverURL;
+    updateDcim.advanceSetting = dcim.advanceSetting;
+    if(dcim.integrationStatus.status == "ACTIVE"){
+      updateDcim.integrationStatus = {
+        "status":"PENDING",
+        "detail":""
+      }
+    }else{
+      updateDcim.integrationStatus = {
+        "status":"ACTIVE",
+        "detail":""
+      };
+    }
+    this.service.updateStatus(updateDcim).subscribe(
+      (data)=>{
+        if(data.status == 200){
+          this.updateStatusAlertType = "alert-success";
+          if(updateDcim.integrationStatus.status == "ACTIVE"){
+            this.updateStatusAlertcontent = "The server "+updateDcim.name+" has been activated.";
+          }else{
+            this.updateStatusAlertcontent = "The server "+updateDcim.name+" has been suspended.";
+          }
+          this.updateStatusAlertclose = false;
+          setTimeout(() => {
+            this.updateStatusAlertclose = true  
+          },2000);
+          this.getVmareConfigdatas(this.currentPage,this.pageSize);
+        }
+      },error=>{
+        this.updateStatusAlertType = "alert-danger";
+        this.updateStatusAlertcontent = "Activation or suspension of the server failed.";
+        this.updateStatusAlertclose = false;
+        setTimeout(() => {
+          this.updateStatusAlertclose = true  
+        },2000);
+        this.getVmareConfigdatas(this.currentPage,this.pageSize);
+      }
+    )
+  }
   setInfo(){
     this.info=this.pageSize;
     this.getVmareConfigdatas(this.currentPage,this.pageSize)
@@ -65,7 +152,8 @@ export class DcimListComponent implements OnInit {
       (data)=>{if(data.status == 200){     
             var types:string[]=["Nlyte","PowerIQ","OtherDCIM"]; 
             data.json().content.forEach(element=>{
-              if(types.indexOf(element.type) != -1){
+              if(types.indexOf(element.type) != -1){                 
+                this.checkStatus(element);
                 this.dcimConfigs.push(element);
               }
             })
@@ -115,6 +203,7 @@ export class DcimListComponent implements OnInit {
   close(){
     this.alertclose = true;
   }
+ 
   syncData(id:string,url:string){
     this.service.syncData(id).subscribe(
       (data)=>{

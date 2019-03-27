@@ -14,6 +14,23 @@ SPDX-License-Identifier: BSD-2-Clause -->
           </span>
       </div>
     </clr-alert>
+    <clr-alert [clrAlertType]="'alert-danger'" [clrAlertAppLevel]="true" [clrAlertClosed]= "isStatusErrorMsgAlertClose" (clrAlertClosedChange)="statusMsgAlertClose()" >
+        <clr-alert-item>
+            <span class="alert-text">
+                {{statusErrorMsg}}you can reactive the integration by click <clr-icon shape="ellipsis-vertical"></clr-icon> > Active , you can update the setting by click Edit Setting button if needed. 
+            </span>
+            <div class="alert-actions">
+                <button class="btn alert-action" (click)="fixError()">Update Setting</button>
+            </div>
+        </clr-alert-item>
+    </clr-alert>
+    <clr-alert [clrAlertType]="updateStatusAlertType" (clrAlertClosedChange)="updateStatusResultClose()" [clrAlertClosed]= "updateStatusAlertclose">
+        <div class="alert-item">
+            <span class="alert-text">
+                {{updateStatusAlertcontent}}
+            </span>
+        </div>
+    </clr-alert>
   <clr-datagrid>
   
    <clr-dg-column style="width: 10%">Type</clr-dg-column>
@@ -22,24 +39,31 @@ SPDX-License-Identifier: BSD-2-Clause -->
    <clr-dg-column>Description</clr-dg-column>
    <clr-dg-column style="width: 10%">LoginUserName</clr-dg-column>
    <clr-dg-column style="width: 10%">VerifyCert</clr-dg-column>
-  
+   <clr-dg-column style="width: 10%">Status</clr-dg-column>
+   
    <clr-dg-placeholder>We couldn't find any DCIM Config!</clr-dg-placeholder>
   
   
   <clr-dg-row *ngFor="let dcimConfig of dcimConfigs">
-     <clr-dg-action-overflow>
-         <button class="action-item" (click)="onEdit(dcimConfig.id)" *appHasPrivilege=updatefacility>Edit</button>
-         <button class="action-item" (click)="onDelete(dcimConfig.id)" *appHasPrivilege=deletefacility>Delete</button>
-         <button class="action-item" (click)="syncData(dcimConfig.id,dcimConfig.serverURL)" *appHasPrivilege=syncdata>SyncData</button>
-      </clr-dg-action-overflow>
+        <clr-dg-action-overflow>
+            <button class="action-item" (click)="onEdit(dcimConfig.id)" *appHasPrivilege=updatefacility>Edit</button>
+            <button class="action-item" (click)="onDelete(dcimConfig.id)" *appHasPrivilege=deletefacility>Delete</button>
+            <button class="action-item" (click)="syncData(dcimConfig.id,dcimConfig.serverURL)" *appHasPrivilege=syncdata>SyncData</button>
+            <button class="action-item" *ngIf="dcimConfig.integrationStatus.status == 'ACTIVE'" (click)="updateDcimStatus(dcimConfig)" >Pending</button>
+            <button class="action-item" *ngIf="dcimConfig.integrationStatus.status != 'ACTIVE'" (click)="updateDcimStatus(dcimConfig)" >Active</button>
+        </clr-dg-action-overflow>
        <clr-dg-cell>{{dcimConfig.type}}</clr-dg-cell>
        <clr-dg-cell>{{dcimConfig.serverURL}}</clr-dg-cell>
        <clr-dg-cell>{{dcimConfig.name}}</clr-dg-cell>
        <clr-dg-cell>{{dcimConfig.description}}</clr-dg-cell>    
        <clr-dg-cell>{{dcimConfig.userName}}</clr-dg-cell>
        <clr-dg-cell>{{dcimConfig.verifyCert}}</clr-dg-cell>
-       
-  </clr-dg-row>
+       <clr-dg-cell>{{dcimConfig.integrationStatus.status}}
+            <clr-icon *ngIf="dcimConfig.integrationStatus.status == 'ERROR'" class="alert-icon" style="color: #c92100;cursor: pointer;" shape="exclamation-circle" (click)="showErrorMsg(dcimConfig)"></clr-icon>       
+            <clr-icon *ngIf="dcimConfig.integrationStatus.status == 'ACTIVE'" class="alert-icon" shape="check-circle" style="color: #318700;"></clr-icon>
+            <clr-icon *ngIf="dcimConfig.integrationStatus.status == 'PENDING'" class="alert-icon" shape="exclamation-triangle" style="color: #ffdc0b;"></clr-icon>
+        </clr-dg-cell>
+    </clr-dg-row>
   
   
   <clr-dg-footer *ngIf="dcimConfigs.length>0">
