@@ -33,16 +33,16 @@ FlowGate is an open source vendor-neutral project to enable facility awareness i
 * Docker-compose 2.0(or above)
 
 **Up and Running Flowgate**
-1. Git Clone the code
+1. Get the source code to your hosts
 ```
 git clone https://github.com/vmware/flowgate
 ```
-2. Run build command to build Flowgate.
+2. Build Flowgate.
 ```
 cd flowgate/build
 bash build.sh all -version v1.0
 ```
-3. Start up Flowgate
+3. Run Flowgate
 ```
 docker-compose up -f docker-compose.run.images.yml &
 ```
