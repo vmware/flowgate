@@ -23,7 +23,7 @@ FlowGate is an open source vendor-neutral project to enable facility awareness i
 * **Role based access control** API level access control support. 
 * **RestAPI support** Provide unified facility information querying services. APIs for all operations and data query make it easy to integrate with other systems.
 ## Get Start
-**System requirements
+**System requirements**
 Linux System Docker 17.06(or above) and Docker-compose 2.0(or above)
 
 Steps (TODO)
@@ -41,3 +41,6 @@ refer to [CONTRIBUTING](CONTRIBUTING.md).
 
 ## License
 [License](LICENSE.txt)
+
+##Feedback
+If you find a bug or want to request a new feature, please open a [GitHub Issue](https://github.com/vmware/flowgate/issues)
