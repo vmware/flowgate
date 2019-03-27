@@ -23,16 +23,37 @@ FlowGate is an open source vendor-neutral project to enable facility awareness i
 * **Role based access control** API level access control support. 
 * **RestAPI support** Provide unified facility information querying services. APIs for all operations and data query make it easy to integrate with other systems.
 ## Get Start
+**DEMO**
+
+[Demo](https://github.com/yixingjia/wormhole/releases/download/1.0/FlowGate_Demo.mp4)
+
 **System requirements**
 * Linux System with minimal 4GB Memory 
 * Docker 17.06(or above) 
 * Docker-compose 2.0(or above)
 
 **Up and Running Flowgate**
+1. Git Clone the code
+```
+git clone https://github.com/vmware/flowgate
+```
+2. Run build command to build Flowgate.
+```
+cd flowgate/build
+bash build.sh all -version v1.0
+```
+3. Start up Flowgate
+```
+docker-compose up -f docker-compose.run.images.yml &
+```
+4. Access Flowgate
+
+Open a browser and visit https://your-IP
+
 **System architecture**
 
 ## Documentation
-Please refer the [Usage Demo]() for how to create user, setup integration. 
+Please refer the demo for how to create user, setup integration.
 ## Contributing
 
 The Flowgate project team welcomes contributions from the community. If you wish to contribute code and you have not
