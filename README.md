@@ -1,7 +1,14 @@
 # Flowgate
-FlowGate purpose is to enable facility awareness in SDDC and make IT operations management and automation better on high availability, cost saving and improved sustainability, with more information on power, cooling, environment (e.g. humidity, temperature) and security.
+FlowGate is an open source vendor-neutral project to enable facility awareness in SDDC and make IT operations management and automation better on high availability, cost saving and improved sustainability, with more information on power, cooling, environment (e.g. humidity, temperature) and security.
 <img alt="FlowGate" src="docs/images/FlowGate.png">
-## Overview
+## Features
+* Support multiple DCIM and CMDB system integration. 
+  - Nlyte
+  - PowerIQ
+  - Infoblox
+  - labsdb
+  - IBIS(TODO)
+  - Pulse IoT Center(TODO)
 
 ## Try it out
 
