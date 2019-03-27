@@ -24,15 +24,15 @@ FlowGate is an open source vendor-neutral project to enable facility awareness i
 * **RestAPI support** Provide unified facility information querying services. APIs for all operations and data query make it easy to integrate with other systems.
 ## Get Start
 **System requirements**
-Linux System with minimal 4GB Memory 
-Docker 17.06(or above) and Docker-compose 2.0(or above)
+* Linux System with minimal 4GB Memory 
+* Docker 17.06(or above) 
+* Docker-compose 2.0(or above)
 
-Steps (TODO)
+**Up and Running Flowgate**
+**System architecture**
 
 ## Documentation
-
-## Releases & Major Branches
-
+Please refer the [Usage Demo]() for how to create user, setup integration. 
 ## Contributing
 
 The Flowgate project team welcomes contributions from the community. If you wish to contribute code and you have not
