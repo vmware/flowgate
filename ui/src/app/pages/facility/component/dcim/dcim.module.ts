@@ -24,4 +24,4 @@ import { PagesModule } from '../../../pages.module';
   declarations: [DcimComponent,DcimListComponent,DcimAddComponent,DcimEditComponent],
   providers:[DcimService]
 })
-export class DcimModule { }
+export class DcimModule {}

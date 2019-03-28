@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vmware.wormhole.common.WormholeConstant;
 import com.vmware.wormhole.common.model.FacilitySoftwareConfig;
+import com.vmware.wormhole.common.model.IntegrationStatus;
 import com.vmware.wormhole.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.wormhole.common.model.redis.message.EventType;
 import com.vmware.wormhole.common.model.redis.message.MessagePublisher;
@@ -147,6 +148,13 @@ public class FacilitySoftwareController {
          old.setAdvanceSetting(config.getAdvanceSetting());
          old.setIntegrationStatus(config.getIntegrationStatus());
          serverValidationService.validateFacilityServer(config);
+         /**If the integrationStatus is error and passed the server validation,
+         then update the status from error to active.**/
+         if(config.getIntegrationStatus().getStatus().equals(IntegrationStatus.Status.ERROR)) {
+            IntegrationStatus status = new IntegrationStatus();
+            status.setStatus(IntegrationStatus.Status.ACTIVE);
+            old.setIntegrationStatus(status);
+         }
          repository.save(old);
       } catch (Exception e) {
          throw new WormholeRequestException(e.getMessage());
@@ -159,7 +167,7 @@ public class FacilitySoftwareController {
       FacilitySoftwareConfig example = new FacilitySoftwareConfig();
       example.setId(id);
       FacilitySoftwareConfig server = repository.findOne(Example.of(example));
-      if(server == null) {
+      if (server == null) {
          throw new WormholeRequestException("Invalid ID");
       }
       notifyFacilityWorker(server);

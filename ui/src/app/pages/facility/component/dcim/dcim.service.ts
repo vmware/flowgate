@@ -8,6 +8,7 @@ import { Headers, URLSearchParams } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { AuthenticationService } from '../../../auth/authenticationService';
 import {environment} from 'environments/environment.prod';
+import { FacilityModule } from '../../facility.module';
 
 @Injectable()
 export class DcimService {
@@ -71,6 +72,14 @@ export class DcimService {
         verifyCert:verifyCert,
         advanceSetting:JSON.parse(advanceSettings)
       }); 
+      return this.http.put(""+this.API_URL+"/v1/facilitysoftware", body,this.options).map((res)=>res)
+    }
+
+    updateStatus(dcim:FacilityModule){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      let body = JSON.stringify(dcim);
       return this.http.put(""+this.API_URL+"/v1/facilitysoftware", body,this.options).map((res)=>res)
     }
 
