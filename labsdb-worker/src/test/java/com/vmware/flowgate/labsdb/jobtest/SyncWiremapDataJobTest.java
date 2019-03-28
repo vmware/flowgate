@@ -35,7 +35,7 @@ import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.NetworkMapping;
 import com.vmware.flowgate.common.PduMapping;
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 
 import junit.framework.TestCase;
@@ -218,9 +218,9 @@ public class SyncWiremapDataJobTest {
          if(asset.getAssetName().equals("w1-eeqa-fas3250-01")) {
             List<String> networks = asset.getSwitches();
             TestCase.assertEquals("5c778c598ecf859960e2be30", networks.get(0));
-            String device = asset.getJustificationfields().get(WormholeConstant.NETWORK_PORT_FOR_SERVER);
-            TestCase.assertEquals("01"+WormholeConstant.SEPARATOR+"sin2-build-rdev1"+WormholeConstant.SEPARATOR+"onboard-1"+
-            WormholeConstant.SEPARATOR+""+"5c778c598ecf859960e2be30", device);
+            String device = asset.getJustificationfields().get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
+            TestCase.assertEquals("01"+FlowgateConstant.SEPARATOR+"sin2-build-rdev1"+FlowgateConstant.SEPARATOR+"onboard-1"+
+            FlowgateConstant.SEPARATOR+""+"5c778c598ecf859960e2be30", device);
          }
       }
    }
@@ -245,7 +245,7 @@ public class SyncWiremapDataJobTest {
       HashMap<String,String> fileds = new HashMap<String,String>();
       nets.add(net1.toString());
       nets.add(net2.toString());
-      fileds.put(WormholeConstant.NETWORK_PORT_FOR_SERVER, String.join(WormholeConstant.SPILIT_FLAG, nets));
+      fileds.put(FlowgateConstant.NETWORK_PORT_FOR_SERVER, String.join(FlowgateConstant.SPILIT_FLAG, nets));
       assetNet.setJustificationfields(fileds);
       
       Map<String,String> network = new HashMap<String,String>();
@@ -260,8 +260,8 @@ public class SyncWiremapDataJobTest {
             List<String> networks = asset.getSwitches();
             TestCase.assertEquals("5c778c598ecf859960e2be30", networks.get(0));
             String networkdevices = 
-                  asset.getJustificationfields().get(WormholeConstant.NETWORK_PORT_FOR_SERVER);
-            String expectValue = String.join(WormholeConstant.SPILIT_FLAG, nets);
+                  asset.getJustificationfields().get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
+            String expectValue = String.join(FlowgateConstant.SPILIT_FLAG, nets);
             TestCase.assertEquals(expectValue, networkdevices);
          }
       }

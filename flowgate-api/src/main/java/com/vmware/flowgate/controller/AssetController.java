@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vmware.flowgate.common.AssetCategory;
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.RealTimeData;
@@ -170,9 +170,9 @@ public class AssetController {
       if (pageNumber < 1) {
          pageNumber = 1;
       } else if (pageSize == 0) {
-         pageSize = WormholeConstant.defaultPageSize;
-      } else if (pageSize > WormholeConstant.maxPageSize) {
-         pageSize = WormholeConstant.maxPageSize;
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageable = new PageRequest(pageNumber - 1, pageSize);
       Page<Asset> assets = assetRepository.findByAssetNameLikeAndCategoryOrTagLikeAndCategory(
@@ -327,7 +327,7 @@ public class AssetController {
          String[] assetIDs = formular.split("\\+|-|\\*|/|\\(|\\)");
          Map<String, List<RealTimeData>> dataSlice = new HashMap<String, List<RealTimeData>>();
          for (String id : assetIDs) {
-            if (id.length() == WormholeConstant.MONGOIDLENGTH) {//the default mongdb id length is 24
+            if (id.length() == FlowgateConstant.MONGOIDLENGTH) {//the default mongdb id length is 24
 
                List<RealTimeData> currentData =
                      realtimeDataRepository.getDataByIDAndTimeRange(id, starttime, duration);
@@ -531,9 +531,9 @@ public class AssetController {
       if (pageNumber < 1) {
          pageNumber = 1;
       } else if (pageSize == 0) {
-         pageSize = WormholeConstant.defaultPageSize;
-      } else if (pageSize > WormholeConstant.maxPageSize) {
-         pageSize = WormholeConstant.maxPageSize;
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
       }
       ServerMapping example = new ServerMapping();
       example.setVroID(vropsID);
@@ -550,9 +550,9 @@ public class AssetController {
       if (pageNumber < 1) {
          pageNumber = 1;
       } else if (pageSize == 0) {
-         pageSize = WormholeConstant.defaultPageSize;
-      } else if (pageSize > WormholeConstant.maxPageSize) {
-         pageSize = WormholeConstant.maxPageSize;
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
       }
       ServerMapping example = new ServerMapping();
       example.setVcID(vcID);

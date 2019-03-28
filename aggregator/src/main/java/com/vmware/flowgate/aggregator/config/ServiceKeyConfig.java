@@ -6,7 +6,7 @@ package com.vmware.flowgate.aggregator.config;
 
 import org.springframework.context.annotation.Configuration;
 
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 
 @Configuration
 public class ServiceKeyConfig {
@@ -14,7 +14,7 @@ public class ServiceKeyConfig {
    private String serviceKey;
 
    public ServiceKeyConfig() {
-      this.serviceKey = System.getenv(WormholeConstant.serviceKey);
+      this.serviceKey = System.getenv(FlowgateConstant.serviceKey);
    }
 
    public String getServiceKey() {

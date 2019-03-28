@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
@@ -76,6 +76,10 @@ public class FacilitySoftwareController {
          throw new WormholeRequestException(message);
       }
       serverValidationService.validateFacilityServer(config);
+      IntegrationStatus integrationStatus = new IntegrationStatus();
+      integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+      integrationStatus.setStatus(IntegrationStatus.Status.ACTIVE);
+      config.setIntegrationStatus(integrationStatus);
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       config.setUserId(user.getUserId());
       repository.save(config);
@@ -105,9 +109,9 @@ public class FacilitySoftwareController {
       if (currentPage < 1) {
          currentPage = 1;
       } else if (pageSize == 0) {
-         pageSize = WormholeConstant.defaultPageSize;
-      } else if (pageSize > WormholeConstant.maxPageSize) {
-         pageSize = WormholeConstant.maxPageSize;
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
       }
       try {
 
@@ -118,7 +122,6 @@ public class FacilitySoftwareController {
          Example<FacilitySoftwareConfig> example = Example.of(facility, matcher);
          return repository.findAll(example, pageRequest);
       } catch (Exception e) {
-         e.printStackTrace();
          throw new WormholeRequestException(e.getMessage());
       }
    }
@@ -139,26 +142,15 @@ public class FacilitySoftwareController {
          throw new WormholeRequestException(HttpStatus.NOT_FOUND,
                "FacilitySoftwareConfig not found", null);
       }
-      try {
-         old.setName(config.getName());
-         old.setDescription(config.getDescription());
-         old.setUserName(config.getUserName());
-         old.setPassword(config.getPassword());
-         old.setVerifyCert(config.isVerifyCert());
-         old.setAdvanceSetting(config.getAdvanceSetting());
-         old.setIntegrationStatus(config.getIntegrationStatus());
-         serverValidationService.validateFacilityServer(config);
-         /**If the integrationStatus is error and passed the server validation,
-         then update the status from error to active.**/
-         if(config.getIntegrationStatus().getStatus().equals(IntegrationStatus.Status.ERROR)) {
-            IntegrationStatus status = new IntegrationStatus();
-            status.setStatus(IntegrationStatus.Status.ACTIVE);
-            old.setIntegrationStatus(status);
-         }
-         repository.save(old);
-      } catch (Exception e) {
-         throw new WormholeRequestException(e.getMessage());
-      }
+      old.setName(config.getName());
+      old.setDescription(config.getDescription());
+      old.setUserName(config.getUserName());
+      old.setPassword(config.getPassword());
+      old.setVerifyCert(config.isVerifyCert());
+      old.setAdvanceSetting(config.getAdvanceSetting());
+      old.setIntegrationStatus(config.getIntegrationStatus());
+      serverValidationService.validateFacilityServer(config);
+      repository.save(old);
    }
 
    @ResponseStatus(HttpStatus.CREATED)

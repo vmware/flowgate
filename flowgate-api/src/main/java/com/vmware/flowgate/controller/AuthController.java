@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.AuthToken;
 import com.vmware.flowgate.common.model.AuthenticationResult;
 import com.vmware.flowgate.common.model.WormholePrivilege;
@@ -86,8 +86,8 @@ public class AuthController {
          roleNames.add(Role_admin);
          AuthorityUtil util = new AuthorityUtil();
          WormholeUserDetails userDetails = 
-               new WormholeUserDetails(WormholeConstant.systemUser,WormholeConstant.systemUser, 
-                     WormholeConstant.systemUser, util.createGrantedAuthorities(roleNames));
+               new WormholeUserDetails(FlowgateConstant.systemUser,FlowgateConstant.systemUser, 
+                     FlowgateConstant.systemUser, util.createGrantedAuthorities(roleNames));
          access_token = jwtTokenUtil.generate(userDetails);
       }
       Cookie cookie = new Cookie(JwtTokenUtil.Token_Name, access_token.getAccess_token());
@@ -261,9 +261,9 @@ public class AuthController {
          currentPage = 1;
       }
       if(pageSize == null) {
-         pageSize = WormholeConstant.defaultPageSize;
-      }else if(pageSize > WormholeConstant.maxPageSize){
-         pageSize = WormholeConstant.maxPageSize;
+         pageSize = FlowgateConstant.defaultPageSize;
+      }else if(pageSize > FlowgateConstant.maxPageSize){
+         pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageRequest = new PageRequest(currentPage-1,pageSize);
       Page<WormholeUser> pageUsers = userRepository.findAll(pageRequest);
@@ -303,8 +303,8 @@ public class AuthController {
       if(currentPage < 1) {
          currentPage = 1;
       }
-      if(pageSize > WormholeConstant.maxPageSize) {
-          pageSize = WormholeConstant.maxPageSize;
+      if(pageSize > FlowgateConstant.maxPageSize) {
+          pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageRequest = new PageRequest(currentPage-1,pageSize);
       return roleRepository.findAll(pageRequest);

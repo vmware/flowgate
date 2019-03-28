@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import com.vmware.flowgate.aggregator.config.ServiceKeyConfig;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
@@ -240,7 +240,7 @@ public class AggregatorService implements AsyncService {
       Map<String, ArrayList<String>> humiditySensorMap = new HashMap<String, ArrayList<String>>();
       for (Asset sensor : sensors) {
          if (sensor.getJustificationfields() != null) {
-            String pduAssetID = sensor.getJustificationfields().get(WormholeConstant.PDU_ASSET_ID);
+            String pduAssetID = sensor.getJustificationfields().get(FlowgateConstant.PDU_ASSET_ID);
             if (pduAssetID != null) {
                switch (sensor.getSubCategory()) {
                case Temperature:

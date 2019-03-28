@@ -5,7 +5,7 @@
 package com.vmware.flowgate.labsdb.common;
 import java.io.Serializable;
 
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 
 public class EndDevice implements Serializable{
    /**
@@ -64,8 +64,8 @@ public class EndDevice implements Serializable{
    
    @Override
    public String toString() {
-      return this.startPort+WormholeConstant.SEPARATOR+this.endDeviceName+WormholeConstant.SEPARATOR
-            +this.endPort+WormholeConstant.SEPARATOR+this.endDeviceAssetId;
+      return this.startPort+FlowgateConstant.SEPARATOR+this.endDeviceName+FlowgateConstant.SEPARATOR
+            +this.endPort+FlowgateConstant.SEPARATOR+this.endDeviceAssetId;
    }
 
 }

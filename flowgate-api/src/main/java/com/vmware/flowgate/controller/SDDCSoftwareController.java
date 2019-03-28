@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.redis.message.EventType;
@@ -185,9 +185,9 @@ public class SDDCSoftwareController {
       if (currentPage < 1) {
          currentPage = 1;
       } else if (pageSize == 0) {
-         pageSize = WormholeConstant.defaultPageSize;
-      } else if (pageSize > WormholeConstant.maxPageSize) {
-         pageSize = WormholeConstant.maxPageSize;
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
       SDDCSoftwareConfig sddc = new SDDCSoftwareConfig();
