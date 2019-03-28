@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.vmware.wormhole</groupId>
-	<artifactId>wormhole-worker</artifactId>
+	<groupId>com.vmware.flowgate</groupId>
+	<artifactId>flowgate-worker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>wormhole-worker</name>
+	<name>flowgate-worker</name>
 	<description>Common Jobs modles</description>
 
 	<parent>

@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.vmware.wormhole</groupId>
+	<groupId>com.vmware.flowgate</groupId>
 	<artifactId>infoblox-worker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -22,7 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<wormhole.version>0.0.1-SNAPSHOT</wormhole.version>
+		<flowgate.version>0.0.1-SNAPSHOT</flowgate.version>
 	</properties>
 
 	<dependencies>
@@ -35,14 +35,14 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
-			<artifactId>wormhole-common</artifactId>
-			<version>${wormhole.version}</version>
+			<groupId>com.vmware.flowgate</groupId>
+			<artifactId>flowgate-common</artifactId>
+			<version>${flowgate.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>common-restclient</artifactId>
-			<version>${wormhole.version}</version>
+			<version>${flowgate.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -3,13 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.vmware.wormhole</groupId>
+	<groupId>com.vmware.flowgate</groupId>
 	<artifactId>vc-worker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>vc-worker</name>
-	<description>vc-worker for wormhole</description>
+	<description>vc-worker for flowgate</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -23,7 +23,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<vsphere.sdk.root>.</vsphere.sdk.root>
-		<wormhole.version>0.0.1-SNAPSHOT</wormhole.version>
+		<flowgate.version>0.0.1-SNAPSHOT</flowgate.version>
 		<commons-cli.version>1.3.1</commons-cli.version>
 		<commons-configuration.version>1.10</commons-configuration.version>
 	</properties>
@@ -45,7 +45,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vim25.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vim25</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -60,7 +60,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/bcpkix-jdk15on-150.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>bcpkix</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -75,7 +75,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/bcprov-ext-jdk15on-150.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>bcprov-ext</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -90,7 +90,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/bcprov-jdk15on-150.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>bcprov</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -105,7 +105,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/query-vmodl.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>query-vmodl</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -120,7 +120,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/reflect-vmodl.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>reflect-vmodl</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -135,7 +135,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/samples-annotations-1.0.0.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>samples-annotations</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -150,7 +150,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/samples-core-1.0.0.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>samples-core</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -165,7 +165,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/sblim-cim-client2-2.1.1.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>sblim-cim-client</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -180,7 +180,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/ssoclient.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>ssoclient</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -195,7 +195,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/ssosamples.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>ssosamples</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -210,7 +210,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vapi-authentication-2.9.0.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vapi-authentication</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -225,7 +225,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vapi-runtime-2.9.0.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vapi-runtime</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -240,7 +240,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vapi-samltoken-2.9.0.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vapi-samltoken</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -255,7 +255,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vim-vmodl.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vim-vmodl</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -270,7 +270,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vlsi-client.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vlsi-client</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -285,7 +285,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vlsi-core.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vlsi-core</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -300,7 +300,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vmc-bindings-1.1.0.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vmc-bindings</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -315,7 +315,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vmc-sdk-common-1.1.0.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vmc-sdk-common</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -330,7 +330,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vsphereautomation-client-sdk-1.2.0.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vsphereautomation-client</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -345,7 +345,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vsphereautomation-lookupservice-1.0.0.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vsphereautomation-lookupservice</artifactId>
 							<version>1.0</version>
 							<packaging>jar</packaging>
@@ -360,7 +360,7 @@
 						</goals>
 						<configuration>
 							<file>./libs/vsphere-samples-6.7.0.jar</file>
-							<groupId>com.vmware.wormhole</groupId>
+							<groupId>com.vmware.flowgate</groupId>
 							<artifactId>vsphereautomation-sample</artifactId>
 							<version>6.7.0</version>
 							<packaging>jar</packaging>
@@ -453,14 +453,14 @@
 			<version>5.0.2</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
-			<artifactId>wormhole-common</artifactId>
-			<version>${wormhole.version}</version>
+			<groupId>com.vmware.flowgate</groupId>
+			<artifactId>flowgate-common</artifactId>
+			<version>${flowgate.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>common-restclient</artifactId>
-			<version>${wormhole.version}</version>
+			<version>${flowgate.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -481,113 +481,113 @@
 			<version>${commons-cli.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vim25</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>bcpkix</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>bcprov-ext</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>bcprov</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>query-vmodl</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>reflect-vmodl</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>samples-annotations</artifactId>
 			<version>1.0</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>samples-core</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>sblim-cim-client</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>ssoclient</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>ssosamples</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vapi-authentication</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vapi-runtime</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vapi-samltoken</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vim-vmodl</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vlsi-client</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vlsi-core</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vmc-bindings</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vmc-sdk-common</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vsphereautomation-client</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vsphereautomation-lookupservice</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.wormhole</groupId>
+			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>vsphereautomation-sample</artifactId>
 			<version>6.7.0</version>
 		</dependency>
