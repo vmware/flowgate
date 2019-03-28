@@ -2,7 +2,7 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-package com.vmware.wormhole.controller;
+package com.vmware.flowgate.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;

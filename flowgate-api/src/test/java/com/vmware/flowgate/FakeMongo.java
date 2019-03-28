@@ -2,7 +2,7 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-package com.vmware.wormhole;
+package com.vmware.flowgate;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
