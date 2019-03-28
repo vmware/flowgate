@@ -7,9 +7,148 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </span>
     </div>
   </clr-alert>
-    
-    
+ 
   <clr-tabs>
+        <clr-tab *appHasPrivilege=integrationSummary>
+            <button clrTabLink (click)="getFirstPageData()">Integration Summary</button>
+            <clr-tab-content *clrIfActive="true">
+                <h5>FACILITY</h5>
+                <div class="row" style="height:43%;max-height: 200px;">
+                    <div class="col-lg-3 col-sm-3 col-3">
+                        <div class="card" style="height:110%;">
+                            <div class="row">
+                                <span class="bigTitle">ASSETS</span>
+                            </div>
+                            <div class="row">
+                                <span class="bigFont">{{flowgateSummery.assetsNum}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-3 col-3">
+                        <div class="card btn" style="height:110%;" (click)="showSystemSummary()">
+                            <div class="row">
+                                <span class="bigTitle">SYSTEM</span>
+                            </div>
+                            <div class="row">
+                                <span class="bigFont">{{flowgateSummery.facilitySystemNum}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-6">
+                        <div class="card" style="height:110%;">
+                            <div class="row" style="margin: auto;">
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="row">
+                                        <span class="smallTitle">SERVER</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="smallFont">{{flowgateSummery.serverNum}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="row">
+                                        <span class="smallTitle">PDU</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="smallFont">{{flowgateSummery.pduNum}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="row">
+                                        <span class="smallTitle">CABINET</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="smallFont">{{flowgateSummery.cabinetNum}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin: auto;padding-top: 4%;">
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="row">
+                                        <span class="smallTitle">SWITCH</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="smallFont">{{flowgateSummery.switchNum}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                    <div class="card btn" style="border:0px;" (click)="showSensorSummary()">
+                                        <div class="row">
+                                            <span class="smallTitle" style="margin-top:-6px;">SENSORS</span>
+                                        </div>
+                                        <div class="row">
+                                            <span class="smallFont">{{flowgateSummery.sensorNum}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-sm-4 col-4">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h5 style="margin-top:8%;">SDDC</h5>
+                <div class="row">
+                    <div class="col-lg-3 col-sm-3 col-3">
+                        <div class="card">
+                            <div class="row">
+                                <span class="bigTitle">USERS</span>
+                            </div>
+                            <div class="row">
+                                <span class="bigFont">{{flowgateSummery.userNum}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-3 col-3">
+                        <div class="card btn" (click)="showServerSummary()">
+                            <div class="row">
+                                <span class="bigTitle">SERVER</span>
+                            </div>
+                            <div class="row">
+                                <span class="bigFont">{{flowgateSummery.sddcServerNum}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-sm-6 col-6">
+                        <div class="card">
+                            <div class="row">
+                                <div class="col-lg-6 col-sm-6 col-6">
+                                    <div class="row">
+                                        <span class="integrationTitle">INTEGRATION</span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="integrationFont">{{flowgateSummery.sddcIntegrationNum}}</span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-6 col-6">
+                                    <div class="row">
+                                        <div class="col-lg-12 col-sm-12 col-12">
+                                            <div class="row">
+                                                <span class="integrationSmallTitle">VC</span>
+                                            </div>
+                                            <div class="row">
+                                                <span class="integrationSmallFont">{{flowgateSummery.vcNum}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-sm-12 col-12">
+                                            <div class="row">
+                                                <span class="integrationSmallTitle">VRO</span>
+                                            </div>
+                                            <div class="row">
+                                                <span class="integrationSmallFont">{{flowgateSummery.vroNum}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </clr-tab-content>
+        </clr-tab>
         <clr-tab *appHasPrivilege=syncData>
             <button clrTabLink>SyncData</button>
             <clr-tab-content *clrIfActive>
@@ -103,3 +242,231 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </clr-tab-content>
             </clr-tab>
     </clr-tabs>
+
+<clr-modal [(clrModalOpen)]="systemSummary" [clrModalStaticBackdrop]="true" [clrModalSize]="'xl'">
+    <h3 class="modal-title">System Summary</h3>
+    <div class="modal-body" style="height: 600px;">
+        <div class="row">
+            <div class="col-md-12 trigger-job-text-center">
+                <clr-tree-node>
+                    Nlyte
+                    <ng-template [clrIfExpanded]="true">
+                        <clr-tree-node>
+                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                                <clr-datagrid>
+                                    <clr-dg-column style="min-width: 17rem;">Host</clr-dg-column>
+                                    <clr-dg-column>SERVER</clr-dg-column>
+                                    <clr-dg-column>PDU</clr-dg-column>
+                                    <clr-dg-column>CABINET</clr-dg-column>
+                                    <clr-dg-column>SWITCH</clr-dg-column>
+                                    <clr-dg-column>SENSORS</clr-dg-column>
+
+                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+
+                                    <clr-dg-row *ngFor="let nlyte of flowgateSummery.nlyteSummary"> 
+                                        <clr-dg-cell style="min-width: 17rem;text-align: center;">
+                                            <span class="systemDetailTitle">{{nlyte.name}}</span>
+                                            <br>
+                                            <span class="systemDetailSubTitle">{{nlyte.url}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.serverNum}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.pduNum}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.cabinetNum}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.switchNum}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{nlyte.sensorNum}}</span>
+                                        </clr-dg-cell>
+                                    </clr-dg-row>
+                                </clr-datagrid>
+                            </div>
+                        </clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+                <clr-tree-node>
+                    PowerIQ
+                    <ng-template [clrIfExpanded]="false">
+                        <clr-tree-node>
+                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                                <clr-datagrid>
+                                    <clr-dg-column>Host</clr-dg-column>
+                                    <clr-dg-column>SENSOR</clr-dg-column>
+                                    <clr-dg-column>PDU</clr-dg-column>
+
+                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+
+                                    <clr-dg-row *ngFor="let PowerIQ of flowgateSummery.powerIqSummary"> 
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailTitle">{{PowerIQ.name}}</span>
+                                            <br>
+                                            <span class="systemDetailSubTitle">{{PowerIQ.url}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{PowerIQ.sensorNum}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{PowerIQ.pduNum}}</span>
+                                        </clr-dg-cell>
+                                    </clr-dg-row>
+                                </clr-datagrid>
+                            </div>
+                        </clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+                <clr-tree-node>
+                    Infoblox
+                    <ng-template [clrIfExpanded]="false">
+                        <clr-tree-node>NO DATA.</clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+                <clr-tree-node>
+                    LabsDB
+                    <ng-template [clrIfExpanded]="false">
+                        <clr-tree-node>NO DATA.</clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+            </div>
+        </div>
+        
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="systemConfirm()">Ok</button>
+    </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="serverSummary" [clrModalStaticBackdrop]="true" [clrModalSize]="'xl'">
+    <h3 class="modal-title">Server Summary</h3>
+    <div class="modal-body" style="height: 600px;">
+        <div class="row">
+            <div class="col-md-12 trigger-job-text-center">
+                <clr-tree-node>
+                    VC
+                    <ng-template [clrIfExpanded]="true">
+                        <clr-tree-node>
+                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                                <clr-datagrid>
+                                    <clr-dg-column>Host</clr-dg-column>
+                                    <clr-dg-column>Number</clr-dg-column>
+
+                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+
+                                    <clr-dg-row *ngFor="let vc of flowgateSummery.vcSummary"> 
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailTitle">{{vc.name}}</span>
+                                            <br>
+                                            <span class="systemDetailSubTitle">{{vc.url}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{vc.hostsNum}}</span>
+                                        </clr-dg-cell>
+                                    </clr-dg-row>
+                                </clr-datagrid>
+                            </div>
+                        </clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+                <clr-tree-node>
+                    VRO
+                    <ng-template [clrIfExpanded]="false">
+                        <clr-tree-node>
+                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                                <clr-datagrid>
+                                    <clr-dg-column>Host</clr-dg-column>
+                                    <clr-dg-column>Number</clr-dg-column>
+
+                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+
+                                    <clr-dg-row *ngFor="let vro of flowgateSummery.vroSummary"> 
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailTitle">{{vro.name}}</span>
+                                            <br>
+                                            <span class="systemDetailSubTitle">{{vro.url}}</span>
+                                        </clr-dg-cell>
+                                        <clr-dg-cell style="text-align: center;">
+                                            <span class="systemDetailFont">{{vro.hostsNum}}</span>
+                                        </clr-dg-cell>
+                                    </clr-dg-row>
+                                </clr-datagrid>
+                            </div>
+                        </clr-tree-node>
+                    </ng-template>
+                </clr-tree-node>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="serverConfirm()">Ok</button>
+    </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="sensorSummary" [clrModalStaticBackdrop]="true" [clrModalSize]="'lg'">
+    <h3 class="modal-title">Sensor Summary</h3>
+    <div class="modal-body" style="height: 500px;">
+        <div class="row" style="margin:auto; ">
+            <div class="col-lg-4 col-sm-4 col-4">
+                <div class="card sensorCard" >
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigTitle">Humidity</span>
+                    </div>
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigFont">{{flowgateSummery.humiditySensorNum}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-4 col-4">
+                <div class="card sensorCard">
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigTitle">Temperature</span>
+                    </div>
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigFont">{{flowgateSummery.temperatureSensorNum}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-4 col-4">
+                <div class="card sensorCard">
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigTitle">AirFlow</span>
+                    </div>
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigFont">{{flowgateSummery.airFlowSensorNum}}</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        <div class="row" style="margin:auto; padding-top: 100px;">
+            <div class="col-lg-4 col-sm-4 col-4">
+                <div class="card sensorCard">
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigTitle">Smoke</span>
+                    </div>
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigFont">{{flowgateSummery.smokeSensorNum}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-4 col-4">
+                <div class="card sensorCard">
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigTitle">Water</span>
+                    </div>
+                    <div class="row" style="margin:auto;">
+                        <span class="modalBigFont">{{flowgateSummery.waterSensorNum}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-4 col-4">
+                
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="sensorConfirm()">Ok</button>
+    </div>
+</clr-modal>

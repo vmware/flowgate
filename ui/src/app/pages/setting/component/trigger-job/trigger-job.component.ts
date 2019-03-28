@@ -4,6 +4,7 @@
 */
 import { Component, OnInit } from '@angular/core';
 import { SettingService } from '../../setting.service';
+import { NodeLogger } from '@angular/core/src/view';
 
 
 @Component({
@@ -17,6 +18,7 @@ export class TriggerJobComponent implements OnInit {
   triggerTipBox:boolean=false;
   syncData:string[]=["startFullMappingAggregation","generateServerPDUMapping"];
   syncUnMappedServers:string[]=["readUnMappedServers"];
+  integrationSummary:string[]=["readSystemSummary"];
   unmappedservershow:boolean=false;
   jobs=[
     {
@@ -40,6 +42,34 @@ export class TriggerJobComponent implements OnInit {
   alertclose:boolean = true;
   alertType:string = "";
   alertcontent:string = "";
+  systemSummary:boolean = false;
+  serverSummary:boolean = false;
+  sensorSummary:boolean = false;
+
+  flowgateSummery={
+    "assetsNum": 0,
+    "facilitySystemNum": 0,
+    "serverNum": 0,
+    "pduNum": 0,
+    "cabinetNum": 0,
+    "switchNum": 0,
+    "sensorNum": 0,
+    "categoryIsUpsNum": 0,
+    "userNum": 0,
+    "sddcServerNum": 0,
+    "sddcIntegrationNum": 0,
+    "vcNum": 0,
+    "vroNum": 0,
+    "humiditySensorNum": 0,
+    "temperatureSensorNum": 0,
+    "airFlowSensorNum": 0,
+    "smokeSensorNum": 0,
+    "waterSensorNum": 0,
+    "nlyteSummary": [],
+    "powerIqSummary": [],
+    "vcSummary": [],
+    "vroSummary": []
+  }
 
   close(){
     this.alertclose = true
@@ -142,6 +172,25 @@ export class TriggerJobComponent implements OnInit {
     }
   }
 
+  showSystemSummary(){
+    this.systemSummary = true;
+  }
+  systemConfirm(){
+    this.systemSummary = false;
+  }
+  showServerSummary(){
+    this.serverSummary = true;
+  }
+  serverConfirm(){
+    this.serverSummary = false;
+  }
+  showSensorSummary(){
+    this.sensorSummary = true;
+  }
+  sensorConfirm(){
+    this.sensorSummary = false;
+  }
+  
   getunmappedservers(){
     this.serverloading = true;
     this.unmappedservershow = false;
@@ -150,7 +199,6 @@ export class TriggerJobComponent implements OnInit {
       this.service.getUnmappedserver().subscribe(
         (data)=>{
           if(data.status == 200){
-           
             this.servers = data.json();
             this.serverloading = false;
           }
@@ -159,8 +207,21 @@ export class TriggerJobComponent implements OnInit {
     },2000);
 
   }
+  getFirstPageData(){
+    this.service.getSystemSummaryData().subscribe(
+      (data)=>{
+        if(data.status == 200){
+          this.flowgateSummery = data.json();
+        }
+      }
+    )
+  }
 
+  getAllDataWhenClickTab(){
+    this.getFirstPageData();
+  }
   ngOnInit() {
+    this.getFirstPageData();
   }
 
 }
