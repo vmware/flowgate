@@ -8,6 +8,7 @@ import { error } from 'util';
 import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
+import { FacilityModule } from '../../../facility.module';
 @Component({
   selector: 'app-dcim-edit',
   templateUrl: './dcim-edit.component.html',
@@ -22,36 +23,13 @@ export class DcimEditComponent implements OnInit {
   operatingModals:boolean = false;
   ignoreCertificatesModals:boolean = false;
   tip:string = "";
-  verify:boolean = false;
-  checked:boolean;
-  yes:boolean = false;
-  no:boolean = true;
- 
   nlyteAdvanceSettingShow:boolean = false;
   powerIQAdvanceSettingShow:boolean = false;
   commonAdvanceSettingShow:boolean = true;
-
-  dcimConfig={
-    id:"",
-    type:"",
-    name:"",
-    description:"",
-    serverURL:"",
-    userName:"",
-    password:"",
-    verifyCert:"true",
-    advanceSetting:{
-      DateFormat:"",
-      TimeZone:"",
-      PDU_POWER_UNIT:"",
-      PDU_AMPS_UNIT:"",
-      PDU_VOLT_UNIT:"",
-      TEMPERATURE_UNIT:"",
-      HUMIDITY_UNIT:""
-    }
-  }
+  dcimConfig:FacilityModule = new FacilityModule();
+  
   read = "";/** This property is to change the read-only attribute of the password input box*/
-  advanceSetting:string = "";
+
 
   changetype(){
     if(this.dcimConfig.type == "Nlyte"){
@@ -67,20 +45,15 @@ export class DcimEditComponent implements OnInit {
   }
   
   save(){
-      this.advanceSetting = JSON.stringify({
-        "DateFormat":this.dcimConfig.advanceSetting.DateFormat,
-        "TimeZone":this.dcimConfig.advanceSetting.TimeZone,
-        "PDU_POWER_UNIT":this.dcimConfig.advanceSetting.PDU_POWER_UNIT,
-        "PDU_AMPS_UNIT":this.dcimConfig.advanceSetting.PDU_AMPS_UNIT,
-        "PDU_VOLT_UNIT":this.dcimConfig.advanceSetting.PDU_VOLT_UNIT,
-        "TEMPERATURE_UNIT":this.dcimConfig.advanceSetting.TEMPERATURE_UNIT,
-        "HUMIDITY_UNIT":this.dcimConfig.advanceSetting.HUMIDITY_UNIT
-      });
-  
       this.read = "readonly";
       this.loading = true;
-      this.service.updateDcimConfig(this.dcimConfig.id,this.dcimConfig.type,this.dcimConfig.name,this.dcimConfig.description,this.dcimConfig.userName,
-        this.dcimConfig.password,this.dcimConfig.serverURL,this.dcimConfig.verifyCert,this.advanceSetting).subscribe(
+      //by default,when user modify the integration setting on the edit page,the integration'status is ACTIVE.
+      this.dcimConfig.integrationStatus={
+        "status":"ACTIVE",
+        "detail":"",
+        "retryCounter":0
+      }
+      this.service.updateFacility(this.dcimConfig).subscribe(
         (data)=>{
           if(data.status == 200){
             this.loading = false;
@@ -90,7 +63,6 @@ export class DcimEditComponent implements OnInit {
         error=>{
           if(error.status == 400 && error.json().errors[0] == "Invalid SSL Certificate"){
             this.loading = false;
-            this.verify = true;
             this.ignoreCertificatesModals = true;
             this.tip = error.json().message+". Are you sure you ignore the certificate check?"
           }else if(error.status == 400 && error.json().errors[0] == "Unknown Host"){
@@ -110,17 +82,18 @@ export class DcimEditComponent implements OnInit {
       )
   
   }
-  Yes(){
+  confirmNoVerifyCertModal(){
     this.ignoreCertificatesModals = false;
     this.read = "";
-    if(this.verify){
-      this.dcimConfig.verifyCert = "false";
-      this.save();
-    }
+    this.dcimConfig.verifyCert = "false";
+    this.save();
   }
-  No(){
+  closeVerifyCertModal(){
     this.read = "";
     this.ignoreCertificatesModals = false;
+  }
+  closeOperationTips(){
+    this.read = "";
     this.operatingModals = false;
   }
   cancel(){
@@ -130,6 +103,15 @@ export class DcimEditComponent implements OnInit {
     this.router.navigate(["/ui/nav/facility/dcim/dcim-list"]);
   }
   ngOnInit() {
+    this.dcimConfig.advanceSetting ={
+      DateFormat:"",
+      TimeZone:"",
+      PDU_POWER_UNIT:"",
+      PDU_AMPS_UNIT:"",
+      PDU_VOLT_UNIT:"",
+      TEMPERATURE_UNIT:"",
+      HUMIDITY_UNIT:""
+    }
     this.dcimConfig.id = window.sessionStorage.getItem("editdcimconfigid");
 
     if(this.dcimConfig.id != null && this.dcimConfig.id != ""){
@@ -149,13 +131,11 @@ export class DcimEditComponent implements OnInit {
                   HUMIDITY_UNIT:"%"
                 }
               }
-              this.checked =  data.json().verifyCert;
-              if(this.checked == false){
+              if(this.dcimConfig.verifyCert == false){
                 this.dcimConfig.verifyCert = "false";
               }else{
                 this.dcimConfig.verifyCert = "true";
               }
-           
             }
           }
         }

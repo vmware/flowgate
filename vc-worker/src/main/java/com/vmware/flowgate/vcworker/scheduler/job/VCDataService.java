@@ -37,7 +37,7 @@ import com.vmware.flowgate.vcworker.model.VCConstants;
 import com.vmware.cis.tagging.TagModel;
 import com.vmware.vim.binding.vim.HostSystem;
 import com.vmware.flowgate.client.WormholeAPIClient;
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
@@ -339,16 +339,16 @@ public class VCDataService implements AsyncService {
       Map<String, String> result = new HashMap<String, String>();
       Map<String, String> enhanceFields = asset.getJustificationfields();
       if (null != enhanceFields) {
-         String allPduPortString = enhanceFields.get(WormholeConstant.PDU_PORT_FOR_SERVER);
+         String allPduPortString = enhanceFields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
          List<String> devicePorts = new ArrayList<String>();
          if (!StringUtils.isEmpty(allPduPortString)) {
-            devicePorts = Arrays.asList(allPduPortString.split(WormholeConstant.SPILIT_FLAG));
+            devicePorts = Arrays.asList(allPduPortString.split(FlowgateConstant.SPILIT_FLAG));
          }
 
-         String allSwitchPortString = enhanceFields.get(WormholeConstant.NETWORK_PORT_FOR_SERVER);
+         String allSwitchPortString = enhanceFields.get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
          if (!StringUtils.isEmpty(allSwitchPortString)) {
             devicePorts
-                  .addAll(Arrays.asList(allSwitchPortString.split(WormholeConstant.SPILIT_FLAG)));
+                  .addAll(Arrays.asList(allSwitchPortString.split(FlowgateConstant.SPILIT_FLAG)));
          }
 
          for (String devicePortString : devicePorts) {
@@ -357,7 +357,7 @@ public class VCDataService implements AsyncService {
             // item[1] device name
             // item[2] end port
             // itme[3] assetid
-            String items[] = devicePortString.split(WormholeConstant.SEPARATOR);
+            String items[] = devicePortString.split(FlowgateConstant.SEPARATOR);
             result.put(items[3], items[1] + ":" + items[2]);
          }
       }

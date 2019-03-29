@@ -41,7 +41,7 @@ import com.vmware.flowgate.poweriqworker.model.SensorReading;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetSubCategory;
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.RealTimeData;
@@ -259,7 +259,7 @@ public class SyncSensorMetaDataJobTest {
          }else if("pek-wor-pdu-02".equals(asset.getAssetName())) {
             TestCase.assertEquals(AssetCategory.PDU, asset.getCategory());
             String sensorIdAndSource = asset.getJustificationfields().get(AssetSubCategory.Temperature.toString());
-            TestCase.assertEquals("7878"+WormholeConstant.SEPARATOR+"po09imkhdplbvf540fwusy67n", sensorIdAndSource);
+            TestCase.assertEquals("7878"+FlowgateConstant.SEPARATOR+"po09imkhdplbvf540fwusy67n", sensorIdAndSource);
          }
          else {
             TestCase.assertEquals("TemperatureSensor01", asset.getAssetName());
@@ -393,7 +393,7 @@ public class SyncSensorMetaDataJobTest {
       sensor.setType(PowerIQService.HumiditySensor);
       String source = "l9i8728d55368540fcba1692";
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(sensor.getId()+WormholeConstant.SEPARATOR+source,
+      TestCase.assertEquals(sensor.getId()+FlowgateConstant.SEPARATOR+source,
             pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
    }
 
@@ -401,14 +401,14 @@ public class SyncSensorMetaDataJobTest {
    public void testAggregatorSensorIdAndSourceForPdu1() {
       Asset pdu = createAsset1();
       HashMap<String, String> justificationfields = new HashMap<String,String>();
-      justificationfields.put(AssetSubCategory.Humidity.toString(), "509"+WormholeConstant.SEPARATOR+"l9i8728d55368540fcba1692");
+      justificationfields.put(AssetSubCategory.Humidity.toString(), "509"+FlowgateConstant.SEPARATOR+"l9i8728d55368540fcba1692");
       pdu.setJustificationfields(justificationfields);
       Sensor sensor = new Sensor();
       sensor.setId(509);
       sensor.setType(PowerIQService.HumiditySensor);
       String source = "l9i8728d55368540fcba1692";
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(sensor.getId()+WormholeConstant.SEPARATOR+source,
+      TestCase.assertEquals(sensor.getId()+FlowgateConstant.SEPARATOR+source,
             pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
    }
    
@@ -416,7 +416,7 @@ public class SyncSensorMetaDataJobTest {
    public void testAggregatorSensorIdAndSourceForPdu2() {
       Asset pdu = createAsset1();
       HashMap<String, String> justificationfields = new HashMap<String,String>();
-      String filed = "509"+WormholeConstant.SEPARATOR+"l9i8728d55368540fcba1692,606"+WormholeConstant.SEPARATOR+"l9i8728d55368540fcba1692";
+      String filed = "509"+FlowgateConstant.SEPARATOR+"l9i8728d55368540fcba1692,606"+FlowgateConstant.SEPARATOR+"l9i8728d55368540fcba1692";
       justificationfields.put(AssetSubCategory.Humidity.toString(), filed);
       pdu.setJustificationfields(justificationfields);
       Sensor sensor = new Sensor();
@@ -424,7 +424,7 @@ public class SyncSensorMetaDataJobTest {
       sensor.setType(PowerIQService.HumiditySensor);
       String source = "l9i8728d55368540fcba1692";
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(filed+WormholeConstant.SPILIT_FLAG+sensor.getId()+WormholeConstant.SEPARATOR+source,
+      TestCase.assertEquals(filed+FlowgateConstant.SPILIT_FLAG+sensor.getId()+FlowgateConstant.SEPARATOR+source,
             pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
    }
    
@@ -439,7 +439,7 @@ public class SyncSensorMetaDataJobTest {
       sensor.setType(PowerIQService.HumiditySensor);
       String source = "l9i8728d55368540fcba1692";
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(sensor.getId()+WormholeConstant.SEPARATOR+source,
+      TestCase.assertEquals(sensor.getId()+FlowgateConstant.SEPARATOR+source,
             pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
    }
    

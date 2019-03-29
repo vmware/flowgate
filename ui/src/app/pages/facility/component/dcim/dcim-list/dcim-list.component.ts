@@ -96,7 +96,7 @@ export class DcimListComponent implements OnInit {
         "detail":""
       };
     }
-    this.service.updateStatus(updateDcim).subscribe(
+    this.service.updateFacility(updateDcim).subscribe(
       (data)=>{
         if(data.status == 200){
           this.updateStatusAlertType = "alert-success";

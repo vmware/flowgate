@@ -34,7 +34,7 @@ import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.NetworkMapping;
 import com.vmware.flowgate.common.PduMapping;
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
@@ -190,15 +190,15 @@ public class LabsdbService implements AsyncService{
             Set<String> pduDevices = new HashSet<String>();
             Set<String> networkDevices = new HashSet<String>();
             if(justficationfields != null) {
-               pduPortString = justficationfields.get(WormholeConstant.PDU_PORT_FOR_SERVER);
-               networkPortString = justficationfields.get(WormholeConstant.NETWORK_PORT_FOR_SERVER);
+               pduPortString = justficationfields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
+               networkPortString = justficationfields.get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
             }
             if(pduPortString != null) {
-               String pdus[] = pduPortString.split(WormholeConstant.SPILIT_FLAG);
+               String pdus[] = pduPortString.split(FlowgateConstant.SPILIT_FLAG);
                Collections.addAll(pduDevices, pdus);
             }
             if(networkPortString != null) {
-               String networks[] = networkPortString.split(WormholeConstant.SPILIT_FLAG);
+               String networks[] = networkPortString.split(FlowgateConstant.SPILIT_FLAG);
                Collections.addAll(networkDevices, networks);
             }
             //Use the device name to find it, and if it exists, record it's number and port information.
@@ -225,12 +225,12 @@ public class LabsdbService implements AsyncService{
                }
             }
             if(!pduDevices.isEmpty()) {
-               pduPortString = String.join(WormholeConstant.SPILIT_FLAG, pduDevices);
-               justficationfields.put(WormholeConstant.PDU_PORT_FOR_SERVER,pduPortString);
+               pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduDevices);
+               justficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER,pduPortString);
             }
             if(!networkDevices.isEmpty()) {
-               networkPortString = String.join(WormholeConstant.SPILIT_FLAG, networkDevices);
-               justficationfields.put(WormholeConstant.NETWORK_PORT_FOR_SERVER,networkPortString);
+               networkPortString = String.join(FlowgateConstant.SPILIT_FLAG, networkDevices);
+               justficationfields.put(FlowgateConstant.NETWORK_PORT_FOR_SERVER,networkPortString);
             }
             asset.setJustificationfields(justficationfields);
          }catch (SAXException | IOException e) {

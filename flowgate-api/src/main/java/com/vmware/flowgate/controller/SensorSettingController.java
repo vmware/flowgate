@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.SensorSetting;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.SensorSettingRepository;
@@ -66,9 +66,9 @@ public class SensorSettingController {
       if(pageNumber < 1) {
          pageNumber = 1;
       }else if(pageSize == 0) {
-         pageSize = WormholeConstant.defaultPageSize;
-      }else if(pageSize > WormholeConstant.maxPageSize) {
-         pageSize = WormholeConstant.maxPageSize;
+         pageSize = FlowgateConstant.defaultPageSize;
+      }else if(pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
       }
       try{
          PageRequest pageRequest = new PageRequest(pageNumber-1,pageSize);

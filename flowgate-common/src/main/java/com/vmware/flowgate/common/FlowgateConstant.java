@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.common;
 
-public class WormholeConstant {
+public class FlowgateConstant {
 
    public static int maxPageSize = 100;
    
@@ -29,4 +29,8 @@ public class WormholeConstant {
    public static String PDU_PORT_FOR_SERVER = "DEVICE_PORT_FOR_SERVER";
    
    public static String NETWORK_PORT_FOR_SERVER = "NETWORK_PORT_FOR_SERVER";
+   
+   public static int MAXNUMBEROFRETRIES = 3;
+   
+   public static int DEFAULTNUMBEROFRETRIES = 0;
 }

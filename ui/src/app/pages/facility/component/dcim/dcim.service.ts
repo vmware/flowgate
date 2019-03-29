@@ -21,21 +21,12 @@ export class DcimService {
     //this.headers.append("Authorization",'Bearer ' + auth.getToken());
     //this.options = new RequestOptions({ headers: this.headers });
    }
-  AddDcimConfig(type,name,description,userName,password,serverURL,verifyCert,advanceSettings){
+  AddDcimConfig(dcim:FacilityModule){
  
     let header = new Headers({ 'Content-Type': 'application/json' });
     header.append("Authorization",'Bearer ' + this.auth.getToken());
     this.options = new RequestOptions({ headers: header });
-    let body = JSON.stringify({
-      type:type,
-      name:name,
-      description:description,
-      userName:userName,
-      password:password,
-      serverURL:serverURL,
-      verifyCert:verifyCert,
-      advanceSetting:JSON.parse(advanceSettings)
-    });
+    let body = JSON.stringify(dcim);
     return this.http.post(""+this.API_URL+"/v1/facilitysoftware", body,this.options).map((res)=>res)
     }
 
@@ -75,7 +66,7 @@ export class DcimService {
       return this.http.put(""+this.API_URL+"/v1/facilitysoftware", body,this.options).map((res)=>res)
     }
 
-    updateStatus(dcim:FacilityModule){
+    updateFacility(dcim:FacilityModule){
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());
       this.options = new RequestOptions({ headers: header });

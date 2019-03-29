@@ -249,7 +249,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </div>
         <div class="modal-footer">
             
-            <button type="button" class="btn btn-primary" (click)="No()">Yes</button>
+            <button type="button" class="btn btn-primary" (click)="closeOperationTips()">Close</button>
         </div>
 </clr-modal>
 <clr-modal [(clrModalOpen)]="ignoreCertificatesModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
@@ -258,8 +258,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <p>{{tip}}</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-outline" (click)="No()">No</button> 
-            <button type="button" class="btn btn-primary" (click)="Yes()">Yes</button>
+            <button type="button" class="btn btn-outline" (click)="closeVerifyCertModal()">No</button> 
+            <button type="button" class="btn btn-primary" (click)="confirmNoVerifyCertModal()">Yes</button>
         </div>
 </clr-modal>
 <div *ngIf="loading" >

@@ -13,7 +13,7 @@ import java.util.Map;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.vmware.flowgate.common.WormholeConstant;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.WormholeUser;
 
 public class InitializeConfigureData {
@@ -59,7 +59,7 @@ public class InitializeConfigureData {
       if(!isInitialized) {
          InitializeConfigureData.roleNameAndPrivilegeMap = roleNameAndPrivilegeMap;
          InitializeConfigureData.privilegeResourceMap = privilegeResourceMap;
-         serviceKey = System.getenv(WormholeConstant.serviceKey);
+         serviceKey = System.getenv(FlowgateConstant.serviceKey);
          privilegeNames = Collections.unmodifiableList(privileges);
          isInitialized = true;
       }
