@@ -57,6 +57,7 @@ public class WormholeAPIClient extends RestClientBase {
    private static final String RealTimeDatasURL = "/v1/assets/sensordata/batchoperation";
    private static final String GetFacilitySoftwareById = "/v1/facilitysoftware/%s";
    private static final String UpdateFacilitySoftwareStatus = "/v1/facilitysoftware";
+   private static final String UpdateSDDCSoftwareStatus = "/v1/sddc";
 
    private static final String GetHostNameByIP = "/v1/assets/mapping/hostnameip/ip/%s";
    private static final String HostNameIPMapping = "/v1/assets/mapping/hostnameip";
@@ -273,6 +274,13 @@ public class WormholeAPIClient extends RestClientBase {
       HttpEntity<Object> postEntity =
             new HttpEntity<Object>(config, RestTemplateBuilder.getDefaultHeader());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + UpdateFacilitySoftwareStatus, HttpMethod.PUT,
+            postEntity, Void.class);
+   }
+   
+   public ResponseEntity<Void> updateSDDC(SDDCSoftwareConfig config) {
+      HttpEntity<Object> postEntity =
+            new HttpEntity<Object>(config, RestTemplateBuilder.getDefaultHeader());
+      return this.restTemplate.exchange(getAPIServiceEndpoint() + UpdateSDDCSoftwareStatus, HttpMethod.PUT,
             postEntity, Void.class);
    }
 
