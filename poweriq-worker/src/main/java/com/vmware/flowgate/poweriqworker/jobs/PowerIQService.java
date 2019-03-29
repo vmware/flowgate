@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.poweriqworker.client.PowerIQAPIClient;
 import com.vmware.flowgate.poweriqworker.config.ServiceKeyConfig;
@@ -97,8 +95,6 @@ public class PowerIQService implements AsyncService {
    public static final String Vibration = "Vibration";
    private static final String Pdu_ID = "Pdu_ID";
    private static final String Sensor_ID = "Sensor_ID";
-   private static final String ConnectException = "ConnectException";
-   private static final String HttpClientErrorException = "HttpClientErrorException";
    private static Map<String, AssetSubCategory> subCategoryMap =
          new HashMap<String, AssetSubCategory>();
    public static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
@@ -236,6 +232,7 @@ public class PowerIQService implements AsyncService {
               integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
            }
            updateIntegrationStatus(powerIQ);
+           return;
         }
       }catch(HttpClientErrorException e) {
          logger.error("Failed to query data from PowerIQ", e);
