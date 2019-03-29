@@ -1,0 +1,25 @@
+[ req ]
+default_bits = 2048
+default_keyfile = flowgate.pem
+default_md = sha256
+prompt = no
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+x509_extensions = v3_req
+
+[ req_distinguished_name ]
+countryName = US
+stateOrProvinceName = CA 
+localityName = Palo Alto
+organizationName = VMware
+organizationalUnitName = Flowgate
+commonName = flowgate
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+subjectKeyIdentifier  = hash
+subjectAltName = @alt_names
+keyUsage  = digitalSignature, keyAgreement, keyCertSign, keyEncipherment
+
+[ alt_names ]
+IP.1 = ipaddressoftheserver

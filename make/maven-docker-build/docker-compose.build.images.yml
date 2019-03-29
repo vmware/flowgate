@@ -1,0 +1,66 @@
+version: '2'
+services:
+
+  mongodb:
+    build:
+      context: $PWD/mongodb
+      dockerfile: $PWD/mongodb/Dockerfile
+    image: flowgate/mongodb:FLOWGATE_VERSION
+    
+  redis:
+    build:
+      context: $PWD/redis
+      dockerfile: $PWD/redis/Dockerfile
+    image: flowgate/redis:FLOWGATE_VERSION
+      
+  flowgate-api:
+    build: 
+      context: $PWD/flowgate-api
+      dockerfile: $PWD/flowgate-api/Dockerfile
+    image: flowgate/api:FLOWGATE_VERSION
+      
+  management:
+    build:
+      context: $PWD/management
+      dockerfile: $PWD/management/Dockerfile
+    image: flowgate/management:FLOWGATE_VERSION
+
+  aggregator:
+    build:
+      context: $PWD/aggregator
+      dockerfile: $PWD/aggregator/Dockerfile
+    image: flowgate/aggregator:FLOWGATE_VERSION
+
+  infoblox-worker:
+    build:
+      context: $PWD/infoblox-worker
+      dockerfile: $PWD/infoblox-worker/Dockerfile
+    image: flowgate/infoblox-worker:FLOWGATE_VERSION
+
+  nlyte-worker:
+    build:
+      context: $PWD/nlyte-worker
+      dockerfile: $PWD/nlyte-worker/Dockerfile
+    image: flowgate/nlyte-worker:FLOWGATE_VERSION
+
+  poweriq-worker:
+    build:
+      context: $PWD/poweriq-worker
+      dockerfile: $PWD/poweriq-worker/Dockerfile
+    image: flowgate/poweriq-worker:FLOWGATE_VERSION
+
+  vc-worker:
+    build:
+      context: $PWD/vc-worker
+      dockerfile: $PWD/vc-worker/Dockerfile
+    image: flowgate/vc-worker:FLOWGATE_VERSION
+
+  vro-worker:
+    build:
+      context: $PWD/vro-worker
+      dockerfile: $PWD/vro-worker/Dockerfile
+    image: flowgate/vro-worker:FLOWGATE_VERSION
+
+networks:
+  db-network:
+  services-network:

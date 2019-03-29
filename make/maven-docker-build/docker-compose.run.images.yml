@@ -1,0 +1,191 @@
+version: '2'
+services:
+
+  mongodb:
+    image: flowgate/mongodb:FLOWGATE_VERSION
+    container_name: flowgate-mongo-container
+    expose:
+      - 27017
+    networks:
+      - db-network
+    volumes:
+      - /opt/vmware/flowgate/data/mongodb/data/db:/data/db
+      - /opt/vmware/flowgate/data/mongodb/data/configdb:/data/configdb
+      - /opt/vmware/flowgate/log/mongodb:/var/log/mongodb
+      - /opt/vmware/flowgate/conf/mongodb/mongod.conf:/etc/mongod.conf
+      - /opt/vmware/flowgate/conf/mongodb/initdb.js:/docker-entrypoint-initdb.d/initdb.js
+    env_file: /opt/vmware/flowgate/conf/mongodb/mongod.env
+    environment:
+      - MONGO_INITDB_DATABASE=flowgate
+
+  redis:
+    image: flowgate/redis:FLOWGATE_VERSION
+    container_name: flowgate-redis-container
+    expose:
+      - 6379
+    networks:
+      - services-network
+    volumes:
+      - /opt/vmware/flowgate/data/redis:/var/lib/redis
+      - /opt/vmware/flowgate/log/redis:/var/log/redis
+      - /opt/vmware/flowgate/conf/redis/redis.conf:/etc/redis.conf
+      
+  flowgate-api:
+    image: flowgate/api:FLOWGATE_VERSION
+    volumes:
+      - /opt/vmware/flowgate/log/flowgate-api:/log
+      - /opt/vmware/flowgate/conf/flowgate-api:/conf
+    container_name: flowgate-api-container
+    networks:
+      - db-network
+      - services-network
+    depends_on:
+      - mongodb
+      - redis
+    links:
+      - mongodb:mongodb
+      - redis:redis
+    expose:
+      - 49610
+    environment:
+      FLOWGATESERVICEKEY: serviceKey
+
+      
+  management:
+    image: flowgate/management:FLOWGATE_VERSION
+    volumes:
+      - /opt/vmware/flowgate/log/management:/log
+      - /opt/vmware/flowgate/conf/management:/conf
+    container_name: flowgate-management-container
+    ports:
+      - 443:49611
+    expose:
+      - 443
+      - 80
+    networks:
+      - services-network
+      - db-network
+    links:
+      - mongodb:mongodb
+      - redis:redis
+      - flowgate-api:flowgate-api
+    environment:
+      FLOWGATESERVICEKEY: serviceKey
+
+  aggregator:
+    image: flowgate/aggregator:FLOWGATE_VERSION
+    volumes:
+      - /opt/vmware/flowgate/log/aggregator:/log
+      - /opt/vmware/flowgate/conf/aggregator:/conf
+    container_name: flowgate-aggregator-container
+    networks:
+      - services-network
+    depends_on:
+      - mongodb
+      - redis
+      - flowgate-api
+      - management
+    links:
+      - redis:redis
+      - flowgate-api:flowgate-api
+    environment:
+      FLOWGATESERVICEKEY: serviceKey
+
+  infoblox-worker:
+    image: flowgate/infoblox-worker:FLOWGATE_VERSION
+    volumes:
+      - /opt/vmware/flowgate/log/infoblox-worker:/log
+      - /opt/vmware/flowgate/conf/infoblox-worker:/conf
+    container_name: flowgate-infoblox-worker-container
+    networks:
+      - services-network
+    depends_on:
+      - mongodb
+      - redis
+      - flowgate-api
+      - aggregator
+    links:
+      - redis:redis
+      - flowgate-api:flowgate-api
+    environment:
+      FLOWGATESERVICEKEY: serviceKey
+
+  nlyte-worker:
+    image: flowgate/nlyte-worker:FLOWGATE_VERSION
+    volumes:
+      - /opt/vmware/flowgate/log/nlyte-worker:/log
+      - /opt/vmware/flowgate/conf/nlyte-worker:/conf
+    container_name: flowgate-nlyte-worker-container
+    networks:
+      - services-network
+    depends_on:
+      - mongodb
+      - redis
+      - flowgate-api
+      - infoblox-worker
+    links:
+      - redis:redis
+      - flowgate-api:flowgate-api
+    environment:
+      FLOWGATESERVICEKEY: serviceKey
+
+  poweriq-worker:
+    image: flowgate/poweriq-worker:FLOWGATE_VERSION
+    volumes:
+      - /opt/vmware/flowgate/log/poweriq-worker:/log
+      - /opt/vmware/flowgate/conf/poweriq-worker:/conf
+    container_name: flowgate-poweriq-worker-container
+    networks:
+      - services-network
+    depends_on:
+      - mongodb
+      - redis
+      - flowgate-api
+      - nlyte-worker
+    links:
+      - redis:redis
+      - flowgate-api:flowgate-api
+    environment:
+      FLOWGATESERVICEKEY: serviceKey
+
+  vc-worker:
+    image: flowgate/vc-worker:FLOWGATE_VERSION
+    volumes:
+      - /opt/vmware/flowgate/log/vc-worker:/log
+      - /opt/vmware/flowgate/conf/vc-worker:/conf
+    container_name: flowgate-vc-worker-container
+    networks:
+      - services-network
+    depends_on:
+      - mongodb
+      - redis
+      - flowgate-api
+      - poweriq-worker
+    links:
+      - redis:redis
+      - flowgate-api:flowgate-api
+    environment:
+      FLOWGATESERVICEKEY: serviceKey
+
+  vro-worker:
+    image: flowgate/vro-worker:FLOWGATE_VERSION
+    volumes:
+      - /opt/vmware/flowgate/log/vro-worker:/log
+      - /opt/vmware/flowgate/conf/vro-worker:/conf
+    container_name: flowgate-vro-worker-container
+    networks:
+      - services-network
+    depends_on:
+      - mongodb
+      - redis
+      - flowgate-api
+      - vc-worker
+    links:
+      - redis:redis
+      - flowgate-api:flowgate-api
+    environment:
+      FLOWGATESERVICEKEY: serviceKey
+
+networks:
+  db-network:
+  services-network:

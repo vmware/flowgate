@@ -1,0 +1,11 @@
+version: '2'
+services:
+  maven-build:
+    build: 
+      context: $PWD/maven-docker-build
+      dockerfile: $PWD/maven-docker-build/Dockerfile
+    image: maven-build:FLOWGATE_VERSION
+    volumes:
+      - $PWD/../../:/flowgate-build
+      - $PWD/build-log:/log
+    container_name: maven-build-container
