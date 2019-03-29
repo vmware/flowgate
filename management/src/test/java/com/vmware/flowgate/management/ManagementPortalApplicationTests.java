@@ -2,7 +2,7 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-package com.vmware.wormhole.management;
+package com.vmware.flowgate.management;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
