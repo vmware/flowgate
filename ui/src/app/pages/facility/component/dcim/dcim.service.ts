@@ -48,24 +48,6 @@ export class DcimService {
         .map((res)=>res)
     }
 
-    updateDcimConfig(id,type,name,description,userName,password,serverURL,verifyCert,advanceSettings){
-      let header = new Headers({ 'Content-Type': 'application/json' });
-      header.append("Authorization",'Bearer ' + this.auth.getToken());
-      this.options = new RequestOptions({ headers: header });
-      let body = JSON.stringify({
-        id:id,
-        type:type,
-        name:name,
-        description:description,
-        userName:userName,
-        password:password,
-        serverURL:serverURL,
-        verifyCert:verifyCert,
-        advanceSetting:JSON.parse(advanceSettings)
-      }); 
-      return this.http.put(""+this.API_URL+"/v1/facilitysoftware", body,this.options).map((res)=>res)
-    }
-
     updateFacility(dcim:FacilityModule){
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());
