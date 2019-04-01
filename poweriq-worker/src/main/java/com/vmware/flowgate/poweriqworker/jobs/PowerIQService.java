@@ -657,6 +657,7 @@ public class PowerIQService implements AsyncService {
                integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
             }
             updateIntegrationStatus(powerIQ);
+            return;
          }
        }
       Map<String, Pdu> pdusMap  = getPdusMapWithNameKey(pdus);//Map<pduName.lowcase,pdu>
