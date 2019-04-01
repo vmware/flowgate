@@ -5,6 +5,7 @@
 package com.vmware.flowgate.vcworker.scheduler.job;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-
-import com.ctc.wstx.util.StringUtil;
+import org.springframework.web.client.ResourceAccessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.cis.tagging.CategoryModel;
 import com.vmware.cis.tagging.CategoryModel.Cardinality;
@@ -40,6 +39,7 @@ import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
@@ -159,9 +159,15 @@ public class VCDataService implements AsyncService {
          }
       }
    }
+   
+   public void updateIntegrationStatus(SDDCSoftwareConfig config) {
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      restClient.updateSDDC(config);
+   }
 
    private void syncCustomAttributes(SDDCSoftwareConfig vc) {
       // TODO need to allow only update 1 vcenter instead of all the vcenter.
+      IntegrationStatus integrationStatus = vc.getIntegrationStatus();
       try (VsphereClient vsphereClient =
             VsphereClient.connect(String.format(VCConstants.SDKURL, vc.getServerURL()),
                   vc.getUserName(), vc.getPassword(), !vc.isVerifyCert());) {
@@ -172,9 +178,32 @@ public class VCDataService implements AsyncService {
          vsphereClient.createCustomAttribute(VCConstants.ASSET_PDUs, VCConstants.HOSTSYSTEM);
          // Add host switch information;
          vsphereClient.createCustomAttribute(VCConstants.ASSET_SWITCHs, VCConstants.HOSTSYSTEM);
-      } catch (Exception e) {
-         logger.error("Failed to sync the host metadata to VC ", e);
-      }
+      } catch(ResourceAccessException e1) {
+         logger.error("Failed to sync the host metadata to VC ", e1);
+         if(e1.getCause().getCause() instanceof ConnectException) {
+            int timesOftry = integrationStatus.getRetryCounter();
+            timesOftry++;
+            if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
+               integrationStatus.setRetryCounter(timesOftry);
+            }else {
+               integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+               integrationStatus.setDetail(e1.getMessage());
+               integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+            }
+            updateIntegrationStatus(vc);
+            return;
+         }
+       }catch(HttpClientErrorException e) {
+          logger.error("Failed to sync the host metadata to VC ", e);
+          integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+          integrationStatus.setDetail(e.getMessage());
+          integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+          updateIntegrationStatus(vc);
+          return;
+       }catch(Exception e) {
+          logger.error("Failed to sync the host metadata to VC ", e);
+          return;
+       }
       try (HostTagClient client = new HostTagClient(vc.getServerURL(), vc.getUserName(),
             vc.getPassword(), !vc.isVerifyCert());) {
          client.initConnection();
