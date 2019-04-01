@@ -33,7 +33,7 @@ import com.vmware.flowgate.repository.SystemSummaryRepositoryEnhancement;
 public class SystemSummaryRepositoryImpl implements SystemSummaryRepositoryEnhancement {
 
    /* (non-Javadoc)
-    * @see com.vmware.wormhole.repository.SystemSummaryRepositoryEnhancement#getSystemSummaryData()
+    * @see com.vmware.flowgate.repository.SystemSummaryRepositoryEnhancement#getSystemSummaryData()
     */
    @Autowired
    MongoTemplate mongoTemplate;
@@ -41,10 +41,10 @@ public class SystemSummaryRepositoryImpl implements SystemSummaryRepositoryEnhan
    @Override
    public SystemSummary getSystemSummaryData() {
       SystemSummary data = new SystemSummary();
-      data.setAssetsNum(getAggregationDataNumber("_class", "com.vmware.wormhole.common.model.Asset",
+      data.setAssetsNum(getAggregationDataNumber("_class", "com.vmware.flowgate.common.model.Asset",
             "_class", "asset"));
       data.setFacilitySystemNum(getAggregationDataNumber("_class",
-            "com.vmware.wormhole.common.model.FacilitySoftwareConfig", "_class",
+            "com.vmware.flowgate.common.model.FacilitySoftwareConfig", "_class",
             "facilitySoftwareConfig"));
       data.setServerNum(getAggregationDataNumber("category", AssetCategory.Server.toString(),
             "category", "asset"));
@@ -57,11 +57,11 @@ public class SystemSummaryRepositoryImpl implements SystemSummaryRepositoryEnhan
       data.setSwitchNum(getAggregationDataNumber("category", AssetCategory.Networks.toString(),
             "category", "asset"));
       data.setUserNum(getAggregationDataNumber("_class",
-            "com.vmware.wormhole.common.model.WormholeUser", "_class", "wormholeUser"));
+            "com.vmware.flowgate.common.model.WormholeUser", "_class", "wormholeUser"));
       data.setSddcServerNum(getAggregationDataNumber("_class",
-            "com.vmware.wormhole.common.model.ServerMapping", "_class", "serverMapping"));
+            "com.vmware.flowgate.common.model.ServerMapping", "_class", "serverMapping"));
       data.setSddcIntegrationNum(getAggregationDataNumber("_class",
-            "com.vmware.wormhole.common.model.SDDCSoftwareConfig", "_class", "sDDCSoftwareConfig"));
+            "com.vmware.flowgate.common.model.SDDCSoftwareConfig", "_class", "sDDCSoftwareConfig"));
       data.setVcNum(getAggregationDataNumber("type", "VCENTER", "type", "sDDCSoftwareConfig"));
       data.setVroNum(getAggregationDataNumber("type", "VRO", "type", "sDDCSoftwareConfig"));
       data.setAirFlowSensorNum(getAggregationDataNumber("subCategory",
