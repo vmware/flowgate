@@ -5,6 +5,7 @@
 package com.vmware.flowgate.nlyteworker.scheduler.job;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,7 +22,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-
+import org.springframework.web.client.ResourceAccessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.nlyteworker.config.ServiceKeyConfig;
 import com.vmware.flowgate.nlyteworker.model.JsonResultForPDURealtimeValue;
@@ -34,6 +35,7 @@ import com.vmware.flowgate.nlyteworker.restclient.NlyteAPIClient;
 import com.vmware.flowgate.nlyteworker.scheduler.job.common.HandleAssetUtil;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
@@ -173,11 +175,7 @@ public class NlyteDataService implements AsyncService {
       }
    }
    
-   private void updateIntegrationStatus(FacilitySoftwareConfig nlyte,String message) {
-      IntegrationStatus integrationStatus = nlyte.getIntegrationStatus();
-      integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-      integrationStatus.setDetail(message);
-      nlyte.setIntegrationStatus(integrationStatus);
+   private void updateIntegrationStatus(FacilitySoftwareConfig nlyte) {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       restClient.updateFacility(nlyte);
    }
@@ -191,9 +189,21 @@ public class NlyteDataService implements AsyncService {
          nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Server);
       }catch(HttpClientErrorException e) {
          logger.error("Failed to query data from Nlyte", e);
-         updateIntegrationStatus(nlyte,e.getMessage());
+         IntegrationStatus integrationStatus = nlyte.getIntegrationStatus();
+         if(integrationStatus == null) {
+            integrationStatus = new IntegrationStatus();
+         }
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(e.getMessage());
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         updateIntegrationStatus(nlyte);
          return;
-      }
+      }catch(ResourceAccessException e1) {
+         if(e1.getCause().getCause() instanceof ConnectException) {
+            checkAndUpdateIntegrationStatus(nlyte, e1.getMessage());
+            return;
+         }
+       }
       HashMap<Integer, LocationGroup> locationMap = assetUtil.initLocationGroupMap(nlyteAPIclient);
       HashMap<Integer, Manufacturer> manufacturerMap =
             assetUtil.initManufacturersMap(nlyteAPIclient);
@@ -357,9 +367,21 @@ public class NlyteDataService implements AsyncService {
             realTimeData = generateRealTimeData(asset, nlyteAPIclient,getAdvanceSetting(facilitySoftwareConfig));
          }catch(HttpClientErrorException e) {
             logger.error("Failed to query data from Nlyte", e);
-            updateIntegrationStatus(facilitySoftwareConfig,e.getMessage());
-            return null;
-         }
+            IntegrationStatus integrationStatus = facilitySoftwareConfig.getIntegrationStatus();
+            if(integrationStatus == null) {
+               integrationStatus = new IntegrationStatus();
+            }
+            integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+            integrationStatus.setDetail(e.getMessage());
+            integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+            updateIntegrationStatus(facilitySoftwareConfig);
+            break;
+         }catch(ResourceAccessException e1) {
+            if(e1.getCause().getCause() instanceof ConnectException) {
+               checkAndUpdateIntegrationStatus(facilitySoftwareConfig, e1.getMessage());
+               break;
+            }
+          }
          if(realTimeData == null) {
             continue;
          }
@@ -482,7 +504,26 @@ public class NlyteDataService implements AsyncService {
       }
       return valueunits;
    }
-
+   
+   public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig nlyte,String message) {
+      IntegrationStatus integrationStatus = nlyte.getIntegrationStatus();
+      if(integrationStatus == null) {
+         integrationStatus = new IntegrationStatus();
+      }
+      int timesOftry = integrationStatus.getRetryCounter();
+      timesOftry++;
+      if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
+         integrationStatus.setRetryCounter(timesOftry);
+      }else {
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(message);
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         logger.error("Failed to query data from Nlyte,error message is "+message);
+      }
+      nlyte.setIntegrationStatus(integrationStatus);
+      updateIntegrationStatus(nlyte);
+   }
+   
    private void syncMappedData(FacilitySoftwareConfig nlyte) {
       NlyteAPIClient nlyteAPIclient = new NlyteAPIClient(nlyte);
       HandleAssetUtil assetUtil = new HandleAssetUtil();
@@ -491,9 +532,21 @@ public class NlyteDataService implements AsyncService {
          nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Server);
       }catch(HttpClientErrorException e) {
          logger.error("Failed to query data from Nlyte", e);
-         updateIntegrationStatus(nlyte,e.getMessage());
+         IntegrationStatus integrationStatus = nlyte.getIntegrationStatus();
+         if(integrationStatus == null) {
+            integrationStatus = new IntegrationStatus();
+         }
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(e.getMessage());
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         updateIntegrationStatus(nlyte);
          return;
-      }
+      }catch(ResourceAccessException e1) {
+         if(e1.getCause().getCause() instanceof ConnectException) {
+            checkAndUpdateIntegrationStatus(nlyte,e1.getMessage());
+            return;
+         }
+       }
       HashMap<Integer, LocationGroup> locationMap = assetUtil.initLocationGroupMap(nlyteAPIclient);
       HashMap<Integer, Material> materialMap = assetUtil.initMaterialsMap(nlyteAPIclient);
       HashMap<Integer, Manufacturer> manufacturerMap =
