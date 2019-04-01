@@ -217,25 +217,20 @@ public class PowerIQService implements AsyncService {
       PowerIQAPIClient client = createClient(powerIQ);
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       List<Asset> sensorsFromPower = null;
-      IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
+     
       try {
          sensorsFromPower = getSensorMetaData(client, powerIQ.getId());
       }catch(ResourceAccessException e1) {
         if(e1.getCause().getCause() instanceof ConnectException) {
-           int timesOftry = integrationStatus.getRetryCounter();
-           timesOftry++;
-           if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
-              integrationStatus.setRetryCounter(timesOftry);
-           }else {
-              integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-              integrationStatus.setDetail(e1.getMessage());
-              integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-           }
-           updateIntegrationStatus(powerIQ);
+           checkAndUpdateIntegrationStatus(powerIQ,e1.getMessage());
            return;
         }
       }catch(HttpClientErrorException e) {
          logger.error("Failed to query data from PowerIQ", e);
+         IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
+         if(integrationStatus == null) {
+            integrationStatus = new IntegrationStatus();
+         }
          integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
          integrationStatus.setDetail(e.getMessage());
          integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
@@ -253,6 +248,25 @@ public class PowerIQService implements AsyncService {
          return;
       }
       restClient.saveAssets(assetsToSave);
+   }
+   
+   public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig powerIQ,String message) {
+      IntegrationStatus integrationStatus =  powerIQ.getIntegrationStatus();
+      if(integrationStatus == null) {
+         integrationStatus = new IntegrationStatus();
+      }
+      int timesOftry = integrationStatus.getRetryCounter();
+      timesOftry++;
+      if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
+         integrationStatus.setRetryCounter(timesOftry);
+      }else {
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(message);
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         logger.error("Failed to query data from PowerIQ,error message is "+message);
+      }
+      powerIQ.setIntegrationStatus(integrationStatus);
+      updateIntegrationStatus(powerIQ);
    }
 
    public Map<Integer, Rack> getRacksMap(PowerIQAPIClient client) {
@@ -630,7 +644,6 @@ public class PowerIQService implements AsyncService {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       List<Asset> allMappedPdus =
             Arrays.asList(restClient.getMappedAsset(AssetCategory.PDU).getBody());
-      IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
       if (allMappedPdus == null || allMappedPdus.isEmpty()) {
          return;
       }
@@ -640,6 +653,10 @@ public class PowerIQService implements AsyncService {
          pdus = client.getPdus();
       }catch(HttpClientErrorException e) {
          logger.error("Failed to query data from PowerIQ", e);
+         IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
+         if(integrationStatus == null) {
+            integrationStatus = new IntegrationStatus();
+         }
          integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
          integrationStatus.setDetail(e.getMessage());
          integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
@@ -647,16 +664,7 @@ public class PowerIQService implements AsyncService {
          return;
       }catch(ResourceAccessException e1) {
          if(e1.getCause().getCause() instanceof ConnectException) {
-            int timesOftry = integrationStatus.getRetryCounter();
-            timesOftry++;
-            if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
-               integrationStatus.setRetryCounter(timesOftry);
-            }else {
-               integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-               integrationStatus.setDetail(e1.getMessage());
-               integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-            }
-            updateIntegrationStatus(powerIQ);
+            checkAndUpdateIntegrationStatus(powerIQ,e1.getMessage());
             return;
          }
        }
@@ -904,7 +912,6 @@ public class PowerIQService implements AsyncService {
       String temperature = advanceSetting.get(AdvanceSettingType.TEMPERATURE_UNIT);
       String humidity = advanceSetting.get(AdvanceSettingType.HUMIDITY_UNIT);
       PowerIQAPIClient powerIQAPIClient = createClient(powerIQ);
-      IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
       for(String assetId:assetIds) {
          Asset asset = restClient.getAssetByID(assetId).getBody();
          if(asset == null) {
@@ -918,6 +925,10 @@ public class PowerIQService implements AsyncService {
          }
          catch(HttpClientErrorException e) {
             logger.error("Failed to query data from PowerIQ", e);
+            IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
+            if(integrationStatus == null) {
+               integrationStatus = new IntegrationStatus();
+            }
             integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
             integrationStatus.setDetail(e.getMessage());
             integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
@@ -925,16 +936,7 @@ public class PowerIQService implements AsyncService {
             break;
          }catch(ResourceAccessException e1) {
             if(e1.getCause().getCause() instanceof ConnectException) {
-               int timesOftry = integrationStatus.getRetryCounter();
-               timesOftry++;
-               if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
-                  integrationStatus.setRetryCounter(timesOftry);
-               }else {
-                  integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-                  integrationStatus.setDetail(e1.getMessage());
-                  integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-               }
-               updateIntegrationStatus(powerIQ);
+               checkAndUpdateIntegrationStatus(powerIQ,e1.getMessage());
                break;
             }
             break;
