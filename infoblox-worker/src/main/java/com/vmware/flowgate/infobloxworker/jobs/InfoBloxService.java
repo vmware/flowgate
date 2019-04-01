@@ -4,6 +4,7 @@
 */
 package com.vmware.flowgate.infobloxworker.jobs;
 
+import java.net.ConnectException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -14,14 +15,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-
+import org.springframework.web.client.ResourceAccessException;
 import com.vmware.flowgate.infobloxworker.config.ServiceKeyConfig;
 import com.vmware.flowgate.infobloxworker.service.InfobloxClient;
 import com.vmware.flowgate.client.WormholeAPIClient;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
@@ -57,7 +60,33 @@ public class InfoBloxService implements AsyncService {
       for (FacilitySoftwareConfig infoblox : infoBloxes) {
          InfobloxClient client = new InfobloxClient(infoblox);
          List<String> hostNames = null;
-         hostNames = client.queryHostNamesByIP(message);
+         IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
+         try {
+            hostNames = client.queryHostNamesByIP(message);
+         }catch(ResourceAccessException e) {
+            logger.error("Failed to query data from Infoblox", e);
+            if(e.getCause().getCause() instanceof ConnectException) {
+               int timesOftry = integrationStatus.getRetryCounter();
+               timesOftry++;
+               if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
+                  integrationStatus.setRetryCounter(timesOftry);
+               }else {
+                  integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+                  integrationStatus.setDetail(e.getMessage());
+                  integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+               }
+               updateIntegrationStatus(infoblox);
+               return;
+            }
+          }catch(HttpClientErrorException e1) {
+             logger.error("Failed to query data from Infoblox", e1);
+             integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+             integrationStatus.setDetail(e1.getMessage());
+             integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+             updateIntegrationStatus(infoblox);
+             return;
+          }
+         
          if (hostNames != null && !hostNames.isEmpty()) {
             for (String hostname : hostNames) {
                try {
@@ -95,5 +124,8 @@ public class InfoBloxService implements AsyncService {
       }
       logger.info(String.format("Cannot find the hostname for IP: %s", message));
    }
-
+   private void updateIntegrationStatus(FacilitySoftwareConfig infoblox) {
+      wormholeAPIClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      wormholeAPIClient.updateFacility(infoblox);
+   }
 }
