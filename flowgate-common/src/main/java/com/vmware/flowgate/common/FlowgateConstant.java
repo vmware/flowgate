@@ -10,7 +10,7 @@ public class FlowgateConstant {
    
    public static int defaultPageSize = 20;
    
-   public static String serviceKey = "WORMHOLESERVICEKEY";
+   public static String serviceKey = "FLOWGATESERVICEKEY";
    
    public static String systemUser = "systemUser";
    
