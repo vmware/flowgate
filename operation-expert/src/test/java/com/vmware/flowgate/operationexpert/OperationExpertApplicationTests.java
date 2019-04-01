@@ -1,4 +1,4 @@
-package com.vmware.wormhole.operationexpert;
+package com.vmware.flowgate.operationexpert;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

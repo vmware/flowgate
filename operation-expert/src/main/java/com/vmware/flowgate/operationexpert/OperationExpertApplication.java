@@ -1,4 +1,4 @@
-package com.vmware.wormhole.operationexpert;
+package com.vmware.flowgate.operationexpert;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
