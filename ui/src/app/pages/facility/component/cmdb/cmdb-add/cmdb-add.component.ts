@@ -9,6 +9,7 @@ import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { DcimService } from '../../dcim/dcim.service';
 import {FormGroup, FormControl, Validators} from "@angular/forms";
+import { FacilityModule } from '../../../facility.module';
 @Component({
   selector: 'app-cmdb-add',
   templateUrl: './cmdb-add.component.html',
@@ -33,15 +34,8 @@ export class CmdbAddComponent implements OnInit {
   verify:boolean = false;
   yes:boolean = false;
   no:boolean = true;
-  cmdbConfig={
-    type:"",
-    name:"",
-    description:"",
-    serverURL:"",
-    userName:"",
-    password:"",
-    verifyCert:"true"
-  }
+
+  cmdbConfig:FacilityModule = new FacilityModule();
   read = "";/** This property is to change the read-only attribute of the password input box*/
   advanceSetting:string = "";
   
@@ -56,14 +50,9 @@ export class CmdbAddComponent implements OnInit {
   }
 
   save(){
-    this.advanceSetting = JSON.stringify({
-      "DateFormat":"",
-      "TimeZone":""
-    });
       this.read = "readonly";
       this.loading = true;
-      this.service.AddDcimConfig(this.cmdbConfig.type,this.cmdbConfig.name,this.cmdbConfig.description,this.cmdbConfig.userName,
-        this.cmdbConfig.password,this.cmdbConfig.serverURL,this.cmdbConfig.verifyCert,this.advanceSetting).subscribe(
+      this.service.AddDcimConfig(this.cmdbConfig).subscribe(
         (data)=>{
           if(data.status == 201){
             this.loading = false;
@@ -113,7 +102,7 @@ export class CmdbAddComponent implements OnInit {
     this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
   }
   ngOnInit() {
-
+    this.cmdbConfig.verifyCert = "false";
   }
 
 }

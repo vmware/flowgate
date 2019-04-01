@@ -9,6 +9,7 @@ import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { DcimService } from '../../dcim/dcim.service';
 import {FormGroup, FormControl, Validators} from "@angular/forms";
+import { FacilityModule } from '../../../facility.module';
 @Component({
   selector: 'app-cmdb-edit',
   templateUrl: './cmdb-edit.component.html',
@@ -33,16 +34,8 @@ export class CmdbEditComponent implements OnInit {
   checked:boolean;
   yes:boolean = false;
   no:boolean = true;
-  cmdbConfig={
-    id:"",
-    type:"",
-    name:"",
-    description:"",
-    serverURL:"",
-    userName:"",
-    password:"",
-    verifyCert:"true"
-  }
+
+  cmdbConfig:FacilityModule = new FacilityModule();
   read = "";/** This property is to change the read-only attribute of the password input box*/
   
   checkIsLabsDB(){
@@ -57,8 +50,7 @@ export class CmdbEditComponent implements OnInit {
   save(){
       this.read = "readonly";
       this.loading = true;
-      this.service.updateDcimConfig(this.cmdbConfig.id,this.cmdbConfig.type,this.cmdbConfig.name,this.cmdbConfig.description,this.cmdbConfig.userName,
-        this.cmdbConfig.password,this.cmdbConfig.serverURL,this.cmdbConfig.verifyCert,null).subscribe(
+      this.service.updateFacility(this.cmdbConfig).subscribe(
         (data)=>{
           if(data.status == 200){
             this.loading = false;
