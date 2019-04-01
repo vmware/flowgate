@@ -7,7 +7,7 @@ package com.vmware.flowgate.nlyteworker;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages="com.vmware.wormhole")
+@SpringBootApplication(scanBasePackages="com.vmware.flowgate")
 public class NlyteWorkerApplication {
 
 	public static void main(String[] args) {
