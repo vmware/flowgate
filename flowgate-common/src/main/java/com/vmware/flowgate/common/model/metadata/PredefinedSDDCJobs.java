@@ -17,7 +17,7 @@ public class PredefinedSDDCJobs {
                "com.vmware.flowgate.aggregator.scheduler.job.AggregatorJobDispatcher",
                JobType.AGGREGATOR),
          new JobConfig("AGGREGATOR-PREDEFINED-SYNC-VC-DATA", "SyncVCData", "AggregateJobs",
-               "Hourly", "SyncVCAll", "", "0 0/30 * * * ?",
+               "Hourly", "SyncVCAll", "", "0 33 23 * * ?",
                "com.vmware.flowgate.aggregator.scheduler.job.VCenterJobDispatcher",
                JobType.AGGREGATOR),
          new JobConfig("AGGREGATOR-PREDEFINED-SYNC-VRO-DATA", "SyncVROData", "AggregateJobs",
