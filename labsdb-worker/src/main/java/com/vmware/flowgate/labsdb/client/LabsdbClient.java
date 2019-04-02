@@ -5,6 +5,7 @@
 package com.vmware.flowgate.labsdb.client;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -61,4 +62,10 @@ public class LabsdbClient {
             exchange(getServiceEndPoint()+String.format(GetwiremapURL, deviceName), 
                   HttpMethod.GET, RestTemplateBuilder.getDefaultEntity(), String.class);
    }
+   
+   public boolean checkConnection() {
+      ResponseEntity<String> result = this.restTemplate.getForEntity(getServiceEndPoint(), String.class);
+      return result.getStatusCodeValue() == HttpStatus.OK.value();
+   }
+   
 }
