@@ -5,6 +5,8 @@
 package com.vmware.flowgate.vroworker.scheduler.job;
 
 import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
@@ -22,6 +25,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.vroworker.config.ServiceKeyConfig;
@@ -29,6 +33,7 @@ import com.vmware.flowgate.vroworker.vro.AlertClient;
 import com.vmware.flowgate.vroworker.vro.MetricClient;
 import com.vmware.flowgate.vroworker.vro.VROConfig;
 import com.vmware.flowgate.vroworker.vro.VROConsts;
+import com.vmware.ops.api.client.exceptions.AuthException;
 import com.vmware.ops.api.model.property.PropertyContent;
 import com.vmware.ops.api.model.property.PropertyContents;
 import com.vmware.ops.api.model.resource.ResourceDto;
@@ -36,8 +41,10 @@ import com.vmware.ops.api.model.resource.ResourceIdentifier;
 import com.vmware.ops.api.model.stat.StatContent;
 import com.vmware.ops.api.model.stat.StatContents;
 import com.vmware.flowgate.client.WormholeAPIClient;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.ServerSensorData;
@@ -91,13 +98,14 @@ public class VROAsyncJob implements AsyncService {
       smMap.put(ServerSensorType.PDU_RealtimeLoad, VROConsts.ENVRIONMENT_PDU_AMPS_METRIC);
       smMap.put(ServerSensorType.PDU_RealtimeVoltage, VROConsts.ENVRIONMENT_PDU_VOLTS_METRIC);
       smMap.put(ServerSensorType.PDU_RealtimePower, VROConsts.ENVRIONMENT_PDU_POWER_METRIC);
-      smMap.put(ServerSensorType.PDU_RealtimeLoadPercent, VROConsts.ENVRIONMENT_PDU_AMPS_LOAD_METRIC);
+      smMap.put(ServerSensorType.PDU_RealtimeLoadPercent,
+            VROConsts.ENVRIONMENT_PDU_AMPS_LOAD_METRIC);
 
       sensorMetricMapping = Collections.unmodifiableMap(smMap);
    }
    private static int executionCount = 0;
-   private static HashMap<String,Long> latencyFactorMap = new HashMap<String,Long>();
-   private static HashMap<String,Long> lastUpdateTimeMap = new HashMap<String, Long>();
+   private static HashMap<String, Long> latencyFactorMap = new HashMap<String, Long>();
+   private static HashMap<String, Long> lastUpdateTimeMap = new HashMap<String, Long>();
 
    private static final String EntityName = "VMEntityName";
    private static final String VMEntityObjectID = "VMEntityObjectID";
@@ -148,7 +156,8 @@ public class VROAsyncJob implements AsyncService {
                      break;
                   case EventMessageUtil.VRO_SyncMetricPropertyAndAlert:
                      syncVROMetricPropertyAlertDefinition(vroInfo);
-                     logger.info("Finish Sync customer attributes and alerts for " + vroInfo.getName());
+                     logger.info(
+                           "Finish Sync customer attributes and alerts for " + vroInfo.getName());
                      break;
                   default:
                      break;
@@ -189,11 +198,39 @@ public class VROAsyncJob implements AsyncService {
       }
    }
 
+   public void updateIntegrationStatus(SDDCSoftwareConfig config) {
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      restClient.updateSDDC(config);
+   }
+
    private void syncVROMetricData(SDDCSoftwareConfig config) {
+      if (!config.checkIsActive()) {
+         return;
+      }
       VROConfig vro = new VROConfig(config);
       long currentTime = System.currentTimeMillis();
-      MetricClient metricClient = new MetricClient(vro, publisher);
-      List<ResourceDto> hosts = metricClient.getHostSystemsResources();
+      MetricClient metricClient = null;
+      List<ResourceDto> hosts = null;
+      try {
+         metricClient = new MetricClient(vro, publisher);
+         hosts = metricClient.getHostSystemsResources();
+      } catch (AuthException e) {
+         logger.error("Failed to connect to VROps manager ", e);
+         IntegrationStatus integrationStatus = config.getIntegrationStatus();
+         if (integrationStatus == null) {
+            integrationStatus = new IntegrationStatus();
+         }
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(e.getMessage());
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         updateIntegrationStatus(config);
+         return;
+      } catch (UndeclaredThrowableException e1) {
+         if (e1.getUndeclaredThrowable().getCause() instanceof ConnectException) {
+            checkAndUpdateIntegrationStatus(config,e1.getUndeclaredThrowable().getCause().getMessage());
+            return;
+         }
+      }
       //read all host/asset maaping from apiserver
       Map<String, Asset> assetDictionary = new HashMap<String, Asset>();
       try {
@@ -219,7 +256,6 @@ public class VROAsyncJob implements AsyncService {
       HashMap<String, ServerMapping> entityNameDictionary = new HashMap<String, ServerMapping>();
       HashMap<String, ServerMapping> objectIDDictionary = new HashMap<String, ServerMapping>();
       //HashMap<String, ServerMapping> vcIDDictionary = new HashMap<String, ServerMapping>();
-
 
       for (ServerMapping mapping : mappings) {
          entityNameDictionary.put(mapping.getVroVMEntityName(), mapping);
@@ -307,7 +343,7 @@ public class VROAsyncJob implements AsyncService {
                      restClient.saveServerMapping(refer);
                      validMapping.add(refer);
                   }
-               }else {
+               } else {
                   if (null != ipaddress) {
                      logger.info("Notify Infoblox to query the assetname");
                      publisher.publish(null, ipaddress);
@@ -328,17 +364,17 @@ public class VROAsyncJob implements AsyncService {
 
       //         Set<String> validAssetIDs =
       //               validMapping.stream().map(ServerMapping::getAssetID).collect(Collectors.toSet());
-      if(validMapping.isEmpty()) {
+      if (validMapping.isEmpty()) {
          logger.info("No Mapping find.Sync nothing for this execution.");
          return;
       }
       Long latencyFactor = latencyFactorMap.get(config.getServerURL());
-      if(latencyFactor == null) {
+      if (latencyFactor == null) {
          latencyFactor = 24L;
       }
       Long lastUpdateTimeStamp = lastUpdateTimeMap.get(config.getServerURL());
 
-      if(lastUpdateTimeStamp == null) {
+      if (lastUpdateTimeStamp == null) {
          lastUpdateTimeStamp = currentTime - FIVE_MINUTES * latencyFactor;
       }
       boolean hasNewData = false;
@@ -346,10 +382,9 @@ public class VROAsyncJob implements AsyncService {
             executionCount, lastUpdateTimeStamp, latencyFactor));
       for (ServerMapping mapping : validMapping) {
          if (mapping.getAsset() != null) {
-            ServerSensorData[] sensorDatas = restClient
-                  .getServerRelatedSensorDataByServerID(mapping.getAsset(), lastUpdateTimeStamp,
-                        FIVE_MINUTES * latencyFactor)
-                  .getBody();
+            ServerSensorData[] sensorDatas =
+                  restClient.getServerRelatedSensorDataByServerID(mapping.getAsset(),
+                        lastUpdateTimeStamp, FIVE_MINUTES * latencyFactor).getBody();
             StatContents contents = new StatContents();
             StatContent frontTemp = new StatContent();
             List<Double> frontValues = new ArrayList<Double>();
@@ -371,7 +406,7 @@ public class VROAsyncJob implements AsyncService {
             List<Long> humidityTimes = new ArrayList<Long>();
 
             for (ServerSensorData data : sensorDatas) {
-               if(data.getTimeStamp() > lastUpdateTimeStamp) {
+               if (data.getTimeStamp() > lastUpdateTimeStamp) {
                   lastUpdateTimeStamp = data.getTimeStamp();
                   hasNewData = true;
                }
@@ -448,41 +483,40 @@ public class VROAsyncJob implements AsyncService {
             }
 
             if (!contents.getStatContents().isEmpty()) {
-               logger.info("Push data to VRO: "+config.getServerURL());
+               logger.info("Push data to VRO: " + config.getServerURL());
                metricClient.addStats(null, UUID.fromString(mapping.getVroResourceID()), contents,
                      false);
             }
             //UPDATE THE PROPERTIES
             if (executionCount % 1000 == 0) {
                PropertyContents propertyContents = new PropertyContents();
-               packagingPropertyContent(assetDictionary.get(mapping.getAsset()),
-                     propertyContents);
+               packagingPropertyContent(assetDictionary.get(mapping.getAsset()), propertyContents);
                metricClient.addProperties(null, UUID.fromString(mapping.getVroResourceID()),
                      propertyContents);
             }
          }
       }
-      if(hasNewData) {
-         Long factor = (currentTime-lastUpdateTimeStamp)/FIVE_MINUTES+1;
-         if(factor > 24) {
+      if (hasNewData) {
+         Long factor = (currentTime - lastUpdateTimeStamp) / FIVE_MINUTES + 1;
+         if (factor > 24) {
             factor = 24L;
-         }else if(factor < 0) {
+         } else if (factor < 0) {
             factor = 1L;
          }
          latencyFactorMap.put(config.getServerURL(), factor);
-         if(lastUpdateTimeStamp > currentTime) {
+         if (lastUpdateTimeStamp > currentTime) {
             lastUpdateTimeStamp = currentTime;
          }
          lastUpdateTimeMap.put(config.getServerURL(), lastUpdateTimeStamp);
-      }else {
-         latencyFactor =latencyFactor+1;
-         if(latencyFactor > 24) {
-            latencyFactor =24L;
+      } else {
+         latencyFactor = latencyFactor + 1;
+         if (latencyFactor > 24) {
+            latencyFactor = 24L;
          }
          latencyFactorMap.put(config.getServerURL(), latencyFactor);
       }
       executionCount++;
-      logger.info("Finished Sync metric data for VRO: "+config.getServerURL());
+      logger.info("Finished Sync metric data for VRO: " + config.getServerURL());
    }
 
    private void packagingPropertyContent(Asset asset, PropertyContents contents) {
@@ -498,10 +532,51 @@ public class VROAsyncJob implements AsyncService {
 
    }
 
+   public void checkAndUpdateIntegrationStatus(SDDCSoftwareConfig vro, String message) {
+      IntegrationStatus integrationStatus = vro.getIntegrationStatus();
+      if (integrationStatus == null) {
+         integrationStatus = new IntegrationStatus();
+      }
+      int timesOftry = integrationStatus.getRetryCounter();
+      timesOftry++;
+      if (timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
+         integrationStatus.setRetryCounter(timesOftry);
+      } else {
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(message);
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         logger.error("Failed to sync data from VRO,error message is +" + message);
+      }
+      vro.setIntegrationStatus(integrationStatus);
+      updateIntegrationStatus(vro);
+   }
+
    private void syncVROMetricPropertyAlertDefinition(SDDCSoftwareConfig config) {
+      if (!config.checkIsActive()) {
+         return;
+      }
       VROConfig vroConf = new VROConfig(config);
-      MetricClient metricClient = new MetricClient(vroConf, publisher);
-      metricClient.checkPredefinedMetricsandProperties();
+      MetricClient metricClient = null;
+      try {
+         metricClient = new MetricClient(vroConf, publisher);
+         metricClient.checkPredefinedMetricsandProperties();
+      } catch (AuthException e) {
+         logger.error("Failed to sync the metric data from VRO ", e);
+         IntegrationStatus integrationStatus = config.getIntegrationStatus();
+         if (integrationStatus == null) {
+            integrationStatus = new IntegrationStatus();
+         }
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(e.getMessage());
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         updateIntegrationStatus(config);
+         return;
+      } catch (UndeclaredThrowableException e1) {
+         if (e1.getUndeclaredThrowable().getCause() instanceof ConnectException) {
+            checkAndUpdateIntegrationStatus(config,e1.getUndeclaredThrowable().getCause().getMessage());
+            return;
+         }
+      }
       AlertClient alertClient = new AlertClient(vroConf);
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       alertClient.setRestClient(restClient);
