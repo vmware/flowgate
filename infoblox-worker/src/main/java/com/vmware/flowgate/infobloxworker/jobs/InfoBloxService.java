@@ -58,28 +58,24 @@ public class InfoBloxService implements AsyncService {
       FacilitySoftwareConfig[] infoBloxes =
             wormholeAPIClient.getFacilitySoftwareByType(SoftwareType.InfoBlox).getBody();
       for (FacilitySoftwareConfig infoblox : infoBloxes) {
+         if(!infoblox.checkIsActive()) {
+            continue;
+         }
          InfobloxClient client = new InfobloxClient(infoblox);
          List<String> hostNames = null;
-         IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
          try {
             hostNames = client.queryHostNamesByIP(message);
          }catch(ResourceAccessException e) {
-            logger.error("Failed to query data from Infoblox", e);
             if(e.getCause().getCause() instanceof ConnectException) {
-               int timesOftry = integrationStatus.getRetryCounter();
-               timesOftry++;
-               if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
-                  integrationStatus.setRetryCounter(timesOftry);
-               }else {
-                  integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-                  integrationStatus.setDetail(e.getMessage());
-                  integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-               }
-               updateIntegrationStatus(infoblox);
+               checkAndUpdateIntegrationStatus(infoblox, e.getCause().getCause().getMessage());
                return;
             }
           }catch(HttpClientErrorException e1) {
              logger.error("Failed to query data from Infoblox", e1);
+             IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
+             if(integrationStatus == null) {
+                integrationStatus = new IntegrationStatus();
+             }
              integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
              integrationStatus.setDetail(e1.getMessage());
              integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
@@ -124,6 +120,25 @@ public class InfoBloxService implements AsyncService {
       }
       logger.info(String.format("Cannot find the hostname for IP: %s", message));
    }
+   
+   public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig infoblox,String message) {
+      IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
+      if(integrationStatus == null) {
+         integrationStatus = new IntegrationStatus();
+      }
+      int timesOftry = integrationStatus.getRetryCounter();
+      timesOftry++;
+      if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
+         integrationStatus.setRetryCounter(timesOftry);
+      }else {
+         logger.error("Failed to query data from Infoblox");
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(message);
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+      }
+      updateIntegrationStatus(infoblox);
+   }
+   
    private void updateIntegrationStatus(FacilitySoftwareConfig infoblox) {
       wormholeAPIClient.setServiceKey(serviceKeyConfig.getServiceKey());
       wormholeAPIClient.updateFacility(infoblox);
