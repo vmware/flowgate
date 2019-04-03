@@ -1,8 +1,8 @@
 import {ClaritySeedAppHome} from './app.po';
 
-fdescribe('wormhole app', function () {
+fdescribe('Flowgate app', function () {
 
-  let expectedMsg: string = 'Welcome to VMware Wormhole';
+  let expectedMsg: string = 'Welcome to VMware Flowgate';
 
   let page: ClaritySeedAppHome;
 
