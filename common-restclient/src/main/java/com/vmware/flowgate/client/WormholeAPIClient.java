@@ -272,14 +272,20 @@ public class WormholeAPIClient extends RestClientBase {
    
    public ResponseEntity<Void> updateFacility(FacilitySoftwareConfig config) {
       HttpEntity<Object> postEntity =
-            new HttpEntity<Object>(config, RestTemplateBuilder.getDefaultHeader());
+            new HttpEntity<Object>(config, buildHeaders());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + UpdateFacilitySoftwareStatus, HttpMethod.PUT,
             postEntity, Void.class);
    }
    
    public ResponseEntity<Void> updateSDDC(SDDCSoftwareConfig config) {
+      HttpHeaders headers = RestTemplateBuilder.getDefaultHeader();
+      headers.add("serviceKey", this.serviceKey);
+      initAuthenticationWebToken();
+      if(cookies != null) {
+         headers.put(HttpHeaders.COOKIE, cookies);
+      }
       HttpEntity<Object> postEntity =
-            new HttpEntity<Object>(config, RestTemplateBuilder.getDefaultHeader());
+            new HttpEntity<Object>(config, headers);
       return this.restTemplate.exchange(getAPIServiceEndpoint() + UpdateSDDCSoftwareStatus, HttpMethod.PUT,
             postEntity, Void.class);
    }

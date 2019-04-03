@@ -30,11 +30,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
+import com.vmware.flowgate.config.InitializeConfigureData;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.SDDCSoftwareRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
@@ -86,6 +88,10 @@ public class SDDCSoftwareController {
       }
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       server.setUserId(user.getUserId());
+      IntegrationStatus integrationStatus = new IntegrationStatus();
+      integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+      integrationStatus.setStatus(IntegrationStatus.Status.ACTIVE);
+      server.setIntegrationStatus(integrationStatus);
       sddcRepository.save(server);
       //notify worker for the start jobs
       notifySDDCWorker(server);
@@ -101,7 +107,7 @@ public class SDDCSoftwareController {
    //Update
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
-   public void updateSDDCSoftwareConfig(@RequestBody SDDCSoftwareConfig server) {
+   public void updateSDDCSoftwareConfig(@RequestBody SDDCSoftwareConfig server,HttpServletRequest request) {
       SDDCSoftwareConfig old = sddcRepository.findOne(server.getId());
       if (old == null) {
          throw new WormholeRequestException(HttpStatus.NOT_FOUND, "SDDCSoftware not found", null);
@@ -117,7 +123,8 @@ public class SDDCSoftwareController {
       }
       if (changedFileds.isEmpty()) {
          throw new WormholeRequestException(HttpStatus.OK, "Nothing is modified", null);
-      } else {
+      }
+      if(!InitializeConfigureData.checkServiceKey(request.getHeader("servicekey"))) {
          switch (server.getType()) {
          case VRO:
             serverValidationService.validateVROServer(server);
@@ -128,8 +135,9 @@ public class SDDCSoftwareController {
          default:
             throw WormholeRequestException.InvalidFiled("type", server.getType().toString());
          }
-         sddcRepository.updateSDDCSoftwareByFileds(server.getId(), changedFileds);
       }
+      sddcRepository.updateSDDCSoftwareByFileds(server.getId(), changedFileds);
+      
    }
 
 

@@ -8,6 +8,7 @@ import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { VmwareService } from '../../vmware/vmware.service';
+import { SddcsoftwareModule } from '../../../sddcsoftware.module';
 @Component({
   selector: 'app-vmware-config-add',
   templateUrl: './vmware-config-add.component.html',
@@ -23,25 +24,15 @@ export class VmwareConfigAddComponent implements OnInit {
   ignoreCertificatesModals:boolean = false;
   tip:string = "";
   verify:boolean = false;
-  yes:boolean = false;
-  no:boolean = true;
-  vmwareConfig={
-    type:"",
-    name:"",
-    description:"",
-    serverURL:"",
-    userName:"",
-    password:"",
-    verifyCert:"true"
-  }
+  vmwareConfig:SddcsoftwareModule = new SddcsoftwareModule();
+
   read = "";/** This property is to change the read-only attribute of the password input box*/
 
   
   save(){
       this.read = "readonly";
       this.loading = true;
-      this.service.AddVmwareConfig(this.vmwareConfig.type,this.vmwareConfig.name,this.vmwareConfig.description,this.vmwareConfig.userName,
-        this.vmwareConfig.password,this.vmwareConfig.serverURL,this.vmwareConfig.verifyCert).subscribe(
+      this.service.AddVmwareConfig(this.vmwareConfig).subscribe(
         (data)=>{
           if(data.status == 201){
             this.loading = false;
@@ -91,7 +82,7 @@ export class VmwareConfigAddComponent implements OnInit {
     this.router.navigate(["/ui/nav/sddc/vmware/vmware-list"]);
   }
   ngOnInit() {
-
+    this.vmwareConfig.verifyCert = "false";
   }
 
   

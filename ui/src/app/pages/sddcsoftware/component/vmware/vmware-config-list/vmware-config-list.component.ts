@@ -8,6 +8,7 @@ import { error } from 'util';
 import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import { VmwareService } from '../vmware.service';
+import { SddcsoftwareModule } from '../../../sddcsoftware.module';
 @Component({
   selector: 'app-vmware-config-list',
   templateUrl: './vmware-config-list.component.html',
@@ -23,9 +24,9 @@ export class VmwareConfigListComponent implements OnInit {
   pageSize:string = '5';
   info:string='';
   disabled:String="";
-  basic:boolean = false;
+  deleteOperationConfirm:boolean = false;
   vmwareConfigId:string = '';
-  clrAlertClosed:boolean = true;
+  deleteOperationAlertClosed:boolean = true;
   addsddc:string[]=["createSddcSoftwareConfig"];
   updatesddc:string[]=["updateSddcSoftwareConfig","readSddcSoftwareConfigByID"];
   deletesddc:string[]=["deleteSddcSoftwareConfig"];
@@ -33,6 +34,91 @@ export class VmwareConfigListComponent implements OnInit {
   alertclose:boolean = true;
   alertType:string = "";
   alertcontent:string = "";
+
+  updateStatusAlertclose:boolean = true;
+  updateStatusAlertType:string = "";
+  updateStatusAlertcontent:string = "";
+
+   //for integrationStatus alert message
+   isStatusErrorMsgAlertClose:boolean=true;
+   editStatusSDDCId:string = "";
+   statusErrorMsg = "";
+   sddc:SddcsoftwareModule = new SddcsoftwareModule();
+   checkStatus(element:any):any{
+     var status = {
+       "status":"ACTIVE",
+       "detail":""
+     };
+     if(element.integrationStatus == null){
+       element.integrationStatus = status;
+     }
+     return element;
+   }
+   showErrorMsg(sddc:SddcsoftwareModule){
+     this.isStatusErrorMsgAlertClose = false;
+     this.statusErrorMsg = "The server "+sddc.name+" has an error:"+sddc.integrationStatus.detail
+     this.editStatusSDDCId = sddc.id;
+   }
+   statusMsgAlertClose(){
+     this.isStatusErrorMsgAlertClose = true;
+     this.editStatusSDDCId = "";
+   }
+   fixError(){
+     window.sessionStorage.setItem("editserverid",this.editStatusSDDCId);
+     this.router.navigateByUrl("/ui/nav/sddc/vmware/vmware-edit");
+   }
+   updateStatusResultClose(){
+     this.updateStatusAlertclose = true;
+   }
+
+   updateSDDCStatus(sddc:SddcsoftwareModule){
+    var toUpdateSddc:SddcsoftwareModule = new SddcsoftwareModule();
+    toUpdateSddc.id = sddc.id;
+    toUpdateSddc.type = sddc.type;
+    toUpdateSddc.description = sddc.description
+    toUpdateSddc.name = sddc.name;
+    toUpdateSddc.userName = sddc.userName;
+    toUpdateSddc.password = sddc.password;
+    toUpdateSddc.serverURL = sddc.serverURL;
+    toUpdateSddc.verifyCert = sddc.verifyCert;
+    if(sddc.integrationStatus.status == "ACTIVE"){
+      toUpdateSddc.integrationStatus = {
+        "status":"PENDING",
+        "detail":""
+      }
+    }else{
+      toUpdateSddc.integrationStatus = {
+        "status":"ACTIVE",
+        "detail":"",
+        "retryCounter":0
+      };
+    }
+    this.service.updateVmwareConfig(toUpdateSddc).subscribe(
+      (data)=>{
+        if(data.status == 200){
+          this.updateStatusAlertType = "alert-success";
+          if(toUpdateSddc.integrationStatus.status == "ACTIVE"){
+            this.updateStatusAlertcontent = "The server "+toUpdateSddc.name+" has been activated.";
+          }else{
+            this.updateStatusAlertcontent = "The server "+toUpdateSddc.name+" has been suspended.";
+          }
+          this.updateStatusAlertclose = false;
+          setTimeout(() => {
+            this.updateStatusAlertclose = true  
+          },2000);
+          this.getVmareConfigdatas(this.currentPage,this.pageSize);
+        }
+      },error=>{
+        this.updateStatusAlertType = "alert-danger";
+        this.updateStatusAlertcontent = "Activation or suspension of the server failed.";
+        this.updateStatusAlertclose = false;
+        setTimeout(() => {
+          this.updateStatusAlertclose = true  
+        },2000);
+        this.getVmareConfigdatas(this.currentPage,this.pageSize);
+      }
+    )
+  }
 
   setInfo(){
     this.info=this.pageSize;
@@ -50,14 +136,7 @@ export class VmwareConfigListComponent implements OnInit {
       this.getVmareConfigdatas(this.currentPage,this.pageSize)
     }
   }
-  createTime(time){
-		var da = time;
-	    da = new Date(da);
-	    var year = da.getFullYear()+'-';
-	    var month = da.getMonth()+1+'-';
-	    var date = da.getDate();
-	    return year+month+date;
-	}
+
   getVmareConfigdatas(currentPage,pageSize){
     this.service.getVmwareConfigData(currentPage,pageSize).subscribe(
       (data)=>{if(data.status == 200){
@@ -73,42 +152,37 @@ export class VmwareConfigListComponent implements OnInit {
       }
     })
   }
-  toEditvmwareConfig(){
+  addNewSddc(){
     this.router.navigate(["/ui/nav/sddc/vmware/vmware-add"]);
   }
   onEdit(id){
     window.sessionStorage.setItem("editserverid",id);
     this.router.navigateByUrl("/ui/nav/sddc/vmware/vmware-edit");
   }
-  confirm(){
+  confirmDelete(){
     this.service.deleteVmwareConfig(this.vmwareConfigId).subscribe(data=>{
       
       if(data.status == 200){
-        this.basic = false;
+        this.deleteOperationConfirm = false;
         this.getVmareConfigdatas(this.currentPage,this.pageSize)
       }else{
-        this.clrAlertClosed = false;
+        this.deleteOperationAlertClosed = false;
       }
     },
     error=>{
-      this.clrAlertClosed = false;
+      this.deleteOperationAlertClosed = false;
     })
   }
-  onClose(){
-    this.basic = false;
-  }
-  cancel(){
-    this.basic = false;
+ 
+  closeModalOfDeleteOperation(){
+    this.deleteOperationConfirm = false;
     this.vmwareConfigId = "";
   }
   onDelete(id){
-    this.basic = true;
+    this.deleteOperationConfirm = true;
     this.vmwareConfigId = id;
-  
   }
-  close(){
-    this.alertclose = true
-  }
+
   syncData(id:string,url:string){
     this.service.syncData(id).subscribe(
       (data)=>{
