@@ -211,7 +211,7 @@ public class VCDataService implements AsyncService {
                integrationStatus = new IntegrationStatus();
             }
             integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-            integrationStatus.setDetail(e2.getMessage());
+            integrationStatus.setDetail("Invalid username or password.");
             integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
             updateIntegrationStatus(vc);
             return;
@@ -345,7 +345,7 @@ public class VCDataService implements AsyncService {
                integrationStatus = new IntegrationStatus();
             }
             integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-            integrationStatus.setDetail(e2.getMessage());
+            integrationStatus.setDetail("Invalid username or password.");
             integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
             updateIntegrationStatus(vcInfo);
             return;
