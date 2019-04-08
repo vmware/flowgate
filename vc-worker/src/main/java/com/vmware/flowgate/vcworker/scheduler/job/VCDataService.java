@@ -128,31 +128,12 @@ public class VCDataService implements AsyncService {
             }
             break;
          case EventMessageUtil.VCENTER_SyncCustomerAttrs:
-            SDDCSoftwareConfig vc = null;
-            try {
-               vc = mapper.readValue(message.getContent(), SDDCSoftwareConfig.class);
-            } catch (IOException e1) {
-               // TODO Auto-generated catch block
-               logger.error("Failed to convert message", e1);
-            }
-            if (vc != null) {
-               syncCustomAttributes(vc);
-            }
-            // TODO send message to notify UI if needed.or notify a task system that this
-            // job is done.
-            // now we do nothing.
+            logger.warn(
+                  "VCENTER_SyncCustomerAttrs command is depreacted. use VCENTER_SyncData instead");
             break;
          case EventMessageUtil.VCENTER_SyncCustomerAttrsData:
-            SDDCSoftwareConfig vcInfo = null;
-            try {
-               vcInfo = mapper.readValue(message.getContent(), SDDCSoftwareConfig.class);
-            } catch (IOException e) {
-               // TODO Auto-generated catch block
-               logger.info("Failed to convert message", e);
-            }
-            if (vcInfo != null) {
-               syncHostMetaData(vcInfo);
-            }
+            logger.warn(
+                  "VCENTER_SyncCustomerAttrsData command is depreacted. use VCENTER_SyncData instead");
             break;
          default:
             logger.warn("Not supported command");
