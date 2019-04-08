@@ -21,15 +21,15 @@ public class PredefinedSDDCJobs {
                "com.vmware.flowgate.aggregator.scheduler.job.VCenterJobDispatcher",
                JobType.AGGREGATOR),
          new JobConfig("AGGREGATOR-PREDEFINED-SYNC-VRO-DATA", "SyncVROData", "AggregateJobs",
-               "FiveMinutes", "SyncVROAll", "", "0 0/5 * * * ?",
+               "FiveMinutes", "SyncVROAll", "", "1 0/5 * * * ?",
                "com.vmware.flowgate.aggregator.scheduler.job.VROJobDispatcher",
                JobType.AGGREGATOR),
          new JobConfig("AGGREGATOR-PREDEFINED-SYNC-NLYTE-DATA", "SyncNlyteData", "AggregateJobs",
-               "FiveMinutes", "SyncNlyteAll", "", "0 0/5 * * * ?",
+               "FiveMinutes", "SyncNlyteAll", "", "20 0/5 * * * ?",
                "com.vmware.flowgate.aggregator.scheduler.job.NlyteJobDispatcher",
                JobType.AGGREGATOR),
          new JobConfig("AGGREGATOR-PREDEFINED-SYNC-POWERIQ-DATA", "SyncPOWERIQData", "AggregateJobs",
-               "FiveMinutes", "SyncPowerIQAll", "", "0 0/5 * * * ?",
+               "FiveMinutes", "SyncPowerIQAll", "", "40 0/5 * * * ?",
                "com.vmware.flowgate.aggregator.scheduler.job.PowerIQJobDispatcher",
                JobType.AGGREGATOR));
 }
