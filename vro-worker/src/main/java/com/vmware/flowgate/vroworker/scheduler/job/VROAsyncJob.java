@@ -166,30 +166,11 @@ public class VROAsyncJob implements AsyncService {
             }
             break;
          case EventMessageUtil.VRO_SyncMetricData:
-            SDDCSoftwareConfig vro = null;
-            try {
-               vro = mapper.readValue(message.getContent(), SDDCSoftwareConfig.class);
-            } catch (IOException e1) {
-               // TODO Auto-generated catch block
-               logger.error("Failed to convert message", e1);
-            }
-            if (vro != null) {
-               syncVROMetricData(vro);
-               logger.info("Finish Sync Metric data for " + vro.getName());
-            }
+            logger.warn("VRO_SyncMetricData command is deprecated, please use VRO_SyncData");
             break;
          case EventMessageUtil.VRO_SyncMetricPropertyAndAlert:
-            SDDCSoftwareConfig vroInfo = null;
-            try {
-               vroInfo = mapper.readValue(message.getContent(), SDDCSoftwareConfig.class);
-            } catch (IOException e1) {
-               // TODO Auto-generated catch block
-               logger.error("Failed to convert message", e1);
-            }
-            if (vroInfo != null) {
-               syncVROMetricPropertyAlertDefinition(vroInfo);
-               logger.info("Finish Sync customer attributes and alerts for " + vroInfo.getName());
-            }
+            logger.warn(
+                  "VRO_SyncMetricPropertyAndAlert command is deprecated, please use VRO_SyncData");
             break;
          default:
             logger.warn("Unknown command, ignore it: " + command.getId());
@@ -227,7 +208,8 @@ public class VROAsyncJob implements AsyncService {
          return;
       } catch (UndeclaredThrowableException e1) {
          if (e1.getUndeclaredThrowable().getCause() instanceof ConnectException) {
-            checkAndUpdateIntegrationStatus(config,e1.getUndeclaredThrowable().getCause().getMessage());
+            checkAndUpdateIntegrationStatus(config,
+                  e1.getUndeclaredThrowable().getCause().getMessage());
             return;
          }
       }
@@ -573,7 +555,8 @@ public class VROAsyncJob implements AsyncService {
          return;
       } catch (UndeclaredThrowableException e1) {
          if (e1.getUndeclaredThrowable().getCause() instanceof ConnectException) {
-            checkAndUpdateIntegrationStatus(config,e1.getUndeclaredThrowable().getCause().getMessage());
+            checkAndUpdateIntegrationStatus(config,
+                  e1.getUndeclaredThrowable().getCause().getMessage());
             return;
          }
       }
