@@ -6,6 +6,7 @@ package com.vmware.flowgate.labsdb.job;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,8 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.xml.sax.SAXException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.labsdb.client.LabsdbClient;
@@ -37,6 +41,7 @@ import com.vmware.flowgate.common.PduMapping;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
@@ -138,6 +143,30 @@ public class LabsdbService implements AsyncService{
       }
    }
    
+   private void updateIntegrationStatus(FacilitySoftwareConfig labsdb) {
+      wormholeApiClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      wormholeApiClient.updateFacility(labsdb);
+   }
+   
+   public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig labsdb,String message) {
+      IntegrationStatus integrationStatus = labsdb.getIntegrationStatus();
+      if(integrationStatus == null) {
+         integrationStatus = new IntegrationStatus();
+      }
+      int timesOftry = integrationStatus.getRetryCounter();
+      timesOftry++;
+      if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
+         integrationStatus.setRetryCounter(timesOftry);
+      }else {
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(message);
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         logger.error("Failed to query data from Labsdb");
+      }
+      labsdb.setIntegrationStatus(integrationStatus);
+      updateIntegrationStatus(labsdb);
+   }
+   
    public void syncWiremapData(FacilitySoftwareConfig config,boolean isAll) {
       wormholeApiClient.setServiceKey(serviceKeyConfig.getServiceKey());
       ResponseEntity<Asset[]> result = wormholeApiClient.getAssetsByType(AssetCategory.Server);
@@ -151,7 +180,29 @@ public class LabsdbService implements AsyncService{
       Map<String,String> pduIDListMap = getAssetNameIDMap(AssetCategory.PDU);
       Map<String,String> networkIDListMap = getAssetNameIDMap(AssetCategory.Networks);
       LabsdbClient labsdbClient = createClient(config);
-      List<Asset> assetsOfMappedWiremap = generatorWiremapData(servers,pduIDListMap,networkIDListMap,labsdbClient);
+      List<Asset> assetsOfMappedWiremap = null;
+      try {
+         if(!labsdbClient.checkConnection()) {
+            return;
+         }
+      }catch(HttpClientErrorException e) {
+         logger.error("Failed to query data from Labsdb", e);
+         IntegrationStatus integrationStatus = config.getIntegrationStatus();
+         if(integrationStatus == null) {
+            integrationStatus = new IntegrationStatus();
+         }
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(e.getMessage());
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         updateIntegrationStatus(config);
+         return;
+      }catch(ResourceAccessException e1) {
+         if(e1.getCause().getCause() instanceof ConnectException) {
+            checkAndUpdateIntegrationStatus(config, e1.getMessage());
+            return;
+         }
+       }
+      assetsOfMappedWiremap = generatorWiremapData(servers,pduIDListMap,networkIDListMap,labsdbClient);
       if(assetsOfMappedWiremap == null) {
          return;
       }
@@ -287,6 +338,5 @@ public class LabsdbService implements AsyncService{
       }
       return assetNameAndIdMap;
    }
-   
    
 }
