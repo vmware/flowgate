@@ -6,9 +6,7 @@ package com.vmware.flowgate.controller;
 
 import java.io.IOException;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.IntegrationStatus;
@@ -131,6 +128,18 @@ public class FacilitySoftwareController {
    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
    public void delete(@PathVariable String id) {
       repository.delete(id);
+   }
+   
+   //only modify the status of integration,and not verify information of server. 
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/status", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+   public void updateStatus(@RequestBody FacilitySoftwareConfig server) {
+      FacilitySoftwareConfig old = repository.findOne(server.getId());
+      if (old == null) {
+         throw new WormholeRequestException(HttpStatus.NOT_FOUND, "FacilitySoftwareConfig not found", null);
+      }
+      old.setIntegrationStatus(server.getIntegrationStatus());
+      repository.save(old);
    }
 
    //Update

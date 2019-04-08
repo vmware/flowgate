@@ -30,11 +30,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
+import com.vmware.flowgate.config.InitializeConfigureData;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.SDDCSoftwareRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
@@ -86,6 +88,10 @@ public class SDDCSoftwareController {
       }
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       server.setUserId(user.getUserId());
+      IntegrationStatus integrationStatus = new IntegrationStatus();
+      integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+      integrationStatus.setStatus(IntegrationStatus.Status.ACTIVE);
+      server.setIntegrationStatus(integrationStatus);
       sddcRepository.save(server);
       //notify worker for the start jobs
       notifySDDCWorker(server);
@@ -96,6 +102,18 @@ public class SDDCSoftwareController {
    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
    public void delete(@PathVariable String id) {
       sddcRepository.delete(id);
+   }
+   
+   //only modify the status of integration,and not verify information of server. 
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/status", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+   public void updateStatus(@RequestBody SDDCSoftwareConfig server) {
+      SDDCSoftwareConfig old = sddcRepository.findOne(server.getId());
+      if (old == null) {
+         throw new WormholeRequestException(HttpStatus.NOT_FOUND, "SDDCSoftware not found", null);
+      }
+      old.setIntegrationStatus(server.getIntegrationStatus());
+      sddcRepository.save(old);
    }
 
    //Update
@@ -117,19 +135,18 @@ public class SDDCSoftwareController {
       }
       if (changedFileds.isEmpty()) {
          throw new WormholeRequestException(HttpStatus.OK, "Nothing is modified", null);
-      } else {
-         switch (server.getType()) {
-         case VRO:
-            serverValidationService.validateVROServer(server);
-            break;
-         case VCENTER:
-            serverValidationService.validVCServer(server);
-            break;
-         default:
-            throw WormholeRequestException.InvalidFiled("type", server.getType().toString());
-         }
-         sddcRepository.updateSDDCSoftwareByFileds(server.getId(), changedFileds);
       }
+      switch (server.getType()) {
+      case VRO:
+         serverValidationService.validateVROServer(server);
+         break;
+      case VCENTER:
+         serverValidationService.validVCServer(server);
+         break;
+      default:
+         throw WormholeRequestException.InvalidFiled("type", server.getType().toString());
+      }
+      sddcRepository.updateSDDCSoftwareByFileds(server.getId(), changedFileds);
    }
 
 

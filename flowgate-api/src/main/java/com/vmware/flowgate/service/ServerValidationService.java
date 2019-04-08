@@ -4,6 +4,8 @@
 */
 package com.vmware.flowgate.service;
 
+import java.lang.reflect.UndeclaredThrowableException;
+import java.net.ConnectException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
@@ -54,17 +56,24 @@ public class ServerValidationService {
 
    public void validateVROServer(SDDCSoftwareConfig server) {
       try {
-            VRopsAuth ss = createVRopsAuth(server);
-            ss.getClient().apiVersionsClient().getCurrentVersion();
-      }catch(Exception e) {
-         if(e instanceof SSLException) {
-            throw new WormholeRequestException(HttpStatus.BAD_REQUEST,"Certificate verification error",e.getCause());
-         }else if(e instanceof AuthException) {
-            throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,"Invalid user name or password",e.getCause());
-         }else if(e instanceof ConnectionException){
-            throw new WormholeRequestException(HttpStatus.BAD_REQUEST,"Failed to connect to server",e.getCause());
+         VRopsAuth ss = createVRopsAuth(server);
+         ss.getClient().apiVersionsClient().getCurrentVersion();
+      } catch (AuthException e) {
+         throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
+               "Invalid user name or password", e.getCause());
+      } catch (SslException e1) {
+         throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+               "Certificate verification error", e1.getCause());
+      } catch (UndeclaredThrowableException e2) {
+         if (e2.getUndeclaredThrowable().getCause() instanceof ConnectException) {
+            throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                  "Failed to connect to server", e2.getCause());
+         }else if(e2.getUndeclaredThrowable() instanceof SSLException) {
+            throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                  "Certificate verification error", e2.getCause());
          }else {
-            throw new WormholeRequestException("This is a Exception Message :"+e.getMessage(),e.getCause());
+            throw new WormholeRequestException("This is a Exception Message :" + e2.getMessage(),
+                  e2.getCause());
          }
       }
    }
@@ -72,7 +81,6 @@ public class ServerValidationService {
    public VRopsAuth createVRopsAuth(SDDCSoftwareConfig server) {
       return new VRopsAuth(server);
    }
-
 
    public void validateFacilityServer(FacilitySoftwareConfig config) throws WormholeRequestException{
       try {
