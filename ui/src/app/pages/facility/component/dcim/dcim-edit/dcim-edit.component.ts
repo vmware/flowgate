@@ -47,12 +47,6 @@ export class DcimEditComponent implements OnInit {
   save(){
       this.read = "readonly";
       this.loading = true;
-      //by default,when user modify the integration setting on the edit page,the integration'status is ACTIVE.
-      this.dcimConfig.integrationStatus={
-        "status":"ACTIVE",
-        "detail":"",
-        "retryCounter":0
-      }
       this.service.updateFacility(this.dcimConfig).subscribe(
         (data)=>{
           if(data.status == 200){

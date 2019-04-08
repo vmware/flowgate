@@ -16,4 +16,15 @@ import { VmwareComponent } from './component/vmware/vmware.component';
   ],
   declarations: [SddcsoftwareComponent]
 })
-export class SddcsoftwareModule { }
+export class SddcsoftwareModule {
+  public id;
+  public name;
+  public description;
+  public userName;
+  public password;
+  public serverURL;
+  public type;
+  public userId;
+  public verifyCert;
+  public integrationStatus;
+ }
