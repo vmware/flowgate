@@ -78,13 +78,6 @@ export class DcimListComponent implements OnInit {
   updateDcimStatus(dcim:FacilityModule){
     var updateDcim:FacilityModule = new FacilityModule();
     updateDcim.id = dcim.id;
-    updateDcim.type = dcim.type;
-    updateDcim.description = dcim.description
-    updateDcim.name = dcim.name;
-    updateDcim.userName = dcim.userName;
-    updateDcim.password = dcim.password;
-    updateDcim.serverURL = dcim.serverURL;
-    updateDcim.advanceSetting = dcim.advanceSetting;
     if(dcim.integrationStatus.status == "ACTIVE"){
       updateDcim.integrationStatus = {
         "status":"PENDING",
@@ -93,10 +86,11 @@ export class DcimListComponent implements OnInit {
     }else{
       updateDcim.integrationStatus = {
         "status":"ACTIVE",
-        "detail":""
+        "detail":"",
+        "retryCounter":0
       };
     }
-    this.service.updateFacility(updateDcim).subscribe(
+    this.service.updateFacilityStatus(updateDcim).subscribe(
       (data)=>{
         if(data.status == 200){
           this.updateStatusAlertType = "alert-success";
@@ -109,7 +103,7 @@ export class DcimListComponent implements OnInit {
           setTimeout(() => {
             this.updateStatusAlertclose = true  
           },2000);
-          this.getVmareConfigdatas(this.currentPage,this.pageSize);
+          this.getDcimConfigdatas(this.currentPage,this.pageSize);
         }
       },error=>{
         this.updateStatusAlertType = "alert-danger";
@@ -118,24 +112,24 @@ export class DcimListComponent implements OnInit {
         setTimeout(() => {
           this.updateStatusAlertclose = true  
         },2000);
-        this.getVmareConfigdatas(this.currentPage,this.pageSize);
+        this.getDcimConfigdatas(this.currentPage,this.pageSize);
       }
     )
   }
   setInfo(){
     this.info=this.pageSize;
-    this.getVmareConfigdatas(this.currentPage,this.pageSize)
+    this.getDcimConfigdatas(this.currentPage,this.pageSize)
   }
   previous(){
     if(this.currentPage>1){
       this.currentPage--;
-      this.getVmareConfigdatas(this.currentPage,this.pageSize)
+      this.getDcimConfigdatas(this.currentPage,this.pageSize)
     }
   }
   next(){
     if(this.currentPage < this.totalPage){
       this.currentPage++
-      this.getVmareConfigdatas(this.currentPage,this.pageSize)
+      this.getDcimConfigdatas(this.currentPage,this.pageSize)
     }
   }
   createTime(time){
@@ -146,7 +140,7 @@ export class DcimListComponent implements OnInit {
 	    var date = da.getDate();
 	    return year+month+date;
 	}
-  getVmareConfigdatas(currentPage,pageSize){
+  getDcimConfigdatas(currentPage,pageSize){
     this.dcimConfigs = [];
     this.service.getDcimConfigData(currentPage,pageSize).subscribe(
       (data)=>{if(data.status == 200){     
@@ -179,7 +173,7 @@ export class DcimListComponent implements OnInit {
       
       if(data.status == 200){
         this.basic = false;
-        this.getVmareConfigdatas(this.currentPage,this.pageSize)
+        this.getDcimConfigdatas(this.currentPage,this.pageSize)
       }else{
         this.clrAlertClosed = false;
       }
@@ -233,7 +227,7 @@ export class DcimListComponent implements OnInit {
     )
   }
   ngOnInit() {
-     this.getVmareConfigdatas(this.currentPage,this.pageSize); 
+     this.getDcimConfigdatas(this.currentPage,this.pageSize); 
   
   }
 

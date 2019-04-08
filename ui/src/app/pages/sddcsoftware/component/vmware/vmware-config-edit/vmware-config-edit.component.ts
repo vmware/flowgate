@@ -8,6 +8,7 @@ import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { VmwareService } from '../../vmware/vmware.service';
+import { SddcsoftwareModule } from '../../../sddcsoftware.module';
 @Component({
   selector: 'app-vmware-config-edit',
   templateUrl: './vmware-config-edit.component.html',
@@ -21,25 +22,14 @@ export class VmwareConfigEditComponent implements OnInit {
   ignoreCertificatesModals:boolean = false;
   tip:string = "";
   verify:boolean = false;
-  yes:boolean = false;
-  no:boolean = true;
+ 
   checked:boolean;
   read = "";
-  vmwareConfig={
-    id:"",
-    type:"",
-    name:"",
-    description:"",
-    serverURL:"",
-    userName:"",
-    password:"",
-    verifyCert:""
-  }
+  vmwareConfig:SddcsoftwareModule = new SddcsoftwareModule();
   save(){
     this.read = "readonly";
       this.loading = true;
-      this.service.updateVmwareConfig(this.vmwareConfig.id,this.vmwareConfig.type,this.vmwareConfig.name,this.vmwareConfig.description,this.vmwareConfig.userName,
-        this.vmwareConfig.password,this.vmwareConfig.serverURL,this.vmwareConfig.verifyCert).subscribe(
+      this.service.updateVmwareConfig(this.vmwareConfig).subscribe(
         (data)=>{
           if(data.status == 200){
             this.loading = false;

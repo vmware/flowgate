@@ -56,6 +56,14 @@ export class DcimService {
       return this.http.put(""+this.API_URL+"/v1/facilitysoftware", body,this.options).map((res)=>res)
     }
 
+    updateFacilityStatus(dcim:FacilityModule){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      let body = JSON.stringify(dcim);
+      return this.http.put(""+this.API_URL+"/v1/facilitysoftware/status", body,this.options).map((res)=>res)
+    }
+
     getDcimConfigData(pageNumber,pageSize){
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());

@@ -8,6 +8,7 @@ import { Headers, URLSearchParams } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { AuthenticationService } from '../../../auth/authenticationService';
 import {environment} from 'environments/environment.prod';
+import { SddcsoftwareModule } from '../../sddcsoftware.module';
 
 @Injectable()
 export class VmwareService {
@@ -21,20 +22,11 @@ export class VmwareService {
     //this.options = new RequestOptions({ headers: this.headers });
   }
 
-  AddVmwareConfig(type,name,description,userName,password,serverURL,verifyCert){
+  AddVmwareConfig(vmwareConfig:SddcsoftwareModule){
     let header = new Headers({ 'Content-Type': 'application/json' });
     header.append("Authorization",'Bearer ' + this.auth.getToken());
     this.options = new RequestOptions({ headers: header });
-    let body = JSON.stringify({
-      type:type,
-      name:name,
-      description:description,
-      userName:userName,
-      password:password,
-      serverURL:serverURL,
-      verifyCert:verifyCert
-   
-    });
+    let body = JSON.stringify(vmwareConfig);
    
     return this.http.post(""+this.API_URL+"/v1/sddc", body,this.options).map((res)=>res)
     }
@@ -57,23 +49,24 @@ export class VmwareService {
         .map((res)=>res)
     }
 
-    updateVmwareConfig(id,type,name,description,userName,password,serverURL,verifyCert){
+    updateVmwareConfig(vmwareConfig:SddcsoftwareModule){
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());
       this.options = new RequestOptions({ headers: header });
-      let body = JSON.stringify({
-        id:id,
-        type:type,
-        name:name,
-        description:description,
-        userName:userName,
-        password:password,
-        serverURL:serverURL,
-        verifyCert:verifyCert
-      });
+      let body = JSON.stringify(vmwareConfig);
       
       return this.http.put(""+this.API_URL+"/v1/sddc", body,this.options).map((res)=>res)
     }
+
+    updateStatus(vmwareConfig:SddcsoftwareModule){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      let body = JSON.stringify(vmwareConfig);
+      
+      return this.http.put(""+this.API_URL+"/v1/sddc/status", body,this.options).map((res)=>res)
+    }
+
 
     getVmwareConfigData(pageNumber,pageSize){
       let header = new Headers({ 'Content-Type': 'application/json' });

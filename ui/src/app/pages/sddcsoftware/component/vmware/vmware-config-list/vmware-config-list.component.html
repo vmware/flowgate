@@ -1,19 +1,37 @@
 <!-- Copyright 2019 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause -->
-<button class="btn btn-primary btn-icon" style="margin-right: 12px" (click)="toEditvmwareConfig()" *appHasPrivilege=addsddc>
+<button class="btn btn-primary btn-icon" style="margin-right: 12px" (click)="addNewSddc()" *appHasPrivilege=addsddc>
   <clr-icon shape="plus">
     </clr-icon>
     <font style="vertical-align: inherit;">
       <font style="vertical-align: inherit;"  >Add New Integration</font>
      </font>
 </button>
-<clr-alert [clrAlertType]="alertType" (clrAlertClosedChange)="close()" [clrAlertClosed]= "alertclose">
+<clr-alert [clrAlertType]="alertType" [clrAlertClosed]= "alertclose">
     <div class="alert-item">
         <span class="alert-text">
             {{alertcontent}}
         </span>
     </div>
   </clr-alert>
+
+  <clr-alert [clrAlertType]="'alert-danger'" [clrAlertAppLevel]="true" [clrAlertClosed]= "isStatusErrorMsgAlertClose" (clrAlertClosedChange)="statusMsgAlertClose()" >
+        <clr-alert-item>
+            <span class="alert-text">
+                {{statusErrorMsg}}you can reactive the integration by click <clr-icon shape="ellipsis-vertical"></clr-icon> > Active , you can update the setting by click Edit Setting button if needed. 
+            </span>
+            <div class="alert-actions">
+                <button class="btn alert-action" (click)="fixError()">Update Setting</button>
+            </div>
+        </clr-alert-item>
+    </clr-alert>
+    <clr-alert [clrAlertType]="updateStatusAlertType" (clrAlertClosedChange)="updateStatusResultClose()" [clrAlertClosed]= "updateStatusAlertclose">
+        <div class="alert-item">
+            <span class="alert-text">
+                {{updateStatusAlertcontent}}
+            </span>
+        </div>
+    </clr-alert>
 <clr-datagrid>
 
  <clr-dg-column>Type</clr-dg-column>
@@ -22,7 +40,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
  <clr-dg-column>Description</clr-dg-column>
  <clr-dg-column>LoginUserName</clr-dg-column>
  <clr-dg-column>VerifyCert</clr-dg-column>
-
+ <clr-dg-column>Status</clr-dg-column>
  <clr-dg-placeholder>We couldn't find any SDDCSoftWares!</clr-dg-placeholder>
 
 
@@ -31,14 +49,20 @@ SPDX-License-Identifier: BSD-2-Clause -->
        <button class="action-item" (click)="onEdit(vmwareConfig.id)" *appHasPrivilege=updatesddc>Edit</button>
        <button class="action-item" (click)="onDelete(vmwareConfig.id)" *appHasPrivilege=deletesddc>Delete</button>
        <button class="action-item" (click)="syncData(vmwareConfig.id,vmwareConfig.ServerUrl)">SyncData</button>
-   </clr-dg-action-overflow>
+       <button class="action-item" *ngIf="vmwareConfig.integrationStatus.status == 'ACTIVE'" (click)="updateDcimStatus(vmwareConfig)" >Pending</button>
+       <button class="action-item" *ngIf="vmwareConfig.integrationStatus.status != 'ACTIVE'" (click)="updateDcimStatus(vmwareConfig)" >Active</button>
+    </clr-dg-action-overflow>
      <clr-dg-cell>{{vmwareConfig.type}}</clr-dg-cell>
      <clr-dg-cell>{{vmwareConfig.serverURL}}</clr-dg-cell>
      <clr-dg-cell>{{vmwareConfig.name}}</clr-dg-cell>
      <clr-dg-cell>{{vmwareConfig.description}}</clr-dg-cell>    
      <clr-dg-cell>{{vmwareConfig.userName}}</clr-dg-cell>
      <clr-dg-cell>{{vmwareConfig.verifyCert}}</clr-dg-cell>
-     
+     <clr-dg-cell>{{vmwareConfig.integrationStatus.status}}
+            <clr-icon *ngIf="vmwareConfig.integrationStatus.status == 'ERROR'" class="alert-icon" style="color: #c92100;cursor: pointer;" shape="exclamation-circle" (click)="showErrorMsg(vmwareConfig)"></clr-icon>       
+            <clr-icon *ngIf="vmwareConfig.integrationStatus.status == 'ACTIVE'" class="alert-icon" shape="check-circle" style="color: #318700;"></clr-icon>
+            <clr-icon *ngIf="vmwareConfig.integrationStatus.status == 'PENDING'" class="alert-icon" shape="exclamation-triangle" style="color: #ffdc0b;"></clr-icon>
+     </clr-dg-cell>
 </clr-dg-row>
 
 
@@ -60,10 +84,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
        <!-- </clr-dg-pagination> -->
 </clr-dg-footer>
 </clr-datagrid>
-<clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
+<clr-modal [(clrModalOpen)]="deleteOperationConfirm" [clrModalStaticBackdrop]="true">
    <h3 class="modal-title">Operation tips</h3>
    <div class="modal-body">
-       <clr-alert [(clrAlertClosed)] = "clrAlertClosed"  [clrAlertType]="'alert-danger'" (clrAlertClosedChange)="onClose()">
+       <clr-alert [(clrAlertClosed)] = "deleteOperationAlertClosed"  [clrAlertType]="'alert-danger'">
            <div class="alert-item">
                <span class="alert-text">
                    Operation error
@@ -73,7 +97,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
        <p>Are you sure you want to delete this data? This action is permenant and cannot be recovered.</p>
    </div>
    <div class="modal-footer">
-       <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
-       <button type="button" class="btn btn-primary" (click)="confirm()">Ok</button>
+       <button type="button" class="btn btn-outline" (click)="closeModalOfDeleteOperation()">Cancel</button>
+       <button type="button" class="btn btn-primary" (click)="confirmDelete()">Ok</button>
    </div>
 </clr-modal>
