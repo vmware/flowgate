@@ -29,17 +29,6 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
    @Override
    public void execute(JobExecutionContext context) throws JobExecutionException {
       execount++;
-      //will execute hourly?
-      try {
-         EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
-               EventMessageUtil.PDUServerMappingCommand, "");
-         String message = EventMessageUtil.convertEventMessageAsString(eventMessage);
-         publisher.publish(EventMessageUtil.AggregatorTopic, message);
-         logger.info("Send pdu servermapping command");
-      } catch (IOException e) {
-         logger.error("Failed to send pdu servermapping command.", e);
-      }
-
       //will execute weekly?
       if (execount % 168 == 0) {
          try {
@@ -50,6 +39,26 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
             logger.info("Send full mapping sync command");
          } catch (IOException e) {
             logger.error("Failed to send full mapping sync command", e);
+         }
+      } else {
+         //will execute hourly?
+         try {
+            EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
+                  EventMessageUtil.PDUServerMappingCommand, "");
+            String message = EventMessageUtil.convertEventMessageAsString(eventMessage);
+            publisher.publish(EventMessageUtil.AggregatorTopic, message);
+            logger.info("Send pdu servermapping command");
+         } catch (IOException e) {
+            logger.error("Failed to send pdu server mapping command.", e);
+         }
+         try {
+            EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
+                  EventMessageUtil.SyncTemperatureAndHumiditySensors, "");
+            String message = EventMessageUtil.convertEventMessageAsString(eventMessage);
+            publisher.publish(EventMessageUtil.AggregatorTopic, message);
+            logger.info("Send sensor host mapping sync command.");
+         } catch (IOException e) {
+            logger.error("Failed to send sensor sync command", e);
          }
       }
    }
