@@ -49,8 +49,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
        <button class="action-item" (click)="onEdit(vmwareConfig.id)" *appHasPrivilege=updatesddc>Edit</button>
        <button class="action-item" (click)="onDelete(vmwareConfig.id)" *appHasPrivilege=deletesddc>Delete</button>
        <button class="action-item" (click)="syncData(vmwareConfig.id,vmwareConfig.ServerUrl)">SyncData</button>
-       <button class="action-item" *ngIf="vmwareConfig.integrationStatus.status == 'ACTIVE'" (click)="updateDcimStatus(vmwareConfig)" >Pending</button>
-       <button class="action-item" *ngIf="vmwareConfig.integrationStatus.status != 'ACTIVE'" (click)="updateDcimStatus(vmwareConfig)" >Active</button>
+       <button class="action-item" *ngIf="vmwareConfig.integrationStatus.status == 'ACTIVE'" (click)="updateSDDCStatus(vmwareConfig)" >Pending</button>
+       <button class="action-item" *ngIf="vmwareConfig.integrationStatus.status != 'ACTIVE'" (click)="updateSDDCStatus(vmwareConfig)" >Active</button>
     </clr-dg-action-overflow>
      <clr-dg-cell>{{vmwareConfig.type}}</clr-dg-cell>
      <clr-dg-cell>{{vmwareConfig.serverURL}}</clr-dg-cell>
