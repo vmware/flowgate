@@ -1,0 +1,7 @@
+1>First,you should back up your image files and databases.
+2>Run a mongo service in a docker container on your test server.
+3>Run the update_sql_script.js in mongo to fix databases,don't forgot to config envirment variables for mongo before running this script.
+4>Start up all service,base on this databases.
+5>Test new version features.
+6>Found problems and fixed.
+7>Do the same upgrade in a production environment without any problems.
