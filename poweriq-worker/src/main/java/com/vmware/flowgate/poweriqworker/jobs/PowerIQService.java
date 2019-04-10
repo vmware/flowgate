@@ -390,11 +390,12 @@ public class PowerIQService implements AsyncService {
 
    public List<Asset> getSensorMetaData(PowerIQAPIClient client, String assetSource){
       List<Asset> assets = new ArrayList<Asset>();
+      List<Asset> pdus = new ArrayList<Asset>();
       List<Sensor> sensors = getSensors(client);
       if (sensors == null || sensors.isEmpty()) {
          return assets;
       }
-      Map<String, Asset> pduAssetMap = getPDUAssetMap();
+      Map<String, Asset> pduAssetMap = getPDUAssetMap();//get all pdus from flowgate
       Map<Integer, Rack> racksMap = getRacksMap(client);
       Map<Integer, Row> rowsMap = getRowsMap(client);
       Map<Integer, Aisle> aislesMap = getAislesMap(client);
@@ -414,6 +415,7 @@ public class PowerIQService implements AsyncService {
                asset = fillLocation(sensor, racksMap, rowsMap, aislesMap, roomsMap, floorsMap,
                      dataCentersMap);
             } else {
+               //If the sensor's has pdu information. Then it can use the PDU's location info.
                asset.setRoom(pduAsset.getRoom());
                asset.setFloor(pduAsset.getFloor());
                asset.setBuilding(pduAsset.getBuilding());
@@ -422,9 +424,9 @@ public class PowerIQService implements AsyncService {
                asset.setRegion(pduAsset.getRegion());
                //Record the pdu_assetId for the sensor.
                justificationfieldsForSensor.put(FlowgateConstant.PDU_ASSET_ID, pduAsset.getId());
-               //Record the sensorId and sensor source for the pdu.
+               //Record the sensorId and sensor_source for the pdu.
                pduAsset = aggregatorSensorIdAndSourceForPdu(pduAsset,sensor,assetSource);
-               assets.add(pduAsset);
+               pdus.add(pduAsset);
             }
          } else {
             asset = fillLocation(sensor, racksMap, rowsMap, aislesMap, roomsMap, floorsMap,
@@ -443,6 +445,7 @@ public class PowerIQService implements AsyncService {
          asset.setSubCategory(subCategoryMap.get(sensor.getType()));
          assets.add(asset);
       }
+      restClient.saveAssets(pdus);//save pdus 
       return assets;
    }
    
