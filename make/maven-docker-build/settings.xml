@@ -177,25 +177,6 @@ under the License.
            <activeByDefault>true</activeByDefault>
         </activation>
         <properties>
-           <db.driverClass>org.postgresql.Driver</db.driverClass>
-           <db.connectionURL>jdbc:postgresql://localhost/omsdb</db.connectionURL>
-           <db.username>omsdb</db.username>
-           <db.password>password</db.password>
-
-           <vim.host></vim.host>
-           <vim.evs_url></vim.evs_url>
-           <vim.evs_token></vim.evs_token>
-           <vim.thumbprint></vim.thumbprint>
-
-           <vim.oms_moref></vim.oms_moref>
-
-           <oms.guard_keystore></oms.guard_keystore>
-           <oms.guard_keystore_pswd></oms.guard_keystore_pswd>
-           <oms.guard_keystore_alias></oms.guard_keystore_alias>
-           <oms.keystore></oms.keystore>
-           <oms.keystore_pswd></oms.keystore_pswd>
-           <oms.keystore_alias></oms.keystore_alias>
-           <oms.ssh_key_pair></oms.ssh_key_pair>
         </properties>
      </profile>
 
@@ -206,25 +187,6 @@ under the License.
      <profile>
         <id>development</id>
         <properties>
-           <db.driverClass>org.postgresql.Driver</db.driverClass>
-           <db.connectionURL>jdbc:postgresql://10.117.169.198/omsdb</db.connectionURL>
-           <db.username>omsdb</db.username>
-           <db.password>password</db.password>
-
-           <vim.host>10.117.8.213</vim.host>
-           <vim.evs_url>https://pek2-lab-08-dhcp213.eng.vmware.com/vsm/extensionService</vim.evs_url>
-           <vim.evs_token>402b86e238ea5aad44f388d679edbcc79e976f6b</vim.evs_token>
-           <vim.thumbprint>f1:59:15:4b:62:c8:34:ec:16:17:ed:14:f9:52:ce:d1:e5:1a:b1:3d</vim.thumbprint>
-
-           <vim.oms_moref>VirtualMachine:vm-750</vim.oms_moref>
-
-           <oms.guard_keystore>/opt/oms/.certs/guard.key</oms.guard_keystore>
-           <oms.guard_keystore_pswd></oms.guard_keystore_pswd>
-           <oms.guard_keystore_alias>encrypt</oms.guard_keystore_alias>
-           <oms.keystore>/opt/oms/.certs/oms.jks</oms.keystore>
-           <oms.keystore_pswd>c1wOdUkP</oms.keystore_pswd>
-           <oms.keystore_alias>oms_server</oms.keystore_alias>
-           <oms.ssh_key_pair>/opt/oms/.certs/sshkey</oms.ssh_key_pair>
         </properties>
      </profile>
     <!--
