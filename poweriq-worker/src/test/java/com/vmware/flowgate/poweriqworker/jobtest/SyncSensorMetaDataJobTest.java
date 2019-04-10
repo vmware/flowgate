@@ -250,7 +250,7 @@ public class SyncSensorMetaDataJobTest {
       Mockito.when(this.wormholeAPIClient.getAssetsBySourceAndType("po09imkhdplbvf540fwusy67n",
             AssetCategory.PDU)).thenReturn(getPDUAssets(AssetCategory.PDU));
       List<Asset> assets = powerIQService.getSensorMetaData(powerIQAPIClient, "po09imkhdplbvf540fwusy67n");
-      TestCase.assertEquals(3, assets.size());
+      TestCase.assertEquals(2, assets.size());
       for (Asset asset : assets) {
          if ("8999".equals(asset.getSerialnumber())) {
             TestCase.assertEquals("HumiditySensor", asset.getAssetName());
