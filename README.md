@@ -28,11 +28,12 @@ FlowGate is an open source vendor-neutral project to enable facility awareness i
 [Demo](https://github.com/yixingjia/wormhole/releases/download/1.0/FlowGate_Demo.mp4)
 
 **System requirements**
-* Linux System with minimal 4GB Memory 
+* Linux System with minimal 4GB Memory (recommend Ubuntu 16.04 LTS or later) 
 * Docker 17.06(or above) 
 * Docker-compose 2.0(or above)
 
 **Up and Running Flowgate**
+**Run from source code**
 1. Get the source code to your hosts
 ```
 git clone https://github.com/vmware/flowgate
@@ -50,6 +51,8 @@ docker-compose up -f docker-compose.run.images.yml &
 
 Open a browser and visit https://your-IP
 
+**Install from binary**
+TODO
 **System architecture**
 
 ## Documentation
