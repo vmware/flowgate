@@ -443,6 +443,7 @@ public class PowerIQService implements AsyncService {
          asset.setAssetSource(assetSource);
          asset.setCategory(AssetCategory.Sensors);
          asset.setSubCategory(subCategoryMap.get(sensor.getType()));
+         asset.setCreated(System.currentTimeMillis());
          assets.add(asset);
       }
       restClient.saveAssets(pdus);//save pdus 
@@ -631,10 +632,10 @@ public class PowerIQService implements AsyncService {
             justificationfields.put(Pdu_ID, asset.getJustificationfields().get(Pdu_ID));
             justificationfields.put(Sensor_ID, asset.getJustificationfields().get(Sensor_ID));
             assetToUpdate.setJustificationfields(justificationfields);
-            assetToUpdate.setLastupdate(new Date().getTime());
+            assetToUpdate.setLastupdate(System.currentTimeMillis());
             assets.add(assetToUpdate);
          } else {
-            asset.setCreated(new Date().getTime());
+            asset.setCreated(System.currentTimeMillis());
             assets.add(asset);
          }
       }
