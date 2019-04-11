@@ -12,7 +12,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-tab *appHasPrivilege=integrationSummary>
             <button clrTabLink (click)="getFirstPageData()">Integration Summary</button>
             <clr-tab-content *clrIfActive="true">
-                <h5>FACILITY</h5>
+                <h5>Data center Facility System</h5>
                 <div class="row" style="height:43%;max-height: 200px;">
                     <div class="col-lg-3 col-sm-3 col-3">
                         <div class="card" style="height:110%;">
@@ -39,7 +39,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             <div class="row" style="margin: auto;">
                                 <div class="col-lg-4 col-sm-4 col-4">
                                     <div class="row">
-                                        <span class="smallTitle">SERVER</span>
+                                        <span class="smallTitle">SERVERS</span>
                                     </div>
                                     <div class="row">
                                         <span class="smallFont">{{flowgateSummery.serverNum}}</span>
@@ -47,7 +47,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 </div>
                                 <div class="col-lg-4 col-sm-4 col-4">
                                     <div class="row">
-                                        <span class="smallTitle">PDU</span>
+                                        <span class="smallTitle">PDUS</span>
                                     </div>
                                     <div class="row">
                                         <span class="smallFont">{{flowgateSummery.pduNum}}</span>
@@ -55,7 +55,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 </div>
                                 <div class="col-lg-4 col-sm-4 col-4">
                                     <div class="row">
-                                        <span class="smallTitle">CABINET</span>
+                                        <span class="smallTitle">CABINETS</span>
                                     </div>
                                     <div class="row">
                                         <span class="smallFont">{{flowgateSummery.cabinetNum}}</span>
@@ -65,7 +65,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             <div class="row" style="margin: auto;padding-top: 4%;">
                                 <div class="col-lg-4 col-sm-4 col-4">
                                     <div class="row">
-                                        <span class="smallTitle">SWITCH</span>
+                                        <span class="smallTitle">SWITCHS</span>
                                     </div>
                                     <div class="row">
                                         <span class="smallFont">{{flowgateSummery.switchNum}}</span>
@@ -87,7 +87,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         </div>
                     </div>
                 </div>
-                <h5 style="margin-top:8%;">SDDC</h5>
+                <h5 style="margin-top:8%;"> IT Management System</h5>
                 <div class="row">
                     <div class="col-lg-3 col-sm-3 col-3">
                         <div class="card">
@@ -102,7 +102,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     <div class="col-lg-3 col-sm-3 col-3">
                         <div class="card btn" (click)="showServerSummary()">
                             <div class="row">
-                                <span class="bigTitle">SERVER</span>
+                                <span class="bigTitle">SERVERS</span>
                             </div>
                             <div class="row">
                                 <span class="bigFont">{{flowgateSummery.sddcServerNum}}</span>
@@ -114,7 +114,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             <div class="row">
                                 <div class="col-lg-6 col-sm-6 col-6">
                                     <div class="row">
-                                        <span class="integrationTitle">INTEGRATION</span>
+                                        <span class="integrationTitle">Total IT Management System</span>
                                     </div>
                                     <div class="row">
                                         <span class="integrationFont">{{flowgateSummery.sddcIntegrationNum}}</span>
