@@ -99,7 +99,7 @@ buildDockerImages(){
 		rm $OUTPUTIMAGEPATH/* -rf
 	fi
 
-	jarname=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "vc-worker")
+	jarname=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "vc-worker" "labsdb-worker")
 	for j in "${jarname[@]}"
 	do
 		cp $OUTPUTJARPATH/$j-0.0.1-SNAPSHOT.jar $CURRENTPATH/$j
