@@ -10,7 +10,7 @@ OUTPUTJARNAME=-0.0.1-SNAPSHOT.jar
 
 commonproject=("flowgate-common" "common-restclient" "worker-jobs")
 flowgateapiproject=("flowgate-api")
-serviceproject=("vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator")
+serviceproject=("vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "labsdb-worker")
 specialproject=("vc-worker")
 mongodbangredis=("mongodb" "redis")
 
