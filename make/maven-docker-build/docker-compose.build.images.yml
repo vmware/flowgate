@@ -48,6 +48,12 @@ services:
       context: $PWD/poweriq-worker
       dockerfile: $PWD/poweriq-worker/Dockerfile
     image: flowgate/poweriq-worker:FLOWGATE_VERSION
+    
+  labsdb-worker:
+    build:
+      context: $PWD/labsdb-worker
+      dockerfile: $PWD/labsdb-worker/Dockerfile
+    image: flowgate/labsdb-worker:FLOWGATE_VERSION
 
   vc-worker:
     build:

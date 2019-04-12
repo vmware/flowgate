@@ -11,7 +11,7 @@ FLOWGATEOPTDIR=/opt/vmware/flowgate
 DOCKERCOMPOSERUNFILE=$DOCKERMAVENBUILD/docker-compose.run.images.yml
 CONFTAR=$CURRENTPATH/conf.tar.gz
 
-SERVICEPROJECT=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "mongodb" "redis" "vc-worker")
+SERVICEPROJECT=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "mongodb" "redis" "vc-worker" "labsdb-worker")
 
 if [ -d "$FLOWGATEOPTDIR" ];then
     rm $FLOWGATEOPTDIR -rf
@@ -36,7 +36,7 @@ chown -R 10000:10000 $FLOWGATEOPTDIR/log/redis
 chown -R 10000:10000 $FLOWGATEOPTDIR/data/redis
 chmod o+rx $FLOWGATEOPTDIR/conf/mongodb/initdb.js
 
-SEDPROJECT=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "vc-worker")
+SEDPROJECT=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "vc-worker" "labsdb-worker")
 for j in "${SEDPROJECT[@]}"
 do
     sed -i -e 's/spring.data.mongodb.host=localhost/spring.data.mongodb.host=mongodb/' $FLOWGATEOPTDIR/conf/$j/application.properties

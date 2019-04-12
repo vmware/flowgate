@@ -81,10 +81,8 @@ services:
     networks:
       - services-network
     depends_on:
-      - mongodb
       - redis
       - flowgate-api
-      - management
     links:
       - redis:redis
       - flowgate-api:flowgate-api
@@ -100,10 +98,8 @@ services:
     networks:
       - services-network
     depends_on:
-      - mongodb
       - redis
       - flowgate-api
-      - aggregator
     links:
       - redis:redis
       - flowgate-api:flowgate-api
@@ -119,10 +115,8 @@ services:
     networks:
       - services-network
     depends_on:
-      - mongodb
       - redis
       - flowgate-api
-      - infoblox-worker
     links:
       - redis:redis
       - flowgate-api:flowgate-api
@@ -138,10 +132,25 @@ services:
     networks:
       - services-network
     depends_on:
-      - mongodb
       - redis
       - flowgate-api
-      - nlyte-worker
+    links:
+      - redis:redis
+      - flowgate-api:flowgate-api
+    environment:
+      FLOWGATESERVICEKEY: serviceKey
+      
+  labsdb-worker:
+    image: flowgate/labsdb-worker:FLOWGATE_VERSION
+    volumes:
+      - /opt/vmware/flowgate/log/labsdb-worker:/log
+      - /opt/vmware/flowgate/conf/labsdb-worker:/conf
+    container_name: flowgate-labsdb-worker-container
+    networks:
+      - services-network
+    depends_on:
+      - redis
+      - flowgate-api
     links:
       - redis:redis
       - flowgate-api:flowgate-api
@@ -157,10 +166,8 @@ services:
     networks:
       - services-network
     depends_on:
-      - mongodb
       - redis
       - flowgate-api
-      - poweriq-worker
     links:
       - redis:redis
       - flowgate-api:flowgate-api
@@ -176,10 +183,8 @@ services:
     networks:
       - services-network
     depends_on:
-      - mongodb
       - redis
       - flowgate-api
-      - vc-worker
     links:
       - redis:redis
       - flowgate-api:flowgate-api
