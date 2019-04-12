@@ -95,9 +95,9 @@ export class DcimListComponent implements OnInit {
         if(data.status == 200){
           this.updateStatusAlertType = "alert-success";
           if(updateDcim.integrationStatus.status == "ACTIVE"){
-            this.updateStatusAlertcontent = "The server "+updateDcim.name+" has been activated.";
+            this.updateStatusAlertcontent = "The server "+dcim.name+" has been activated.";
           }else{
-            this.updateStatusAlertcontent = "The server "+updateDcim.name+" has been suspended.";
+            this.updateStatusAlertcontent = "The server "+dcim.name+" has been suspended.";
           }
           this.updateStatusAlertclose = false;
           setTimeout(() => {

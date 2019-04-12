@@ -91,9 +91,9 @@ export class VmwareConfigListComponent implements OnInit {
         if(data.status == 200){
           this.updateStatusAlertType = "alert-success";
           if(toUpdateSddc.integrationStatus.status == "ACTIVE"){
-            this.updateStatusAlertcontent = "The server "+toUpdateSddc.name+" has been activated.";
+            this.updateStatusAlertcontent = "The server "+sddc.name+" has been activated.";
           }else{
-            this.updateStatusAlertcontent = "The server "+toUpdateSddc.name+" has been suspended.";
+            this.updateStatusAlertcontent = "The server "+sddc.name+" has been suspended.";
           }
           this.updateStatusAlertclose = false;
           setTimeout(() => {
@@ -133,15 +133,17 @@ export class VmwareConfigListComponent implements OnInit {
   getVmareConfigdatas(currentPage,pageSize){
     this.service.getVmwareConfigData(currentPage,pageSize).subscribe(
       (data)=>{if(data.status == 200){
-          
-            this.vmwareConfigs = data.json().content
-            this.currentPage = data.json().number+1;
-            this.totalPage = data.json().totalPages
-            if(this.totalPage == 1){
-              this.disabled = "disabled";
-            }else{
-              this.disabled = "";
-            }
+        this.vmwareConfigs = data.json().content;
+        this.vmwareConfigs.forEach(element=>{    
+          this.checkStatus(element);
+        })
+        this.currentPage = data.json().number+1;
+        this.totalPage = data.json().totalPages;
+        if(this.totalPage == 1){
+          this.disabled = "disabled";
+        }else{
+          this.disabled = "";
+        }
       }
     })
   }
