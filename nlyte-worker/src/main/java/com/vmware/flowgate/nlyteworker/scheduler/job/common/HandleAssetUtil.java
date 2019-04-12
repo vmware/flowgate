@@ -169,6 +169,7 @@ public class HandleAssetUtil {
             }
             
          }
+         asset.setCreated(System.currentTimeMillis());
          assetsFromNlyte.add(asset);
       }
       return assetsFromNlyte;
@@ -263,6 +264,7 @@ public class HandleAssetUtil {
             exsitingAsset.setMountingSide(asset.getMountingSide());
             updateAsset.add(exsitingAsset);
          }else {
+            asset.setCreated(System.currentTimeMillis());
             resultAsset.add(asset);
          }
       }
