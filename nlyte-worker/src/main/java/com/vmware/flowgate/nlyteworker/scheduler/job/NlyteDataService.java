@@ -401,6 +401,7 @@ public class NlyteDataService implements AsyncService {
          realTimeData.setAssetID(asset.getId());
          realTimeData.setValues(valueUnits);
          realTimeData.setTime(valueUnits.get(0).getTime());
+         realTimeData.setId(realTimeData.getAssetID()+"_"+realTimeData.getTime());
       }
       return realTimeData;
    }
