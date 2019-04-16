@@ -11,5 +11,5 @@ import com.vmware.flowgate.common.model.SystemSummary;
  *
  */
 public interface SystemSummaryRepositoryEnhancement {
-   SystemSummary getSystemSummaryData();
+   SystemSummary getSystemResult();
 }

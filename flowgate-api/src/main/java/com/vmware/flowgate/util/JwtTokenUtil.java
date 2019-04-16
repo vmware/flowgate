@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.model.AuthToken;
-import com.vmware.flowgate.common.model.WormholeUser;
 import com.vmware.flowgate.security.service.UserDetailsServiceImpl;
 
 @Component
@@ -60,15 +59,12 @@ public class JwtTokenUtil {
       Date issure_date = new Date();
       Date expires_date = new Date(System.currentTimeMillis()+expiration*1000);
       long timeMillis = expires_date.getTime();
-      AuthorityUtil authorityUtil = new AuthorityUtil();
       String token = JWT.create().withIssuer(issuer).withIssuedAt(issure_date)
             .withExpiresAt(expires_date).withSubject(user.getUsername())
             .withClaim("userId", user.getUserId())
-            .withArrayClaim(CLAIM_AUTHORITIES, authorityUtil.getAuthorities(user))
             .sign(algorithm);
       access_token.setAccess_token(token);
       access_token.setExpires_in(timeMillis);
-      WormholeUser wormholeuser = serviceImpl.getUserByName(user.getUsername());
       try {
          mapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
          redisTemplate.opsForValue().set(Prefix_token + token,

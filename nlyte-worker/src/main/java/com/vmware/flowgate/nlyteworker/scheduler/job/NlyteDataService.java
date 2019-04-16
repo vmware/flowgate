@@ -249,6 +249,12 @@ public class NlyteDataService implements AsyncService {
       }
       List<Asset> newNetworkersNeedToSave = generateNewAsset(nlyte.getId(), nlyteAssets, locationMap,
             manufacturerMap, networkMaterialMap,AssetCategory.Networks);
+      //To fix the category of asset is null.
+      for(Asset asset:newNetworkersNeedToSave) {
+         if(asset.getCategory() == null) {
+            asset.setCategory(AssetCategory.Networks);
+         }
+      }
       restClient.saveAssets(newNetworkersNeedToSave);
       logger.info("Finish sync the networks data for: " + nlyte.getName());
    }
