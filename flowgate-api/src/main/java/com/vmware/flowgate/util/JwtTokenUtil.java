@@ -77,10 +77,6 @@ public class JwtTokenUtil {
       return access_token;
       
    }
-
-   public WormholeUserDetails getUserDetails(DecodedJWT jwt) {
-      return new WormholeUserDetails(jwt.getClaim("userId").asString(),jwt.getSubject(), "N/A", AuthorityUtil.createGrantedAuthorities(jwt.getClaim(CLAIM_AUTHORITIES).asArray(String.class)));
-  }
    
    public DecodedJWT getDecodedJwt(String token) {
       if (token == null) {
@@ -101,11 +97,5 @@ public class JwtTokenUtil {
    public boolean isCreatedAfterLastPasswordReset(Date issuedAt , long lastPasswordReset) {
       return issuedAt.getTime()>lastPasswordReset;
    }
-   
-   public AuthToken refreshToken(DecodedJWT jwt) {
-      WormholeUserDetails user = getUserDetails(jwt);
-      return generate(user);
-   }
-   
  
 }

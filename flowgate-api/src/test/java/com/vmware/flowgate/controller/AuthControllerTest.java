@@ -161,9 +161,13 @@ public class AuthControllerTest {
             }
          }
       }
+      ObjectMapper mapper = new ObjectMapper();
       WormholeUserDetails userdetail = new WormholeUserDetails();
       userdetail.setUsername("tom");
+      userdetail.setPassword("$2a$10$Vm8MLIkGwinuICfcqW5RDOoE.aJqnvsaPhnxl7.N4H7oLKVIu3o0.");
+      
       Mockito.doReturn(userdetail).when(tokenService).getCurrentUser(any());
+      Mockito.doReturn(mapper.writeValueAsString(userdetail)).when(tokenService).getUserJsonString(any());
       MvcResult result1 = this.mockMvc.perform(get("/v1/auth/token/refresh").header("Authorization", "Bearer "+access_token))
       .andDo(document("AuthController-RefreshAccessToken-example"))
       .andReturn();
