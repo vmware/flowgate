@@ -772,7 +772,7 @@ public class PowerIQService implements AsyncService {
                realTimeData.setValues(values);
                realTimeData.setTime(values.get(0).getTime());
                //this will remove the duplicated items.
-               realTimeData.setAssetID(map.getKey()+"_"+realTimeData.getTime());
+               realTimeData.setId(map.getKey()+"_"+realTimeData.getTime());
                realTimeDatas.add(realTimeData);
             }else {
                continue;
