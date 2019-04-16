@@ -21,7 +21,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.AuthToken;
@@ -67,11 +69,29 @@ public class AccessTokenService {
    public AuthToken refreshToken(String token) {
       DecodedJWT jwt = jwtTokenUtil.getDecodedJwt(token);
       WormholeUser user =  userservice.getUserByName(jwt.getSubject());
-      redisTemplate.delete(JwtTokenUtil.Prefix_token + token);
+      ObjectMapper mapper = new ObjectMapper();
       if(jwtTokenUtil.isCreatedAfterLastPasswordReset(jwt.getIssuedAt(),user.getLastPasswordResetDate())) {
-         return jwtTokenUtil.refreshToken(jwt);
+         String userdetailString = getUserJsonString(token);
+         WormholeUserDetails userDetails = null;
+         try {
+            userDetails = mapper.readValue(userdetailString, WormholeUserDetails.class);
+         }catch (IOException e) {
+            logger.error(e.getMessage());
+            return null;
+         }
+         AuthToken refreshToken = jwtTokenUtil.generate(userDetails);
+         redisTemplate.delete(JwtTokenUtil.Prefix_token + token);
+         return refreshToken;
       }
       return null;
+   }
+   
+   public String getUserJsonString(String token) {
+      String userJson = redisTemplate.opsForValue().get(JwtTokenUtil.Prefix_token + token);
+      if(userJson == null) {
+         throw new WormholeRequestException(HttpStatus.UNAUTHORIZED, "Invalid token",null);
+      }
+      return userJson;
    }
    
    public void removeToken(String token) {
@@ -103,13 +123,10 @@ public class AccessTokenService {
          logger.error("Get current user failed,please check the token."+request.getRequestURI());
          return null;
       }
-      String userJson = redisTemplate.opsForValue().get(JwtTokenUtil.Prefix_token + token);
+      String userJson = getUserJsonString(token);
       ObjectMapper mapper = new ObjectMapper();
       mapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
       WormholeUserDetails user = null;
-      if(userJson == null) {
-         return null;
-      }
       try {
          user = mapper.readValue(userJson,WormholeUserDetails.class);
       } catch (IOException e) {
