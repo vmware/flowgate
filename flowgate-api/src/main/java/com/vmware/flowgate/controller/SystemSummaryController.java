@@ -21,6 +21,6 @@ public class SystemSummaryController {
 
    @RequestMapping(value = "/systemsummary", method = RequestMethod.GET)
    public SystemSummary getAllDashBoardData() {
-      return systemSummaryRepository.getSystemSummaryData();
+      return systemSummaryRepository.getSystemResult();
    }
 }
