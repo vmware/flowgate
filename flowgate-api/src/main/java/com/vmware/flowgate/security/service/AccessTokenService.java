@@ -123,7 +123,12 @@ public class AccessTokenService {
          logger.error("Get current user failed,please check the token."+request.getRequestURI());
          return null;
       }
-      String userJson = getUserJsonString(token);
+      String userJson = null;
+      try {
+         userJson = getUserJsonString(token);
+      }catch (WormholeRequestException e) {
+         return null;
+      }
       ObjectMapper mapper = new ObjectMapper();
       mapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
       WormholeUserDetails user = null;
