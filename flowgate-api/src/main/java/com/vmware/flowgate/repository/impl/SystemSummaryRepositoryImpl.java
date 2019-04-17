@@ -151,7 +151,7 @@ public class SystemSummaryRepositoryImpl implements SystemSummaryRepositoryEnhan
       Aggregation aggregation = Aggregation.newAggregation(
             Aggregation.match(Criteria.where("assetSource").is(nlyte.getId())),
             Aggregation.group("category").count().as("num"),
-            Aggregation.match(Criteria.where("sum").gt(0)));
+            Aggregation.match(Criteria.where("num").gt(0)));
 
       AggregationResults<BasicDBObject> res =
             mongoTemplate.aggregate(aggregation, "asset", BasicDBObject.class);
