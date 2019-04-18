@@ -45,9 +45,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/vim25.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
+							<groupId>com.vmware.vim</groupId>
 							<artifactId>vim25</artifactId>
-							<version>1.0</version>
+							<version>6.0.0-2561048</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -60,9 +60,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/bcpkix-jdk15on-150.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
-							<artifactId>bcpkix</artifactId>
-							<version>1.0</version>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcpkix-jdk15on</artifactId>
+							<version>1.50</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -75,9 +75,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/bcprov-ext-jdk15on-150.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
-							<artifactId>bcprov-ext</artifactId>
-							<version>1.0</version>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcprov-ext-jdk15on</artifactId>
+							<version>1.50</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -90,9 +90,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/bcprov-jdk15on-150.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
-							<artifactId>bcprov</artifactId>
-							<version>1.0</version>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcprov-jdk15on</artifactId>
+							<version>1.50</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -105,9 +105,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/query-vmodl.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
+							<groupId>com.vmware.vlsi</groupId>
 							<artifactId>query-vmodl</artifactId>
-							<version>1.0</version>
+							<version>6.5.0-4258493</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -120,9 +120,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/reflect-vmodl.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
+							<groupId>com.vmware.vlsi</groupId>
 							<artifactId>reflect-vmodl</artifactId>
-							<version>1.0</version>
+							<version>6.5.0-4258493</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -135,9 +135,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/samples-annotations-1.0.0.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
-							<artifactId>samples-annotations</artifactId>
-							<version>1.0</version>
+							<groupId>com.vmware.vsphere.samples.annotations</groupId>
+							<artifactId>vsphere-samples-annotations</artifactId>
+							<version>1.0.0</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -150,9 +150,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/samples-core-1.0.0.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
-							<artifactId>samples-core</artifactId>
-							<version>1.0</version>
+							<groupId>com.vmware.vsphere.samples.core</groupId>
+							<artifactId>vsphere-samples-core</artifactId>
+							<version>1.0.0</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -165,9 +165,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/sblim-cim-client2-2.1.1.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
-							<artifactId>sblim-cim-client</artifactId>
-							<version>1.0</version>
+							<groupId>net.sourceforge.sblim</groupId>
+							<artifactId>sblim-cim-client2</artifactId>
+							<version>2.1.1</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -270,9 +270,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/vlsi-client.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
+							<groupId>com.vmware.vlsi</groupId>
 							<artifactId>vlsi-client</artifactId>
-							<version>1.0</version>
+							<version>6.5.0-4258493</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -285,9 +285,9 @@
 						</goals>
 						<configuration>
 							<file>./libs/vlsi-core.jar</file>
-							<groupId>com.vmware.flowgate</groupId>
+							<groupId>com.vmware.vlsi</groupId>
 							<artifactId>vlsi-core</artifactId>
-							<version>1.0</version>
+							<version>6.5.0-4258493</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -481,50 +481,49 @@
 			<version>${commons-cli.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
+			<groupId>com.vmware.vim</groupId>
 			<artifactId>vim25</artifactId>
-			<version>1.0</version>
+			<version>6.0.0-2561048</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
-			<artifactId>bcpkix</artifactId>
-			<version>1.0</version>
+  			<groupId>org.bouncycastle</groupId>
+  			<artifactId>bcpkix-jdk15on</artifactId>
+  			<version>1.50</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
-			<artifactId>bcprov-ext</artifactId>
-			<version>1.0</version>
+		  <groupId>org.bouncycastle</groupId>
+		  <artifactId>bcprov-ext-jdk15on</artifactId>
+		  <version>1.50</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
-			<artifactId>bcprov</artifactId>
-			<version>1.0</version>
+		  <groupId>org.bouncycastle</groupId>
+		  <artifactId>bcprov-jdk15on</artifactId>
+		  <version>1.50</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
-			<artifactId>query-vmodl</artifactId>
-			<version>1.0</version>
+		  <groupId>com.vmware.vlsi</groupId>
+		  <artifactId>query-vmodl</artifactId>
+		  <version>6.5.0-4258493</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
-			<artifactId>reflect-vmodl</artifactId>
-			<version>1.0</version>
+  			<groupId>com.vmware.vlsi</groupId>
+  			<artifactId>reflect-vmodl</artifactId>
+  			<version>6.5.0-4258493</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
-			<artifactId>samples-annotations</artifactId>
-			<version>1.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
-			<artifactId>samples-core</artifactId>
-			<version>1.0</version>
+		  <groupId>com.vmware.vsphere.samples.annotations</groupId>
+		  <artifactId>vsphere-samples-annotations</artifactId>
+		  <version>1.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
-			<artifactId>sblim-cim-client</artifactId>
-			<version>1.0</version>
+		  <groupId>com.vmware.vsphere.samples.core</groupId>
+		  <artifactId>vsphere-samples-core</artifactId>
+		  <version>1.0.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>net.sourceforge.sblim</groupId>
+		  <artifactId>sblim-cim-client2</artifactId>
+		  <version>2.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vmware.flowgate</groupId>
@@ -557,14 +556,14 @@
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
-			<artifactId>vlsi-client</artifactId>
-			<version>1.0</version>
+		  <groupId>com.vmware.vlsi</groupId>
+		  <artifactId>vlsi-client</artifactId>
+		  <version>6.5.0-4258493</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vmware.flowgate</groupId>
-			<artifactId>vlsi-core</artifactId>
-			<version>1.0</version>
+		  <groupId>com.vmware.vlsi</groupId>
+		  <artifactId>vlsi-core</artifactId>
+		  <version>6.5.0-4258493</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vmware.flowgate</groupId>
