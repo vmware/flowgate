@@ -215,6 +215,36 @@
 				<artifactId>maven-install-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>install-platform-api-model</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<file>./libs/platform-api-model-1.6.jar</file>
+							<groupId>com.vmware</groupId>
+							<artifactId>platform-api-model</artifactId>
+							<version>1.6</version>
+							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+					<execution>
+						<id>install-vcops-suiteapi</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<file>./libs/vcops-suiteapi-client-1.6.jar</file>
+							<groupId>com.vmware</groupId>
+							<artifactId>vcops-suiteapi-client</artifactId>
+							<version>1.6</version>
+							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
+						</configuration>
+					</execution>
+					<execution>
 						<id>install-query-vmodl</id>
 						<phase>initialize</phase>
 						<goals>
