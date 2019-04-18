@@ -7,7 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </span>
     </div>
   </clr-alert>
- 
+
   <clr-tabs>
         <clr-tab *appHasPrivilege=integrationSummary>
             <button clrTabLink (click)="getFirstPageData()">Integration Summary</button>
@@ -149,6 +149,20 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </div>
             </clr-tab-content>
         </clr-tab>
+        <clr-tab *appHasPrivilege=assetTopology>
+            <button clrTabLink>Asset Topology</button>
+            <clr-tab-content *clrIfActive>
+                
+                <setting-asset></setting-asset>
+            
+                <div class="row">
+                    <span class="label label-info" style="border:0px; color:white;background:#006a91;width: 75px;">vCenter</span>
+                    <span class="label label-success" style="border:0px; color:white;background:#bbcdd6;width: 75px;">Host</span>
+                    <span class="label label-warning" style="border:0px; color:white;background:#ea924c;width: 75px;">PDU</span>
+                    <span class="label label-danger" style="border:0px; color:white;background:#04273e;width: 75px;">Switch</span>
+                </div>
+            </clr-tab-content>
+        </clr-tab>
         <clr-tab *appHasPrivilege=syncData>
             <button clrTabLink>SyncData</button>
             <clr-tab-content *clrIfActive>
@@ -235,12 +249,6 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     </div>
                 </clr-tab-content>
             </clr-tab>
-            <clr-tab>
-                <button clrTabLink>TODO</button>
-                <clr-tab-content *clrIfActive>
-                    
-                </clr-tab-content>
-            </clr-tab>
     </clr-tabs>
 
 <clr-modal [(clrModalOpen)]="systemSummary" [clrModalStaticBackdrop]="true" [clrModalSize]="'xl'">
@@ -261,7 +269,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                     <clr-dg-column>SWITCH</clr-dg-column>
                                     <clr-dg-column>SENSORS</clr-dg-column>
 
-                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+                                    <clr-dg-placeholder>We couldn't find any Nlyte!</clr-dg-placeholder>
 
                                     <clr-dg-row *ngFor="let nlyte of flowgateSummery.nlyteSummary"> 
                                         <clr-dg-cell style="min-width: 17rem;text-align: center;">
@@ -300,7 +308,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                     <clr-dg-column>SENSOR</clr-dg-column>
                                     <clr-dg-column>PDU</clr-dg-column>
 
-                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+                                    <clr-dg-placeholder>We couldn't find any PowerIQ!</clr-dg-placeholder>
 
                                     <clr-dg-row *ngFor="let PowerIQ of flowgateSummery.powerIqSummary"> 
                                         <clr-dg-cell style="text-align: center;">
@@ -354,7 +362,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                     <clr-dg-column>Host</clr-dg-column>
                                     <clr-dg-column>Number</clr-dg-column>
 
-                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+                                    <clr-dg-placeholder>We couldn't find any VC!</clr-dg-placeholder>
 
                                     <clr-dg-row *ngFor="let vc of flowgateSummery.vcSummary"> 
                                         <clr-dg-cell style="text-align: center;">
@@ -380,7 +388,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                     <clr-dg-column>Host</clr-dg-column>
                                     <clr-dg-column>Number</clr-dg-column>
 
-                                    <clr-dg-placeholder>We couldn't find any job!</clr-dg-placeholder>
+                                    <clr-dg-placeholder>We couldn't find any VRO!</clr-dg-placeholder>
 
                                     <clr-dg-row *ngFor="let vro of flowgateSummery.vroSummary"> 
                                         <clr-dg-cell style="text-align: center;">

@@ -109,4 +109,23 @@ export class SettingService {
       this.options = new RequestOptions({ headers: header });
       return this.http.get(""+this.API_URL+"/v1/summary/systemsummary",this.options).map((res)=>res)
     }
+    getAllVcenter(){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      return this.http.get(""+this.API_URL+"/v1/sddc/vc",this.options).map((res)=>res)
+    }
+    getVcenterById(id){
+      // console.log(id)
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      return this.http.get(""+this.API_URL+"/v1/assets/mapping/vc/"+id,this.options).map((res)=>res)
+    }
+    getAssetById(id){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      return this.http.get(""+this.API_URL+"/v1/assets/"+id,this.options).map((res)=>res)
+    }
 }

@@ -19,6 +19,7 @@ export class TriggerJobComponent implements OnInit {
   syncData:string[]=["startFullMappingAggregation","generateServerPDUMapping"];
   syncUnMappedServers:string[]=["readUnMappedServers"];
   integrationSummary:string[]=["readSystemSummary"];
+  assetTopology:string[]=["readAsset","readSddcSoftwareConfigByVC","readMappingsByVCID"];
   unmappedservershow:boolean=false;
   jobs=[
     {

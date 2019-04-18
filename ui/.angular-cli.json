@@ -28,7 +28,12 @@
                 "../node_modules/mutationobserver-shim/dist/mutationobserver.min.js",
                 "../node_modules/@webcomponents/custom-elements/custom-elements.min.js",
                 "../node_modules/@clr/icons/clr-icons.min.js",
-                "../node_modules/web-animations-js/web-animations.min.js"
+                "../node_modules/web-animations-js/web-animations.min.js",
+                "./assets/d3js/d3.v3.min.js",
+                "./assets/d3js/sankey.js",
+                "./assets/d3js/d3.chart.js",
+                "./assets/d3js/d3.chart.sankey.min.js"
+        
             ],
             "environmentSource": "environments/environment.ts",
             "environments": {
