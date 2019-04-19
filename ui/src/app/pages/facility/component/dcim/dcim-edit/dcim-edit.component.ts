@@ -106,8 +106,8 @@ export class DcimEditComponent implements OnInit {
       TEMPERATURE_UNIT:"",
       HUMIDITY_UNIT:""
     }
-    this.dcimConfig.id = window.sessionStorage.getItem("editdcimconfigid");
-
+    this.dcimConfig.id = this.activedRoute.snapshot.params['id'];
+   
     if(this.dcimConfig.id != null && this.dcimConfig.id != ""){
       this.service.getDcimConfig(this.dcimConfig.id).subscribe(
         (data)=>{

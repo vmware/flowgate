@@ -84,8 +84,7 @@ export class CmdbListComponent implements OnInit {
     this.router.navigate(["/ui/nav/facility/cmdb/cmdb-add"]);
   }
   onEdit(id){
-    window.sessionStorage.setItem("editcmdbconfigid",id);
-    this.router.navigateByUrl("/ui/nav/facility/cmdb/cmdb-edit");
+    this.router.navigate(['/ui/nav/facility/cmdb/cmdb-edit',id]);
   }
   confirm(){
     this.service.deleteDcimConfig(this.cmdbConfigId).subscribe(data=>{

@@ -18,7 +18,7 @@ const routes: Routes = [
         path:'cmdb-list',
         component:CmdbListComponent
       },{
-        path:'cmdb-edit',
+        path:'cmdb-edit/:id',
         component:CmdbEditComponent
       },{
         path:'cmdb-add',

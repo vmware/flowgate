@@ -79,7 +79,7 @@ export class VmwareConfigEditComponent implements OnInit {
     this.router.navigate(["/ui/nav/sddc/vmware/vmware-list"]);
   }
   ngOnInit() {
-    this.vmwareConfig.id = window.sessionStorage.getItem("editserverid");
+    this.vmwareConfig.id = this.activedRoute.snapshot.params['id'];
 
     if(this.vmwareConfig.id != null && this.vmwareConfig.id != ""){
       this.service.getVmwareConfig(this.vmwareConfig.id).subscribe(

@@ -64,8 +64,7 @@ export class VmwareConfigListComponent implements OnInit {
      this.editStatusSDDCId = "";
    }
    fixError(){
-     window.sessionStorage.setItem("editserverid",this.editStatusSDDCId);
-     this.router.navigateByUrl("/ui/nav/sddc/vmware/vmware-edit");
+     this.router.navigate(['/ui/nav/sddc/vmware/vmware-edit',this.editStatusSDDCId]);
    }
    updateStatusResultClose(){
      this.updateStatusAlertclose = true;
@@ -151,8 +150,7 @@ export class VmwareConfigListComponent implements OnInit {
     this.router.navigate(["/ui/nav/sddc/vmware/vmware-add"]);
   }
   onEdit(id){
-    window.sessionStorage.setItem("editserverid",id);
-    this.router.navigateByUrl("/ui/nav/sddc/vmware/vmware-edit");
+    this.router.navigate(['/ui/nav/sddc/vmware/vmware-edit',id]);
   }
   confirmDelete(){
     this.service.deleteVmwareConfig(this.vmwareConfigId).subscribe(data=>{

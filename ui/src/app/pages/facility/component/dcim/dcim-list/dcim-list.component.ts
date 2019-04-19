@@ -69,8 +69,8 @@ export class DcimListComponent implements OnInit {
     this.operationDcim = {};
   }
   fixError(){
-    window.sessionStorage.setItem("editdcimconfigid",this.editStatusDcimId);
-    this.router.navigateByUrl("/ui/nav/facility/dcim/dcim-edit");
+    let id = this.editStatusDcimId;
+    this.router.navigate(['/ui/nav/facility/dcim/dcim-edit',id]);
   }
   updateStatusResultClose(){
     this.updateStatusAlertclose = true;
@@ -165,8 +165,7 @@ export class DcimListComponent implements OnInit {
     this.router.navigate(["/ui/nav/facility/dcim/dcim-add"]);
   }
   onEdit(id){
-    window.sessionStorage.setItem("editdcimconfigid",id);
-    this.router.navigateByUrl("/ui/nav/facility/dcim/dcim-edit");
+    this.router.navigate(['/ui/nav/facility/dcim/dcim-edit',id]);
   }
   confirm(){
     this.service.deleteDcimConfig(this.dcimConfigId).subscribe(data=>{

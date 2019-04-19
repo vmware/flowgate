@@ -79,8 +79,7 @@ export class UserListComponent implements OnInit {
     this.router.navigate(["/ui/nav/user/user-add"]);
   }
   onEdit(id){
-    window.sessionStorage.setItem("editid",id);
-    this.router.navigateByUrl("/ui/nav/user/user-edit");
+    this.router.navigate(['/ui/nav/user/user-edit',id]);
   }
   confirm(){
     this.data.deleteUser(this.userId).subscribe(data=>{

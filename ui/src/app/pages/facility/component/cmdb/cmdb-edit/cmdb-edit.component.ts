@@ -100,7 +100,7 @@ export class CmdbEditComponent implements OnInit {
     this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
   }
   ngOnInit() {
-    this.cmdbConfig.id = window.sessionStorage.getItem("editcmdbconfigid");
+    this.cmdbConfig.id = this.activedRoute.snapshot.params['id'];
 
     if(this.cmdbConfig.id != null && this.cmdbConfig.id != ""){
       this.service.getDcimConfig(this.cmdbConfig.id).subscribe(
