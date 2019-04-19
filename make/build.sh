@@ -9,7 +9,7 @@ CURRENTPATH=`pwd` #make
 
 OUTPUTJARFILESNUM=9
 UIDISTFILENUM=18
-TIMEOUTSECOND=240
+TIMEOUTSECOND=600
 BUILDLOG=$CURRENTPATH/build-log
 SOURCECODEDIR=$CURRENTPATH/../../flowgate
 OUTPUTJARPATH=$CURRENTPATH/jar-output
@@ -22,7 +22,6 @@ DOCKERCOMPOSEBUILDJARFILE=$DOCKERMAVENBUILD/docker-compose.build.jar.yml
 DOCKERCOMPOSERUNFILE=$DOCKERMAVENBUILD/docker-compose.run.images.yml
 CONFTAR=$CURRENTPATH/conf.tar.gz
 
-APACHERESOURCEDIR=/var/www/html
 
 #####set version
 if [[ $2 == '-version' ]]; then
@@ -30,7 +29,7 @@ if [[ $2 == '-version' ]]; then
 	FLOWGATE_VERSION=${INPUT:=v1.0}
 	echo $FLOWGATE_VERSION
 else
-	echo "eg. 'bash build.sh ( ui | jar | image | save | copy2server | all ) -version v1.0'"
+	echo "eg. 'bash build.sh ( ui | jar | image | save | all ) -version v1.0'"
 	exit 0
 fi
 sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSEBUILDIMAGESFILE
@@ -123,12 +122,6 @@ saveDockerImages(){
 	flowgate/redis:$FLOWGATE_VERSION flowgate/mongodb:$FLOWGATE_VERSION >> $FLOWGATEIMAGESTAR
 }
 
-copyResourceToServer(){
-
-	echo "copy all resource to apache server..."
-
-	cp $DOCKERCOMPOSERUNFILE $FLOWGATEIMAGESTAR $CONFTAR $APACHERESOURCEDIR
-}
 
 case $1 in
 	"ui")
@@ -143,18 +136,14 @@ case $1 in
 	"save")
 		saveDockerImages
 	;;
-	"copy2server")
-		copyResourceToServer
-	;;
 	"all")
 		buildUi
 		buildAllJars
 		buildDockerImages
 		saveDockerImages
-		copyResourceToServer
 		echo "build success."
 	;;
 	*)
-		echo "bash build.sh ( ui | jar | image | save | copy2server | all ) -version v1.0"
+		echo "bash build.sh ( ui | jar | image | save | all ) -version v1.0"
 	;;
 esac
