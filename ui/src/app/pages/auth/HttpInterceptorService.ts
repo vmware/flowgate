@@ -28,8 +28,8 @@
       
      return super.post(url, body, options);
    }
-
-   RefactorRequestOptionArgs(options ? : RequestOptionsArgs): RequestOptionsArgs {
+   /**
+    RefactorRequestOptionArgs(options ? : RequestOptionsArgs): RequestOptionsArgs {
      if (options == null) {
        options = new RequestOptions();
      }
@@ -44,6 +44,9 @@
      }
      return options;
    }
+    * 
+    */
+   
    intercept(observable: Observable < Response > ) : Observable < Response > {
        return observable.catch((err, source) => {
            if(err.status == 401 && err.json().error == "Unauthorized"){
@@ -54,7 +57,6 @@
 
    }
    logout(): void {
-    localStorage.removeItem('currentUser'); 
     window.location.href = "/";
   }
  }

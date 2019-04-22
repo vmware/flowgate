@@ -22,7 +22,7 @@ export const routes: Routes = [
             path:'sensorsetting-list',
             component:SensorsettingListComponent
           },{
-            path:'sensorsetting-edit',
+            path:'sensorsetting-edit/:id',
             component:SensorsettingEditComponent
           },{
             path:'sensorsetting-add',

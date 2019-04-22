@@ -16,14 +16,14 @@ import { AuthenticationService } from '../auth/authenticationService';
 })
 export class UserLoginComponent implements OnInit {
 
+
     tips:boolean = false;
-    //auth:boolean = false;
     textContent = "";
-   user ={
+    user ={
     id:"",
     username:"",
     password:"",
-   }
+    }
     constructor(private router: Router,private data:AuthenticationService,private ls:LocalStorage) {
     }
     userName:string
@@ -42,23 +42,7 @@ export class UserLoginComponent implements OnInit {
             this.login(this.userName,this.password);
         }
     }
-    // login(userName,password){
-    //     this.data.login(userName,password,window.sessionStorage.getItem("auth_url")).subscribe(
-    //         (data)=>{if( data.json().code == 1){
-    //             this.tips = false;
-    //             this.user.username = data.json().data.userName;
-    //             this.user.id = data.json().data.id;
-    //             this.auth = true;
-    //             window.sessionStorage.setItem("username",this.user.username);
-    //             window.sessionStorage.setItem("id",this.user.id);
-    //             this.router.navigate(["nav"]);
-    //         }else{
-    //             this.tips = true;
-    //             this.textContent = "Invalid user name or password";
-    //             this.auth = false;
-    //         }
-    //       })      
-    // }
+  
     login(userName,password){
         this.data.login(userName,password).subscribe(
             (data)=>{if(data){

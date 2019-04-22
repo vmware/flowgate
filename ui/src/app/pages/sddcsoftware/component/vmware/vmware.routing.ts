@@ -18,7 +18,7 @@ const routes: Routes = [
       path:'vmware-list',
       component:VmwareConfigListComponent
     },{
-      path:'vmware-edit',
+      path:'vmware-edit/:id',
       component:VmwareConfigEditComponent
     },{
       path:'vmware-add',

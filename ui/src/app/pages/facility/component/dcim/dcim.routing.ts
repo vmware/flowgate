@@ -17,7 +17,7 @@ const routes: Routes = [
         path:'dcim-list',
         component:DcimListComponent
       },{
-        path:'dcim-edit',
+        path:'dcim-edit/:id',
         component:DcimEditComponent
       },{
         path:'dcim-add',

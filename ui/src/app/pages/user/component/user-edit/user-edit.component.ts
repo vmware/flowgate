@@ -182,7 +182,7 @@ export class UserEditComponent implements OnInit {
 
   }
   ngOnInit() { 
-    this.user.id = window.sessionStorage.getItem("editid");
+    this.user.id = this.activedRoute.snapshot.params['id'];
     if(this.user.id != null && this.user.id != ""){
       this.getusers();
     }

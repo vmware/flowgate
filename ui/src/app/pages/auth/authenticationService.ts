@@ -18,10 +18,10 @@ const httpOptions = {
 
 @Injectable()
 export class AuthenticationService {
-  //private authurl = window.sessionStorage.getItem("api_url");
   private authurl:string=environment.API_URL;
   private headers = new Headers({ 'Content-Type': 'application/json' });
   private options:RequestOptions;
+  private currentUser:string;
 
   constructor(private http: Http,private router: Router) {
   }
@@ -32,8 +32,7 @@ export class AuthenticationService {
     return this.http.post(""+this.authurl+"/v1/auth/login", JSON.stringify({userName: username, password: password}), options).pipe(
       tap(res => {
         if (res.ok) {
-          // login successful, store username and jwt token in local storage to keep user logged in between page refreshes
-          localStorage.setItem('currentUser', JSON.stringify({username: username, token: res.json().token, authorities:res.json().privileges}));
+          this.currentUser = JSON.stringify({username: username, token: res.json().token, authorities:res.json().privileges});
           return of(true);
         } else {
           return of(false);
@@ -46,7 +45,7 @@ export class AuthenticationService {
   }
 
   getCurrentUser(): any {
-    const userStr = localStorage.getItem('currentUser');
+    const userStr = this.currentUser;
     return userStr ? JSON.parse(userStr) : '';
   }
 
@@ -72,7 +71,6 @@ export class AuthenticationService {
     this.http.get(""+this.authurl+"/v1/auth/logout",this.options).subscribe(
       (data)=>{
         if(data.status == 200){
-          localStorage.removeItem('currentUser');
           this.router.navigateByUrl("/");
           
         }

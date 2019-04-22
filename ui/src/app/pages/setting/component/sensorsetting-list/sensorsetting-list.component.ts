@@ -71,8 +71,7 @@ export class SensorsettingListComponent implements OnInit {
     this.router.navigate(["/ui/nav/setting/sensorsetting-add"]);
   }
   onEdit(id){
-    window.sessionStorage.setItem("editsensorsettingid",id);
-    this.router.navigateByUrl("/ui/nav/setting/sensorsetting-edit");
+    this.router.navigate(['/ui/nav/setting/sensorsetting-edit',id]);
   }
   confirm(){
     this.data.deletesensorsetting(this.sensorsettingId).subscribe(data=>{

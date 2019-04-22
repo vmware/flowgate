@@ -12,7 +12,7 @@ import {Router,ActivatedRoute} from '@angular/router';
 })
 export class SensorsettingEditComponent implements OnInit {
 
-  constructor(private service:SettingService,private router:Router) { }
+  constructor(private service:SettingService,private router:Router,private activedRoute:ActivatedRoute) { }
 
   sensorsetting = {
     id:"",
@@ -53,7 +53,7 @@ export class SensorsettingEditComponent implements OnInit {
 
 
   ngOnInit() {
-    this.sensorsetting.id = window.sessionStorage.getItem("editsensorsettingid");
+    this.sensorsetting.id = this.activedRoute.snapshot.params['id'];
     if(this.sensorsetting.id != null && this.sensorsetting.id != ""){
       this.service.getsensorsetting(this.sensorsetting.id).subscribe(
         (data)=>{
