@@ -28,7 +28,7 @@ export const routes: Routes = [
             path:'sensorsetting-add',
             component:SensorsettingAddComponent
           },{
-            path:'job-trigger',
+            path:'system-setting',
             component:TriggerJobComponent
           }
         ]
