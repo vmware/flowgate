@@ -15,6 +15,23 @@
           </span>
       </div>
     </clr-alert>
+    <clr-alert [clrAlertType]="'alert-danger'" [clrAlertAppLevel]="true" [clrAlertClosed]= "isStatusErrorMsgAlertClose" (clrAlertClosedChange)="statusMsgAlertClose()" >
+        <clr-alert-item>
+            <span class="alert-text">
+                {{statusErrorMsg}}you can reactive the integration by click <clr-icon shape="ellipsis-vertical"></clr-icon> > Active , you can update the setting by click Edit Setting button if needed. 
+            </span>
+            <div class="alert-actions">
+                <button class="btn alert-action" (click)="fixError()">Update Setting</button>
+            </div>
+        </clr-alert-item>
+    </clr-alert>
+    <clr-alert [clrAlertType]="updateStatusAlertType" (clrAlertClosedChange)="updateStatusResultClose()" [clrAlertClosed]= "updateStatusAlertclose">
+        <div class="alert-item">
+            <span class="alert-text">
+                {{updateStatusAlertcontent}}
+            </span>
+        </div>
+    </clr-alert>
   <clr-datagrid>
   
    <clr-dg-column style="width: 10%">Type</clr-dg-column>
@@ -23,7 +40,8 @@
    <clr-dg-column>Description</clr-dg-column>
    <clr-dg-column style="width: 10%">LoginUserName</clr-dg-column>
    <clr-dg-column style="width: 10%">VerifyCert</clr-dg-column>
-  
+   <clr-dg-column style="width: 10%">Status</clr-dg-column>
+
    <clr-dg-placeholder>We couldn't find any CMDB integration!</clr-dg-placeholder>
   
   
@@ -32,6 +50,8 @@
          <button class="action-item" (click)="onEdit(cmdbConfig.id)" *appHasPrivilege=updatefacility>Edit</button>
          <button class="action-item" (click)="onDelete(cmdbConfig.id)" *appHasPrivilege=deletefacility>Delete</button>
          <button class="action-item" (click)="syncData(cmdbConfig.id,cmdbConfig.serverURL)" *appHasPrivilege=syncdata>SyncData</button>
+         <button class="action-item" *ngIf="cmdbConfig.integrationStatus.status == 'ACTIVE'" (click)="updateCMDBStatus(cmdbConfig)" >Pending</button>
+        <button class="action-item" *ngIf="cmdbConfig.integrationStatus.status != 'ACTIVE'" (click)="updateCMDBStatus(cmdbConfig)" >Active</button>
       </clr-dg-action-overflow>
        <clr-dg-cell>{{cmdbConfig.type}}</clr-dg-cell>
        <clr-dg-cell>{{cmdbConfig.serverURL}}</clr-dg-cell>
@@ -39,7 +59,11 @@
        <clr-dg-cell>{{cmdbConfig.description}}</clr-dg-cell>    
        <clr-dg-cell>{{cmdbConfig.userName}}</clr-dg-cell>
        <clr-dg-cell>{{cmdbConfig.verifyCert}}</clr-dg-cell>
-       
+       <clr-dg-cell>{{cmdbConfig.integrationStatus.status}}
+        <clr-icon *ngIf="cmdbConfig.integrationStatus.status == 'ERROR'" class="alert-icon" style="color: #c92100;cursor: pointer;" shape="exclamation-circle" (click)="showErrorMsg(cmdbConfig)"></clr-icon>       
+        <clr-icon *ngIf="cmdbConfig.integrationStatus.status == 'ACTIVE'" class="alert-icon" shape="check-circle" style="color: #318700;"></clr-icon>
+        <clr-icon *ngIf="cmdbConfig.integrationStatus.status == 'PENDING'" class="alert-icon" shape="exclamation-triangle" style="color: #ffdc0b;"></clr-icon>
+    </clr-dg-cell>
   </clr-dg-row>
   
   

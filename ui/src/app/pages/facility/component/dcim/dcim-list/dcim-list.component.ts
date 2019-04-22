@@ -45,7 +45,6 @@ export class DcimListComponent implements OnInit {
   isStatusErrorMsgAlertClose:boolean=true;
   editStatusDcimId:string = "";
   statusErrorMsg = "";
-  operationDcim ={};
   dcimModule:FacilityModule = new FacilityModule();
   checkStatus(element:any):any{
     var status = {
@@ -61,12 +60,10 @@ export class DcimListComponent implements OnInit {
     this.isStatusErrorMsgAlertClose = false;
     this.statusErrorMsg = "The server "+dcim.name+" has an error:"+dcim.integrationStatus.detail
     this.editStatusDcimId = dcim.id;
-    this.operationDcim = dcim;
   }
   statusMsgAlertClose(){
     this.isStatusErrorMsgAlertClose = true;
     this.editStatusDcimId = "";
-    this.operationDcim = {};
   }
   fixError(){
     window.sessionStorage.setItem("editdcimconfigid",this.editStatusDcimId);

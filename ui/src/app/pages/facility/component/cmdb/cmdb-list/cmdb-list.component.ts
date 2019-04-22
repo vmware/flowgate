@@ -8,6 +8,7 @@ import { error } from 'util';
 import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import { DcimService } from '../../dcim/dcim.service';
+import { FacilityModule } from '../../../facility.module';
 
 @Component({
   selector: 'app-cmdb-list',
@@ -36,20 +37,98 @@ export class CmdbListComponent implements OnInit {
   alertclose:boolean = true;
   alertType:string = "";
   alertcontent:string = "";
+
+  updateStatusAlertclose:boolean = true;
+  updateStatusAlertType:string = "";
+  updateStatusAlertcontent:string = "";
+  
+  //for integrationStatus alert message
+  isStatusErrorMsgAlertClose:boolean=true;
+  editStatusDcimId:string = "";
+  statusErrorMsg = "";
+  dcimModule:FacilityModule = new FacilityModule();
+  checkStatus(element:any):any{
+    var status = {
+      "status":"ACTIVE",
+      "detail":""
+    };
+    if(element.integrationStatus == null){
+      element.integrationStatus = status;
+    }
+    return element;
+  }
+  showErrorMsg(cmdb:any){
+    this.isStatusErrorMsgAlertClose = false;
+    this.statusErrorMsg = "The server "+cmdb.name+" has an error:"+cmdb.integrationStatus.detail
+    this.editStatusDcimId = cmdb.id;
+  }
+  statusMsgAlertClose(){
+    this.isStatusErrorMsgAlertClose = true;
+    this.editStatusDcimId = "";
+  }
+  fixError(){
+    window.sessionStorage.setItem("editdcimconfigid",this.editStatusDcimId);
+    this.router.navigateByUrl("/ui/nav/facility/cmdb/cmdb-edit");
+  }
+  updateStatusResultClose(){
+    this.updateStatusAlertclose = true;
+  }
+  updateCMDBStatus(cmdb:FacilityModule){
+    var updateCmdb:FacilityModule = new FacilityModule();
+    updateCmdb.id = cmdb.id;
+    if(cmdb.integrationStatus.status == "ACTIVE"){
+      updateCmdb.integrationStatus = {
+        "status":"PENDING",
+        "detail":""
+      }
+    }else{
+      updateCmdb.integrationStatus = {
+        "status":"ACTIVE",
+        "detail":"",
+        "retryCounter":0
+      };
+    }
+    this.service.updateFacilityStatus(updateCmdb).subscribe(
+      (data)=>{
+        if(data.status == 200){
+          this.updateStatusAlertType = "alert-success";
+          if(updateCmdb.integrationStatus.status == "ACTIVE"){
+            this.updateStatusAlertcontent = "The server "+cmdb.name+" has been activated.";
+          }else{
+            this.updateStatusAlertcontent = "The server "+cmdb.name+" has been suspended.";
+          }
+          this.updateStatusAlertclose = false;
+          setTimeout(() => {
+            this.updateStatusAlertclose = true  
+          },2000);
+          this.getCMDBConfigdatas(this.currentPage,this.pageSize);
+        }
+      },error=>{
+        this.updateStatusAlertType = "alert-danger";
+        this.updateStatusAlertcontent = "Activation or suspension of the server failed.";
+        this.updateStatusAlertclose = false;
+        setTimeout(() => {
+          this.updateStatusAlertclose = true  
+        },2000);
+        this.getCMDBConfigdatas(this.currentPage,this.pageSize);
+      }
+    )
+  }
+
   setInfo(){
     this.info=this.pageSize;
-    this.getVmareConfigdatas(this.currentPage,this.pageSize)
+    this.getCMDBConfigdatas(this.currentPage,this.pageSize)
   }
   previous(){
     if(this.currentPage>1){
       this.currentPage--;
-      this.getVmareConfigdatas(this.currentPage,this.pageSize)
+      this.getCMDBConfigdatas(this.currentPage,this.pageSize)
     }
   }
   next(){
     if(this.currentPage < this.totalPage){
       this.currentPage++
-      this.getVmareConfigdatas(this.currentPage,this.pageSize)
+      this.getCMDBConfigdatas(this.currentPage,this.pageSize)
     }
   }
   createTime(time){
@@ -60,13 +139,14 @@ export class CmdbListComponent implements OnInit {
 	    var date = da.getDate();
 	    return year+month+date;
 	}
-  getVmareConfigdatas(currentPage,pageSize){
+  getCMDBConfigdatas(currentPage,pageSize){
     this.cmdbConfigs = [];
     this.service.getDcimConfigData(currentPage,pageSize).subscribe(
       (data)=>{if(data.status == 200){
             var types:string[]=["InfoBlox","OtherCMDB","Labsdb"]; 
             data.json().content.forEach(element=>{
               if(types.indexOf(element.type) != -1){
+                this.checkStatus(element);
                 this.cmdbConfigs.push(element);
               }
             })
@@ -92,7 +172,7 @@ export class CmdbListComponent implements OnInit {
       
       if(data.status == 200){
         this.basic = false;
-        this.getVmareConfigdatas(this.currentPage,this.pageSize)
+        this.getCMDBConfigdatas(this.currentPage,this.pageSize)
       }else{
         this.clrAlertClosed = false;
       }
@@ -145,7 +225,7 @@ export class CmdbListComponent implements OnInit {
     )
   }
   ngOnInit() {
-     this.getVmareConfigdatas(this.currentPage,this.pageSize); 
+     this.getCMDBConfigdatas(this.currentPage,this.pageSize); 
   
   }
 
