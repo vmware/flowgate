@@ -4,7 +4,6 @@ RUN mkdir /flowgate-build \
   && mkdir /log
 VOLUME /flowgate-build /log
 COPY build.sh /
-COPY settings.xml /usr/share/maven/conf/
 RUN chmod o+x build.sh
 
 WORKDIR /

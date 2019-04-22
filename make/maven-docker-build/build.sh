@@ -9,12 +9,11 @@ OUTPUTJARPATH=$MAKEDIR/jar-output
 OUTPUTJARNAME=-0.0.1-SNAPSHOT.jar
 
 commonproject=("flowgate-common" "common-restclient" "worker-jobs")
-flowgateapiproject=("flowgate-api")
-serviceproject=("vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "labsdb-worker")
-specialproject=("vc-worker")
+serviceproject=("nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "labsdb-worker")
+specialproject=("vc-worker" "flowgate-api" "vro-worker")
 mongodbangredis=("mongodb" "redis")
 
-alldir=(${serviceproject[*]} ${specialproject[*]} ${flowgateapiproject[*]})
+alldir=(${serviceproject[*]} ${specialproject[*]})
 
 
 if [ -f "$BUILDLOG" ];then
@@ -55,16 +54,18 @@ do
 	mvn clean install >> $BUILDLOG
 done
 
-echo "Build api model." >> $BUILDLOG
-for w in "${flowgateapiproject[@]}"
+echo "Build special model." >> $BUILDLOG
+for k in "${specialproject[@]}"
 do
-	cd $SOURCEDIR/$w
-	mvn clean package >> $BUILDLOG
-	if [ -f "target/$w$OUTPUTJARNAME" ];then
+	cd $SOURCEDIR/$k
+	mvn clean initialize  >> $BUILDLOG
+	mvn package  >> $BUILDLOG
+	if [ -f "target/$k$OUTPUTJARNAME" ];then
 		cp target/*.jar $OUTPUTJARPATH/
 	else
-		echo "build $w$OUTPUTJARNAME failure" >> $BUILDERRORLOG
-		mvn clean package >> $BUILDERRORLOG
+		echo "build $k$OUTPUTJARNAME failure" >> $BUILDERRORLOG
+		mvn clean initialize  >> $BUILDERRORLOG
+		mvn package  >> $BUILDERRORLOG
 		continue
 	fi
 done
@@ -83,22 +84,6 @@ do
 	else
 		echo "build $j$OUTPUTJARNAME failure" >> $BUILDERRORLOG
 		mvn clean package >> $BUILDERRORLOG
-		continue
-	fi
-done
-
-echo "Build vc model." >> $BUILDLOG
-for k in "${specialproject[@]}"
-do
-	cd $SOURCEDIR/$k
-	mvn clean initialize  >> $BUILDLOG
-	mvn package  >> $BUILDLOG
-	if [ -f "target/$k$OUTPUTJARNAME" ];then
-		cp target/*.jar $OUTPUTJARPATH/
-	else
-		echo "build $k$OUTPUTJARNAME failure" >> $BUILDERRORLOG
-		mvn clean initialize  >> $BUILDERRORLOG
-		mvn package  >> $BUILDERRORLOG
 		continue
 	fi
 done
