@@ -221,7 +221,12 @@ public class LabsdbService implements AsyncService{
          return null;
       } 
       for(Asset asset:servers) {
-         ResponseEntity<String> result = labsdbClient.getWireMap(asset.getAssetName());
+         ResponseEntity<String> result = null;
+         try {
+            result = labsdbClient.getWireMap(asset.getAssetName());
+         }catch(Exception e) {
+            logger.error("An exception occurred while accessing the labsdb server."+e.getMessage());
+         }
          if(result == null || result.getBody() == null) {
             continue;
          }
@@ -314,7 +319,7 @@ public class LabsdbService implements AsyncService{
    public List<Asset> filterServers(List<Asset> servers){
       List<Asset> unMappedServer = new ArrayList<Asset>();
       for(Asset server:servers) {
-         if(server.getStatus() == null || server.getStatus().getPduMapping() == null ||  server.getStatus().getNetworkMapping() == null) {
+         if(server.getStatus() == null || (server.getStatus().getPduMapping() == null &&  server.getStatus().getNetworkMapping() == null)) {
             unMappedServer.add(server);
          }else if(server.getStatus().getPduMapping().getWeight()<PduMapping.MAPPEDBYLABSDB.getWeight() ||
                server.getStatus().getNetworkMapping().getWeight()<NetworkMapping.MAPPEDBYLABSDB.getWeight()) {
