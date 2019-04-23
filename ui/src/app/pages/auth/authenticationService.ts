@@ -32,7 +32,8 @@ export class AuthenticationService {
     return this.http.post(""+this.authurl+"/v1/auth/login", JSON.stringify({userName: username, password: password}), options).pipe(
       tap(res => {
         if (res.ok) {
-          this.currentUser = JSON.stringify({username: username, token: res.json().token, authorities:res.json().privileges});
+          let currentUser = btoa(JSON.stringify({username: username, token: res.json().token, authorities:res.json().privileges}));
+          sessionStorage.setItem('currentUser', currentUser);
           return of(true);
         } else {
           return of(false);
@@ -45,8 +46,9 @@ export class AuthenticationService {
   }
 
   getCurrentUser(): any {
-    const userStr = this.currentUser;
-    return userStr ? JSON.parse(userStr) : '';
+    const userStr:string = sessionStorage.getItem('currentUser');
+    const user = atob(userStr);
+    return user ? JSON.parse(user) : '';
   }
 
   getToken(): string {
@@ -71,6 +73,7 @@ export class AuthenticationService {
     this.http.get(""+this.authurl+"/v1/auth/logout",this.options).subscribe(
       (data)=>{
         if(data.status == 200){
+          sessionStorage.removeItem('currentUser');
           this.router.navigateByUrl("/");
           
         }

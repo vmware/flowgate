@@ -109,7 +109,7 @@ export class DcimAddComponent implements OnInit {
       TEMPERATURE_UNIT:"C",
       HUMIDITY_UNIT:"%"
     }
-    this.dcimConfig.verifyCert = "false";
+    this.dcimConfig.verifyCert = "true";
   }
 
 }
