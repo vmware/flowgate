@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 
 import com.vmware.flowgate.common.model.SystemSummary;
 
@@ -13,6 +13,7 @@ import com.vmware.flowgate.common.model.SystemSummary;
  *
  */
 public interface SystemSummaryRepository
-      extends MongoRepository<SystemSummary, String>, SystemSummaryRepositoryEnhancement {
+      extends CouchbasePagingAndSortingRepository<SystemSummary, String>,
+      SystemSummaryRepositoryEnhancement {
 
 }

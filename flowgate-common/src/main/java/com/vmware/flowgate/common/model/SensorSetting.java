@@ -4,10 +4,12 @@
 */
 package com.vmware.flowgate.common.model;
 
+import com.couchbase.client.java.repository.annotation.Id;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 
 public class SensorSetting {
 
+   @Id
    private String id;
    private ServerSensorType type;
    private double minNum;

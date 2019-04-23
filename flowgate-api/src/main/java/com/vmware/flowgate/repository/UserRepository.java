@@ -4,9 +4,9 @@
 */
 package com.vmware.flowgate.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 
 import com.vmware.flowgate.common.model.WormholeUser;
 
-public interface UserRepository extends MongoRepository<WormholeUser, String> {
+public interface UserRepository extends CouchbasePagingAndSortingRepository<WormholeUser, String> {
 }

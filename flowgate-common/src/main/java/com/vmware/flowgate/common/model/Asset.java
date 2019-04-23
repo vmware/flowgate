@@ -9,6 +9,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 
+import com.couchbase.client.java.repository.annotation.Id;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
@@ -20,6 +21,7 @@ public class Asset implements Serializable {
    /**
     * Created by wormhole, if use MongoDB, it will be the object id created by MongoDB _id
     */
+   @Id
    private String id;
 
    /**

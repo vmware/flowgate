@@ -4,10 +4,14 @@
 */
 package com.vmware.flowgate.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
+import org.springframework.data.couchbase.core.query.ViewIndexed;
+import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 
 import com.vmware.flowgate.common.model.AssetIPMapping;
 
-public interface AssetIPMappingRepository extends MongoRepository<AssetIPMapping, String> {
+@N1qlPrimaryIndexed
+@ViewIndexed(designDoc = "assetIPMapping")
+public interface AssetIPMappingRepository extends CouchbasePagingAndSortingRepository<AssetIPMapping, String> {
 
 }

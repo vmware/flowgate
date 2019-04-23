@@ -6,7 +6,10 @@ package com.vmware.flowgate.common.model;
 
 import java.util.List;
 
+import com.couchbase.client.java.repository.annotation.Id;
+
 public class RealTimeData {
+   @Id
    private String id;
    private String assetID;
 

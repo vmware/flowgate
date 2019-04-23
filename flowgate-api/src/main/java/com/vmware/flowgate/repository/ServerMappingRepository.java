@@ -6,11 +6,12 @@ package com.vmware.flowgate.repository;
 
 import java.util.List;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 
 import com.vmware.flowgate.common.model.ServerMapping;
 
-public interface ServerMappingRepository extends MongoRepository<ServerMapping, String> {
+public interface ServerMappingRepository
+      extends CouchbasePagingAndSortingRepository<ServerMapping, String> {
    List<ServerMapping> findByAssetNotNull();
    List<ServerMapping> findByAssetIsNull();
 }
