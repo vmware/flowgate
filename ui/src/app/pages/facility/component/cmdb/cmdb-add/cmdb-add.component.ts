@@ -102,7 +102,7 @@ export class CmdbAddComponent implements OnInit {
     this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
   }
   ngOnInit() {
-    this.cmdbConfig.verifyCert = "false";
+    this.cmdbConfig.verifyCert = "true";
   }
 
 }
