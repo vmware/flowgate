@@ -4,7 +4,10 @@
 */
 package com.vmware.flowgate.common.model;
 
+import com.couchbase.client.java.repository.annotation.Id;
+
 public class ServerMapping {
+   @Id
    private String id;
    private String asset;
    private String vcID;

@@ -43,7 +43,6 @@ import com.vmware.flowgate.config.InitializeConfigureData;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.RoleRepository;
 import com.vmware.flowgate.repository.UserRepository;
-import com.vmware.flowgate.repository.WormholePrivilegeRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.security.service.UserDetailsServiceImpl;
 import com.vmware.flowgate.util.AuthorityUtil;
@@ -59,8 +58,6 @@ public class AuthController {
    private UserRepository userRepository;
    @Autowired
    private RoleRepository roleRepository;
-   @Autowired
-   private WormholePrivilegeRepository privilegeRepository;
    @Autowired
    private AccessTokenService accessTokenService;
    @Autowired
@@ -341,8 +338,5 @@ public class AuthController {
    @RequestMapping(value="/privileges",method = RequestMethod.GET)
    public List<String> getPrivilegeName(){
       return InitializeConfigureData.privilegeNames;
-   }
-   public List<WormholePrivilege> readPrivilege(){
-      return privilegeRepository.findAll();
    }
 }

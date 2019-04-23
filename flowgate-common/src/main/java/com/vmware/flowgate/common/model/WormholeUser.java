@@ -7,10 +7,13 @@ package com.vmware.flowgate.common.model;
 import java.util.Date;
 import java.util.List;
 
+import com.couchbase.client.java.repository.annotation.Id;
+
 public class WormholeUser {
    /**
     * userId
     */
+   @Id
    private String id;
    /**
     * userName

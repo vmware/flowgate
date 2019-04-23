@@ -6,15 +6,19 @@ package com.vmware.flowgate.repository;
 
 import java.util.List;
 
+import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
+import org.springframework.data.couchbase.core.query.ViewIndexed;
+import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.model.Asset;
 
+@N1qlPrimaryIndexed
+@ViewIndexed(designDoc = "asset")
 public interface AssetRepository
-      extends MongoRepository<Asset, String>, AssetRepositoryEnhancement {
+      extends CouchbasePagingAndSortingRepository<Asset, String>, AssetRepositoryEnhancement {
    public Asset findOneByAssetNumber(long assetNumber);
 
    public List<Asset> findByPdusIsNull();

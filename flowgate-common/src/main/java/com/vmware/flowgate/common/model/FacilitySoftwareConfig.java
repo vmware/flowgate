@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 
+import com.couchbase.client.java.repository.annotation.Id;
 import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.security.EncryptionGuard;
 
@@ -18,7 +19,7 @@ public class FacilitySoftwareConfig implements Serializable {
     *
     */
    private static final long serialVersionUID = 1L;
-
+   @Id
    private String id;
    private String name;
    private String description;

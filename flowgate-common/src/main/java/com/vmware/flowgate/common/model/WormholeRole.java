@@ -6,10 +6,13 @@ package com.vmware.flowgate.common.model;
 
 import java.util.List;
 
+import com.couchbase.client.java.repository.annotation.Id;
+
 public class WormholeRole {
    /**
     * roleid
     */
+   @Id
    private String id;
    /**
     * roleName

@@ -4,10 +4,11 @@
 */
 package com.vmware.flowgate.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 
 import com.vmware.flowgate.common.model.SensorSetting;
 
-public interface SensorSettingRepository extends MongoRepository<SensorSetting,String>,SensorSettingRepositoryOther {
+public interface SensorSettingRepository extends
+      CouchbasePagingAndSortingRepository<SensorSetting, String>, SensorSettingRepositoryOther {
 
 }
