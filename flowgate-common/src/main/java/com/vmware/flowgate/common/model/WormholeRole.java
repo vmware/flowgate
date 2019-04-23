@@ -18,9 +18,9 @@ public class WormholeRole implements BaseDocument {
     * roleName
     */
    private String roleName;
-  
+
    private List<String>  privilegeNames;
-   
+
    public String getId() {
       return id;
    }

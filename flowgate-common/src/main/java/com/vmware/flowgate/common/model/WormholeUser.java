@@ -43,13 +43,13 @@ public class WormholeUser implements BaseDocument {
     * email
     */
    private String emailAddress;
-   
+
    private List<String> roleNames;
-   
+
    private List<String> userGroupIDs;
-   
+
    private long lastPasswordResetDate;
-   
+
 
    public List<String> getRoleNames() {
       return roleNames;
@@ -73,7 +73,7 @@ public class WormholeUser implements BaseDocument {
    public void setUserName(String userName) {
       this.userName = userName;
    }
-   
+
    public Integer getGender() {
       return gender;
    }
@@ -97,7 +97,7 @@ public class WormholeUser implements BaseDocument {
    public void setMobile(String mobile) {
       this.mobile = mobile;
    }
-   
+
    public Integer getStatus() {
       return status;
    }
@@ -137,5 +137,5 @@ public class WormholeUser implements BaseDocument {
    public void setUserGroupIDs(List<String> userGroupIDs) {
       this.userGroupIDs = userGroupIDs;
    }
-   
+
 }
