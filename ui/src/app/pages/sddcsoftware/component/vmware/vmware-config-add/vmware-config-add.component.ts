@@ -82,7 +82,7 @@ export class VmwareConfigAddComponent implements OnInit {
     this.router.navigate(["/ui/nav/sddc/vmware/vmware-list"]);
   }
   ngOnInit() {
-    this.vmwareConfig.verifyCert = "false";
+    this.vmwareConfig.verifyCert = "true";
   }
 
   
