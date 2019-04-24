@@ -51,6 +51,7 @@ public class PrepareSecurityMetadataSourceService
    private PrivilegeResourcesMappingReposity mappingReposity;
    @Autowired
    private RoleRepository roleRepository;
+
    @Value("${api.guardstore.alias:flowgateEncrypt}")
    private String guardStoreAlias;
 
