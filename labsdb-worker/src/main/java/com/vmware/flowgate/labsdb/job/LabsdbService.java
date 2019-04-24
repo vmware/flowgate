@@ -173,14 +173,13 @@ public class LabsdbService implements AsyncService{
       if(result == null || result.getBody() == null) {
          return;
       }
-      List<Asset> servers = Arrays.asList(result.getBody());
+      List<Asset> servers = new ArrayList<Asset>(Arrays.asList(result.getBody()));
       if(!isAll) {
          servers = filterServers(servers);
       }
       Map<String,String> pduIDListMap = getAssetNameIDMap(AssetCategory.PDU);
       Map<String,String> networkIDListMap = getAssetNameIDMap(AssetCategory.Networks);
       LabsdbClient labsdbClient = createClient(config);
-      List<Asset> assetsOfMappedWiremap = null;
       try {
          if(!labsdbClient.checkConnection()) {
             return;
@@ -202,15 +201,7 @@ public class LabsdbService implements AsyncService{
             return;
          }
        }
-      assetsOfMappedWiremap = generatorWiremapData(servers,pduIDListMap,networkIDListMap,labsdbClient);
-      if(assetsOfMappedWiremap == null) {
-         return;
-      }
-      wormholeApiClient.saveAssets(assetsOfMappedWiremap);
-   }
-   
-   public List<Asset> generatorWiremapData(List<Asset> servers,Map<String,String> pduNameAndIdMap,
-         Map<String,String> networkNameAndIdMap,LabsdbClient labsdbClient){
+      //generatorWiremapData(servers,pduIDListMap,networkIDListMap,labsdbClient);
       SAXParserFactory spf = SAXParserFactory.newInstance();
       WiremapSaxHandler handler = new WiremapSaxHandler(wirmMap_node);
       SAXParser parser = null;
@@ -218,96 +209,102 @@ public class LabsdbService implements AsyncService{
          parser = spf.newSAXParser();
       } catch (ParserConfigurationException | SAXException e) {
          logger.error("Create new sax parser failed."+e.getMessage());
-         return null;
       } 
       for(Asset asset:servers) {
-         ResponseEntity<String> result = null;
+         ResponseEntity<String> resultEntity = null;
          try {
-            result = labsdbClient.getWireMap(asset.getAssetName());
+            resultEntity = labsdbClient.getWireMap(asset.getAssetName());
          }catch(Exception e) {
             logger.error("An exception occurred while accessing the labsdb server."+e.getMessage());
          }
-         if(result == null || result.getBody() == null) {
+         if(resultEntity == null || result.getBody() == null) {
             continue;
          }
-         Set<String> pduIDList = null;
-         Set<String> networkIDList = null;
          try {
-            parser.parse(new ByteArrayInputStream(result.getBody().getBytes()), handler);
-            List<EndDevice> devices = handler.getEndDevices();//Get all the devices connected to the server 
-            if(devices == null || devices.isEmpty()) {
-               continue;
-            }
-            pduIDList = new HashSet<String>();
-            networkIDList = new HashSet<String>();
-            HashMap<String,String> justficationfields = asset.getJustificationfields();
-            String pduPortString = null;
-            String networkPortString = null;
-            Set<String> pduDevices = new HashSet<String>();
-            Set<String> networkDevices = new HashSet<String>();
-            if(justficationfields != null) {
-               pduPortString = justficationfields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
-               networkPortString = justficationfields.get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
-            }
-            if(pduPortString != null) {
-               String pdus[] = pduPortString.split(FlowgateConstant.SPILIT_FLAG);
-               Collections.addAll(pduDevices, pdus);
-            }
-            if(networkPortString != null) {
-               String networks[] = networkPortString.split(FlowgateConstant.SPILIT_FLAG);
-               Collections.addAll(networkDevices, networks);
-            }
-            //Use the device name to find it, and if it exists, record it's number and port information.
-            for(EndDevice device:devices) {
-               if(device.getStartPort() == null || device.getEndPort() == null || device.getEndDeviceName() == null) {
-                  continue;
-               }
-               String pduId = pduNameAndIdMap.get(device.getEndDeviceName());
-               if(pduId != null) {
-                  pduIDList.add(pduId);
-                  device.setEndDeviceAssetId(pduId);
-                  String pduDevice = device.toString();
-                  pduDevices.add(pduDevice);
-               }else {
-                  String networkId= networkNameAndIdMap.get(device.getEndDeviceName());
-                  if(networkId != null) {
-                     networkIDList.add(networkId);
-                     device.setEndDeviceAssetId(networkId);
-                     String networkDevice = device.toString();
-                     networkDevices.add(networkDevice);
-                  }else {
-                     continue;
-                  }
-               }
-            }
-            if(!pduDevices.isEmpty()) {
-               pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduDevices);
-               justficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER,pduPortString);
-            }
-            if(!networkDevices.isEmpty()) {
-               networkPortString = String.join(FlowgateConstant.SPILIT_FLAG, networkDevices);
-               justficationfields.put(FlowgateConstant.NETWORK_PORT_FOR_SERVER,networkPortString);
-            }
-            asset.setJustificationfields(justficationfields);
-         }catch (SAXException | IOException e) {
+            parser.parse(new ByteArrayInputStream(resultEntity.getBody().getBytes()), handler);
+         } catch(SAXException | IOException e) {
             logger.error("Error parsing XML input stream.This XML input stream is "+result.getBody());
          }
-         //update the mapping status,from UNPPED or MAPPEDBYAGGREGATOR to MAPPEDBYLABSDB
-         AssetStatus status = asset.getStatus();
-         if(status == null) {
-            status = new AssetStatus();
+         List<EndDevice> devices = handler.getEndDevices();//Get all the devices connected to the server 
+         if(devices == null || devices.isEmpty()) {
+            continue;
          }
-         if(!pduIDList.isEmpty()) {
-            status.setPduMapping(PduMapping.MAPPEDBYLABSDB);
-            asset.setPdus(new ArrayList<String>(pduIDList));
-         }
-         if(!networkIDList.isEmpty()) {
-            status.setNetworkMapping(NetworkMapping.MAPPEDBYLABSDB);
-            asset.setSwitches(new ArrayList<String>(networkIDList));
-         }
-         asset.setStatus(status);
+         generatorWiremapData(asset,pduIDListMap,devices,networkIDListMap);
+         wormholeApiClient.saveAssets(asset);
       }
-      return servers;
+   }
+   
+   public Asset generatorWiremapData(Asset asset,Map<String,String> pduNameAndIdMap,
+         List<EndDevice> devices,Map<String,String> networkNameAndIdMap){
+      Set<String> pduIDList = null;
+      Set<String> networkIDList = null;
+      pduIDList = new HashSet<String>();
+      networkIDList = new HashSet<String>();
+      HashMap<String, String> justficationfields = asset.getJustificationfields();
+      String pduPortString = null;
+      String networkPortString = null;
+      Set<String> pduDevices = new HashSet<String>();
+      Set<String> networkDevices = new HashSet<String>();
+      if (justficationfields != null) {
+         pduPortString = justficationfields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
+         networkPortString = justficationfields.get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
+      }
+      if (pduPortString != null) {
+         String pdus[] = pduPortString.split(FlowgateConstant.SPILIT_FLAG);
+         Collections.addAll(pduDevices, pdus);
+      }
+      if (networkPortString != null) {
+         String networks[] = networkPortString.split(FlowgateConstant.SPILIT_FLAG);
+         Collections.addAll(networkDevices, networks);
+      }
+      //Use the device name to find it, and if it exists, record it's number and port information.
+      for (EndDevice device : devices) {
+         if (device.getStartPort() == null || device.getEndPort() == null
+               || device.getEndDeviceName() == null) {
+            continue;
+         }
+         String pduId = pduNameAndIdMap.get(device.getEndDeviceName());
+         if (pduId != null) {
+            pduIDList.add(pduId);
+            device.setEndDeviceAssetId(pduId);
+            String pduDevice = device.toString();
+            pduDevices.add(pduDevice);
+         } else {
+            String networkId = networkNameAndIdMap.get(device.getEndDeviceName());
+            if (networkId != null) {
+               networkIDList.add(networkId);
+               device.setEndDeviceAssetId(networkId);
+               String networkDevice = device.toString();
+               networkDevices.add(networkDevice);
+            } else {
+               continue;
+            }
+         }
+      }
+      if (!pduDevices.isEmpty()) {
+         pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduDevices);
+         justficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, pduPortString);
+      }
+      if (!networkDevices.isEmpty()) {
+         networkPortString = String.join(FlowgateConstant.SPILIT_FLAG, networkDevices);
+         justficationfields.put(FlowgateConstant.NETWORK_PORT_FOR_SERVER, networkPortString);
+      }
+      asset.setJustificationfields(justficationfields);
+      //update the mapping status,from UNPPED or MAPPEDBYAGGREGATOR to MAPPEDBYLABSDB
+      AssetStatus status = asset.getStatus();
+      if (status == null) {
+         status = new AssetStatus();
+      }
+      if (!pduIDList.isEmpty()) {
+         status.setPduMapping(PduMapping.MAPPEDBYLABSDB);
+         asset.setPdus(new ArrayList<String>(pduIDList));
+      }
+      if (!networkIDList.isEmpty()) {
+         status.setNetworkMapping(NetworkMapping.MAPPEDBYLABSDB);
+         asset.setSwitches(new ArrayList<String>(networkIDList));
+      }
+      asset.setStatus(status);
+      return asset;
    }
    
    LabsdbClient createClient(FacilitySoftwareConfig config) {
