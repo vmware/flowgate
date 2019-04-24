@@ -55,7 +55,7 @@ public class PrepareSecurityMetadataSourceService
    @Value("${api.guardstore.alias:flowgateEncrypt}")
    private String guardStoreAlias;
 
-   @Value("${api.guardstore.path:/opt/vmware/flowgate/conf/flowgate-api/guard.key}")
+   @Value("${api.guardstore.path:guard.jceks}")
    private String guardStoreFilePath;
    @Value("${api.guardstore.pass}")
    private String guardStorePass;
