@@ -5,8 +5,12 @@
 package com.vmware.flowgate.controller;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +27,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
-import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
@@ -34,6 +40,7 @@ import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
+import com.vmware.flowgate.util.EncryptionGuard;
 import com.vmware.flowgate.util.HandleURL;
 import com.vmware.flowgate.util.WormholeUserDetails;
 
@@ -79,13 +86,17 @@ public class FacilitySoftwareController {
       config.setIntegrationStatus(integrationStatus);
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       config.setUserId(user.getUserId());
+      encryptServerPassword(config);
       repository.save(config);
+      decryptServerPassword(config);
       notifyFacilityWorker(config);
    }
 
    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
    public FacilitySoftwareConfig getFacilitySoftwareConfigByID(@PathVariable String id) {
-      return repository.findOne(id);
+      FacilitySoftwareConfig server = repository.findOne(id);
+      decryptServerPassword(server);
+      return server;
    }
 
    @RequestMapping(value = "/type/{type}", method = RequestMethod.GET)
@@ -95,7 +106,11 @@ public class FacilitySoftwareController {
       facility.setType(type);
       ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("verifyCert");
       Example<FacilitySoftwareConfig> example = Example.of(facility, matcher);
-      return repository.findAll(example);
+      List<FacilitySoftwareConfig> result = repository.findAll(example);
+      if (result != null) {
+         decryptServerListPassword(result);
+      }
+      return result;
    }
 
    @RequestMapping(value = "/page/{pageNumber}/pagesize/{pageSize}", method = RequestMethod.GET)
@@ -117,7 +132,9 @@ public class FacilitySoftwareController {
          facility.setUserId(user.getUserId());
          ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("verifyCert");
          Example<FacilitySoftwareConfig> example = Example.of(facility, matcher);
-         return repository.findAll(example, pageRequest);
+         Page<FacilitySoftwareConfig> result = repository.findAll(example, pageRequest);
+         decryptServerListPassword(result.getContent());
+         return result;
       } catch (Exception e) {
          throw new WormholeRequestException(e.getMessage());
       }
@@ -129,14 +146,15 @@ public class FacilitySoftwareController {
    public void delete(@PathVariable String id) {
       repository.delete(id);
    }
-   
+
    //only modify the status of integration,and not verify information of server. 
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/status", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateStatus(@RequestBody FacilitySoftwareConfig server) {
       FacilitySoftwareConfig old = repository.findOne(server.getId());
       if (old == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND, "FacilitySoftwareConfig not found", null);
+         throw new WormholeRequestException(HttpStatus.NOT_FOUND,
+               "FacilitySoftwareConfig not found", null);
       }
       old.setIntegrationStatus(server.getIntegrationStatus());
       repository.save(old);
@@ -159,6 +177,7 @@ public class FacilitySoftwareController {
       old.setAdvanceSetting(config.getAdvanceSetting());
       old.setIntegrationStatus(config.getIntegrationStatus());
       serverValidationService.validateFacilityServer(config);
+      encryptServerPassword(old);
       repository.save(old);
    }
 
@@ -171,6 +190,7 @@ public class FacilitySoftwareController {
       if (server == null) {
          throw new WormholeRequestException("Invalid ID");
       }
+      decryptServerPassword(server);
       notifyFacilityWorker(server);
    }
 
@@ -227,6 +247,40 @@ public class FacilitySoftwareController {
          break;
       default:
          break;
+      }
+   }
+
+   private void encryptServerPassword(FacilitySoftwareConfig server) {
+      if (server.getPassword() == null || server.getPassword().equals("")) {
+         return;
+      } else {
+         try {
+            server.setPassword(EncryptionGuard.encode(server.getPassword()));
+         } catch (UnsupportedEncodingException e) {
+            throw new WormholeException(e.getMessage(), e.getCause());
+         } catch (GeneralSecurityException e) {
+            throw new WormholeException(e.getMessage(), e.getCause());
+         }
+      }
+   }
+
+   private void decryptServerPassword(FacilitySoftwareConfig server) {
+      if (server.getPassword() == null || server.getPassword().equals("")) {
+         return;
+      } else {
+         try {
+            server.setPassword(EncryptionGuard.decode(server.getPassword()));
+         } catch (UnsupportedEncodingException e) {
+            throw new WormholeException(e.getMessage(), e.getCause());
+         } catch (GeneralSecurityException e) {
+            throw new WormholeException(e.getMessage(), e.getCause());
+         }
+      }
+   }
+
+   private void decryptServerListPassword(List<FacilitySoftwareConfig> servers) {
+      for (FacilitySoftwareConfig server : servers) {
+         decryptServerPassword(server);
       }
    }
 }

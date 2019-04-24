@@ -5,7 +5,9 @@
 package com.vmware.flowgate.controller;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,17 +32,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
-import com.vmware.flowgate.config.InitializeConfigureData;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.SDDCSoftwareRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
+import com.vmware.flowgate.util.EncryptionGuard;
 import com.vmware.flowgate.util.WormholeUserDetails;
 
 @RestController
@@ -92,8 +95,11 @@ public class SDDCSoftwareController {
       integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
       integrationStatus.setStatus(IntegrationStatus.Status.ACTIVE);
       server.setIntegrationStatus(integrationStatus);
+      //encrypt the password
+      encryptServerPassword(server);
       sddcRepository.save(server);
       //notify worker for the start jobs
+      decryptServerPassword(server);
       notifySDDCWorker(server);
    }
 
@@ -103,7 +109,7 @@ public class SDDCSoftwareController {
    public void delete(@PathVariable String id) {
       sddcRepository.delete(id);
    }
-   
+
    //only modify the status of integration,and not verify information of server. 
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/status", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -125,6 +131,18 @@ public class SDDCSoftwareController {
          throw new WormholeRequestException(HttpStatus.NOT_FOUND, "SDDCSoftware not found", null);
       }
       HashMap<String, Object> changedFileds = null;
+
+      switch (server.getType()) {
+      case VRO:
+         serverValidationService.validateVROServer(server);
+         break;
+      case VCENTER:
+         serverValidationService.validVCServer(server);
+         break;
+      default:
+         throw WormholeRequestException.InvalidFiled("type", server.getType().toString());
+      }
+      encryptServerPassword(server);
       try {
          server.setServerURL(old.getServerURL());
          server.setType(old.getType());
@@ -135,16 +153,6 @@ public class SDDCSoftwareController {
       }
       if (changedFileds.isEmpty()) {
          throw new WormholeRequestException(HttpStatus.OK, "Nothing is modified", null);
-      }
-      switch (server.getType()) {
-      case VRO:
-         serverValidationService.validateVROServer(server);
-         break;
-      case VCENTER:
-         serverValidationService.validVCServer(server);
-         break;
-      default:
-         throw WormholeRequestException.InvalidFiled("type", server.getType().toString());
       }
       sddcRepository.updateSDDCSoftwareByFileds(server.getId(), changedFileds);
    }
@@ -178,7 +186,9 @@ public class SDDCSoftwareController {
    //get a server
    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
    public SDDCSoftwareConfig getServerConfig(@PathVariable String id) {
-      return sddcRepository.findOne(id);
+      SDDCSoftwareConfig server = sddcRepository.findOne(id);
+      decryptServerPassword(server);
+      return server;
    }
 
    //get
@@ -186,14 +196,22 @@ public class SDDCSoftwareController {
    public List<SDDCSoftwareConfig> getVROServerConfigs() {
       SDDCSoftwareConfig example = new SDDCSoftwareConfig();
       example.setType(SoftwareType.VRO);
-      return sddcRepository.findAll(Example.of(example));
+      List<SDDCSoftwareConfig> result = sddcRepository.findAll(Example.of(example));
+      if (result != null) {
+         decryptServerListPassword(result);
+      }
+      return result;
    }
 
    @RequestMapping(value = "/vc", method = RequestMethod.GET)
    public List<SDDCSoftwareConfig> getVCServerConfigs() {
       SDDCSoftwareConfig example = new SDDCSoftwareConfig();
       example.setType(SoftwareType.VCENTER);
-      return sddcRepository.findAll(Example.of(example));
+      List<SDDCSoftwareConfig> result = sddcRepository.findAll(Example.of(example));
+      if (result != null) {
+         decryptServerListPassword(result);
+      }
+      return result;
    }
 
    @RequestMapping(value = "/page/{pageNumber}/pagesize/{pageSize}", method = RequestMethod.GET)
@@ -213,7 +231,9 @@ public class SDDCSoftwareController {
       try {
          ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("verifyCert");
          Example<SDDCSoftwareConfig> example = Example.of(sddc, matcher);
-         return sddcRepository.findAll(example, pageRequest);
+         Page<SDDCSoftwareConfig> result = sddcRepository.findAll(example, pageRequest);
+         decryptServerListPassword(result.getContent());
+         return result;
       } catch (Exception e) {
          throw new WormholeRequestException(e.getMessage());
       }
@@ -229,6 +249,7 @@ public class SDDCSoftwareController {
       if (datas.isEmpty()) {
          throw new WormholeRequestException("The result is empty");
       }
+      decryptServerListPassword(datas);
       return datas;
    }
 
@@ -242,6 +263,7 @@ public class SDDCSoftwareController {
       example.setType(type);
       example.setUserId(user.getUserId());
       List<SDDCSoftwareConfig> datas = sddcRepository.findAll(Example.of(example));
+      decryptServerListPassword(datas);
       return datas;
    }
 
@@ -252,6 +274,7 @@ public class SDDCSoftwareController {
       example.setId(id);
       example.setUserId(getCurrentUserID(request));
       SDDCSoftwareConfig server = sddcRepository.findOne(Example.of(example));
+      decryptServerPassword(server);
       notifySDDCWorker(server);
    }
 
@@ -294,6 +317,40 @@ public class SDDCSoftwareController {
          publisher.publish(notifyTopic, EventMessageUtil.generateSDDCNotifyMessage(eventType));
       } catch (IOException e) {
          logger.error("Failed to send out message", e);
+      }
+   }
+
+   private void encryptServerPassword(SDDCSoftwareConfig server) {
+      if (server.getPassword() == null || server.getPassword().equals("")) {
+         return;
+      } else {
+         try {
+            server.setPassword(EncryptionGuard.encode(server.getPassword()));
+         } catch (UnsupportedEncodingException e) {
+            throw new WormholeException(e.getMessage(), e.getCause());
+         } catch (GeneralSecurityException e) {
+            throw new WormholeException(e.getMessage(), e.getCause());
+         }
+      }
+   }
+
+   private void decryptServerPassword(SDDCSoftwareConfig server) {
+      if (server.getPassword() == null || server.getPassword().equals("")) {
+         return;
+      } else {
+         try {
+            server.setPassword(EncryptionGuard.decode(server.getPassword()));
+         } catch (UnsupportedEncodingException e) {
+            throw new WormholeException(e.getMessage(), e.getCause());
+         } catch (GeneralSecurityException e) {
+            throw new WormholeException(e.getMessage(), e.getCause());
+         }
+      }
+   }
+
+   private void decryptServerListPassword(List<SDDCSoftwareConfig> servers) {
+      for (SDDCSoftwareConfig server : servers) {
+         decryptServerPassword(server);
       }
    }
 }

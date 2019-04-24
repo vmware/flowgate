@@ -39,6 +39,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.auth.NlyteAuth;
@@ -50,6 +51,7 @@ import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
+import com.vmware.flowgate.util.EncryptionGuard;
 import com.vmware.flowgate.util.WormholeUserDetails;
 
 import junit.framework.TestCase;
@@ -157,6 +159,7 @@ public class FacilitySoftwareControllerTest {
       Mockito.doReturn(listOperations).when(template).opsForList();
       Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
       FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
+      facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
       facilitySoftware = facilitySoftwareRepository.save(facilitySoftware);
       MvcResult result = this.mockMvc
             .perform(post("/v1/facilitysoftware/syncdatabyserverid/"+facilitySoftware.getId()+""))
@@ -175,6 +178,7 @@ public class FacilitySoftwareControllerTest {
       Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
       FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
       facilitySoftware.setType(FacilitySoftwareConfig.SoftwareType.PowerIQ);
+      facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
       facilitySoftware = facilitySoftwareRepository.save(facilitySoftware);
       MvcResult result = this.mockMvc
             .perform(post("/v1/facilitysoftware/syncdatabyserverid/"+facilitySoftware.getId()+""))
@@ -274,6 +278,7 @@ public class FacilitySoftwareControllerTest {
    public void facilitySoftwareQueryByPageExample() throws Exception {
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
+      facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
       facilitySoftwareRepository.save(facilitySoftware);
       int pageNumber = 1;
       int pageSize = 5;
@@ -298,9 +303,11 @@ public class FacilitySoftwareControllerTest {
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       FacilitySoftwareConfig facilitySoftware1 = createFacilitySoftware();
       facilitySoftware1.setName("1");
+      facilitySoftware1.setPassword(EncryptionGuard.encode(facilitySoftware1.getPassword()));
       facilitySoftwareRepository.save(facilitySoftware1);
       FacilitySoftwareConfig facilitySoftware2 = createFacilitySoftware();
       facilitySoftware1.setName("2");
+      facilitySoftware2.setPassword(EncryptionGuard.encode(facilitySoftware2.getPassword()));
       facilitySoftwareRepository.save(facilitySoftware2);
       
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
