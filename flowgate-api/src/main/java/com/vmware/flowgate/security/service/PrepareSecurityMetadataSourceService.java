@@ -12,8 +12,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ import com.vmware.flowgate.common.model.WormholeRole;
 import com.vmware.flowgate.config.InitializeConfigureData;
 import com.vmware.flowgate.repository.PrivilegeResourcesMappingReposity;
 import com.vmware.flowgate.repository.RoleRepository;
+import com.vmware.flowgate.repository.UserRepository;
 import com.vmware.flowgate.util.FlowgateKeystore;
 import com.vmware.flowgate.util.WormholeResourceWeightComparator;
 
@@ -41,8 +44,8 @@ public class PrepareSecurityMetadataSourceService
       implements FilterInvocationSecurityMetadataSource {
    private static final Logger logger =
          LoggerFactory.getLogger(PrepareSecurityMetadataSourceService.class);
-   private HashMap<String, TreeMap<WormholeResources, String>> resourcesMap = 
-         new  HashMap<String, TreeMap<WormholeResources, String>>();  
+   private HashMap<String, TreeMap<WormholeResources, String>> resourcesMap =
+         new  HashMap<String, TreeMap<WormholeResources, String>>();
    private List<String> privilegeNames = new ArrayList<String>();
    @Autowired
    private PrivilegeResourcesMappingReposity mappingReposity;
@@ -65,7 +68,7 @@ public class PrepareSecurityMetadataSourceService
       InitializeConfigureData.init(prepareRolePrivilegeMap(),resourceMappings,privilegeNames);
       FlowgateKeystore.init(guardStoreFilePath, guardStoreAlias, guardStorePass);
   }
-   
+
    public HashMap<String, List<Map<AntPathRequestMatcher, Collection<ConfigAttribute>>>> initResourceMap(
          Iterable<PrivilegeResourceMapping> privilegeResourceMappings) {
       HashMap<String,List<Map<AntPathRequestMatcher,Collection<ConfigAttribute>>>> resourcesPrivilegeMap = new HashMap<>();
@@ -93,7 +96,7 @@ public class PrepareSecurityMetadataSourceService
       }
       return resourcesPrivilegeMap;
    }
-   
+
    public static List<Map<AntPathRequestMatcher, Collection<ConfigAttribute>>> getMappingList(
          TreeMap<WormholeResources, String> resourcemap) {
       List<Map<AntPathRequestMatcher, Collection<ConfigAttribute>>> mappingList =
@@ -113,7 +116,7 @@ public class PrepareSecurityMetadataSourceService
       }
       return mappingList;
    }
-   
+
    @Override
    public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
       if(InitializeConfigureData.privilegeResourceMap == null) loadResourceDefine();

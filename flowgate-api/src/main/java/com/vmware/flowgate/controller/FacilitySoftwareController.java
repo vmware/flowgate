@@ -38,7 +38,10 @@ import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
+<<<<<<< HEAD
 import com.vmware.flowgate.util.BaseDocumentUtil;
+=======
+>>>>>>> Add keystore guard
 import com.vmware.flowgate.util.EncryptionGuard;
 import com.vmware.flowgate.util.HandleURL;
 import com.vmware.flowgate.util.WormholeUserDetails;
@@ -82,7 +85,10 @@ public class FacilitySoftwareController {
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       config.setUserId(user.getUserId());
       encryptServerPassword(config);
+<<<<<<< HEAD
       BaseDocumentUtil.generateID(config);
+=======
+>>>>>>> Add keystore guard
       repository.save(config);
       decryptServerPassword(config);
       notifyFacilityWorker(config);
@@ -136,7 +142,7 @@ public class FacilitySoftwareController {
       repository.delete(id);
    }
 
-   //only modify the status of integration,and not verify information of server. 
+   //only modify the status of integration,and not verify information of server.
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/status", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateStatus(@RequestBody FacilitySoftwareConfig server) {

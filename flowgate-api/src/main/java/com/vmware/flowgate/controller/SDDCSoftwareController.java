@@ -105,7 +105,7 @@ public class SDDCSoftwareController {
       sddcRepository.delete(id);
    }
 
-   //only modify the status of integration,and not verify information of server. 
+   //only modify the status of integration,and not verify information of server.
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/status", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateStatus(@RequestBody SDDCSoftwareConfig server) {

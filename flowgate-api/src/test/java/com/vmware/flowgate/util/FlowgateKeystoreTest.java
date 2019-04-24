@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.vmware.flowgate.util;
 

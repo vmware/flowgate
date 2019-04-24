@@ -139,7 +139,7 @@ public class SDDCSoftwareControllerTest {
    }
    @Test
    public void syncSDDCServerDataExample() throws JsonProcessingException, Exception {
-      
+
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       SDDCSoftwareConfig sddcCreate = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       sddcCreate.setPassword(EncryptionGuard.encode(sddcCreate.getPassword()));
@@ -163,7 +163,7 @@ public class SDDCSoftwareControllerTest {
       }
       sddcRepository.delete(sddc.getId());
    }
-   
+
    /**
     * Update SDDCSoftwareConfig Test case one:To update the IsVerifyCert.Whether can be saved
     * successfully,when the VerifyCert is true. The message 'Certificate verification error' will be
@@ -325,14 +325,14 @@ public class SDDCSoftwareControllerTest {
               };
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/type/" + SoftwareType.VCENTER + ""))
             .andExpect(status().isOk())
-            .andDo(document("SDDCSoftware-queryByType-example", 
+            .andDo(document("SDDCSoftware-queryByType-example",
                     responseFields(
                     fieldWithPath("[]").description("An array of SDDCSoftwareConfig.")
                     ).andWithPrefix("[].", fieldpath)))
             .andReturn();
       ObjectMapper mapper = new ObjectMapper();
       String res = result.getResponse().getContentAsString();
-      
+
       SDDCSoftwareConfig [] sddcs = mapper.readValue(res, SDDCSoftwareConfig[].class);
       for(SDDCSoftwareConfig sddc:sddcs) {
          if(sddc.getName().equals("flowgate")) {
@@ -341,7 +341,7 @@ public class SDDCSoftwareControllerTest {
       }
       sddcRepository.delete(sddcCreate.getId());
    }
-   
+
    @Test
    public void getVROServerConfigsExample() throws Exception {
       SDDCSoftwareConfig sddc1Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
@@ -350,12 +350,12 @@ public class SDDCSoftwareControllerTest {
       sddc1Create.setDescription("flowgate cluster");
       SDDCSoftwareConfig sddc2Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       sddc2Create.setType(SoftwareType.VRO);
-      
+
       sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
       sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
       sddcRepository.save(sddc1Create);
       sddcRepository.save(sddc2Create);
-      
+
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
               fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
               fieldWithPath("name").description("The facilitySoftware name."),
@@ -373,7 +373,7 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
-      
+
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/vrops"))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-getVROServerConfigs-example", responseFields(
@@ -391,7 +391,7 @@ public class SDDCSoftwareControllerTest {
       sddcRepository.delete(sddc1Create.getId());
       sddcRepository.delete(sddc2Create.getId());
    }
-   
+
    @Test
    public void getVROServerConfigsByUserExample() throws Exception {
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
@@ -405,7 +405,7 @@ public class SDDCSoftwareControllerTest {
        sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
        sddcRepository.save(sddc1Create);
        sddcRepository.save(sddc2Create);
-      
+
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
               fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
               fieldWithPath("name").description("The facilitySoftware name."),
@@ -423,7 +423,7 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
-      
+
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/user/vrops"))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-getVROServerConfigsByUser-example", responseFields(
@@ -431,7 +431,7 @@ public class SDDCSoftwareControllerTest {
                     .andWithPrefix("[].", fieldpath)))
             .andReturn();
       String res = result.getResponse().getContentAsString();
-      
+
       ObjectMapper mapper = new ObjectMapper();
       SDDCSoftwareConfig [] sddcs = mapper.readValue(res, SDDCSoftwareConfig[].class);
       for(SDDCSoftwareConfig sddc:sddcs) {
@@ -450,7 +450,7 @@ public class SDDCSoftwareControllerTest {
       sddc1Create.setDescription("flowgate cluster");
       SDDCSoftwareConfig sddc2Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       sddc2Create.setType(SoftwareType.VCENTER);
-      
+
       sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
       sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
       sddcRepository.save(sddc1Create);
@@ -472,14 +472,14 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
-      
+
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/vc"))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-getVCServerConfigs-example", responseFields(
                     fieldWithPath("[]").description("An array of asserts"))
                     .andWithPrefix("[].", fieldpath))).andReturn();
       String res = result.getResponse().getContentAsString();
-      
+
       ObjectMapper mapper = new ObjectMapper();
       SDDCSoftwareConfig [] sddcs = mapper.readValue(res, SDDCSoftwareConfig[].class);
       for(SDDCSoftwareConfig sddc:sddcs) {
