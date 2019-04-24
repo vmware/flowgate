@@ -5,8 +5,6 @@
 package com.vmware.flowgate.common.model;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 
 import com.couchbase.client.java.repository.annotation.Id;
@@ -30,16 +28,16 @@ public class FacilitySoftwareConfig implements Serializable {
    private String userId;
    private boolean verifyCert;
    private IntegrationStatus integrationStatus;
-   private HashMap<AdvanceSettingType,String> advanceSetting;
+   private HashMap<AdvanceSettingType, String> advanceSetting;
 
    public enum SoftwareType {
-      Nlyte,PowerIQ,Device42,InfoBlox,OtherDCIM,OtherCMDB,Labsdb
+      Nlyte, PowerIQ, Device42, InfoBlox, OtherDCIM, OtherCMDB, Labsdb
    }
 
-   public enum AdvanceSettingType{
-      DateFormat,TimeZone,PDU_AMPS_UNIT, PDU_POWER_UNIT,PDU_VOLT_UNIT,TEMPERATURE_UNIT,HUMIDITY_UNIT
+   public enum AdvanceSettingType {
+      DateFormat, TimeZone, PDU_AMPS_UNIT, PDU_POWER_UNIT, PDU_VOLT_UNIT, TEMPERATURE_UNIT, HUMIDITY_UNIT
    }
-   
+
    public String getUserName() {
       return userName;
    }
@@ -49,40 +47,21 @@ public class FacilitySoftwareConfig implements Serializable {
    }
 
    public String getPassword() {
-      if (password == null) {
-         return null;
-      }
-      try {
-         return EncryptionGuard.decode(password);
-      } catch (UnsupportedEncodingException e) {
-         throw new WormholeException(e.getMessage(), e.getCause());
-      } catch (GeneralSecurityException e) {
-         throw new WormholeException(e.getMessage(), e.getCause());
-      }
+      return password;
    }
 
    public void setPassword(String password) {
-      if (password == null || password.equals("")) {
-         this.password = null;
-      }else {
-         try {
-            this.password = EncryptionGuard.encode(password);
-         } catch (UnsupportedEncodingException e) {
-            throw new WormholeException(e.getMessage(), e.getCause());
-         } catch (GeneralSecurityException e) {
-            throw new WormholeException(e.getMessage(), e.getCause());
-         }
-      }
+      this.password = password;
    }
 
    public boolean checkIsActive() {
-      if(this.integrationStatus != null && this.integrationStatus.getStatus()!=null &&
-            !IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus())) {
+      if (this.integrationStatus != null && this.integrationStatus.getStatus() != null
+            && !IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus())) {
          return false;
       }
       return true;
    }
-   
+
    public String getServerURL() {
       return serverURL;
    }
@@ -138,7 +117,7 @@ public class FacilitySoftwareConfig implements Serializable {
    public void setDescription(String description) {
       this.description = description;
    }
-   
+
    public IntegrationStatus getIntegrationStatus() {
       return integrationStatus;
    }
@@ -155,5 +134,5 @@ public class FacilitySoftwareConfig implements Serializable {
       this.advanceSetting = advanceSetting;
    }
 
-   
+
 }

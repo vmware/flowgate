@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package com.vmware.flowgate.common.security;
+package com.vmware.flowgate.util;
 
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
@@ -24,6 +24,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.vmware.flowgate.common.exception.WormholeException;
+import com.vmware.flowgate.common.security.SaltGenerator;
 
 public class EncryptionGuard {
 
@@ -64,9 +65,8 @@ public class EncryptionGuard {
       if (clearText == null) {
          return null;
       }
-      String initKey = EncryptionConstant.EncryptionKey;
+      String initKey = FlowgateKeystore.getEncryptKey();
       Key key = new SecretKeySpec(initKey.getBytes(), "AES");
-      //Key key = GuardKeyStore.getEncryptionKey();
       String salt = SaltGenerator.genRandomString(SALT_SIZE);
 
       String inputText = salt + clearText; // add salt
@@ -96,9 +96,9 @@ public class EncryptionGuard {
          throw new WormholeException("This encodedText is invalid");
          //throw EncryptionException.SHORT_ENCRYPTED_STRING(encodedText);
       }
-      String initKey = EncryptionConstant.EncryptionKey;
+      String initKey = FlowgateKeystore.getEncryptKey();
       Key key = new SecretKeySpec(initKey.getBytes(), "AES");
-      String salt = encodedText.substring(0, SALT_SIZE);
+      encodedText.substring(0, SALT_SIZE);
       String encryptedText = encodedText.substring(SALT_SIZE);
 
       byte[] encryptedBytes = Base64.getDecoder().decode(encryptedText);

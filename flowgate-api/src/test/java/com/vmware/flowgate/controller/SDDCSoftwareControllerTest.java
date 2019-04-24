@@ -54,6 +54,7 @@ import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.SDDCSoftwareRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
+import com.vmware.flowgate.util.EncryptionGuard;
 import com.vmware.flowgate.util.WormholeUserDetails;
 
 import junit.framework.TestCase;
@@ -146,6 +147,7 @@ public class SDDCSoftwareControllerTest {
       
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       SDDCSoftwareConfig sddcCreate = createSDDCSoftwareConfig(SoftwareType.VCENTER);
+      sddcCreate.setPassword(EncryptionGuard.encode(sddcCreate.getPassword()));
       SDDCSoftwareConfig sddc = sddcRepository.save(sddcCreate);
       AuthVcUser vcAuth = Mockito.mock(AuthVcUser.class);
       ListOperations<String, String> listOperations = Mockito.mock(ListOperations.class);
@@ -277,6 +279,7 @@ public class SDDCSoftwareControllerTest {
    @Test
    public void SDDCSoftwareQueryByPageExample() throws Exception {
       SDDCSoftwareConfig sddcCreate = createSDDCSoftwareConfig(SoftwareType.VCENTER);
+      sddcCreate.setPassword(EncryptionGuard.encode(sddcCreate.getPassword()));
       SDDCSoftwareConfig sddc = sddcRepository.save(sddcCreate);
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       int pageNumber = 1;
@@ -306,6 +309,7 @@ public class SDDCSoftwareControllerTest {
       sddcCreate.setType(SoftwareType.VCENTER);
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       sddcCreate.setId("1");
+      sddcCreate.setPassword(EncryptionGuard.encode(sddcCreate.getPassword()));
       SDDCSoftwareConfig sddc = sddcRepository.save(sddcCreate);
       String type = "VCENTER";
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
@@ -350,7 +354,8 @@ public class SDDCSoftwareControllerTest {
       sddc2Create.setType(SoftwareType.VRO);
       sddc2Create.setId("2");
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
-      
+      sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
+      sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
       SDDCSoftwareConfig sddc1 = sddcRepository.save(sddc1Create);
       SDDCSoftwareConfig sddc2 = sddcRepository.save(sddc2Create);
       
@@ -398,7 +403,8 @@ public class SDDCSoftwareControllerTest {
        sddc2Create.setType(SoftwareType.VRO);
        sddc2Create.setId("2");
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
-      
+      sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
+      sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
       SDDCSoftwareConfig sddc1 = sddcRepository.save(sddc1Create);
       SDDCSoftwareConfig sddc2 = sddcRepository.save(sddc2Create);
       
@@ -445,7 +451,8 @@ public class SDDCSoftwareControllerTest {
       sddc2Create.setType(SoftwareType.VCENTER);
       sddc2Create.setId("2");
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
-      
+      sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
+      sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
       SDDCSoftwareConfig sddc1 = sddcRepository.save(sddc1Create);
       SDDCSoftwareConfig sddc2 = sddcRepository.save(sddc2Create);
       

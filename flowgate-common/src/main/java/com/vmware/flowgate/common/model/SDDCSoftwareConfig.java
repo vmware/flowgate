@@ -41,39 +41,21 @@ public class SDDCSoftwareConfig implements Serializable {
    }
 
    public String getPassword() {
-      if(password == null) {
-         return null;
-      }
-      try {
-         return EncryptionGuard.decode(password);
-      } catch (UnsupportedEncodingException e) {
-         throw new WormholeException(e.getMessage(), e.getCause());
-      } catch (GeneralSecurityException e) {
-         throw new WormholeException(e.getMessage(), e.getCause());
-      }
+      return password;
    }
 
    public void setPassword(String password) {
-      if(password == null) {
-         this.password = password;
-      }
-      try {
-         this.password=EncryptionGuard.encode(password);
-       } catch (UnsupportedEncodingException e) {
-          throw new WormholeException(e.getMessage(), e.getCause());
-       } catch (GeneralSecurityException e) {
-          throw new WormholeException(e.getMessage(), e.getCause());
-       }
+      this.password = password;
    }
 
    public boolean checkIsActive() {
-      if(this.integrationStatus != null && this.integrationStatus.getStatus()!=null &&
-            !IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus())) {
+      if (this.integrationStatus != null && this.integrationStatus.getStatus() != null
+            && !IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus())) {
          return false;
       }
       return true;
    }
-   
+
    public String getServerURL() {
       return serverURL;
    }
