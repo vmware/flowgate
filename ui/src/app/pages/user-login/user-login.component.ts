@@ -44,10 +44,27 @@ export class UserLoginComponent implements OnInit {
     }
   
     login(userName,password){
+        let userInfoBase64:string = "";
+        let user:string = "";
+        let privilegeName:string[] = [];
         this.data.login(userName,password).subscribe(
-            (data)=>{if(data){
-                this.tips = false;
-                this.router.navigate(["ui/nav"]);
+            (res)=>{if(res.status == 200){
+                userInfoBase64 = res.json().access_token.split('.')[1];
+                user = atob(userInfoBase64);
+                this.data.getPrivileges(res.json().access_token).subscribe(
+                    (priData)=>{
+                        if(priData.status == 200){
+                            privilegeName = priData.json();
+                            let currentUser = btoa(JSON.stringify({username: JSON.parse(user).sub, token: res.json().access_token, authorities:privilegeName,expires_in:res.json().expires_in}));
+                            sessionStorage.setItem('currentUser', currentUser);
+                            this.tips = false;
+                            this.router.navigate(["ui/nav"]);
+                        }else{
+                            this.tips = true;
+                            this.textContent = "Invalid user name or password";
+                        }
+                    }
+                )
             }else{
                 this.tips = true;
                 this.textContent = "Invalid user name or password";

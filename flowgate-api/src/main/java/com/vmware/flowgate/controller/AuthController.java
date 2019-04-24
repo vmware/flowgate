@@ -7,7 +7,7 @@ package com.vmware.flowgate.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.AuthToken;
+import com.vmware.flowgate.common.model.WormholePrivilege;
 import com.vmware.flowgate.common.model.WormholeRole;
 import com.vmware.flowgate.common.model.WormholeUser;
 import com.vmware.flowgate.common.security.DesensitizationUserData;
@@ -62,7 +63,7 @@ public class AuthController {
    @Value("${jwt.expiration:7200}")
    private int expiration;
    private static String Role_admin = "admin";
-   
+
    @RequestMapping(value="/token", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
    public AuthToken getToken(@RequestBody(required = false) WormholeUser user,
          @RequestHeader(name = "serviceKey",required = false) String serviceKey, HttpServletRequest request,
@@ -77,8 +78,8 @@ public class AuthController {
          List<String> roleNames = new ArrayList<String>();
          roleNames.add(Role_admin);
          AuthorityUtil util = new AuthorityUtil();
-         WormholeUserDetails userDetails = 
-               new WormholeUserDetails(FlowgateConstant.systemUser,FlowgateConstant.systemUser, 
+         WormholeUserDetails userDetails =
+               new WormholeUserDetails(FlowgateConstant.systemUser,FlowgateConstant.systemUser,
                      FlowgateConstant.systemUser, util.createGrantedAuthorities(roleNames));
          access_token = jwtTokenUtil.generate(userDetails);
       }
@@ -90,7 +91,7 @@ public class AuthController {
       response.addCookie(cookie);
       return access_token;
    }
-   
+
    @RequestMapping(value="/token/refresh", method = RequestMethod.GET)
    public AuthToken refreshToken(HttpServletRequest request,HttpServletResponse response) {
       String authToken = accessTokenService.getToken(request);
@@ -113,7 +114,7 @@ public class AuthController {
       }
       return access_token;
    }
-   
+
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/logout", method = RequestMethod.GET)
    public void logout( HttpServletRequest request,
@@ -123,7 +124,7 @@ public class AuthController {
          accessTokenService.removeToken(authToken);
       }
    }
-   
+
    // Create a new user
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value="/user", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -199,7 +200,7 @@ public class AuthController {
       }
       return user;
    }
-   
+
    // Read a user by user name
    @RequestMapping(value = "/user/username/{name}", method = RequestMethod.GET)
    public WormholeUser readUserByName(@PathVariable(required = false) String name,HttpServletRequest request) {
@@ -218,7 +219,7 @@ public class AuthController {
       }
       return user;
    }
-   
+
    // Read users
    @RequestMapping(value = "/user",method = RequestMethod.GET)
    public Page<WormholeUser> queryUserByPageable (@RequestParam("currentPage") int currentPage,
@@ -260,7 +261,7 @@ public class AuthController {
          @RequestParam("pageSize") int pageSize) {
       if(currentPage < FlowgateConstant.defaultPageNumber) {
          currentPage = FlowgateConstant.defaultPageNumber;
-      } 
+      }
       if(pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       }else if(pageSize > FlowgateConstant.maxPageSize) {
@@ -299,7 +300,9 @@ public class AuthController {
    }
 
    @RequestMapping(value="/privileges",method = RequestMethod.GET)
-   public List<String> getPrivilegeName(){
-      return InitializeConfigureData.privilegeNames;
+   public Set<String> getPrivilegeName(HttpServletRequest request){
+      WormholeUserDetails user = accessTokenService.getCurrentUser(request);
+      AuthorityUtil util = new AuthorityUtil();
+      return util.getPrivilege(user);
    }
 }
