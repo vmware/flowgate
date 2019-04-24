@@ -10,11 +10,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.vmware.flowgate.common.FlowgateConstant;
-import com.vmware.flowgate.common.model.WormholeUser;
 
 public class InitializeConfigureData {
 
@@ -37,6 +37,7 @@ public class InitializeConfigureData {
    public static final String Default_Access_Privilege = "Default_Access_Privilege";
    private static boolean isInitialized;
    private static String serviceKey = null;
+   //private static 
    public static List<String> privilegeNames = new ArrayList<String>();
    static{
       

@@ -12,11 +12,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.FilterInvocation;
@@ -27,11 +30,11 @@ import org.springframework.stereotype.Service;
 import com.vmware.flowgate.common.model.PrivilegeResourceMapping;
 import com.vmware.flowgate.common.model.WormholeResources;
 import com.vmware.flowgate.common.model.WormholeRole;
-import com.vmware.flowgate.common.model.WormholeUser;
 import com.vmware.flowgate.config.InitializeConfigureData;
 import com.vmware.flowgate.repository.PrivilegeResourcesMappingReposity;
 import com.vmware.flowgate.repository.RoleRepository;
 import com.vmware.flowgate.repository.UserRepository;
+import com.vmware.flowgate.util.FlowgateKeystore;
 import com.vmware.flowgate.util.WormholeResourceWeightComparator;
 
 @Service
@@ -49,12 +52,20 @@ public class PrepareSecurityMetadataSourceService
    @Autowired
    private RoleRepository roleRepository;
    
+   @Value("${api.guardstore.alias:flowgateEncrypt}")
+   private String guardStoreAlias;
+
+   @Value("${api.guardstore.path:guard.jceks}")
+   private String guardStoreFilePath;
+   @Value("${api.guardstore.pass}")
+   private String guardStorePass;
    @PostConstruct
    public void loadResourceDefine(){
       logger.info("Initialization security resource.");
       List<PrivilegeResourceMapping> privilegeResourceMappings = mappingReposity.findAll();
       HashMap<String,List<Map<AntPathRequestMatcher,Collection<ConfigAttribute>>>> resourceMappings = initResourceMap(privilegeResourceMappings);
       InitializeConfigureData.init(prepareRolePrivilegeMap(),resourceMappings,privilegeNames);
+      FlowgateKeystore.init(guardStoreFilePath, guardStoreAlias, guardStorePass);
   }
    
    public HashMap<String,List<Map<AntPathRequestMatcher,Collection<ConfigAttribute>>>> initResourceMap(List<PrivilegeResourceMapping> privilegeResourceMappings) {
