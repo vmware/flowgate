@@ -47,6 +47,7 @@ public class WormholeAPIClient extends RestClientBase {
    private static final String GetVROServersURL = "/v1/sddc/vrops";
    private static final String GetAssetByVROURL = "/v1/assets/vrops/%s";
    private static final String AssetURL = "/v1/assets/batchoperation";
+   private static final String SaveAssetURL = "/v1/assets";
    private static final String ServerMappingMergURL = "/v1/assets/mapping/merge/%s/%s";
 
    private static final String GetAssetBySourceAndTypeURL = "/v1/assets/source/%s/type/%s";
@@ -199,6 +200,13 @@ public class WormholeAPIClient extends RestClientBase {
       HttpEntity<Object> postEntity =
             new HttpEntity<Object>(assets, RestTemplateBuilder.getDefaultHeader());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + AssetURL, HttpMethod.POST,
+            postEntity, Void.class);
+   }
+   
+   public ResponseEntity<Void> saveAssets(Asset asset) {
+      HttpEntity<Object> postEntity =
+            new HttpEntity<Object>(asset, RestTemplateBuilder.getDefaultHeader());
+      return this.restTemplate.exchange(getAPIServiceEndpoint() + SaveAssetURL, HttpMethod.POST,
             postEntity, Void.class);
    }
 

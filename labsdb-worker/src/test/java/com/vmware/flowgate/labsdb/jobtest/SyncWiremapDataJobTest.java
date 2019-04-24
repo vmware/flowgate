@@ -28,6 +28,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.vmware.flowgate.labsdb.client.LabsdbClient;
 import com.vmware.flowgate.labsdb.common.EndDevice;
+import com.vmware.flowgate.labsdb.common.EndDevice.WireMapType;
 import com.vmware.flowgate.labsdb.config.ServiceKeyConfig;
 import com.vmware.flowgate.labsdb.job.LabsdbService;
 import com.vmware.flowgate.client.WormholeAPIClient;
@@ -122,7 +123,7 @@ public class SyncWiremapDataJobTest {
       }
    }
    
-   //PduMappingStatus or NetworkMappingStatus is null
+   //PduMappingStatus and NetworkMappingStatus is null
    @Test
    public void filterServersTest3() {
       List<Asset> servers = new ArrayList<Asset>();
@@ -136,7 +137,6 @@ public class SyncWiremapDataJobTest {
       asset1.setManufacturer("Dell");
       AssetStatus assetstatus = new AssetStatus();
       assetstatus.setStatus(AssetStatus.Status.Active);
-      assetstatus.setPduMapping(PduMapping.MAPPEDBYLABSDB);
       asset1.setStatus(assetstatus);
       
       Asset asset = new Asset();
@@ -149,7 +149,6 @@ public class SyncWiremapDataJobTest {
       asset.setManufacturer("NetApp");
       AssetStatus status = new AssetStatus();
       status.setStatus(AssetStatus.Status.Active);
-      status.setNetworkMapping(NetworkMapping.MAPPEDBYLABSDB);
       asset.setStatus(status);
       servers.add(asset);
       servers.add(asset1);
@@ -191,7 +190,6 @@ public class SyncWiremapDataJobTest {
       asset.setManufacturer("NetApp");
       AssetStatus status = new AssetStatus();
       status.setStatus(AssetStatus.Status.Active);
-      status.setNetworkMapping(NetworkMapping.MAPPEDBYLABSDB);
       asset.setStatus(status);
       servers.add(asset);
       servers.add(asset1);
@@ -207,27 +205,23 @@ public class SyncWiremapDataJobTest {
    
    @Test
    public void generatorWiremapDataTest() {
-      ResponseEntity<Asset[]> result = getAssets(AssetCategory.Server);
+      Asset assetFromflowgate = createServer();
       Map<String,String> network = new HashMap<String,String>();
       network.put("sin2-build-rdev1", "5c778c598ecf859960e2be30");
       Map<String,String> pdu = new HashMap<String,String>();
       pdu.put("w3r17c05-pdu4", "wertbhukloiup5996q23df530");
-      Mockito.when(this.labsdbClient.getWireMap(anyString())).thenReturn(getWiremap());
-      List<Asset> assets = labsdbService.generatorWiremapData(Arrays.asList(result.getBody()),pdu, network, labsdbClient);
-      for(Asset asset:assets) {
-         if(asset.getAssetName().equals("w1-eeqa-fas3250-01")) {
-            List<String> networks = asset.getSwitches();
-            TestCase.assertEquals("5c778c598ecf859960e2be30", networks.get(0));
-            String device = asset.getJustificationfields().get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
-            TestCase.assertEquals("01"+FlowgateConstant.SEPARATOR+"sin2-build-rdev1"+FlowgateConstant.SEPARATOR+"onboard-1"+
-            FlowgateConstant.SEPARATOR+""+"5c778c598ecf859960e2be30", device);
-         }
-      }
+      List<EndDevice> devices = getDevices();
+      Asset asset = labsdbService.generatorWiremapData(assetFromflowgate,pdu, devices,network);
+      List<String> networks = asset.getSwitches();
+      TestCase.assertEquals("5c778c598ecf859960e2be30", networks.get(0));
+      String device = asset.getJustificationfields().get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
+      TestCase.assertEquals("01"+FlowgateConstant.SEPARATOR+"sin2-build-rdev1"+FlowgateConstant.SEPARATOR+"onboard-1"+
+      FlowgateConstant.SEPARATOR+""+"5c778c598ecf859960e2be30", device);
    }
    
    @Test
    public void generatorWiremapDataTest1() {
-      ResponseEntity<Asset[]> result = getAssets(AssetCategory.Server);
+      Asset assetFromflowgate = createServer();
       EndDevice net1 = new EndDevice();
       net1.setEndDeviceAssetId("5c8749469662e32e2470d654");
       net1.setEndDeviceName("w4-pek2");
@@ -241,30 +235,42 @@ public class SyncWiremapDataJobTest {
       net2.setStartPort("01");
       
       HashSet<String> nets = new HashSet<String>();
-      Asset assetNet = result.getBody()[0];
       HashMap<String,String> fileds = new HashMap<String,String>();
       nets.add(net1.toString());
       nets.add(net2.toString());
       fileds.put(FlowgateConstant.NETWORK_PORT_FOR_SERVER, String.join(FlowgateConstant.SPILIT_FLAG, nets));
-      assetNet.setJustificationfields(fileds);
+      assetFromflowgate.setJustificationfields(fileds);
       
       Map<String,String> network = new HashMap<String,String>();
       network.put("sin2-build-rdev1", "5c778c598ecf859960e2be30");
       Map<String,String> pdu = new HashMap<String,String>();
       pdu.put("w3r17c05-pdu4", "wertbhukloiup5996q23df530");
-      Mockito.when(this.labsdbClient.getWireMap(anyString())).thenReturn(getWiremap());
-      List<Asset> assets = labsdbService.generatorWiremapData(Arrays.asList(result.getBody()),pdu, network, labsdbClient);
       
-      for(Asset asset:assets) {
-         if(asset.getAssetName().equals("w1-eeqa-fas3250-01")) {
-            List<String> networks = asset.getSwitches();
-            TestCase.assertEquals("5c778c598ecf859960e2be30", networks.get(0));
-            String networkdevices = 
-                  asset.getJustificationfields().get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
-            String expectValue = String.join(FlowgateConstant.SPILIT_FLAG, nets);
-            TestCase.assertEquals(expectValue, networkdevices);
-         }
-      }
+      List<EndDevice> devices = getDevices();
+      Asset asset = labsdbService.generatorWiremapData(assetFromflowgate,pdu, devices,network);
+      List<String> networks = asset.getSwitches();
+      TestCase.assertEquals("5c778c598ecf859960e2be30", networks.get(0));
+      String networkdevices = 
+            asset.getJustificationfields().get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
+      String expectValue = String.join(FlowgateConstant.SPILIT_FLAG, nets);
+      TestCase.assertEquals(expectValue, networkdevices);
+   }
+   
+   List<EndDevice> getDevices(){
+      EndDevice device1 = new EndDevice();
+      device1.setEndDeviceName("sin2-build-rdev1");
+      device1.setEndPort("onboard-1");
+      device1.setStartPort("01");
+      device1.setWireMapType(WireMapType.net);
+      List<EndDevice> devices = new ArrayList<EndDevice>();
+      devices.add(device1);
+      
+      EndDevice device2 = new EndDevice();
+      device2.setEndDeviceName("w3r17c05-pdu4");
+      device2.setEndPort("onboard-5");
+      device2.setStartPort("02");
+      device1.setWireMapType(WireMapType.power);
+      return devices;
    }
    
    public ResponseEntity<String> getWiremap(){
