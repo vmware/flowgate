@@ -7,6 +7,7 @@ package com.vmware.flowgate.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,11 +30,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.AuthToken;
-import com.vmware.flowgate.common.model.AuthenticationResult;
 import com.vmware.flowgate.common.model.WormholePrivilege;
 import com.vmware.flowgate.common.model.WormholeRole;
 import com.vmware.flowgate.common.model.WormholeUser;
@@ -45,7 +43,6 @@ import com.vmware.flowgate.repository.RoleRepository;
 import com.vmware.flowgate.repository.UserRepository;
 import com.vmware.flowgate.repository.WormholePrivilegeRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
-import com.vmware.flowgate.security.service.UserDetailsServiceImpl;
 import com.vmware.flowgate.util.AuthorityUtil;
 import com.vmware.flowgate.util.JwtTokenUtil;
 import com.vmware.flowgate.util.WormholeUserDetails;
@@ -63,8 +60,6 @@ public class AuthController {
    private WormholePrivilegeRepository privilegeRepository;
    @Autowired
    private AccessTokenService accessTokenService;
-   @Autowired
-   private UserDetailsServiceImpl userdetailservice;
    @Autowired
    private JwtTokenUtil jwtTokenUtil;
    @Value("${jwt.expiration:7200}")
@@ -120,24 +115,6 @@ public class AuthController {
          response.addCookie(cookie);
       }
       return access_token;
-   }
-
-   @RequestMapping(value = "/login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-   public AuthenticationResult login(@RequestBody WormholeUser user, HttpServletRequest request,
-         HttpServletResponse response) {
-      UserDetails userDetails = userdetailservice.loadUserByUsername(user.getUserName());
-      AuthorityUtil util = new AuthorityUtil();
-      AuthenticationResult result = new AuthenticationResult();
-      AuthToken access_token = accessTokenService.createToken(user);
-      Cookie cookie = new Cookie(JwtTokenUtil.Token_Name, access_token.getAccess_token());
-      cookie.setHttpOnly(true);
-      cookie.setPath("/");
-      cookie.setDomain(request.getServerName());
-      response.addCookie(cookie);
-      result.setPrivileges(util.getPrivilege(userDetails));
-      result.setToken(access_token);
-      result.setUserName(user.getUserName());
-      return result;
    }
    
    @ResponseStatus(HttpStatus.OK)
@@ -339,8 +316,10 @@ public class AuthController {
    }
 
    @RequestMapping(value="/privileges",method = RequestMethod.GET)
-   public List<String> getPrivilegeName(){
-      return InitializeConfigureData.privilegeNames;
+   public Set<String> getPrivilegeName(HttpServletRequest request){
+      WormholeUserDetails user = accessTokenService.getCurrentUser(request);
+      AuthorityUtil util = new AuthorityUtil();
+      return util.getPrivilege(user);
    }
    public List<WormholePrivilege> readPrivilege(){
       return privilegeRepository.findAll();

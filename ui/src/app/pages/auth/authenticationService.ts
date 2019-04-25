@@ -26,23 +26,18 @@ export class AuthenticationService {
   constructor(private http: Http,private router: Router) {
   }
 
-  login(username: string, password: string): Observable<any> {
+  login(username: string, password: string){
     let header = new Headers({ 'Content-Type': 'application/json' });
     let options:RequestOptions = new RequestOptions({ headers: header });
-    return this.http.post(""+this.authurl+"/v1/auth/login", JSON.stringify({userName: username, password: password}), options).pipe(
-      tap(res => {
-        if (res.ok) {
-          let currentUser = btoa(JSON.stringify({username: username, token: res.json().token, authorities:res.json().privileges}));
-          sessionStorage.setItem('currentUser', currentUser);
-          return of(true);
-        } else {
-          return of(false);
-        }
-      }),
-      catchError((err) => {
-        return of(false)
-      })
-    );
+    return this.http.post(""+this.authurl+"/v1/auth/token", JSON.stringify({userName: username, password: password}), options).map((res)=>res)
+  }
+
+  getPrivileges(token:string){
+    let header = new Headers({ 'Content-Type': 'application/json' });
+    header.append("Authorization",'Bearer ' + token);
+    this.options = new RequestOptions({ headers: header });
+    return this.http.get(""+this.authurl+"/v1/auth/privileges",this.options)
+      .map((res)=>res)
   }
 
   getCurrentUser(): any {
@@ -53,12 +48,12 @@ export class AuthenticationService {
 
   getToken(): string {
     const currentUser = this.getCurrentUser();
-    return currentUser ? currentUser.token.access_token : '';
+    return currentUser ? currentUser.token : '';
   }
 
   getExpiredTime(): number{
     const currentUser = this.getCurrentUser();
-    return currentUser ? currentUser.token.expires_in : '';
+    return currentUser ? currentUser.expires_in : '';
   }
 
   getUsername(): string {
@@ -85,7 +80,6 @@ export class AuthenticationService {
   isLoggedIn(): boolean {
     const expriedTime:number = this.getExpiredTime();
     const currentTime:number = new Date().getTime();
-
     return expriedTime>currentTime;
   }
 
