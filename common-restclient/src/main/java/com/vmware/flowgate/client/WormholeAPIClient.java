@@ -198,21 +198,21 @@ public class WormholeAPIClient extends RestClientBase {
 
    public ResponseEntity<Void> saveAssets(List<Asset> assets) {
       HttpEntity<Object> postEntity =
-            new HttpEntity<Object>(assets, RestTemplateBuilder.getDefaultHeader());
+            new HttpEntity<Object>(assets, buildHeaders());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + AssetURL, HttpMethod.POST,
             postEntity, Void.class);
    }
    
    public ResponseEntity<Void> saveAssets(Asset asset) {
       HttpEntity<Object> postEntity =
-            new HttpEntity<Object>(asset, RestTemplateBuilder.getDefaultHeader());
+            new HttpEntity<Object>(asset, buildHeaders());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + SaveAssetURL, HttpMethod.POST,
             postEntity, Void.class);
    }
 
    public ResponseEntity<Void> saveRealTimeData(List<RealTimeData> realTimeDatas) {
       HttpEntity<Object> postEntity =
-            new HttpEntity<Object>(realTimeDatas, RestTemplateBuilder.getDefaultHeader());
+            new HttpEntity<Object>(realTimeDatas, buildHeaders());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + RealTimeDatasURL, HttpMethod.POST,
             postEntity, Void.class);
    }
@@ -225,7 +225,7 @@ public class WormholeAPIClient extends RestClientBase {
 
    public ResponseEntity<Void> saveServerMapping(ServerMapping mapping) {
       HttpEntity<Object> postEntity =
-            new HttpEntity<Object>(mapping, RestTemplateBuilder.getDefaultHeader());
+            new HttpEntity<Object>(mapping, buildHeaders());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + ServerMappingURL, HttpMethod.POST,
             postEntity, Void.class);
    }
@@ -316,7 +316,7 @@ public class WormholeAPIClient extends RestClientBase {
 
    public ResponseEntity<Void> createHostnameIPMapping(AssetIPMapping mapping) {
       HttpEntity<Object> postEntity =
-            new HttpEntity<Object>(mapping, RestTemplateBuilder.getDefaultHeader());
+            new HttpEntity<Object>(mapping, buildHeaders());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + HostNameIPMapping,
             HttpMethod.POST, postEntity, Void.class);
    }
