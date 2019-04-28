@@ -184,24 +184,6 @@ public class AuthControllerTest {
    }
    
    @Test
-   public void testLogin() throws Exception {
-      ValueOperations<String, String> valueOperations = Mockito.mock(ValueOperations.class);
-      Mockito.doReturn(valueOperations).when(template).opsForValue();
-      WormholeUser wormholeuser = new WormholeUser();
-      wormholeuser.setUserName("tom");
-      wormholeuser.setPassword("$2a$10$Vm8MLIkGwinuICfcqW5RDOoE.aJqnvsaPhnxl7.N4H7oLKVIu3o0.");
-      wormholeuser.setRoleNames(Arrays.asList("admin"));
-      userRepository.save(wormholeuser);
-      this.mockMvc.perform(post("/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
-            .content("{\"userName\":\"tom\",\"password\":\"123456\"}"))
-      .andExpect(jsonPath("userName").value("tom"))
-      .andDo(document("AuthController-UserLogin-example", relaxedRequestFields(
-      fieldWithPath("userName").description("A user name for Wormhole Project"),
-      fieldWithPath("password").description("A password for Wormhole Project."))));
-      
-   }
-   
-   @Test
    public void testLogout() throws Exception {
       ValueOperations<String, String> valueOperations = Mockito.mock(ValueOperations.class);
       Mockito.doReturn(valueOperations).when(template).opsForValue();
