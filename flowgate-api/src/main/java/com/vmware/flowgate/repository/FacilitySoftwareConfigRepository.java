@@ -4,15 +4,23 @@
 */
 package com.vmware.flowgate.repository;
 
+import java.util.List;
+
 import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
 import org.springframework.data.couchbase.core.query.ViewIndexed;
 import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 
 @N1qlPrimaryIndexed
 @ViewIndexed(designDoc = "facilitySoftwareConfig")
 public interface FacilitySoftwareConfigRepository extends CouchbasePagingAndSortingRepository<FacilitySoftwareConfig, String>{
+   FacilitySoftwareConfig findOneByServerURL(String serverURL);
 
+   List<FacilitySoftwareConfig> findAllByType(SoftwareType type);
+
+   Page<FacilitySoftwareConfig> findALlByUserId(String userId, Pageable page);
 }

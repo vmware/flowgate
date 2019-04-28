@@ -7,7 +7,7 @@ package com.vmware.flowgate.common.model;
 import com.couchbase.client.java.repository.annotation.Id;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 
-public class SensorSetting {
+public class SensorSetting implements BaseDocument {
 
    @Id
    private String id;

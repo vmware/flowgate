@@ -7,15 +7,16 @@ package com.vmware.flowgate.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.assertj.core.util.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.AuthToken;
 import com.vmware.flowgate.common.model.AuthenticationResult;
-import com.vmware.flowgate.common.model.WormholePrivilege;
 import com.vmware.flowgate.common.model.WormholeRole;
 import com.vmware.flowgate.common.model.WormholeUser;
 import com.vmware.flowgate.common.security.DesensitizationUserData;
@@ -46,6 +46,7 @@ import com.vmware.flowgate.repository.UserRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.security.service.UserDetailsServiceImpl;
 import com.vmware.flowgate.util.AuthorityUtil;
+import com.vmware.flowgate.util.BaseDocumentUtil;
 import com.vmware.flowgate.util.JwtTokenUtil;
 import com.vmware.flowgate.util.WormholeUserDetails;
 
@@ -151,19 +152,15 @@ public class AuthController {
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value="/user", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void createUser(@RequestBody WormholeUser user,HttpServletResponse response) {
-      WormholeUser example = new WormholeUser();
-      example.setUserName(user.getUserName());
-      ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("lastPasswordResetDate");
-      Example<WormholeUser> userexample = Example.of(example, matcher);
-      if(userRepository.findOne(userexample) != null) {
-         logger.info(user.getUserName()+" is already exsit");
-         String message = example.getUserName()+"is already exsit";
+      if (userRepository.findOneByUserName(user.getUserName()) != null) {
+         String message = user.getUserName() + "is already exsit";
          throw new WormholeRequestException(message);
       }
       user.setCreateTime(new Date());
       BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
       user.setPassword(encoder.encode(user.getPassword().trim()));
       user.setLastPasswordResetDate(new Date().getTime());
+      BaseDocumentUtil.generateID(user);
       userRepository.save(user);
    }
 
@@ -234,11 +231,7 @@ public class AuthController {
       WormholeUser currentUser = userRepository.findOne(userDetail.getUserId());
       WormholeUser user = null;
       if(currentUser.getRoleNames().contains(Role_admin)) {
-         WormholeUser example = new WormholeUser();
-         example.setUserName(name);
-         ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("lastPasswordResetDate");
-         Example<WormholeUser> userexample = Example.of(example, matcher);
-         user = userRepository.findOne(userexample);
+         user = userRepository.findOneByUserName(name);
       }else if(currentUser.getUserName().equals(name)){
          user = currentUser;
       }else {
@@ -270,21 +263,19 @@ public class AuthController {
    // Read users
    @RequestMapping(value="/user/users", method = RequestMethod.GET)
    public List<WormholeUser> queryUsers() {
-      return DesensitizationUserData.desensitizationUser(userRepository.findAll());
+      return DesensitizationUserData
+            .desensitizationUser(Lists.newArrayList(userRepository.findAll()));
    }
 
 // Create a new role
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value="/role",method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void createRole(@RequestBody WormholeRole role) {
-      WormholeRole example = new WormholeRole();
-      example.setRoleName(role.getRoleName());
-      if(roleRepository.findOne(Example.of(example)) != null) {
-         logger.info("The role "+example.getRoleName()+" is already exsit.");
-         String message = "The role "+example.getRoleName()+" is already exsit.";
+      if (roleRepository.findOneByRoleName(role.getRoleName()) != null) {
+         String message = "The role " + role.getRoleName() + " is already exsit.";
          throw new WormholeRequestException(message);
       }
-      role.setId(null);
+      BaseDocumentUtil.generateID(role);
       roleRepository.save(role);
       InitializeConfigureData.setPrivileges(role.getRoleName(), role.getPrivilegeNames());
    }
@@ -309,7 +300,7 @@ public class AuthController {
    // Read roles
    @RequestMapping(value = "/roles",method = RequestMethod.GET)
    public List<WormholeRole> readRoleNames() {
-      return  roleRepository.findAll();
+      return Lists.newArrayList(roleRepository.findAll());
    }
    // Delete a role
    @ResponseStatus(HttpStatus.OK)

@@ -5,15 +5,10 @@
 package com.vmware.flowgate.common.model;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
 
 import com.couchbase.client.java.repository.annotation.Id;
-import com.vmware.flowgate.common.exception.WormholeException;
-import com.vmware.flowgate.common.security.EncryptionGuard;
 
-
-public class SDDCSoftwareConfig implements Serializable {
+public class SDDCSoftwareConfig implements Serializable, BaseDocument {
 
    private static final long serialVersionUID = 1L;
    @Id

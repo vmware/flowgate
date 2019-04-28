@@ -62,13 +62,14 @@ public class PrepareSecurityMetadataSourceService
    @PostConstruct
    public void loadResourceDefine(){
       logger.info("Initialization security resource.");
-      List<PrivilegeResourceMapping> privilegeResourceMappings = mappingReposity.findAll();
+      Iterable<PrivilegeResourceMapping> privilegeResourceMappings = mappingReposity.findAll();
       HashMap<String,List<Map<AntPathRequestMatcher,Collection<ConfigAttribute>>>> resourceMappings = initResourceMap(privilegeResourceMappings);
       InitializeConfigureData.init(prepareRolePrivilegeMap(),resourceMappings,privilegeNames);
       FlowgateKeystore.init(guardStoreFilePath, guardStoreAlias, guardStorePass);
   }
    
-   public HashMap<String,List<Map<AntPathRequestMatcher,Collection<ConfigAttribute>>>> initResourceMap(List<PrivilegeResourceMapping> privilegeResourceMappings) {
+   public HashMap<String, List<Map<AntPathRequestMatcher, Collection<ConfigAttribute>>>> initResourceMap(
+         Iterable<PrivilegeResourceMapping> privilegeResourceMappings) {
       HashMap<String,List<Map<AntPathRequestMatcher,Collection<ConfigAttribute>>>> resourcesPrivilegeMap = new HashMap<>();
       WormholeResourceWeightComparator comparator = new WormholeResourceWeightComparator();
       TreeMap<WormholeResources, String> sortMap =
@@ -152,7 +153,7 @@ public class PrepareSecurityMetadataSourceService
    }
 
    public HashMap<String, List<String>> prepareRolePrivilegeMap() {
-      List<WormholeRole> roles = roleRepository.findAll();
+      Iterable<WormholeRole> roles = roleRepository.findAll();
       HashMap<String, List<String>> rolePrivilegeMap = new HashMap<String, List<String>>();
       for (WormholeRole role : roles) {
          rolePrivilegeMap.put(role.getRoleName(), role.getPrivilegeNames());

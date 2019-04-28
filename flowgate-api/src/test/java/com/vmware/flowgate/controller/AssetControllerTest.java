@@ -55,13 +55,14 @@ import com.vmware.flowgate.common.model.AssetRealtimeDataSpec;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.ServerSensorData;
-import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
+import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ValueUnit.ValueType;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
+import com.vmware.flowgate.util.BaseDocumentUtil;
 
 class MappingIdForDoc {
    public String FirstId;
@@ -1582,8 +1583,10 @@ public class AssetControllerTest {
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
       realTimeDatas.add(realTimeData);
       Asset asset = createAsset();
+      BaseDocumentUtil.generateID(asset);
       asset = assetRepository.save(asset);
-      realTimeDatas = realtimeDataRepository.save(realTimeDatas);
+      BaseDocumentUtil.generateID(realTimeDatas);
+      Iterable<RealTimeData> result = realtimeDataRepository.save(realTimeDatas);
       this.mockMvc
             .perform(get("/v1/assets/" + asset.getId() + "/serversensordata").param("starttime",
                   "1501981711206"))
@@ -1593,7 +1596,7 @@ public class AssetControllerTest {
                   responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
                         .andWithPrefix("[].", fieldpath)));
       assetRepository.delete(asset);
-      realtimeDataRepository.delete(realTimeDatas);
+      realtimeDataRepository.delete(result);
    }
 
    RealTimeData createRealTimeData() {

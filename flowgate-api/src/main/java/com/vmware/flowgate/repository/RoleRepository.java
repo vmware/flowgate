@@ -14,5 +14,5 @@ import com.vmware.flowgate.common.model.WormholeRole;
 @N1qlPrimaryIndexed
 @ViewIndexed(designDoc = "wormholeRole")
 public interface RoleRepository extends CouchbasePagingAndSortingRepository<WormholeRole, String> {
-
+   WormholeRole findOneByRoleName(String roleName);
 }

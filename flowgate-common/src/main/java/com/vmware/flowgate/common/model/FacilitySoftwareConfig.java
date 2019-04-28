@@ -8,10 +8,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import com.couchbase.client.java.repository.annotation.Id;
-import com.vmware.flowgate.common.exception.WormholeException;
-import com.vmware.flowgate.common.security.EncryptionGuard;
 
-public class FacilitySoftwareConfig implements Serializable {
+public class FacilitySoftwareConfig implements Serializable, BaseDocument {
 
    /**
     *
