@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
+import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 
 @N1qlPrimaryIndexed
 @ViewIndexed(designDoc = "sDDCSoftwareConfig")

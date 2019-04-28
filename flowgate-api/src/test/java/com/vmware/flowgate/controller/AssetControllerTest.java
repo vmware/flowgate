@@ -63,6 +63,7 @@ import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
+import com.vmware.flowgate.util.BaseDocumentUtil;
 
 class MappingIdForDoc {
    public String FirstId;
@@ -787,17 +788,17 @@ public class AssetControllerTest {
    public void getAssetsByVCIdExample() throws Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
-      
+
       ServerMapping mapping = createServerMapping();
       mapping.setAsset(asset.getId());
       mapping.setVcID("5b7cfd5655368548d42e0fd5");
       mapping.setVcHostName("10.192.74.203");
       mapping.setVcMobID("host-11");
       serverMappingRepository.save(mapping);
-      
+
       Asset asset2 = createAsset();
       asset2 = assetRepository.save(asset2);
-      
+
       ServerMapping mapping2 = createServerMapping();
       mapping2.setAsset(asset2.getId());
       mapping2.setVcID("5b7cfd5655368548d42e0fd6");
@@ -924,7 +925,7 @@ public class AssetControllerTest {
       String keywords = "lhy";
       FacilitySoftwareConfig facility = createFacilitySoftware();
       facilitySoftwareRepository.save(facility);
-      
+
       this.mockMvc
             .perform(get("/v1/assets/page/"
                   + pageNumber + "/pagesize/" + pageSize + "/keywords/" + keywords))
@@ -1576,7 +1577,9 @@ public class AssetControllerTest {
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
       realTimeDatas.add(realTimeData);
       Asset asset = createAsset();
+      BaseDocumentUtil.generateID(asset);
       asset = assetRepository.save(asset);
+      BaseDocumentUtil.generateID(realTimeDatas);
       Iterable<RealTimeData> result = realtimeDataRepository.save(realTimeDatas);
       this.mockMvc
             .perform(get("/v1/assets/" + asset.getId() + "/serversensordata").param("starttime",
@@ -1589,7 +1592,7 @@ public class AssetControllerTest {
       assetRepository.delete(asset);
       realtimeDataRepository.delete(result);
    }
-   
+
    RealTimeData createRealTimeData() {
       List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
       ValueUnit valueunitvoltage = new ValueUnit();
@@ -1632,7 +1635,7 @@ public class AssetControllerTest {
       asset.setAssetName("pek-wor-server-02");
       asset.setAssetNumber(12345);
       asset.setAssetSource("5b7d208d55368540fcba1692");
-      asset.setCategory(AssetCategory.Server); 
+      asset.setCategory(AssetCategory.Server);
       asset.setModel("Dell 750");
       asset.setManufacturer("Dell");
       Map<ServerSensorType, String> sensorsformulars =
@@ -1643,7 +1646,7 @@ public class AssetControllerTest {
       asset.setSensorsformulars(sensorsformulars);
       return asset;
    }
-   
+
    FacilitySoftwareConfig createFacilitySoftware() throws Exception {
       FacilitySoftwareConfig example = new FacilitySoftwareConfig();
       example.setId("5b7d208d55368540fcba1692");
