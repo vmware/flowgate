@@ -6,7 +6,7 @@ package com.vmware.flowgate.common.model;
 
 import com.couchbase.client.java.repository.annotation.Id;
 
-public class ServerMapping {
+public class ServerMapping implements BaseDocument {
    @Id
    private String id;
    private String asset;

@@ -9,4 +9,5 @@ import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRe
 import com.vmware.flowgate.common.model.WormholeUser;
 
 public interface UserRepository extends CouchbasePagingAndSortingRepository<WormholeUser, String> {
+   WormholeUser findOneByUserName(String userName);
 }

@@ -9,7 +9,7 @@ import java.util.List;
 
 import com.couchbase.client.java.repository.annotation.Id;
 
-public class WormholeUser {
+public class WormholeUser implements BaseDocument {
    /**
     * userId
     */

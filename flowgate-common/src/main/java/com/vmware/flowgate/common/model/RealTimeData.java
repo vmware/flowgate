@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.couchbase.client.java.repository.annotation.Id;
 
-public class RealTimeData {
+public class RealTimeData implements BaseDocument {
    @Id
    private String id;
    private String assetID;

@@ -16,7 +16,7 @@ import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 
-public class Asset implements Serializable {
+public class Asset implements Serializable, BaseDocument {
 
    /**
     * Created by wormhole, if use MongoDB, it will be the object id created by MongoDB _id

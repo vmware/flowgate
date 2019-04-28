@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.couchbase.client.java.repository.annotation.Id;
 
-public class WormholeRole {
+public class WormholeRole implements BaseDocument {
    /**
     * roleid
     */

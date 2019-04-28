@@ -18,7 +18,7 @@ import com.vmware.flowgate.common.model.Asset;
 @N1qlPrimaryIndexed
 @ViewIndexed(designDoc = "asset")
 public interface AssetRepository
-      extends CouchbasePagingAndSortingRepository<Asset, String>, AssetRepositoryEnhancement {
+      extends CouchbasePagingAndSortingRepository<Asset, String> {
    public Asset findOneByAssetNumber(long assetNumber);
 
    public List<Asset> findByPdusIsNull();
@@ -29,4 +29,6 @@ public interface AssetRepository
          AssetCategory category1, String tag, AssetCategory category, Pageable pageable);
 
    public Asset findOneByAssetName(String name);
+
+   public List<Asset> findAllByAssetSourceAndCategory(String assetSource, AssetCategory category);
 }
