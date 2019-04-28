@@ -31,7 +31,7 @@ public class BaseDocumentUtil {
       new HashMap<String, Object>();
       Class<?> oldC = oldAsset.getClass();
       for (Field fieldNew : newAsset.getClass().getDeclaredFields()) {
-         fieldNew.isAccessible();
+         Boolean accessible = fieldNew.isAccessible();
          fieldNew.setAccessible(true);
          Field fieldOld = oldC.getDeclaredField(fieldNew.getName());
          fieldOld.setAccessible(true);
@@ -47,6 +47,7 @@ public class BaseDocumentUtil {
             }
          }
          fieldOld.set(oldAsset, newValue);
+         fieldOld.setAccessible(accessible);
       }
    }
 }
