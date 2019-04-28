@@ -9,7 +9,7 @@ CURRENTPATH=`pwd` #make
 
 OUTPUTJARFILESNUM=9
 UIDISTFILENUM=18
-TIMEOUTSECOND=600
+TIMEOUTSECOND=900
 BUILDLOG=$CURRENTPATH/build-log
 SOURCECODEDIR=$CURRENTPATH/../../flowgate
 OUTPUTJARPATH=$CURRENTPATH/jar-output
@@ -32,6 +32,8 @@ else
 	echo "eg. 'bash build.sh ( ui | jar | image | save | all ) -version v1.0'"
 	exit 0
 fi
+RELEASES_VERSION=flowgate-$FLOWGATE_VERSION.tar.gz
+
 sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSEBUILDIMAGESFILE
 sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSERUNFILE
 sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSEBUILDJARFILE
@@ -120,6 +122,8 @@ saveDockerImages(){
 	flowgate/management:$FLOWGATE_VERSION flowgate/infoblox-worker:$FLOWGATE_VERSION flowgate/labsdb-worker:$FLOWGATE_VERSION \
 	flowgate/poweriq-worker:$FLOWGATE_VERSION flowgate/aggregator:$FLOWGATE_VERSION flowgate/api:$FLOWGATE_VERSION \
 	flowgate/redis:$FLOWGATE_VERSION flowgate/mongodb:$FLOWGATE_VERSION >> $FLOWGATEIMAGESTAR
+
+	tar -cvzf $RELEASES_VERSION flowgate_run.sh conf.tar.gz maven-docker-build/docker-compose.run.images.yml docker-images-output/flowgate.tar
 }
 
 
