@@ -32,6 +32,8 @@ public class RestClientConfig {
    
    @Value("${wormhole.apiclient.socket.timeout:8000}")
    private int socketTimeout;
+   @Value("${wormhole.apiclient.connectionrequest.timeout:30000}")
+   private int connectionRequestTimeout;
    
    @Bean(name = "httpRequestFactory")
    public ClientHttpRequestFactory httpRequestFactory() {
@@ -61,7 +63,7 @@ public class RestClientConfig {
       connectionManager.setMaxTotal(5);
       connectionManager.setDefaultMaxPerRoute(5);
       RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(socketTimeout)
-            .setConnectTimeout(socketTimeout).setConnectionRequestTimeout(socketTimeout).build();
+            .setConnectTimeout(socketTimeout).setConnectionRequestTimeout(connectionRequestTimeout).build();
 
       return HttpClientBuilder.create().setDefaultRequestConfig(requestConfig)
             .setConnectionManager(connectionManager).build();
