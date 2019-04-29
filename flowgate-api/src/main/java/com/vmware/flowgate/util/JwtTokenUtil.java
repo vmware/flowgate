@@ -27,10 +27,8 @@ import com.vmware.flowgate.security.service.UserDetailsServiceImpl;
 public class JwtTokenUtil {
 
    private static final Logger logger = LoggerFactory.getLogger(JwtTokenUtil.class);
-   @Value("${jwt.issuer:Wormhole}")
+   @Value("${jwt.issuer:Flowgate}")
    private String issuer;
-   @Value("${jwt.secret:mySecret}")
-   private String secret;
    @Value("${jwt.expiration:7200}")
    private int expiration;
    @Autowired
@@ -47,6 +45,7 @@ public class JwtTokenUtil {
     * @return
     */
    public AuthToken generate(WormholeUserDetails user) {
+      String secret = FlowgateKeystore.getEncryptKey();
       Algorithm algorithm = null;
       try {
          algorithm = Algorithm.HMAC256(secret);
@@ -79,6 +78,7 @@ public class JwtTokenUtil {
    }
    
    public DecodedJWT getDecodedJwt(String token) {
+      String secret = FlowgateKeystore.getEncryptKey();
       if (token == null) {
          return null;
      }
