@@ -110,13 +110,13 @@ public class AssetController {
    @RequestMapping(value = "/source/{assetsource}/type/{type}", method = RequestMethod.GET)
    public List<Asset> getAssetBySourceAndType(@PathVariable String assetSource,
          @PathVariable AssetCategory type) {
-      return assetRepository.findAllByAssetSourceAndCategory(assetSource, type);
+      return assetRepository.findAllByAssetSourceAndCategory(assetSource, type.name());
    }
 
    // Read Asset by type
    @RequestMapping(value = "/type/{type}", method = RequestMethod.GET)
    public List<Asset> getAssetByType(@PathVariable AssetCategory type) {
-      return assetRepository.findByCategory(type);
+      return assetRepository.findByCategory(type.name());
    }
 
    // Read mapped Asset
