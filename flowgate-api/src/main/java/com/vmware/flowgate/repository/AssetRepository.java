@@ -7,6 +7,7 @@ package com.vmware.flowgate.repository;
 import java.util.List;
 
 import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
+import org.springframework.data.couchbase.core.query.Query;
 import org.springframework.data.couchbase.core.query.ViewIndexed;
 import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 import org.springframework.data.domain.Page;
@@ -23,12 +24,15 @@ public interface AssetRepository
 
    public List<Asset> findByPdusIsNull();
 
-   public List<Asset> findByCategory(AssetCategory category);
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND `category` = $2")
+   public List<Asset> findByCategory(String category);
 
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND (`assetName` LIKE $1 AND `category` = $2)")
    public Page<Asset> findByAssetNameLikeAndCategoryOrTagLikeAndCategory(String assetName,
          AssetCategory category1, String tag, AssetCategory category, Pageable pageable);
 
    public Asset findOneByAssetName(String name);
 
-   public List<Asset> findAllByAssetSourceAndCategory(String assetSource, AssetCategory category);
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND (`assetSource` = $1 AND `category` = $2)")
+   public List<Asset> findAllByAssetSourceAndCategory(String assetSource, String category);
 }
