@@ -12,8 +12,6 @@ import org.springframework.data.couchbase.core.query.ViewIndexed;
 import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.model.Asset;
 
 @N1qlPrimaryIndexed
@@ -24,12 +22,11 @@ public interface AssetRepository
 
    public List<Asset> findByPdusIsNull();
 
-   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND `category` = $2")
-   public List<Asset> findByCategory(String category);
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND `category` = $1")
+   public List<Asset> findAssetsByCategory(String category);
 
-   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND (`assetName` LIKE $1 AND `category` = $2)")
-   public Page<Asset> findByAssetNameLikeAndCategoryOrTagLikeAndCategory(String assetName,
-         AssetCategory category1, String tag, AssetCategory category, Pageable pageable);
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND (`assetName` LIKE $1 OR `tag` LIKE $1) AND `category` = $2")
+   public Page<Asset> findByAssetNameLikeAndCategoryOrTagLikeAndCategory(String keywords, String category, Pageable pageable);
 
    public Asset findOneByAssetName(String name);
 

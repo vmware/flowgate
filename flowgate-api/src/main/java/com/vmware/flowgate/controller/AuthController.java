@@ -245,12 +245,12 @@ public class AuthController {
    
    // Read users
    @RequestMapping(value = "/user/page",method = RequestMethod.GET)
-   public Page<WormholeUser> queryUserByPageable (@RequestParam("currentPage") Integer currentPage,
-         @RequestParam("pageSize") Integer pageSize) {
-      if(currentPage < 1) {
-         currentPage = 1;
+   public Page<WormholeUser> queryUserByPageable (@RequestParam("currentPage") int currentPage,
+         @RequestParam("pageSize") int pageSize) {
+      if(currentPage < FlowgateConstant.defaultPageNumber) {
+         currentPage = FlowgateConstant.defaultPageNumber;
       }
-      if(pageSize == null) {
+      if(pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       }else if(pageSize > FlowgateConstant.maxPageSize){
          pageSize = FlowgateConstant.maxPageSize;
@@ -286,13 +286,15 @@ public class AuthController {
    }
    // Read roles
    @RequestMapping(value = "/role/page",method = RequestMethod.GET)
-   public Page<WormholeRole> queryByPage(@RequestParam ("currentPage") Integer currentPage,
-         @RequestParam("pageSize") Integer pageSize) {
-      if(currentPage < 1) {
-         currentPage = 1;
-      }
-      if(pageSize > FlowgateConstant.maxPageSize) {
-          pageSize = FlowgateConstant.maxPageSize;
+   public Page<WormholeRole> queryByPage(@RequestParam ("currentPage") int currentPage,
+         @RequestParam("pageSize") int pageSize) {
+      if(currentPage < FlowgateConstant.defaultPageNumber) {
+         currentPage = FlowgateConstant.defaultPageNumber;
+      } 
+      if(pageSize <= 0) {
+         pageSize = FlowgateConstant.defaultPageSize;
+      }else if(pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageRequest = new PageRequest(currentPage-1,pageSize);
       return roleRepository.findAll(pageRequest);

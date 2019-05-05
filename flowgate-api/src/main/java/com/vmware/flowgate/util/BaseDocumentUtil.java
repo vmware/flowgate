@@ -15,7 +15,7 @@ import com.vmware.flowgate.common.model.BaseDocument;
 public class BaseDocumentUtil {
 
    public static <T extends BaseDocument> void generateID(T document) {
-      if (document.getId() != null) {
+      if (document.getId() == null) {
          document.setId(UUID.randomUUID().toString());
       }
    }

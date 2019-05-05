@@ -17,6 +17,6 @@ import com.vmware.flowgate.common.model.RealTimeData;
 @ViewIndexed(designDoc = "assetRealtimeData")
 public interface AssetRealtimeDataRepository
       extends CouchbasePagingAndSortingRepository<RealTimeData, String> {
-   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} and assetID = $1 and time between $2 and $2+$3 within #{#n1ql.bucket}")
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} and assetID = $1 and time between $2 and $2+$3")
    public List<RealTimeData> getDataByIDAndTimeRange(String assetID, long starttime, int duration);
 }

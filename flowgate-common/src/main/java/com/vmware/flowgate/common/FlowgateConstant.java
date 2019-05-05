@@ -6,9 +6,11 @@ package com.vmware.flowgate.common;
 
 public class FlowgateConstant {
 
-   public static int maxPageSize = 100;
+   public static int maxPageSize = 1000;
    
    public static int defaultPageSize = 20;
+   
+   public static int defaultPageNumber = 1;
    
    public static String serviceKey = "FLOWGATESERVICEKEY";
    

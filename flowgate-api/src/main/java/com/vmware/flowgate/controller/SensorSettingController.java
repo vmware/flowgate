@@ -60,9 +60,9 @@ public class SensorSettingController {
    public Page<SensorSetting> getSensorSettingsByPage(
          @PathVariable("pageNumber") int pageNumber,
          @PathVariable("pageSize") int pageSize) {
-      if(pageNumber < 1) {
-         pageNumber = 1;
-      }else if(pageSize == 0) {
+      if(pageNumber < FlowgateConstant.defaultPageNumber) {
+         pageNumber = FlowgateConstant.defaultPageNumber;
+      }else if(pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       }else if(pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
