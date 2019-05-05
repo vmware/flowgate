@@ -12,10 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +33,6 @@ import com.vmware.flowgate.common.model.WormholeRole;
 import com.vmware.flowgate.config.InitializeConfigureData;
 import com.vmware.flowgate.repository.PrivilegeResourcesMappingReposity;
 import com.vmware.flowgate.repository.RoleRepository;
-import com.vmware.flowgate.repository.UserRepository;
 import com.vmware.flowgate.util.FlowgateKeystore;
 import com.vmware.flowgate.util.WormholeResourceWeightComparator;
 

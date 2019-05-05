@@ -63,7 +63,6 @@ import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
-import com.vmware.flowgate.util.BaseDocumentUtil;
 
 class MappingIdForDoc {
    public String FirstId;
@@ -1577,9 +1576,7 @@ public class AssetControllerTest {
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
       realTimeDatas.add(realTimeData);
       Asset asset = createAsset();
-      BaseDocumentUtil.generateID(asset);
       asset = assetRepository.save(asset);
-      BaseDocumentUtil.generateID(realTimeDatas);
       Iterable<RealTimeData> result = realtimeDataRepository.save(realTimeDatas);
       this.mockMvc
             .perform(get("/v1/assets/" + asset.getId() + "/serversensordata").param("starttime",
