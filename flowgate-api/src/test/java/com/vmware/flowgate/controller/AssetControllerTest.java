@@ -21,12 +21,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,7 +42,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.AssetCategory;
@@ -52,6 +51,7 @@ import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetAddress;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.AssetRealtimeDataSpec;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.ServerSensorData;
@@ -61,8 +61,8 @@ import com.vmware.flowgate.common.model.ValueUnit.ValueType;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
+import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
-import com.vmware.flowgate.util.BaseDocumentUtil;
 
 class MappingIdForDoc {
    public String FirstId;
@@ -90,6 +90,9 @@ public class AssetControllerTest {
    AssetRealtimeDataRepository realtimeDataRepository;
 
    @Autowired
+   private FacilitySoftwareConfigRepository facilitySoftwareRepository;
+
+   @Autowired
    private WebApplicationContext context;
 
    @Autowired
@@ -107,7 +110,6 @@ public class AssetControllerTest {
    @Test
    public void createAnAssetExample() throws JsonProcessingException, Exception {
       Asset asset = createAsset();
-      asset.setId("temporary_id");
       this.mockMvc
             .perform(post("/v1/assets").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(asset)))
@@ -178,20 +180,19 @@ public class AssetControllerTest {
                         .description("This is a collection of states, including the state of the asset, "
                               + "the state of the pdu mapping, and the state of the switch mapping."))))
             .andReturn().getResponse().getHeader("Location");
-      assetRepository.delete("temporary_id");
+      assetRepository.delete(asset.getId());
    }
 
    @Test
    public void saveServerMappingExample() throws JsonProcessingException, Exception {
       ServerMapping mapping = createServerMapping();
-      mapping.setId("temporary_id");
       this.mockMvc
             .perform(post("/v1/assets/mapping").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(mapping)))
             .andExpect(status().isCreated())
             .andDo(document("assets-saveServerMapping-example",
                   requestFields(
-                        fieldWithPath("id").description("ID of the mapping, created by wormhole"),
+                        fieldWithPath("id").description("ID of the mapping, created by flowgate"),
                         fieldWithPath("asset").description("An asset for serverMapping."),
                         fieldWithPath("vcID").description("ID of Vcenter."),
                         fieldWithPath("vcHostName")
@@ -207,16 +208,15 @@ public class AssetControllerTest {
                         fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
                         fieldWithPath("vroResourceID").description("VROps Resource ID."))))
             .andReturn().getResponse().getHeader("Location");
-
-      serverMappingRepository.delete("temporary_id");
+      serverMappingRepository.delete(mapping.getId());
    }
 
    @Test
    public void insertRealtimeDataExample() throws JsonProcessingException, Exception {
-
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
       RealTimeData realtime = new RealTimeData();
+      realtime.setId(UUID.randomUUID().toString());
       List<ValueUnit> values = new ArrayList<ValueUnit>();
       ValueUnit v = new ValueUnit();
       v.setValue("123");
@@ -239,10 +239,8 @@ public class AssetControllerTest {
                         .type(ValueUnit[].class),
                   fieldWithPath("time").description("The time of generate sensor data."))))
             .andReturn().getResponse().getHeader("Location");
-
       assetRepository.delete(asset.getId());
       realtimeDataRepository.delete(realtime.getId());
-
    }
 
    @Test
@@ -251,12 +249,10 @@ public class AssetControllerTest {
       Asset asset1 = createAsset();
       asset1.setAssetName("lhy");
       asset1.setAssetNumber(18);
-      asset1.setId("temporary_id1");
       assets.add(asset1);
       Asset asset2 = createAsset();
       asset2.setAssetName("lwy");
       asset2.setAssetNumber(17);
-      asset2.setId("temporary_id2");
       assets.add(asset2);
 
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
@@ -327,8 +323,8 @@ public class AssetControllerTest {
                         .andWithPrefix("[].", fieldpath)))
             .andReturn().getResponse().getHeader("Location");
 
-      assetRepository.delete("temporary_id1");
-      assetRepository.delete("temporary_id2");
+      assetRepository.delete(asset1.getId());
+      assetRepository.delete(asset2.getId());
    }
 
    @Test
@@ -336,11 +332,9 @@ public class AssetControllerTest {
       List<RealTimeData> realtimedatas = new ArrayList<RealTimeData>();
       RealTimeData realtimedata1 = createRealTimeData();
       realtimedata1.setAssetID("assetid1");
-      realtimedata1.setId("temporary_id1");
       realtimedatas.add(realtimedata1);
       RealTimeData realtimedata2 = createRealTimeData();
       realtimedata2.setAssetID("assetid2");
-      realtimedata2.setId("temporary_id2");
       realtimedatas.add(realtimedata2);
 
       FieldDescriptor[] fieldpath =
@@ -357,8 +351,8 @@ public class AssetControllerTest {
                         .andWithPrefix("[].", fieldpath)))
             .andReturn().getResponse().getHeader("Location");
 
-      realtimeDataRepository.delete("temporary_id1");
-      realtimeDataRepository.delete("temporary_id2");
+      realtimeDataRepository.delete(realtimedata1.getId());
+      realtimeDataRepository.delete(realtimedata2.getId());
    }
 
    @Test
@@ -657,10 +651,8 @@ public class AssetControllerTest {
    public void getHostNameByIPExample() throws Exception {
 
       AssetIPMapping mapping1 = createAssetIPMapping();
-      mapping1.setId("temporary_id1");
       assetIPMappingRepository.save(mapping1);
       AssetIPMapping mapping2 = createAssetIPMapping();
-      mapping2.setId("temporary_id2");
       assetIPMappingRepository.save(mapping2);
 
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
@@ -682,10 +674,8 @@ public class AssetControllerTest {
    public void getUnmappedServersExample() throws Exception {
 
       ServerMapping mapping1 = createServerMapping();
-      mapping1.setId("temporary_id1");
       serverMappingRepository.save(mapping1);
       ServerMapping mapping2 = createServerMapping();
-      mapping2.setId("temporary_id2");
       serverMappingRepository.save(mapping2);
 
       FieldDescriptor[] fieldpath =
@@ -706,6 +696,7 @@ public class AssetControllerTest {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
       ServerMapping mapping = new ServerMapping();
+      mapping.setId(UUID.randomUUID().toString());
       mapping.setAsset(asset.getId());
       mapping.setVcID("5b7cfd5655368548d42e0fd5");
       mapping.setVcHostName("10.192.74.203");
@@ -714,6 +705,7 @@ public class AssetControllerTest {
       Asset asset2 = createAsset();
       asset2 = assetRepository.save(asset2);
       ServerMapping mapping2 = new ServerMapping();
+      mapping2.setId(UUID.randomUUID().toString());
       mapping2.setAsset(asset2.getId());
       mapping2.setVcID("5b7cfd5655368548d42e0fd6");
       mapping2.setVcHostName("10.192.74.203");
@@ -795,15 +787,18 @@ public class AssetControllerTest {
    public void getAssetsByVCIdExample() throws Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
-      ServerMapping mapping = new ServerMapping();
+      
+      ServerMapping mapping = createServerMapping();
       mapping.setAsset(asset.getId());
       mapping.setVcID("5b7cfd5655368548d42e0fd5");
       mapping.setVcHostName("10.192.74.203");
       mapping.setVcMobID("host-11");
       serverMappingRepository.save(mapping);
+      
       Asset asset2 = createAsset();
       asset2 = assetRepository.save(asset2);
-      ServerMapping mapping2 = new ServerMapping();
+      
+      ServerMapping mapping2 = createServerMapping();
       mapping2.setAsset(asset2.getId());
       mapping2.setVcID("5b7cfd5655368548d42e0fd6");
       mapping2.setVcHostName("10.192.74.203");
@@ -891,6 +886,8 @@ public class AssetControllerTest {
       asset2.setAssetNumber(17);
       asset2.setAssetSource(null);
       assetRepository.save(asset2);
+      FacilitySoftwareConfig facility = createFacilitySoftware();
+      facilitySoftwareRepository.save(facility);
       int pageNumber = 1;
       int pageSize = 1;
 
@@ -909,7 +906,7 @@ public class AssetControllerTest {
 
       assetRepository.delete(asset1.getId());
       assetRepository.delete(asset2.getId());
-
+      facilitySoftwareRepository.delete(facility.getId());
    }
 
    @Test
@@ -924,8 +921,10 @@ public class AssetControllerTest {
       assetRepository.save(asset2);
       int pageNumber = 1;
       int pageSize = 1;
-      String keywords = "1";
-
+      String keywords = "lhy";
+      FacilitySoftwareConfig facility = createFacilitySoftware();
+      facilitySoftwareRepository.save(facility);
+      
       this.mockMvc
             .perform(get("/v1/assets/page/"
                   + pageNumber + "/pagesize/" + pageSize + "/keywords/" + keywords))
@@ -943,7 +942,7 @@ public class AssetControllerTest {
 
       assetRepository.delete(asset1.getId());
       assetRepository.delete(asset2.getId());
-
+      facilitySoftwareRepository.delete(facility.getId());
    }
 
    @Test
@@ -951,6 +950,7 @@ public class AssetControllerTest {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
       ServerMapping mapping = new ServerMapping();
+      mapping.setId(UUID.randomUUID().toString());
       mapping.setAsset(asset.getId());
       mapping.setVcID("5b7cfd5655368548d42e0fd5");
       mapping.setVcHostName("10.192.74.203");
@@ -960,6 +960,7 @@ public class AssetControllerTest {
 
       asset2 = assetRepository.save(asset2);
       ServerMapping mapping2 = new ServerMapping();
+      mapping2.setId(UUID.randomUUID().toString());
       mapping2.setAsset(asset2.getId());
       mapping2.setVcID("5b7cfd5655368548d42e0fd6");
       mapping2.setVcHostName("10.192.74.203");
@@ -1042,7 +1043,7 @@ public class AssetControllerTest {
    public void findServersWithPDUInfoExample() throws Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
-      ServerMapping mapping = new ServerMapping();
+      ServerMapping mapping = createServerMapping();
       mapping.setAsset(asset.getId());
       mapping.setVcID("5b7cfd5655368548d42e0fd5");
       mapping.setVcHostName("10.192.74.203");
@@ -1051,7 +1052,7 @@ public class AssetControllerTest {
       Asset asset2 = createAsset();
       asset2.setPdus(Arrays.asList("pdu1", "pdu2"));
       asset2 = assetRepository.save(asset2);
-      ServerMapping mapping2 = new ServerMapping();
+      ServerMapping mapping2 = createServerMapping();
       mapping2.setAsset(asset2.getId());
       mapping2.setVcID("5b7cfd5655368548d42e0fd6");
       mapping2.setVcHostName("10.192.74.203");
@@ -1201,7 +1202,6 @@ public class AssetControllerTest {
                         fieldWithPath("numberOfElements").description("The number of Elements."),
                         fieldWithPath("first").description("Is the first."))));
 
-
       serverMappingRepository.delete(mapping1.getId());
       serverMappingRepository.delete(mapping2.getId());
    }
@@ -1209,7 +1209,6 @@ public class AssetControllerTest {
    @Test
    public void createHostNameIPMappingExample() throws Exception {
       AssetIPMapping assetipmapping = createAssetIPMapping();
-      assetipmapping.setId("temporary_id");
       this.mockMvc
             .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(assetipmapping)))
@@ -1221,7 +1220,7 @@ public class AssetControllerTest {
                         "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"))))
             .andReturn().getResponse().getHeader("Location");
 
-      assetRepository.delete("temporary_id");
+      assetRepository.delete(assetipmapping.getId());
    }
 
    @Test
@@ -1516,12 +1515,9 @@ public class AssetControllerTest {
    public void mergeServerMappingExample() throws Exception {
 
       ServerMapping mapping1 = createServerMapping();
-
       serverMappingRepository.save(mapping1);
       ServerMapping mapping2 = createServerMapping();
-
       serverMappingRepository.save(mapping2);
-
       MappingIdForDoc mappingId = new MappingIdForDoc();
       mappingId.FirstId = mapping1.getId();
       mappingId.SecondId = mapping2.getId();
@@ -1538,9 +1534,7 @@ public class AssetControllerTest {
                         fieldWithPath("SecondId")
                               .description("ID of the mapping's secondid created by wormhole."))));
 
-
       serverMappingRepository.delete(mapping1.getId());
-      serverMappingRepository.delete(mapping2.getId());
    }
 
    @Test
@@ -1552,12 +1546,11 @@ public class AssetControllerTest {
                   .content("{\"id\":\"" + asset.getId() + "\"}"))
             .andExpect(status().isOk()).andDo(document("assets-delete-example",
                   requestFields(fieldWithPath("id").description("The primary key for asset."))));
-
-      assetRepository.delete(asset.getId());
    }
 
    ServerMapping createServerMapping() throws Exception {
       ServerMapping mapping = new ServerMapping();
+      mapping.setId(UUID.randomUUID().toString());
       mapping.setVcHostName("mappinghostname");
       mapping.setVroResourceName("mappingresourcename");
       mapping.setVroID("1");
@@ -1583,44 +1576,42 @@ public class AssetControllerTest {
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
       realTimeDatas.add(realTimeData);
       Asset asset = createAsset();
-      BaseDocumentUtil.generateID(asset);
       asset = assetRepository.save(asset);
-      BaseDocumentUtil.generateID(realTimeDatas);
       Iterable<RealTimeData> result = realtimeDataRepository.save(realTimeDatas);
       this.mockMvc
             .perform(get("/v1/assets/" + asset.getId() + "/serversensordata").param("starttime",
                   "1501981711206"))
             .andExpect(content().string(equalTo(
-                  "[{\"type\":\"PDU_RealtimeVoltage\",\"valueNum\":208.0,\"value\":null,\"timeStamp\":1501981711206},{\"type\":\"PDU_RealtimePower\",\"valueNum\":2.38,\"value\":null,\"timeStamp\":1501981711206},{\"type\":\"PDU_RealtimeLoad\",\"valueNum\":20.0,\"value\":null,\"timeStamp\":1501981711206}]")))
+                  "[{\"type\":\"PDU_RealtimeLoad\",\"valueNum\":20.0,\"value\":null,\"timeStamp\":1501981711206},{\"type\":\"PDU_RealtimePower\",\"valueNum\":2.38,\"value\":null,\"timeStamp\":1501981711206},{\"type\":\"PDU_RealtimeVoltage\",\"valueNum\":208.0,\"value\":null,\"timeStamp\":1501981711206}]")))
             .andDo(document("assets-getServerSensorData-example",
                   responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
                         .andWithPrefix("[].", fieldpath)));
       assetRepository.delete(asset);
       realtimeDataRepository.delete(result);
    }
-
+   
    RealTimeData createRealTimeData() {
       List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
-      ValueUnit valueunit = new ValueUnit();
-      valueunit.setKey(ValueType.PDU_RealtimeLoad);
-      valueunit.setUnit("Amps");
-      valueunit.setValueNum(20);
-      valueunit.setTime(1501981711206L);
-      valueunits.add(valueunit);
-      ValueUnit valueunitpower = new ValueUnit();
-      valueunitpower.setKey(ValueType.PDU_RealtimePower);
-      valueunitpower.setUnit("KW");
-      valueunitpower.setValueNum(2.38);
-      valueunitpower.setTime(1501981711206L);
-      valueunits.add(valueunitpower);
       ValueUnit valueunitvoltage = new ValueUnit();
       valueunitvoltage.setKey(ValueType.PDU_RealtimeVoltage);
       valueunitvoltage.setUnit("Volts");
       valueunitvoltage.setValueNum(208);
       valueunitvoltage.setTime(1501981711206L);
       valueunits.add(valueunitvoltage);
-
+      ValueUnit valueunitpower = new ValueUnit();
+      valueunitpower.setKey(ValueType.PDU_RealtimePower);
+      valueunitpower.setUnit("KW");
+      valueunitpower.setValueNum(2.38);
+      valueunitpower.setTime(1501981711206L);
+      valueunits.add(valueunitpower);
+      ValueUnit valueunit = new ValueUnit();
+      valueunit.setKey(ValueType.PDU_RealtimeLoad);
+      valueunit.setUnit("Amps");
+      valueunit.setValueNum(20);
+      valueunit.setTime(1501981711206L);
+      valueunits.add(valueunit);
       RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setId(UUID.randomUUID().toString());
       realTimeData.setAssetID("5x4ff46982db22e1b040e0f2");
       realTimeData.setValues(valueunits);
       realTimeData.setTime(valueunits.get(0).getTime());
@@ -1629,6 +1620,7 @@ public class AssetControllerTest {
 
    AssetIPMapping createAssetIPMapping() throws Exception {
       AssetIPMapping assetipmapping = new AssetIPMapping();
+      assetipmapping.setId(UUID.randomUUID().toString());
       assetipmapping.setAssetname("assetname");
       assetipmapping.setIp("127.0.0.1");
       return assetipmapping;
@@ -1636,18 +1628,28 @@ public class AssetControllerTest {
 
    Asset createAsset() {
       Asset asset = new Asset();
+      asset.setId(UUID.randomUUID().toString());
       asset.setAssetName("pek-wor-server-02");
       asset.setAssetNumber(12345);
       asset.setAssetSource("5b7d208d55368540fcba1692");
-      asset.setCategory(AssetCategory.Server);
+      asset.setCategory(AssetCategory.Server); 
       asset.setModel("Dell 750");
       asset.setManufacturer("Dell");
-      EnumMap<ServerSensorType, String> sensorsformulars =
-            new EnumMap<ServerSensorType, String>(ServerSensorType.class);
+      Map<ServerSensorType, String> sensorsformulars =
+            new HashMap<ServerSensorType, String>();
       sensorsformulars.put(ServerSensorType.PDU_RealtimeLoad, "5x4ff46982db22e1b040e0f2");
       sensorsformulars.put(ServerSensorType.PDU_RealtimePower, "5x4ff46982db22e1b040e0f2");
       sensorsformulars.put(ServerSensorType.PDU_RealtimeVoltage, "5x4ff46982db22e1b040e0f2");
       asset.setSensorsformulars(sensorsformulars);
       return asset;
+   }
+   
+   FacilitySoftwareConfig createFacilitySoftware() throws Exception {
+      FacilitySoftwareConfig example = new FacilitySoftwareConfig();
+      example.setId("5b7d208d55368540fcba1692");
+      example.setName("Nlyte");
+      example.setType(FacilitySoftwareConfig.SoftwareType.Nlyte);
+      example.setVerifyCert(false);
+      return example;
    }
 }

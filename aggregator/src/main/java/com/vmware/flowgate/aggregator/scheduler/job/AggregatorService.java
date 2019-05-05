@@ -166,7 +166,7 @@ public class AggregatorService implements AsyncService {
             }
             server.setPdus(assetPdus);
             //update the pdu formula
-            EnumMap<ServerSensorType, String> formulas = server.getSensorsformulars();
+            Map<ServerSensorType, String> formulas = server.getSensorsformulars();
             if (formulas == null) {
                formulas = new EnumMap<ServerSensorType, String>(ServerSensorType.class);
             }
@@ -215,7 +215,7 @@ public class AggregatorService implements AsyncService {
          candidateServer = Arrays.asList(allServers);
       } else {
          for (Asset asset : allServers) {
-            EnumMap<ServerSensorType, String> formulas = asset.getSensorsformulars();
+            Map<ServerSensorType, String> formulas = asset.getSensorsformulars();
             if (formulas == null) {
                formulas = new EnumMap<ServerSensorType, String>(ServerSensorType.class);
                asset.setSensorsformulars(formulas);

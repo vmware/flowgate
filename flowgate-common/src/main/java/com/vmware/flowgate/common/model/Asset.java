@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.couchbase.client.java.repository.annotation.Id;
 import com.vmware.flowgate.common.AssetCategory;
@@ -150,8 +151,8 @@ public class Asset implements Serializable, BaseDocument {
     */
    private HashMap<String, String> Justificationfields = new HashMap<String, String>();
 
-   private EnumMap<ServerSensorType, String> sensorsformulars =
-         new EnumMap<ServerSensorType, String>(ServerSensorType.class);
+   private Map<ServerSensorType, String> sensorsformulars =
+         new HashMap<ServerSensorType, String>();
 
    private long lastupdate;
    private long created;
@@ -377,11 +378,11 @@ public class Asset implements Serializable, BaseDocument {
       Justificationfields = justificationfields;
    }
 
-   public EnumMap<ServerSensorType, String> getSensorsformulars() {
+   public Map<ServerSensorType, String> getSensorsformulars() {
       return sensorsformulars;
    }
 
-   public void setSensorsformulars(EnumMap<ServerSensorType, String> sensorsformulars) {
+   public void setSensorsformulars(Map<ServerSensorType, String> sensorsformulars) {
       this.sensorsformulars = sensorsformulars;
    }
 

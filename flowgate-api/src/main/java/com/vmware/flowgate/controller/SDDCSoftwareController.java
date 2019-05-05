@@ -178,9 +178,9 @@ public class SDDCSoftwareController {
    @RequestMapping(value = "/page/{pageNumber}/pagesize/{pageSize}", method = RequestMethod.GET)
    public Page<SDDCSoftwareConfig> queryServer(@PathVariable("pageNumber") int currentPage,
          @PathVariable("pageSize") int pageSize, HttpServletRequest request) {
-      if (currentPage < 1) {
-         currentPage = 1;
-      } else if (pageSize == 0) {
+      if (currentPage < FlowgateConstant.defaultPageNumber) {
+         currentPage = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;

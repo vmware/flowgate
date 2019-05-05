@@ -108,15 +108,15 @@ public class AssetController {
 
    // Read Asset by source and type
    @RequestMapping(value = "/source/{assetsource}/type/{type}", method = RequestMethod.GET)
-   public List<Asset> getAssetBySourceAndType(@PathVariable String assetSource,
-         @PathVariable AssetCategory type) {
+   public List<Asset> getAssetBySourceAndType(@PathVariable("assetsource") String assetSource,
+         @PathVariable("type") AssetCategory type) {
       return assetRepository.findAllByAssetSourceAndCategory(assetSource, type.name());
    }
 
    // Read Asset by type
    @RequestMapping(value = "/type/{type}", method = RequestMethod.GET)
    public List<Asset> getAssetByType(@PathVariable AssetCategory type) {
-      return assetRepository.findByCategory(type.name());
+      return assetRepository.findAssetsByCategory(type.name());
    }
 
    // Read mapped Asset
@@ -161,16 +161,16 @@ public class AssetController {
       if (keyWords == null) {
          keyWords = "";
       }
-      if (pageNumber < 1) {
-         pageNumber = 1;
-      } else if (pageSize == 0) {
+      if (pageNumber < FlowgateConstant.defaultPageNumber) {
+         pageNumber = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageable = new PageRequest(pageNumber - 1, pageSize);
       Page<Asset> assets = assetRepository.findByAssetNameLikeAndCategoryOrTagLikeAndCategory(
-            keyWords, AssetCategory.Server, keyWords, AssetCategory.Server, pageable);
+            keyWords, AssetCategory.Server.name(), pageable);
       HashMap<String, String> assetSourceIDAndAssetSourceNameMap = new HashMap<String, String>();
       for (Asset asset : assets.getContent()) {
          String assetSourceID = asset.getAssetSource();
@@ -492,9 +492,9 @@ public class AssetController {
    @RequestMapping(value = "/mapping/vrops/{vropsID}/page/{pageNumber}/pagesize/{pageSize}", method = RequestMethod.GET)
    public Page<ServerMapping> getPageMappingsByVROPSId(@PathVariable("vropsID") String vropsID,
          @PathVariable("pageNumber") int pageNumber, @PathVariable("pageSize") int pageSize) {
-      if (pageNumber < 1) {
-         pageNumber = 1;
-      } else if (pageSize == 0) {
+      if (pageNumber < FlowgateConstant.defaultPageNumber) {
+         pageNumber = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
@@ -510,9 +510,9 @@ public class AssetController {
    @RequestMapping(value = "/mapping/vc/{vcID}/page/{pageNumber}/pagesize/{pageSize}", method = RequestMethod.GET)
    public Page<ServerMapping> getPageMappingsByVCId(@PathVariable("vcID") String vcID,
          @PathVariable("pageNumber") int pageNumber, @PathVariable("pageSize") int pageSize) {
-      if (pageNumber < 1) {
-         pageNumber = 1;
-      } else if (pageSize == 0) {
+      if (pageNumber < FlowgateConstant.defaultPageNumber) {
+         pageNumber = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;

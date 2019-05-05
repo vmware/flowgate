@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -113,7 +114,8 @@ public class SensorSettingControllerTest {
             .perform(get("/v1/sensors/setting/page/" + pageNumber
                   + "/pagesize/" + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$..content[0].maxNum").value(sensorsetting.getMaxNum()))
+            .andExpect(jsonPath("$.content[0].maxNum").value(sensorsetting.getMaxNum()))
+            .andExpect(jsonPath("$..content.length()").value(1))
             .andExpect(jsonPath("last", is(true)))
             .andExpect(jsonPath("number", is(0)))
             .andExpect(jsonPath("size", is(5)))
@@ -172,9 +174,11 @@ public class SensorSettingControllerTest {
 
    SensorSetting createSensorSetting() {
       SensorSetting example = new SensorSetting();
+      example.setId(UUID.randomUUID().toString());
       example.setType(ServerSensorType.BACKPANELTEMP);
       example.setMaxNum(35);
       example.setMinNum(5);
       return example;
    }
+ 
 }
