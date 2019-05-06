@@ -9,7 +9,7 @@ CURRENTPATH=`pwd` #make
 
 OUTPUTJARFILESNUM=9
 UIDISTFILENUM=18
-TIMEOUTSECOND=600
+TIMEOUTSECOND=900
 BUILDLOG=$CURRENTPATH/build-log
 SOURCECODEDIR=$CURRENTPATH/../../flowgate
 OUTPUTJARPATH=$CURRENTPATH/jar-output
@@ -32,6 +32,7 @@ else
 	echo "eg. 'bash build.sh ( ui | jar | image | save | all ) -version v1.0'"
 	exit 0
 fi
+RELEASES_VERSION=flowgate-$FLOWGATE_VERSION.tar.gz
 sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSEBUILDIMAGESFILE
 sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSERUNFILE
 sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSEBUILDJARFILE
@@ -90,7 +91,7 @@ buildDockerImages(){
 	docker rmi flowgate/vro-worker:$FLOWGATE_VERSION flowgate/vc-worker:$FLOWGATE_VERSION flowgate/nlyte-worker:$FLOWGATE_VERSION \
     flowgate/management:$FLOWGATE_VERSION flowgate/infoblox-worker:$FLOWGATE_VERSION flowgate/labsdb-worker:$FLOWGATE_VERSION \
     flowgate/poweriq-worker:$FLOWGATE_VERSION flowgate/aggregator:$FLOWGATE_VERSION flowgate/api:$FLOWGATE_VERSION \
-    flowgate/redis:$FLOWGATE_VERSION flowgate/mongodb:$FLOWGATE_VERSION maven-build:$FLOWGATE_VERSION
+    flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION maven-build:$FLOWGATE_VERSION
 
 	if [ ! -d "$OUTPUTIMAGEPATH" ];then
 		mkdir $OUTPUTIMAGEPATH
@@ -105,6 +106,10 @@ buildDockerImages(){
 	done
 
 	cd $CURRENTPATH
+	chmod a+x $CURRENTPATH/database/entrypoint.sh
+	chmod a+x $CURRENTPATH/database/init.sh
+	chmod a+x $CURRENTPATH/database/initData.sh
+	
 	docker-compose -f $DOCKERCOMPOSEBUILDIMAGESFILE build --force-rm --no-cache
 }
 
@@ -119,7 +124,15 @@ saveDockerImages(){
 	docker save flowgate/vro-worker:$FLOWGATE_VERSION flowgate/vc-worker:$FLOWGATE_VERSION flowgate/nlyte-worker:$FLOWGATE_VERSION \
 	flowgate/management:$FLOWGATE_VERSION flowgate/infoblox-worker:$FLOWGATE_VERSION flowgate/labsdb-worker:$FLOWGATE_VERSION \
 	flowgate/poweriq-worker:$FLOWGATE_VERSION flowgate/aggregator:$FLOWGATE_VERSION flowgate/api:$FLOWGATE_VERSION \
-	flowgate/redis:$FLOWGATE_VERSION flowgate/mongodb:$FLOWGATE_VERSION >> $FLOWGATEIMAGESTAR
+	flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION >> $FLOWGATEIMAGESTAR
+	mkdir flowgate
+	mkdir -p flowgate/docker-images-output
+	mkdir -p flowgate/maven-docker-build
+	cp flowgate_run.sh conf.tar.gz flowgate
+	cp maven-docker-build/docker-compose.run.images.yml flowgate/maven-docker-build
+	cp docker-images-output/flowgate.tar flowgate/docker-images-output
+	tar -cvzf $RELEASES_VERSION flowgate
+	rm flowgate -rf
 }
 
 
