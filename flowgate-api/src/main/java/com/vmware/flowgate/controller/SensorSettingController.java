@@ -71,7 +71,6 @@ public class SensorSettingController {
          PageRequest pageRequest = new PageRequest(pageNumber-1,pageSize);
          return repository.findAll(pageRequest);
       }catch(Exception e) {
-         e.printStackTrace();
          throw new WormholeRequestException(e.getMessage());
       }
    }

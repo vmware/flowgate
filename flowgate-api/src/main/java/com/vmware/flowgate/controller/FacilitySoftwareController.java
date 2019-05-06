@@ -98,7 +98,7 @@ public class FacilitySoftwareController {
    @RequestMapping(value = "/type/{type}", method = RequestMethod.GET)
    public List<FacilitySoftwareConfig> getFacilitySoftwareConfigByType(
          @PathVariable SoftwareType type) {
-      List<FacilitySoftwareConfig> result = repository.findAllByType(type);
+      List<FacilitySoftwareConfig> result = repository.findAllByType(type.name());
       if (result != null) {
          decryptServerListPassword(result);
       }

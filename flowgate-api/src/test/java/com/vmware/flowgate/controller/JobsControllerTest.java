@@ -4,20 +4,13 @@
 */
 package com.vmware.flowgate.controller;
 
-import static org.mockito.Matchers.any;
-
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,39 +22,22 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.payload.FieldDescriptor;
-import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vmware.flowgate.auth.NlyteAuth;
-import com.vmware.flowgate.common.AssetCategory;
-import com.vmware.flowgate.common.AssetSubCategory;
-import com.vmware.flowgate.common.MountingSide;
-import com.vmware.flowgate.common.model.AssetAddress;
-import com.vmware.flowgate.common.model.AssetRealtimeDataSpec;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.JobConfig;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.JobConfig.JobType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
-import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.JobsRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
-import com.vmware.flowgate.util.WormholeUserDetails;
-
-import junit.framework.TestCase;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
@@ -72,9 +48,6 @@ public class JobsControllerTest {
           new JUnitRestDocumentation("target/generated-snippets");
 
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private FacilitySoftwareConfigRepository facilitySoftwareRepository;

@@ -159,7 +159,7 @@ public class SDDCSoftwareController {
    //get
    @RequestMapping(value = "/vrops", method = RequestMethod.GET)
    public List<SDDCSoftwareConfig> getVROServerConfigs() {
-      List<SDDCSoftwareConfig> result = sddcRepository.findAllByType(SoftwareType.VRO);
+      List<SDDCSoftwareConfig> result = sddcRepository.findAllByType(SoftwareType.VRO.name());
       if (result != null) {
          decryptServerListPassword(result);
       }
@@ -168,7 +168,7 @@ public class SDDCSoftwareController {
 
    @RequestMapping(value = "/vc", method = RequestMethod.GET)
    public List<SDDCSoftwareConfig> getVCServerConfigs() {
-      List<SDDCSoftwareConfig> result = sddcRepository.findAllByType(SoftwareType.VCENTER);
+      List<SDDCSoftwareConfig> result = sddcRepository.findAllByType(SoftwareType.VCENTER.name());
       if (result != null) {
          decryptServerListPassword(result);
       }
@@ -218,7 +218,7 @@ public class SDDCSoftwareController {
          HttpServletRequest request) {
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       List<SDDCSoftwareConfig> datas =
-            sddcRepository.findAllByUserIdAndType(user.getUserId(), type);
+            sddcRepository.findAllByUserIdAndType(user.getUserId(), type.name());
       decryptServerListPassword(datas);
       return datas;
    }
@@ -226,8 +226,11 @@ public class SDDCSoftwareController {
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/syncdatabyserverid/{id}", method = RequestMethod.POST)
    public void syncSDDCServerData(@PathVariable("id") String id, HttpServletRequest request) {
-      SDDCSoftwareConfig server =
-            sddcRepository.findOneByIdAndUserId(id, getCurrentUserID(request));
+      SDDCSoftwareConfig server = sddcRepository.findOne(id);
+      String userID =  getCurrentUserID(request);
+      if(!userID.equals(server.getUserId())){
+         return;
+      }
       decryptServerPassword(server);
       notifySDDCWorker(server);
    }

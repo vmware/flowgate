@@ -105,17 +105,17 @@ public class JobsController {
 
    @RequestMapping(value = "/vrojobs", method = RequestMethod.GET)
    public List<JobConfig> getVROJobs() {
-      return Lists.newArrayList(jobsRepository.findAllByJobType(JobType.VRO));
+      return Lists.newArrayList(jobsRepository.findAllByJobType(JobType.VRO.name()));
    }
 
    @RequestMapping(value = "/vcjobs", method = RequestMethod.GET)
    public List<JobConfig> getVCJobs() {
-      return Lists.newArrayList(jobsRepository.findAllByJobType(JobType.VCENTER));
+      return Lists.newArrayList(jobsRepository.findAllByJobType(JobType.VCENTER.name()));
    }
 
    @RequestMapping(value = "/type/{jobtype}", method = RequestMethod.GET)
    public List<JobConfig> getJobsByType(@PathVariable("jobtype") JobType type) {
-      return Lists.newArrayList(jobsRepository.findAllByJobType(type));
+      return Lists.newArrayList(jobsRepository.findAllByJobType(type.name()));
    }
 
 }
