@@ -36,21 +36,16 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
 2. unzip the binary package.
 ```
     $ tar xvf flowgate-*.tar.gz
-    docker-images-output/flowgate.tar
-    maven-docker-build/docker-compose.run.images.yml
-    conf.tar.gz
-    flowgate_run.sh
-
 ```
 
-3. Then you will get a directory named flowgate, there is four files in the folder: ```flowgate_run.sh```, ```conf.tar.gz```, ```maven-docker-build/docker-compose.run.images.yml```,```docker-images-output/flowgate.tar```, then:
+3. Load Flowgate images:
 ```
     $ cd flowgate/
     $ sudo docker load < docker-images-output/flowgate.tar
     Loaded image: flowgate/infoblox-worker:v1.0
     Loaded image: flowgate/labsdb-worker:v1.0
     Loaded image: flowgate/api:v1.0
-    Loaded image: flowgate/mongodb:v1.0
+    Loaded image: flowgate/database:v1.0
     Loaded image: flowgate/vro-worker:v1.0
     Loaded image: flowgate/vc-worker:v1.0
     Loaded image: flowgate/poweriq-worker:v1.0
@@ -61,9 +56,7 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
 
 ```
 
-## Finishing installation and starting Flowgate
-
-### Start Flowgate
+4. Start Flowgate
 
 ```
     $ sudo bash flowgate_run.sh
@@ -87,7 +80,7 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
 1. Source Installation: the flowgate_run.sh under *flowgate/make/*.
 2. Binary Installation: the flowgate_run.sh extract from flowgate-*.tar.gz.
 
-If everything worked properly, you should be able to open a browser to visit the admin portal at **https://yourdomain** (change *yourdomain* to your server's hostname or ip). Note that the default administrator username/password are admin/Admin!23.
+If everything worked properly, you should be able to open a browser to visit the admin portal at **https://yourdomain** (change *yourdomain* to your server's hostname or ip). Note that the default administrator username/password are admin/Admin!23. Please change it immediately.
 
 ### Managing Flowgate's lifecycle
 You can use docker-compose to manage the lifecycle of Flowgate. Some useful commands are listed as follows (must run in the same directory as *docker-compose.run.images.yml*).
@@ -98,22 +91,7 @@ $ sudo docker-compose -f docker-compose.run.images.yml down
 Stopping flowgate-labsdb-worker-container ... done
 Stopping flowgate-nlyte-worker-container ... done
 Stopping flowgate-vc-worker-container ... done
-Stopping flowgate-poweriq-worker-container ... done
-Stopping flowgate-management-container ... done
-Stopping flowgate-infoblox-worker-container ... done
-Stopping flowgate-vro-worker-container ... done
-Stopping flowgate-aggregator-container ... done
-Stopping flowgate-api-container ... done
-Stopping flowgate-redis-container ... done
-Stopping flowgate-mongo-container ... done
-Removing flowgate-labsdb-worker-container ... done
-Removing flowgate-nlyte-worker-container ... done
-Removing flowgate-vc-worker-container ... done
-Removing flowgate-poweriq-worker-container ... done
-Removing flowgate-management-container ... done
-Removing flowgate-infoblox-worker-container ... done
-Removing flowgate-vro-worker-container ... done
-Removing flowgate-aggregator-container ... done
+...
 Removing flowgate-api-container ... done
 Removing flowgate-redis-container ... done
 Removing flowgate-mongo-container ... done
@@ -139,7 +117,7 @@ Creating flowgate-poweriq-worker-container
 ```  
 
 ## Troubleshooting
-1. When Flowgate does not work properly, run the below commands to find out if all containers of Flowgate are in **UP** status: 
+1. When Flowgate does not work properly, check the Flowgate services status by: 
 ```
     $ sudo docker-compose -f docker-compose.run.images.yml ps
                Name                             Command               State                    Ports                  
@@ -156,4 +134,4 @@ flowgate-redis-container             docker-entrypoint.sh redis ...   Up      63
 flowgate-vc-worker-container         sh start.sh                      Up                                              
 flowgate-vro-worker-container        sh start.sh                      Up  
 ```
-If a container is not in **UP** state, check the log file of that container in directory ```/opt/vmware/flowgate/log```. For example, if the container ```flowgate-api-container``` is not running, you should look at the log file ```/opt/vmware/flowgate/log/flowgate-api/*.log```.  
+If a container is not in **Up** state, check the log file of that container in directory ```/opt/vmware/flowgate/log```. For example, if the container ```flowgate-api-container``` is not running, you should look at the log file ```/opt/vmware/flowgate/log/flowgate-api/*.log```.  
