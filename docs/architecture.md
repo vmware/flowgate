@@ -1,3 +1,3 @@
 # Architecture
-<img alt="FlowGate Architecture" src="docs/images/architecture1.png">
-<img alt="FlowGate Detail Design" src="docs/images/architecture.png">
+<img alt="FlowGate Architecture" src="images/architecture1.png">
+<img alt="FlowGate Detail Design" src="images/architecture.png">
