@@ -29,12 +29,12 @@ FlowGate is an open source vendor-neutral project to enable facility awareness i
 
 **Install from Source code**
 [Compile document](docs/compile_guide.md)
+
 **Install from binary**
 [Install Document](docs/installation_guide.md)
+
 **System architecture**
 
-## Documentation
-Please refer the demo for how to create user, setup integration.
 ## Contributing
 
 The Flowgate project team welcomes contributions from the community. If you wish to contribute code and you have not
