@@ -2,7 +2,7 @@
 
 This guide provides instructions for developers to build Flowgate from source code.
 
-## Step 1: Prepare for a build environment for Flowgate
+### Step 1: Prepare for a build environment for Flowgate
 
 Flowgate is deployed as several Docker containers and most of the code is written in Java language. The build environment requires Docker, Docker Compose. Please install the below prerequisites:
 
@@ -12,14 +12,13 @@ docker                | 1.10 +
 docker-compose        | 1.6.0 +
 git                   | latest is preferred
 
-## Step 2: Getting the source code
+### Step 2: Getting the source code
 
    ```
       $ git clone git@github.com:vmware/flowgate.git
    ```
 
-## Step 3: Building Flowgate
-### Compile code with your own environment, then build Flowgate
+### Step 3: Building Flowgate
 
 *  Build Flowgate:
 
@@ -28,9 +27,9 @@ git                   | latest is preferred
       $ sudo bash build.sh all -version v1.0
    ```
 
-### Verify your build
+### Step 4: Verify build
 
-If everything worked properly, you can get the below message:
+If everything works properly, you can get the below message:
 
    ```
       ...
@@ -41,27 +40,27 @@ If everything worked properly, you can get the below message:
       docker-images-output/flowgate.tar
       build success.
    ```
-Also, you can execute below command to verify your installation:
+Also, you can execute below command to verify the container images:
 
    ```
       $ sudo docker images
       REPOSITORY                 TAG                 IMAGE ID            CREATED             SIZE
-      flowgate/labsdb-worker     v1.0                b751b1e55ec9        5 hours ago         228MB
-      flowgate/nlyte-worker      v1.0                4c1b5c0c1893        5 hours ago         226MB
-      flowgate/aggregator        v1.0                a6ada87420a8        5 hours ago         229MB
-      flowgate/poweriq-worker    v1.0                b1d6997bd8c8        5 hours ago         226MB
-      flowgate/vro-worker        v1.0                6910c721130c        5 hours ago         231MB
-      flowgate/vc-worker         v1.0                81c255461862        5 hours ago         255MB
-      flowgate/redis             v1.0                b0d6035edaf6        5 hours ago         102MB
-      flowgate/api               v1.0                0b71d1eea75b        5 hours ago         238MB
-      flowgate/mongodb           v1.0                a56dcb8f1dad        5 hours ago         271MB
-      flowgate/infoblox-worker   v1.0                227b8304775d        5 hours ago         221MB
-      flowgate/management        v1.0                939197e11efe        5 hours ago         249MB
-      photon                     2.0                 c3c18145a8cd        13 days ago         32.4MB
-      maven                      3.3.9-jdk-8         9997d8483b2f        2 years ago         653MB
+      flowgate/labsdb-worker     v1.0                b751b1e55ec9        5 minutes ago         228MB
+      flowgate/nlyte-worker      v1.0                4c1b5c0c1893        5 minutes ago         226MB
+      flowgate/aggregator        v1.0                a6ada87420a8        5 minutes ago         229MB
+      flowgate/poweriq-worker    v1.0                b1d6997bd8c8        5 minutes ago         226MB
+      flowgate/vro-worker        v1.0                6910c721130c        5 minutes ago         231MB
+      flowgate/vc-worker         v1.0                81c255461862        5 minutes ago         255MB
+      flowgate/redis             v1.0                b0d6035edaf6        5 minutes ago         102MB
+      flowgate/api               v1.0                0b71d1eea75b        5 minutes ago         238MB
+      flowgate/database          v1.0                a56dcb8f1dad        5 minutes ago         271MB
+      flowgate/infoblox-worker   v1.0                227b8304775d        5 minutes ago         221MB
+      flowgate/management        v1.0                939197e11efe        5 minutes ago         249MB
    ```
-## Run Flowgate
-Follow the **[instruction](installation_guide.md#finishing-installation-and-starting-flowgate)** to start up Flowgate.
+## Start Flowgate
+```
+$ sudo bash flowgate_run.sh
+```
 ## Appendix
 * Using the build.sh
 
