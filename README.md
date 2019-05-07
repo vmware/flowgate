@@ -27,7 +27,7 @@ FlowGate is an open source vendor-neutral project to enable facility awareness i
 
 [Demo](https://github.com/yixingjia/wormhole/releases/download/1.0/FlowGate_Demo.mp4)
 
-##Install from Source code**
+**Install from Source code**
 [Compile document](docs/compile_guide.md)
 **Install from binary**
 [Install Document](docs/installation_guide.md)
