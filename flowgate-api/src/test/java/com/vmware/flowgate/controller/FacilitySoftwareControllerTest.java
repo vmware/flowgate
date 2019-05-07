@@ -17,6 +17,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -135,7 +137,7 @@ public class FacilitySoftwareControllerTest {
       } else {
          TestCase.fail();
       }
-      facilitySoftwareRepository.delete(facilitySoftware.getId());
+      
    }
    
    @Test
@@ -229,8 +231,10 @@ public class FacilitySoftwareControllerTest {
                      fieldWithPath("advanceSetting").description(""),
                      fieldWithPath("integrationStatus").description("The status of integration."))));
       } catch (Exception e) {
+         facilitySoftwareRepository.delete(facilitySoftware.getId());
          TestCase.fail();
       }
+      facilitySoftwareRepository.delete(facilitySoftware.getId());
    }
 
    @Test
@@ -268,6 +272,7 @@ public class FacilitySoftwareControllerTest {
                      fieldWithPath("advanceSetting").description(""),
                      fieldWithPath("integrationStatus").description("The status of integration."))));
       } catch (Exception e) {
+         facilitySoftwareRepository.delete(facilitySoftware.getId());
          TestCase.fail();
       }
 
@@ -353,6 +358,7 @@ public class FacilitySoftwareControllerTest {
 
    FacilitySoftwareConfig createFacilitySoftware() throws Exception {
       FacilitySoftwareConfig example = new FacilitySoftwareConfig();
+      example.setId(UUID.randomUUID().toString());
       example.setName("Nlyte");
       example.setUserName("administrator@vsphere.local");
       example.setPassword("Admin!23");

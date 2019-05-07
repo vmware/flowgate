@@ -11,7 +11,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,7 +25,6 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
-import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -66,7 +64,6 @@ public class SensorSettingControllerTest {
    @Test
    public void createAnSensorSetting() throws JsonProcessingException, Exception {
       SensorSetting  sensorsetting = createSensorSetting();
-      sensorsetting.setId("temporary_id");
       this.mockMvc
             .perform(post("/v1/sensors/setting").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(sensorsetting)))
@@ -130,33 +127,18 @@ public class SensorSettingControllerTest {
    }
    
    @Test
-   public void sensorQuerySettingExample() throws Exception {
-      SensorSetting  sensorsetting1 = createSensorSetting();
-      sensorsetting1.setId("1");
-      sensorSettingRepository.save(sensorsetting1);
-      SensorSetting  sensorsetting2 = createSensorSetting();
-      sensorsetting2.setId("2");
-      sensorSettingRepository.save(sensorsetting2);
-      
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of the sensorSetting, created by wormhole"),
-              fieldWithPath("type").description(
-                    "The sensor type."),
-              fieldWithPath("minNum").description("Value type is double"),
-              fieldWithPath("maxNum").description("Value type is double"),
-              fieldWithPath("minValue").description("Value type is string"),
-              fieldWithPath("maxValue").description("Value type is string")
-               };
+   public void sensorQuerySettingByIDExample() throws Exception {
+      SensorSetting  sensorsetting = createSensorSetting();
+      sensorSettingRepository.save(sensorsetting);
       this.mockMvc
-            .perform(get("/v1/sensors/setting"))
+            .perform(get("/v1/sensors/setting/"+sensorsetting.getId())
+                  .content("{\"id\":\""+sensorsetting.getId()+"\"}"))
             .andExpect(status().isOk())
-            .andDo(document("sensorSetting-querySetting-example", responseFields(
-                    fieldWithPath("[]").description("An array of RealTimeData"))
-                    .andWithPrefix("[].", fieldpath)))
-                    .andReturn().getResponse().getHeader("Location");
+            .andDo(document("sensorSetting-queryByID-example", requestFields(
+                  fieldWithPath("id").description("ID of the sensorSetting, created by wormhole")
+                 )));
 
-      sensorSettingRepository.delete(sensorsetting1.getId());
-      sensorSettingRepository.delete(sensorsetting2.getId());
+      sensorSettingRepository.delete(sensorsetting.getId());
    }
 
    @Test
@@ -169,7 +151,6 @@ public class SensorSettingControllerTest {
             .andDo(document("sensorSetting-delete-example", requestFields(
             fieldWithPath("id").description("The primary key for sensorsetting."))));
 
-      sensorSettingRepository.delete(sensorsetting.getId());
    }
 
    SensorSetting createSensorSetting() {

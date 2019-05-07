@@ -21,7 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,11 +30,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.AuthToken;
-import com.vmware.flowgate.common.model.AuthenticationResult;
 import com.vmware.flowgate.common.model.WormholeRole;
 import com.vmware.flowgate.common.model.WormholeUser;
 import com.vmware.flowgate.common.security.DesensitizationUserData;
@@ -44,7 +41,6 @@ import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.RoleRepository;
 import com.vmware.flowgate.repository.UserRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
-import com.vmware.flowgate.security.service.UserDetailsServiceImpl;
 import com.vmware.flowgate.util.AuthorityUtil;
 import com.vmware.flowgate.util.BaseDocumentUtil;
 import com.vmware.flowgate.util.JwtTokenUtil;
@@ -61,8 +57,6 @@ public class AuthController {
    private RoleRepository roleRepository;
    @Autowired
    private AccessTokenService accessTokenService;
-   @Autowired
-   private UserDetailsServiceImpl userdetailservice;
    @Autowired
    private JwtTokenUtil jwtTokenUtil;
    @Value("${jwt.expiration:7200}")
@@ -110,7 +104,7 @@ public class AuthController {
       }
       AuthToken access_token = accessTokenService.refreshToken(authToken);
       if(access_token != null) {
-         response.addHeader(InitializeConfigureData.Authentication_Header, authToken);
+         response.addHeader(InitializeConfigureData.Authentication_Header, access_token.getAccess_token());
          Cookie cookie = new Cookie(JwtTokenUtil.Token_Name, access_token.getAccess_token());
          cookie.setHttpOnly(true);
          cookie.setPath("/");
@@ -118,24 +112,6 @@ public class AuthController {
          response.addCookie(cookie);
       }
       return access_token;
-   }
-
-   @RequestMapping(value = "/login", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-   public AuthenticationResult login(@RequestBody WormholeUser user, HttpServletRequest request,
-         HttpServletResponse response) {
-      UserDetails userDetails = userdetailservice.loadUserByUsername(user.getUserName());
-      AuthorityUtil util = new AuthorityUtil();
-      AuthenticationResult result = new AuthenticationResult();
-      AuthToken access_token = accessTokenService.createToken(user);
-      Cookie cookie = new Cookie(JwtTokenUtil.Token_Name, access_token.getAccess_token());
-      cookie.setHttpOnly(true);
-      cookie.setPath("/");
-      cookie.setDomain(request.getServerName());
-      response.addCookie(cookie);
-      result.setPrivileges(util.getPrivilege(userDetails));
-      result.setToken(access_token);
-      result.setUserName(user.getUserName());
-      return result;
    }
    
    @ResponseStatus(HttpStatus.OK)
@@ -244,7 +220,7 @@ public class AuthController {
    }
    
    // Read users
-   @RequestMapping(value = "/user/page",method = RequestMethod.GET)
+   @RequestMapping(value = "/user",method = RequestMethod.GET)
    public Page<WormholeUser> queryUserByPageable (@RequestParam("currentPage") int currentPage,
          @RequestParam("pageSize") int pageSize) {
       if(currentPage < FlowgateConstant.defaultPageNumber) {
@@ -260,14 +236,8 @@ public class AuthController {
       DesensitizationUserData.desensitizationUser(pageUsers.getContent());
       return pageUsers;
    }
-   // Read users
-   @RequestMapping(value="/user/users", method = RequestMethod.GET)
-   public List<WormholeUser> queryUsers() {
-      return DesensitizationUserData
-            .desensitizationUser(Lists.newArrayList(userRepository.findAll()));
-   }
 
-// Create a new role
+   // Create a new role
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value="/role",method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void createRole(@RequestBody WormholeRole role) {

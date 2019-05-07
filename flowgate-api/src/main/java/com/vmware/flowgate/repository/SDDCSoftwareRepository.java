@@ -7,13 +7,12 @@ package com.vmware.flowgate.repository;
 import java.util.List;
 
 import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
+import org.springframework.data.couchbase.core.query.Query;
 import org.springframework.data.couchbase.core.query.ViewIndexed;
 import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
-import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 
 @N1qlPrimaryIndexed
 @ViewIndexed(designDoc = "sDDCSoftwareConfig")
@@ -23,11 +22,13 @@ public interface SDDCSoftwareRepository extends
    Page<SDDCSoftwareConfig> findAllByUserId(String userId, Pageable pageable);
 
    List<SDDCSoftwareConfig> findAllByUserId(String userId);
+   
    SDDCSoftwareConfig findOneByServerURL(String serverURL);
 
-   List<SDDCSoftwareConfig> findAllByType(SoftwareType type);
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND `type` = $1")
+   List<SDDCSoftwareConfig> findAllByType(String type);
+   
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND `userId` = $1 AND `type` = $2")
+   List<SDDCSoftwareConfig> findAllByUserIdAndType(String userId, String type);
 
-   List<SDDCSoftwareConfig> findAllByUserIdAndType(String userId, SoftwareType type);
-
-   SDDCSoftwareConfig findOneByIdAndUserId(String id, String userId);
 }
