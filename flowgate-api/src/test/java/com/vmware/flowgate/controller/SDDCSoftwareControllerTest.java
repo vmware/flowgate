@@ -325,22 +325,13 @@ public class SDDCSoftwareControllerTest {
               };
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/type/" + SoftwareType.VCENTER + ""))
             .andExpect(status().isOk())
-<<<<<<< HEAD
             .andDo(document("SDDCSoftware-queryByType-example",
-=======
-            .andDo(document("SDDCSoftware-queryByType-example",
->>>>>>> Refactor the Repository and the test cases
                     responseFields(
                     fieldWithPath("[]").description("An array of SDDCSoftwareConfig.")
                     ).andWithPrefix("[].", fieldpath)))
             .andReturn();
       ObjectMapper mapper = new ObjectMapper();
       String res = result.getResponse().getContentAsString();
-<<<<<<< HEAD
-
-=======
-
->>>>>>> Refactor the Repository and the test cases
       SDDCSoftwareConfig [] sddcs = mapper.readValue(res, SDDCSoftwareConfig[].class);
       for(SDDCSoftwareConfig sddc:sddcs) {
          if(sddc.getName().equals("flowgate")) {
@@ -358,20 +349,10 @@ public class SDDCSoftwareControllerTest {
       sddc1Create.setDescription("flowgate cluster");
       SDDCSoftwareConfig sddc2Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       sddc2Create.setType(SoftwareType.VRO);
-<<<<<<< HEAD
-
-=======
-
->>>>>>> Refactor the Repository and the test cases
       sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
       sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
       sddcRepository.save(sddc1Create);
       sddcRepository.save(sddc2Create);
-<<<<<<< HEAD
-
-=======
-
->>>>>>> Refactor the Repository and the test cases
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
               fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
               fieldWithPath("name").description("The facilitySoftware name."),
@@ -389,11 +370,6 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
-<<<<<<< HEAD
-
-=======
-
->>>>>>> Refactor the Repository and the test cases
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/vrops"))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-getVROServerConfigs-example", responseFields(
@@ -425,11 +401,6 @@ public class SDDCSoftwareControllerTest {
        sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
        sddcRepository.save(sddc1Create);
        sddcRepository.save(sddc2Create);
-<<<<<<< HEAD
-
-=======
-
->>>>>>> Refactor the Repository and the test cases
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
               fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
               fieldWithPath("name").description("The facilitySoftware name."),
@@ -447,11 +418,6 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
-<<<<<<< HEAD
-
-=======
-
->>>>>>> Refactor the Repository and the test cases
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/user/vrops"))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-getVROServerConfigsByUser-example", responseFields(
@@ -459,11 +425,6 @@ public class SDDCSoftwareControllerTest {
                     .andWithPrefix("[].", fieldpath)))
             .andReturn();
       String res = result.getResponse().getContentAsString();
-<<<<<<< HEAD
-
-=======
-
->>>>>>> Refactor the Repository and the test cases
       ObjectMapper mapper = new ObjectMapper();
       SDDCSoftwareConfig [] sddcs = mapper.readValue(res, SDDCSoftwareConfig[].class);
       for(SDDCSoftwareConfig sddc:sddcs) {
@@ -482,11 +443,6 @@ public class SDDCSoftwareControllerTest {
       sddc1Create.setDescription("flowgate cluster");
       SDDCSoftwareConfig sddc2Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       sddc2Create.setType(SoftwareType.VCENTER);
-<<<<<<< HEAD
-
-=======
-
->>>>>>> Refactor the Repository and the test cases
       sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
       sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
       sddcRepository.save(sddc1Create);

@@ -4,9 +4,6 @@
 */
 package com.vmware.flowgate.controller;
 
-
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.google.common.collect.Lists;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.SensorSetting;
 import com.vmware.flowgate.exception.WormholeRequestException;
@@ -44,10 +39,6 @@ public class SensorSettingController {
       repository.save(sensorSetting);
    }
 
-   @RequestMapping(value="setting",method = RequestMethod.GET)
-   public List<SensorSetting> getSensorSettings() {
-      return Lists.newArrayList(repository.findAll());
-   }
    //get
    @RequestMapping(value="setting/{id}",method = RequestMethod.GET)
    public SensorSetting getSensorSetting(@PathVariable("id") String id) {

@@ -79,25 +79,25 @@ public class AuthControllerTest {
 
    @Autowired
    private WebApplicationContext context;
-   
+
    @Autowired
    private RoleRepository roleRepository;
-   
+
    @SpyBean
    private AccessTokenService tokenService;
-   
+
    @SpyBean
    private UserDetailsServiceImpl userDetailservice;
-   
+
    @MockBean
    private StringRedisTemplate template;
-   
+
    @Autowired
    private UserRepository userRepository;
-   
+
    @Autowired
    private JwtTokenUtil jwtUtil;
-   
+
    @Rule
    public ExpectedException expectedEx = ExpectedException.none();
 
@@ -152,7 +152,7 @@ public class AuthControllerTest {
       wormholeuser.setPassword("$2a$10$Vm8MLIkGwinuICfcqW5RDOoE.aJqnvsaPhnxl7.N4H7oLKVIu3o0.");
       wormholeuser.setRoleNames(Arrays.asList("admin"));
       userRepository.save(wormholeuser);
-      
+
       MvcResult result = this.mockMvc
       .perform(post("/v1/auth/token").contentType(MediaType.APPLICATION_JSON)
       .content("{\"userName\":\"tomRefresh\",\"password\":\"123456\"}"))
@@ -173,13 +173,13 @@ public class AuthControllerTest {
       userdetail.setUserId(userId);
       userdetail.setUsername("tomRefresh");
       userdetail.setPassword("$2a$10$Vm8MLIkGwinuICfcqW5RDOoE.aJqnvsaPhnxl7.N4H7oLKVIu3o0.");
-      
+
       Mockito.doReturn(userdetail).when(tokenService).getCurrentUser(any());
       Mockito.doReturn(mapper.writeValueAsString(userdetail)).when(tokenService).getUserJsonString(any());
       MvcResult result1 = this.mockMvc.perform(get("/v1/auth/token/refresh").header("Authorization", "Bearer "+access_token))
       .andDo(document("AuthController-RefreshAccessToken-example"))
       .andReturn();
-      
+
       DecodedJWT jwt = jwtUtil.getDecodedJwt(result1.getResponse().getHeader("Authorization"));
       TestCase.assertEquals("tomRefresh", jwt.getSubject());
       userRepository.delete(wormholeuser.getId());
@@ -193,7 +193,7 @@ public class AuthControllerTest {
       .andExpect(status().isOk())
       .andReturn();
    }
-   
+
    @Test
    public void testLogout() throws Exception {
       ValueOperations<String, String> valueOperations = Mockito.mock(ValueOperations.class);
@@ -228,18 +228,18 @@ public class AuthControllerTest {
    public void deleteUserExample() throws Exception {
        WormholeUser user = createUser();
        userRepository.save(user);
-       
+
        this.mockMvc.perform(delete("/v1/auth/user/"+user.getId()+"").content("{\"id\":\"" + user.getId() + "\"}"))
               .andExpect(status().isOk())
               .andDo(document("AuthController-deleteUser-example", requestFields(
                       fieldWithPath("id").description("ID of User, created by wormhole"))))
               .andReturn();
    }
-   
+
    @Test
    public void updateUserExample() throws Exception {
       WormholeUserDetails userdetail = new WormholeUserDetails();
-      String userId = UUID.randomUUID().toString(); 
+      String userId = UUID.randomUUID().toString();
       userdetail.setUserId(userId);
       List<String> rolenames = new ArrayList<String>();
       rolenames.add("admin");
@@ -248,7 +248,7 @@ public class AuthControllerTest {
       adminUser.setId(userId);
       userRepository.save(adminUser);
       Mockito.doReturn(userdetail).when(tokenService).getCurrentUser(any());
-      
+
       WormholeUser user = createUser();
       userRepository.save(user);
 
@@ -277,11 +277,11 @@ public class AuthControllerTest {
       userRepository.delete(user.getId());
       userRepository.delete(adminUser.getId());
    }
-   
+
    @Test
    public void updateUserExample1() throws Exception {
       WormholeUserDetails userdetail = new WormholeUserDetails();
-      String userId = UUID.randomUUID().toString(); 
+      String userId = UUID.randomUUID().toString();
       userdetail.setUserId(userId);
       List<String> rolenames = new ArrayList<String>();
       rolenames.add("admin");
@@ -290,7 +290,7 @@ public class AuthControllerTest {
       adminUser.setId(userId);
       userRepository.save(adminUser);
       Mockito.doReturn(userdetail).when(tokenService).getCurrentUser(any());
-      
+
       WormholeUser user = createUser();
       userRepository.save(user);
 
@@ -319,11 +319,11 @@ public class AuthControllerTest {
       userRepository.delete(user.getId());
       userRepository.delete(adminUser.getId());
    }
-   
+
    @Test
    public void readOneUserByIdExample() throws Exception {
       WormholeUserDetails userdetail = new WormholeUserDetails();
-      String userId = UUID.randomUUID().toString(); 
+      String userId = UUID.randomUUID().toString();
       userdetail.setUserId(userId);
       List<String> rolenames = new ArrayList<String>();
       rolenames.add("admin");
@@ -350,15 +350,15 @@ public class AuthControllerTest {
                       fieldWithPath("userGroupIDs").description("userGroupIDs").type(List.class),
                       fieldWithPath("lastPasswordResetDate").description("lastPasswordResetDate").type(JsonFieldType.NUMBER))))
               .andReturn();
-       
+
        userRepository.delete(user.getId());
        userRepository.delete(adminUser.getId());
    }
-   
+
    @Test
    public void readOneUserByIdExample1() throws Exception {
       WormholeUserDetails userdetail = new WormholeUserDetails();
-      String userId = UUID.randomUUID().toString(); 
+      String userId = UUID.randomUUID().toString();
       userdetail.setUserId(userId);
       List<String> rolenames = new ArrayList<String>();
       rolenames.add("sysuser");
@@ -372,12 +372,12 @@ public class AuthControllerTest {
               .andReturn();
       userRepository.delete(sysuser.getId());
    }
-   
+
    @Test
    public void readOneUserByIdExample2() throws Exception {
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("Forbidden");
-      String userId = UUID.randomUUID().toString(); 
+      String userId = UUID.randomUUID().toString();
       WormholeUserDetails userdetail = new WormholeUserDetails();
       userdetail.setUserId(userId);
       List<String> rolenames = new ArrayList<String>();
@@ -395,11 +395,11 @@ public class AuthControllerTest {
          throw result.getResolvedException();
       }
    }
-   
+
    @Test
    public void readOneUserByNameExample() throws Exception {
       WormholeUserDetails userdetail = new WormholeUserDetails();
-      String userId = UUID.randomUUID().toString(); 
+      String userId = UUID.randomUUID().toString();
       userdetail.setUserId(userId);
       List<String> rolenames = new ArrayList<String>();
       rolenames.add("admin");
@@ -428,11 +428,11 @@ public class AuthControllerTest {
       userRepository.delete(userId);
       userRepository.delete(user.getId());
    }
-   
+
    @Test
    public void readOneUserByUserNameExample1() throws Exception {
       WormholeUserDetails userdetail = new WormholeUserDetails();
-      String userId = UUID.randomUUID().toString(); 
+      String userId = UUID.randomUUID().toString();
       userdetail.setUserId(userId);
       List<String> rolenames = new ArrayList<String>();
       rolenames.add("sysuser");
@@ -447,12 +447,12 @@ public class AuthControllerTest {
               .andReturn();
       userRepository.delete(sysuser.getId());
    }
-   
+
    @Test
    public void readOneUserByUserNameExample2() throws Exception {
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("Forbidden");
-      String userId = UUID.randomUUID().toString(); 
+      String userId = UUID.randomUUID().toString();
       WormholeUserDetails userdetail = new WormholeUserDetails();
       userdetail.setUserId(userId);
       List<String> rolenames = new ArrayList<String>();
@@ -471,23 +471,23 @@ public class AuthControllerTest {
          throw result.getResolvedException();
       }
    }
-   
+
    @Test
    public void readUsersByPageExample() throws Exception {
        WormholeUser user1 = createUser();
        userRepository.save(user1);
-       this.mockMvc.perform(get("/v1/auth/user/page").content("{\"currentPage\":\"1\",\"pageSize\":\"5\"}")
+       this.mockMvc.perform(get("/v1/auth/user").content("{\"currentPage\":\"1\",\"pageSize\":\"5\"}")
               .param("currentPage", "1").param("pageSize", "5"))
               .andExpect(status().isOk())
               .andDo(document("AuthController-readUsersByPage-example", requestFields(
                       fieldWithPath("currentPage").description("get datas for this page number."),
                       fieldWithPath("pageSize")
                             .description("The number of data displayed per page."))));
-       
+
        userRepository.delete(user1.getId());
 
    }
-   
+
    @Test
    public void createRoleExample() throws Exception {
        WormholeRole role = createRole();
@@ -500,7 +500,7 @@ public class AuthControllerTest {
                       fieldWithPath("privilegeNames").description("list of privilegeNames").type(List.class))));
        roleRepository.delete(role.getId());
    }
-   
+
    @Test
    public void readOneRoleByIdExample() throws Exception {
        WormholeRole role = createRole();
@@ -511,41 +511,24 @@ public class AuthControllerTest {
                       fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
                       fieldWithPath("roleName").description("roleName."),
                       fieldWithPath("privilegeNames").description("list of privilegeNames").type(List.class))));
-       
+
        roleRepository.delete(role.getId());
    }
    @Test
    public void readRoleByPageExample() throws Exception {
        WormholeRole role = createRole();
        roleRepository.save(role);
-       this.mockMvc.perform(get("/v1/auth/role/page").content("{\"currentPage\":\"1\",\"pageSize\":\"5\"}")
+       this.mockMvc.perform(get("/v1/auth/role").content("{\"currentPage\":\"1\",\"pageSize\":\"5\"}")
                .param("currentPage", "1").param("pageSize", "5"))
               .andExpect(status().isOk())
               .andDo(document("AuthController-readRoleByPage-example", requestFields(
                       fieldWithPath("currentPage").description("get datas for this page number."),
                       fieldWithPath("pageSize")
                             .description("The number of data displayed per page."))));
-       
+
        roleRepository.delete(role.getId());
    }
-   @Test
-   public void readRoleNamesExample() throws Exception {
-       WormholeRole role = createRole();
-       roleRepository.save(role);
-       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-               fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
-               fieldWithPath("roleName").description("roleName."),
-               fieldWithPath("privilegeNames").description("list of privilegeNames").type(List.class)
-               };
-       
-       this.mockMvc.perform(get("/v1/auth/roles"))
-              .andExpect(status().isOk())
-              .andDo(document("AuthController-readRoleNames-example", responseFields(
-                      fieldWithPath("[]").description("An array of asserts"))
-                      .andWithPrefix("[].", fieldpath)));
-       
-       roleRepository.delete(role.getId());
-   }
+
    @Test
    public void deleteRoleExample() throws Exception {
        WormholeRole role = createRole();
@@ -558,7 +541,7 @@ public class AuthControllerTest {
                 )))
               .andReturn();
    }
-   
+
    @Test
    public void updateRoleExample() throws Exception {
 
@@ -579,7 +562,7 @@ public class AuthControllerTest {
        TestCase.assertEquals("sddcuser", role1.getRoleName());
        roleRepository.delete(role.getId());
    }
-   
+
    AuthToken createToken(){
       AuthToken token = new AuthToken();
       token.setAccess_token("R$TYUIMJ");
@@ -602,7 +585,7 @@ public class AuthControllerTest {
        List<String> userGroupIDs = new ArrayList<String>();
        userGroupIDs.add("userGroupIDs1");
        userGroupIDs.add("userGroupIDs2");
-       
+
        WormholeUser user = new WormholeUser();
        user.setId(UUID.randomUUID().toString());
        user.setCreateTime(new Date());
