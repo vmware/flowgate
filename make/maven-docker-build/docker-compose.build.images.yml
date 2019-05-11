@@ -1,11 +1,11 @@
 version: '2'
 services:
 
-  mongodb:
+  database:
     build:
-      context: $PWD/mongodb
-      dockerfile: $PWD/mongodb/Dockerfile
-    image: flowgate/mongodb:FLOWGATE_VERSION
+      context: $PWD/database
+      dockerfile: $PWD/database/Dockerfile
+    image: flowgate/database:FLOWGATE_VERSION
     
   redis:
     build:
