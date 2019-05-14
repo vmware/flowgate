@@ -43,6 +43,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.auth.AuthVcUser;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
@@ -113,9 +114,9 @@ public class SDDCSoftwareControllerTest {
                      .content(objectMapper.writeValueAsString(sddc)))
                .andDo(document("SDDCSoftware-create-example", requestFields(
                      fieldWithPath("id")
-                           .description("ID of the SDDCSoftwareConfig, created by wormhole"),
+                           .description("ID of the SDDCSoftwareConfig, created by flowgate"),
                      fieldWithPath("name").description("The SDDCSoftwareConfig name."),
-                     fieldWithPath("description").description(""),
+                     fieldWithPath("description").description("The SDDCSoftwareConfig description."),
                      fieldWithPath("serverURL")
                            .description("An ip address for a SDDCSoftwareConfig"),
                      fieldWithPath("userName")
@@ -126,7 +127,7 @@ public class SDDCSoftwareControllerTest {
                            .description(
                                  "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS")
                            .type(SoftwareType.class).optional(),
-                     fieldWithPath("userId").description(""),
+                     fieldWithPath("userId").description("userId"),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
                      fieldWithPath("integrationStatus").description("The status of integration."))))
@@ -187,9 +188,9 @@ public class SDDCSoftwareControllerTest {
                      .content(objectMapper.writeValueAsString(sddc)))
                .andDo(document("SDDCSoftware-update-example", requestFields(
                      fieldWithPath("id")
-                           .description("ID of the SDDCSoftwareConfig, created by wormhole"),
+                           .description("ID of the SDDCSoftwareConfig, created by flowgate"),
                      fieldWithPath("name").description("The SDDCSoftwareConfig name."),
-                     fieldWithPath("description").description(""),
+                     fieldWithPath("description").description("The SDDCSoftwareConfig description."),
                      fieldWithPath("serverURL")
                            .description("An ip address for a SDDCSoftwareConfig"),
                      fieldWithPath("userName")
@@ -200,7 +201,7 @@ public class SDDCSoftwareControllerTest {
                            .description(
                                  "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS")
                            .type(SoftwareType.class).optional(),
-                     fieldWithPath("userId").description(""),
+                     fieldWithPath("userId").description("userId"),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
                      fieldWithPath("integrationStatus").description("The status of integration."))))
@@ -307,9 +308,9 @@ public class SDDCSoftwareControllerTest {
       sddcCreate.setPassword(EncryptionGuard.encode(sddcCreate.getPassword()));
       sddcRepository.save(sddcCreate);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
               fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description(""),
+              fieldWithPath("description").description("The facilitySoftware description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -319,7 +320,7 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("type").description(
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
-                      ""),
+                      "userId"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
@@ -354,9 +355,9 @@ public class SDDCSoftwareControllerTest {
       sddcRepository.save(sddc1Create);
       sddcRepository.save(sddc2Create);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
               fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description(""),
+              fieldWithPath("description").description("The facilitySoftware description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -366,7 +367,7 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("type").description(
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
-                      ""),
+                      "userId"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
@@ -402,9 +403,9 @@ public class SDDCSoftwareControllerTest {
        sddcRepository.save(sddc1Create);
        sddcRepository.save(sddc2Create);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
               fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description(""),
+              fieldWithPath("description").description("The facilitySoftware description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -414,7 +415,7 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("type").description(
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
-                      ""),
+                      "userId"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
@@ -448,9 +449,9 @@ public class SDDCSoftwareControllerTest {
       sddcRepository.save(sddc1Create);
       sddcRepository.save(sddc2Create);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
               fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description(""),
+              fieldWithPath("description").description("The facilitySoftware description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -460,7 +461,7 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("type").description(
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
-                      ""),
+                      "userId"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
@@ -503,6 +504,9 @@ public class SDDCSoftwareControllerTest {
       example.setPassword("Admin!23");
       example.setUserId("1001");
       example.setVerifyCert(false);
+      example.setDescription("description");
+      IntegrationStatus integrationStatus = new IntegrationStatus();
+      example.setIntegrationStatus(integrationStatus);
       return example;
    }
 

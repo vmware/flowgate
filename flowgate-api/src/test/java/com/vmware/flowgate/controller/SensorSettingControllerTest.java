@@ -11,6 +11,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -69,7 +70,7 @@ public class SensorSettingControllerTest {
                   .content(objectMapper.writeValueAsString(sensorsetting)))
             .andExpect(status().isCreated())
             .andDo(document("sensorSetting-create-example", requestFields(
-                  fieldWithPath("id").description("ID of the sensorSetting, created by wormhole"),
+                  fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
                   fieldWithPath("type").description(
                         "The sensor type."),
                   fieldWithPath("minNum").description("Value type is double"),
@@ -90,7 +91,7 @@ public class SensorSettingControllerTest {
                   .content(objectMapper.writeValueAsString(sensorsetting)))
             .andExpect(status().isOk())
             .andDo(document("sensorSetting-update-example", requestFields(
-                  fieldWithPath("id").description("ID of the sensorSetting, created by wormhole"),
+                  fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
                   fieldWithPath("type").description(
                         "The sensor type."),
                   fieldWithPath("minNum").description("Value type is double"),
@@ -112,8 +113,8 @@ public class SensorSettingControllerTest {
                   + "/pagesize/" + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content[0].maxNum").value(sensorsetting.getMaxNum()))
-            .andExpect(jsonPath("$..content.length()").value(1))
-            .andExpect(jsonPath("last", is(true)))
+            .andExpect(jsonPath("$..content.length()").value(5))
+            .andExpect(jsonPath("last", is(false)))
             .andExpect(jsonPath("number", is(0)))
             .andExpect(jsonPath("size", is(5)))
             .andExpect(jsonPath("first", is(true)))
@@ -125,7 +126,7 @@ public class SensorSettingControllerTest {
 
       sensorSettingRepository.delete(sensorsetting.getId());
    }
-   
+
    @Test
    public void sensorQuerySettingByIDExample() throws Exception {
       SensorSetting  sensorsetting = createSensorSetting();
@@ -134,8 +135,14 @@ public class SensorSettingControllerTest {
             .perform(get("/v1/sensors/setting/"+sensorsetting.getId())
                   .content("{\"id\":\""+sensorsetting.getId()+"\"}"))
             .andExpect(status().isOk())
-            .andDo(document("sensorSetting-queryByID-example", requestFields(
-                  fieldWithPath("id").description("ID of the sensorSetting, created by wormhole")
+            .andDo(document("sensorSetting-querySetting-example", responseFields(
+                  fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
+                  fieldWithPath("type").description(
+                        "The sensor type."),
+                  fieldWithPath("minNum").description("Value type is double"),
+                  fieldWithPath("maxNum").description("Value type is double"),
+                  fieldWithPath("minValue").description("Value type is string"),
+                  fieldWithPath("maxValue").description("Value type is string")
                  )));
 
       sensorSettingRepository.delete(sensorsetting.getId());
@@ -159,7 +166,9 @@ public class SensorSettingControllerTest {
       example.setType(ServerSensorType.BACKPANELTEMP);
       example.setMaxNum(35);
       example.setMinNum(5);
+      example.setMaxValue("maxValue");
+      example.setMinValue("minValue");
       return example;
    }
- 
+
 }
