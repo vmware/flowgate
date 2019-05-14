@@ -591,7 +591,6 @@ public class AuthControllerTest {
        user.setCreateTime(new Date());
        user.setEmailAddress("emailAddress");
        user.setGender(1);
-       user.setLastPasswordResetDate(new Date().getTime());
        user.setMobile("mobile");
        user.setPassword("password");
        user.setRoleNames(rolenames);
