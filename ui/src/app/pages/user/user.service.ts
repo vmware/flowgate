@@ -25,7 +25,7 @@ export class UserService {
     let header = new Headers({ 'Content-Type': 'application/json' });
     header.append("Authorization",'Bearer ' + this.auth.getToken());
     this.options = new RequestOptions({ headers: header });
-    return this.http.get(""+this.Auth_URL+"/v1/auth/roles",this.options).map((res)=>res)
+    return this.http.get(""+this.Auth_URL+"/v1/auth/role?currentPage=0&pageSize=2000",this.options).map((res)=>res)
    }
     postuser(name,password,email,roleName){
       let header = new Headers({ 'Content-Type': 'application/json' });
@@ -62,7 +62,7 @@ export class UserService {
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());
       this.options = new RequestOptions({ headers: header });
-      return this.http.get(""+this.Auth_URL+"/v1/auth/user/page?currentPage="+Page+"&pageSize="+Size+"",this.options).map((res)=>res)
+      return this.http.get(""+this.Auth_URL+"/v1/auth/user?currentPage="+Page+"&pageSize="+Size+"",this.options).map((res)=>res)
     }
 
   deleteUser(id){

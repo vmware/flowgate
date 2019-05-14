@@ -19,16 +19,16 @@ public interface SystemSummaryRepository
    public static final String hackid = "hid";
    public static final int cas = 89657;
 
-   @Query("SELECT COUNT(*) AS count FROM #{#n1ql.bucket} WHERE _class = $1")
+   @Query("SELECT COUNT(_class) AS count FROM #{#n1ql.bucket} WHERE _class = $1")
    int countByClass(String classpath);
 
-   @Query("SELECT COUNT(*) AS count FROM #{#n1ql.bucket} WHERE _class = $1 and type = $2")
+   @Query("SELECT COUNT(1) AS count FROM #{#n1ql.bucket} WHERE _class = $1 and type = $2")
    int countByClassAndType(String classpath,String value);
 
-   @Query("SELECT COUNT(*) AS count FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.ServerMapping' and vcID = $1")
+   @Query("SELECT COUNT(1) AS count FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.ServerMapping' and vcID = $1")
    int countServerMappingByVC(String vcID);
 
-   @Query("SELECT COUNT(*) AS count FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.ServerMapping' and vroID = $1")
+   @Query("SELECT COUNT(1) AS count FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.ServerMapping' and vroID = $1")
    int countServerMappingByVRO(String vroID);
 
    @Query("SELECT count(category) AS count,category,\""+hackid+"\" as _ID, "+cas+" as _CAS FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.Asset' GROUP BY category")
