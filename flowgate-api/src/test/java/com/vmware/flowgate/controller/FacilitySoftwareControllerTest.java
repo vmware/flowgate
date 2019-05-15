@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -47,7 +48,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.auth.NlyteAuth;
 import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
@@ -115,9 +118,9 @@ public class FacilitySoftwareControllerTest {
             .andExpect(status().is4xxClientError())
             .andDo(document("facilitySoftware-create-example", requestFields(
                   fieldWithPath("id")
-                        .description("ID of the facilitySoftware, created by wormhole"),
+                        .description("ID of the facilitySoftware, created by flowgate"),
                   fieldWithPath("name").description("The facilitySoftware name."),
-                  fieldWithPath("description").description(""),
+                  fieldWithPath("description").description("The facilitySoftware description."),
                   fieldWithPath("serverURL")
                         .description("The server's address, it can be an IP or FQDN."),
                   fieldWithPath("userName").description("An username used to obtain authorization"),
@@ -126,10 +129,10 @@ public class FacilitySoftwareControllerTest {
                   fieldWithPath("type").description(
                         "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB")
                         .type(AssetSubCategory.class).optional(),
-                  fieldWithPath("userId").description(""),
+                  fieldWithPath("userId").description("userid"),
                   fieldWithPath("verifyCert").description(
                         "Whether to verify the certificate when accessing the serverURL."),
-                  fieldWithPath("advanceSetting").description(""),
+                  fieldWithPath("advanceSetting").description("advanceSetting"),
                   fieldWithPath("integrationStatus").description("The status of integration."))))
             .andReturn();
       if (result.getResolvedException() != null) {
@@ -137,9 +140,9 @@ public class FacilitySoftwareControllerTest {
       } else {
          TestCase.fail();
       }
-      
+
    }
-   
+
    @Test
    public void syncFacilityServerDataExample() throws JsonProcessingException, Exception {
       expectedEx.expect(WormholeRequestException.class);
@@ -153,7 +156,7 @@ public class FacilitySoftwareControllerTest {
          TestCase.fail();
       }
    }
-   
+
    @Test
    public void syncFacilityServerDataExample1() throws JsonProcessingException, Exception {
       ListOperations<String, String> listOperations = Mockito.mock(ListOperations.class);
@@ -168,10 +171,10 @@ public class FacilitySoftwareControllerTest {
             .andReturn();
       if (result.getResolvedException() != null) {
          throw result.getResolvedException();
-      } 
+      }
       facilitySoftwareRepository.delete(facilitySoftware.getId());
    }
-   
+
    @Test
    public void syncFacilityServerDataExample2() throws JsonProcessingException, Exception {
       ListOperations<String, String> listOperations = Mockito.mock(ListOperations.class);
@@ -188,10 +191,10 @@ public class FacilitySoftwareControllerTest {
             .andReturn();
       if (result.getResolvedException() != null) {
          throw result.getResolvedException();
-      } 
+      }
       facilitySoftwareRepository.delete(facilitySoftware.getId());
    }
-   
+
    @Test
    public void createAnFacilitySoftware() throws JsonProcessingException, Exception {
 
@@ -214,9 +217,9 @@ public class FacilitySoftwareControllerTest {
                .andExpect(status().isCreated())
                .andDo(document("facilitySoftware-create-example", requestFields(
                      fieldWithPath("id")
-                           .description("ID of the facilitySoftware, created by wormhole"),
+                           .description("ID of the facilitySoftware, created by flowgate"),
                      fieldWithPath("name").description("The facilitySoftware name."),
-                     fieldWithPath("description").description(""),
+                     fieldWithPath("description").description("The facilitySoftware description."),
                      fieldWithPath("serverURL")
                            .description("The server's address, it can be an IP or FQDN."),
                      fieldWithPath("userName")
@@ -226,9 +229,9 @@ public class FacilitySoftwareControllerTest {
                      fieldWithPath("type").description(
                            "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB")
                            .type(AssetSubCategory.class).optional(),
-                     fieldWithPath("userId").description(""),
+                     fieldWithPath("userId").description("userId"),
                      fieldWithPath("verifyCert").description("Whether to verify the certificate when accessing the serverURL."),
-                     fieldWithPath("advanceSetting").description(""),
+                     fieldWithPath("advanceSetting").description("advanceSetting"),
                      fieldWithPath("integrationStatus").description("The status of integration."))));
       } catch (Exception e) {
          facilitySoftwareRepository.delete(facilitySoftware.getId());
@@ -254,9 +257,9 @@ public class FacilitySoftwareControllerTest {
                      .content(objectMapper.writeValueAsString(facilitySoftware)))
                .andDo(document("facilitySoftware-update-example", requestFields(
                      fieldWithPath("id")
-                           .description("ID of the facilitySoftware, created by wormhole"),
+                           .description("ID of the facilitySoftware, created by flowgate"),
                      fieldWithPath("name").description("The facilitySoftware name."),
-                     fieldWithPath("description").description(""),
+                     fieldWithPath("description").description("The facilitySoftware description."),
                      fieldWithPath("serverURL")
                            .description("The server's address, it can be an IP or FQDN."),
                      fieldWithPath("userName")
@@ -266,10 +269,10 @@ public class FacilitySoftwareControllerTest {
                      fieldWithPath("type").description(
                            "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB")
                            .type(AssetSubCategory.class).optional(),
-                     fieldWithPath("userId").description(""),
+                     fieldWithPath("userId").description("userId"),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
-                     fieldWithPath("advanceSetting").description(""),
+                     fieldWithPath("advanceSetting").description("advanceSetting"),
                      fieldWithPath("integrationStatus").description("The status of integration."))));
       } catch (Exception e) {
          facilitySoftwareRepository.delete(facilitySoftware.getId());
@@ -302,7 +305,7 @@ public class FacilitySoftwareControllerTest {
 
       facilitySoftwareRepository.delete(facilitySoftware.getId());
    }
-   
+
    @Test
    public void getFacilitySoftwareConfigByTypeExample() throws Exception {
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
@@ -314,11 +317,11 @@ public class FacilitySoftwareControllerTest {
       facilitySoftware1.setName("2");
       facilitySoftware2.setPassword(EncryptionGuard.encode(facilitySoftware2.getPassword()));
       facilitySoftwareRepository.save(facilitySoftware2);
-      
+
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
               fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description(""),
+              fieldWithPath("description").description("The facilitySoftware description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -328,7 +331,7 @@ public class FacilitySoftwareControllerTest {
               fieldWithPath("type").description(
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
-                      ""),
+                      "userId"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
@@ -366,6 +369,11 @@ public class FacilitySoftwareControllerTest {
       example.setType(FacilitySoftwareConfig.SoftwareType.Nlyte);
       example.setUserId("1");
       example.setVerifyCert(false);
+      example.setDescription("description");
+      HashMap advanceSetting = new HashMap<AdvanceSettingType, String>();
+      example.setAdvanceSetting(advanceSetting);
+      IntegrationStatus integrationStatus = new IntegrationStatus();
+      example.setIntegrationStatus(integrationStatus);
       return example;
    }
 

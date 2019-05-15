@@ -57,7 +57,7 @@ public class JobsControllerTest {
 
     @Autowired
     private JobsRepository jobsRepository;
-    
+
     @SpyBean
     private ServerValidationService serverValidationService;
 
@@ -68,7 +68,7 @@ public class JobsControllerTest {
     private StringRedisTemplate template;
     @MockBean
     private MessagePublisher publisher;
-    
+
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
 
@@ -77,7 +77,7 @@ public class JobsControllerTest {
        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
              .apply(documentationConfiguration(this.restDocumentation)).build();
     }
-    
+
     @Test
     public void startFullMappingAggregationExample() throws JsonProcessingException, Exception {
 
@@ -98,22 +98,22 @@ public class JobsControllerTest {
              .andDo(document("JobsController-generateServerPDUMapping-example"))
              .andReturn();
     }
-    
+
     @Test
     public void syncHostnameByIpExample() throws JsonProcessingException, Exception {
 
        Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
-       
+
        String ip = "127.0.0.1";
        this.mockMvc
              .perform(post("/v1/jobs/synchostnamebyip/"+ip+"").contentType(MediaType.APPLICATION_JSON))
              .andDo(document("JobsController-syncHostnameByIp-example"))
              .andReturn();
     }
-    
+
     @Test
     public void getVROJobsExample() throws JsonProcessingException, Exception {
-        
+
         JobConfig jobconfig1 = createJobConfig();
         jobconfig1.setId("1");
         jobconfig1.setJobType(JobType.VRO);
@@ -122,10 +122,10 @@ public class JobsControllerTest {
         jobconfig2.setId("2");
         jobconfig2.setJobType(JobType.VRO);
         jobsRepository.save(jobconfig2);
-        
+
         Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
         FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-                fieldWithPath("id").description("ID of jobconfig, created by wormhole"),
+                fieldWithPath("id").description("ID of jobconfig, created by flowgate"),
                 fieldWithPath("jobName").description("jobName."),
                 fieldWithPath("jobGroup").description("jobGroup"),
                 fieldWithPath("triggerGroup").description("triggerGroup"),
@@ -138,23 +138,23 @@ public class JobsControllerTest {
                 fieldWithPath("jobClass").description(
                         "jobClass"),
                 fieldWithPath("jobType").description(
-                        "jobType.").type(JobType.class).optional()
+                        "jobType.").optional()
                 };
-        
+
        this.mockMvc
              .perform(get("/v1/jobs/vrojobs"))
              .andExpect(status().isOk())
              .andDo(document("JobsController-getVROJobs-example", responseFields(
                      fieldWithPath("[]").description("An array of asserts"))
                      .andWithPrefix("[].", fieldpath)));
-        
+
         jobsRepository.delete(jobconfig1);
         jobsRepository.delete(jobconfig2);
     }
-    
+
     @Test
     public void getVCJobsExample() throws JsonProcessingException, Exception {
-        
+
         JobConfig jobconfig1 = createJobConfig();
         jobconfig1.setId("1");
         jobconfig1.setJobType(JobType.VCENTER);
@@ -163,10 +163,10 @@ public class JobsControllerTest {
         jobconfig2.setId("2");
         jobconfig2.setJobType(JobType.VCENTER);
         jobsRepository.save(jobconfig2);
-        
+
         Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
         FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-                fieldWithPath("id").description("ID of jobconfig, created by wormhole"),
+                fieldWithPath("id").description("ID of jobconfig, created by flowgate"),
                 fieldWithPath("jobName").description("jobName."),
                 fieldWithPath("jobGroup").description("jobGroup"),
                 fieldWithPath("triggerGroup").description("triggerGroup"),
@@ -179,23 +179,23 @@ public class JobsControllerTest {
                 fieldWithPath("jobClass").description(
                         "jobClass"),
                 fieldWithPath("jobType").description(
-                        "jobType.").type(JobType.class).optional()
+                        "jobType.").optional()
                 };
-        
+
        this.mockMvc
              .perform(get("/v1/jobs/vcjobs"))
              .andExpect(status().isOk())
              .andDo(document("JobsController-getVCJobs-example", responseFields(
                      fieldWithPath("[]").description("An array of asserts"))
                      .andWithPrefix("[].", fieldpath)));
-        
+
         jobsRepository.delete(jobconfig1);
         jobsRepository.delete(jobconfig2);
     }
-    
+
     @Test
     public void getJobsByTypeExample() throws JsonProcessingException, Exception {
-        
+
         JobConfig jobconfig1 = createJobConfig();
         jobconfig1.setId("1");
         jobconfig1.setJobType(JobType.VCENTER);
@@ -204,10 +204,10 @@ public class JobsControllerTest {
         jobconfig2.setId("2");
         jobconfig2.setJobType(JobType.VCENTER);
         jobsRepository.save(jobconfig2);
-        
+
         Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
         FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-                fieldWithPath("id").description("ID of jobconfig, created by wormhole"),
+                fieldWithPath("id").description("ID of jobconfig, created by flowgate"),
                 fieldWithPath("jobName").description("jobName."),
                 fieldWithPath("jobGroup").description("jobGroup"),
                 fieldWithPath("triggerGroup").description("triggerGroup"),
@@ -220,9 +220,9 @@ public class JobsControllerTest {
                 fieldWithPath("jobClass").description(
                         "jobClass"),
                 fieldWithPath("jobType").description(
-                        "jobType.").type(JobType.class).optional()
+                        "jobType.").optional()
                 };
-        
+
         JobType jobtype = JobType.VCENTER;
        this.mockMvc
              .perform(get("/v1/jobs/type/"+ jobtype +""))
@@ -230,11 +230,11 @@ public class JobsControllerTest {
              .andDo(document("JobsController-getJobsByType-example", responseFields(
                      fieldWithPath("[]").description("An array of asserts"))
                      .andWithPrefix("[].", fieldpath)));
-        
+
         jobsRepository.delete(jobconfig1);
         jobsRepository.delete(jobconfig2);
     }
-    
+
     JobConfig createJobConfig()
     {
         JobConfig job = new JobConfig();
@@ -247,7 +247,7 @@ public class JobsControllerTest {
         job.setTriggerGroup("triggerGroup");
         job.setTriggerName("triggerName");
         job.setCronExpression("cronExpression");
-        
+
         return job;
     }
 }

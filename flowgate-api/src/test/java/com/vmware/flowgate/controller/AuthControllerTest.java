@@ -121,8 +121,8 @@ public class AuthControllerTest {
       .content("{\"userName\":\"tom\",\"password\":\"123456\"}"))
       .andExpect(status().isOk())
       .andDo(document("AuthController-CreateAccessToken-example", relaxedRequestFields(
-      fieldWithPath("userName").description("A user name for Wormhole Project"),
-      fieldWithPath("password").description("A password for Wormhole Project."))))
+      fieldWithPath("userName").description("A user name for flowgate Project"),
+      fieldWithPath("password").description("A password for flowgate Project."))))
       .andReturn();
       userRepository.delete(wormholeuser.getId());
    }
@@ -152,7 +152,8 @@ public class AuthControllerTest {
       wormholeuser.setPassword("$2a$10$Vm8MLIkGwinuICfcqW5RDOoE.aJqnvsaPhnxl7.N4H7oLKVIu3o0.");
       wormholeuser.setRoleNames(Arrays.asList("admin"));
       userRepository.save(wormholeuser);
-
+//      Thread.sleep(3000);
+      System.out.println("create user time : "+wormholeuser.getLastPasswordResetDate());
       MvcResult result = this.mockMvc
       .perform(post("/v1/auth/token").contentType(MediaType.APPLICATION_JSON)
       .content("{\"userName\":\"tomRefresh\",\"password\":\"123456\"}"))
@@ -168,6 +169,8 @@ public class AuthControllerTest {
             }
          }
       }
+      DecodedJWT jwtcre = jwtUtil.getDecodedJwt(access_token);
+      System.out.println("test issure at :"+jwtcre.getIssuedAt().getTime());
       ObjectMapper mapper = new ObjectMapper();
       WormholeUserDetails userdetail = new WormholeUserDetails();
       userdetail.setUserId(userId);
@@ -180,6 +183,7 @@ public class AuthControllerTest {
       .andDo(document("AuthController-RefreshAccessToken-example"))
       .andReturn();
 
+      //JwtTokenUtil jwtUtil = new JwtTokenUtil();
       DecodedJWT jwt = jwtUtil.getDecodedJwt(result1.getResponse().getHeader("Authorization"));
       TestCase.assertEquals("tomRefresh", jwt.getSubject());
       userRepository.delete(wormholeuser.getId());
@@ -210,7 +214,7 @@ public class AuthControllerTest {
               .content(objectMapper.writeValueAsString(user)))
               .andExpect(status().isCreated())
               .andDo(document("AuthController-createUser-example", requestFields(
-                      fieldWithPath("id").description("ID of User, created by wormhole"),
+                      fieldWithPath("id").description("ID of User, created by flowgate"),
                       fieldWithPath("userName").description("userName.").type(JsonFieldType.STRING),
                       fieldWithPath("gender").description("gender").type(JsonFieldType.NUMBER),
                       fieldWithPath("password").description("password").type(JsonFieldType.STRING),
@@ -232,7 +236,7 @@ public class AuthControllerTest {
        this.mockMvc.perform(delete("/v1/auth/user/"+user.getId()+"").content("{\"id\":\"" + user.getId() + "\"}"))
               .andExpect(status().isOk())
               .andDo(document("AuthController-deleteUser-example", requestFields(
-                      fieldWithPath("id").description("ID of User, created by wormhole"))))
+                      fieldWithPath("id").description("ID of User, created by flowgate"))))
               .andReturn();
    }
 
@@ -257,7 +261,7 @@ public class AuthControllerTest {
                   .content(objectMapper.writeValueAsString(user)))
             .andExpect(status().isOk())
             .andDo(document("AuthController-updateUser-example",
-                  requestFields(fieldWithPath("id").description("ID of User, created by wormhole"),
+                  requestFields(fieldWithPath("id").description("ID of User, created by flowgate"),
                         fieldWithPath("userName").description("userName.")
                               .type(JsonFieldType.STRING),
                         fieldWithPath("gender").description("gender").type(JsonFieldType.NUMBER),
@@ -299,7 +303,7 @@ public class AuthControllerTest {
                   .content(objectMapper.writeValueAsString(user)))
             .andExpect(status().isOk())
             .andDo(document("AuthController-updateUser-example",
-                  requestFields(fieldWithPath("id").description("ID of User, created by wormhole"),
+                  requestFields(fieldWithPath("id").description("ID of User, created by flowgate"),
                         fieldWithPath("userName").description("userName.")
                               .type(JsonFieldType.STRING),
                         fieldWithPath("gender").description("gender").type(JsonFieldType.NUMBER),
@@ -338,7 +342,7 @@ public class AuthControllerTest {
       this.mockMvc.perform(get("/v1/auth/user/"+user.getId()+""))
               .andExpect(status().isOk())
               .andDo(document("AuthController-readOneUserById-example", responseFields(
-                      fieldWithPath("id").description("ID of User, created by wormhole"),
+                      fieldWithPath("id").description("ID of User, created by flowgate"),
                       fieldWithPath("userName").description("userName.").type(JsonFieldType.STRING),
                       fieldWithPath("gender").description("gender").type(JsonFieldType.NUMBER),
                       fieldWithPath("password").description("password"),
@@ -413,7 +417,7 @@ public class AuthControllerTest {
       this.mockMvc.perform(get("/v1/auth/user/username/"+user.getUserName()+""))
               .andExpect(status().isOk())
               .andDo(document("AuthController-readOneUserByUserName-example", responseFields(
-                    fieldWithPath("id").description("ID of User, created by wormhole"),
+                    fieldWithPath("id").description("ID of User, created by flowgate"),
                     fieldWithPath("userName").description("userName.").type(JsonFieldType.STRING),
                     fieldWithPath("gender").description("gender").type(JsonFieldType.NUMBER),
                     fieldWithPath("password").description("password"),
@@ -495,7 +499,7 @@ public class AuthControllerTest {
               .content(objectMapper.writeValueAsString(role)))
               .andExpect(status().isCreated())
               .andDo(document("AuthController-createRole-example", requestFields(
-                      fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+                      fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
                       fieldWithPath("roleName").description("roleName."),
                       fieldWithPath("privilegeNames").description("list of privilegeNames").type(List.class))));
        roleRepository.delete(role.getId());
@@ -508,7 +512,7 @@ public class AuthControllerTest {
        this.mockMvc.perform(get("/v1/auth/role/"+role.getId()+""))
               .andExpect(status().isOk())
               .andDo(document("AuthController-readOneRoleById-example", responseFields(
-                      fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+                      fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
                       fieldWithPath("roleName").description("roleName."),
                       fieldWithPath("privilegeNames").description("list of privilegeNames").type(List.class))));
 
@@ -526,6 +530,7 @@ public class AuthControllerTest {
                       fieldWithPath("pageSize")
                             .description("The number of data displayed per page."))));
 
+
        roleRepository.delete(role.getId());
    }
 
@@ -537,7 +542,7 @@ public class AuthControllerTest {
               .andExpect(status().isOk())
               .andDo(document("AuthController-deleteRole-example", requestFields(
                       fieldWithPath("id")
-                      .description("ID of the AuthController, created by wormhole")
+                      .description("ID of the AuthController, created by flowgate")
                 )))
               .andReturn();
    }
@@ -554,7 +559,7 @@ public class AuthControllerTest {
               .andExpect(status().isOk())
               .andDo(document("AuthController-updateRole-example", requestFields(
                       fieldWithPath("id")
-                      .description("ID of the Role, created by wormhole"),
+                      .description("ID of the Role, created by flowgate"),
                 fieldWithPath("roleName").description("roleName."),
                 fieldWithPath("privilegeNames").description("privilegeNames").type(String.class))))
               .andReturn();
@@ -587,8 +592,9 @@ public class AuthControllerTest {
        userGroupIDs.add("userGroupIDs2");
 
        WormholeUser user = new WormholeUser();
+       long time = System.currentTimeMillis();
        user.setId(UUID.randomUUID().toString());
-       user.setCreateTime(new Date());
+       user.setCreateTime(new Date(time));
        user.setEmailAddress("emailAddress");
        user.setGender(1);
        user.setMobile("mobile");

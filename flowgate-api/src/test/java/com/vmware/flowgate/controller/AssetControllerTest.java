@@ -45,6 +45,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.AssetCategory;
+import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.model.Asset;
@@ -115,7 +116,7 @@ public class AssetControllerTest {
                   .content(objectMapper.writeValueAsString(asset)))
             .andExpect(status().isCreated()).andExpect(header().string("Location", notNullValue()))
             .andDo(document("assets-create-example", requestFields(
-                  fieldWithPath("id").description("ID of the asset, created by wormhole"),
+                  fieldWithPath("id").description("ID of the asset, created by flowgate"),
                   fieldWithPath("assetNumber").description(
                         "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                         .type(long.class),
@@ -147,9 +148,9 @@ public class AssetControllerTest {
                   fieldWithPath("building").description("The location building of the asset")
                         .optional(),
                   fieldWithPath("floor").description("The location floor of the asset").optional(),
-                  fieldWithPath("room").description(""),
-                  fieldWithPath("row").description("").optional(),
-                  fieldWithPath("col").description("").optional(),
+                  fieldWithPath("room").description("The location room of the asset"),
+                  fieldWithPath("row").description("The location row of the asset").optional(),
+                  fieldWithPath("col").description("The location col of the asset").optional(),
                   fieldWithPath("extraLocation")
                         .description("Extra location information. Only valid for some system.")
                         .optional(),
@@ -232,8 +233,8 @@ public class AssetControllerTest {
                   .content(objectMapper.writeValueAsString(realtime)))
             .andExpect(status().isOk())
             .andDo(document("assets-insertRealtimeData-example", requestFields(
-                  fieldWithPath("id").description("ID of the realtime, created by wormhole"),
-                  fieldWithPath("assetID").description("ID of the asset, created by wormhole"),
+                  fieldWithPath("id").description("ID of the realtime, created by flowgate"),
+                  fieldWithPath("assetID").description("ID of the asset, created by flowgate"),
                   fieldWithPath("values")
                         .description("A list of sensor data. eg. Humidity , Electric... ")
                         .type(ValueUnit[].class),
@@ -247,16 +248,16 @@ public class AssetControllerTest {
    public void createAssetBatchExample() throws JsonProcessingException, Exception {
       List<Asset> assets = new ArrayList<Asset>();
       Asset asset1 = createAsset();
-      asset1.setAssetName("lhy");
+      asset1.setAssetName("assetname");
       asset1.setAssetNumber(18);
       assets.add(asset1);
       Asset asset2 = createAsset();
-      asset2.setAssetName("lwy");
+      asset2.setAssetName("assetname2");
       asset2.setAssetNumber(17);
       assets.add(asset2);
 
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the asset, created by wormhole"),
+            fieldWithPath("id").description("ID of the asset, created by flowgate"),
             fieldWithPath("assetNumber").description(
                   "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                   .type(long.class),
@@ -285,8 +286,9 @@ public class AssetControllerTest {
             fieldWithPath("city").description("The location city of the asset").optional(),
             fieldWithPath("building").description("The location building of the asset").optional(),
             fieldWithPath("floor").description("The location floor of the asset").optional(),
-            fieldWithPath("room").description(""), fieldWithPath("row").description("").optional(),
-            fieldWithPath("col").description("").optional(),
+            fieldWithPath("room").description("The location room of the asset"),
+            fieldWithPath("row").description("The location row of the asset").optional(),
+            fieldWithPath("col").description("The location col of the asset").optional(),
             fieldWithPath("extraLocation")
                   .description("Extra location information. Only valid for some system.")
                   .optional(),
@@ -339,7 +341,7 @@ public class AssetControllerTest {
 
       FieldDescriptor[] fieldpath =
             new FieldDescriptor[] { fieldWithPath("id").description("ID of the RealTimeData"),
-                  fieldWithPath("assetID").description("ID of the asset, created by wormhole"),
+                  fieldWithPath("assetID").description("ID of the asset, created by flowgate"),
                   fieldWithPath("values").description("List of ValueUnit") };
       this.mockMvc
             .perform(post("/v1/assets/sensordata/batchoperation")
@@ -360,7 +362,7 @@ public class AssetControllerTest {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the asset, created by wormhole"),
+            fieldWithPath("id").description("ID of the asset, created by flowgate"),
             fieldWithPath("assetNumber").description(
                   "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                   .type(long.class),
@@ -389,8 +391,9 @@ public class AssetControllerTest {
             fieldWithPath("city").description("The location city of the asset").optional(),
             fieldWithPath("building").description("The location building of the asset").optional(),
             fieldWithPath("floor").description("The location floor of the asset").optional(),
-            fieldWithPath("room").description(""), fieldWithPath("row").description("").optional(),
-            fieldWithPath("col").description("").optional(),
+            fieldWithPath("room").description("The location room of the asset"),
+            fieldWithPath("row").description("The location row of the asset").optional(),
+            fieldWithPath("col").description("The location col of the asset").optional(),
             fieldWithPath("extraLocation")
                   .description("Extra location information. Only valid for some system.")
                   .optional(),
@@ -436,7 +439,7 @@ public class AssetControllerTest {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the asset, created by wormhole"),
+            fieldWithPath("id").description("ID of the asset, created by flowgate"),
             fieldWithPath("assetNumber").description(
                   "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                   .type(long.class),
@@ -465,8 +468,9 @@ public class AssetControllerTest {
             fieldWithPath("city").description("The location city of the asset").optional(),
             fieldWithPath("building").description("The location building of the asset").optional(),
             fieldWithPath("floor").description("The location floor of the asset").optional(),
-            fieldWithPath("room").description(""), fieldWithPath("row").description("").optional(),
-            fieldWithPath("col").description("").optional(),
+            fieldWithPath("room").description("The location room of the asset"),
+            fieldWithPath("row").description("The location row of the asset").optional(),
+            fieldWithPath("col").description("The location col of the asset").optional(),
             fieldWithPath("extraLocation")
                   .description("Extra location information. Only valid for some system.")
                   .optional(),
@@ -513,7 +517,7 @@ public class AssetControllerTest {
       mapping = serverMappingRepository.save(mapping);
 
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the asset, created by wormhole"),
+            fieldWithPath("id").description("ID of the asset, created by flowgate"),
             fieldWithPath("assetNumber").description(
                   "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                   .type(long.class),
@@ -542,8 +546,9 @@ public class AssetControllerTest {
             fieldWithPath("city").description("The location city of the asset").optional(),
             fieldWithPath("building").description("The location building of the asset").optional(),
             fieldWithPath("floor").description("The location floor of the asset").optional(),
-            fieldWithPath("room").description(""), fieldWithPath("row").description("").optional(),
-            fieldWithPath("col").description("").optional(),
+            fieldWithPath("room").description("The location room of the asset"),
+            fieldWithPath("row").description("The location row of the asset").optional(),
+            fieldWithPath("col").description("The location col of the asset").optional(),
             fieldWithPath("extraLocation")
                   .description("Extra location information. Only valid for some system.")
                   .optional(),
@@ -590,7 +595,7 @@ public class AssetControllerTest {
       serverMappingRepository.save(mapping);
 
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the mapping, created by wormhole"),
+            fieldWithPath("id").description("ID of the mapping, created by flowgate"),
             fieldWithPath("asset").description("An asset for serverMapping."),
             fieldWithPath("vcID").description("ID of Vcenter."),
             fieldWithPath("vcHostName").description("Server's hostname display in Vcenter."),
@@ -623,7 +628,7 @@ public class AssetControllerTest {
       serverMappingRepository.save(mapping);
 
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the mapping, created by wormhole"),
+            fieldWithPath("id").description("ID of the mapping, created by flowgate"),
             fieldWithPath("asset").description("An asset for serverMapping."),
             fieldWithPath("vcID").description("ID of Vcenter."),
             fieldWithPath("vcHostName").description("Server's hostname display in Vcenter."),
@@ -656,7 +661,7 @@ public class AssetControllerTest {
       assetIPMappingRepository.save(mapping2);
 
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the AssetIPMapping, created by wormhole"),
+            fieldWithPath("id").description("ID of the AssetIPMapping, created by flowgate"),
             fieldWithPath("ip").description("IP of AssetIPMapping."),
             fieldWithPath("assetname").description("name of asset.") };
       this.mockMvc.perform(get("/v1/assets/mapping/hostnameip/ip/" + mapping1.getIp()))
@@ -678,8 +683,8 @@ public class AssetControllerTest {
       ServerMapping mapping2 = createServerMapping();
       serverMappingRepository.save(mapping2);
 
-      FieldDescriptor[] fieldpath =
-            new FieldDescriptor[] { fieldWithPath("").description("hostname") };
+      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
+                  fieldWithPath("").description("hostname") };
 
       this.mockMvc.perform(get("/v1/assets/mapping/unmappedservers")).andExpect(status().isOk())
             .andDo(document("assets-getUnmappedServers-example",
@@ -713,7 +718,7 @@ public class AssetControllerTest {
       serverMappingRepository.save(mapping2);
 
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the asset, created by wormhole"),
+            fieldWithPath("id").description("ID of the asset, created by flowgate"),
             fieldWithPath("assetNumber").description(
                   "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                   .type(long.class),
@@ -742,8 +747,9 @@ public class AssetControllerTest {
             fieldWithPath("city").description("The location city of the asset").optional(),
             fieldWithPath("building").description("The location building of the asset").optional(),
             fieldWithPath("floor").description("The location floor of the asset").optional(),
-            fieldWithPath("room").description(""), fieldWithPath("row").description("").optional(),
-            fieldWithPath("col").description("").optional(),
+            fieldWithPath("room").description("The location room of the asset"),
+            fieldWithPath("row").description("The location row of the asset").optional(),
+            fieldWithPath("col").description("The location col of the asset").optional(),
             fieldWithPath("extraLocation")
                   .description("Extra location information. Only valid for some system.")
                   .optional(),
@@ -806,7 +812,7 @@ public class AssetControllerTest {
       serverMappingRepository.save(mapping2);
 
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the asset, created by wormhole"),
+            fieldWithPath("id").description("ID of the asset, created by flowgate"),
             fieldWithPath("assetNumber").description(
                   "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                   .type(long.class),
@@ -835,8 +841,9 @@ public class AssetControllerTest {
             fieldWithPath("city").description("The location city of the asset").optional(),
             fieldWithPath("building").description("The location building of the asset").optional(),
             fieldWithPath("floor").description("The location floor of the asset").optional(),
-            fieldWithPath("room").description(""), fieldWithPath("row").description("").optional(),
-            fieldWithPath("col").description("").optional(),
+            fieldWithPath("room").description("The location room of the asset"),
+            fieldWithPath("row").description("The location row of the asset").optional(),
+            fieldWithPath("col").description("The location col of the asset").optional(),
             fieldWithPath("extraLocation")
                   .description("Extra location information. Only valid for some system.")
                   .optional(),
@@ -877,12 +884,12 @@ public class AssetControllerTest {
    @Test
    public void readAssetsByAssetNameAndTagLikExample() throws Exception {
       Asset asset1 = createAsset();
-      asset1.setAssetName("lhy");
+      asset1.setAssetName("assetname");
       asset1.setAssetNumber(18);
       asset1.setAssetSource(null);
       assetRepository.save(asset1);
       Asset asset2 = createAsset();
-      asset2.setAssetName("lwy");
+      asset2.setAssetName("assetname2");
       asset2.setAssetNumber(17);
       asset2.setAssetSource(null);
       assetRepository.save(asset2);
@@ -912,16 +919,16 @@ public class AssetControllerTest {
    @Test
    public void readAssetsByAssetNameAndTagLikAndKeywordsExample() throws Exception {
       Asset asset1 = createAsset();
-      asset1.setAssetName("lhy");
+      asset1.setAssetName("assetname");
       asset1.setAssetNumber(18);
       assetRepository.save(asset1);
       Asset asset2 = createAsset();
-      asset2.setAssetName("lwy");
+      asset2.setAssetName("assetname2");
       asset2.setAssetNumber(17);
       assetRepository.save(asset2);
       int pageNumber = 1;
       int pageSize = 1;
-      String keywords = "lhy";
+      String keywords = "keyword";
       FacilitySoftwareConfig facility = createFacilitySoftware();
       facilitySoftwareRepository.save(facility);
 
@@ -968,7 +975,7 @@ public class AssetControllerTest {
       serverMappingRepository.save(mapping2);
 
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the asset, created by wormhole"),
+            fieldWithPath("id").description("ID of the asset, created by flowgate"),
             fieldWithPath("assetNumber").description(
                   "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                   .type(long.class),
@@ -997,8 +1004,9 @@ public class AssetControllerTest {
             fieldWithPath("city").description("The location city of the asset").optional(),
             fieldWithPath("building").description("The location building of the asset").optional(),
             fieldWithPath("floor").description("The location floor of the asset").optional(),
-            fieldWithPath("room").description(""), fieldWithPath("row").description("").optional(),
-            fieldWithPath("col").description("").optional(),
+            fieldWithPath("room").description("The location room of the asset"),
+            fieldWithPath("row").description("The location row of the asset").optional(),
+            fieldWithPath("col").description("The location col of the asset").optional(),
             fieldWithPath("extraLocation")
                   .description("Extra location information. Only valid for some system.")
                   .optional(),
@@ -1059,7 +1067,7 @@ public class AssetControllerTest {
       mapping2.setVcMobID("host-11");
       serverMappingRepository.save(mapping2);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the asset, created by wormhole"),
+            fieldWithPath("id").description("ID of the asset, created by flowgate"),
             fieldWithPath("assetNumber").description(
                   "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                   .type(long.class),
@@ -1088,8 +1096,9 @@ public class AssetControllerTest {
             fieldWithPath("city").description("The location city of the asset").optional(),
             fieldWithPath("building").description("The location building of the asset").optional(),
             fieldWithPath("floor").description("The location floor of the asset").optional(),
-            fieldWithPath("room").description(""), fieldWithPath("row").description("").optional(),
-            fieldWithPath("col").description("").optional(),
+            fieldWithPath("room").description("The location floor of the asset"),
+            fieldWithPath("row").description("The location row of the asset").optional(),
+            fieldWithPath("col").description("The location col of the asset").optional(),
             fieldWithPath("extraLocation")
                   .description("Extra location information. Only valid for some system.")
                   .optional(),
@@ -1214,7 +1223,7 @@ public class AssetControllerTest {
                   .content(objectMapper.writeValueAsString(assetipmapping)))
             .andExpect(status().isCreated())
             .andDo(document("assets-createHostNameIPMapping-example", requestFields(
-                  fieldWithPath("id").description("ID of the asset, created by wormhole"),
+                  fieldWithPath("id").description("ID of the asset, created by flowgate"),
                   fieldWithPath("ip").description("ip of hostname"),
                   fieldWithPath("assetname").description(
                         "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"))))
@@ -1234,7 +1243,7 @@ public class AssetControllerTest {
             .andExpect(jsonPath("model", is(asset.getModel())))
             .andExpect(jsonPath("manufacturer", is(asset.getManufacturer())))
             .andDo(document("assets-get-example", responseFields(
-                  fieldWithPath("id").description("ID of the asset, created by wormhole"),
+                  fieldWithPath("id").description("ID of the asset, created by flowgate"),
                   fieldWithPath("assetNumber").description(
                         "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                         .type(long.class),
@@ -1266,9 +1275,9 @@ public class AssetControllerTest {
                   fieldWithPath("building").description("The location building of the asset")
                         .optional(),
                   fieldWithPath("floor").description("The location floor of the asset").optional(),
-                  fieldWithPath("room").description(""),
-                  fieldWithPath("row").description("").optional(),
-                  fieldWithPath("col").description("").optional(),
+                  fieldWithPath("room").description("The location room of the asset"),
+                  fieldWithPath("row").description("The location row of the asset").optional(),
+                  fieldWithPath("col").description("The location col of the asset").optional(),
                   fieldWithPath("extraLocation")
                         .description("Extra location information. Only valid for some system.")
                         .optional(),
@@ -1316,7 +1325,7 @@ public class AssetControllerTest {
             .andExpect(jsonPath("model", is(asset.getModel())))
             .andExpect(jsonPath("manufacturer", is(asset.getManufacturer())))
             .andDo(document("assets-getAssetByName-example", responseFields(
-                  fieldWithPath("id").description("ID of the asset, created by wormhole"),
+                  fieldWithPath("id").description("ID of the asset, created by flowgate"),
                   fieldWithPath("assetNumber").description(
                         "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                         .type(long.class),
@@ -1348,9 +1357,9 @@ public class AssetControllerTest {
                   fieldWithPath("building").description("The location building of the asset")
                         .optional(),
                   fieldWithPath("floor").description("The location floor of the asset").optional(),
-                  fieldWithPath("room").description(""),
-                  fieldWithPath("row").description("").optional(),
-                  fieldWithPath("col").description("").optional(),
+                  fieldWithPath("room").description("The location room of the asset"),
+                  fieldWithPath("row").description("The location row of the asset").optional(),
+                  fieldWithPath("col").description("The location col of the asset").optional(),
                   fieldWithPath("extraLocation")
                         .description("Extra location information. Only valid for some system.")
                         .optional(),
@@ -1399,7 +1408,7 @@ public class AssetControllerTest {
                   .content(objectMapper.writeValueAsString(asset)))
             .andExpect(status().isOk())
             .andDo(document("assets-update-example", requestFields(
-                  fieldWithPath("id").description("ID of the asset, created by wormhole"),
+                  fieldWithPath("id").description("ID of the asset, created by flowgate"),
                   fieldWithPath("assetNumber").description(
                         "A unique number that can identify an asset from third part DCIM/CMDB systems.")
                         .type(long.class),
@@ -1431,9 +1440,9 @@ public class AssetControllerTest {
                   fieldWithPath("building").description("The location building of the asset")
                         .optional(),
                   fieldWithPath("floor").description("The location floor of the asset").optional(),
-                  fieldWithPath("room").description(""),
-                  fieldWithPath("row").description("").optional(),
-                  fieldWithPath("col").description("").optional(),
+                  fieldWithPath("room").description("The location room of the asset"),
+                  fieldWithPath("row").description("The location row of the asset").optional(),
+                  fieldWithPath("col").description("The location col of the asset").optional(),
                   fieldWithPath("extraLocation")
                         .description("Extra location information. Only valid for some system.")
                         .optional(),
@@ -1482,7 +1491,7 @@ public class AssetControllerTest {
             .andExpect(status().isOk())
             .andDo(document("assets-updateServerMapping-example",
                   requestFields(
-                        fieldWithPath("id").description("ID of the mapping, created by wormhole"),
+                        fieldWithPath("id").description("ID of the mapping, created by flowgate"),
                         fieldWithPath("asset").description("An asset for serverMapping."),
                         fieldWithPath("vcID").description("ID of Vcenter."),
                         fieldWithPath("vcHostName")
@@ -1530,9 +1539,9 @@ public class AssetControllerTest {
             .andDo(document("assets-mergeServerMapping-example",
                   requestFields(
                         fieldWithPath("FirstId")
-                              .description("ID of the mapping's firstid created by wormhole."),
+                              .description("ID of the mapping's firstid created by flowgate."),
                         fieldWithPath("SecondId")
-                              .description("ID of the mapping's secondid created by wormhole."))));
+                              .description("ID of the mapping's secondid created by flowgate."))));
 
       serverMappingRepository.delete(mapping1.getId());
    }
@@ -1635,6 +1644,23 @@ public class AssetControllerTest {
       asset.setCategory(AssetCategory.Server);
       asset.setModel("Dell 750");
       asset.setManufacturer("Dell");
+      asset.setSerialnumber("Serialnumber");
+      asset.setRegion("Region");
+      asset.setCountry("china");
+      asset.setCity("beijing");
+      asset.setBuilding("Raycom");
+      asset.setFloor("9F");
+      asset.setRoom("901");
+      asset.setRow("9");
+      asset.setCol("9");
+      asset.setExtraLocation("");
+      asset.setCabinetName("");
+      List <String> pdus = new ArrayList<>();
+      asset.setPdus(pdus);
+      List <String> switches = new ArrayList<>();
+      asset.setSwitches(switches);
+      AssetStatus status = new AssetStatus();
+      asset.setStatus(status);
       Map<ServerSensorType, String> sensorsformulars =
             new HashMap<ServerSensorType, String>();
       sensorsformulars.put(ServerSensorType.PDU_RealtimeLoad, "5x4ff46982db22e1b040e0f2");
