@@ -103,7 +103,7 @@ export class UserAddComponent implements AfterViewChecked,OnInit {
           "privilegeNames":"",
           "enable":""
          })
-        data.json().forEach(element => {
+        data.json().content.forEach(element => {
          var role={
          "id":"",
          "roleName":"",
