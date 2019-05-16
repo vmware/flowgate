@@ -8,4 +8,23 @@ services:
     volumes:
       - $PWD/../../:/flowgate-build
       - $PWD/build-log:/log
+    networks:
+      - build-network
     container_name: maven-build-container
+    depends_on:
+      - database-build
+    links:
+      - database-build:database-build
+
+  database-build:
+    build:
+      context: $PWD/maven-docker-build/database-build
+      dockerfile: $PWD/maven-docker-build/database-build/Dockerfile
+    image: database-build:FLOWGATE_VERSION
+    networks:
+      - build-network
+    ports:
+      - 8091:8091
+    container_name: database-build-container
+networks:
+  build-network:
