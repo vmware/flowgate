@@ -61,7 +61,9 @@ buildAllJars(){
 	fi
 
 	cd $CURRENTPATH
-
+	chmod a+x $DOCKERMAVENBUILD/database-build/entrypoint.sh
+	chmod a+x $DOCKERMAVENBUILD/database-build/init.sh
+	sed -i -e "s/localhost/database-build/g" $SOURCECODEDIR/flowgate-api/src/test/resources/application.properties
 	docker-compose -f $DOCKERCOMPOSEBUILDJARFILE build --force-rm --no-cache
     docker-compose -f $DOCKERCOMPOSEBUILDJARFILE up -d
 
@@ -87,11 +89,11 @@ buildDockerImages(){
 
 	echo "build docker images..."
 
-	docker rm maven-build-container -f
+	docker rm maven-build-container database-build-container -f
 	docker rmi flowgate/vro-worker:$FLOWGATE_VERSION flowgate/vc-worker:$FLOWGATE_VERSION flowgate/nlyte-worker:$FLOWGATE_VERSION \
     flowgate/management:$FLOWGATE_VERSION flowgate/infoblox-worker:$FLOWGATE_VERSION flowgate/labsdb-worker:$FLOWGATE_VERSION \
     flowgate/poweriq-worker:$FLOWGATE_VERSION flowgate/aggregator:$FLOWGATE_VERSION flowgate/api:$FLOWGATE_VERSION \
-    flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION maven-build:$FLOWGATE_VERSION
+    flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION maven-build:$FLOWGATE_VERSION database-build:$FLOWGATE_VERSION
 
 	if [ ! -d "$OUTPUTIMAGEPATH" ];then
 		mkdir $OUTPUTIMAGEPATH
