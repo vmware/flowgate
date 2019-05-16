@@ -18,7 +18,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -169,10 +171,12 @@ public class AssetController {
          pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageable = new PageRequest(pageNumber - 1, pageSize);
-      Page<Asset> assets = assetRepository.findByAssetNameLikeAndCategoryOrTagLikeAndCategory(
-            keyWords, AssetCategory.Server.name(), pageable);
+      List<Asset> assets = assetRepository.findByAssetNameLikeAndCategoryOrTagLikeAndCategory(
+            keyWords+"%", AssetCategory.Server.name(), pageSize, pageSize*(pageNumber - 1));
+      long total = assetRepository.getNumber(keyWords+"%", AssetCategory.Server.name());
+      PageImpl<Asset> assetPage = new PageImpl<Asset>(assets,pageable,total);
       HashMap<String, String> assetSourceIDAndAssetSourceNameMap = new HashMap<String, String>();
-      for (Asset asset : assets.getContent()) {
+      for (Asset asset : assetPage.getContent()) {
          String assetSourceID = asset.getAssetSource();
          if (assetSourceID != null) {
             String assetSourceName = assetSourceIDAndAssetSourceNameMap.get(assetSourceID);
@@ -183,7 +187,7 @@ public class AssetController {
             asset.setAssetSource(assetSourceName);
          }
       }
-      return assets;
+      return assetPage;
    }
 
    /**
