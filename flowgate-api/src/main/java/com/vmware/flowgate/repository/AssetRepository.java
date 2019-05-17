@@ -23,10 +23,10 @@ public interface AssetRepository
    @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND `category` = $1")
    public List<Asset> findAssetsByCategory(String category);
 
-   @Query("SELECT META(#{#n1ql.bucket}).id AS _ID, META(#{#n1ql.bucket}).cas AS _CAS, #{#n1ql.bucket}.* FROM #{#n1ql.bucket} where _class = 'com.vmware.flowgate.common.model.Asset' and (`assetName` LIKE $1 OR `tag` LIKE $1 ) AND `category` = $2 Limit $3 offset $4")
+   @Query("SELECT META(#{#n1ql.bucket}).id AS _ID, META(#{#n1ql.bucket}).cas AS _CAS, #{#n1ql.bucket}.* FROM #{#n1ql.bucket} where _class = 'com.vmware.flowgate.common.model.Asset' and `assetName` LIKE $1 AND `category` = $2 Limit $3 offset $4")
    public List<Asset> findByAssetNameLikeAndCategoryOrTagLikeAndCategory(String keywords, String category, int pageSize, int offset);
 
-   @Query("SELECT COUNT(_class) AS count FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.Asset' And (`assetName` LIKE $1 OR `tag` LIKE $1) AND `category` = $2 ")
+   @Query("SELECT COUNT(_class) AS count FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.Asset' And `assetName` LIKE $1 AND `category` = $2 ")
    public long getNumber(String keywords, String category);
 
    public Asset findOneByAssetName(String name);

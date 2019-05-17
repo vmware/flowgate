@@ -61,7 +61,7 @@ export class ServermappingService {
     this.options = new RequestOptions({ headers: header });
     let body = JSON.stringify({
       id:id,
-      assetID:assetID
+      asset:assetID
     });
     
     return this.http.put(""+this.API_URL+"/v1/assets/mapping", body,this.options).map((res)=>res)
