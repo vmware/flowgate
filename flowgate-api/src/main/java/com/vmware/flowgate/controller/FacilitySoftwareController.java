@@ -14,8 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -40,6 +38,7 @@ import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
+import com.vmware.flowgate.util.BaseDocumentUtil;
 import com.vmware.flowgate.util.EncryptionGuard;
 import com.vmware.flowgate.util.HandleURL;
 import com.vmware.flowgate.util.WormholeUserDetails;
@@ -71,11 +70,7 @@ public class FacilitySoftwareController {
          HttpServletRequest request) {
       HandleURL handleURL = new HandleURL();
       config.setServerURL(handleURL.formatURL(config.getServerURL()));
-      FacilitySoftwareConfig facility = new FacilitySoftwareConfig();
-      facility.setServerURL(config.getServerURL());
-      ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("verifyCert");
-      Example<FacilitySoftwareConfig> example = Example.of(facility, matcher);
-      if (repository.findOne(example) != null) {
+      if (repository.findOneByServerURL(config.getServerURL()) != null) {
          String message = String.format("The server %s is already exsit.", config.getServerURL());
          throw new WormholeRequestException(message);
       }
@@ -87,6 +82,7 @@ public class FacilitySoftwareController {
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       config.setUserId(user.getUserId());
       encryptServerPassword(config);
+      BaseDocumentUtil.generateID(config);
       repository.save(config);
       decryptServerPassword(config);
       notifyFacilityWorker(config);
@@ -102,11 +98,7 @@ public class FacilitySoftwareController {
    @RequestMapping(value = "/type/{type}", method = RequestMethod.GET)
    public List<FacilitySoftwareConfig> getFacilitySoftwareConfigByType(
          @PathVariable SoftwareType type) {
-      FacilitySoftwareConfig facility = new FacilitySoftwareConfig();
-      facility.setType(type);
-      ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("verifyCert");
-      Example<FacilitySoftwareConfig> example = Example.of(facility, matcher);
-      List<FacilitySoftwareConfig> result = repository.findAll(example);
+      List<FacilitySoftwareConfig> result = repository.findAllByType(type.name());
       if (result != null) {
          decryptServerListPassword(result);
       }
@@ -118,9 +110,9 @@ public class FacilitySoftwareController {
          @PathVariable("pageNumber") int currentPage, @PathVariable("pageSize") int pageSize,
          HttpServletRequest request) {
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
-      if (currentPage < 1) {
-         currentPage = 1;
-      } else if (pageSize == 0) {
+      if (currentPage < FlowgateConstant.defaultPageNumber) {
+         currentPage = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
@@ -128,11 +120,8 @@ public class FacilitySoftwareController {
       try {
 
          PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
-         FacilitySoftwareConfig facility = new FacilitySoftwareConfig();
-         facility.setUserId(user.getUserId());
-         ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("verifyCert");
-         Example<FacilitySoftwareConfig> example = Example.of(facility, matcher);
-         Page<FacilitySoftwareConfig> result = repository.findAll(example, pageRequest);
+         Page<FacilitySoftwareConfig> result =
+               repository.findALlByUserId(user.getUserId(), pageRequest);
          decryptServerListPassword(result.getContent());
          return result;
       } catch (Exception e) {
@@ -147,7 +136,7 @@ public class FacilitySoftwareController {
       repository.delete(id);
    }
 
-   //only modify the status of integration,and not verify information of server. 
+   //only modify the status of integration,and not verify information of server.
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/status", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateStatus(@RequestBody FacilitySoftwareConfig server) {
@@ -184,9 +173,7 @@ public class FacilitySoftwareController {
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/syncdatabyserverid/{id}", method = RequestMethod.POST)
    public void syncFacilityServerData(@PathVariable("id") String id, HttpServletRequest request) {
-      FacilitySoftwareConfig example = new FacilitySoftwareConfig();
-      example.setId(id);
-      FacilitySoftwareConfig server = repository.findOne(Example.of(example));
+      FacilitySoftwareConfig server = repository.findOne(id);
       if (server == null) {
          throw new WormholeRequestException("Invalid ID");
       }

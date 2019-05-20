@@ -1,5 +1,5 @@
-= Wormhole API Guide
-Wormhoel;
+= Flowgate API Guide
+Flowgate;
 :doctype: book
 :icons: font
 :source-highlighter: highlightjs
@@ -10,9 +10,9 @@ Wormhoel;
 = Overview
 
 [[overview-http-verbs]]
-== HTTP verbs
+== HTTP Verbs
 
-Wormhole API tries to adhere as closely as possible to standard HTTP and REST conventions in its
+Flowgate API tries to adhere as closely as possible to standard HTTP and REST conventions in its
 use of HTTP verbs.
 
 |===
@@ -31,7 +31,7 @@ use of HTTP verbs.
 | Used to delete an existing resource
 |===
 
-Wormhole API tries to adhere as closely as possible to standard HTTP and REST conventions in its
+Flowgate API tries to adhere as closely as possible to standard HTTP and REST conventions in its
 use of HTTP status codes.
 
 |===
@@ -65,7 +65,7 @@ The Asset provides the entry point into the service.
 [[resources-assets-get]]
 === getAssetByID
 
-A `GET` request is used to access the Asset read.
+A `GET` request is used to access the Asset read by ID.
 
 ==== Request structure
 
@@ -713,10 +713,6 @@ include::{snippets}/facilitySoftware-syncFacilityServerData-example/http-respons
 
 include::{snippets}/facilitySoftware-syncFacilityServerData-example/curl-request.adoc[]
 
-==== Request Fields
-
-include::{snippets}/facilitySoftware-syncFacilityServerData-example/request-fields.adoc[]
-
 [[resources-facilitySoftware-put]]
 === updateFacilitySoftware
 
@@ -978,7 +974,7 @@ include::{snippets}/sensorSetting-queryByPage-example/request-fields.adoc[]
 [[resources-sensorSetting-querySetting]]
 === getSensorSettings
 
-A `GET` request is used to access the sensorSetting read Setting.
+A `GET` request is used to access the sensorSetting read Setting by ID.
 
 ==== Request structure
 
@@ -1249,27 +1245,6 @@ include::{snippets}/AuthController-deleteRole-example/curl-request.adoc[]
 
 include::{snippets}/AuthController-deleteRole-example/request-fields.adoc[]
 
-[[resources-AuthController-readRoleNames]]
-=== getAllRoleNames
-
-A `GET` request is used to access the AuthController GET All RoleNames.
-
-==== Request structure
-
-include::{snippets}/AuthController-readRoleNames-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/AuthController-readRoleNames-example/http-response.adoc[]
-
-==== CURL request
-
-include::{snippets}/AuthController-readRoleNames-example/curl-request.adoc[]
-
-==== Response Fields
-
-include::{snippets}/AuthController-readRoleNames-example/response-fields.adoc[]
-
 [[resources-AuthController-readRoleByPage]]
 === getRolesWithPagenation
 
@@ -1439,26 +1414,6 @@ include::{snippets}/AuthController-readUsersByPage-example/curl-request.adoc[]
 
 include::{snippets}/AuthController-readUsersByPage-example/request-fields.adoc[]
 
-[[resources-AuthController-readAllUsers]]
-=== getAllUsers
-
-A `GET` request is used to access the AuthController GET All Users.
-
-==== Request structure
-
-include::{snippets}/AuthController-readAllUsers-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/AuthController-readAllUsers-example/http-response.adoc[]
-
-==== CURL request
-
-include::{snippets}/AuthController-readAllUsers-example/curl-request.adoc[]
-
-==== Response Fields
-
-include::{snippets}/AuthController-readAllUsers-example/response-fields.adoc[]
 
 [[resources-AuthController-CreateAccessToken]]
 === createAccessToken
@@ -1498,26 +1453,6 @@ include::{snippets}/AuthController-RefreshAccessToken-example/http-response.adoc
 
 include::{snippets}/AuthController-RefreshAccessToken-example/curl-request.adoc[]
 
-
-[[resources-AuthController-UserLogin]]
-=== login
-
-A `POST` request is used to access the AuthController for create User.
-
-==== Request structure
-
-include::{snippets}/AuthController-UserLogin-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/AuthController-UserLogin-example/http-response.adoc[]
-
-==== CURL request
-
-include::{snippets}/AuthController-UserLogin-example/curl-request.adoc[]
-
-==== Request Fields
-include::{snippets}/AuthController-UserLogin-example/request-fields.adoc[]
 
 [[resources-AuthController-UserLogout]]
 === logout

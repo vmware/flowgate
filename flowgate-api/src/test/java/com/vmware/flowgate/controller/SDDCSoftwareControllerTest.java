@@ -4,7 +4,6 @@
 */
 package com.vmware.flowgate.controller;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.mockito.Matchers.any;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -15,12 +14,10 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import java.util.UUID;
 import javax.net.ssl.SSLException;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,10 +40,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.auth.AuthVcUser;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
@@ -103,7 +100,6 @@ public class SDDCSoftwareControllerTest {
    public void createVCenterSDDCSoftwareConfig() throws JsonProcessingException, Exception {
       SDDCSoftwareConfig sddc = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
-      sddc.setId("temporary_id");
       AuthVcUser vcAuth = Mockito.mock(AuthVcUser.class);
       ListOperations<String, String> listOperations = Mockito.mock(ListOperations.class);
       Mockito.doReturn(0L).when(listOperations).leftPush(Mockito.anyString(), Mockito.anyString());
@@ -118,9 +114,9 @@ public class SDDCSoftwareControllerTest {
                      .content(objectMapper.writeValueAsString(sddc)))
                .andDo(document("SDDCSoftware-create-example", requestFields(
                      fieldWithPath("id")
-                           .description("ID of the SDDCSoftwareConfig, created by wormhole"),
+                           .description("ID of the SDDCSoftwareConfig, created by flowgate"),
                      fieldWithPath("name").description("The SDDCSoftwareConfig name."),
-                     fieldWithPath("description").description(""),
+                     fieldWithPath("description").description("The SDDCSoftwareConfig description."),
                      fieldWithPath("serverURL")
                            .description("An ip address for a SDDCSoftwareConfig"),
                      fieldWithPath("userName")
@@ -131,7 +127,7 @@ public class SDDCSoftwareControllerTest {
                            .description(
                                  "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS")
                            .type(SoftwareType.class).optional(),
-                     fieldWithPath("userId").description(""),
+                     fieldWithPath("userId").description("userId"),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
                      fieldWithPath("integrationStatus").description("The status of integration."))))
@@ -144,7 +140,7 @@ public class SDDCSoftwareControllerTest {
    }
    @Test
    public void syncSDDCServerDataExample() throws JsonProcessingException, Exception {
-      
+
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       SDDCSoftwareConfig sddcCreate = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       sddcCreate.setPassword(EncryptionGuard.encode(sddcCreate.getPassword()));
@@ -168,7 +164,7 @@ public class SDDCSoftwareControllerTest {
       }
       sddcRepository.delete(sddc.getId());
    }
-   
+
    /**
     * Update SDDCSoftwareConfig Test case one:To update the IsVerifyCert.Whether can be saved
     * successfully,when the VerifyCert is true. The message 'Certificate verification error' will be
@@ -192,9 +188,9 @@ public class SDDCSoftwareControllerTest {
                      .content(objectMapper.writeValueAsString(sddc)))
                .andDo(document("SDDCSoftware-update-example", requestFields(
                      fieldWithPath("id")
-                           .description("ID of the SDDCSoftwareConfig, created by wormhole"),
+                           .description("ID of the SDDCSoftwareConfig, created by flowgate"),
                      fieldWithPath("name").description("The SDDCSoftwareConfig name."),
-                     fieldWithPath("description").description(""),
+                     fieldWithPath("description").description("The SDDCSoftwareConfig description."),
                      fieldWithPath("serverURL")
                            .description("An ip address for a SDDCSoftwareConfig"),
                      fieldWithPath("userName")
@@ -205,7 +201,7 @@ public class SDDCSoftwareControllerTest {
                            .description(
                                  "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS")
                            .type(SoftwareType.class).optional(),
-                     fieldWithPath("userId").description(""),
+                     fieldWithPath("userId").description("userId"),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
                      fieldWithPath("integrationStatus").description("The status of integration."))))
@@ -267,12 +263,11 @@ public class SDDCSoftwareControllerTest {
       SDDCSoftwareConfig sddcCreate = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       SDDCSoftwareConfig sddc = sddcRepository.save(sddcCreate);
       sddc.setName("test update name");
-      MvcResult result = this.mockMvc
+      this.mockMvc
             .perform(put("/v1/sddc/").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(sddc)))
             .andExpect(status().isOk())
             .andReturn();
-      TestCase.assertEquals(200, result.getResponse().getStatus());
       sddcRepository.delete(sddc.getId());
    }
 
@@ -307,15 +302,15 @@ public class SDDCSoftwareControllerTest {
    public void SDDCSoftwareQueryByTypeAndUserId() throws Exception {
       SDDCSoftwareConfig sddcCreate = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       sddcCreate.setType(SoftwareType.VCENTER);
+      sddcCreate.setName("flowgate");
+      sddcCreate.setDescription("flowgate cluster");
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
-      sddcCreate.setId("1");
       sddcCreate.setPassword(EncryptionGuard.encode(sddcCreate.getPassword()));
-      SDDCSoftwareConfig sddc = sddcRepository.save(sddcCreate);
-      String type = "VCENTER";
+      sddcRepository.save(sddcCreate);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
               fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description(""),
+              fieldWithPath("description").description("The facilitySoftware description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -325,44 +320,44 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("type").description(
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
-                      ""),
+                      "userId"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
-      this.mockMvc.perform(get("/v1/sddc/type/" + type + ""))
+      MvcResult result = this.mockMvc.perform(get("/v1/sddc/type/" + SoftwareType.VCENTER + ""))
             .andExpect(status().isOk())
-            .andExpect(content()
-                  .string(equalTo("[{\"id\":\"1\",\"name\":\"test server\",\"description\":null,"
-                        + "\"userName\":\"administrator@vsphere.local\","
-                        + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VCENTER\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null}]")))
-            .andDo(document("SDDCSoftware-queryByType-example", 
+            .andDo(document("SDDCSoftware-queryByType-example",
                     responseFields(
                     fieldWithPath("[]").description("An array of SDDCSoftwareConfig.")
-                    ).andWithPrefix("[].", fieldpath)
-                    ));
-
-      sddcRepository.delete(sddc.getId());
+                    ).andWithPrefix("[].", fieldpath)))
+            .andReturn();
+      ObjectMapper mapper = new ObjectMapper();
+      String res = result.getResponse().getContentAsString();
+      SDDCSoftwareConfig [] sddcs = mapper.readValue(res, SDDCSoftwareConfig[].class);
+      for(SDDCSoftwareConfig sddc:sddcs) {
+         if(sddc.getName().equals("flowgate")) {
+            TestCase.assertEquals("flowgate cluster", sddc.getDescription());
+         }
+      }
+      sddcRepository.delete(sddcCreate.getId());
    }
-   
+
    @Test
    public void getVROServerConfigsExample() throws Exception {
       SDDCSoftwareConfig sddc1Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
-      sddc1Create.setId("1");
       sddc1Create.setType(SoftwareType.VRO);
+      sddc1Create.setName("flowgate");
+      sddc1Create.setDescription("flowgate cluster");
       SDDCSoftwareConfig sddc2Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       sddc2Create.setType(SoftwareType.VRO);
-      sddc2Create.setId("2");
-      Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
       sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
-      SDDCSoftwareConfig sddc1 = sddcRepository.save(sddc1Create);
-      SDDCSoftwareConfig sddc2 = sddcRepository.save(sddc2Create);
-      
+      sddcRepository.save(sddc1Create);
+      sddcRepository.save(sddc2Create);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
               fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description(""),
+              fieldWithPath("description").description("The facilitySoftware description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -372,46 +367,45 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("type").description(
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
-                      ""),
+                      "userId"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
-      
-      this.mockMvc.perform(get("/v1/sddc/vrops"))
+      MvcResult result = this.mockMvc.perform(get("/v1/sddc/vrops"))
             .andExpect(status().isOk())
-            .andExpect(content().string(equalTo("[{\"id\":\"1\",\"name\":\"test server\",\"description\":null,"
-                        + "\"userName\":\"administrator@vsphere.local\","
-                        + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VRO\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null},{\"id\":\"2\",\"name\":\"test server\",\"description\":null,"
-                        + "\"userName\":\"administrator@vsphere.local\","
-                        + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VRO\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null}]")))
             .andDo(document("SDDCSoftware-getVROServerConfigs-example", responseFields(
                     fieldWithPath("[]").description("An array of asserts"))
-                    .andWithPrefix("[].", fieldpath)));
-
-      sddcRepository.delete(sddc1.getId());
-      sddcRepository.delete(sddc2.getId());
+                    .andWithPrefix("[].", fieldpath)))
+            .andReturn();
+      ObjectMapper mapper = new ObjectMapper();
+      String res = result.getResponse().getContentAsString();
+      SDDCSoftwareConfig [] sddcs = mapper.readValue(res, SDDCSoftwareConfig[].class);
+      for(SDDCSoftwareConfig sddc:sddcs) {
+         if(sddc.getName().equals("flowgate")) {
+            TestCase.assertEquals("flowgate cluster", sddc.getDescription());
+         }
+      }
+      sddcRepository.delete(sddc1Create.getId());
+      sddcRepository.delete(sddc2Create.getId());
    }
-   
+
    @Test
    public void getVROServerConfigsByUserExample() throws Exception {
+      Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
        SDDCSoftwareConfig sddc1Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
-       sddc1Create.setId("1");
        sddc1Create.setType(SoftwareType.VRO);
+       sddc1Create.setName("flowgate");
+       sddc1Create.setDescription("flowgate cluster");
        SDDCSoftwareConfig sddc2Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
        sddc2Create.setType(SoftwareType.VRO);
-       sddc2Create.setId("2");
-      Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
-      sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
-      sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
-      SDDCSoftwareConfig sddc1 = sddcRepository.save(sddc1Create);
-      SDDCSoftwareConfig sddc2 = sddcRepository.save(sddc2Create);
-      
+       sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
+       sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
+       sddcRepository.save(sddc1Create);
+       sddcRepository.save(sddc2Create);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
               fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description(""),
+              fieldWithPath("description").description("The facilitySoftware description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -421,45 +415,43 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("type").description(
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
-                      ""),
+                      "userId"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
-      
-      this.mockMvc.perform(get("/v1/sddc/user/vrops"))
+      MvcResult result = this.mockMvc.perform(get("/v1/sddc/user/vrops"))
             .andExpect(status().isOk())
-            .andExpect(content().string(equalTo("[{\"id\":\"1\",\"name\":\"test server\",\"description\":null,"
-                        + "\"userName\":\"administrator@vsphere.local\","
-                        + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VRO\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null},{\"id\":\"2\",\"name\":\"test server\",\"description\":null,"
-                        + "\"userName\":\"administrator@vsphere.local\","
-                        + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VRO\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null}]")))
             .andDo(document("SDDCSoftware-getVROServerConfigsByUser-example", responseFields(
                     fieldWithPath("[]").description("An array of asserts"))
-                    .andWithPrefix("[].", fieldpath)));
-
-      sddcRepository.delete(sddc1.getId());
-      sddcRepository.delete(sddc2.getId());
+                    .andWithPrefix("[].", fieldpath)))
+            .andReturn();
+      String res = result.getResponse().getContentAsString();
+      ObjectMapper mapper = new ObjectMapper();
+      SDDCSoftwareConfig [] sddcs = mapper.readValue(res, SDDCSoftwareConfig[].class);
+      for(SDDCSoftwareConfig sddc:sddcs) {
+         if(sddc.getName().equals("flowgate")) {
+            TestCase.assertEquals("flowgate cluster", sddc.getDescription());
+         }
+      }
+      sddcRepository.delete(sddc1Create.getId());
+      sddcRepository.delete(sddc2Create.getId());
    }
    @Test
    public void getVCServerConfigsExample() throws Exception {
       SDDCSoftwareConfig sddc1Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
-      sddc1Create.setId("1");
       sddc1Create.setType(SoftwareType.VCENTER);
+      sddc1Create.setName("flowgate");
+      sddc1Create.setDescription("flowgate cluster");
       SDDCSoftwareConfig sddc2Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       sddc2Create.setType(SoftwareType.VCENTER);
-      sddc2Create.setId("2");
-      Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
       sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
-      SDDCSoftwareConfig sddc1 = sddcRepository.save(sddc1Create);
-      SDDCSoftwareConfig sddc2 = sddcRepository.save(sddc2Create);
-      
+      sddcRepository.save(sddc1Create);
+      sddcRepository.save(sddc2Create);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by wormhole"),
+              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
               fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description(""),
+              fieldWithPath("description").description("The facilitySoftware description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -469,26 +461,27 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("type").description(
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
-                      ""),
+                      "userId"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
-      
-      this.mockMvc.perform(get("/v1/sddc/vc"))
+
+      MvcResult result = this.mockMvc.perform(get("/v1/sddc/vc"))
             .andExpect(status().isOk())
-            .andExpect(content().string(equalTo("[{\"id\":\"1\",\"name\":\"test server\",\"description\":null,"
-                        + "\"userName\":\"administrator@vsphere.local\","
-                        + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VCENTER\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null},{\"id\":\"2\",\"name\":\"test server\",\"description\":null,"
-                        + "\"userName\":\"administrator@vsphere.local\","
-                        + "\"password\":\"Admin!23\",\"serverURL\":\"10.160.30.134\",\"type\":\"VCENTER\","
-                        + "\"userId\":\"1001\",\"verifyCert\":false,\"integrationStatus\":null}]")))
             .andDo(document("SDDCSoftware-getVCServerConfigs-example", responseFields(
                     fieldWithPath("[]").description("An array of asserts"))
-                    .andWithPrefix("[].", fieldpath)));
+                    .andWithPrefix("[].", fieldpath))).andReturn();
+      String res = result.getResponse().getContentAsString();
 
-      sddcRepository.delete(sddc1.getId());
-      sddcRepository.delete(sddc2.getId());
+      ObjectMapper mapper = new ObjectMapper();
+      SDDCSoftwareConfig [] sddcs = mapper.readValue(res, SDDCSoftwareConfig[].class);
+      for(SDDCSoftwareConfig sddc:sddcs) {
+         if(sddc.getName().equals("flowgate")) {
+            TestCase.assertEquals("flowgate cluster", sddc.getDescription());
+         }
+      }
+      sddcRepository.delete(sddc1Create.getId());
+      sddcRepository.delete(sddc2Create.getId());
    }
 
    @Test
@@ -499,12 +492,11 @@ public class SDDCSoftwareControllerTest {
             .perform(
                   delete("/v1/sddc/" + sddc.getId()))
             .andExpect(status().isOk()).andDo(document("SDDCSoftware-delete-example"));
-
-      sddcRepository.delete(sddc.getId());
    }
 
    SDDCSoftwareConfig createSDDCSoftwareConfig(SoftwareType type) {
       SDDCSoftwareConfig example = new SDDCSoftwareConfig();
+      example.setId(UUID.randomUUID().toString());
       example.setName("test server");
       example.setServerURL("10.160.30.134");
       example.setType(type);
@@ -512,6 +504,9 @@ public class SDDCSoftwareControllerTest {
       example.setPassword("Admin!23");
       example.setUserId("1001");
       example.setVerifyCert(false);
+      example.setDescription("description");
+      IntegrationStatus integrationStatus = new IntegrationStatus();
+      example.setIntegrationStatus(integrationStatus);
       return example;
    }
 

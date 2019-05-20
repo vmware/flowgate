@@ -425,7 +425,7 @@ public class NlyteDataService implements AsyncService {
    public Set<String> getAssetIdfromformular(List<Asset> nlyteMappedAssets) {
       Set<String> assetIds = new HashSet<String>();
       for (Asset asset : nlyteMappedAssets) {
-         EnumMap<ServerSensorType, String> sensorsformularsmap = asset.getSensorsformulars();
+         Map<ServerSensorType, String> sensorsformularsmap = asset.getSensorsformulars();
          for (Map.Entry<ServerSensorType, String> map : sensorsformularsmap.entrySet()) {
             if(sensorType.contains(map.getKey())) {
                String[] assetIDs = map.getValue().split("\\+|-|\\*|/|\\(|\\)");

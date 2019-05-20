@@ -11,7 +11,7 @@ OUTPUTJARNAME=-0.0.1-SNAPSHOT.jar
 commonproject=("flowgate-common" "common-restclient" "worker-jobs")
 serviceproject=("nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "labsdb-worker")
 specialproject=("vc-worker" "flowgate-api" "vro-worker")
-mongodbangredis=("mongodb" "redis")
+databaseangredis=("database" "redis")
 
 alldir=(${serviceproject[*]} ${specialproject[*]})
 
@@ -30,7 +30,7 @@ do
 	cp $SOURCEDIR/$n/src/main/resources/application.properties $MAKEDIR/conf/$n/
 done
 
-for m in "${mongodbangredis[@]}"
+for m in "${databaseangredis[@]}"
 do
 	mkdir -p $MAKEDIR/conf/$m/
 	cp $MAKEDIR/$m/*.conf $MAKEDIR/conf/$m/
@@ -38,8 +38,8 @@ done
 
 mkdir $MAKEDIR/conf/cert
 cp $MAKEDIR/management/Flowgate.cnf $MAKEDIR/conf/cert/
-cp $MAKEDIR/mongodb/*.env $MAKEDIR/conf/mongodb/
-cp $SOURCEDIR/flowgate-api/src/main/resources/*.js $MAKEDIR/conf/mongodb/
+cp $MAKEDIR/database/init.sh $MAKEDIR/conf/database/
+cp $MAKEDIR/database/initData.sh $MAKEDIR/conf/database/
 cd $MAKEDIR
 tar cvf conf.tar.gz conf
 

@@ -6,7 +6,6 @@ package com.vmware.flowgate.controller;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,10 +17,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -36,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
@@ -44,8 +43,8 @@ import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.ServerSensorData;
-import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
+import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ValueUnit.ValueType;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
@@ -53,6 +52,7 @@ import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
+import com.vmware.flowgate.util.BaseDocumentUtil;
 
 @RestController
 @RequestMapping("/v1/assets")
@@ -84,6 +84,7 @@ public class AssetController {
    public HttpHeaders create(@RequestBody Asset asset) {
       HttpHeaders httpHeaders = new HttpHeaders();
       asset.setCreated(System.currentTimeMillis());
+      BaseDocumentUtil.generateID(asset);
       assetRepository.save(asset);
       httpHeaders.setLocation(linkTo(AssetController.class).slash(asset.getId()).toUri());
       return httpHeaders;
@@ -92,6 +93,7 @@ public class AssetController {
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/batchoperation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void batchCreation(@RequestBody List<Asset> assets) {
+      BaseDocumentUtil.generateID(assets);
       assetRepository.save(assets);
    }
 
@@ -108,21 +110,15 @@ public class AssetController {
 
    // Read Asset by source and type
    @RequestMapping(value = "/source/{assetsource}/type/{type}", method = RequestMethod.GET)
-   public List<Asset> getAssetBySourceAndType(@PathVariable String assetsource,
-         @PathVariable AssetCategory type) {
-      Asset assetExample = new Asset();
-      assetExample.setAssetSource(assetsource);
-      assetExample.setCategory(type);
-      ExampleMatcher matcher = ExampleMatcher.matching().withIgnorePaths("cabinetsize",
-            "cabinetUnitPosition", "lastupdate", "created", "assetNumber");
-      Example<Asset> example = Example.of(assetExample, matcher);
-      return assetRepository.findAll(example);
+   public List<Asset> getAssetBySourceAndType(@PathVariable("assetsource") String assetSource,
+         @PathVariable("type") AssetCategory type) {
+      return assetRepository.findAllByAssetSourceAndCategory(assetSource, type.name());
    }
 
    // Read Asset by type
    @RequestMapping(value = "/type/{type}", method = RequestMethod.GET)
    public List<Asset> getAssetByType(@PathVariable AssetCategory type) {
-      return assetRepository.findByCategory(type);
+      return assetRepository.findAssetsByCategory(type.name());
    }
 
    // Read mapped Asset
@@ -131,10 +127,10 @@ public class AssetController {
       List<ServerMapping> serverMappings = serverMappingRepository.findByAssetNotNull();
       List<String> assetIDs =
             serverMappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
-      List<Asset> assets = assetRepository.findByIDs(assetIDs);
+      Iterable<Asset> assets = assetRepository.findAll(assetIDs);
       Set<String> assetids = new HashSet<String>();
       if (category.equals(AssetCategory.Server)) {
-         return assets;
+         return Lists.newArrayList(assets);
       } else {
          if (category.equals(AssetCategory.PDU)) {
             for (Asset asset : assets) {
@@ -150,12 +146,12 @@ public class AssetController {
             }
          }
          if (!assetids.isEmpty()) {
-            assets = assetRepository.findByIDs(new ArrayList<String>(assetids));
+            assets = assetRepository.findAll(assetids);
          } else {
             assets = new ArrayList<Asset>();
          }
       }
-      return assets;
+      return Lists.newArrayList(assets);
    }
 
 
@@ -167,18 +163,20 @@ public class AssetController {
       if (keyWords == null) {
          keyWords = "";
       }
-      if (pageNumber < 1) {
-         pageNumber = 1;
-      } else if (pageSize == 0) {
+      if (pageNumber < FlowgateConstant.defaultPageNumber) {
+         pageNumber = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageable = new PageRequest(pageNumber - 1, pageSize);
-      Page<Asset> assets = assetRepository.findByAssetNameLikeAndCategoryOrTagLikeAndCategory(
-            keyWords, AssetCategory.Server, keyWords, AssetCategory.Server, pageable);
+      List<Asset> assets = assetRepository.findByAssetNameLikeAndCategoryOrTagLikeAndCategory(
+            keyWords+"%", AssetCategory.Server.name(), pageSize, pageSize*(pageNumber - 1));
+      long total = assetRepository.getNumber(keyWords+"%", AssetCategory.Server.name());
+      PageImpl<Asset> assetPage = new PageImpl<Asset>(assets,pageable,total);
       HashMap<String, String> assetSourceIDAndAssetSourceNameMap = new HashMap<String, String>();
-      for (Asset asset : assets.getContent()) {
+      for (Asset asset : assetPage.getContent()) {
          String assetSourceID = asset.getAssetSource();
          if (assetSourceID != null) {
             String assetSourceName = assetSourceIDAndAssetSourceNameMap.get(assetSourceID);
@@ -189,7 +187,7 @@ public class AssetController {
             asset.setAssetSource(assetSourceName);
          }
       }
-      return assets;
+      return assetPage;
    }
 
    /**
@@ -202,7 +200,7 @@ public class AssetController {
       List<ServerMapping> serverMappings = serverMappingRepository.findByAssetNotNull();
       List<String> assetIDs =
             serverMappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
-      List<Asset> assets = assetRepository.findByIDs(assetIDs);
+      Iterable<Asset> assets = assetRepository.findAll(assetIDs);
       List<Asset> result = new ArrayList<Asset>();
       for (Asset asset : assets) {
          if (asset.getPdus() == null || asset.getPdus().isEmpty()) {
@@ -223,7 +221,7 @@ public class AssetController {
       List<ServerMapping> serverMappings = serverMappingRepository.findByAssetNotNull();
       List<String> assetIDs =
             serverMappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
-      List<Asset> assets = assetRepository.findByIDs(assetIDs);
+      Iterable<Asset> assets = assetRepository.findAll(assetIDs);
       List<Asset> result = new ArrayList<Asset>();
       for (Asset asset : assets) {
          if (asset.getPdus() != null && !asset.getPdus().isEmpty()) {
@@ -242,17 +240,13 @@ public class AssetController {
       if (old == null) {
          throw new WormholeRequestException(HttpStatus.NOT_FOUND, "Asset not found", null);
       }
-      HashMap<String, Object> changedFileds = null;
       try {
-         changedFileds = queryChangedAssetFileds(old, asset);
+         BaseDocumentUtil.applyChanges(old, asset);
       } catch (Exception e) {
          throw new WormholeRequestException("Failed to update the Asset", e);
       }
-      if (changedFileds.isEmpty()) {
-         throw new WormholeRequestException("Nothing to update");
-      }
-      changedFileds.put("lastupdate", System.currentTimeMillis());
-      assetRepository.updateAssetByFileds(asset.getId(), changedFileds);
+      old.setLastupdate(System.currentTimeMillis());
+      assetRepository.save(old);
    }
 
    // Delete a asset
@@ -262,34 +256,10 @@ public class AssetController {
       assetRepository.delete(id);
    }
 
-   private HashMap<String, Object> queryChangedAssetFileds(Asset oldAsset, Asset newAsset)
-         throws NoSuchFieldException, IllegalAccessException, SecurityException,
-         JsonProcessingException {
-      HashMap<String, Object> changes = new HashMap<String, Object>();
-      Class<?> oldC = oldAsset.getClass();
-      for (Field fieldNew : newAsset.getClass().getDeclaredFields()) {
-         fieldNew.setAccessible(true);
-         Field fieldOld = oldC.getDeclaredField(fieldNew.getName());
-         fieldOld.setAccessible(true);
-         Object newValue = fieldNew.get(newAsset);
-         Object oldValue = fieldOld.get(oldAsset);
-         if (null != newValue) {
-            if (fieldNew.get(newAsset).equals(fieldOld.get(oldAsset))) {
-               continue;
-            }
-         } else {
-            if (null == oldValue) {
-               continue;
-            }
-         }
-         changes.put(fieldOld.getName(), newValue);
-      }
-      return changes;
-   }
-
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/sensordata/batchoperation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void realTimeDatabatchCreation(@RequestBody List<RealTimeData> realtimedatas) {
+      BaseDocumentUtil.generateID(realtimedatas);
       realtimeDataRepository.save(realtimedatas);
    }
 
@@ -300,6 +270,7 @@ public class AssetController {
       if (!data.getAssetID().equals(assetID)) {
          throw new WormholeRequestException("Invalid AssetID.");
       }
+      BaseDocumentUtil.generateID(data);
       realtimeDataRepository.save(data);
    }
 
@@ -458,25 +429,22 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/vrops/{id}", method = RequestMethod.GET)
    public List<ServerMapping> getMappingsByVROPSId(@PathVariable("id") String vropsID) {
-      ServerMapping example = new ServerMapping();
-      example.setVroID(vropsID);
-      return serverMappingRepository.findAll(Example.of(example));
+      return serverMappingRepository.findAllByVroID(vropsID);
    }
 
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/mapping", method = RequestMethod.POST)
    public void saveServerMapping(@RequestBody ServerMapping serverMapping) {
+      BaseDocumentUtil.generateID(serverMapping);
       serverMappingRepository.save(serverMapping);
    }
 
    @RequestMapping(value = "/vrops/{id}")
    public List<Asset> getAssetsByVROPSId(@PathVariable("id") String vropsID) {
-      ServerMapping example = new ServerMapping();
-      example.setVroID(vropsID);
-      List<ServerMapping> mappings = serverMappingRepository.findAll(Example.of(example));
+      List<ServerMapping> mappings = serverMappingRepository.findAllByVroID(vropsID);
       List<String> assetIDs =
             mappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
-      return assetRepository.findByIDs(assetIDs);
+      return Lists.newArrayList(assetRepository.findAll(assetIDs));
    }
 
    // Update serverMapping
@@ -528,18 +496,17 @@ public class AssetController {
    @RequestMapping(value = "/mapping/vrops/{vropsID}/page/{pageNumber}/pagesize/{pageSize}", method = RequestMethod.GET)
    public Page<ServerMapping> getPageMappingsByVROPSId(@PathVariable("vropsID") String vropsID,
          @PathVariable("pageNumber") int pageNumber, @PathVariable("pageSize") int pageSize) {
-      if (pageNumber < 1) {
-         pageNumber = 1;
-      } else if (pageSize == 0) {
+      if (pageNumber < FlowgateConstant.defaultPageNumber) {
+         pageNumber = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      ServerMapping example = new ServerMapping();
-      example.setVroID(vropsID);
+
       PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
       Page<ServerMapping> mappings =
-            serverMappingRepository.findAll(Example.of(example), pageRequest);
+            serverMappingRepository.findAllByVroID(vropsID, pageRequest);
       return replaceAssetIDwithAssetName(mappings);
    }
 
@@ -547,18 +514,16 @@ public class AssetController {
    @RequestMapping(value = "/mapping/vc/{vcID}/page/{pageNumber}/pagesize/{pageSize}", method = RequestMethod.GET)
    public Page<ServerMapping> getPageMappingsByVCId(@PathVariable("vcID") String vcID,
          @PathVariable("pageNumber") int pageNumber, @PathVariable("pageSize") int pageSize) {
-      if (pageNumber < 1) {
-         pageNumber = 1;
-      } else if (pageSize == 0) {
+      if (pageNumber < FlowgateConstant.defaultPageNumber) {
+         pageNumber = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
          pageSize = FlowgateConstant.defaultPageSize;
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      ServerMapping example = new ServerMapping();
-      example.setVcID(vcID);
       PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
       Page<ServerMapping> mappings =
-            serverMappingRepository.findAll(Example.of(example), pageRequest);
+            serverMappingRepository.findAllByVcID(vcID, pageRequest);
       return replaceAssetIDwithAssetName(mappings);
    }
 
@@ -571,7 +536,7 @@ public class AssetController {
          }
       }
       List<String> assetIds = new ArrayList<String>(serverMappings.keySet());
-      List<Asset> assets = assetRepository.findByIDs(assetIds);
+      Iterable<Asset> assets = assetRepository.findAll(assetIds);
       for (Asset asset : assets) {
          serverMappings.get(asset.getId()).setAsset(asset.getAssetName());
       }
@@ -581,23 +546,19 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/vc/{id}", method = RequestMethod.GET)
    public List<ServerMapping> getMappingsByVCId(@PathVariable("id") String vcID) {
-      ServerMapping example = new ServerMapping();
-      example.setVcID(vcID);
-      return serverMappingRepository.findAll(Example.of(example));
+      return serverMappingRepository.findAllByVcID(vcID);
    }
 
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/hostnameip/ip/{ip:.+}", method = RequestMethod.GET)
    public List<AssetIPMapping> getHostNameByIP(@PathVariable("ip") String ip) {
-      AssetIPMapping example = new AssetIPMapping();
-      example.setIp(ip);
-      List<AssetIPMapping> mappings = assetIPMappingRepository.findAll(Example.of(example));
-      return mappings;
+      return assetIPMappingRepository.findAllByIp(ip);
    }
 
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.POST)
    public void createHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
+      BaseDocumentUtil.generateID(mapping);
       assetIPMappingRepository.save(mapping);
    }
 
@@ -622,12 +583,10 @@ public class AssetController {
 
    @RequestMapping(value = "/vc/{id}", method = RequestMethod.GET)
    public List<Asset> getAssetsByVCId(@PathVariable("id") String vcID) {
-      ServerMapping example = new ServerMapping();
-      example.setVcID(vcID);
-      List<ServerMapping> mappings = serverMappingRepository.findAll(Example.of(example));
+      List<ServerMapping> mappings = serverMappingRepository.findAllByVcID(vcID);
       List<String> assetIDs =
             mappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
-      return assetRepository.findByIDs(assetIDs);
+      return Lists.newArrayList(assetRepository.findAll(assetIDs));
    }
 
 

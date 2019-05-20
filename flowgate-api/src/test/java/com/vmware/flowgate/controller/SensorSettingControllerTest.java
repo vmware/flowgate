@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,7 +26,6 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
-import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -65,13 +65,12 @@ public class SensorSettingControllerTest {
    @Test
    public void createAnSensorSetting() throws JsonProcessingException, Exception {
       SensorSetting  sensorsetting = createSensorSetting();
-      sensorsetting.setId("temporary_id");
       this.mockMvc
             .perform(post("/v1/sensors/setting").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(sensorsetting)))
             .andExpect(status().isCreated())
             .andDo(document("sensorSetting-create-example", requestFields(
-                  fieldWithPath("id").description("ID of the sensorSetting, created by wormhole"),
+                  fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
                   fieldWithPath("type").description(
                         "The sensor type."),
                   fieldWithPath("minNum").description("Value type is double"),
@@ -92,7 +91,7 @@ public class SensorSettingControllerTest {
                   .content(objectMapper.writeValueAsString(sensorsetting)))
             .andExpect(status().isOk())
             .andDo(document("sensorSetting-update-example", requestFields(
-                  fieldWithPath("id").description("ID of the sensorSetting, created by wormhole"),
+                  fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
                   fieldWithPath("type").description(
                         "The sensor type."),
                   fieldWithPath("minNum").description("Value type is double"),
@@ -113,7 +112,8 @@ public class SensorSettingControllerTest {
             .perform(get("/v1/sensors/setting/page/" + pageNumber
                   + "/pagesize/" + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$..content[0].maxNum").value(sensorsetting.getMaxNum()))
+            .andExpect(jsonPath("$.content[0].maxNum").value(sensorsetting.getMaxNum()))
+            .andExpect(jsonPath("$..content.length()").value(1))
             .andExpect(jsonPath("last", is(true)))
             .andExpect(jsonPath("number", is(0)))
             .andExpect(jsonPath("size", is(5)))
@@ -126,35 +126,26 @@ public class SensorSettingControllerTest {
 
       sensorSettingRepository.delete(sensorsetting.getId());
    }
-   
+
    @Test
-   public void sensorQuerySettingExample() throws Exception {
-      SensorSetting  sensorsetting1 = createSensorSetting();
-      sensorsetting1.setId("1");
-      sensorSettingRepository.save(sensorsetting1);
-      SensorSetting  sensorsetting2 = createSensorSetting();
-      sensorsetting2.setId("2");
-      sensorSettingRepository.save(sensorsetting2);
-      
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of the sensorSetting, created by wormhole"),
-              fieldWithPath("type").description(
-                    "The sensor type."),
-              fieldWithPath("minNum").description("Value type is double"),
-              fieldWithPath("maxNum").description("Value type is double"),
-              fieldWithPath("minValue").description("Value type is string"),
-              fieldWithPath("maxValue").description("Value type is string")
-               };
+   public void sensorQuerySettingByIDExample() throws Exception {
+      SensorSetting  sensorsetting = createSensorSetting();
+      sensorSettingRepository.save(sensorsetting);
       this.mockMvc
-            .perform(get("/v1/sensors/setting"))
+            .perform(get("/v1/sensors/setting/"+sensorsetting.getId())
+                  .content("{\"id\":\""+sensorsetting.getId()+"\"}"))
             .andExpect(status().isOk())
             .andDo(document("sensorSetting-querySetting-example", responseFields(
-                    fieldWithPath("[]").description("An array of RealTimeData"))
-                    .andWithPrefix("[].", fieldpath)))
-                    .andReturn().getResponse().getHeader("Location");
+                  fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
+                  fieldWithPath("type").description(
+                        "The sensor type."),
+                  fieldWithPath("minNum").description("Value type is double"),
+                  fieldWithPath("maxNum").description("Value type is double"),
+                  fieldWithPath("minValue").description("Value type is string"),
+                  fieldWithPath("maxValue").description("Value type is string")
+                 )));
 
-      sensorSettingRepository.delete(sensorsetting1.getId());
-      sensorSettingRepository.delete(sensorsetting2.getId());
+      sensorSettingRepository.delete(sensorsetting.getId());
    }
 
    @Test
@@ -167,14 +158,17 @@ public class SensorSettingControllerTest {
             .andDo(document("sensorSetting-delete-example", requestFields(
             fieldWithPath("id").description("The primary key for sensorsetting."))));
 
-      sensorSettingRepository.delete(sensorsetting.getId());
    }
 
    SensorSetting createSensorSetting() {
       SensorSetting example = new SensorSetting();
+      example.setId(UUID.randomUUID().toString());
       example.setType(ServerSensorType.BACKPANELTEMP);
       example.setMaxNum(35);
       example.setMinNum(5);
+      example.setMaxValue("maxValue");
+      example.setMinValue("minValue");
       return example;
    }
+
 }

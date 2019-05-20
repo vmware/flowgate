@@ -4,9 +4,14 @@
 */
 package com.vmware.flowgate.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
+import org.springframework.data.couchbase.core.query.ViewIndexed;
+import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 
 import com.vmware.flowgate.common.model.PrivilegeResourceMapping;
 
-public interface PrivilegeResourcesMappingReposity extends MongoRepository<PrivilegeResourceMapping,String> {
+@N1qlPrimaryIndexed
+@ViewIndexed(designDoc = "privilegeResourcesMapping")
+public interface PrivilegeResourcesMappingReposity
+      extends CouchbasePagingAndSortingRepository<PrivilegeResourceMapping, String> {
 }

@@ -10,7 +10,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.collect.Lists;
 import com.vmware.flowgate.common.model.JobConfig;
 import com.vmware.flowgate.common.model.JobConfig.JobType;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
@@ -105,23 +105,17 @@ public class JobsController {
 
    @RequestMapping(value = "/vrojobs", method = RequestMethod.GET)
    public List<JobConfig> getVROJobs() {
-      JobConfig example = new JobConfig();
-      example.setJobType(JobType.VRO);
-      return jobsRepository.findAll(Example.of(example));
+      return Lists.newArrayList(jobsRepository.findAllByJobType(JobType.VRO.name()));
    }
 
    @RequestMapping(value = "/vcjobs", method = RequestMethod.GET)
    public List<JobConfig> getVCJobs() {
-      JobConfig example = new JobConfig();
-      example.setJobType(JobType.VCENTER);
-      return jobsRepository.findAll(Example.of(example));
+      return Lists.newArrayList(jobsRepository.findAllByJobType(JobType.VCENTER.name()));
    }
 
    @RequestMapping(value = "/type/{jobtype}", method = RequestMethod.GET)
    public List<JobConfig> getJobsByType(@PathVariable("jobtype") JobType type) {
-      JobConfig example = new JobConfig();
-      example.setJobType(type);
-      return jobsRepository.findAll(Example.of(example));
+      return Lists.newArrayList(jobsRepository.findAllByJobType(type.name()));
    }
 
 }

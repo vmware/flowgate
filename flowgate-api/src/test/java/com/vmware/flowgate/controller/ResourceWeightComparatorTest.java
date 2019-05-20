@@ -5,17 +5,10 @@
 package com.vmware.flowgate.controller;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.junit.Test;
-import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.access.SecurityConfig;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
 import com.vmware.flowgate.common.model.WormholeResources;
 import com.vmware.flowgate.util.WormholeResourceWeightComparator;
 

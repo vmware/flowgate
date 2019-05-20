@@ -4,9 +4,11 @@
 */
 package com.vmware.flowgate.common.model;
 
+import com.couchbase.client.java.repository.annotation.Id;
 
-public class AssetIPMapping {
+public class AssetIPMapping implements BaseDocument {
 
+   @Id
    private String id;
    private String ip;
    private String assetname;

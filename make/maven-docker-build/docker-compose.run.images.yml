@@ -1,22 +1,17 @@
 version: '2'
 services:
 
-  mongodb:
-    image: flowgate/mongodb:FLOWGATE_VERSION
-    container_name: flowgate-mongo-container
-    expose:
-      - 27017
+  database:
+    image: flowgate/database:FLOWGATE_VERSION
+    container_name: flowgate-database-container
     networks:
       - db-network
     volumes:
-      - /opt/vmware/flowgate/data/mongodb/data/db:/data/db
-      - /opt/vmware/flowgate/data/mongodb/data/configdb:/data/configdb
-      - /opt/vmware/flowgate/log/mongodb:/var/log/mongodb
-      - /opt/vmware/flowgate/conf/mongodb/mongod.conf:/etc/mongod.conf
-      - /opt/vmware/flowgate/conf/mongodb/initdb.js:/docker-entrypoint-initdb.d/initdb.js
-    env_file: /opt/vmware/flowgate/conf/mongodb/mongod.env
-    environment:
-      - MONGO_INITDB_DATABASE=flowgate
+      - /opt/vmware/flowgate/data/database/data:/opt/couchbase/var/lib/couchbase/data
+      - /opt/vmware/flowgate/log/database:/opt/couchbase/var/lib/couchbase/logs
+      - /opt/vmware/flowgate/conf/database/config:/opt/couchbase/var/lib/couchbase/config
+      - /opt/vmware/flowgate/conf/database/init.sh:/init.sh
+      - /opt/vmware/flowgate/conf/database/initData.sh:/home/couchbase/initData.sh
 
   redis:
     image: flowgate/redis:FLOWGATE_VERSION
@@ -40,10 +35,10 @@ services:
       - db-network
       - services-network
     depends_on:
-      - mongodb
+      - database
       - redis
     links:
-      - mongodb:mongodb
+      - database:database
       - redis:redis
     expose:
       - 49610
@@ -66,7 +61,7 @@ services:
       - services-network
       - db-network
     links:
-      - mongodb:mongodb
+      - database:database
       - redis:redis
       - flowgate-api:flowgate-api
     environment:

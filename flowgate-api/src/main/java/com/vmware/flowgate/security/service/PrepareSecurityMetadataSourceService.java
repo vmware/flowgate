@@ -20,20 +20,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Service;
-
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.PrivilegeResourceMapping;
 import com.vmware.flowgate.common.model.WormholeResources;
 import com.vmware.flowgate.common.model.WormholeRole;
 import com.vmware.flowgate.config.InitializeConfigureData;
 import com.vmware.flowgate.repository.PrivilegeResourcesMappingReposity;
 import com.vmware.flowgate.repository.RoleRepository;
-import com.vmware.flowgate.repository.UserRepository;
 import com.vmware.flowgate.util.FlowgateKeystore;
 import com.vmware.flowgate.util.WormholeResourceWeightComparator;
 
@@ -42,16 +43,14 @@ public class PrepareSecurityMetadataSourceService
       implements FilterInvocationSecurityMetadataSource {
    private static final Logger logger =
          LoggerFactory.getLogger(PrepareSecurityMetadataSourceService.class);
-   private HashMap<String, TreeMap<WormholeResources, String>> resourcesMap = 
-         new  HashMap<String, TreeMap<WormholeResources, String>>();  
+   private HashMap<String, TreeMap<WormholeResources, String>> resourcesMap =
+         new  HashMap<String, TreeMap<WormholeResources, String>>();
    private List<String> privilegeNames = new ArrayList<String>();
    @Autowired
    private PrivilegeResourcesMappingReposity mappingReposity;
    @Autowired
-   private UserRepository userRepository;
-   @Autowired
    private RoleRepository roleRepository;
-   
+
    @Value("${api.guardstore.alias:flowgateEncrypt}")
    private String guardStoreAlias;
 
@@ -62,13 +61,16 @@ public class PrepareSecurityMetadataSourceService
    @PostConstruct
    public void loadResourceDefine(){
       logger.info("Initialization security resource.");
-      List<PrivilegeResourceMapping> privilegeResourceMappings = mappingReposity.findAll();
+      PageRequest pageRequest = new PageRequest(FlowgateConstant.defaultPageNumber-1, FlowgateConstant.maxPageSize);
+      Page<PrivilegeResourceMapping> mappings = mappingReposity.findAll(pageRequest);
+      List<PrivilegeResourceMapping> privilegeResourceMappings = mappings.getContent();
       HashMap<String,List<Map<AntPathRequestMatcher,Collection<ConfigAttribute>>>> resourceMappings = initResourceMap(privilegeResourceMappings);
       InitializeConfigureData.init(prepareRolePrivilegeMap(),resourceMappings,privilegeNames);
       FlowgateKeystore.init(guardStoreFilePath, guardStoreAlias, guardStorePass);
   }
-   
-   public HashMap<String,List<Map<AntPathRequestMatcher,Collection<ConfigAttribute>>>> initResourceMap(List<PrivilegeResourceMapping> privilegeResourceMappings) {
+
+   public HashMap<String, List<Map<AntPathRequestMatcher, Collection<ConfigAttribute>>>> initResourceMap(
+         Iterable<PrivilegeResourceMapping> privilegeResourceMappings) {
       HashMap<String,List<Map<AntPathRequestMatcher,Collection<ConfigAttribute>>>> resourcesPrivilegeMap = new HashMap<>();
       WormholeResourceWeightComparator comparator = new WormholeResourceWeightComparator();
       TreeMap<WormholeResources, String> sortMap =
@@ -94,7 +96,7 @@ public class PrepareSecurityMetadataSourceService
       }
       return resourcesPrivilegeMap;
    }
-   
+
    public static List<Map<AntPathRequestMatcher, Collection<ConfigAttribute>>> getMappingList(
          TreeMap<WormholeResources, String> resourcemap) {
       List<Map<AntPathRequestMatcher, Collection<ConfigAttribute>>> mappingList =
@@ -114,7 +116,7 @@ public class PrepareSecurityMetadataSourceService
       }
       return mappingList;
    }
-   
+
    @Override
    public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
       if(InitializeConfigureData.privilegeResourceMap == null) loadResourceDefine();
@@ -152,7 +154,17 @@ public class PrepareSecurityMetadataSourceService
    }
 
    public HashMap<String, List<String>> prepareRolePrivilegeMap() {
-      List<WormholeRole> roles = roleRepository.findAll();
+      List<WormholeRole> roles = new ArrayList<WormholeRole>();
+      PageRequest pageRequest = new PageRequest(FlowgateConstant.defaultPageNumber-1, FlowgateConstant.maxPageSize);
+      Page<WormholeRole> flwogateRoles = roleRepository.findAll(pageRequest);
+      roles.addAll(flwogateRoles.getContent());
+      if(flwogateRoles.getTotalPages()>1) {
+         for(int i = 1; i<flwogateRoles.getTotalPages(); i++) {
+            PageRequest page = new PageRequest(i, FlowgateConstant.maxPageSize);
+            Page<WormholeRole> rolePage = roleRepository.findAll(page);
+            roles.addAll(rolePage.getContent());
+         }
+      }
       HashMap<String, List<String>> rolePrivilegeMap = new HashMap<String, List<String>>();
       for (WormholeRole role : roles) {
          rolePrivilegeMap.put(role.getRoleName(), role.getPrivilegeNames());

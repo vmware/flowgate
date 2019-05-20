@@ -23,8 +23,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,8 +55,6 @@ import junit.framework.TestCase;
 @SpringBootTest
 @ActiveProfiles("test")
 public class SycnRealTimeDataJobTest {
-
-   private static final Logger logger = LoggerFactory.getLogger(SycnRealTimeDataJobTest.class);
 
    @Mock
    private WormholeAPIClient wormholeAPIClient;

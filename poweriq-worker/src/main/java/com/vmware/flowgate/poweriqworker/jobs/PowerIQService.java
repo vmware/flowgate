@@ -894,7 +894,7 @@ public class PowerIQService implements AsyncService {
    public Set<String> getAssetIdfromformular(List<Asset> powerIQMappedAssets) {
       Set<String> assetIds = new HashSet<String>();
       for (Asset asset : powerIQMappedAssets) {
-         EnumMap<ServerSensorType, String> sensorsformularsmap = asset.getSensorsformulars();
+         Map<ServerSensorType, String> sensorsformularsmap = asset.getSensorsformulars();
          for (Map.Entry<ServerSensorType, String> map : sensorsformularsmap.entrySet()) {
             if(sensorType.contains(map.getKey())) {
                String[] assetIDs = map.getValue().split("\\+|-|\\*|/|\\(|\\)");

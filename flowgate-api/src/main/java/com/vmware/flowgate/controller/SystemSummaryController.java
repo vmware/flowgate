@@ -10,17 +10,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vmware.flowgate.common.model.SystemSummary;
-import com.vmware.flowgate.repository.SystemSummaryRepository;
+import com.vmware.flowgate.service.SummaryService;
 
 @RestController
 @RequestMapping("/v1/summary")
 public class SystemSummaryController {
 
    @Autowired
-   SystemSummaryRepository systemSummaryRepository;
+   SummaryService summaryService;
 
    @RequestMapping(value = "/systemsummary", method = RequestMethod.GET)
    public SystemSummary getAllDashBoardData() {
-      return systemSummaryRepository.getSystemResult();
+      return summaryService.getSystemResult();
    }
 }

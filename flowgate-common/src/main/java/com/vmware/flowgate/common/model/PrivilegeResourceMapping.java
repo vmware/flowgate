@@ -6,8 +6,11 @@ package com.vmware.flowgate.common.model;
 
 import java.util.List;
 
+import com.couchbase.client.java.repository.annotation.Id;
+
 public class PrivilegeResourceMapping {
 
+   @Id
    private String id;
    private String privilegeName;
    private List<WormholeResources> resource;

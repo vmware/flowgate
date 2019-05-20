@@ -7,10 +7,13 @@ package com.vmware.flowgate.common.model;
 import java.util.Date;
 import java.util.List;
 
-public class WormholeUser {
+import com.couchbase.client.java.repository.annotation.Id;
+
+public class WormholeUser implements BaseDocument {
    /**
     * userId
     */
+   @Id
    private String id;
    /**
     * userName
@@ -40,13 +43,13 @@ public class WormholeUser {
     * email
     */
    private String emailAddress;
-   
+
    private List<String> roleNames;
-   
+
    private List<String> userGroupIDs;
-   
+
    private long lastPasswordResetDate;
-   
+
 
    public List<String> getRoleNames() {
       return roleNames;
@@ -70,7 +73,7 @@ public class WormholeUser {
    public void setUserName(String userName) {
       this.userName = userName;
    }
-   
+
    public Integer getGender() {
       return gender;
    }
@@ -94,7 +97,7 @@ public class WormholeUser {
    public void setMobile(String mobile) {
       this.mobile = mobile;
    }
-   
+
    public Integer getStatus() {
       return status;
    }
@@ -134,5 +137,5 @@ public class WormholeUser {
    public void setUserGroupIDs(List<String> userGroupIDs) {
       this.userGroupIDs = userGroupIDs;
    }
-   
+
 }

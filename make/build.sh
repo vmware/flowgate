@@ -33,7 +33,6 @@ else
 	exit 0
 fi
 RELEASES_VERSION=flowgate-$FLOWGATE_VERSION.tar.gz
-
 sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSEBUILDIMAGESFILE
 sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSERUNFILE
 sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSEBUILDJARFILE
@@ -48,7 +47,7 @@ buildUi(){
 	export PATH=$PATH:$PWD/node-v11.2.0-linux-x64/bin
 	npm install -g @angular/cli@latest
 	npm install --unsafe-perm
-	ng build -prod -aot=false
+	ng build --prod -e prod -aot=false
 }
 
 buildAllJars(){
@@ -62,7 +61,9 @@ buildAllJars(){
 	fi
 
 	cd $CURRENTPATH
-
+	chmod a+x $DOCKERMAVENBUILD/database-build/entrypoint.sh
+	chmod a+x $DOCKERMAVENBUILD/database-build/init.sh
+	sed -i -e "s/localhost/database-build/g" $SOURCECODEDIR/flowgate-api/src/test/resources/application.properties
 	docker-compose -f $DOCKERCOMPOSEBUILDJARFILE build --force-rm --no-cache
     docker-compose -f $DOCKERCOMPOSEBUILDJARFILE up -d
 
@@ -88,11 +89,11 @@ buildDockerImages(){
 
 	echo "build docker images..."
 
-	docker rm maven-build-container -f
+	docker rm maven-build-container database-build-container -f
 	docker rmi flowgate/vro-worker:$FLOWGATE_VERSION flowgate/vc-worker:$FLOWGATE_VERSION flowgate/nlyte-worker:$FLOWGATE_VERSION \
     flowgate/management:$FLOWGATE_VERSION flowgate/infoblox-worker:$FLOWGATE_VERSION flowgate/labsdb-worker:$FLOWGATE_VERSION \
     flowgate/poweriq-worker:$FLOWGATE_VERSION flowgate/aggregator:$FLOWGATE_VERSION flowgate/api:$FLOWGATE_VERSION \
-    flowgate/redis:$FLOWGATE_VERSION flowgate/mongodb:$FLOWGATE_VERSION maven-build:$FLOWGATE_VERSION
+    flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION maven-build:$FLOWGATE_VERSION database-build:$FLOWGATE_VERSION
 
 	if [ ! -d "$OUTPUTIMAGEPATH" ];then
 		mkdir $OUTPUTIMAGEPATH
@@ -107,6 +108,10 @@ buildDockerImages(){
 	done
 
 	cd $CURRENTPATH
+	chmod a+x $CURRENTPATH/database/entrypoint.sh
+	chmod a+x $CURRENTPATH/database/init.sh
+	chmod a+x $CURRENTPATH/database/initData.sh
+	
 	docker-compose -f $DOCKERCOMPOSEBUILDIMAGESFILE build --force-rm --no-cache
 }
 
@@ -121,9 +126,15 @@ saveDockerImages(){
 	docker save flowgate/vro-worker:$FLOWGATE_VERSION flowgate/vc-worker:$FLOWGATE_VERSION flowgate/nlyte-worker:$FLOWGATE_VERSION \
 	flowgate/management:$FLOWGATE_VERSION flowgate/infoblox-worker:$FLOWGATE_VERSION flowgate/labsdb-worker:$FLOWGATE_VERSION \
 	flowgate/poweriq-worker:$FLOWGATE_VERSION flowgate/aggregator:$FLOWGATE_VERSION flowgate/api:$FLOWGATE_VERSION \
-	flowgate/redis:$FLOWGATE_VERSION flowgate/mongodb:$FLOWGATE_VERSION >> $FLOWGATEIMAGESTAR
-
-	tar -cvzf $RELEASES_VERSION flowgate_run.sh conf.tar.gz maven-docker-build/docker-compose.run.images.yml docker-images-output/flowgate.tar
+	flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION >> $FLOWGATEIMAGESTAR
+	mkdir flowgate
+	mkdir -p flowgate/docker-images-output
+	mkdir -p flowgate/maven-docker-build
+	cp flowgate_run.sh conf.tar.gz flowgate
+	cp maven-docker-build/docker-compose.run.images.yml flowgate/maven-docker-build
+	cp docker-images-output/flowgate.tar flowgate/docker-images-output
+	tar -cvzf $RELEASES_VERSION flowgate
+	rm flowgate -rf
 }
 
 

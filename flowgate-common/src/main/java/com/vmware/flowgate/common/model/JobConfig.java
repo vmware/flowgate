@@ -4,7 +4,10 @@
 */
 package com.vmware.flowgate.common.model;
 
+import com.couchbase.client.java.repository.annotation.Id;
+
 public class JobConfig {
+   @Id
    private String id;
    private String jobName;
    private String jobGroup;

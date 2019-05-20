@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.model.AuthToken;
-import com.vmware.flowgate.security.service.UserDetailsServiceImpl;
 
 @Component
 public class JwtTokenUtil {
@@ -33,8 +32,6 @@ public class JwtTokenUtil {
    private int expiration;
    @Autowired
    private StringRedisTemplate redisTemplate;
-   @Autowired
-   private UserDetailsServiceImpl serviceImpl;
    public static final String Prefix_token = "token_";
    public static final String Token_Name = "token";
    public static final String Token_type = "Bearer";
