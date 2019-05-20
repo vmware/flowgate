@@ -4,16 +4,18 @@
 */
 package com.vmware.flowgate.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import com.vmware.flowgate.common.AssetCategory;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
@@ -22,6 +24,7 @@ import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.JobConfig;
 import com.vmware.flowgate.common.model.JobConfig.JobType;
+import com.vmware.flowgate.common.model.PageModelImp;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SensorSetting;
@@ -50,7 +53,7 @@ public class WormholeAPIClient extends RestClientBase {
    private static final String SaveAssetURL = "/v1/assets";
    private static final String ServerMappingMergURL = "/v1/assets/mapping/merge/%s/%s";
 
-   private static final String GetAssetBySourceAndTypeURL = "/v1/assets/source/%s/type/%s";
+   private static final String GetAssetBySourceAndTypeURL = "/v1/assets/source/%s/type/%s?currentPage=%s&pageSize=%s";
    private static final String GetFacilitySoftwareByTypeURL = "/v1/facilitysoftware/type/%s";
    private static final String GetMappedAssetURL = "/v1/assets/mappedasset/category/%s";
    private static final String GetAssetByIdURL = "/v1/assets/%s";
@@ -65,7 +68,7 @@ public class WormholeAPIClient extends RestClientBase {
 
    private static final String GetServersWithnoPDUInfo = "/v1/assets/pdusisnull";
    private static final String GetServersWithPDUInfo = "/v1/assets/pdusisnotnull";
-   private static final String GetAssetsByType = "/v1/assets/type/%s";
+   private static final String GetAssetsByType = "/v1/assets/type/%s?currentPage=%s&pageSize=%s";
    private static final String GetAssetByName = "/v1/assets/name/%s";
 
    private static final String GetToken = "/v1/auth/token";
@@ -184,16 +187,46 @@ public class WormholeAPIClient extends RestClientBase {
             getDefaultEntity(), Asset.class);
    }
 
-   public ResponseEntity<Asset[]> getAssetsBySourceAndType(String source, AssetCategory type) {
+   public ResponseEntity<PageModelImp<Asset>> getAssetsBySourceAndType(String source, AssetCategory type,int currentPage,int pageSize) {
       return this.restTemplate.exchange(
-            getAPIServiceEndpoint() + String.format(GetAssetBySourceAndTypeURL, source, type),
-            HttpMethod.GET, getDefaultEntity(), Asset[].class);
+            getAPIServiceEndpoint() + String.format(GetAssetBySourceAndTypeURL, source, type, currentPage, pageSize),
+            HttpMethod.GET, getDefaultEntity(), new ParameterizedTypeReference<PageModelImp<Asset>>() {});
    }
 
-   public ResponseEntity<Asset[]> getAssetsByType(AssetCategory type) {
+   public List<Asset> getAllAssetsBySourceAndType(String source, AssetCategory category){
+      List<Asset> assets = new ArrayList<Asset>();
+      int currentPage = FlowgateConstant.defaultPageNumber;
+      PageModelImp<Asset> assetsPage = getAssetsBySourceAndType(source,category,currentPage,FlowgateConstant.maxPageSize).getBody();
+      if(assetsPage != null) {
+         assets.addAll(assetsPage.getContent());
+         while(!assetsPage.isLast()) {
+            currentPage++;
+            assetsPage = getAssetsBySourceAndType(source,category,currentPage,FlowgateConstant.maxPageSize).getBody();
+            assets.addAll(assetsPage.getContent());
+         }
+      }
+      return assets;
+   }
+
+   public ResponseEntity<PageModelImp<Asset>> getAssetsByType(AssetCategory type,int currentPage,int pageSize) {
       return this.restTemplate.exchange(
-            getAPIServiceEndpoint() + String.format(GetAssetsByType, type), HttpMethod.GET,
-            getDefaultEntity(), Asset[].class);
+            getAPIServiceEndpoint() + String.format(GetAssetsByType, type,currentPage,pageSize), HttpMethod.GET,
+            getDefaultEntity(), new ParameterizedTypeReference<PageModelImp<Asset>>() {});
+   }
+
+   public List<Asset> getAllAssetsByType(AssetCategory category){
+      List<Asset> assets = new ArrayList<Asset>();
+      int currentPage = FlowgateConstant.defaultPageNumber;
+      PageModelImp<Asset> assetsPage = getAssetsByType(category,currentPage,FlowgateConstant.maxPageSize).getBody();
+      if(assetsPage != null) {
+         assets.addAll(assetsPage.getContent());
+         while(!assetsPage.isLast()) {
+            currentPage++;
+            assetsPage = getAssetsByType(category,currentPage,FlowgateConstant.maxPageSize).getBody();
+            assets.addAll(assetsPage.getContent());
+         }
+      }
+      return assets;
    }
 
    public ResponseEntity<Void> saveAssets(List<Asset> assets) {
@@ -202,7 +235,7 @@ public class WormholeAPIClient extends RestClientBase {
       return this.restTemplate.exchange(getAPIServiceEndpoint() + AssetURL, HttpMethod.POST,
             postEntity, Void.class);
    }
-   
+
    public ResponseEntity<Void> saveAssets(Asset asset) {
       HttpEntity<Object> postEntity =
             new HttpEntity<Object>(asset, buildHeaders());
@@ -277,14 +310,14 @@ public class WormholeAPIClient extends RestClientBase {
             getAPIServiceEndpoint() + String.format(GetFacilitySoftwareById, id), HttpMethod.GET,
             getDefaultEntity(), FacilitySoftwareConfig.class);
    }
-   
+
    public ResponseEntity<Void> updateFacility(FacilitySoftwareConfig config) {
       HttpEntity<Object> postEntity =
             new HttpEntity<Object>(config, buildHeaders());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + UpdateFacilitySoftwareStatus, HttpMethod.PUT,
             postEntity, Void.class);
    }
-   
+
    public ResponseEntity<Void> updateSDDC(SDDCSoftwareConfig config) {
       HttpEntity<Object> postEntity =
             new HttpEntity<Object>(config, buildHeaders());
