@@ -10,12 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.flowgate.nlyteworker.model.LocationGroup;
-import com.vmware.flowgate.nlyteworker.model.Manufacturer;
-import com.vmware.flowgate.nlyteworker.model.Material;
-import com.vmware.flowgate.nlyteworker.model.NlyteAsset;
-import com.vmware.flowgate.nlyteworker.model.UMounting;
-import com.vmware.flowgate.nlyteworker.restclient.NlyteAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
@@ -23,6 +17,12 @@ import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.NetworkMapping;
 import com.vmware.flowgate.common.PduMapping;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.nlyteworker.model.LocationGroup;
+import com.vmware.flowgate.nlyteworker.model.Manufacturer;
+import com.vmware.flowgate.nlyteworker.model.Material;
+import com.vmware.flowgate.nlyteworker.model.NlyteAsset;
+import com.vmware.flowgate.nlyteworker.model.UMounting;
+import com.vmware.flowgate.nlyteworker.restclient.NlyteAPIClient;
 
 public class HandleAssetUtil {
 
