@@ -43,15 +43,9 @@ public class SensorSettingController {
       repository.save(sensorSetting);
    }
 
-   @RequestMapping(value="/setting",method = RequestMethod.GET)
-   public List<SensorSetting> getSensorSettings() {
-      return Lists.newArrayList(repository.findAll());
-   }
-
    //get
    @RequestMapping(value="/setting/{id}",method = RequestMethod.GET)
    public SensorSetting getSensorSetting(@PathVariable("id") String id) {
-
       return repository.findOne(id);
    }
 
