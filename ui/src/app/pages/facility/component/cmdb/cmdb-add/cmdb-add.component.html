@@ -56,7 +56,6 @@ SPDX-License-Identifier: BSD-2-Clause -->
                           role="tooltip"
                           class="tooltip tooltip-validation tooltip-md"
                           [class.invalid]="cmdbForm.get('userName').invalid && (cmdbForm.get('userName').dirty || cmdbForm.get('userName').touched)">
-                          <input type="text" name="userName" tabindex="-1" style="width: 0px; height: 0px; position: absolute; border: 0px; padding: 0px;">
                           <input type="text" id="empuserName" placeholder="Enter UserName" autocomplete="off"                      
                               formControlName="userName"
                               [(ngModel)]="cmdbConfig.userName">
