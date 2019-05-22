@@ -38,7 +38,7 @@ public class HandleAssetUtil {
    public static final int cabinetMaterials = 4;
    public static final int networkMaterials = 5;
    /**
-    *   
+    *
     * @return
     */
    public Map<String,Asset> generateAssetsMap (List<Asset> assets) {
@@ -51,7 +51,7 @@ public class HandleAssetUtil {
          assetFromWormholeMap.put(asset.getAssetSource()+"_"+asset.getAssetNumber(), asset);
       }
       return assetFromWormholeMap;
-      
+
    }
    /**
     * get mapped asset
@@ -69,10 +69,10 @@ public class HandleAssetUtil {
          }
       }
    }
-   
+
    /**
     * init MaterialsMap information
-    * 
+    *
     */
    public HashMap<Integer,Material> initMaterialsMap(NlyteAPIClient nlyteAPIclient){
       List<Material> bladeServerMaterials = nlyteAPIclient.getMaterials(true,bladeServerMaterial);
@@ -80,7 +80,7 @@ public class HandleAssetUtil {
       for(Material material:bladeServerMaterials) {
          material.setMaterialType(AssetCategory.Server);
          material.setMaterialSubtype(AssetSubCategory.Blade);
-         materialMap.put(material.getMaterialID(), material);  
+         materialMap.put(material.getMaterialID(), material);
       }
       List<Material> standardServerMaterials = nlyteAPIclient.getMaterials(true,standardServerMaterial);
       for(Material material:standardServerMaterials) {
@@ -90,10 +90,10 @@ public class HandleAssetUtil {
       }
       return materialMap;
    }
-   
+
    /**
     * initLocationGroupMap information
-    * 
+    *
     */
    public HashMap<Integer,LocationGroup> initLocationGroupMap(NlyteAPIClient nlyteAPIclient){
       List<LocationGroup> locationGroups = nlyteAPIclient.getLocationGroups(true);
@@ -107,7 +107,7 @@ public class HandleAssetUtil {
       }
       return LocationMap;
    }
-  
+
    /**
     * init ManufacturersMap information
     */
@@ -124,7 +124,7 @@ public class HandleAssetUtil {
      return manufacturerMap;
    }
    /**
-    * 
+    *
     * @param nlyteAssets
     * @return
     */
@@ -167,14 +167,14 @@ public class HandleAssetUtil {
             default:
                break;
             }
-            
+
          }
          asset.setCreated(System.currentTimeMillis());
          assetsFromNlyte.add(asset);
       }
       return assetsFromNlyte;
    }
-   
+
    /**
     * Supplemental location information
     * @param asset
@@ -234,9 +234,9 @@ public class HandleAssetUtil {
       if(uHeight!=null) {
          asset.setCabinetsize(uHeight);
       }
-      return asset; 
+      return asset;
    }
-   
+
    public List<Asset> handleAssets(List<Asset> toUpdateAssets,Map<String,Asset> exsitingaAssetMap){
       List<Asset> resultAsset = new ArrayList<Asset>();
       List<Asset> updateAsset = new ArrayList<Asset>();
@@ -271,5 +271,5 @@ public class HandleAssetUtil {
       resultAsset.addAll(updateAsset);
       return resultAsset;
    }
- 
+
 }

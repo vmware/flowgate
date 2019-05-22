@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -264,12 +263,7 @@ public class NlyteDataService implements AsyncService {
          HashMap<Integer, Manufacturer> manufacturerMap, HashMap<Integer, Material> materialMap,
          AssetCategory category) {
       HandleAssetUtil assetUtil = new HandleAssetUtil();
-      ResponseEntity<Asset[]> result = restClient.getAssetsBySourceAndType(nlyteSource, category);
-      List<Asset> oldAssetsFromWormhole = null;
-      if (result != null) {
-         oldAssetsFromWormhole = Arrays.asList(result.getBody());
-      }
-
+      List<Asset> oldAssetsFromWormhole = restClient.getAllAssetsBySourceAndType(nlyteSource,category);
       Map<String, Asset> assetsFromWormholeMap = assetUtil.generateAssetsMap(oldAssetsFromWormhole);
       List<Asset> newAssetsFromNlyte = assetUtil.getAssetsFromNlyte(nlyteSource, nlyteAssets,
             locationMap, materialMap, manufacturerMap);

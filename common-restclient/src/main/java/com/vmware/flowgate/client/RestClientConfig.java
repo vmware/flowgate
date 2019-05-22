@@ -29,12 +29,12 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class RestClientConfig {
-   
-   @Value("${wormhole.apiclient.socket.timeout:8000}")
+
+   @Value("${wormhole.apiclient.socket.timeout:20000}")
    private int socketTimeout;
    @Value("${wormhole.apiclient.connectionrequest.timeout:30000}")
    private int connectionRequestTimeout;
-   
+
    @Bean(name = "httpRequestFactory")
    public ClientHttpRequestFactory httpRequestFactory() {
       return new HttpComponentsClientHttpRequestFactory(httpClient());

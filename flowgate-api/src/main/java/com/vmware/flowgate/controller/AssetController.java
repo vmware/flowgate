@@ -110,15 +110,38 @@ public class AssetController {
 
    // Read Asset by source and type
    @RequestMapping(value = "/source/{assetsource}/type/{type}", method = RequestMethod.GET)
-   public List<Asset> getAssetBySourceAndType(@PathVariable("assetsource") String assetSource,
-         @PathVariable("type") AssetCategory type) {
-      return assetRepository.findAllByAssetSourceAndCategory(assetSource, type.name());
+   public Page<Asset> getAssetBySourceAndType(@PathVariable("assetsource") String assetSource,
+         @PathVariable("type") AssetCategory type,@RequestParam("currentPage") int currentPage,
+         @RequestParam("pageSize") int pageSize) {
+      if (currentPage < FlowgateConstant.defaultPageNumber) {
+         currentPage = FlowgateConstant.defaultPageNumber;
+      }
+      if (pageSize <= 0) {
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
+      }
+      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+
+      return assetRepository.findByAssetSourceAndCategory(assetSource, type.name(),pageRequest);
    }
 
    // Read Asset by type
    @RequestMapping(value = "/type/{type}", method = RequestMethod.GET)
-   public List<Asset> getAssetByType(@PathVariable AssetCategory type) {
-      return assetRepository.findAssetsByCategory(type.name());
+   public Page<Asset> getAssetByType(@PathVariable AssetCategory type,
+         @RequestParam("currentPage") int currentPage,
+         @RequestParam("pageSize") int pageSize) {
+      if (currentPage < FlowgateConstant.defaultPageNumber) {
+         currentPage = FlowgateConstant.defaultPageNumber;
+      }
+      if (pageSize <= 0) {
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
+      }
+      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+
+      return assetRepository.findAssetByCategory(type.name(),pageRequest);
    }
 
    // Read mapped Asset
@@ -205,7 +228,6 @@ public class AssetController {
       for (Asset asset : assets) {
          if (asset.getPdus() == null || asset.getPdus().isEmpty()) {
             result.add(asset);
-            ;
          }
       }
       return result;

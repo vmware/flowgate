@@ -61,14 +61,14 @@ public class SycnRealTimeDataJobTest {
 
    @Mock
    private NlyteAPIClient nlyteAPIClient;
-   
+
    @Mock
    private ServiceKeyConfig config;
 
    @Spy
    @InjectMocks
    private NlyteDataService nlyteDataService = new NlyteDataService();
-   
+
    @Before
    public void before() {
       MockitoAnnotations.initMocks(this);
@@ -83,20 +83,19 @@ public class SycnRealTimeDataJobTest {
    public void testSycnRealTimeDataJob() {
       Mockito.doReturn(getServiceKey()).when(config).getServiceKey();
       Mockito.doReturn(nlyteAPIClient).when(nlyteDataService).createClient(any(FacilitySoftwareConfig.class));
-   
+
       nlyteDataService.syncRealtimeData(getFacilitySoftwareByType().getBody().clone()[0]);
    }
-   
+
    @Test
    public void testGenerateNewAsset() {
       List<NlyteAsset> nlyteAssets = getNlyteAsset();
       HashMap<Integer, LocationGroup> locationMap = getLocationMap();
       HashMap<Integer, Material> materialMap = getMaterialMap();
       HashMap<Integer, Manufacturer> manufacturerMap = getManufacturerMap();
-      Asset[] preAssets = new Asset[] {new Asset()};
-      Mockito.when(this.wormholeAPIClient.getAssetsBySourceAndType("l9i8728d55368540fcba1692",
-            AssetCategory.Server)).thenReturn(new ResponseEntity<Asset[]>(preAssets,HttpStatus.OK));
-      
+      Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("l9i8728d55368540fcba1692",AssetCategory.Server))
+      .thenReturn(new ArrayList<Asset>());
+
       List<Asset>assets = nlyteDataService.generateNewAsset("l9i8728d55368540fcba1692", nlyteAssets,
             locationMap, manufacturerMap, materialMap, AssetCategory.Server);
       for(Asset asset:assets) {
@@ -108,43 +107,22 @@ public class SycnRealTimeDataJobTest {
          }
       }
    }
-   
+
    @Test
    public void testGenerateNewAsset1() {
       List<NlyteAsset> nlyteAssets = getNlyteAsset();
       HashMap<Integer, LocationGroup> locationMap = getLocationMap();
       HashMap<Integer, Material> materialMap = getMaterialMap();
       HashMap<Integer, Manufacturer> manufacturerMap = getManufacturerMap();
-      Asset[] preAssets = new Asset[1];
+      List<Asset> assetsFromFlowgate = new ArrayList<Asset>();
       Asset preAsset = new Asset();
       preAsset.setAssetNumber(197);
       preAsset.setAssetSource("l9i8728d55368540fcba1692");
-      preAssets[0] = preAsset;
-      
-      Mockito.when(this.wormholeAPIClient.getAssetsBySourceAndType("l9i8728d55368540fcba1692",
-            AssetCategory.Server)).thenReturn(new ResponseEntity<Asset[]>(preAssets,HttpStatus.OK));
-      
-      List<Asset>assets = nlyteDataService.generateNewAsset("l9i8728d55368540fcba1692", nlyteAssets,
-            locationMap, manufacturerMap, materialMap, AssetCategory.Server);
-      for(Asset asset:assets) {
-         if("sin2-blrqeops-esxstress024".equals(asset.getAssetName())) {
-            TestCase.assertEquals(197, asset.getAssetNumber());
-            TestCase.assertEquals("SG-07-04", asset.getRoom());
-            TestCase.assertEquals("Cisco 1721 Modular Access Router", asset.getModel());
-            TestCase.assertEquals("Cisco", asset.getManufacturer());
-         }
-      }
-   }
-   
-   @Test
-   public void testGenerateNewAsset2() {
-      List<NlyteAsset> nlyteAssets = getNlyteAsset();
-      HashMap<Integer, LocationGroup> locationMap = getLocationMap();
-      HashMap<Integer, Material> materialMap = getMaterialMap();
-      HashMap<Integer, Manufacturer> manufacturerMap = getManufacturerMap();
-      Mockito.when(this.wormholeAPIClient.getAssetsBySourceAndType("l9i8728d55368540fcba1692",
-            AssetCategory.Server)).thenReturn(null);
-      List<Asset>assets = nlyteDataService.generateNewAsset("l9i8728d55368540fcba1692", nlyteAssets,
+      assetsFromFlowgate.add(preAsset);
+      Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("l9i8728d55368540fcba1692", AssetCategory.Server))
+      .thenReturn(assetsFromFlowgate);
+
+      List<Asset> assets = nlyteDataService.generateNewAsset("l9i8728d55368540fcba1692", nlyteAssets,
             locationMap, manufacturerMap, materialMap, AssetCategory.Server);
       for(Asset asset:assets) {
          if("sin2-blrqeops-esxstress024".equals(asset.getAssetName())) {
@@ -211,9 +189,9 @@ public class SycnRealTimeDataJobTest {
       TestCase.assertEquals(20.0, valueunits.get(0).getValueNum());
       TestCase.assertEquals(20.0, valueunits.get(1).getValueNum());
       TestCase.assertEquals(120.0, valueunits.get(2).getValueNum());
-      
+
    }
-   
+
    @Test
    public void testGenerateValueUnits2() {
       List<PowerStripsRealtimeValue> values = getPowerStripsRealtimeValue1().getBody().getValue();
@@ -231,7 +209,7 @@ public class SycnRealTimeDataJobTest {
       TestCase.assertEquals(20.0, valueunits.get(0).getValueNum());
       TestCase.assertEquals(20.0, valueunits.get(1).getValueNum());
       TestCase.assertEquals(120.0, valueunits.get(2).getValueNum());
-      
+
    }
 
    @Test
@@ -320,7 +298,7 @@ public class SycnRealTimeDataJobTest {
       pduvalue.setValue(value);
       return new ResponseEntity<JsonResultForPDURealtimeValue>(pduvalue,HttpStatus.OK);
    }
-   
+
    public ResponseEntity<JsonResultForPDURealtimeValue> getPowerStripsRealtimeValue1(){
       JsonResultForPDURealtimeValue pduvalue = new JsonResultForPDURealtimeValue();
       List<PowerStripsRealtimeValue> value = new ArrayList<PowerStripsRealtimeValue>();
@@ -359,7 +337,7 @@ public class SycnRealTimeDataJobTest {
       asset.setManufacturer("Dell");
       return asset;
    }
-   
+
    String getServiceKey() {
       return "servicekey";
    }
@@ -376,7 +354,7 @@ public class SycnRealTimeDataJobTest {
       assets.add(nlyteAsset);
       return assets;
    }
-   
+
    HashMap<Integer, LocationGroup> getLocationMap(){
       HashMap<Integer, LocationGroup> locationMap = new HashMap<Integer, LocationGroup>();
       LocationGroup location = new LocationGroup();
@@ -385,17 +363,17 @@ public class SycnRealTimeDataJobTest {
       location.setLocationGroupType("Room");
       location.setParentLocationGroupID(7);
       locationMap.put(8, location);
-      
+
       LocationGroup location1 = new LocationGroup();
       location1.setLocationGroupID(7);
       location1.setLocationGroupName("4th");
       location1.setLocationGroupType("Floor");
       location1.setParentLocationGroupID(null);
       locationMap.put(7, location1);
-      
+
       return locationMap;
    }
-   
+
    HashMap<Integer,Material> getMaterialMap(){
       HashMap<Integer,Material> materialMap = new HashMap<Integer,Material>();
       Material material = new Material();
@@ -407,7 +385,7 @@ public class SycnRealTimeDataJobTest {
       materialMap.put(1, material);
       return materialMap;
    }
-   
+
    HashMap<Integer,Manufacturer> getManufacturerMap(){
       HashMap<Integer,Manufacturer> manufacturerMap = new HashMap<Integer,Manufacturer>();
       Manufacturer manufacturer = new Manufacturer();
@@ -415,6 +393,6 @@ public class SycnRealTimeDataJobTest {
       manufacturer.setDetail("Cisco");
       return manufacturerMap;
    }
-   
-   
+
+
 }

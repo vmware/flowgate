@@ -141,7 +141,7 @@ public class AggregatorService implements AsyncService {
       if (incompletServers == null || incompletServers.length == 0) {
          return;
       }
-      Asset[] pdus = restClient.getAssetsByType(AssetCategory.PDU).getBody();
+      List<Asset> pdus = restClient.getAllAssetsByType(AssetCategory.PDU);
 
       // create map for PDUs base on the location.
       Map<String, List<Asset>> pduLookupMap = new HashMap<String, List<Asset>>();
@@ -231,8 +231,8 @@ public class AggregatorService implements AsyncService {
       if (candidateServer.isEmpty()) {
          return;
       }
-      Asset[] sensors = restClient.getAssetsByType(AssetCategory.Sensors).getBody();
-      if (sensors == null) {
+      List<Asset> sensors = restClient.getAllAssetsByType(AssetCategory.Sensors);
+      if (sensors.isEmpty()) {
          return;
       }
       Map<String, ArrayList<String>> temperatureSensorMap =
@@ -304,4 +304,5 @@ public class AggregatorService implements AsyncService {
          restClient.saveAssets(needUpdateServers);
       }
    }
+
 }

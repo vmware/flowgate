@@ -8,7 +8,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -51,7 +49,7 @@ import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 
 @Service
 public class LabsdbService implements AsyncService{
-   
+
    private static final Logger logger = LoggerFactory.getLogger(LabsdbService.class);
    @Autowired
    private WormholeAPIClient wormholeApiClient;
@@ -61,7 +59,7 @@ public class LabsdbService implements AsyncService{
    private ServiceKeyConfig serviceKeyConfig;
    private ObjectMapper mapper = new ObjectMapper();
    private static final String wirmMap_node = "PORT";
-   
+
    @Override
    public void executeAsync(EventMessage message) {
       // TODO Auto-generated method stub
@@ -121,7 +119,7 @@ public class LabsdbService implements AsyncService{
          }
       }
    }
-   
+
    public void excuteJob(String commanId,FacilitySoftwareConfig labsdb) {
       if(!labsdb.checkIsActive()) {
          return;
@@ -142,12 +140,12 @@ public class LabsdbService implements AsyncService{
          break;
       }
    }
-   
+
    private void updateIntegrationStatus(FacilitySoftwareConfig labsdb) {
       wormholeApiClient.setServiceKey(serviceKeyConfig.getServiceKey());
       wormholeApiClient.updateFacility(labsdb);
    }
-   
+
    public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig labsdb,String message) {
       IntegrationStatus integrationStatus = labsdb.getIntegrationStatus();
       if(integrationStatus == null) {
@@ -166,14 +164,10 @@ public class LabsdbService implements AsyncService{
       labsdb.setIntegrationStatus(integrationStatus);
       updateIntegrationStatus(labsdb);
    }
-   
+
    public void syncWiremapData(FacilitySoftwareConfig config,boolean isAll) {
       wormholeApiClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      ResponseEntity<Asset[]> result = wormholeApiClient.getAssetsByType(AssetCategory.Server);
-      if(result == null || result.getBody() == null) {
-         return;
-      }
-      List<Asset> servers = new ArrayList<Asset>(Arrays.asList(result.getBody()));
+      List<Asset> servers = wormholeApiClient.getAllAssetsByType(AssetCategory.Server);
       if(!isAll) {
          servers = filterServers(servers);
       }
@@ -209,7 +203,7 @@ public class LabsdbService implements AsyncService{
          parser = spf.newSAXParser();
       } catch (ParserConfigurationException | SAXException e) {
          logger.error("Create new sax parser failed."+e.getMessage());
-      } 
+      }
       for(Asset asset:servers) {
          ResponseEntity<String> resultEntity = null;
          try {
@@ -217,15 +211,15 @@ public class LabsdbService implements AsyncService{
          }catch(Exception e) {
             logger.error("An exception occurred while accessing the labsdb server."+e.getMessage());
          }
-         if(resultEntity == null || result.getBody() == null) {
+         if(resultEntity == null || resultEntity.getBody() == null) {
             continue;
          }
          try {
             parser.parse(new ByteArrayInputStream(resultEntity.getBody().getBytes()), handler);
          } catch(SAXException | IOException e) {
-            logger.error("Error parsing XML input stream.This XML input stream is "+result.getBody());
+            logger.error("Error parsing XML input stream.This XML input stream is "+resultEntity.getBody());
          }
-         List<EndDevice> devices = handler.getEndDevices();//Get all the devices connected to the server 
+         List<EndDevice> devices = handler.getEndDevices();//Get all the devices connected to the server
          if(devices == null || devices.isEmpty()) {
             continue;
          }
@@ -233,7 +227,7 @@ public class LabsdbService implements AsyncService{
          wormholeApiClient.saveAssets(asset);
       }
    }
-   
+
    public Asset generatorWiremapData(Asset asset,Map<String,String> pduNameAndIdMap,
          List<EndDevice> devices,Map<String,String> networkNameAndIdMap){
       Set<String> pduIDList = null;
@@ -306,11 +300,11 @@ public class LabsdbService implements AsyncService{
       asset.setStatus(status);
       return asset;
    }
-   
+
    LabsdbClient createClient(FacilitySoftwareConfig config) {
       return new LabsdbClient(config);
    }
-   
+
    //The asset's status will be updated when the aggregator job excute.
    //eg:From UNMAPPED changed to MAPPEDBYAGGREGATOR
    public List<Asset> filterServers(List<Asset> servers){
@@ -327,18 +321,14 @@ public class LabsdbService implements AsyncService{
       }
       return unMappedServer;
    }
-   
+
    public Map<String,String> getAssetNameIDMap(AssetCategory category){
       Map<String,String> assetNameAndIdMap = new HashMap<String,String>();
-      ResponseEntity<Asset[]> result = wormholeApiClient.getAssetsByType(category);
-      if(result == null || result.getBody() == null) {
-         return assetNameAndIdMap;
-      }
-      Asset[] assets = result.getBody();
+      List<Asset> assets = wormholeApiClient.getAllAssetsByType(category);
       for(Asset asset:assets) {
          assetNameAndIdMap.put(asset.getAssetName(), asset.getId());
       }
       return assetNameAndIdMap;
    }
-   
+
 }
