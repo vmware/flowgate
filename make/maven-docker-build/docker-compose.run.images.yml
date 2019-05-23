@@ -7,12 +7,26 @@ services:
     networks:
       - db-network
     volumes:
-      - /opt/vmware/flowgate/data/database/data:/opt/couchbase/var/lib/couchbase/data
-      - /opt/vmware/flowgate/log/database:/opt/couchbase/var/lib/couchbase/logs
-      - /opt/vmware/flowgate/conf/database/config:/opt/couchbase/var/lib/couchbase/config
+      - /opt/vmware/flowgate/data/database/data:/opt/couchbase/var
       - /opt/vmware/flowgate/conf/database/init.sh:/init.sh
       - /opt/vmware/flowgate/conf/database/initData.sh:/home/couchbase/initData.sh
-
+    expose:
+      - 8091
+      - 8092
+      - 8093
+      - 8094
+      - 8095
+      - 8096
+      - 11207
+      - 11210
+      - 11211
+      - 18091
+      - 18092
+      - 18093
+      - 18094
+      - 18095
+      - 18096
+          
   redis:
     image: flowgate/redis:FLOWGATE_VERSION
     container_name: flowgate-redis-container
@@ -45,7 +59,6 @@ services:
     environment:
       FLOWGATESERVICEKEY: serviceKey
 
-      
   management:
     image: flowgate/management:FLOWGATE_VERSION
     volumes:
