@@ -16,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vmware.flowgate.client.WormholeAPIClient;
+import com.vmware.flowgate.common.model.SensorSetting;
 import com.vmware.ops.api.client.controllers.AlertDefinitionsClient;
 import com.vmware.ops.api.client.controllers.RecommendationsClient;
 import com.vmware.ops.api.client.controllers.SymptomDefinitionsClient;
@@ -40,8 +42,6 @@ import com.vmware.ops.api.model.symptomdefinition.SymptomDefinition.SymptomDefin
 import com.vmware.ops.api.model.symptomdefinition.SymptomDefinitionQuery;
 import com.vmware.ops.api.model.symptomdefinition.SymptomState;
 import com.vmware.ops.api.model.symptomdefinition.ThresholdType;
-import com.vmware.flowgate.client.WormholeAPIClient;
-import com.vmware.flowgate.common.model.SensorSetting;
 
 public class AlertClient extends VROBase {
 
@@ -108,7 +108,7 @@ public class AlertClient extends VROBase {
          createPredefinedSymptoms(missingSymptoms, existSymptoms);
       } else {
          //  check whether we need to update the threshold of the symptoms
-         SensorSetting[] sensorSettings = restClient.getSensorThreshold().getBody();
+         List<SensorSetting> sensorSettings = restClient.getAllSensorThreshold();
          Map<String, SensorSetting> symptomCondtionValues =
                getSymptomCondtionValues(sensorSettings);
          SymptomDefinitionsClient sd = getClient().symptomDefinitionsClient();
@@ -267,7 +267,7 @@ public class AlertClient extends VROBase {
    }
 
    // Symptom name and value;
-   private Map<String, SensorSetting> getSymptomCondtionValues(SensorSetting[] sensorSettings) {
+   private Map<String, SensorSetting> getSymptomCondtionValues(List<SensorSetting> sensorSettings) {
       Map<String, SensorSetting> result = new HashMap<String, SensorSetting>();
       for (SensorSetting setting : sensorSettings) {
          switch (setting.getType()) {

@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.exception.WormholeException;
@@ -40,7 +41,7 @@ public class WormholeAPIClient extends RestClientBase {
 
    private static final String GetJobsURL = "/v1/jobs/type/%s";
 
-   private static final String SensorSettingURL = "/v1/sensors/setting";
+   private static final String SensorSettingURL = "/v1/sensors/setting/page/%s/pagesize/%s";
    private static final String ServerMappingURL = "/v1/assets/mapping";
    private static final String ServerMappingByVCURL = "/v1/assets/mapping/vc/%s";
    private static final String GetVCServersURL = "/v1/sddc/vc";
@@ -263,9 +264,24 @@ public class WormholeAPIClient extends RestClientBase {
             postEntity, Void.class);
    }
 
-   public ResponseEntity<SensorSetting[]> getSensorThreshold() {
-      return this.restTemplate.exchange(getAPIServiceEndpoint() + SensorSettingURL, HttpMethod.GET,
-            getDefaultEntity(), SensorSetting[].class);
+   public ResponseEntity<PageModelImp<SensorSetting>> getSensorThreshold(int currentPage,int pageSize) {
+      return this.restTemplate.exchange(getAPIServiceEndpoint() + String.format(SensorSettingURL,currentPage,pageSize), HttpMethod.GET,
+            getDefaultEntity(), new ParameterizedTypeReference<PageModelImp<SensorSetting>>() {});
+   }
+
+   public List<SensorSetting> getAllSensorThreshold(){
+	   List<SensorSetting> sensorSettings = new ArrayList<SensorSetting>();
+       int currentPage = FlowgateConstant.defaultPageNumber;
+       PageModelImp<SensorSetting> sensorSettingsPage = getSensorThreshold(currentPage,FlowgateConstant.maxPageSize).getBody();
+       if(sensorSettingsPage != null) {
+    	  sensorSettings.addAll(sensorSettingsPage.getContent());
+          while(!sensorSettingsPage.isLast()) {
+             currentPage++;
+             sensorSettingsPage = getSensorThreshold(currentPage,FlowgateConstant.maxPageSize).getBody();
+             sensorSettings.addAll(sensorSettingsPage.getContent());
+         }
+      }
+      return sensorSettings;
    }
 
    public ResponseEntity<SDDCSoftwareConfig[]> getVROServers() {
@@ -300,7 +316,7 @@ public class WormholeAPIClient extends RestClientBase {
    }
 
    public ResponseEntity<FacilitySoftwareConfig[]> getFacilitySoftwareByType(SoftwareType type) {
-      return this.restTemplate.exchange(
+	   return this.restTemplate.exchange(
             getAPIServiceEndpoint() + String.format(GetFacilitySoftwareByTypeURL, type),
             HttpMethod.GET, getDefaultEntity(), FacilitySoftwareConfig[].class);
    }
@@ -342,7 +358,7 @@ public class WormholeAPIClient extends RestClientBase {
    }
 
    public ResponseEntity<AssetIPMapping[]> getHostnameIPMappingByIP(String ip) {
-      return this.restTemplate.exchange(
+	   return this.restTemplate.exchange(
             getAPIServiceEndpoint() + String.format(GetHostNameByIP, ip), HttpMethod.GET,
             getDefaultEntity(), AssetIPMapping[].class);
    }
