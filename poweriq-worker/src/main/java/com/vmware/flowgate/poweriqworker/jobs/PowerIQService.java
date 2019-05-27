@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,31 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vmware.flowgate.client.WormholeAPIClient;
+import com.vmware.flowgate.common.AssetCategory;
+import com.vmware.flowgate.common.AssetSubCategory;
+import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.RealtimeDataUnit;
+import com.vmware.flowgate.common.exception.WormholeException;
+import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
+import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.common.model.RealTimeData;
+import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
+import com.vmware.flowgate.common.model.ValueUnit;
+import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
+import com.vmware.flowgate.common.model.ValueUnit.ValueType;
+import com.vmware.flowgate.common.model.redis.message.AsyncService;
+import com.vmware.flowgate.common.model.redis.message.EventMessage;
+import com.vmware.flowgate.common.model.redis.message.EventType;
+import com.vmware.flowgate.common.model.redis.message.EventUser;
+import com.vmware.flowgate.common.model.redis.message.impl.EventMessageImpl;
+import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
+import com.vmware.flowgate.common.utils.WormholeDateFormat;
 import com.vmware.flowgate.poweriqworker.client.PowerIQAPIClient;
 import com.vmware.flowgate.poweriqworker.config.ServiceKeyConfig;
 import com.vmware.flowgate.poweriqworker.model.Aisle;
@@ -36,29 +61,6 @@ import com.vmware.flowgate.poweriqworker.model.Room;
 import com.vmware.flowgate.poweriqworker.model.Row;
 import com.vmware.flowgate.poweriqworker.model.Sensor;
 import com.vmware.flowgate.poweriqworker.model.SensorReading;
-import com.vmware.flowgate.client.WormholeAPIClient;
-import com.vmware.flowgate.common.AssetCategory;
-import com.vmware.flowgate.common.AssetSubCategory;
-import com.vmware.flowgate.common.RealtimeDataUnit;
-import com.vmware.flowgate.common.FlowgateConstant;
-import com.vmware.flowgate.common.exception.WormholeException;
-import com.vmware.flowgate.common.model.Asset;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
-import com.vmware.flowgate.common.model.IntegrationStatus;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
-import com.vmware.flowgate.common.model.RealTimeData;
-import com.vmware.flowgate.common.model.ValueUnit;
-import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
-import com.vmware.flowgate.common.model.ValueUnit.ValueType;
-import com.vmware.flowgate.common.model.redis.message.AsyncService;
-import com.vmware.flowgate.common.model.redis.message.EventMessage;
-import com.vmware.flowgate.common.model.redis.message.EventType;
-import com.vmware.flowgate.common.model.redis.message.EventUser;
-import com.vmware.flowgate.common.model.redis.message.impl.EventMessageImpl;
-import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
-import com.vmware.flowgate.common.utils.WormholeDateFormat;
 
 @Service
 public class PowerIQService implements AsyncService {
@@ -862,10 +864,8 @@ public class PowerIQService implements AsyncService {
          return;
       }
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
-      //filter and get assets which are from the PowerIQ
-      List<Asset> mappedAssets = getPowerIQMappedAsset(allMappedAssets, powerIQ.getId());
       //get assetIds from asset's sensorsFromulars attribute
-      Set<String> assetIds = getAssetIdfromformular(mappedAssets);
+      Set<String> assetIds = getAssetIdfromformular(allMappedAssets);
       if (assetIds.isEmpty()) {
          return;
       }
@@ -895,7 +895,7 @@ public class PowerIQService implements AsyncService {
             if(sensorType.contains(map.getKey())) {
                String[] assetIDs = map.getValue().split("\\+|-|\\*|/|\\(|\\)");
                for (String assetId : assetIDs) {
-                  if (assetId.equals("") || assetId.length() != FlowgateConstant.MONGOIDLENGTH) {
+                  if (assetId.equals("") || assetId.length() != FlowgateConstant.COUCHBASEIDLENGTH) {
                      continue;
                   }
                   assetIds.add(assetId);

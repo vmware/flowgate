@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -320,7 +319,7 @@ public class AssetController {
          String[] assetIDs = formular.split("\\+|-|\\*|/|\\(|\\)");
          Map<String, List<RealTimeData>> dataSlice = new HashMap<String, List<RealTimeData>>();
          for (String id : assetIDs) {
-            if (id.length() == FlowgateConstant.MONGOIDLENGTH) {//the default mongdb id length is 24
+            if (id.length() == FlowgateConstant.COUCHBASEIDLENGTH) {//the default uuid length is 32
 
                List<RealTimeData> currentData =
                      realtimeDataRepository.getDataByIDAndTimeRange(id, starttime, duration);
