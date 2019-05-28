@@ -107,6 +107,22 @@ public class AssetController {
       return assetRepository.findOneByAssetName(name);
    }
 
+   // Read Asset by source
+   @RequestMapping(value = "/source/{assetsource}", method = RequestMethod.GET)
+   public Page<Asset> getAssetBySource(@PathVariable("assetsource") String assetSource,
+        @RequestParam("currentPage") int currentPage,@RequestParam("pageSize") int pageSize) {
+      if (currentPage < FlowgateConstant.defaultPageNumber) {
+         currentPage = FlowgateConstant.defaultPageNumber;
+      }
+      if (pageSize <= 0) {
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
+      }
+      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+      return assetRepository.findByAssetSource(assetSource,pageRequest);
+   }
+
    // Read Asset by source and type
    @RequestMapping(value = "/source/{assetsource}/type/{type}", method = RequestMethod.GET)
    public Page<Asset> getAssetBySourceAndType(@PathVariable("assetsource") String assetSource,

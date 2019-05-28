@@ -58,6 +58,7 @@ public class WormholeAPIClient extends RestClientBase {
    private static final String GetFacilitySoftwareByTypeURL = "/v1/facilitysoftware/type/%s";
    private static final String GetMappedAssetURL = "/v1/assets/mappedasset/category/%s";
    private static final String GetAssetByIdURL = "/v1/assets/%s";
+   private static final String GetAssetBySource = "/v1/assets/source/%s?currentPage=%s&pageSize=%s";
 
    private static final String RealTimeDatasURL = "/v1/assets/sensordata/batchoperation";
    private static final String GetFacilitySoftwareById = "/v1/facilitysoftware/%s";
@@ -224,6 +225,27 @@ public class WormholeAPIClient extends RestClientBase {
          while(!assetsPage.isLast()) {
             currentPage++;
             assetsPage = getAssetsByType(category,currentPage,FlowgateConstant.maxPageSize).getBody();
+            assets.addAll(assetsPage.getContent());
+         }
+      }
+      return assets;
+   }
+
+   public ResponseEntity<PageModelImp<Asset>> getAssetsBySource(String source,int currentPage,int pageSize) {
+      return this.restTemplate.exchange(
+            getAPIServiceEndpoint() + String.format(GetAssetBySource, source,currentPage,pageSize), HttpMethod.GET,
+            getDefaultEntity(), new ParameterizedTypeReference<PageModelImp<Asset>>() {});
+   }
+
+   public List<Asset> getAllAssetsBySource(String source){
+      List<Asset> assets = new ArrayList<Asset>();
+      int currentPage = FlowgateConstant.defaultPageNumber;
+      PageModelImp<Asset> assetsPage = getAssetsBySource(source,currentPage,FlowgateConstant.maxPageSize).getBody();
+      if(assetsPage != null) {
+         assets.addAll(assetsPage.getContent());
+         while(!assetsPage.isLast()) {
+            currentPage++;
+            assetsPage = getAssetsBySource(source,currentPage,FlowgateConstant.maxPageSize).getBody();
             assets.addAll(assetsPage.getContent());
          }
       }

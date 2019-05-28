@@ -855,6 +855,25 @@ public class PowerIQService implements AsyncService {
       return values;
    }
 
+   public List<Asset> filterSensorFromPower(String source, Set<String> assetIds){
+	   List<Asset> assets = new ArrayList<Asset>();
+	   List<Asset> assetsFromPowerIQ = restClient.getAllAssetsBySource(source);
+	   Map<String,Asset> assetIdMap = new HashMap<String,Asset>();
+
+	   for(Asset asset:assetsFromPowerIQ) {
+		   assetIdMap.put(asset.getId(), asset);
+	   }
+
+	   for(String id:assetIds) {
+		   Asset asset = assetIdMap.get(id);
+		   if(asset != null) {
+			   assets.add(asset);
+		   }
+	   }
+
+	   return assets;
+   }
+
    public void syncSensorRealtimeData(FacilitySoftwareConfig powerIQ) {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       List<Asset> allMappedAssets =
@@ -869,7 +888,9 @@ public class PowerIQService implements AsyncService {
       if (assetIds.isEmpty()) {
          return;
       }
-      realTimeDatas = getSensorRealTimeData(powerIQ, assetIds);
+      //filter sensors
+      List<Asset> sensorFromPowerIQ = filterSensorFromPower(powerIQ.getId(),assetIds);
+      realTimeDatas = getSensorRealTimeData(powerIQ, sensorFromPowerIQ);
       logger.info("Received new Sensor data, data item size is:" + realTimeDatas.size());
       if(realTimeDatas.isEmpty()) {
          return;
@@ -906,7 +927,7 @@ public class PowerIQService implements AsyncService {
       return assetIds;
    }
 
-   public List<RealTimeData> getSensorRealTimeData(FacilitySoftwareConfig powerIQ,Set<String> assetIds){
+   public List<RealTimeData> getSensorRealTimeData(FacilitySoftwareConfig powerIQ,List<Asset> assets){
       HashMap<AdvanceSettingType, String> advanceSetting = getAdvanceSetting(powerIQ);
       List<RealTimeData> realtimeDatas = new ArrayList<RealTimeData>();
       String dateFormat = advanceSetting.get(AdvanceSettingType.DateFormat);
@@ -914,11 +935,7 @@ public class PowerIQService implements AsyncService {
       String temperature = advanceSetting.get(AdvanceSettingType.TEMPERATURE_UNIT);
       String humidity = advanceSetting.get(AdvanceSettingType.HUMIDITY_UNIT);
       PowerIQAPIClient powerIQAPIClient = createClient(powerIQ);
-      for(String assetId:assetIds) {
-         Asset asset = restClient.getAssetByID(assetId).getBody();
-         if(asset == null) {
-            continue;
-         }
+      for(Asset asset:assets) {
          HashMap<String,String> sensorExtraInfo = asset.getJustificationfields();
          String sensorId =  sensorExtraInfo.get(Sensor_ID);
          Sensor sensor = null;
@@ -1003,10 +1020,10 @@ public class PowerIQService implements AsyncService {
          }
 
          values.add(value);
-         realTimeData.setAssetID(assetId);
+         realTimeData.setAssetID(asset.getId());
          realTimeData.setTime(recordedTime);
          realTimeData.setValues(values);
-         realTimeData.setId(assetId+"_"+recordedTime);
+         realTimeData.setId(asset.getId()+"_"+recordedTime);
          realtimeDatas.add(realTimeData);
       }
       return realtimeDatas;
