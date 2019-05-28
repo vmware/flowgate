@@ -855,22 +855,14 @@ public class PowerIQService implements AsyncService {
       return values;
    }
 
-   public List<Asset> filterSensorFromPower(String source, Set<String> assetIds){
+   public List<Asset> filterAssetsBySource(String source, Set<String> assetIds){
 	   List<Asset> assets = new ArrayList<Asset>();
 	   List<Asset> assetsFromPowerIQ = restClient.getAllAssetsBySource(source);
-	   Map<String,Asset> assetIdMap = new HashMap<String,Asset>();
-
 	   for(Asset asset:assetsFromPowerIQ) {
-		   assetIdMap.put(asset.getId(), asset);
-	   }
-
-	   for(String id:assetIds) {
-		   Asset asset = assetIdMap.get(id);
-		   if(asset != null) {
+		   if(assetIds.contains(asset.getId())) {
 			   assets.add(asset);
 		   }
 	   }
-
 	   return assets;
    }
 
@@ -889,7 +881,7 @@ public class PowerIQService implements AsyncService {
          return;
       }
       //filter sensors
-      List<Asset> sensorFromPowerIQ = filterSensorFromPower(powerIQ.getId(),assetIds);
+      List<Asset> sensorFromPowerIQ = filterAssetsBySource(powerIQ.getId(),assetIds);
       realTimeDatas = getSensorRealTimeData(powerIQ, sensorFromPowerIQ);
       logger.info("Received new Sensor data, data item size is:" + realTimeDatas.size());
       if(realTimeDatas.isEmpty()) {

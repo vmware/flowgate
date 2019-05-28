@@ -68,6 +68,7 @@ import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
+import com.vmware.flowgate.util.BaseDocumentUtil;
 
 class MappingIdForDoc {
    public String FirstId;
@@ -1533,7 +1534,7 @@ public class AssetControllerTest {
 
    Asset createAsset() {
       Asset asset = new Asset();
-      asset.setId(UUID.randomUUID().toString().replaceAll("-", ""));
+      BaseDocumentUtil.generateID(asset);
       asset.setAssetName("pek-wor-server-02");
       asset.setAssetNumber(12345);
       asset.setAssetSource("5b7d208d55368540fcba1692");
