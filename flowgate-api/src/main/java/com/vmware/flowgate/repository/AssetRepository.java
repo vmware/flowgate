@@ -12,6 +12,7 @@ import org.springframework.data.couchbase.core.query.ViewIndexed;
 import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import com.vmware.flowgate.common.model.Asset;
 
 @N1qlPrimaryIndexed
@@ -29,6 +30,8 @@ public interface AssetRepository
 
    @Query("SELECT COUNT(_class) AS count FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.Asset' And `assetName` LIKE $1 AND `category` = $2 ")
    public long getNumber(String keywords, String category);
+
+   public Page<Asset> findByAssetSource(String assetSource, Pageable page);
 
    public Asset findOneByAssetName(String name);
 

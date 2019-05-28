@@ -16,7 +16,7 @@ public class BaseDocumentUtil {
 
    public static <T extends BaseDocument> void generateID(T document) {
       if (document.getId() == null) {
-         document.setId(UUID.randomUUID().toString());
+         document.setId(UUID.randomUUID().toString().replaceAll("-", ""));
       }
    }
 

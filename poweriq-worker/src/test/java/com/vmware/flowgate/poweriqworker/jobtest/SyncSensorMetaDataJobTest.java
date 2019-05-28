@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +27,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.vmware.flowgate.client.WormholeAPIClient;
+import com.vmware.flowgate.common.AssetCategory;
+import com.vmware.flowgate.common.AssetSubCategory;
+import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
+import com.vmware.flowgate.common.model.RealTimeData;
+import com.vmware.flowgate.common.utils.WormholeDateFormat;
 import com.vmware.flowgate.poweriqworker.client.PowerIQAPIClient;
 import com.vmware.flowgate.poweriqworker.jobs.PowerIQService;
 import com.vmware.flowgate.poweriqworker.model.Aisle;
@@ -38,16 +49,6 @@ import com.vmware.flowgate.poweriqworker.model.Room;
 import com.vmware.flowgate.poweriqworker.model.Row;
 import com.vmware.flowgate.poweriqworker.model.Sensor;
 import com.vmware.flowgate.poweriqworker.model.SensorReading;
-import com.vmware.flowgate.client.WormholeAPIClient;
-import com.vmware.flowgate.common.AssetCategory;
-import com.vmware.flowgate.common.AssetSubCategory;
-import com.vmware.flowgate.common.FlowgateConstant;
-import com.vmware.flowgate.common.model.Asset;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
-import com.vmware.flowgate.common.model.RealTimeData;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
-import com.vmware.flowgate.common.utils.WormholeDateFormat;
 
 import junit.framework.TestCase;
 
@@ -277,8 +278,6 @@ public class SyncSensorMetaDataJobTest {
       Asset asset = createAsset();
       asset.setId("123o89qw4jjasd0");
       asset.setJustificationfields(justificationfields);
-      Mockito.when(this.wormholeAPIClient.getAssetByID("123o89qw4jjasd0"))
-            .thenReturn(new ResponseEntity<Asset>(asset, HttpStatus.OK));
       Sensor sensor = createSensor();
       sensor.setId(6566);
       sensor.setName("HumiditySensor");
@@ -293,8 +292,11 @@ public class SyncSensorMetaDataJobTest {
       Set<String> assetIds = new HashSet<String>();
       assetIds.add("123o89qw4jjasd0");
 
+      List<Asset> assets = new ArrayList<Asset>();
+      assets.add(asset);
+
       List<RealTimeData> realTimeDatas =
-            powerIQService.getSensorRealTimeData(createFacility(), assetIds);
+            powerIQService.getSensorRealTimeData(createFacility(), assets);
       for (RealTimeData realtimeData : realTimeDatas) {
          TestCase.assertEquals("123o89qw4jjasd0", realtimeData.getAssetID());
          TestCase.assertEquals(1550111474000l, realtimeData.getTime());
@@ -312,18 +314,18 @@ public class SyncSensorMetaDataJobTest {
       Asset asset = createAsset();
       asset.setId("123o89qw4jjasd0");
       asset.setJustificationfields(justificationfields);
-      Mockito.when(this.wormholeAPIClient.getAssetByID("123o89qw4jjasd0"))
-            .thenReturn(new ResponseEntity<Asset>(asset, HttpStatus.OK));
       Sensor sensor = createSensor();
       sensor.setId(6566);
       sensor.setName("HumiditySensor");
       sensor.setSerialNumber("8999");
       sensor.setType("HumiditySensor");
       Mockito.when(this.powerIQAPIClient.getSensorById("6566")).thenReturn(sensor);
-      Set<String> assetIds = new HashSet<String>();
-      assetIds.add("123o89qw4jjasd0");
+
+      List<Asset> assets = new ArrayList<Asset>();
+      assets.add(asset);
+
       List<RealTimeData> realTimeDatas =
-            powerIQService.getSensorRealTimeData(createFacility(), assetIds);
+            powerIQService.getSensorRealTimeData(createFacility(), assets);
       TestCase.assertEquals(0, realTimeDatas.size());
 
    }
@@ -335,21 +337,16 @@ public class SyncSensorMetaDataJobTest {
       Asset asset = createAsset();
       asset.setId("123o89qw4jjasd0");
       asset.setJustificationfields(justificationfields);
-      Mockito.when(this.wormholeAPIClient.getAssetByID("123o89qw4jjasd0"))
-      .thenReturn(new ResponseEntity<Asset>(asset, HttpStatus.OK));
 
       HashMap<String, String> justificationfields1 = new HashMap<String, String>();
       justificationfields1.put("Sensor_ID", "6567");
       Asset asset1 = createAsset();
       asset1.setId("123o89qw4jjasd1");
       asset1.setJustificationfields(justificationfields1);
-      Mockito.when(this.wormholeAPIClient.getAssetByID("123o89qw4jjasd1"))
-      .thenReturn(new ResponseEntity<Asset>(asset1, HttpStatus.OK));
 
       Sensor sensor = createSensor();
       SensorReading sensorReading = createReading();
       sensorReading.setUom("%");
-
       sensor.setId(6566);
       sensor.setName("HumiditySensor");
       sensor.setSerialNumber("8999");
@@ -360,7 +357,6 @@ public class SyncSensorMetaDataJobTest {
       Sensor sensor1 = createSensor();
       SensorReading sensorReading1 = createReading();
       sensorReading1.setUom("F");
-
       sensor1.setId(6567);
       sensor1.setName("TemperatureSensor");
       sensor1.setSerialNumber("9000");
@@ -371,11 +367,20 @@ public class SyncSensorMetaDataJobTest {
       Set<String> assetIds = new HashSet<String>();
       assetIds.add("123o89qw4jjasd0");
       assetIds.add("123o89qw4jjasd1");
-      List<RealTimeData> realTimeDatas =
-            powerIQService.getSensorRealTimeData(createFacility(), assetIds);
-      TestCase.assertEquals((double)(100-32)*5/9, realTimeDatas.get(0).getValues().get(0).getValueNum());
-      TestCase.assertEquals((double)100, realTimeDatas.get(1).getValues().get(0).getValueNum());
 
+      List<Asset> assets = new ArrayList<Asset>();
+      assets.add(asset);
+      assets.add(asset1);
+
+      List<RealTimeData> realTimeDatas =
+            powerIQService.getSensorRealTimeData(createFacility(), assets);
+      for(RealTimeData realtimedata:realTimeDatas) {
+    	  if("123o89qw4jjasd0".equals(realtimedata.getAssetID())) {
+    		  TestCase.assertEquals((double)100, realtimedata.getValues().get(0).getValueNum());
+    	  }else {
+    		  TestCase.assertEquals((double)(100-32)*5/9, realtimedata.getValues().get(0).getValueNum());
+    	  }
+      }
    }
 
    @Test

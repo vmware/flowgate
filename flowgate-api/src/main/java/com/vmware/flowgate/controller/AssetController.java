@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -106,6 +105,22 @@ public class AssetController {
    @RequestMapping(value = "/name/{name}", method = RequestMethod.GET)
    public Asset getAssetByName(@PathVariable String name) {
       return assetRepository.findOneByAssetName(name);
+   }
+
+   // Read Asset by source
+   @RequestMapping(value = "/source/{assetsource}", method = RequestMethod.GET)
+   public Page<Asset> getAssetBySource(@PathVariable("assetsource") String assetSource,
+        @RequestParam("currentPage") int currentPage,@RequestParam("pageSize") int pageSize) {
+      if (currentPage < FlowgateConstant.defaultPageNumber) {
+         currentPage = FlowgateConstant.defaultPageNumber;
+      }
+      if (pageSize <= 0) {
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
+      }
+      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+      return assetRepository.findByAssetSource(assetSource,pageRequest);
    }
 
    // Read Asset by source and type
@@ -320,7 +335,7 @@ public class AssetController {
          String[] assetIDs = formular.split("\\+|-|\\*|/|\\(|\\)");
          Map<String, List<RealTimeData>> dataSlice = new HashMap<String, List<RealTimeData>>();
          for (String id : assetIDs) {
-            if (id.length() == FlowgateConstant.MONGOIDLENGTH) {//the default mongdb id length is 24
+            if (id.length() == FlowgateConstant.COUCHBASEIDLENGTH) {//the default uuid length is 32
 
                List<RealTimeData> currentData =
                      realtimeDataRepository.getDataByIDAndTimeRange(id, starttime, duration);
