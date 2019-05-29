@@ -52,6 +52,9 @@ export class SensorsettingAddComponent implements OnInit {
     this.modalIsOpen = false;
     this.operationTip = "";
   }
+  cancel(){
+    this.router.navigate(["/ui/nav/setting"]);
+  }
   ngOnInit() {
   }
 }
