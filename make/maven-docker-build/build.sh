@@ -29,7 +29,7 @@ do
 	mkdir -p $MAKEDIR/conf/$n/
 	cp $SOURCEDIR/$n/src/main/resources/application.properties $MAKEDIR/conf/$n/
 done
-
+cp $SOURCEDIR/flowgate-api/src/main/resources/guard.jceks $MAKEDIR/conf/flowgate-api/
 for m in "${databaseangredis[@]}"
 do
 	mkdir -p $MAKEDIR/conf/$m/

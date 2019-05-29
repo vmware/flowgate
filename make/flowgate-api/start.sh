@@ -1,3 +1,4 @@
 #!/bin/sh
 cp /conf/application.properties /
-java -jar /jar/flowgate-api.jar
+cp /conf/guard.jceks /jar
+java -Xbootclasspath/a:/jar -jar /jar/flowgate-api.jar
