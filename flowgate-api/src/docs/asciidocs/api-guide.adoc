@@ -272,48 +272,6 @@ include::{snippets}/assets-getPageMappingsByVCId-example/curl-request.adoc[]
 
 include::{snippets}/assets-getPageMappingsByVCId-example/response-fields.adoc[]
 
-[[resources-assets-getMappingsByVropsId]]
-=== getServerMappingsByVropsId
-
-A `GET` request is used to access the ServerMapping read by VropsId.
-
-==== Request structure
-
-include::{snippets}/assets-getMappingsByVropsId-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getMappingsByVropsId-example/http-response.adoc[]
-
-==== CURL request
-
-include::{snippets}/assets-getMappingsByVropsId-example/curl-request.adoc[]
-
-==== Response Fields
-
-include::{snippets}/assets-getMappingsByVropsId-example/response-fields.adoc[]
-
-[[resources-assets-getMappingsByVCId]]
-=== getServerMappingsByVCId
-
-A `GET` request is used to access the ServerMapping read by VCId.
-
-==== Request structure
-
-include::{snippets}/assets-getMappingsByVCId-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getMappingsByVCId-example/http-response.adoc[]
-
-==== CURL request
-
-include::{snippets}/assets-getMappingsByVCId-example/curl-request.adoc[]
-
-==== Response Fields
-
-include::{snippets}/assets-getMappingsByVCId-example/response-fields.adoc[]
-
 [[resources-assets-getHostNameByIP]]
 === getAssetNameIPMappingByIP
 
@@ -373,30 +331,30 @@ include::{snippets}/assets-getAssetsByVCId-example/http-response.adoc[]
 
 include::{snippets}/assets-getAssetsByVCId-example/curl-request.adoc[]
 
-==== Response Fields
+==== Request Fields
 
-include::{snippets}/assets-getAssetsByVCId-example/response-fields.adoc[]
+include::{snippets}/assets-getAssetsByVCId-example/request-fields.adoc[]
 
-[[resources-assets-getAssetsByVROPSId]]
-=== getMappedAssetsByVROpsID
+[[resources-assets-getAssetsByVroId]]
+=== getMappedAssetsByvroID
 
-A `GET` request is used to access the assets read by VropsId.
+A `GET` request is used to access the assert read by VroId.
 
 ==== Request structure
 
-include::{snippets}/assets-getAssetsByVROPSId-example/http-request.adoc[]
+include::{snippets}/assets-getAssetsByVroId-example/http-request.adoc[]
 
 ==== Example response
 
-include::{snippets}/assets-getAssetsByVROPSId-example/http-response.adoc[]
+include::{snippets}/assets-getAssetsByVroId-example/http-response.adoc[]
 
 ==== CURL request
 
-include::{snippets}/assets-getAssetsByVROPSId-example/curl-request.adoc[]
+include::{snippets}/assets-getAssetsByVroId-example/curl-request.adoc[]
 
-==== Response Fields
+==== Request Fields
 
-include::{snippets}/assets-getAssetsByVROPSId-example/response-fields.adoc[]
+include::{snippets}/assets-getAssetsByVroId-example/request-fields.adoc[]
 
 [[resources-assets-getServerSensorData]]
 === getServerSensorData

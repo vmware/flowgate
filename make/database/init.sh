@@ -3,11 +3,11 @@
 #Copyright 2019 VMware, Inc.
 #SPDX-License-Identifier: BSD-2-Clause
 #
-/opt/couchbase/bin/couchbase-cli cluster-init --cluster-username=flowgate_cluster --cluster-password=ADMINPASSWD_CHANGE --cluster-ramsize=4192 --cluster-index-ramsize=2048 --cluster-fts-ramsize=1024 --index-storage-setting=default --services=data,index,query
-/opt/couchbase/bin/couchbase-cli bucket-create -c localhost -u flowgate_cluster -p ADMINPASSWD_CHANGE --bucket flowgate --bucket-type couchbase --bucket-ramsize 1024 --bucket-replica 1 --wait
+/opt/couchbase/bin/couchbase-cli cluster-init --cluster-username=flowgate_cluster --cluster-password=ADMINPASSWD_CHANGE --cluster-ramsize=4096 --cluster-index-ramsize=2048 --cluster-fts-ramsize=1024 --index-storage-setting=default --services=data,index,query
+/opt/couchbase/bin/couchbase-cli bucket-create -c localhost -u flowgate_cluster -p ADMINPASSWD_CHANGE --bucket flowgate --bucket-type couchbase --bucket-ramsize 4096 --bucket-replica 1 --wait
 /opt/couchbase/bin/couchbase-cli user-manage -c localhost -u flowgate_cluster -p ADMINPASSWD_CHANGE --set --rbac-username=flowgate --rbac-password=USERPASSWD_CHANGE --roles=bucket_full_access[*] --auth-domain=local
 bash /home/couchbase/initData.sh
-/opt/couchbase/bin/cbdocloader -c localhost -u flowgate -p USERPASSWD_CHANGE -b flowgate -m 1024 -d ./database.zip
+/opt/couchbase/bin/cbdocloader -c localhost -u flowgate -p USERPASSWD_CHANGE -b flowgate -m 4096 -d ./database.zip
 
 ###create index###
 cbq -u flowgate_cluster -p ADMINPASSWD_CHANGE --script='CREATE INDEX `userName_index` ON `flowgate`(`userName`, `_class`) where _class = "com.vmware.flowgate.common.model.WormholeUser"'
