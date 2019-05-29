@@ -70,6 +70,8 @@ import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
 import com.vmware.flowgate.util.BaseDocumentUtil;
 
+import junit.framework.TestCase;
+
 class MappingIdForDoc {
    public String FirstId;
    public String SecondId;
@@ -405,72 +407,6 @@ public class AssetControllerTest {
       assetRepository.delete(asset.getId());
    }
 
-
-   @Test
-   public void getMappingsByVropsIdExample() throws Exception {
-
-      ServerMapping mapping = createServerMapping();
-      mapping.setVroID("1");
-      serverMappingRepository.save(mapping);
-
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the mapping, created by flowgate"),
-            fieldWithPath("asset").description("An asset for serverMapping."),
-            fieldWithPath("vcID").description("ID of Vcenter."),
-            fieldWithPath("vcHostName").description("Server's hostname display in Vcenter."),
-            fieldWithPath("vcMobID").description("EXSI server's management object ID."),
-            fieldWithPath("vcClusterMobID").description("MobID of Vcenter Cluster."),
-            fieldWithPath("vcInstanceUUID").description("Vcenter's UUID."),
-            fieldWithPath("vroID").description("ID of VROps."),
-            fieldWithPath("vroResourceName").description("Resource Name in VROps for this server."),
-            fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
-            fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
-            fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
-            fieldWithPath("vroResourceID").description("VROps Resource ID.") };
-
-      this.mockMvc.perform(get("/v1/assets/mapping/vrops/" + mapping.getVroID()))
-            .andExpect(status().isOk())
-            .andDo(document("assets-getMappingsByVropsId-example",
-                  responseFields(fieldWithPath("[]").description("An array of ServerMappings"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
-
-      serverMappingRepository.delete(mapping.getId());
-   }
-
-   @Test
-   public void getMappingsByVCIdExample() throws Exception {
-
-      ServerMapping mapping = createServerMapping();
-      mapping.setVroID("1");
-      mapping.setVcID("2");
-      serverMappingRepository.save(mapping);
-
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the mapping, created by flowgate"),
-            fieldWithPath("asset").description("An asset for serverMapping."),
-            fieldWithPath("vcID").description("ID of Vcenter."),
-            fieldWithPath("vcHostName").description("Server's hostname display in Vcenter."),
-            fieldWithPath("vcMobID").description("EXSI server's management object ID."),
-            fieldWithPath("vcClusterMobID").description("MobID of Vcenter Cluster."),
-            fieldWithPath("vcInstanceUUID").description("Vcenter's UUID."),
-            fieldWithPath("vroID").description("ID of VROps."),
-            fieldWithPath("vroResourceName").description("Resource Name in VROps for this server."),
-            fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
-            fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
-            fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
-            fieldWithPath("vroResourceID").description("VROps Resource ID.") };
-
-      this.mockMvc.perform(get("/v1/assets/mapping/vc/" + mapping.getVcID()))
-            .andExpect(status().isOk())
-            .andDo(document("assets-getMappingsByVCId-example",
-                  responseFields(fieldWithPath("[]").description("An array of ServerMappings"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
-
-      serverMappingRepository.delete(mapping.getId());
-   }
-
    @Test
    public void getHostNameByIPExample() throws Exception {
 
@@ -607,7 +543,6 @@ public class AssetControllerTest {
       assetRepository.delete(asset2.getId());
       serverMappingRepository.delete(mapping2.getId());
    }
-
 
    @Test
    public void readAssetsByAssetNameAndTagLikExample() throws Exception {
@@ -872,6 +807,56 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void findAssetsByVroIdTest() throws Exception{
+      ServerMapping mapping1 = createServerMapping();
+      mapping1.setAsset("0001bdc8b25d4c2badfd045ab61aabfa");
+      serverMappingRepository.save(mapping1);
+      ServerMapping mapping2 = createServerMapping();
+      serverMappingRepository.save(mapping2);
+      Asset asset = new Asset();
+      asset.setId("0001bdc8b25d4c2badfd045ab61aabfa");
+      assetRepository.save(asset);
+      MvcResult result = this.mockMvc
+      .perform(get("/v1/assets/vrops/1").content("{\"vroID\":1}"))
+      .andExpect(status().isOk())
+      .andDo(document("assets-getAssetsByVroId-example", requestFields(
+    		  fieldWithPath("vroID").description("ID of VROps"))))
+      .andReturn();
+      ObjectMapper mapper = new ObjectMapper();
+      String res = result.getResponse().getContentAsString();
+      Asset [] assets = mapper.readValue(res, Asset[].class);
+      TestCase.assertEquals(asset.getId(), assets[0].getId());
+      serverMappingRepository.delete(mapping1.getId());
+      serverMappingRepository.delete(mapping2.getId());
+      assetRepository.delete(asset.getId());
+   }
+
+   @Test
+   public void findAssetsByVCIdTest() throws Exception{
+      ServerMapping mapping1 = createServerMapping();
+      mapping1.setAsset("0001bdc8b25d4c2badfd045ab61aabfa");
+      serverMappingRepository.save(mapping1);
+      ServerMapping mapping2 = createServerMapping();
+      serverMappingRepository.save(mapping2);
+      Asset asset = new Asset();
+      asset.setId("0001bdc8b25d4c2badfd045ab61aabfa");
+      assetRepository.save(asset);
+      MvcResult result = this.mockMvc
+      .perform(get("/v1/assets/vrops/1").content("{\"vroID\":1}"))
+      .andExpect(status().isOk())
+      .andDo(document("assets-getAssetsByVroId-example", requestFields(
+    		  fieldWithPath("vroID").description("ID of VROps"))))
+      .andReturn();
+      ObjectMapper mapper = new ObjectMapper();
+      String res = result.getResponse().getContentAsString();
+      Asset [] assets = mapper.readValue(res, Asset[].class);
+      TestCase.assertEquals(asset.getId(), assets[0].getId());
+      serverMappingRepository.delete(mapping1.getId());
+      serverMappingRepository.delete(mapping2.getId());
+      assetRepository.delete(asset.getId());
+   }
+
+   @Test
    public void getPageMappingsByVROPSIdExample() throws Exception {
       ServerMapping mapping1 = createServerMapping();
       mapping1.setVcClusterMobID("1");
@@ -922,7 +907,6 @@ public class AssetControllerTest {
       serverMappingRepository.save(mapping2);
       int pageNumber = 1;
       int pageSize = 1;
-      int vropsID = 1;
       int vcID = 1;
 
       this.mockMvc.perform(
@@ -1209,7 +1193,6 @@ public class AssetControllerTest {
 
       ServerMapping mapping = createServerMapping();
       serverMappingRepository.save(mapping);
-
       mapping.setVcClusterMobID("1");
       mapping.setVcHostName("1");
 
@@ -1285,7 +1268,7 @@ public class AssetControllerTest {
                   requestFields(fieldWithPath("id").description("The primary key for asset."))));
    }
 
-   ServerMapping createServerMapping() throws Exception {
+   ServerMapping createServerMapping() {
       ServerMapping mapping = new ServerMapping();
       mapping.setId(UUID.randomUUID().toString());
       mapping.setVcHostName("mappinghostname");
@@ -1355,7 +1338,7 @@ public class AssetControllerTest {
       return realTimeData;
    }
 
-   AssetIPMapping createAssetIPMapping() throws Exception {
+   AssetIPMapping createAssetIPMapping() {
       AssetIPMapping assetipmapping = new AssetIPMapping();
       assetipmapping.setId(UUID.randomUUID().toString());
       assetipmapping.setAssetname("assetname");
@@ -1398,7 +1381,7 @@ public class AssetControllerTest {
       return asset;
    }
 
-   FacilitySoftwareConfig createFacilitySoftware() throws Exception {
+   FacilitySoftwareConfig createFacilitySoftware() {
       FacilitySoftwareConfig example = new FacilitySoftwareConfig();
       example.setId("5b7d208d55368540fcba1692");
       example.setName("Nlyte");
