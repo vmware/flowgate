@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.couchbase.client.java.document.json.JsonArray;
 import com.google.common.collect.Lists;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
@@ -165,7 +166,8 @@ public class AssetController {
       List<ServerMapping> serverMappings = serverMappingRepository.findByAssetNotNull();
       List<String> assetIDs =
             serverMappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
-      Iterable<Asset> assets = assetRepository.findAll(assetIDs);
+      JsonArray assetIdarray = JsonArray.from(assetIDs);
+      Iterable<Asset> assets = assetRepository.findAll(assetIdarray);
       Set<String> assetids = new HashSet<String>();
       if (category.equals(AssetCategory.Server)) {
          return Lists.newArrayList(assets);
@@ -184,7 +186,8 @@ public class AssetController {
             }
          }
          if (!assetids.isEmpty()) {
-            assets = assetRepository.findAll(assetids);
+             JsonArray array = JsonArray.from(assetids);
+             assets = assetRepository.findAll(array);
          } else {
             assets = new ArrayList<Asset>();
          }
@@ -238,7 +241,8 @@ public class AssetController {
       List<ServerMapping> serverMappings = serverMappingRepository.findByAssetNotNull();
       List<String> assetIDs =
             serverMappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
-      Iterable<Asset> assets = assetRepository.findAll(assetIDs);
+      JsonArray array = JsonArray.from(assetIDs);
+      Iterable<Asset> assets = assetRepository.findAll(array);
       List<Asset> result = new ArrayList<Asset>();
       for (Asset asset : assets) {
          if (asset.getPdus() == null || asset.getPdus().isEmpty()) {
@@ -258,7 +262,8 @@ public class AssetController {
       List<ServerMapping> serverMappings = serverMappingRepository.findByAssetNotNull();
       List<String> assetIDs =
             serverMappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
-      Iterable<Asset> assets = assetRepository.findAll(assetIDs);
+      JsonArray array = JsonArray.from(assetIDs);
+      Iterable<Asset> assets = assetRepository.findAll(array);
       List<Asset> result = new ArrayList<Asset>();
       for (Asset asset : assets) {
          if (asset.getPdus() != null && !asset.getPdus().isEmpty()) {
@@ -463,12 +468,6 @@ public class AssetController {
       return valueType.toString().equals(sType.toString());
    }
 
-   @ResponseStatus(HttpStatus.OK)
-   @RequestMapping(value = "/mapping/vrops/{id}", method = RequestMethod.GET)
-   public List<ServerMapping> getMappingsByVROPSId(@PathVariable("id") String vropsID) {
-      return serverMappingRepository.findAllByVroID(vropsID);
-   }
-
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/mapping", method = RequestMethod.POST)
    public void saveServerMapping(@RequestBody ServerMapping serverMapping) {
@@ -478,10 +477,27 @@ public class AssetController {
 
    @RequestMapping(value = "/vrops/{id}")
    public List<Asset> getAssetsByVROPSId(@PathVariable("id") String vropsID) {
-      List<ServerMapping> mappings = serverMappingRepository.findAllByVroID(vropsID);
-      List<String> assetIDs =
-            mappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
-      return Lists.newArrayList(assetRepository.findAll(assetIDs));
+      List<ServerMapping> mappings = new ArrayList<ServerMapping>();
+      int currentPage = FlowgateConstant.defaultPageNumber;
+      PageRequest pageRequest = new PageRequest(currentPage-1, FlowgateConstant.maxPageSize);
+      Page<ServerMapping> mappingPage =
+            serverMappingRepository.findAllByVroID(vropsID, pageRequest);
+      mappings.addAll(mappingPage.getContent());
+      while(!mappingPage.isLast()) {
+    	  currentPage++;
+    	  pageRequest = new PageRequest(currentPage-1, FlowgateConstant.maxPageSize);
+    	  mappingPage = serverMappingRepository.findAllByVroID(vropsID, pageRequest);
+    	  mappings.addAll(mappingPage.getContent());
+      }
+      List<String> assetIDs = new ArrayList<String>();
+      for(ServerMapping mapping:mappings) {
+    	  String assetId = mapping.getAsset();
+    	  if(assetId != null) {
+    		  assetIDs.add(assetId);
+    	  }
+      }
+      JsonArray array = JsonArray.from(assetIDs);
+      return assetRepository.findAll(array);
    }
 
    // Update serverMapping
@@ -573,17 +589,12 @@ public class AssetController {
          }
       }
       List<String> assetIds = new ArrayList<String>(serverMappings.keySet());
-      Iterable<Asset> assets = assetRepository.findAll(assetIds);
+      JsonArray array = JsonArray.from(assetIds);
+      Iterable<Asset> assets = assetRepository.findAll(array);
       for (Asset asset : assets) {
          serverMappings.get(asset.getId()).setAsset(asset.getAssetName());
       }
       return mappings;
-   }
-
-   @ResponseStatus(HttpStatus.OK)
-   @RequestMapping(value = "/mapping/vc/{id}", method = RequestMethod.GET)
-   public List<ServerMapping> getMappingsByVCId(@PathVariable("id") String vcID) {
-      return serverMappingRepository.findAllByVcID(vcID);
    }
 
    @ResponseStatus(HttpStatus.OK)
@@ -620,10 +631,27 @@ public class AssetController {
 
    @RequestMapping(value = "/vc/{id}", method = RequestMethod.GET)
    public List<Asset> getAssetsByVCId(@PathVariable("id") String vcID) {
-      List<ServerMapping> mappings = serverMappingRepository.findAllByVcID(vcID);
-      List<String> assetIDs =
-            mappings.stream().map(ServerMapping::getAsset).collect(Collectors.toList());
-      return Lists.newArrayList(assetRepository.findAll(assetIDs));
+      List<ServerMapping> mappings = new ArrayList<ServerMapping>();
+      int currentPage = FlowgateConstant.defaultPageNumber;
+      PageRequest pageRequest = new PageRequest(currentPage-1, FlowgateConstant.maxPageSize);
+      Page<ServerMapping> mappingPage =
+            serverMappingRepository.findAllByVcID(vcID, pageRequest);
+      mappings.addAll(mappingPage.getContent());
+      while(!mappingPage.isLast()) {
+    	  currentPage++;
+    	  pageRequest = new PageRequest(currentPage - 1, FlowgateConstant.maxPageSize);
+    	  mappingPage = serverMappingRepository.findAllByVcID(vcID, pageRequest);
+    	  mappings.addAll(mappingPage.getContent());
+      }
+      List<String> assetIDs = new ArrayList<String>();
+      for(ServerMapping mapping:mappings) {
+    	  String assetId = mapping.getAsset();
+    	  if(assetId != null) {
+    		  assetIDs.add(assetId);
+    	  }
+      }
+      JsonArray array = JsonArray.from(assetIDs);
+      return assetRepository.findAll(array);
    }
 
 

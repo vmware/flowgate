@@ -29,6 +29,7 @@
 		<vlsi-core.version>6.5.0-4258493</vlsi-core.version>
 		<jwt.version>3.3.0</jwt.version>
 		<commons-io.version>2.4</commons-io.version>
+		<couchbase-java-client.version>2.4.7</couchbase-java-client.version>
 	</properties>
 
 	<dependencies>
@@ -47,7 +48,18 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-couchbase</artifactId>
+			<exclusions>
+				<exclusion>
+				<groupId>com.couchbase.client</groupId>
+        		<artifactId>java-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+		 <dependency>
+        	<groupId>com.couchbase.client</groupId>
+        	<artifactId>java-client</artifactId>
+        	<version>${couchbase-java-client.version}</version>
+      	</dependency>
 		<dependency> 
 			<groupId>org.springframework.boot</groupId> 
 			<artifactId>spring-boot-starter-security</artifactId> 
@@ -66,6 +78,12 @@
 			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>flowgate-common</artifactId>
 			<version>${flowgate.version}</version>
+			<exclusions>
+				<exclusion>
+				<groupId>com.couchbase.client</groupId>
+        		<artifactId>java-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.vmware</groupId>

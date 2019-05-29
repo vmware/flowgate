@@ -8,15 +8,14 @@ import java.util.List;
 
 import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
 import org.springframework.data.couchbase.core.query.Query;
-import org.springframework.data.couchbase.core.query.ViewIndexed;
 import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.couchbase.client.java.document.json.JsonArray;
 import com.vmware.flowgate.common.model.Asset;
 
 @N1qlPrimaryIndexed
-@ViewIndexed(designDoc = "asset")
 public interface AssetRepository
       extends CouchbasePagingAndSortingRepository<Asset, String> {
    public Asset findOneByAssetNumber(long assetNumber);
@@ -32,6 +31,9 @@ public interface AssetRepository
    public long getNumber(String keywords, String category);
 
    public Page<Asset> findByAssetSource(String assetSource, Pageable page);
+
+   @Query("SELECT META(#{#n1ql.bucket}).id AS _ID, META(#{#n1ql.bucket}).cas AS _CAS, #{#n1ql.bucket}.* FROM #{#n1ql.bucket} use keys $1")
+   public List<Asset> findAll(JsonArray assetIds);
 
    public Asset findOneByAssetName(String name);
 

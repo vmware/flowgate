@@ -70,6 +70,8 @@ import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
 import com.vmware.flowgate.util.BaseDocumentUtil;
 
+import junit.framework.TestCase;
+
 class MappingIdForDoc {
    public String FirstId;
    public String SecondId;
@@ -406,150 +408,6 @@ public class AssetControllerTest {
    }
 
    @Test
-   public void readAssetByVROPSIdExample() throws Exception {
-      Asset asset = createAsset();
-      ServerMapping mapping = createServerMapping();
-      asset = assetRepository.save(asset);
-      mapping.setAsset(asset.getId());
-      mapping = serverMappingRepository.save(mapping);
-
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the asset, created by flowgate"),
-            fieldWithPath("assetNumber").description(
-                  "A unique number that can identify an asset from third part DCIM/CMDB systems.")
-                  .type(long.class),
-            fieldWithPath("assetName").description(
-                  "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
-            fieldWithPath("assetSource").description(
-                  "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
-            fieldWithPath("category").description(
-                  "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
-                  .type(AssetCategory.class),
-            fieldWithPath("subCategory")
-                  .description("The subcategory of the asset. Only apply to some systems.")
-                  .type(AssetSubCategory.class).optional(),
-            fieldWithPath("manufacturer").description("The manufacture name"),
-            fieldWithPath("model").description("The model of the asset"),
-            fieldWithPath("serialnumber").description(
-                  "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
-                  .optional(),
-            fieldWithPath("tag").description(
-                  "Some system will use tag to identify an asset. It can be either an number or a string.")
-                  .type(String.class).optional(),
-            fieldWithPath("assetAddress").description("The access address of the asset")
-                  .type(AssetAddress.class).optional(),
-            fieldWithPath("region").description("The location region of the asset").optional(),
-            fieldWithPath("country").description("The location country of the asset").optional(),
-            fieldWithPath("city").description("The location city of the asset").optional(),
-            fieldWithPath("building").description("The location building of the asset").optional(),
-            fieldWithPath("floor").description("The location floor of the asset").optional(),
-            fieldWithPath("room").description("The location room of the asset"),
-            fieldWithPath("row").description("The location row of the asset").optional(),
-            fieldWithPath("col").description("The location col of the asset").optional(),
-            fieldWithPath("extraLocation")
-                  .description("Extra location information. Only valid for some system.")
-                  .optional(),
-            fieldWithPath("cabinetName").description(
-                  "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
-                  .optional(),
-            fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
-                  .type(int.class).optional(),
-            fieldWithPath("mountingSide").description("The cabinet unit number")
-                  .type(MountingSide.class).optional(),
-            fieldWithPath("cabinetsize").description("The cabinet size(only for cabinet type)")
-                  .type(int.class).optional(),
-            fieldWithPath("cabinetAssetNumber").description(
-                  "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
-                  .type(long.class).optional(),
-            fieldWithPath("assetRealtimeDataSpec")
-                  .description("Only valid for sensor type of asset.")
-                  .type(AssetRealtimeDataSpec.class).optional(),
-            fieldWithPath("justificationfields")
-                  .description("Justification fields that input by user."),
-            fieldWithPath("sensorsformulars")
-                  .description("The sensor data generator logic for this asset."),
-            fieldWithPath("lastupdate").description("When this asset was last upated"),
-            fieldWithPath("created").description("When this asset was created"),
-            fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
-            fieldWithPath("switches")
-                  .description("Physical switchs that this host connected with") };
-
-      this.mockMvc.perform(get("/v1/assets/vrops/" + mapping.getVroID())).andExpect(status().isOk())
-            .andDo(document("assets-getAssetsByVROPSId-example",
-                  responseFields(fieldWithPath("[]").description("An array of asserts"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
-
-      assetRepository.delete(asset.getId());
-      serverMappingRepository.delete(mapping.getId());
-   }
-
-   @Test
-   public void getMappingsByVropsIdExample() throws Exception {
-
-      ServerMapping mapping = createServerMapping();
-      mapping.setVroID("1");
-      serverMappingRepository.save(mapping);
-
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the mapping, created by flowgate"),
-            fieldWithPath("asset").description("An asset for serverMapping."),
-            fieldWithPath("vcID").description("ID of Vcenter."),
-            fieldWithPath("vcHostName").description("Server's hostname display in Vcenter."),
-            fieldWithPath("vcMobID").description("EXSI server's management object ID."),
-            fieldWithPath("vcClusterMobID").description("MobID of Vcenter Cluster."),
-            fieldWithPath("vcInstanceUUID").description("Vcenter's UUID."),
-            fieldWithPath("vroID").description("ID of VROps."),
-            fieldWithPath("vroResourceName").description("Resource Name in VROps for this server."),
-            fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
-            fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
-            fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
-            fieldWithPath("vroResourceID").description("VROps Resource ID.") };
-
-      this.mockMvc.perform(get("/v1/assets/mapping/vrops/" + mapping.getVroID()))
-            .andExpect(status().isOk())
-            .andDo(document("assets-getMappingsByVropsId-example",
-                  responseFields(fieldWithPath("[]").description("An array of ServerMappings"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
-
-      serverMappingRepository.delete(mapping.getId());
-   }
-
-   @Test
-   public void getMappingsByVCIdExample() throws Exception {
-
-      ServerMapping mapping = createServerMapping();
-      mapping.setVroID("1");
-      mapping.setVcID("2");
-      serverMappingRepository.save(mapping);
-
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the mapping, created by flowgate"),
-            fieldWithPath("asset").description("An asset for serverMapping."),
-            fieldWithPath("vcID").description("ID of Vcenter."),
-            fieldWithPath("vcHostName").description("Server's hostname display in Vcenter."),
-            fieldWithPath("vcMobID").description("EXSI server's management object ID."),
-            fieldWithPath("vcClusterMobID").description("MobID of Vcenter Cluster."),
-            fieldWithPath("vcInstanceUUID").description("Vcenter's UUID."),
-            fieldWithPath("vroID").description("ID of VROps."),
-            fieldWithPath("vroResourceName").description("Resource Name in VROps for this server."),
-            fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
-            fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
-            fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
-            fieldWithPath("vroResourceID").description("VROps Resource ID.") };
-
-      this.mockMvc.perform(get("/v1/assets/mapping/vc/" + mapping.getVcID()))
-            .andExpect(status().isOk())
-            .andDo(document("assets-getMappingsByVCId-example",
-                  responseFields(fieldWithPath("[]").description("An array of ServerMappings"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
-
-      serverMappingRepository.delete(mapping.getId());
-   }
-
-   @Test
    public void getHostNameByIPExample() throws Exception {
 
       AssetIPMapping mapping1 = createAssetIPMapping();
@@ -676,98 +534,6 @@ public class AssetControllerTest {
                   .description("Physical switchs that this host connected with") };
       this.mockMvc.perform(get("/v1/assets/mappedasset/category/" + asset.getCategory()))
             .andDo(document("assets-getMapped-example",
-                  responseFields(fieldWithPath("[]").description("An array of asserts"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
-
-      assetRepository.delete(asset.getId());
-      serverMappingRepository.delete(mapping.getId());
-      assetRepository.delete(asset2.getId());
-      serverMappingRepository.delete(mapping2.getId());
-   }
-
-   @Test
-   public void getAssetsByVCIdExample() throws Exception {
-      Asset asset = createAsset();
-      asset = assetRepository.save(asset);
-
-      ServerMapping mapping = createServerMapping();
-      mapping.setAsset(asset.getId());
-      mapping.setVcID("5b7cfd5655368548d42e0fd5");
-      mapping.setVcHostName("10.192.74.203");
-      mapping.setVcMobID("host-11");
-      serverMappingRepository.save(mapping);
-
-      Asset asset2 = createAsset();
-      asset2 = assetRepository.save(asset2);
-
-      ServerMapping mapping2 = createServerMapping();
-      mapping2.setAsset(asset2.getId());
-      mapping2.setVcID("5b7cfd5655368548d42e0fd6");
-      mapping2.setVcHostName("10.192.74.203");
-      mapping2.setVcMobID("host-11");
-      serverMappingRepository.save(mapping2);
-
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the asset, created by flowgate"),
-            fieldWithPath("assetNumber").description(
-                  "A unique number that can identify an asset from third part DCIM/CMDB systems.")
-                  .type(long.class),
-            fieldWithPath("assetName").description(
-                  "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
-            fieldWithPath("assetSource").description(
-                  "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
-            fieldWithPath("category").description(
-                  "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
-                  .type(AssetCategory.class),
-            fieldWithPath("subCategory")
-                  .description("The subcategory of the asset. Only apply to some systems.")
-                  .type(AssetSubCategory.class).optional(),
-            fieldWithPath("manufacturer").description("The manufacture name"),
-            fieldWithPath("model").description("The model of the asset"),
-            fieldWithPath("serialnumber").description(
-                  "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
-                  .optional(),
-            fieldWithPath("tag").description(
-                  "Some system will use tag to identify an asset. It can be either an number or a string.")
-                  .type(String.class).optional(),
-            fieldWithPath("assetAddress").description("The access address of the asset")
-                  .type(AssetAddress.class).optional(),
-            fieldWithPath("region").description("The location region of the asset").optional(),
-            fieldWithPath("country").description("The location country of the asset").optional(),
-            fieldWithPath("city").description("The location city of the asset").optional(),
-            fieldWithPath("building").description("The location building of the asset").optional(),
-            fieldWithPath("floor").description("The location floor of the asset").optional(),
-            fieldWithPath("room").description("The location room of the asset"),
-            fieldWithPath("row").description("The location row of the asset").optional(),
-            fieldWithPath("col").description("The location col of the asset").optional(),
-            fieldWithPath("extraLocation")
-                  .description("Extra location information. Only valid for some system.")
-                  .optional(),
-            fieldWithPath("cabinetName").description(
-                  "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
-                  .optional(),
-            fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
-                  .type(int.class).optional(),
-            fieldWithPath("cabinetsize").description("The cabinet size(only for cabinet type)")
-                  .type(int.class).optional(),
-            fieldWithPath("cabinetAssetNumber").description(
-                  "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
-                  .type(long.class).optional(),
-            fieldWithPath("assetRealtimeDataSpec")
-                  .description("Only valid for sensor type of asset.")
-                  .type(AssetRealtimeDataSpec.class).optional(),
-            fieldWithPath("justificationfields")
-                  .description("Justification fields that input by user."),
-            fieldWithPath("sensorsformulars")
-                  .description("The sensor data generator logic for this asset."),
-            fieldWithPath("lastupdate").description("When this asset was last upated"),
-            fieldWithPath("created").description("When this asset was created"),
-            fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
-            fieldWithPath("switches")
-                  .description("Physical switchs that this host connected with") };
-      this.mockMvc.perform(get("/v1/assets/vc/" + mapping.getVcID()))
-            .andDo(document("assets-getAssetsByVCId-example",
                   responseFields(fieldWithPath("[]").description("An array of asserts"))
                         .andWithPrefix("[].", fieldpath)))
             .andReturn().getResponse().getHeader("Location");
@@ -1041,6 +807,60 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void findAssetsByVroIdTest() throws Exception{
+      ServerMapping mapping1 = createServerMapping();
+      mapping1.setVroID("90o76d5655368548d42e0fd5");
+      mapping1.setAsset("0001bdc8b25d4c2badfd045ab61aabfa");
+      serverMappingRepository.save(mapping1);
+      ServerMapping mapping2 = createServerMapping();
+      mapping1.setVroID("90o76d5655368548d42e0fd5");
+      serverMappingRepository.save(mapping2);
+      Asset asset = new Asset();
+      asset.setId("0001bdc8b25d4c2badfd045ab61aabfa");
+      assetRepository.save(asset);
+      MvcResult result = this.mockMvc
+      .perform(get("/v1/assets/vrops/90o76d5655368548d42e0fd5").content("{\"vroID\":\"90o76d5655368548d42e0fd5\"}"))
+      .andExpect(status().isOk())
+      .andDo(document("assets-getAssetsByVroId-example", requestFields(
+    		  fieldWithPath("vroID").description("ID of VROps"))))
+      .andReturn();
+      ObjectMapper mapper = new ObjectMapper();
+      String res = result.getResponse().getContentAsString();
+      Asset [] assets = mapper.readValue(res, Asset[].class);
+      TestCase.assertEquals(asset.getId(), assets[0].getId());
+      serverMappingRepository.delete(mapping1.getId());
+      serverMappingRepository.delete(mapping2.getId());
+      assetRepository.delete(asset.getId());
+   }
+
+   @Test
+   public void findAssetsByVCIdTest() throws Exception{
+      ServerMapping mapping1 = createServerMapping();
+      mapping1.setAsset("0001bdc8b25d4c2badfd045ab61aabfa");
+      mapping1.setVcID("5b7cfd5655368548d42e0fd5");
+      serverMappingRepository.save(mapping1);
+      ServerMapping mapping2 = createServerMapping();
+      mapping2.setVcID("5b7cfd5655368548d42e0fd5");
+      serverMappingRepository.save(mapping2);
+      Asset asset = new Asset();
+      asset.setId("0001bdc8b25d4c2badfd045ab61aabfa");
+      assetRepository.save(asset);
+      MvcResult result = this.mockMvc
+      .perform(get("/v1/assets/vc/5b7cfd5655368548d42e0fd5").content("{\"vcID\":\"5b7cfd5655368548d42e0fd5\"}"))
+      .andExpect(status().isOk())
+      .andDo(document("assets-getAssetsByVcId-example", requestFields(
+    		  fieldWithPath("vcID").description("ID of VCENER"))))
+      .andReturn();
+      ObjectMapper mapper = new ObjectMapper();
+      String res = result.getResponse().getContentAsString();
+      Asset [] assets = mapper.readValue(res, Asset[].class);
+      TestCase.assertEquals(asset.getId(), assets[0].getId());
+      serverMappingRepository.delete(mapping1.getId());
+      serverMappingRepository.delete(mapping2.getId());
+      assetRepository.delete(asset.getId());
+   }
+
+   @Test
    public void getPageMappingsByVROPSIdExample() throws Exception {
       ServerMapping mapping1 = createServerMapping();
       mapping1.setVcClusterMobID("1");
@@ -1091,7 +911,6 @@ public class AssetControllerTest {
       serverMappingRepository.save(mapping2);
       int pageNumber = 1;
       int pageSize = 1;
-      int vropsID = 1;
       int vcID = 1;
 
       this.mockMvc.perform(
@@ -1378,7 +1197,6 @@ public class AssetControllerTest {
 
       ServerMapping mapping = createServerMapping();
       serverMappingRepository.save(mapping);
-
       mapping.setVcClusterMobID("1");
       mapping.setVcHostName("1");
 
@@ -1454,7 +1272,7 @@ public class AssetControllerTest {
                   requestFields(fieldWithPath("id").description("The primary key for asset."))));
    }
 
-   ServerMapping createServerMapping() throws Exception {
+   ServerMapping createServerMapping() {
       ServerMapping mapping = new ServerMapping();
       mapping.setId(UUID.randomUUID().toString());
       mapping.setVcHostName("mappinghostname");
@@ -1524,7 +1342,7 @@ public class AssetControllerTest {
       return realTimeData;
    }
 
-   AssetIPMapping createAssetIPMapping() throws Exception {
+   AssetIPMapping createAssetIPMapping() {
       AssetIPMapping assetipmapping = new AssetIPMapping();
       assetipmapping.setId(UUID.randomUUID().toString());
       assetipmapping.setAssetname("assetname");
@@ -1567,7 +1385,7 @@ public class AssetControllerTest {
       return asset;
    }
 
-   FacilitySoftwareConfig createFacilitySoftware() throws Exception {
+   FacilitySoftwareConfig createFacilitySoftware() {
       FacilitySoftwareConfig example = new FacilitySoftwareConfig();
       example.setId("5b7d208d55368540fcba1692");
       example.setName("Nlyte");
