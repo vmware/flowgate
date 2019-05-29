@@ -95,7 +95,8 @@ public class NlyteAsset {
    private UMounting uMounting;
    
    public boolean isActived() {
-      return "Active".equals(recordStatus);
+      return "Active".equals(recordStatus) && "Operational".equals(operationalStatus)
+            && 0 < cabinetAssetID;
    }
    public int getAssetID() {
       return assetID;

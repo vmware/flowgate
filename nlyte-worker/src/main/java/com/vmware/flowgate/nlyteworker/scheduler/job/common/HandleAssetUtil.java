@@ -37,6 +37,7 @@ public class HandleAssetUtil {
    public static final int powerStripMaterial = 3;
    public static final int cabinetMaterials = 4;
    public static final int networkMaterials = 5;
+   public static final int NETWORK_SUBTYPE_STANDARD = 7;
    /**
     *
     * @return
@@ -146,6 +147,10 @@ public class HandleAssetUtil {
          asset.setAssetName(nlyteAsset.getAssetName());
          asset = supplementLocation(asset,nlyteAsset.getLocationGroupID(),locationMap);
          asset = supplementMaterial(asset,nlyteAsset.getMaterialID(),manufacturerMap,materialMap);
+         //we need to refactor the code
+         if (asset.getCategory() == null) {
+            continue;
+         }
          asset.setAssetSource(nlyteSource);
          AssetStatus status = new AssetStatus();
          status.setNetworkMapping(NetworkMapping.UNMAPPED);
