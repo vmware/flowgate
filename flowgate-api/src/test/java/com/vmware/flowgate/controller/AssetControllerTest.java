@@ -809,15 +809,17 @@ public class AssetControllerTest {
    @Test
    public void findAssetsByVroIdTest() throws Exception{
       ServerMapping mapping1 = createServerMapping();
+      mapping1.setVroID("90o76d5655368548d42e0fd5");
       mapping1.setAsset("0001bdc8b25d4c2badfd045ab61aabfa");
       serverMappingRepository.save(mapping1);
       ServerMapping mapping2 = createServerMapping();
+      mapping1.setVroID("90o76d5655368548d42e0fd5");
       serverMappingRepository.save(mapping2);
       Asset asset = new Asset();
       asset.setId("0001bdc8b25d4c2badfd045ab61aabfa");
       assetRepository.save(asset);
       MvcResult result = this.mockMvc
-      .perform(get("/v1/assets/vrops/1").content("{\"vroID\":1}"))
+      .perform(get("/v1/assets/vrops/90o76d5655368548d42e0fd5").content("{\"vroID\":\"90o76d5655368548d42e0fd5\"}"))
       .andExpect(status().isOk())
       .andDo(document("assets-getAssetsByVroId-example", requestFields(
     		  fieldWithPath("vroID").description("ID of VROps"))))
@@ -835,17 +837,19 @@ public class AssetControllerTest {
    public void findAssetsByVCIdTest() throws Exception{
       ServerMapping mapping1 = createServerMapping();
       mapping1.setAsset("0001bdc8b25d4c2badfd045ab61aabfa");
+      mapping1.setVcID("5b7cfd5655368548d42e0fd5");
       serverMappingRepository.save(mapping1);
       ServerMapping mapping2 = createServerMapping();
+      mapping2.setVcID("5b7cfd5655368548d42e0fd5");
       serverMappingRepository.save(mapping2);
       Asset asset = new Asset();
       asset.setId("0001bdc8b25d4c2badfd045ab61aabfa");
       assetRepository.save(asset);
       MvcResult result = this.mockMvc
-      .perform(get("/v1/assets/vrops/1").content("{\"vroID\":1}"))
+      .perform(get("/v1/assets/vc/5b7cfd5655368548d42e0fd5").content("{\"vcID\":\"5b7cfd5655368548d42e0fd5\"}"))
       .andExpect(status().isOk())
-      .andDo(document("assets-getAssetsByVroId-example", requestFields(
-    		  fieldWithPath("vroID").description("ID of VROps"))))
+      .andDo(document("assets-getAssetsByVcId-example", requestFields(
+    		  fieldWithPath("vcID").description("ID of VCENER"))))
       .andReturn();
       ObjectMapper mapper = new ObjectMapper();
       String res = result.getResponse().getContentAsString();
