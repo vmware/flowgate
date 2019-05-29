@@ -50,7 +50,9 @@ export class SensorsettingEditComponent implements OnInit {
     this.modalIsOpen = false;
     this.operationTip = "";
   }
-
+  cancel(){
+    this.router.navigate(["/ui/nav/setting"]);
+  }
 
   ngOnInit() {
     this.sensorsetting.id = this.activedRoute.snapshot.params['id'];
