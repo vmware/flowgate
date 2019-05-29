@@ -4,7 +4,6 @@
 */
 package com.vmware.flowgate.controller;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -17,7 +16,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -1302,14 +1300,27 @@ public class AssetControllerTest {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
       Iterable<RealTimeData> result = realtimeDataRepository.save(realTimeDatas);
-      this.mockMvc
+      MvcResult result1 = this.mockMvc
             .perform(get("/v1/assets/" + asset.getId() + "/serversensordata").param("starttime",
                   "1501981711206"))
-            .andExpect(content().string(equalTo(
-                  "[{\"type\":\"PDU_RealtimeLoad\",\"valueNum\":20.0,\"value\":null,\"timeStamp\":1501981711206},{\"type\":\"PDU_RealtimePower\",\"valueNum\":2.38,\"value\":null,\"timeStamp\":1501981711206},{\"type\":\"PDU_RealtimeVoltage\",\"valueNum\":208.0,\"value\":null,\"timeStamp\":1501981711206}]")))
             .andDo(document("assets-getServerSensorData-example",
                   responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
-                        .andWithPrefix("[].", fieldpath)));
+                        .andWithPrefix("[].", fieldpath)))
+            .andReturn();
+      ObjectMapper mapper = new ObjectMapper();
+      String res = result1.getResponse().getContentAsString();
+      ServerSensorData [] datas = mapper.readValue(res, ServerSensorData[].class);
+      for(ServerSensorData serverdata:datas) {
+    	  if(serverdata.getType().name().equals("PDU_RealtimeLoad")) {
+    		  TestCase.assertEquals(serverdata.getValueNum(), 20.0);
+    	  }else if(serverdata.getType().name().equals("PDU_RealtimePower")) {
+    		  TestCase.assertEquals(serverdata.getValueNum(), 2.38);
+    	  }else if(serverdata.getType().name().equals("PDU_RealtimeVoltage")) {
+    		  TestCase.assertEquals(serverdata.getValueNum(), 208.0);
+    	  }else {
+    		  TestCase.fail();
+    	  }
+      }
       assetRepository.delete(asset);
       realtimeDataRepository.delete(result);
    }
