@@ -276,6 +276,8 @@ public class NlyteAPIClient {
          nextPageNlyteAssets = nlyteAssetResult.getValue();
          nlyteAssets.addAll(nextPageNlyteAssets);
       }
+      HandleAssetUtil util = new HandleAssetUtil();
+      nlyteAssets = util.filterUnActivedAsset(nlyteAssets, category);
       return nlyteAssets;
    }
    public ResponseEntity<JsonResultForPDURealtimeValue> getPowerStripsRealtimeValue(long assetNumber) {

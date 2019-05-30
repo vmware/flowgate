@@ -136,9 +136,6 @@ public class HandleAssetUtil {
       List<Asset> assetsFromNlyte = new ArrayList<Asset>();
       Asset asset;
       for(NlyteAsset nlyteAsset:nlyteAssets) {
-         if(nlyteAsset.isTemplateRelated() || !nlyteAsset.isActived()) {
-            continue;
-         }
          asset = new Asset();
          asset.setAssetNumber(nlyteAsset.getAssetNumber());
          asset.setCabinetAssetNumber(String.valueOf(nlyteAsset.getCabinetAssetID()));
@@ -275,6 +272,37 @@ public class HandleAssetUtil {
       }
       resultAsset.addAll(updateAsset);
       return resultAsset;
+   }
+
+   public List<NlyteAsset> filterUnActivedAsset(List<NlyteAsset> nlyteAssets, AssetCategory category) {
+      List<NlyteAsset> assets = new ArrayList<NlyteAsset>();
+      for (NlyteAsset nlyteAsset : nlyteAssets) {
+         if (nlyteAsset.isTemplateRelated() || !nlyteAsset.isActived()) {
+            continue;
+         }
+         switch (category) {
+         case Server:
+            if (nlyteAsset.getCabinetAssetID() <= 0) {
+               continue;
+            }
+            break;
+         case PDU:
+            if (nlyteAsset.getCabinetAssetID() <= 0 && nlyteAsset.getuMounting() == null) {
+               continue;
+            }
+            break;
+         case Networks:
+            if (nlyteAsset.getCabinetAssetID() <= 0) {
+               continue;
+            }
+            break;
+         case Cabinet:
+         default:
+            break;
+         }
+         assets.add(nlyteAsset);
+      }
+      return assets;
    }
 
 }
