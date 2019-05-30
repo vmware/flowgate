@@ -4,6 +4,7 @@
 */
 package com.vmware.flowgate.nlyteworker.restclient;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,7 +103,6 @@ public class NlyteAPIClient {
 
    public void setNlyteServiceEndpoint(String nlyteServiceEndpoint) {
       this.nlyteServiceEndpoint = nlyteServiceEndpoint;
-      ;
    }
 
    public String getNlyteServiceEndpoint() {
@@ -224,18 +224,21 @@ public class NlyteAPIClient {
          return materials;
       }
       List<Material> nextPageMaterials = null;
-      while (materialResult.getOdatanextLink() != null
-            && !materialResult.getOdatanextLink().equals("")) {
+      URLDecoder decoder = new URLDecoder();
+      String nextLink = materialResult.getOdatanextLink();
+      while (nextLink != null && !nextLink.equals("")) {
+         nextLink = decoder.decode(nextLink);
          nextPageMaterials = new LinkedList<Material>();
          try {
-            materialResult = this.restTemplate.exchange(materialResult.getOdatanextLink(),
+            materialResult = this.restTemplate.exchange(nextLink,
                   HttpMethod.GET, getDefaultEntity(), JsonResultForMaterial.class).getBody();
          }catch(HttpServerErrorException e) {
-            logger.error("Internal Server Error.The url is "+materialResult.getOdatanextLink());
+            logger.error("Internal Server Error.The url is "+nextLink);
             break;
          }
          nextPageMaterials = materialResult.getValue();
          materials.addAll(nextPageMaterials);
+         nextLink = materialResult.getOdatanextLink();
       }
       return materials;
    }
@@ -267,14 +270,17 @@ public class NlyteAPIClient {
       if (!isAllData) {
          return nlyteAssets;
       }
+      URLDecoder decoder = new URLDecoder();
       List<NlyteAsset> nextPageNlyteAssets = null;
-      while (nlyteAssetResult.getOdatanextLink() != null
-            && !nlyteAssetResult.getOdatanextLink().equals("")) {
+      String nextLink = nlyteAssetResult.getOdatanextLink();
+      while (nextLink != null && !nextLink.equals("")) {
+         nextLink = decoder.decode(nextLink);
          nextPageNlyteAssets = new ArrayList<NlyteAsset>();
-         nlyteAssetResult = this.restTemplate.exchange(nlyteAssetResult.getOdatanextLink(),
+         nlyteAssetResult = this.restTemplate.exchange(nextLink,
                HttpMethod.GET, getDefaultEntity(), JsonResultForAsset.class).getBody();
          nextPageNlyteAssets = nlyteAssetResult.getValue();
          nlyteAssets.addAll(nextPageNlyteAssets);
+         nextLink = nlyteAssetResult.getOdatanextLink();
       }
       HandleAssetUtil util = new HandleAssetUtil();
       nlyteAssets = util.filterUnActivedAsset(nlyteAssets, category);
