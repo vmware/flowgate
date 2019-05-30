@@ -124,7 +124,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                     <div class="row">
                                         <div class="col-lg-12 col-sm-12 col-12">
                                             <div class="row">
-                                                <span class="integrationSmallTitle">VC</span>
+                                                <span class="integrationSmallTitle">VMware vCenter Server</span>
                                             </div>
                                             <div class="row">
                                                 <span class="integrationSmallFont">{{flowgateSummery.vcNum}}</span>
@@ -134,7 +134,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                     <div class="row">
                                         <div class="col-lg-12 col-sm-12 col-12">
                                             <div class="row">
-                                                <span class="integrationSmallTitle">VRO</span>
+                                                <span class="integrationSmallTitle">vRealize Operations Manager</span>
                                             </div>
                                             <div class="row">
                                                 <span class="integrationSmallFont">{{flowgateSummery.vroNum}}</span>
@@ -252,7 +252,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </clr-tabs>
 
 <clr-modal [(clrModalOpen)]="systemSummary" [clrModalStaticBackdrop]="true" [clrModalSize]="'xl'">
-    <h3 class="modal-title">System Summary</h3>
+    <h3 class="modal-title">Data center Facility System</h3>
     <div class="modal-body" style="height: 600px;">
         <div class="row">
             <div class="col-md-12 trigger-job-text-center">
@@ -262,14 +262,14 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <clr-tree-node>
                             <div class="col-md-12" style="margin-left:-1.25rem;">
                                 <clr-datagrid>
-                                    <clr-dg-column style="min-width: 17rem;">Host</clr-dg-column>
+                                    <clr-dg-column style="min-width: 17rem;">Nlyte System</clr-dg-column>
                                     <clr-dg-column>SERVER</clr-dg-column>
                                     <clr-dg-column>PDU</clr-dg-column>
                                     <clr-dg-column>CABINET</clr-dg-column>
                                     <clr-dg-column>SWITCH</clr-dg-column>
                                     <clr-dg-column>SENSORS</clr-dg-column>
 
-                                    <clr-dg-placeholder>We couldn't find any Nlyte!</clr-dg-placeholder>
+                                    <clr-dg-placeholder>We couldn't find any Nlyte System!</clr-dg-placeholder>
 
                                     <clr-dg-row *ngFor="let nlyte of flowgateSummery.nlyteSummary"> 
                                         <clr-dg-cell style="min-width: 17rem;text-align: center;">
@@ -277,19 +277,19 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                             <br>
                                             <span class="systemDetailSubTitle">{{nlyte.url}}</span>
                                         </clr-dg-cell>
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailFont">{{nlyte.serverNum}}</span>
                                         </clr-dg-cell>
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailFont">{{nlyte.pduNum}}</span>
                                         </clr-dg-cell>
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailFont">{{nlyte.cabinetNum}}</span>
                                         </clr-dg-cell>
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailFont">{{nlyte.switchNum}}</span>
                                         </clr-dg-cell>
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailFont">{{nlyte.sensorNum}}</span>
                                         </clr-dg-cell>
                                     </clr-dg-row>
@@ -304,22 +304,22 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <clr-tree-node>
                             <div class="col-md-12" style="margin-left:-1.25rem;">
                                 <clr-datagrid>
-                                    <clr-dg-column>Host</clr-dg-column>
+                                    <clr-dg-column>PowerIQ System</clr-dg-column>
                                     <clr-dg-column>SENSOR</clr-dg-column>
                                     <clr-dg-column>PDU</clr-dg-column>
 
-                                    <clr-dg-placeholder>We couldn't find any PowerIQ!</clr-dg-placeholder>
+                                    <clr-dg-placeholder>We couldn't find any PowerIQ System!</clr-dg-placeholder>
 
                                     <clr-dg-row *ngFor="let PowerIQ of flowgateSummery.powerIqSummary"> 
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailTitle">{{PowerIQ.name}}</span>
                                             <br>
                                             <span class="systemDetailSubTitle">{{PowerIQ.url}}</span>
                                         </clr-dg-cell>
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailFont">{{PowerIQ.sensorNum}}</span>
                                         </clr-dg-cell>
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailFont">{{PowerIQ.pduNum}}</span>
                                         </clr-dg-cell>
                                     </clr-dg-row>
@@ -349,28 +349,28 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </div>
 </clr-modal>
 <clr-modal [(clrModalOpen)]="serverSummary" [clrModalStaticBackdrop]="true" [clrModalSize]="'xl'">
-    <h3 class="modal-title">Server Summary</h3>
+    <h3 class="modal-title">IT Management System</h3>
     <div class="modal-body" style="height: 600px;">
         <div class="row">
             <div class="col-md-12 trigger-job-text-center">
                 <clr-tree-node>
-                    VC
+                    VMware vCenter
                     <ng-template [clrIfExpanded]="true">
                         <clr-tree-node>
                             <div class="col-md-12" style="margin-left:-1.25rem;">
                                 <clr-datagrid>
-                                    <clr-dg-column>Host</clr-dg-column>
-                                    <clr-dg-column>Number</clr-dg-column>
+                                    <clr-dg-column>VMware vCenter Server</clr-dg-column>
+                                    <clr-dg-column>Managed Host Number</clr-dg-column>
 
-                                    <clr-dg-placeholder>We couldn't find any VC!</clr-dg-placeholder>
+                                    <clr-dg-placeholder>We couldn't find any VMware vCenter Server!</clr-dg-placeholder>
 
                                     <clr-dg-row *ngFor="let vc of flowgateSummery.vcSummary"> 
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailTitle">{{vc.name}}</span>
                                             <br>
                                             <span class="systemDetailSubTitle">{{vc.url}}</span>
                                         </clr-dg-cell>
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailFont">{{vc.hostsNum}}</span>
                                         </clr-dg-cell>
                                     </clr-dg-row>
@@ -380,23 +380,23 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     </ng-template>
                 </clr-tree-node>
                 <clr-tree-node>
-                    VRO
+                    VMware vRealize Operations Manager
                     <ng-template [clrIfExpanded]="false">
                         <clr-tree-node>
                             <div class="col-md-12" style="margin-left:-1.25rem;">
                                 <clr-datagrid>
-                                    <clr-dg-column>Host</clr-dg-column>
-                                    <clr-dg-column>Number</clr-dg-column>
+                                    <clr-dg-column>VMware vRealize Operations Manager</clr-dg-column>
+                                    <clr-dg-column>Managed Host Number</clr-dg-column>
 
-                                    <clr-dg-placeholder>We couldn't find any VRO!</clr-dg-placeholder>
+                                    <clr-dg-placeholder>We couldn't find any VMware vRealize Operations Manager!</clr-dg-placeholder>
 
                                     <clr-dg-row *ngFor="let vro of flowgateSummery.vroSummary"> 
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailTitle">{{vro.name}}</span>
                                             <br>
                                             <span class="systemDetailSubTitle">{{vro.url}}</span>
                                         </clr-dg-cell>
-                                        <clr-dg-cell style="text-align: center;">
+                                        <clr-dg-cell>
                                             <span class="systemDetailFont">{{vro.hostsNum}}</span>
                                         </clr-dg-cell>
                                     </clr-dg-row>
