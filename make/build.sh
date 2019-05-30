@@ -47,6 +47,7 @@ buildUi(){
 	export PATH=$PATH:$PWD/node-v11.2.0-linux-x64/bin
 	npm install -g @angular/cli@latest
 	npm install --unsafe-perm
+	npm config set unsafe-perm true
 	ng build --prod -e prod -aot=false
 }
 
