@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.vmware.flowgate.client.RestTemplateBuilder;
+import com.vmware.flowgate.common.AssetCategory;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.nlyteworker.exception.NlyteWorkerException;
 import com.vmware.flowgate.nlyteworker.model.JsonResultForAsset;
 import com.vmware.flowgate.nlyteworker.model.JsonResultForLocationGroup;
@@ -32,9 +35,6 @@ import com.vmware.flowgate.nlyteworker.model.Material;
 import com.vmware.flowgate.nlyteworker.model.NlyteAsset;
 import com.vmware.flowgate.nlyteworker.model.SessionExpriesData;
 import com.vmware.flowgate.nlyteworker.scheduler.job.common.HandleAssetUtil;
-import com.vmware.flowgate.client.RestTemplateBuilder;
-import com.vmware.flowgate.common.AssetCategory;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 
 @Service
 public class NlyteAPIClient {
@@ -51,7 +51,8 @@ public class NlyteAPIClient {
    private static final String AuthenticateBasicURL = "/nlyte/integration/api/odata/auth/AuthenticateBasic";
    private static final String GetPowerStripRealtimeValue = "/nlyte/integration/api/odata/PowerStrips(%s)/GetRealtimeValues";
    private static final String GetNetworksURL = "/nlyte/integration/api/odata/Networks";
-   private static final String GetNetworkMaterialsURL = "/nlyte/integration/api/odata/NetworkMaterials";
+   private static final String GetNetworkMaterialsURL =
+         "/nlyte/integration/api/odata/NetworkMaterials?$filter=(materialSubtypeID eq 7)";
    protected String nlyteServiceEndpoint;
 
    protected String username;
