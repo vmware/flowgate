@@ -53,7 +53,7 @@ sed -i -e "s/USERPASSWD_CHANGE/$USERPASSWD/" $FLOWGATEOPTDIR/conf/database/init.
 sed -i -e "s/COUCHBASEPASSWD_CHANGE/$USERPASSWD/" $FLOWGATEOPTDIR/conf/flowgate-api/application.properties
 
 REDISPASSWD=$(openssl rand 32|sha256sum|head -c 64)
-SEDREDISPASSWD=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "infoblox-worker" "aggregator" "vc-worker")
+SEDREDISPASSWD=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "infoblox-worker" "aggregator" "vc-worker" "labsdb-worker")
 for i in "${SEDREDISPASSWD[@]}"
 do
     sed -i -e "s/REDISPASSWD_CHANGE/$REDISPASSWD/" $FLOWGATEOPTDIR/conf/redis/redis.conf
