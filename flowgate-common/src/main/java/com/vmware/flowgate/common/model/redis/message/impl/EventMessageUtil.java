@@ -103,9 +103,6 @@ public class EventMessageUtil {
          SDDCSoftwareConfig[] sddcs) throws JsonProcessingException {
       List<String> result = new ArrayList<String>();
       for (SDDCSoftwareConfig sddc : sddcs) {
-         if(!sddc.checkIsActive()) {
-            continue;
-         }
          String payload = mapper.writeValueAsString(sddc);
          EventMessage message = EventMessageUtil.createEventMessage(type, targetCommand, payload);
          result.add(mapper.writeValueAsString(message));
@@ -116,9 +113,6 @@ public class EventMessageUtil {
          FacilitySoftwareConfig[] facilites) throws JsonProcessingException {
       List<String> result = new ArrayList<String>();
       for (FacilitySoftwareConfig facility : facilites) {
-         if(!facility.checkIsActive()) {
-            continue;
-         }
          String payload = mapper.writeValueAsString(facility);
          EventMessage message = EventMessageUtil.createEventMessage(type, targetCommand, payload);
          result.add(mapper.writeValueAsString(message));
