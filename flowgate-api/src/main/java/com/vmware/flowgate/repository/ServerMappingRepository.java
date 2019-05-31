@@ -25,4 +25,10 @@ public interface ServerMappingRepository
    Page<ServerMapping> findAllByVroID(String vroID, Pageable pageable);
 
    Page<ServerMapping> findAllByVcID(String vcID, Pageable pageable);
+
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND `vroID` = $1")
+   List<ServerMapping> findAllByVroID(String vroID);
+
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND `vcID` = $1")
+   List<ServerMapping> findAllByVCID(String vcID);
 }

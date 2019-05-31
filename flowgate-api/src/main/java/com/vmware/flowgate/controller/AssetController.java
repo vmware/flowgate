@@ -546,6 +546,22 @@ public class AssetController {
    }
 
    @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/mapping/vrops/{vropsID}", method = RequestMethod.GET)
+   public List<ServerMapping> getMappingsByVROPSId(@PathVariable("vropsID") String vropsID) {
+      List<ServerMapping> mappings =
+            serverMappingRepository.findAllByVroID(vropsID);
+      return mappings;
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/mapping/vc/{vcID}", method = RequestMethod.GET)
+   public List<ServerMapping> getMappingsByVCId(@PathVariable("vcID") String vcID) {
+      List<ServerMapping> mappings =
+            serverMappingRepository.findAllByVCID(vcID);
+      return mappings;
+   }
+
+   @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/vrops/{vropsID}/page/{pageNumber}/pagesize/{pageSize}", method = RequestMethod.GET)
    public Page<ServerMapping> getPageMappingsByVROPSId(@PathVariable("vropsID") String vropsID,
          @PathVariable("pageNumber") int pageNumber, @PathVariable("pageSize") int pageSize) {
