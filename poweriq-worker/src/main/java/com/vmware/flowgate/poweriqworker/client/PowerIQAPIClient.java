@@ -35,8 +35,8 @@ import com.vmware.flowgate.poweriqworker.model.RoomsResult;
 import com.vmware.flowgate.poweriqworker.model.Row;
 import com.vmware.flowgate.poweriqworker.model.RowsResult;
 import com.vmware.flowgate.poweriqworker.model.Sensor;
-import com.vmware.flowgate.poweriqworker.model.SensorRes;
 import com.vmware.flowgate.poweriqworker.model.SensorResult;
+import com.vmware.flowgate.poweriqworker.model.SensorsResult;
 
 public class PowerIQAPIClient {
 
@@ -143,9 +143,9 @@ public class PowerIQAPIClient {
 
    public List<Sensor> getSensors() {
       List<Sensor> sensors = new ArrayList<Sensor>();
-      ResponseEntity<SensorResult> sensorsResult =
+      ResponseEntity<SensorsResult> sensorsResult =
             this.restTemplate.exchange(getPowerIQServiceEndpoint() + GetSensorsURL, HttpMethod.GET,
-                  getDefaultEntity(), SensorResult.class);
+                  getDefaultEntity(), SensorsResult.class);
       if (sensorsResult != null && sensorsResult.getBody() != null
             && sensorsResult.getBody().getSensors() != null) {
          sensors = sensorsResult.getBody().getSensors();
@@ -155,9 +155,9 @@ public class PowerIQAPIClient {
 
    public Sensor getSensorById(String id) {
       Sensor sensor = new Sensor();
-      ResponseEntity<SensorRes> sensorResult = this.restTemplate.exchange(
+      ResponseEntity<SensorResult> sensorResult = this.restTemplate.exchange(
             getPowerIQServiceEndpoint() + String.format(GetSensorByIdURL, id), HttpMethod.GET,
-            getDefaultEntity(), SensorRes.class);
+            getDefaultEntity(), SensorResult.class);
       if (sensorResult != null) {
          sensor = sensorResult.getBody().getSensor();
       }

@@ -1,22 +1,16 @@
-/**
- * Copyright 2019 VMware, Inc.
- * SPDX-License-Identifier: BSD-2-Clause
-*/
 package com.vmware.flowgate.poweriqworker.model;
-
-import java.util.List;
 
 public class SensorResult {
 
-   private List<Sensor> sensors;
+   private Sensor sensor;
 
-   public List<Sensor> getSensors() {
-      return sensors;
+   public Sensor getSensor() {
+      return sensor;
    }
 
-   public void setSensors(List<Sensor> sensors) {
-      this.sensors = sensors;
+   public void setSensor(Sensor sensor) {
+      this.sensor = sensor;
    }
-   
-   
+
+
 }
