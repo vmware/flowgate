@@ -177,14 +177,6 @@ public class SyncSensorMetaDataJobTest {
    }
 
    @Test
-   public void testGetPduMap() {
-      Mockito.when(this.powerIQAPIClient.getPdus()).thenReturn(getPdus());
-      Map<Integer, Pdu> pdus = powerIQService.getPduMap(powerIQAPIClient);
-      TestCase.assertEquals(true, pdus.containsKey(1));
-      TestCase.assertEquals(true, pdus.containsKey(2));
-   }
-
-   @Test
    public void testGetAssetMap() {
       Mockito.when(this.wormholeAPIClient.getFacilitySoftwareByType(SoftwareType.Nlyte))
             .thenReturn(getFacilitySoftwareByType(SoftwareType.Nlyte));
