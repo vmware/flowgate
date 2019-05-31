@@ -17,6 +17,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import com.vmware.flowgate.client.RestTemplateBuilder;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.poweriqworker.model.Aisle;
 import com.vmware.flowgate.poweriqworker.model.AislesResult;
 import com.vmware.flowgate.poweriqworker.model.DataCenter;
@@ -33,31 +35,30 @@ import com.vmware.flowgate.poweriqworker.model.Row;
 import com.vmware.flowgate.poweriqworker.model.RowsResult;
 import com.vmware.flowgate.poweriqworker.model.Sensor;
 import com.vmware.flowgate.poweriqworker.model.SensorResult;
-import com.vmware.flowgate.client.RestTemplateBuilder;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 
 public class PowerIQAPIClient {
-   
+
    private static final Logger logger = LoggerFactory.getLogger(PowerIQAPIClient.class);
-   
+
    private static final String GetPdusURL = "/api/v2/pdus";
-   
+   private static final String GetPduByIdURL = "/api/v2/pdus/%s";
    private static final String GetSensorsURL = "/api/v2/sensors";
-   
+
+   private static final String GetPDUsByPageURL = "/api/v2/pdus?order=id.asc&limit=%s&offset=%s";
    private static final String GetSensorByIdURL = "/api/v2/sensors/%s";
-   
+
    private static final String GetRacksURL = "/api/v2/racks";
-   
+
    private static final String GetRowsURL = "/api/v2/rows";
-   
+
    private static final String GetAislesURL = "/api/v2/aisles";
-   
+
    private static final String GetRoomsURL = "/api/v2/rooms";
-   
+
    private static final String GetFloorsURL = "/api/v2/floors";
-   
+
    private static final String GetDataCentersURL = "/api/v2/data_centers";
-   
+
    private String powerIQServiceEndpoint;
 
    private String username;
@@ -65,10 +66,10 @@ public class PowerIQAPIClient {
    private String password;
 
    private RestTemplate restTemplate;
-   
+
    public PowerIQAPIClient() {
    }
-   
+
    public PowerIQAPIClient(FacilitySoftwareConfig facilitySoftwareConfig) {
       this.username = facilitySoftwareConfig.getUserName();
       this.password = facilitySoftwareConfig.getPassword();
@@ -77,7 +78,7 @@ public class PowerIQAPIClient {
          this.restTemplate =
                RestTemplateBuilder.buildTemplate(facilitySoftwareConfig.isVerifyCert(), 60000);
       } catch (Exception e) {
-         logger.error("Error initializing the PowerIQAPIClient",e);
+         logger.error("Error initializing the PowerIQAPIClient", e);
       }
    }
 
@@ -92,19 +93,20 @@ public class PowerIQAPIClient {
    public void setRestTemplate(RestTemplate restTemplate) {
       this.restTemplate = restTemplate;
    }
-   
+
    protected HttpHeaders buildHeaders() {
       HttpHeaders headers = RestTemplateBuilder.getDefaultHeader();
       String auth = this.username + ":" + this.password;
-      byte [] encodeAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("US-ASCII")));
-      headers.add("Authorization", "Basic "+new String(encodeAuth));
+      byte[] encodeAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("US-ASCII")));
+      headers.add("Authorization", "Basic " + new String(encodeAuth));
       return headers;
    }
 
    protected HttpEntity<String> getDefaultEntity() {
       return new HttpEntity<String>(buildHeaders());
    }
-   
+
+   @Deprecated
    public List<Pdu> getPdus() {
       List<Pdu> pdus = new ArrayList<Pdu>();
       ResponseEntity<PdusResult> pdusResult =
@@ -116,7 +118,27 @@ public class PowerIQAPIClient {
       }
       return pdus;
    }
-   
+
+   public List<Pdu> getPdus(int limit, int offset) {
+      ResponseEntity<PdusResult> pdusResult = this.restTemplate.exchange(
+            getPowerIQServiceEndpoint() + String.format(GetPDUsByPageURL, limit, offset),
+            HttpMethod.GET, getDefaultEntity(), PdusResult.class);
+      if (pdusResult != null && pdusResult.getBody() != null) {
+         return pdusResult.getBody().getPdus();
+      }
+      return null;
+   }
+
+   public Pdu getPduByID(String id) {
+      ResponseEntity<Pdu> pduResult = this.restTemplate.exchange(
+            getPowerIQServiceEndpoint() + String.format(GetPduByIdURL, id), HttpMethod.GET,
+            getDefaultEntity(), Pdu.class);
+      if (pduResult != null) {
+         return pduResult.getBody();
+      }
+      return null;
+   }
+
    public List<Sensor> getSensors() {
       List<Sensor> sensors = new ArrayList<Sensor>();
       ResponseEntity<SensorResult> sensorsResult =
@@ -128,18 +150,18 @@ public class PowerIQAPIClient {
       }
       return sensors;
    }
-   
+
    public Sensor getSensorById(String id) {
       Sensor sensor = new Sensor();
-      ResponseEntity<Sensor> sensorResult =
-            this.restTemplate.exchange(getPowerIQServiceEndpoint() + String.format(GetSensorByIdURL, id), HttpMethod.GET,
-                  getDefaultEntity(), Sensor.class);
-      if(sensorResult != null) {
+      ResponseEntity<Sensor> sensorResult = this.restTemplate.exchange(
+            getPowerIQServiceEndpoint() + String.format(GetSensorByIdURL, id), HttpMethod.GET,
+            getDefaultEntity(), Sensor.class);
+      if (sensorResult != null) {
          sensor = sensorResult.getBody();
       }
       return sensor;
    }
-   
+
    public List<Rack> getRacks() {
       List<Rack> racks = new ArrayList<Rack>();
       ResponseEntity<RacksResult> rackResult =
@@ -151,7 +173,7 @@ public class PowerIQAPIClient {
       }
       return racks;
    }
-   
+
    public List<Row> getRows() {
       List<Row> rows = new ArrayList<Row>();
       ResponseEntity<RowsResult> rowsResult =
@@ -175,7 +197,7 @@ public class PowerIQAPIClient {
       }
       return aisles;
    }
-   
+
    public List<Room> getRooms() {
       List<Room> rooms = new ArrayList<Room>();
       ResponseEntity<RoomsResult> roomsResult =
@@ -187,7 +209,7 @@ public class PowerIQAPIClient {
       }
       return rooms;
    }
-   
+
    public List<Floor> getFloors() {
       List<Floor> floors = new ArrayList<Floor>();
       ResponseEntity<FloorsResult> floorsResult =
@@ -199,7 +221,7 @@ public class PowerIQAPIClient {
       }
       return floors;
    }
-   
+
    public List<DataCenter> getDataCenters() {
       List<DataCenter> dataCenters = new ArrayList<DataCenter>();
       ResponseEntity<DataCentersResult> dataCentersResult =

@@ -98,7 +98,7 @@ public class PowerIQService implements AsyncService {
    private static Map<String, AssetSubCategory> subCategoryMap =
          new HashMap<String, AssetSubCategory>();
    public static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
-   public static Map<String,ValueType> sensorValueType = new HashMap<String,ValueType>();
+   public static Map<String, ValueType> sensorValueType = new HashMap<String, ValueType>();
    static {
       subCategoryMap.put(HumiditySensor, AssetSubCategory.Humidity);
       subCategoryMap.put(TemperatureSensor, AssetSubCategory.Temperature);
@@ -162,11 +162,11 @@ public class PowerIQService implements AsyncService {
                if (null == powerIQinfo) {
                   continue;
                }
-               if(!powerIQinfo.checkIsActive()) {
+               if (!powerIQinfo.checkIsActive()) {
                   continue;
                }
                for (EventUser payloadCommand : payloadMessage.getTarget().getUsers()) {
-                  executeJob(payloadCommand.getId(),powerIQinfo);
+                  executeJob(payloadCommand.getId(), powerIQinfo);
                }
             }
             break;
@@ -179,15 +179,15 @@ public class PowerIQService implements AsyncService {
                logger.error("Failed to convert message", e1);
             }
             if (powerIQ != null) {
-               executeJob(command.getId(),powerIQ);
+               executeJob(command.getId(), powerIQ);
             }
             break;
          }
       }
    }
 
-   private void executeJob(String commonId,FacilitySoftwareConfig powerIQ) {
-      if(!powerIQ.checkIsActive()) {
+   private void executeJob(String commonId, FacilitySoftwareConfig powerIQ) {
+      if (!powerIQ.checkIsActive()) {
          return;
       }
       switch (commonId) {
@@ -201,6 +201,11 @@ public class PowerIQService implements AsyncService {
          syncRealtimeData(powerIQ);
          syncSensorRealtimeData(powerIQ);
          logger.info("Finish sync realtime data for " + powerIQ.getName());
+         break;
+      case EventMessageUtil.PowerIQ_SyncAllPDUID:
+         logger.info("Sync PDU ID for all PUDs");
+         syncPDUID(powerIQ);
+         logger.info("Finish sync PDU ID for all PDUs");
          break;
       default:
          logger.warn("Not supported command");
@@ -220,15 +225,15 @@ public class PowerIQService implements AsyncService {
 
       try {
          sensorsFromPower = getSensorMetaData(client, powerIQ.getId());
-      }catch(ResourceAccessException e1) {
-        if(e1.getCause().getCause() instanceof ConnectException) {
-           checkAndUpdateIntegrationStatus(powerIQ,e1.getMessage());
-           return;
-        }
-      }catch(HttpClientErrorException e) {
+      } catch (ResourceAccessException e1) {
+         if (e1.getCause().getCause() instanceof ConnectException) {
+            checkAndUpdateIntegrationStatus(powerIQ, e1.getMessage());
+            return;
+         }
+      } catch (HttpClientErrorException e) {
          logger.error("Failed to query data from PowerIQ", e);
          IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
-         if(integrationStatus == null) {
+         if (integrationStatus == null) {
             integrationStatus = new IntegrationStatus();
          }
          integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
@@ -250,20 +255,20 @@ public class PowerIQService implements AsyncService {
       restClient.saveAssets(assetsToSave);
    }
 
-   public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig powerIQ,String message) {
-      IntegrationStatus integrationStatus =  powerIQ.getIntegrationStatus();
-      if(integrationStatus == null) {
+   public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig powerIQ, String message) {
+      IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
+      if (integrationStatus == null) {
          integrationStatus = new IntegrationStatus();
       }
       int timesOftry = integrationStatus.getRetryCounter();
       timesOftry++;
-      if(timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
+      if (timesOftry < FlowgateConstant.MAXNUMBEROFRETRIES) {
          integrationStatus.setRetryCounter(timesOftry);
-      }else {
+      } else {
          integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
          integrationStatus.setDetail(message);
          integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-         logger.error("Failed to query data from PowerIQ,error message is "+message);
+         logger.error("Failed to query data from PowerIQ,error message is " + message);
       }
       powerIQ.setIntegrationStatus(integrationStatus);
       updateIntegrationStatus(powerIQ);
@@ -375,7 +380,8 @@ public class PowerIQService implements AsyncService {
             return assetsMap;
          }
          for (FacilitySoftwareConfig nlyte : nlytes) {
-            List<Asset> nlytePdus = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.PDU);
+            List<Asset> nlytePdus =
+                  restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.PDU);
             for (Asset asset : nlytePdus) {
                assetsMap.put(asset.getAssetName().toLowerCase(), asset);
             }
@@ -387,7 +393,7 @@ public class PowerIQService implements AsyncService {
       return assetsMap;
    }
 
-   public List<Asset> getSensorMetaData(PowerIQAPIClient client, String assetSource){
+   public List<Asset> getSensorMetaData(PowerIQAPIClient client, String assetSource) {
       List<Asset> assets = new ArrayList<Asset>();
       List<Asset> pdus = new ArrayList<Asset>();
       List<Sensor> sensors = getSensors(client);
@@ -402,40 +408,43 @@ public class PowerIQService implements AsyncService {
       Map<Integer, Floor> floorsMap = getFloorsMap(client);
       Map<Integer, DataCenter> dataCentersMap = getDataCentersMap(client);
 
-      Map<Integer, Pdu> pduMap = getPduMap(client);
+      //Map<Integer, Pdu> pduMap = getPduMap(client);
+      //Map<Integer, Pdu> pduMap = new HashMap<Integer, Pdu>();
       for (Sensor sensor : sensors) {
          Asset asset = null;
          HashMap<String, String> justificationfieldsForSensor = new HashMap<String, String>();
-         if (sensor.getPduId() != null && !pduMap.isEmpty()) {
+         if (sensor.getPduId() != null) {
             asset = new Asset();
-            Pdu pdu = pduMap.get(sensor.getPduId());
-            Asset pduAsset = pduAssetMap.get(pdu.getName().toLowerCase());
-            if (pduAsset == null) {
-               asset = fillLocation(sensor, racksMap, rowsMap, aislesMap, roomsMap, floorsMap,
-                     dataCentersMap);
-            } else {
-               //If the sensor's has pdu information. Then it can use the PDU's location info.
-               asset.setRoom(pduAsset.getRoom());
-               asset.setFloor(pduAsset.getFloor());
-               asset.setBuilding(pduAsset.getBuilding());
-               asset.setCity(pduAsset.getCity());
-               asset.setCountry(pduAsset.getCountry());
-               asset.setRegion(pduAsset.getRegion());
-               //Record the pdu_assetId for the sensor.
-               justificationfieldsForSensor.put(FlowgateConstant.PDU_ASSET_ID, pduAsset.getId());
-               //Record the sensorId and sensor_source for the pdu.
-               pduAsset = aggregatorSensorIdAndSourceForPdu(pduAsset,sensor,assetSource);
-               pdus.add(pduAsset);
+            Pdu pdu = client.getPduByID(String.valueOf(sensor.getPduId()));
+            if (pdu != null) {
+               Asset pduAsset = pduAssetMap.get(pdu.getName().toLowerCase());
+               if (pduAsset == null) {
+                  asset = fillLocation(sensor, racksMap, rowsMap, aislesMap, roomsMap, floorsMap,
+                        dataCentersMap);
+               } else {
+                  //If the sensor's has pdu information. Then it can use the PDU's location info.
+                  asset.setRoom(pduAsset.getRoom());
+                  asset.setFloor(pduAsset.getFloor());
+                  asset.setBuilding(pduAsset.getBuilding());
+                  asset.setCity(pduAsset.getCity());
+                  asset.setCountry(pduAsset.getCountry());
+                  asset.setRegion(pduAsset.getRegion());
+                  //Record the pdu_assetId for the sensor.
+                  justificationfieldsForSensor.put(FlowgateConstant.PDU_ASSET_ID, pduAsset.getId());
+                  //Record the sensorId and sensor_source for the pdu.
+                  pduAsset = aggregatorSensorIdAndSourceForPdu(pduAsset, sensor, assetSource);
+                  pdus.add(pduAsset);
+               }
             }
          } else {
             asset = fillLocation(sensor, racksMap, rowsMap, aislesMap, roomsMap, floorsMap,
                   dataCentersMap);
          }
          //the pduId and sensorId are form the powerIQ system.
-         if(sensor.getPduId() != null) {
+         if (sensor.getPduId() != null) {
             justificationfieldsForSensor.put(Pdu_ID, sensor.getPduId().toString());
          }
-         justificationfieldsForSensor.put(Sensor_ID, sensor.getId()+"");
+         justificationfieldsForSensor.put(Sensor_ID, sensor.getId() + "");
          asset.setAssetName(sensor.getName());
          asset.setJustificationfields(justificationfieldsForSensor);
          asset.setSerialnumber(sensor.getSerialNumber());
@@ -450,24 +459,28 @@ public class PowerIQService implements AsyncService {
    }
 
    //Record the sensorId and sensor source for the pdu.
-   public Asset aggregatorSensorIdAndSourceForPdu(Asset pduAsset,Sensor sensor,String sensorSource) {
+   public Asset aggregatorSensorIdAndSourceForPdu(Asset pduAsset, Sensor sensor,
+         String sensorSource) {
       HashMap<String, String> justificationfields = pduAsset.getJustificationfields();
-      if(justificationfields == null) {
+      if (justificationfields == null) {
          justificationfields = new HashMap<String, String>();
          justificationfields.put(subCategoryMap.get(sensor.getType()).toString(),
-               sensor.getId()+FlowgateConstant.SEPARATOR+sensorSource);
-      }else {
-         String sensorIdAndSource = justificationfields.get(subCategoryMap.get(sensor.getType()).toString());
-         if(sensorIdAndSource != null) {
-            String [] existedSensor = sensorIdAndSource.split(FlowgateConstant.SPILIT_FLAG);
+               sensor.getId() + FlowgateConstant.SEPARATOR + sensorSource);
+      } else {
+         String sensorIdAndSource =
+               justificationfields.get(subCategoryMap.get(sensor.getType()).toString());
+         if (sensorIdAndSource != null) {
+            String[] existedSensor = sensorIdAndSource.split(FlowgateConstant.SPILIT_FLAG);
             Set<String> sensorIdAndSourceSet = new HashSet<String>();
             Collections.addAll(sensorIdAndSourceSet, existedSensor);
-            sensorIdAndSourceSet.add(sensor.getId()+FlowgateConstant.SEPARATOR+sensorSource);
-            sensorIdAndSource =  String.join(FlowgateConstant.SPILIT_FLAG, sensorIdAndSourceSet);;
-         }else {
-            sensorIdAndSource = sensor.getId()+FlowgateConstant.SEPARATOR+sensorSource;
+            sensorIdAndSourceSet.add(sensor.getId() + FlowgateConstant.SEPARATOR + sensorSource);
+            sensorIdAndSource = String.join(FlowgateConstant.SPILIT_FLAG, sensorIdAndSourceSet);
+            ;
+         } else {
+            sensorIdAndSource = sensor.getId() + FlowgateConstant.SEPARATOR + sensorSource;
          }
-         justificationfields.put(subCategoryMap.get(sensor.getType()).toString(), sensorIdAndSource);
+         justificationfields.put(subCategoryMap.get(sensor.getType()).toString(),
+               sensorIdAndSource);
       }
       pduAsset.setJustificationfields(justificationfields);
       return pduAsset;
@@ -479,22 +492,6 @@ public class PowerIQService implements AsyncService {
          sensors = client.getSensors();
       }
       return sensors;
-   }
-
-   public Map<Integer, Pdu> getPduMap(PowerIQAPIClient client) {
-      Map<Integer, Pdu> pdusMap = new HashMap<Integer, Pdu>();
-      List<Pdu> pdus = new ArrayList<Pdu>();
-      try {
-         pdus = client.getPdus();
-         if (pdus != null && !pdus.isEmpty()) {
-            for (Pdu pdu : pdus) {
-               pdusMap.put(pdu.getId(), pdu);
-            }
-         }
-      } catch (Exception e) {
-         logger.error("Failed to get PDU map", e);
-      }
-      return pdusMap;
    }
 
    public Asset fillLocation(Sensor sensor, Map<Integer, Rack> racksMap, Map<Integer, Row> rowsMap,
@@ -588,10 +585,11 @@ public class PowerIQService implements AsyncService {
    public Map<String, Asset> getAssetsFromWormhole(String assetSource) {
       Map<String, Asset> sensors = new HashMap<String, Asset>();
       try {
-         List<Asset> assets = restClient.getAllAssetsBySourceAndType(assetSource, AssetCategory.Sensors);
+         List<Asset> assets =
+               restClient.getAllAssetsBySourceAndType(assetSource, AssetCategory.Sensors);
          for (Asset asset : assets) {
             String sensorId = asset.getJustificationfields().get(Sensor_ID);
-            if(sensorId == null) {
+            if (sensorId == null) {
                continue;
             }
             sensors.put(sensorId, asset);
@@ -611,11 +609,10 @@ public class PowerIQService implements AsyncService {
       List<Asset> assets = new ArrayList<Asset>();
       for (Asset asset : assetsFromPowerIQ) {
          String sensorID = asset.getJustificationfields().get(Sensor_ID);
-         if(sensorID == null) {
+         if (sensorID == null) {
             continue;
          }
-         Asset assetToUpdate =
-               exsitingAsset.get(sensorID);
+         Asset assetToUpdate = exsitingAsset.get(sensorID);
          if (assetToUpdate != null) {
             assetToUpdate.setAssetName(asset.getAssetName());
             assetToUpdate.setRow(asset.getRow());
@@ -650,13 +647,15 @@ public class PowerIQService implements AsyncService {
          return;
       }
       PowerIQAPIClient client = createClient(powerIQ);
-      List<Pdu> pdus = null;
+
+      //only used to check the connection.
+      List<DataCenter> datacenters = null;
       try {
-         pdus = client.getPdus();
-      }catch(HttpClientErrorException e) {
+         datacenters = client.getDataCenters();
+      } catch (HttpClientErrorException e) {
          logger.error("Failed to query data from PowerIQ", e);
          IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
-         if(integrationStatus == null) {
+         if (integrationStatus == null) {
             integrationStatus = new IntegrationStatus();
          }
          integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
@@ -664,55 +663,67 @@ public class PowerIQService implements AsyncService {
          integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
          updateIntegrationStatus(powerIQ);
          return;
-      }catch(ResourceAccessException e1) {
-         if(e1.getCause().getCause() instanceof ConnectException) {
-            checkAndUpdateIntegrationStatus(powerIQ,e1.getMessage());
+      } catch (ResourceAccessException e1) {
+         if (e1.getCause().getCause() instanceof ConnectException) {
+            checkAndUpdateIntegrationStatus(powerIQ, e1.getMessage());
             return;
          }
-       }
-      Map<String, Pdu> pdusMap  = getPdusMapWithNameKey(pdus);//Map<pduName.lowcase,pdu>
-      Map<String, Pdu> matchedPdus = getMatchedPdus(pdusMap, allMappedPdus);//Map<pduAssetId,pdu>
-      List<RealTimeData> realTimeDatas = getRealTimeDatas(matchedPdus,getAdvanceSetting(powerIQ));
+      }
+      Map<String, Pdu> matchedPdus = new HashMap<String, Pdu>();
+      for (Asset asset : allMappedPdus) {
+         String id = null;
+         if (asset.getJustificationfields() != null) {
+            id = asset.getJustificationfields().get(Pdu_ID);
+         }
+         if (id != null) {
+            Pdu pdu = client.getPduByID(id);
+            if (pdu != null) {
+               matchedPdus.put(asset.getId(), pdu);
+            }
+         }
+      }
+      List<RealTimeData> realTimeDatas = getRealTimeDatas(matchedPdus, getAdvanceSetting(powerIQ));
       if (!realTimeDatas.isEmpty()) {
          restClient.saveRealTimeData(realTimeDatas);
       }
    }
 
-   public HashMap<AdvanceSettingType, String> getAdvanceSetting(FacilitySoftwareConfig powerIQ){
-      HashMap<AdvanceSettingType, String> advanceSettingMap = new HashMap<AdvanceSettingType, String>();
-      if(powerIQ.getAdvanceSetting() != null) {
-         for(Map.Entry<AdvanceSettingType, String> map:powerIQ.getAdvanceSetting().entrySet()) {
-            if(map.getValue() != null) {
+   public HashMap<AdvanceSettingType, String> getAdvanceSetting(FacilitySoftwareConfig powerIQ) {
+      HashMap<AdvanceSettingType, String> advanceSettingMap =
+            new HashMap<AdvanceSettingType, String>();
+      if (powerIQ.getAdvanceSetting() != null) {
+         for (Map.Entry<AdvanceSettingType, String> map : powerIQ.getAdvanceSetting().entrySet()) {
+            if (map.getValue() != null) {
                advanceSettingMap.put(map.getKey(), map.getValue());
-            }else {
+            } else {
                continue;
             }
          }
       }
       String dateformat = advanceSettingMap.get(AdvanceSettingType.DateFormat);
-      if(dateformat == null || dateformat.trim().isEmpty()) {
+      if (dateformat == null || dateformat.trim().isEmpty()) {
          advanceSettingMap.put(AdvanceSettingType.DateFormat, DateFormat);
       }
-      if(advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT) == null ||
-			  advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT).isEmpty()) {
-	     advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, MetricUnit.PERCENT.toString());
-	  }
-	  if(advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT) == null ||
-			  advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT).isEmpty()) {
-	     advanceSettingMap.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
-	  }
-	  if(advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT) == null ||
-			  advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT).isEmpty()) {
-	     advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
-	  }
-	  if(advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT) == null ||
-			  advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT).isEmpty()) {
-	     advanceSettingMap.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.V.toString());
-	  }
-	  if(advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT) == null ||
-			  advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT).isEmpty() ) {
-	     advanceSettingMap.put(AdvanceSettingType.TEMPERATURE_UNIT, MetricUnit.C.toString());
-	  }
+      if (advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT) == null
+            || advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT).isEmpty()) {
+         advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, MetricUnit.PERCENT.toString());
+      }
+      if (advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT) == null
+            || advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT).isEmpty()) {
+         advanceSettingMap.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
+      }
+      if (advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT) == null
+            || advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT).isEmpty()) {
+         advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
+      }
+      if (advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT) == null
+            || advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT).isEmpty()) {
+         advanceSettingMap.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.V.toString());
+      }
+      if (advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT) == null
+            || advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT).isEmpty()) {
+         advanceSettingMap.put(AdvanceSettingType.TEMPERATURE_UNIT, MetricUnit.C.toString());
+      }
       return advanceSettingMap;
    }
 
@@ -763,16 +774,16 @@ public class PowerIQService implements AsyncService {
       }
       try {
          for (Map.Entry<String, Pdu> map : pdus.entrySet()) {
-            List<ValueUnit> values = getValueUnits(map.getValue(),advanceSettingMap);
-            if(!values.isEmpty()) {
+            List<ValueUnit> values = getValueUnits(map.getValue(), advanceSettingMap);
+            if (!values.isEmpty()) {
                RealTimeData realTimeData = new RealTimeData();
                realTimeData.setAssetID(map.getKey());
                realTimeData.setValues(values);
                realTimeData.setTime(values.get(0).getTime());
                //this will remove the duplicated items.
-               realTimeData.setId(map.getKey()+"_"+realTimeData.getTime());
+               realTimeData.setId(map.getKey() + "_" + realTimeData.getTime());
                realTimeDatas.add(realTimeData);
-            }else {
+            } else {
                continue;
             }
          }
@@ -784,7 +795,8 @@ public class PowerIQService implements AsyncService {
       return realTimeDatas;
    }
 
-   public List<ValueUnit> getValueUnits(Pdu pdu,HashMap<AdvanceSettingType, String> advanceSettingMap) {
+   public List<ValueUnit> getValueUnits(Pdu pdu,
+         HashMap<AdvanceSettingType, String> advanceSettingMap) {
       List<ValueUnit> values = new ArrayList<ValueUnit>();
       if (pdu == null || pdu.getReading() == null || pdu.getReading().getInletReadings() == null) {
          return values;
@@ -809,22 +821,27 @@ public class PowerIQService implements AsyncService {
             power += inletReading.getApparentPower();
          }
 
-         long valueTime = WormholeDateFormat.getLongTime(time,dateFormat,timezone);
+         long valueTime = WormholeDateFormat.getLongTime(time, dateFormat, timezone);
          if (valueTime == -1) {
-            logger.error("Failed to translate the time string: " + time+".And the dateformat is "+dateFormat);
+            logger.error("Failed to translate the time string: " + time + ".And the dateformat is "
+                  + dateFormat);
             return values;
          }
          ValueUnit voltageValue = new ValueUnit();
          voltageValue.setKey(ValueType.PDU_RealtimeVoltage);
          voltageValue.setTime(valueTime);
-         voltageValue.setValueNum(Double.parseDouble(voltageValue.translateUnit(String.valueOf(voltage), MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
+         voltageValue
+               .setValueNum(Double.parseDouble(voltageValue.translateUnit(String.valueOf(voltage),
+                     MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
          voltageValue.setUnit(RealtimeDataUnit.Volts.toString());
          values.add(voltageValue);
 
          ValueUnit currentValue = new ValueUnit();
          currentValue.setKey(ValueType.PDU_RealtimeLoad);
          currentValue.setTime(valueTime);
-         currentValue.setValueNum(Double.parseDouble(currentValue.translateUnit(String.valueOf(current), MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+         currentValue
+               .setValueNum(Double.parseDouble(currentValue.translateUnit(String.valueOf(current),
+                     MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
          currentValue.setUnit(RealtimeDataUnit.Amps.toString());
          values.add(currentValue);
 
@@ -843,7 +860,8 @@ public class PowerIQService implements AsyncService {
          ValueUnit powerValue = new ValueUnit();
          powerValue.setKey(ValueType.PDU_RealtimePower);
          powerValue.setTime(valueTime);
-         powerValue.setValueNum(Double.parseDouble(powerValue.translateUnit(String.valueOf(power), MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
+         powerValue.setValueNum(Double.parseDouble(powerValue.translateUnit(String.valueOf(power),
+               MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
          powerValue.setUnit(RealtimeDataUnit.KW.toString());
          values.add(powerValue);
 
@@ -855,15 +873,15 @@ public class PowerIQService implements AsyncService {
       return values;
    }
 
-   public List<Asset> filterAssetsBySource(String source, Set<String> assetIds){
-	   List<Asset> assets = new ArrayList<Asset>();
-	   List<Asset> assetsFromPowerIQ = restClient.getAllAssetsBySource(source);
-	   for(Asset asset:assetsFromPowerIQ) {
-		   if(assetIds.contains(asset.getId())) {
-			   assets.add(asset);
-		   }
-	   }
-	   return assets;
+   public List<Asset> filterAssetsBySource(String source, Set<String> assetIds) {
+      List<Asset> assets = new ArrayList<Asset>();
+      List<Asset> assetsFromPowerIQ = restClient.getAllAssetsBySource(source);
+      for (Asset asset : assetsFromPowerIQ) {
+         if (assetIds.contains(asset.getId())) {
+            assets.add(asset);
+         }
+      }
+      return assets;
    }
 
    public void syncSensorRealtimeData(FacilitySoftwareConfig powerIQ) {
@@ -881,10 +899,10 @@ public class PowerIQService implements AsyncService {
          return;
       }
       //filter sensors
-      List<Asset> sensorFromPowerIQ = filterAssetsBySource(powerIQ.getId(),assetIds);
+      List<Asset> sensorFromPowerIQ = filterAssetsBySource(powerIQ.getId(), assetIds);
       realTimeDatas = getSensorRealTimeData(powerIQ, sensorFromPowerIQ);
       logger.info("Received new Sensor data, data item size is:" + realTimeDatas.size());
-      if(realTimeDatas.isEmpty()) {
+      if (realTimeDatas.isEmpty()) {
          return;
       }
       restClient.saveRealTimeData(realTimeDatas);
@@ -905,10 +923,11 @@ public class PowerIQService implements AsyncService {
       for (Asset asset : powerIQMappedAssets) {
          Map<ServerSensorType, String> sensorsformularsmap = asset.getSensorsformulars();
          for (Map.Entry<ServerSensorType, String> map : sensorsformularsmap.entrySet()) {
-            if(sensorType.contains(map.getKey())) {
+            if (sensorType.contains(map.getKey())) {
                String[] assetIDs = map.getValue().split("\\+|-|\\*|/|\\(|\\)");
                for (String assetId : assetIDs) {
-                  if (assetId.equals("") || assetId.length() != FlowgateConstant.COUCHBASEIDLENGTH) {
+                  if (assetId.equals("")
+                        || assetId.length() != FlowgateConstant.COUCHBASEIDLENGTH) {
                      continue;
                   }
                   assetIds.add(assetId);
@@ -919,7 +938,8 @@ public class PowerIQService implements AsyncService {
       return assetIds;
    }
 
-   public List<RealTimeData> getSensorRealTimeData(FacilitySoftwareConfig powerIQ,List<Asset> assets){
+   public List<RealTimeData> getSensorRealTimeData(FacilitySoftwareConfig powerIQ,
+         List<Asset> assets) {
       HashMap<AdvanceSettingType, String> advanceSetting = getAdvanceSetting(powerIQ);
       List<RealTimeData> realtimeDatas = new ArrayList<RealTimeData>();
       String dateFormat = advanceSetting.get(AdvanceSettingType.DateFormat);
@@ -927,17 +947,16 @@ public class PowerIQService implements AsyncService {
       String temperature = advanceSetting.get(AdvanceSettingType.TEMPERATURE_UNIT);
       String humidity = advanceSetting.get(AdvanceSettingType.HUMIDITY_UNIT);
       PowerIQAPIClient powerIQAPIClient = createClient(powerIQ);
-      for(Asset asset:assets) {
-         HashMap<String,String> sensorExtraInfo = asset.getJustificationfields();
-         String sensorId =  sensorExtraInfo.get(Sensor_ID);
+      for (Asset asset : assets) {
+         HashMap<String, String> sensorExtraInfo = asset.getJustificationfields();
+         String sensorId = sensorExtraInfo.get(Sensor_ID);
          Sensor sensor = null;
          try {
             sensor = powerIQAPIClient.getSensorById(sensorId);
-         }
-         catch(HttpClientErrorException e) {
+         } catch (HttpClientErrorException e) {
             logger.error("Failed to query data from PowerIQ", e);
             IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
-            if(integrationStatus == null) {
+            if (integrationStatus == null) {
                integrationStatus = new IntegrationStatus();
             }
             integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
@@ -945,22 +964,23 @@ public class PowerIQService implements AsyncService {
             integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
             updateIntegrationStatus(powerIQ);
             break;
-         }catch(ResourceAccessException e1) {
-            if(e1.getCause().getCause() instanceof ConnectException) {
-               checkAndUpdateIntegrationStatus(powerIQ,e1.getMessage());
+         } catch (ResourceAccessException e1) {
+            if (e1.getCause().getCause() instanceof ConnectException) {
+               checkAndUpdateIntegrationStatus(powerIQ, e1.getMessage());
                break;
             }
             break;
-          }
+         }
          SensorReading reading = sensor.getReading();
-         if(reading == null) {
+         if (reading == null) {
             continue;
          }
          RealTimeData realTimeData = new RealTimeData();
          String valueDateTime = reading.getReadingTime();
-         long recordedTime = WormholeDateFormat.getLongTime(valueDateTime,dateFormat,timezone);
+         long recordedTime = WormholeDateFormat.getLongTime(valueDateTime, dateFormat, timezone);
          if (recordedTime == -1) {
-            logger.error("Failed to translate the time string: " + valueDateTime+".And the dateformat is "+dateFormat);
+            logger.error("Failed to translate the time string: " + valueDateTime
+                  + ".And the dateformat is " + dateFormat);
             continue;
          }
          List<ValueUnit> values = new ArrayList<ValueUnit>();
@@ -970,54 +990,100 @@ public class PowerIQService implements AsyncService {
 
          String unit = reading.getUom();
          MetricUnit sourceUnit = null, targetUnit = null;
-         switch(sensorValueType.get(sensor.getType())) {
-             case HUMIDITY:
-            	 if(unit != null && !unit.isEmpty()) {
-            		 if(unit.equals("%")) {
-            			 sourceUnit = MetricUnit.PERCENT;
-            		 }else {
-            			 sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
-            		 }
-            	 }else {
-            		 if(humidity.equals("%")) {
-            			 sourceUnit = MetricUnit.PERCENT;
-            		 }else {
-            			 sourceUnit = MetricUnit.valueOf(humidity.toUpperCase());
-            		 }
+         switch (sensorValueType.get(sensor.getType())) {
+         case HUMIDITY:
+            if (unit != null && !unit.isEmpty()) {
+               if (unit.equals("%")) {
+                  sourceUnit = MetricUnit.PERCENT;
+               } else {
+                  sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
+               }
+            } else {
+               if (humidity.equals("%")) {
+                  sourceUnit = MetricUnit.PERCENT;
+               } else {
+                  sourceUnit = MetricUnit.valueOf(humidity.toUpperCase());
+               }
 
-            	 }
-                 targetUnit = MetricUnit.PERCENT;
-                 break;
-             case TEMP:
-            	 if(unit != null && !unit.isEmpty()) {
-            		 sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
-            	 }else {
-            		 sourceUnit = MetricUnit.valueOf(temperature.toUpperCase());
-            	 }
-                 targetUnit = MetricUnit.C;
-                 break;
-             default:
-                 break;
+            }
+            targetUnit = MetricUnit.PERCENT;
+            break;
+         case TEMP:
+            if (unit != null && !unit.isEmpty()) {
+               sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
+            } else {
+               sourceUnit = MetricUnit.valueOf(temperature.toUpperCase());
+            }
+            targetUnit = MetricUnit.C;
+            break;
+         default:
+            break;
          }
 
          try {
-            value.setValueNum(Double.parseDouble(value.translateUnit(String.valueOf(reading.getValue()), sourceUnit, targetUnit)));
-        } catch (WormholeException e) {
+            value.setValueNum(Double.parseDouble(
+                  value.translateUnit(String.valueOf(reading.getValue()), sourceUnit, targetUnit)));
+         } catch (WormholeException e) {
             logger.error("Cannot translate Unit", e);
-        }
-         if(targetUnit.toString().equals(MetricUnit.PERCENT.toString())) {
-        	 value.setUnit("%");
-         }else {
-        	 value.setUnit(targetUnit.toString());
+         }
+         if (targetUnit.toString().equals(MetricUnit.PERCENT.toString())) {
+            value.setUnit("%");
+         } else {
+            value.setUnit(targetUnit.toString());
          }
 
          values.add(value);
          realTimeData.setAssetID(asset.getId());
          realTimeData.setTime(recordedTime);
          realTimeData.setValues(values);
-         realTimeData.setId(asset.getId()+"_"+recordedTime);
+         realTimeData.setId(asset.getId() + "_" + recordedTime);
          realtimeDatas.add(realTimeData);
       }
       return realtimeDatas;
+   }
+
+   public void syncPDUID(FacilitySoftwareConfig powerIQ) {
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      List<Asset> allPdusFromFlowgate = restClient.getAllAssetsByType(AssetCategory.PDU);
+      //try to get all pdus from powerIQ;
+      HashMap<String, Asset> pduAssetMapFromFlowgate = new HashMap<String, Asset>();
+      for (Asset asset : allPdusFromFlowgate) {
+         pduAssetMapFromFlowgate.put(asset.getAssetName().toLowerCase(), asset);
+      }
+      int limit = 100;
+      int offset = 0;
+      PowerIQAPIClient client = createClient(powerIQ);
+      List<Pdu> pdus = null;
+      while ((pdus = client.getPdus(limit, offset)) != null) {
+         if (pdus.isEmpty()) {
+            break;
+         }
+         List<Asset> needUpdateAssets = new ArrayList<Asset>();
+         for (Pdu pdu : pdus) {
+            if (pduAssetMapFromFlowgate.containsKey(pdu.getName().toLowerCase())) {
+               Asset asset = pduAssetMapFromFlowgate.get(pdu.getName().toLowerCase());
+               String pduIDFromFlowgate = null;
+               if (!asset.getJustificationfields().isEmpty()) {
+                  pduIDFromFlowgate = asset.getJustificationfields().get(Pdu_ID);
+               }
+               if (!String.valueOf(pdu.getId()).equals(pduIDFromFlowgate)) {
+                  //we need to update the ID.
+                  logger.info(String.format("Update Asset's PDU ID filed from %s to %s",
+                        pduIDFromFlowgate, pdu.getId()));
+                  asset.getJustificationfields().put(Pdu_ID, String.valueOf(pdu.getId()));
+                  needUpdateAssets.add(asset);
+               }
+            } else {
+               //this PDU doesn't appeared in Nlyte.
+               logger.info(String.format("PDU with id %s from %s doesn't show up in Nlyte",
+                     pdu.getId(), powerIQ.getServerURL()));
+            }
+         }
+         //update the asset
+         if (!needUpdateAssets.isEmpty()) {
+            restClient.saveAssets(needUpdateAssets);
+         }
+         offset += limit;
+      }
    }
 }

@@ -15,13 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.vmware.flowgate.aggregator.config.ServiceKeyConfig;
-import com.vmware.flowgate.jobs.BaseJob;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
+import com.vmware.flowgate.jobs.BaseJob;
 
 public class PowerIQJobDispatcher extends BaseJob implements Job {
 
@@ -47,8 +47,10 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
       //this job will be triggered every 5 minutes for realtime job
       //every day for full sync job.
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      boolean fullSync = execount++ % 280 == 0;
+      boolean fullSync = execount % 288 == 0;
 
+      //every 3 days
+      boolean syncPDUID = execount % (288 * 3) == 0;
       logger.info("Send Sync PowerIQ command");
       FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
       if(powerIQs ==null || powerIQs.length==0) {
@@ -56,13 +58,21 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
          return;
       }
       try {
-      template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList, EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
-            EventMessageUtil.PowerIQ_SyncRealtimeData, powerIQs));
-      if(fullSync) {
-         logger.info("Send Sync Nlyte all assets commands");
-         template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList, EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
-               EventMessageUtil.PowerIQ_SyncSensorMetaData, powerIQs));
-      }
+         template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
+               EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
+                     EventMessageUtil.PowerIQ_SyncRealtimeData, powerIQs));
+         if (fullSync) {
+            logger.info("Send Sync PowerIQ sensor metadata command");
+            template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
+                  EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
+                        EventMessageUtil.PowerIQ_SyncSensorMetaData, powerIQs));
+         }
+         if (syncPDUID) {
+            logger.info("Send Sync all PDU ID command");
+            template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
+                  EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
+                        EventMessageUtil.PowerIQ_SyncAllPDUID, powerIQs));
+         }
       publisher.publish(EventMessageUtil.POWERIQTopic, EventMessageUtil.generateFacilityNotifyMessage(EventType.PowerIQ));
       }catch(IOException e) {
          logger.error("Failed to send out message", e);
