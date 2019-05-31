@@ -197,7 +197,6 @@ public class SyncSensorMetaDataJobTest {
    @Test
    public void testGetSensorMetaData1() {
       Mockito.when(this.powerIQAPIClient.getSensors()).thenReturn(getSensors());
-      Mockito.when(this.powerIQAPIClient.getPdus()).thenReturn(new ArrayList<Pdu>());
       Mockito.when(this.powerIQAPIClient.getRacks()).thenReturn(getRacks());
       Mockito.when(this.powerIQAPIClient.getRows()).thenReturn(getRows());
       Mockito.when(this.powerIQAPIClient.getAisles()).thenReturn(getAisles());
@@ -209,9 +208,14 @@ public class SyncSensorMetaDataJobTest {
       Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("po09imkhdplbvf540fwusy67n", AssetCategory.PDU))
       .thenReturn(getAssets(AssetCategory.PDU));
 
+      Pdu pdu2 = createPdu();
+      pdu2.setName("pek-pdu-02");
+      Mockito.when(this.powerIQAPIClient.getPduByID("2")).thenReturn(pdu2);
+
       Map<String, Asset> assetsMap = new HashMap<String, Asset>();
       Asset pdu = createAsset1();
       assetsMap.put(pdu.getAssetName(), pdu);
+
       List<Asset> assets = powerIQService.getSensorMetaData(powerIQAPIClient, "po09imkhdplbvf540fwusy67n");
       TestCase.assertEquals(2, assets.size());
       for (Asset asset : assets) {
@@ -242,6 +246,8 @@ public class SyncSensorMetaDataJobTest {
             .thenReturn(getFacilitySoftwareByType(SoftwareType.Nlyte));
       Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("po09imkhdplbvf540fwusy67n",AssetCategory.PDU))
       .thenReturn(getAssets(AssetCategory.PDU));
+      Pdu pdu2 = createPdu();
+      Mockito.when(this.powerIQAPIClient.getPduByID("2")).thenReturn(pdu2);
       List<Asset> assets = powerIQService.getSensorMetaData(powerIQAPIClient, "po09imkhdplbvf540fwusy67n");
       TestCase.assertEquals(2, assets.size());
       for (Asset asset : assets) {
