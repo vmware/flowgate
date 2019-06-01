@@ -274,8 +274,8 @@ public class PowerIQService implements AsyncService {
       updateIntegrationStatus(powerIQ);
    }
 
-   public Map<Integer, Rack> getRacksMap(PowerIQAPIClient client) {
-      Map<Integer, Rack> racksMap = new HashMap<Integer, Rack>();
+   public Map<Long, Rack> getRacksMap(PowerIQAPIClient client) {
+      Map<Long, Rack> racksMap = new HashMap<Long, Rack>();
       List<Rack> racks = new ArrayList<Rack>();
       try {
          racks = client.getRacks();
@@ -290,8 +290,8 @@ public class PowerIQService implements AsyncService {
       return racksMap;
    }
 
-   public Map<Integer, Row> getRowsMap(PowerIQAPIClient client) {
-      Map<Integer, Row> rowsMap = new HashMap<Integer, Row>();
+   public Map<Long, Row> getRowsMap(PowerIQAPIClient client) {
+      Map<Long, Row> rowsMap = new HashMap<Long, Row>();
       List<Row> rows = new ArrayList<Row>();
       try {
          rows = client.getRows();
@@ -306,8 +306,8 @@ public class PowerIQService implements AsyncService {
       return rowsMap;
    }
 
-   public Map<Integer, Aisle> getAislesMap(PowerIQAPIClient client) {
-      Map<Integer, Aisle> aislesMap = new HashMap<Integer, Aisle>();
+   public Map<Long, Aisle> getAislesMap(PowerIQAPIClient client) {
+      Map<Long, Aisle> aislesMap = new HashMap<Long, Aisle>();
       List<Aisle> aisles = new ArrayList<Aisle>();
       try {
          aisles = client.getAisles();
@@ -322,8 +322,8 @@ public class PowerIQService implements AsyncService {
       return aislesMap;
    }
 
-   public Map<Integer, Room> getRoomsMap(PowerIQAPIClient client) {
-      Map<Integer, Room> roomsMap = new HashMap<Integer, Room>();
+   public Map<Long, Room> getRoomsMap(PowerIQAPIClient client) {
+      Map<Long, Room> roomsMap = new HashMap<Long, Room>();
       List<Room> rooms = new ArrayList<Room>();
       try {
          rooms = client.getRooms();
@@ -338,8 +338,8 @@ public class PowerIQService implements AsyncService {
       return roomsMap;
    }
 
-   public Map<Integer, Floor> getFloorsMap(PowerIQAPIClient client) {
-      Map<Integer, Floor> floorsMap = new HashMap<Integer, Floor>();
+   public Map<Long, Floor> getFloorsMap(PowerIQAPIClient client) {
+      Map<Long, Floor> floorsMap = new HashMap<Long, Floor>();
       List<Floor> floors = new ArrayList<Floor>();
       try {
          floors = client.getFloors();
@@ -355,8 +355,8 @@ public class PowerIQService implements AsyncService {
       return floorsMap;
    }
 
-   public Map<Integer, DataCenter> getDataCentersMap(PowerIQAPIClient client) {
-      Map<Integer, DataCenter> dataCentersMap = new HashMap<Integer, DataCenter>();
+   public Map<Long, DataCenter> getDataCentersMap(PowerIQAPIClient client) {
+      Map<Long, DataCenter> dataCentersMap = new HashMap<Long, DataCenter>();
       List<DataCenter> dataCenters = new ArrayList<DataCenter>();
       try {
          dataCenters = client.getDataCenters();
@@ -401,12 +401,12 @@ public class PowerIQService implements AsyncService {
          return assets;
       }
       Map<String, Asset> pduAssetMap = getPDUAssetMap();//get all pdus from flowgate
-      Map<Integer, Rack> racksMap = getRacksMap(client);
-      Map<Integer, Row> rowsMap = getRowsMap(client);
-      Map<Integer, Aisle> aislesMap = getAislesMap(client);
-      Map<Integer, Room> roomsMap = getRoomsMap(client);
-      Map<Integer, Floor> floorsMap = getFloorsMap(client);
-      Map<Integer, DataCenter> dataCentersMap = getDataCentersMap(client);
+      Map<Long, Rack> racksMap = getRacksMap(client);
+      Map<Long, Row> rowsMap = getRowsMap(client);
+      Map<Long, Aisle> aislesMap = getAislesMap(client);
+      Map<Long, Room> roomsMap = getRoomsMap(client);
+      Map<Long, Floor> floorsMap = getFloorsMap(client);
+      Map<Long, DataCenter> dataCentersMap = getDataCentersMap(client);
 
       //Map<Integer, Pdu> pduMap = getPduMap(client);
       //Map<Integer, Pdu> pduMap = new HashMap<Integer, Pdu>();
@@ -494,9 +494,9 @@ public class PowerIQService implements AsyncService {
       return sensors;
    }
 
-   public Asset fillLocation(Sensor sensor, Map<Integer, Rack> racksMap, Map<Integer, Row> rowsMap,
-         Map<Integer, Aisle> aislesMap, Map<Integer, Room> roomsMap, Map<Integer, Floor> floorsMap,
-         Map<Integer, DataCenter> dataCentersMap) {
+   public Asset fillLocation(Sensor sensor, Map<Long, Rack> racksMap, Map<Long, Row> rowsMap,
+         Map<Long, Aisle> aislesMap, Map<Long, Room> roomsMap, Map<Long, Floor> floorsMap,
+         Map<Long, DataCenter> dataCentersMap) {
       Asset asset = null;
       StringBuilder extraLocation = new StringBuilder();
       Parent parent = null;

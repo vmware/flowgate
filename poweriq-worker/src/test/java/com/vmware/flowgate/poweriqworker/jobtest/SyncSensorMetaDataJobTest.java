@@ -137,43 +137,43 @@ public class SyncSensorMetaDataJobTest {
    @Test
    public void testGetRacksMap() {
       Mockito.when(this.powerIQAPIClient.getRacks()).thenReturn(getRacks());
-      Map<Integer, Rack> racks = powerIQService.getRacksMap(powerIQAPIClient);
-      TestCase.assertEquals(true, racks.containsKey(2));
+      Map<Long, Rack> racks = powerIQService.getRacksMap(powerIQAPIClient);
+      TestCase.assertEquals(true, racks.containsKey(2L));
    }
 
    @Test
    public void testGetRowsMap() {
       Mockito.when(this.powerIQAPIClient.getRows()).thenReturn(getRows());
-      Map<Integer, Row> rows = powerIQService.getRowsMap(powerIQAPIClient);
-      TestCase.assertEquals(true, rows.containsKey(1));
+      Map<Long, Row> rows = powerIQService.getRowsMap(powerIQAPIClient);
+      TestCase.assertEquals(true, rows.containsKey(1L));
    }
 
    @Test
    public void testGetAislesMap() {
       Mockito.when(this.powerIQAPIClient.getAisles()).thenReturn(getAisles());
-      Map<Integer, Aisle> aisles = powerIQService.getAislesMap(powerIQAPIClient);
-      TestCase.assertEquals(true, aisles.containsKey(2));
+      Map<Long, Aisle> aisles = powerIQService.getAislesMap(powerIQAPIClient);
+      TestCase.assertEquals(true, aisles.containsKey(2L));
    }
 
    @Test
    public void testGetRoomsMap() {
       Mockito.when(this.powerIQAPIClient.getRooms()).thenReturn(getRooms());
-      Map<Integer, Room> rooms = powerIQService.getRoomsMap(powerIQAPIClient);
-      TestCase.assertEquals(true, rooms.containsKey(8));
+      Map<Long, Room> rooms = powerIQService.getRoomsMap(powerIQAPIClient);
+      TestCase.assertEquals(true, rooms.containsKey(8L));
    }
 
    @Test
    public void testGetFloorsMap() {
       Mockito.when(this.powerIQAPIClient.getFloors()).thenReturn(getFloors());
-      Map<Integer, Floor> floors = powerIQService.getFloorsMap(powerIQAPIClient);
-      TestCase.assertEquals(true, floors.containsKey(5));
+      Map<Long, Floor> floors = powerIQService.getFloorsMap(powerIQAPIClient);
+      TestCase.assertEquals(true, floors.containsKey(5L));
    }
 
    @Test
    public void testGetDataCentersMap() {
       Mockito.when(this.powerIQAPIClient.getDataCenters()).thenReturn(getDataCenters());
-      Map<Integer, DataCenter> dataCenters = powerIQService.getDataCentersMap(powerIQAPIClient);
-      TestCase.assertEquals(true, dataCenters.containsKey(7));
+      Map<Long, DataCenter> dataCenters = powerIQService.getDataCentersMap(powerIQAPIClient);
+      TestCase.assertEquals(true, dataCenters.containsKey(7L));
    }
 
    @Test
@@ -568,7 +568,7 @@ public class SyncSensorMetaDataJobTest {
       sensor1.setSerialNumber("5487");
       sensor1.setName("TemperatureSensor01");
       sensor1.setType("TemperatureSensor");
-      sensor1.setPduId(2);
+      sensor1.setPduId(2L);
       sensors.add(sensor1);
       return sensors;
    }

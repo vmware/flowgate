@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Pdu {
 
-   private int id;
+   private long id;
    @JsonProperty(value = "snmp3_enabled")
    private boolean snmp3Enabled;
    @JsonProperty(value = "snmp3_user")
@@ -18,7 +18,7 @@ public class Pdu {
    private String description;
    private String contact;
    @JsonProperty(value = "proxy_index")
-   private int proxyIndex;
+   private long proxyIndex;
    @JsonProperty(value = "requires_manual_voltage")
    private String requiresManualVoltage;
    @JsonProperty(value = "configured_inlet_voltage")
@@ -89,11 +89,11 @@ public class Pdu {
    private Reading reading;
    private Health health;
 
-   public int getId() {
+   public long getId() {
       return id;
    }
 
-   public void setId(int id) {
+   public void setId(long id) {
       this.id = id;
    }
 
@@ -137,11 +137,11 @@ public class Pdu {
       this.contact = contact;
    }
 
-   public int getProxyIndex() {
+   public long getProxyIndex() {
       return proxyIndex;
    }
 
-   public void setProxyIndex(int proxyIndex) {
+   public void setProxyIndex(long proxyIndex) {
       this.proxyIndex = proxyIndex;
    }
 

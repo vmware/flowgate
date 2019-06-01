@@ -8,20 +8,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InletPoleReading {
 
-   private int id;
+   private long id;
    @JsonProperty(value = "reading_time")
    private String readingTime;
    private Double current;
    @JsonProperty(value = "unutilized_capacity")
    private Double unutilizedCapacity;
    @JsonProperty(value = "pdu_id")
-   private Integer pduId;
+   private Long pduId;
    @JsonProperty(value = "max_current")
    private String maxCurrent;
    @JsonProperty(value = "min_current")
    private String minCurrent;
    @JsonProperty(value = "inlet_pole_id")
-   private int inlet_pole_id;
+   private long inlet_pole_id;
    private Double voltage;
    @JsonProperty(value = "min_voltage")
    private Double minVoltage;
@@ -32,17 +32,17 @@ public class InletPoleReading {
    @JsonProperty(value = "max_unutilized_capacity")
    private String maxUnutilizedCapacity;
    @JsonProperty(value = "inlet_id")
-   private int inletId;
+   private long inletId;
    @JsonProperty(value = "inlet_ordinal")
-   private int inletOrdinal;
+   private long inletOrdinal;
    @JsonProperty(value = "inlet_pole_ordinal")
-   private int inletPoleOrdinal;
+   private long inletPoleOrdinal;
 
-   public void setId(int id) {
+   public void setId(long id) {
       this.id = id;
    }
 
-   public int getId() {
+   public long getId() {
       return id;
    }
 
@@ -70,11 +70,11 @@ public class InletPoleReading {
       this.unutilizedCapacity = unutilizedCapacity;
    }
 
-   public Integer getPduId() {
+   public Long getPduId() {
       return pduId;
    }
 
-   public void setPduId(Integer pduId) {
+   public void setPduId(Long pduId) {
       this.pduId = pduId;
    }
 
@@ -94,11 +94,11 @@ public class InletPoleReading {
       this.minCurrent = minCurrent;
    }
 
-   public int getInlet_pole_id() {
+   public long getInlet_pole_id() {
       return inlet_pole_id;
    }
 
-   public void setInlet_pole_id(int inlet_pole_id) {
+   public void setInlet_pole_id(long inlet_pole_id) {
       this.inlet_pole_id = inlet_pole_id;
    }
 
@@ -142,27 +142,27 @@ public class InletPoleReading {
       this.maxUnutilizedCapacity = maxUnutilizedCapacity;
    }
 
-   public int getInletId() {
+   public long getInletId() {
       return inletId;
    }
 
-   public void setInletId(int inletId) {
+   public void setInletId(long inletId) {
       this.inletId = inletId;
    }
 
-   public int getInletOrdinal() {
+   public long getInletOrdinal() {
       return inletOrdinal;
    }
 
-   public void setInletOrdinal(int inletOrdinal) {
+   public void setInletOrdinal(long inletOrdinal) {
       this.inletOrdinal = inletOrdinal;
    }
 
-   public int getInletPoleOrdinal() {
+   public long getInletPoleOrdinal() {
       return inletPoleOrdinal;
    }
 
-   public void setInletPoleOrdinal(int inletPoleOrdinal) {
+   public void setInletPoleOrdinal(long inletPoleOrdinal) {
       this.inletPoleOrdinal = inletPoleOrdinal;
    }
 

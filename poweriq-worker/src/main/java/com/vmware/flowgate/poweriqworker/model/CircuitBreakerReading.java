@@ -15,7 +15,7 @@ public class CircuitBreakerReading {
    @JsonProperty(value = "unutilized_capacity")
    private Double unutilizedCapacity;
    @JsonProperty(value = "pdu_id")
-   private Integer pduId;
+   private Long pduId;
    @JsonProperty(value = "max_current")
    private String maxCurrent;
    @JsonProperty(value = "min_current")
@@ -37,7 +37,7 @@ public class CircuitBreakerReading {
       return id;
    }
 
-   public void setId(int id) {
+   public void setId(long id) {
       this.id = id;
    }
 
@@ -65,11 +65,11 @@ public class CircuitBreakerReading {
       this.unutilizedCapacity = unutilizedCapacity;
    }
 
-   public Integer getPduId() {
+   public Long getPduId() {
       return pduId;
    }
 
-   public void setPduId(Integer pduId) {
+   public void setPduId(Long pduId) {
       this.pduId = pduId;
    }
 
@@ -93,7 +93,7 @@ public class CircuitBreakerReading {
       return circuitBreakerId;
    }
 
-   public void setCircuitBreakerId(int circuitBreakerId) {
+   public void setCircuitBreakerId(long circuitBreakerId) {
       this.circuitBreakerId = circuitBreakerId;
    }
 

@@ -8,23 +8,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SensorReading {
 
-   private int id;
+   private long id;
    @JsonProperty(value = "reading_time")
    private String readingTime;
    private Double value;
    @JsonProperty(value = "sensor_id")
-   private Integer sensorId;
+   private Long sensorId;
    @JsonProperty(value = "max_value")
    private String maxValue;
    @JsonProperty(value = "min_value")
    private String minValue;
    private String uom;
 
-   public void setId(int id) {
+   public void setId(long id) {
       this.id = id;
    }
 
-   public int getId() {
+   public long getId() {
       return id;
    }
 
@@ -44,11 +44,11 @@ public class SensorReading {
       this.value = value;
    }
 
-   public Integer getSensorId() {
+   public Long getSensorId() {
       return sensorId;
    }
 
-   public void setSensorId(Integer sensorId) {
+   public void setSensorId(Long sensorId) {
       this.sensorId = sensorId;
    }
 

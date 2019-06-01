@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DataCenter {
 
-   private int id;
+   private long id;
    private String name;
    @JsonProperty(value = "company_name")
    private String companyName;
@@ -48,11 +48,11 @@ public class DataCenter {
    private String pueThresholdMaximum;
    private Parent parent;
 
-   public void setId(int id) {
+   public void setId(long id) {
       this.id = id;
    }
 
-   public int getId() {
+   public long getId() {
       return id;
    }
 

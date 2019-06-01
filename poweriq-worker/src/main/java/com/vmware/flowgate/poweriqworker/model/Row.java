@@ -8,18 +8,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Row {
 
-   private int id;
+   private long id;
    private String name;
    @JsonProperty(value="external_key")
    private String externalKey;
    private String capacity;
    private Parent parent;
 
-   public void setId(int id) {
+   public void setId(long id) {
       this.id = id;
    }
 
-   public int getId() {
+   public long getId() {
       return id;
    }
 

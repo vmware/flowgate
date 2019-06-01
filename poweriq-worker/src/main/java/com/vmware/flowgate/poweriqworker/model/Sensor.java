@@ -8,10 +8,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Sensor {
 
-   private int id;
+   private long id;
    @JsonProperty(value = "pdu_id")
-   private Integer pduId;
-   private int ordinal;
+   private Long pduId;
+   private long ordinal;
    @JsonProperty(value = "attribute_name")
    private String attributeName;
    private String name;
@@ -25,33 +25,33 @@ public class Sensor {
    private String type;
    private Parent parent;
    @JsonProperty(value = "pdu_sensor_id")
-   private int pduSensorId;
+   private long pduSensorId;
    private String label;
    private String removed;
    private SensorReading reading;
    //private State state;
 
-   public void setId(int id) {
+   public void setId(long id) {
       this.id = id;
    }
 
-   public int getId() {
+   public long getId() {
       return id;
    }
 
-   public Integer getPduId() {
+   public Long getPduId() {
       return pduId;
    }
 
-   public void setPduId(Integer pduId) {
+   public void setPduId(Long pduId) {
       this.pduId = pduId;
    }
 
-   public void setOrdinal(int ordinal) {
+   public void setOrdinal(long ordinal) {
       this.ordinal = ordinal;
    }
 
-   public int getOrdinal() {
+   public long getOrdinal() {
       return ordinal;
    }
 
@@ -119,11 +119,11 @@ public class Sensor {
       this.parent = parent;
    }
 
-   public int getPduSensorId() {
+   public long getPduSensorId() {
       return pduSensorId;
    }
 
-   public void setPduSensorId(int pduSensorId) {
+   public void setPduSensorId(long pduSensorId) {
       this.pduSensorId = pduSensorId;
    }
 
