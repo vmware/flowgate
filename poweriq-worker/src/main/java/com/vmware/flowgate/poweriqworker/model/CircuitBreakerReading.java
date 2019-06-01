@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CircuitBreakerReading {
 
-   private int id;
+   private long id;
    @JsonProperty(value = "reading_time")
    private String readingTime;
    private Double current;
@@ -21,7 +21,7 @@ public class CircuitBreakerReading {
    @JsonProperty(value = "min_current")
    private String minCurrent;
    @JsonProperty(value = "circuit_breaker_id")
-   private int circuitBreakerId;
+   private long circuitBreakerId;
    @JsonProperty(value = "min_unutilized_capacity")
    private String minUnutilizedCapacity;
    @JsonProperty(value = "max_unutilized_capacity")
@@ -33,7 +33,7 @@ public class CircuitBreakerReading {
    @JsonProperty(value = "min_current_amps")
    private String minCurrentAmps;
 
-   public int getId() {
+   public long getId() {
       return id;
    }
 
@@ -89,7 +89,7 @@ public class CircuitBreakerReading {
       this.minCurrent = minCurrent;
    }
 
-   public int getCircuitBreakerId() {
+   public long getCircuitBreakerId() {
       return circuitBreakerId;
    }
 
