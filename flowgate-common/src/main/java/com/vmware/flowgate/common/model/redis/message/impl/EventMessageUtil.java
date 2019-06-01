@@ -43,27 +43,35 @@ public class EventMessageUtil {
    public static final String PDUServerMappingCommand = "pduservermapping";
    public static final String SyncTemperatureAndHumiditySensors = "tempandhumiditymapping";
    public static final String FullSyncTemperatureAndHumiditySensors = "fullsynctempandhumiditymapping";
+
+   public static final String AGGREGATOR_EXECOUNT = "aggregator.execount";
+
    public static final String VCENTER_SyncCustomerAttrs = "vcenter.synccustomerattrs";
    public static final String VCENTER_SyncCustomerAttrsData = "vcenter.synccustomerattrsdata";
    public static final String VCENTER_SyncData = "vcenter.syncdata";
+   public static final String VCENTER_EXECOUNT = "vcenter.execount";
 
    public static final String VRO_SyncData = "vro.syncdata";
    public static final String VRO_SyncMetricData = "vro.syncmetricdata";
    public static final String VRO_SyncMetricPropertyAndAlert = "vro.syncmetricpropertyalert";
+   public static final String VRO_EXECOUNT = "vro.execount";
 
    public static final String NLYTE_SyncData= "nlyte.syncdata";
    public static final String NLYTE_SyncAllAssets = "nlyte.syncallassets";
    public static final String NLYTE_SyncRealtimeData="nlyte.syncrealtimedata";
    public static final String NLYTE_SyncMappedAssetData="nlyte.syncmappedassets";
+   public static final String NLYTE_EXECOUNT = "nlyte.execount";
 
    public static final String PowerIQ_SyncRealtimeData="poweriq.syncrealtimedata";
    public static final String PowerIQ_SyncSensorMetaData="poweriq.syncsensormetadata";
    public static final String POWERIQ_SyncData= "poweriq.syncdata";
    public static final String PowerIQ_SyncAllPDUID = "poweriq.syncallpduid";
+   public static final String POWERIQ_EXECOUNT = "poweriq.execount";
 
    public static final String Labsdb_SyncAllWireMapData = "labsdb.syncallwiremapdata";
    public static final String Labsdb_SyncUnMappedAssetWiremapData = "labsdb.syncunmappedassetwiremapdata";
    public static final String Labsdb_SyncData = "labsdb.syncdata";
+   public static final String LABSDB_EXECOUNT = "labsdb.execount";
 
    public static EventMessage convertToEventMessage(EventType type, String message) {
       EventMessage eventMessage =

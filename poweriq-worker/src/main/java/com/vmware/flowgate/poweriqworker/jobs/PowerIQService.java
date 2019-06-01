@@ -1060,23 +1060,28 @@ public class PowerIQService implements AsyncService {
          }
          List<Asset> needUpdateAssets = new ArrayList<Asset>();
          for (Pdu pdu : pdus) {
-            if (pduAssetMapFromFlowgate.containsKey(pdu.getName().toLowerCase())) {
-               Asset asset = pduAssetMapFromFlowgate.get(pdu.getName().toLowerCase());
-               String pduIDFromFlowgate = null;
-               if (!asset.getJustificationfields().isEmpty()) {
-                  pduIDFromFlowgate = asset.getJustificationfields().get(Pdu_ID);
-               }
-               if (!String.valueOf(pdu.getId()).equals(pduIDFromFlowgate)) {
-                  //we need to update the ID.
-                  logger.info(String.format("Update Asset's PDU ID filed from %s to %s",
-                        pduIDFromFlowgate, pdu.getId()));
-                  asset.getJustificationfields().put(Pdu_ID, String.valueOf(pdu.getId()));
-                  needUpdateAssets.add(asset);
+            if (pdu.getName() != null) {
+               if (pduAssetMapFromFlowgate.containsKey(pdu.getName().toLowerCase())) {
+                  Asset asset = pduAssetMapFromFlowgate.get(pdu.getName().toLowerCase());
+                  String pduIDFromFlowgate = null;
+                  if (!asset.getJustificationfields().isEmpty()) {
+                     pduIDFromFlowgate = asset.getJustificationfields().get(Pdu_ID);
+                  }
+                  if (!String.valueOf(pdu.getId()).equals(pduIDFromFlowgate)) {
+                     //we need to update the ID.
+                     logger.info(String.format("Update Asset's PDU ID filed from %s to %s",
+                           pduIDFromFlowgate, pdu.getId()));
+                     asset.getJustificationfields().put(Pdu_ID, String.valueOf(pdu.getId()));
+                     needUpdateAssets.add(asset);
+                  }
+               } else {
+                  //this PDU doesn't appeared in Nlyte.
+                  logger.info(String.format("PDU with id %s from %s doesn't show up in Nlyte",
+                        pdu.getId(), powerIQ.getServerURL()));
                }
             } else {
-               //this PDU doesn't appeared in Nlyte.
-               logger.info(String.format("PDU with id %s from %s doesn't show up in Nlyte",
-                     pdu.getId(), powerIQ.getServerURL()));
+               logger.error(
+                     String.format("The pdu with id %s don't have name field!", pdu.getId()));
             }
          }
          //update the asset

@@ -31,7 +31,6 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
    @Autowired
    private ServiceKeyConfig serviceKeyConfig;
 
-   private static long execount = 0;
 
    @Autowired
    private StringRedisTemplate template;
@@ -47,11 +46,16 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
       //this job will be triggered every 5 minutes for realtime job
       //every day for full sync job.
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      String execountString = template.opsForValue().get(EventMessageUtil.POWERIQ_EXECOUNT);
+      if (execountString == null || "".equals(execountString)) {
+         execountString = "0";
+      }
+      long execount = Long.valueOf(execountString);
       boolean fullSync = execount % 288 == 0;
-
       //every 3 days
       boolean syncPDUID = execount++ % (288 * 3) == 0;
-      logger.info("Send Sync PowerIQ command");
+      logger.info(String.format("Send Sync PowerIQ command, fullSync=%s, syncPDUID=%s", fullSync,
+            syncPDUID));
       FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
       if(powerIQs ==null || powerIQs.length==0) {
          logger.info("No PowerIQ server find");
@@ -73,7 +77,9 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
                   EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
                         EventMessageUtil.PowerIQ_SyncAllPDUID, powerIQs));
          }
-      publisher.publish(EventMessageUtil.POWERIQTopic, EventMessageUtil.generateFacilityNotifyMessage(EventType.PowerIQ));
+         publisher.publish(EventMessageUtil.POWERIQTopic,
+               EventMessageUtil.generateFacilityNotifyMessage(EventType.PowerIQ));
+         template.opsForValue().set(EventMessageUtil.POWERIQ_EXECOUNT, String.valueOf(execount));
       }catch(IOException e) {
          logger.error("Failed to send out message", e);
       }
