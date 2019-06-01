@@ -16,12 +16,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.aggregator.config.ServiceKeyConfig;
-import com.vmware.flowgate.jobs.BaseJob;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
+import com.vmware.flowgate.jobs.BaseJob;
 
 public class VROJobDispatcher extends BaseJob implements Job {
 
@@ -35,11 +35,17 @@ public class VROJobDispatcher extends BaseJob implements Job {
    private ServiceKeyConfig serviceKeyConfig;
    @Autowired
    private MessagePublisher publisher;
-   private static long execount = 0;
    private ObjectMapper mapper = new ObjectMapper();
 
    @Override
    public void execute(JobExecutionContext context) throws JobExecutionException {
+
+      String execountString = template.opsForValue().get(EventMessageUtil.VRO_EXECOUNT);
+      if (execountString == null || "".equals(execountString)) {
+         execountString = "0";
+      }
+      long execount = Long.valueOf(execountString);
+
       boolean syncMetriAlertPropertyDefinition = (execount++ % 288000 == 0);//Will you run 1000 days?
       logger.info("Send Sync VRO metric data commands");
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
@@ -60,6 +66,7 @@ public class VROJobDispatcher extends BaseJob implements Job {
          }
          publisher.publish(EventMessageUtil.VROTopic,
                EventMessageUtil.generateSDDCNotifyMessage(EventType.VROps));
+         template.opsForValue().set(EventMessageUtil.VRO_EXECOUNT, String.valueOf(execount));
       } catch (IOException e) {
          logger.error("Failed to sendout VRO jobs", e);
       }
