@@ -7,18 +7,18 @@ package com.vmware.flowgate.poweriqworker.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Room {
-   private int id;
+   private long id;
    private String name;
    @JsonProperty(value = "external_key")
    private String externalKey;
    private Double capacity;
    private Parent parent;
 
-   public int getId() {
+   public long getId() {
       return id;
    }
 
-   public void setId(int id) {
+   public void setId(long id) {
       this.id = id;
    }
 

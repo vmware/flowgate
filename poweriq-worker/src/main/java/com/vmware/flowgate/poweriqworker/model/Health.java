@@ -14,7 +14,7 @@ public class Health {
    private String connectivityExplanation;
    private String events;
    @JsonProperty(value = "active_events_count")
-   private int activeEventsCount;
+   private long activeEventsCount;
 
    public void setOverall(String overall) {
       this.overall = overall;
@@ -48,11 +48,11 @@ public class Health {
       this.events = events;
    }
 
-   public int getActiveEventsCount() {
+   public long getActiveEventsCount() {
       return activeEventsCount;
    }
 
-   public void setActiveEventsCount(int activeEventsCount) {
+   public void setActiveEventsCount(long activeEventsCount) {
       this.activeEventsCount = activeEventsCount;
    }
 

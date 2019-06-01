@@ -8,11 +8,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InletReading {
 
-   private int id;
+   private long id;
    @JsonProperty(value = "pdu_id")
-   private Integer pduId;
+   private Long pduId;
    @JsonProperty(value = "inlet_id")
-   private int inletId;
+   private long inletId;
    @JsonProperty(value = "reading_time")
    private String readingTime;
    private Double voltage;
@@ -56,29 +56,29 @@ public class InletReading {
    @JsonProperty(value = "watt_hour_delta")
    private String wattHourDelta;
    @JsonProperty(value = "inlet_ordinal")
-   private int inletOrdinal;
+   private long inletOrdinal;
 
-   public void setId(int id) {
+   public void setId(long id) {
       this.id = id;
    }
 
-   public int getId() {
+   public long getId() {
       return id;
    }
 
-   public Integer getPduId() {
+   public Long getPduId() {
       return pduId;
    }
 
-   public void setPduId(Integer pduId) {
+   public void setPduId(Long pduId) {
       this.pduId = pduId;
    }
 
-   public int getInletId() {
+   public long getInletId() {
       return inletId;
    }
 
-   public void setInletId(int inletId) {
+   public void setInletId(long inletId) {
       this.inletId = inletId;
    }
 
@@ -258,11 +258,11 @@ public class InletReading {
       this.wattHourDelta = wattHourDelta;
    }
 
-   public int getInletOrdinal() {
+   public long getInletOrdinal() {
       return inletOrdinal;
    }
 
-   public void setInletOrdinal(int inletOrdinal) {
+   public void setInletOrdinal(long inletOrdinal) {
       this.inletOrdinal = inletOrdinal;
    }
 
