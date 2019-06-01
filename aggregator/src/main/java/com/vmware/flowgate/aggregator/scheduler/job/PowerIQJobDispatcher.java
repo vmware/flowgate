@@ -50,7 +50,7 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
       boolean fullSync = execount % 288 == 0;
 
       //every 3 days
-      boolean syncPDUID = execount % (288 * 3) == 0;
+      boolean syncPDUID = execount++ % (288 * 3) == 0;
       logger.info("Send Sync PowerIQ command");
       FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
       if(powerIQs ==null || powerIQs.length==0) {
