@@ -65,7 +65,7 @@ RUN ln -s dummy.sh /usr/local/bin/iptables-save && \
 COPY initData.sh /home/couchbase
 RUN chown -R couchbase:couchbase /home/couchbase
 COPY init.sh /
-
+COPY limits.conf /etc/security/
 # Fix curl RPATH
 RUN chrpath -r '$ORIGIN/../lib' /opt/couchbase/bin/curl
 
