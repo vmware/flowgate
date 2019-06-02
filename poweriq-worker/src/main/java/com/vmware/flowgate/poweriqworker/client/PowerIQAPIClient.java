@@ -78,7 +78,7 @@ public class PowerIQAPIClient {
       this.powerIQServiceEndpoint = facilitySoftwareConfig.getServerURL();
       try {
          this.restTemplate =
-               RestTemplateBuilder.buildTemplate(facilitySoftwareConfig.isVerifyCert(), 60000);
+               RestTemplateBuilder.buildTemplate(facilitySoftwareConfig.isVerifyCert(), 120000);
       } catch (Exception e) {
          logger.error("Error initializing the PowerIQAPIClient", e);
       }
