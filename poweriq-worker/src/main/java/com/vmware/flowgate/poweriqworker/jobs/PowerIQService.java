@@ -243,7 +243,7 @@ public class PowerIQService implements AsyncService {
          return;
       }
 
-      if (sensorsFromPower.isEmpty()) {
+      if (sensorsFromPower != null && sensorsFromPower.isEmpty()) {
          return;
       }
       Map<String, Asset> exsitingSensorAssets = getAssetsFromWormhole(powerIQ.getId());
