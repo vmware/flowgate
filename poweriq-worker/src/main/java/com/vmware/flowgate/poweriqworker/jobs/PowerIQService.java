@@ -243,7 +243,7 @@ public class PowerIQService implements AsyncService {
          return;
       }
 
-      if (sensorsFromPower != null && sensorsFromPower.isEmpty()) {
+      if (sensorsFromPower == null || sensorsFromPower.isEmpty()) {
          return;
       }
       Map<String, Asset> exsitingSensorAssets = getAssetsFromWormhole(powerIQ.getId());
@@ -398,6 +398,8 @@ public class PowerIQService implements AsyncService {
       List<Asset> pdus = new ArrayList<Asset>();
       List<Sensor> sensors = getSensors(client);
       if (sensors == null || sensors.isEmpty()) {
+         logger.warn(
+               String.format("No sensor data from PowerIQ %s", client.getPowerIQServiceEndpoint()));
          return assets;
       }
       Map<String, Asset> pduAssetMap = getPDUAssetMap();//get all pdus from flowgate
