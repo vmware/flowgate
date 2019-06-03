@@ -576,6 +576,8 @@ public class PowerIQService implements AsyncService {
             parent = dataCenter.getParent();
             break;
          default:
+            logger.error(String.format("Unkown type %s", parent.getType()));
+            parent = null;
             break;
          }
       }
