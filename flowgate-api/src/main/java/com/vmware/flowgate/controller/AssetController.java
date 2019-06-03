@@ -7,6 +7,7 @@ package com.vmware.flowgate.controller;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -186,7 +187,7 @@ public class AssetController {
             }
          }
          if (!assetids.isEmpty()) {
-             JsonArray array = JsonArray.from(assetids);
+            JsonArray array = JsonArray.from(Arrays.asList(assetids));
              assets = assetRepository.findAll(array);
          } else {
             assets = new ArrayList<Asset>();
