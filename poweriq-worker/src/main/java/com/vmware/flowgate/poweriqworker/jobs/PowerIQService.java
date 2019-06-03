@@ -94,6 +94,7 @@ public class PowerIQService implements AsyncService {
    public static final String WaterSensor = "WaterSensor";
    public static final String Vibration = "Vibration";
    private static final String Pdu_ID = "Pdu_ID";
+   private static final String POWERIQ_SOURCE = "PDU_PowerIQ_SOURCE";
    private static final String Sensor_ID = "Sensor_ID";
    private static Map<String, AssetSubCategory> subCategoryMap =
          new HashMap<String, AssetSubCategory>();
@@ -678,6 +679,11 @@ public class PowerIQService implements AsyncService {
          String id = null;
          if (asset.getJustificationfields() != null) {
             id = asset.getJustificationfields().get(Pdu_ID);
+            String source = asset.getJustificationfields().get(POWERIQ_SOURCE);
+            //Only check the pdu that belong to the current PowerIQ.
+            if (source == null || !source.equals(powerIQ.getId())) {
+               id = null;
+            }
          }
          if (id != null) {
             Pdu pdu = client.getPduByID(id);
@@ -1068,16 +1074,21 @@ public class PowerIQService implements AsyncService {
                if (pduAssetMapFromFlowgate.containsKey(pdu.getName().toLowerCase())) {
                   Asset asset = pduAssetMapFromFlowgate.get(pdu.getName().toLowerCase());
                   String pduIDFromFlowgate = null;
+                  String dataSource = null;
                   if (!asset.getJustificationfields().isEmpty()) {
                      pduIDFromFlowgate = asset.getJustificationfields().get(Pdu_ID);
+                     dataSource = asset.getJustificationfields().get(POWERIQ_SOURCE);
                   }
-                  if (!String.valueOf(pdu.getId()).equals(pduIDFromFlowgate)) {
+                  if (!String.valueOf(pdu.getId()).equals(pduIDFromFlowgate)
+                        || dataSource == null) {
                      //we need to update the ID.
                      logger.info(String.format("Update Asset's PDU ID filed from %s to %s",
                            pduIDFromFlowgate, pdu.getId()));
                      asset.getJustificationfields().put(Pdu_ID, String.valueOf(pdu.getId()));
+                     asset.getJustificationfields().put(POWERIQ_SOURCE, powerIQ.getId());
                      needUpdateAssets.add(asset);
                   }
+
                } else {
                   //this PDU doesn't appeared in Nlyte.
                   logger.info(String.format("PDU with id %s from %s doesn't show up in Nlyte",
