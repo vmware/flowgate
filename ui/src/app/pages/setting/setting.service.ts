@@ -120,7 +120,7 @@ export class SettingService {
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());
       this.options = new RequestOptions({ headers: header });
-      return this.http.get(""+this.API_URL+"/v1/assets/mapping/vc/"+id+"/page/1/pagesize/1000",this.options).map((res)=>res)
+      return this.http.get(""+this.API_URL+"/v1/assets/mapping/vc/"+id,this.options).map((res)=>res)
     }
     getAssetById(id){
       let header = new Headers({ 'Content-Type': 'application/json' });
