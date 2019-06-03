@@ -108,13 +108,13 @@ export class AssetChart implements AfterViewInit, OnInit{
                         return;
                     }
 
-                    data.json().forEach(e => {
+                    data.json().content.forEach(e => {
                         if(e.asset != null){
                             howManyAsset++;
                         }
                     })
 
-                    data.json().forEach(e => {
+                    data.json().content.forEach(e => {
 
                         if(e.asset == null){
                             let node = new Node(e.vcHostName, "host", e.asset, num, []);
