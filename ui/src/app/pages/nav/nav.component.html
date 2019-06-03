@@ -36,12 +36,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
                   <a clrVerticalNavLink 
                      routerLink="/ui/nav/user/user-list"
                      routerLinkActive="active" *appHasPrivilege=userManagement>
-                      UserManagement
+                      User Management
                   </a>
                   <a clrVerticalNavLink
                      routerLink="/ui/nav/user/role-list"
                      routerLinkActive="active" *appHasPrivilege=roleManagement>
-                      RoleManagement
+                      Role Management
                   </a>
 
               </clr-vertical-nav-group-children>
@@ -49,7 +49,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
           <clr-vertical-nav-group *appHasPrivilege=sddc
                   routerLinkActive="active">
               <clr-icon shape="rack-server" clrVerticalNavIcon></clr-icon>
-              IT management
+              IT Management
               <clr-vertical-nav-group-children>
                   <a clrVerticalNavLink 
                      routerLink="/ui/nav/sddc/vmware"
@@ -111,7 +111,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 <a clrVerticalNavLink
                 routerLink="/ui/nav/setting/sensorsetting-list" *appHasPrivilege=sensorsetting
                 routerLinkActive="active">
-                Sensorsetting
+                Sensor Setting
              </a>
              <a clrVerticalNavLink
                routerLink="/ui/nav/setting/system-setting" *appHasPrivilege=systemSetting

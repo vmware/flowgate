@@ -1,13 +1,14 @@
 <!-- Copyright 2019 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause -->
 <form>
-    <label> Content for ServerMapping</label>          
+<section class="form-block">
+    <label> Content For Server Mapping</label>          
     <div class="form-group">
-            <label for="selects_3" >ServerType</label>
+            <label for="selects_3" >Server Type</label>
             <div class="select" style="margin-left: -135px;">
                 <select id="selects_2" [ngModelOptions]="{standalone: true}"  [(ngModel)]="serverconfig.type" on-change="changeType()" > 
-                    <option value="VRO" >VRO</option>
-                    <option value="VCENTER">VCENTER</option>
+                    <option value="VRO" >vRealize Operations Manager</option>
+                    <option value="VCENTER">VMware vCenter</option>
                 </select>
             </div>
             <label for="selects_3">Server</label>
@@ -18,30 +19,31 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </select>
             </div>
         </div>
+</section>
 </form>
 
 <clr-datagrid>
 
         <clr-dg-column >
                 <ng-container *clrDgHideableColumn="{hidden: vrohid}">
-                        Host Name(VRO)
+                        vRealize Operations Manager Host Name
                 </ng-container>
         </clr-dg-column>
        
         <clr-dg-column>
                 <ng-container *clrDgHideableColumn="{hidden: vrohid}">
-                        VroVMEntityObjectID
+                        vRealize Operations Manager VM Entity Object ID
                 </ng-container>
         </clr-dg-column>
         
         <clr-dg-column>
                 <ng-container *clrDgHideableColumn="{hidden: hid}">
-                        VcHostName
+                        vCenter Host Name
                 </ng-container>
         </clr-dg-column>
         <clr-dg-column>
                 <ng-container *clrDgHideableColumn="{hidden: hid}">
-                        VcMobID
+                        vCenter Mob ID
                 </ng-container>
         </clr-dg-column>
        

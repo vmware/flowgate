@@ -2,7 +2,7 @@
 SPDX-License-Identifier: BSD-2-Clause -->
 <form>
   <section class="form-block">
-      <label> Content for Sensorsetting</label>          
+      <label> Content For Sensor Setting</label>          
       <div class="form-group row">
         <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
             <label for="gForm_1">Type</label>
@@ -22,34 +22,34 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </div>
       <div class="form-group row">
           <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
-              <label for="gForm_2">MinNum</label>
+              <label for="gForm_2">Min Num</label>
           </div>
           <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-              <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.minNum"  id="gForm_2"  placeholder="minNum" size="45"/>
+              <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.minNum"  id="gForm_2"  placeholder="Min Num" size="45"/>
           </div>
       </div>
       <div class="form-group row">
           <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
-              <label for="gForm_3">MaxNum</label>
+              <label for="gForm_3">Max Num</label>
           </div>
           <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-              <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.maxNum"  id="gForm_3" placeholder="maxNum" size="45"/>
+              <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.maxNum"  id="gForm_3" placeholder="Max Num" size="45"/>
           </div>
       </div>
       <div class="form-group row">
           <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
-              <label for="gForm_4">MinValue</label>
+              <label for="gForm_4">Min Value</label>
           </div>
           <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-              <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.minValue"  id="gForm_4" placeholder="minValue" size="45"/>
+              <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.minValue"  id="gForm_4" placeholder="Min Value" size="45"/>
           </div>
       </div>
       <div class="form-group row">
         <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
-            <label for="gForm_5">MaxValue</label>
+            <label for="gForm_5">Max Value</label>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-            <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.maxValue"  id="gForm_5" placeholder="maxValue" size="45"/>
+            <input class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="sensorsetting.maxValue"  id="gForm_5" placeholder="Max Value" size="45"/>
         </div>
       </div>
       <button type="submit" class="btn btn-primary" on-click="save()">Submit</button>
@@ -57,7 +57,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
   </section>
 </form>
 <clr-modal [(clrModalOpen)]="modalIsOpen" [clrModalStaticBackdrop]="true">
-    <h3 class="modal-title">Operation tips</h3>
+    <h3 class="modal-title">Operation Tips</h3>
     <div class="modal-body">
        
         <p>{{operationTip}}</p>

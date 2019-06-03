@@ -15,7 +15,7 @@ declare var d3;
     selector: 'setting-asset',
     template: '<div class="row" style="margin-top: 22px;">\
                 <div class="col-lg-2 col-sm-2 col-2" style="text-align: center;">\
-                    <label>Select vCenter</label>\
+                    <label>Select VMware vCenter</label>\
                 </div>\
                 <div class="col-lg-4 col-sm-4 col-4">\
                     <div class="form-group">\

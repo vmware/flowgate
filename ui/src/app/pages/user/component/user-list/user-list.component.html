@@ -9,8 +9,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
 </button>
 <clr-datagrid>
  
-  <clr-dg-column>UserName</clr-dg-column>
-  <clr-dg-column>RoleName</clr-dg-column>
+  <clr-dg-column>Username</clr-dg-column>
+  <clr-dg-column>Role Name</clr-dg-column>
   <clr-dg-column>Email</clr-dg-column>
   <clr-dg-column>Creation Date</clr-dg-column>
   <clr-dg-placeholder>We couldn't find any users!</clr-dg-placeholder>
@@ -48,12 +48,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
 </clr-dg-footer>
 </clr-datagrid>
 <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
-    <h3 class="modal-title">Operation tips</h3>
+    <h3 class="modal-title">Operation Tips</h3>
     <div class="modal-body">
         <clr-alert [(clrAlertClosed)] = "clrAlertClosed"  [clrAlertType]="'alert-danger'" (clrAlertClosedChange)="onClose()">
             <div class="alert-item">
                 <span class="alert-text">
-                    Operation error
+                    Operation Error
                 </span>
             </div>
         </clr-alert>

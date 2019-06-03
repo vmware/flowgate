@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 </button>
 <clr-datagrid>
 
- <clr-dg-column>RoleName</clr-dg-column>
+ <clr-dg-column>Role Name</clr-dg-column>
  <clr-dg-column>Privilege</clr-dg-column>
  <clr-dg-placeholder>We couldn't find any roles!</clr-dg-placeholder>
 
@@ -132,11 +132,11 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <clr-wizard-page
     [clrWizardPageNextDisabled]="!formPageOne.valid">
         
-        <ng-template clrPageTitle>Other information</ng-template>
+        <ng-template clrPageTitle>Other Information</ng-template>
         <form #formPageOne="ngForm">
             <section class="form-block">
                     <div class="form-group">
-                            <label class="required" for="roleName">RoleName</label>       
+                            <label class="required" for="roleName">Role Name</label>       
                             <label for="roleName"
                                 aria-haspopup="true"
                                 role="tooltip"
@@ -148,7 +148,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                     [(ngModel)]="role.roleName"
                                     #rolenameInput="ngModel">
                                 <span class="tooltip-content tooltip-bottom-right">
-                                    RoleName is Required.
+                                    Role Name is Required.
                                 </span>
                             </label>
                             </div>
@@ -159,7 +159,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 </clr-wizard>
 
 <clr-wizard #addwizard [(clrWizardOpen)]="addwizardOpen">
-    <clr-wizard-title>Create a Role</clr-wizard-title>
+    <clr-wizard-title>Create A Role</clr-wizard-title>
 
     <clr-wizard-button [type]="'cancel'" (click)="cancleUpdate()">Close</clr-wizard-button>
     <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
@@ -173,7 +173,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         
             <div class="col-md-5 col-sm-12 col-xs-12">
                 <clr-datagrid style="width: 102%;" [(clrDgSelected)]="systemprivilegeselected">
-                    <clr-dg-column >Unowned Privilege</clr-dg-column>
+                    <clr-dg-column >Unowned Privileges</clr-dg-column>
                     <clr-dg-placeholder>We couldn't find any privileges!</clr-dg-placeholder>
                     
                     <clr-dg-row  *ngFor="let item of systemPrivileges" [clrDgItem]="item">               
@@ -187,7 +187,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             </div> 
             <div class="col-md-5 col-sm-12 col-xs-12">
                 <clr-datagrid  [(clrDgSelected)]="roleprivilegeselected">
-                    <clr-dg-column >Owned Privilege</clr-dg-column>
+                    <clr-dg-column >Owned Privileges</clr-dg-column>
                     <clr-dg-placeholder>Please select at least one privilege!</clr-dg-placeholder>
                     
                     <clr-dg-row  *ngFor="let item1 of rolePrivilege" [clrDgItem]="item1">              
@@ -205,7 +205,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     (clrWizardPageOnCommit)="onCommit()"
     (clrWizardPageOnCancel)="doCancel()"
     [clrWizardPageNextDisabled]="!formPageOne.valid">
-        <ng-template clrPageTitle>RoleName</ng-template>
+        <ng-template clrPageTitle>Role Name</ng-template>
         <div class="spinner" *ngIf="loadingFlag">
                 Loading...
         </div>
@@ -217,13 +217,13 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <form #formPageOne="ngForm">
             <section class="form-block">
                     <div class="form-group">
-                            <label class="required" for="roleName">RoleName</label>       
+                            <label class="required" for="roleName">Role Name</label>       
                             <label for="roleName"
                                 aria-haspopup="true"
                                 role="tooltip"
                                 class="tooltip tooltip-validation tooltip-md"
                                 [class.invalid]="rolenameInput.invalid && (rolenameInput.dirty || rolenameInput.touched)">
-                                <input type="text" id="roleName" placeholder="RoleName"
+                                <input type="text" id="roleName" placeholder="Role Name"
                                     required
                                     name="rolename"
                                     [(ngModel)]="role.roleName"
