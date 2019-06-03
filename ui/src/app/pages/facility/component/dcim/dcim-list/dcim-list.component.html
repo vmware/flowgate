@@ -33,13 +33,14 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </clr-alert>
   <clr-datagrid>
   
-   <clr-dg-column style="width: 10%">Type</clr-dg-column>
-   <clr-dg-column>Server Url</clr-dg-column>
+
+   <clr-dg-column>Type</clr-dg-column>
+   <clr-dg-column>ServerUrl</clr-dg-column>
    <clr-dg-column>Name</clr-dg-column>
    <clr-dg-column>Description</clr-dg-column>
-   <clr-dg-column style="width: 10%">Login Username</clr-dg-column>
-   <clr-dg-column style="width: 10%">Verify Cert</clr-dg-column>
-   <clr-dg-column style="width: 10%">Status</clr-dg-column>
+   <clr-dg-column>LoginUserName</clr-dg-column>
+   <clr-dg-column>VerifyCert</clr-dg-column>
+   <clr-dg-column>Status</clr-dg-column>
    
    <clr-dg-placeholder>We couldn't find any integration!</clr-dg-placeholder>
   
@@ -52,12 +53,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <button class="action-item" *ngIf="dcimConfig.integrationStatus.status == 'ACTIVE'" (click)="updateDcimStatus(dcimConfig)" >Pending</button>
             <button class="action-item" *ngIf="dcimConfig.integrationStatus.status != 'ACTIVE'" (click)="updateDcimStatus(dcimConfig)" >Active</button>
         </clr-dg-action-overflow>
-       <clr-dg-cell>{{dcimConfig.type}}</clr-dg-cell>
-       <clr-dg-cell>{{dcimConfig.serverURL}}</clr-dg-cell>
-       <clr-dg-cell>{{dcimConfig.name}}</clr-dg-cell>
-       <clr-dg-cell>{{dcimConfig.description}}</clr-dg-cell>    
-       <clr-dg-cell>{{dcimConfig.userName}}</clr-dg-cell>
-       <clr-dg-cell>{{dcimConfig.verifyCert}}</clr-dg-cell>
+       <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.type}}">{{dcimConfig.type}}</clr-dg-cell>
+       <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.serverURL}}">{{dcimConfig.serverURL}}</clr-dg-cell>
+       <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.name}}">{{dcimConfig.name}}</clr-dg-cell>
+       <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.description}}">{{dcimConfig.description}}</clr-dg-cell>    
+       <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.userName}}">{{dcimConfig.userName}}</clr-dg-cell>
+       <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.verifyCert}}">{{dcimConfig.verifyCert}}</clr-dg-cell>
        <clr-dg-cell>{{dcimConfig.integrationStatus.status}}
             <clr-icon *ngIf="dcimConfig.integrationStatus.status == 'ERROR'" class="alert-icon" style="color: #c92100;cursor: pointer;" shape="exclamation-circle" (click)="showErrorMsg(dcimConfig)"></clr-icon>       
             <clr-icon *ngIf="dcimConfig.integrationStatus.status == 'ACTIVE'" class="alert-icon" shape="check-circle" style="color: #318700;"></clr-icon>

@@ -34,13 +34,13 @@
     </clr-alert>
   <clr-datagrid>
   
-   <clr-dg-column style="width: 10%">Type</clr-dg-column>
-   <clr-dg-column>Server Url</clr-dg-column>
+   <clr-dg-column >Type</clr-dg-column>
+   <clr-dg-column>ServerUrl</clr-dg-column>
    <clr-dg-column>Name</clr-dg-column>
    <clr-dg-column>Description</clr-dg-column>
-   <clr-dg-column style="width: 10%">Login Username</clr-dg-column>
-   <clr-dg-column style="width: 10%">Verify Cert</clr-dg-column>
-   <clr-dg-column style="width: 10%">Status</clr-dg-column>
+   <clr-dg-column >LoginUserName</clr-dg-column>
+   <clr-dg-column >VerifyCert</clr-dg-column>
+   <clr-dg-column>Status</clr-dg-column>
 
    <clr-dg-placeholder>We couldn't find any integration!</clr-dg-placeholder>
   
@@ -53,13 +53,13 @@
          <button class="action-item" *ngIf="cmdbConfig.integrationStatus.status == 'ACTIVE'" (click)="updateCMDBStatus(cmdbConfig)" >Pending</button>
         <button class="action-item" *ngIf="cmdbConfig.integrationStatus.status != 'ACTIVE'" (click)="updateCMDBStatus(cmdbConfig)" >Active</button>
       </clr-dg-action-overflow>
-       <clr-dg-cell>{{cmdbConfig.type}}</clr-dg-cell>
-       <clr-dg-cell>{{cmdbConfig.serverURL}}</clr-dg-cell>
-       <clr-dg-cell>{{cmdbConfig.name}}</clr-dg-cell>
-       <clr-dg-cell>{{cmdbConfig.description}}</clr-dg-cell>    
-       <clr-dg-cell>{{cmdbConfig.userName}}</clr-dg-cell>
-       <clr-dg-cell>{{cmdbConfig.verifyCert}}</clr-dg-cell>
-       <clr-dg-cell>{{cmdbConfig.integrationStatus.status}}
+       <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.type}}">{{cmdbConfig.type}}</clr-dg-cell>
+       <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.serverURL}}">{{cmdbConfig.serverURL}}</clr-dg-cell>
+       <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.name}}">{{cmdbConfig.name}}</clr-dg-cell>
+       <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.description}}">{{cmdbConfig.description}}</clr-dg-cell>    
+       <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.userName}}">{{cmdbConfig.userName}}</clr-dg-cell>
+       <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.verifyCert}}">{{cmdbConfig.verifyCert}}</clr-dg-cell>
+       <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.integrationStatus.status}}">{{cmdbConfig.integrationStatus.status}}
         <clr-icon *ngIf="cmdbConfig.integrationStatus.status == 'ERROR'" class="alert-icon" style="color: #c92100;cursor: pointer;" shape="exclamation-circle" (click)="showErrorMsg(cmdbConfig)"></clr-icon>       
         <clr-icon *ngIf="cmdbConfig.integrationStatus.status == 'ACTIVE'" class="alert-icon" shape="check-circle" style="color: #318700;"></clr-icon>
         <clr-icon *ngIf="cmdbConfig.integrationStatus.status == 'PENDING'" class="alert-icon" shape="exclamation-triangle" style="color: #ffdc0b;"></clr-icon>
