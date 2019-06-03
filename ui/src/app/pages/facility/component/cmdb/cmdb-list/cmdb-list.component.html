@@ -35,14 +35,14 @@
   <clr-datagrid>
   
    <clr-dg-column style="width: 10%">Type</clr-dg-column>
-   <clr-dg-column>ServerUrl</clr-dg-column>
+   <clr-dg-column>Server Url</clr-dg-column>
    <clr-dg-column>Name</clr-dg-column>
    <clr-dg-column>Description</clr-dg-column>
-   <clr-dg-column style="width: 10%">LoginUserName</clr-dg-column>
-   <clr-dg-column style="width: 10%">VerifyCert</clr-dg-column>
+   <clr-dg-column style="width: 10%">Login Username</clr-dg-column>
+   <clr-dg-column style="width: 10%">Verify Cert</clr-dg-column>
    <clr-dg-column style="width: 10%">Status</clr-dg-column>
 
-   <clr-dg-placeholder>We couldn't find any CMDB integration!</clr-dg-placeholder>
+   <clr-dg-placeholder>We couldn't find any integration!</clr-dg-placeholder>
   
   
   <clr-dg-row *ngFor="let cmdbConfig of cmdbConfigs">
@@ -83,12 +83,12 @@
   </clr-dg-footer>
   </clr-datagrid>
   <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
-     <h3 class="modal-title">Operation tips</h3>
+     <h3 class="modal-title">Operation Tips</h3>
      <div class="modal-body">
          <clr-alert [(clrAlertClosed)] = "clrAlertClosed"  [clrAlertType]="'alert-danger'" (clrAlertClosedChange)="onClose()">
              <div class="alert-item">
                  <span class="alert-text">
-                     Operation error
+                     Operation Error
                  </span>
              </div>
          </clr-alert>

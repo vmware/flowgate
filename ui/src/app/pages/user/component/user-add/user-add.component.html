@@ -9,21 +9,21 @@ SPDX-License-Identifier: BSD-2-Clause -->
 </clr-alert>
 <form #userForm="ngForm" >
   <section class="form-block">
-      <label> Content for User</label> 
+      <label> Content For User</label> 
       <div class="form-group">
-        <label class="required" for="empuserName">UserName</label>       
+        <label class="required" for="empuserName">Username</label>       
         <label for="empuserName"
             aria-haspopup="true"
             role="tooltip"
             class="tooltip tooltip-validation tooltip-md"
             [class.invalid]="userNameInput.invalid && (userNameInput.dirty || userNameInput.touched)">
-            <input type="text" id="empuserName" placeholder="UserName"
+            <input type="text" id="empuserName" placeholder="Username"
                 required
                 name="userName"
                 [(ngModel)]="user.username"
                 #userNameInput="ngModel">
             <span class="tooltip-content">
-                UserName is Required.
+                Username is Required.
             </span>
         </label>
       </div>

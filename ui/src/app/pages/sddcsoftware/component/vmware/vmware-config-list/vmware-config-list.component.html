@@ -18,7 +18,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
   <clr-alert [clrAlertType]="'alert-danger'" [clrAlertAppLevel]="true" [clrAlertClosed]= "isStatusErrorMsgAlertClose" (clrAlertClosedChange)="statusMsgAlertClose()" >
         <clr-alert-item>
             <span class="alert-text">
-                {{statusErrorMsg}}you can reactive the integration by click <clr-icon shape="ellipsis-vertical"></clr-icon> > Active , you can update the setting by click Edit Setting button if needed. 
+                {{statusErrorMsg}}You can reactive the integration by click.<clr-icon shape="ellipsis-vertical"></clr-icon> > Active , you can update the setting by click Edit Setting button if needed. 
             </span>
             <div class="alert-actions">
                 <button class="btn alert-action" (click)="fixError()">Update Setting</button>
@@ -35,20 +35,20 @@ SPDX-License-Identifier: BSD-2-Clause -->
 <clr-datagrid>
 
  <clr-dg-column>Type</clr-dg-column>
- <clr-dg-column>ServerUrl</clr-dg-column>
+ <clr-dg-column>Server Url</clr-dg-column>
  <clr-dg-column>Name</clr-dg-column>
  <clr-dg-column>Description</clr-dg-column>
- <clr-dg-column>LoginUserName</clr-dg-column>
- <clr-dg-column>VerifyCert</clr-dg-column>
+ <clr-dg-column>Login Username</clr-dg-column>
+ <clr-dg-column>Verify Cert</clr-dg-column>
  <clr-dg-column>Status</clr-dg-column>
- <clr-dg-placeholder>We couldn't find any SDDCSoftWare integration!</clr-dg-placeholder>
+ <clr-dg-placeholder>We could not find any integration!</clr-dg-placeholder>
 
 
 <clr-dg-row *ngFor="let vmwareConfig of vmwareConfigs">
    <clr-dg-action-overflow>
        <button class="action-item" (click)="onEdit(vmwareConfig.id)" *appHasPrivilege=updatesddc>Edit</button>
        <button class="action-item" (click)="onDelete(vmwareConfig.id)" *appHasPrivilege=deletesddc>Delete</button>
-       <button class="action-item" (click)="syncData(vmwareConfig.id,vmwareConfig.ServerUrl)">SyncData</button>
+       <button class="action-item" (click)="syncData(vmwareConfig.id,vmwareConfig.ServerUrl)">Sync Data</button>
        <button class="action-item" *ngIf="vmwareConfig.integrationStatus.status == 'ACTIVE'" (click)="updateSDDCStatus(vmwareConfig)" >Pending</button>
        <button class="action-item" *ngIf="vmwareConfig.integrationStatus.status != 'ACTIVE'" (click)="updateSDDCStatus(vmwareConfig)" >Active</button>
     </clr-dg-action-overflow>
@@ -85,12 +85,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
 </clr-dg-footer>
 </clr-datagrid>
 <clr-modal [(clrModalOpen)]="deleteOperationConfirm" [clrModalStaticBackdrop]="true">
-   <h3 class="modal-title">Operation tips</h3>
+   <h3 class="modal-title">Operation Tips</h3>
    <div class="modal-body">
        <clr-alert [(clrAlertClosed)] = "deleteOperationAlertClosed"  [clrAlertType]="'alert-danger'">
            <div class="alert-item">
                <span class="alert-text">
-                   Operation error
+                   Operation Error
                </span>
            </div>
        </clr-alert>

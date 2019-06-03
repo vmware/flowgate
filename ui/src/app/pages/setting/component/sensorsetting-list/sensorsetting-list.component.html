@@ -4,17 +4,17 @@ SPDX-License-Identifier: BSD-2-Clause -->
   <clr-icon shape="plus">
     </clr-icon>
     <font style="vertical-align: inherit;">
-      <font style="vertical-align: inherit;"  >Create a Sensorsetting</font>
+      <font style="vertical-align: inherit;"  >Create A Sensorsetting</font>
      </font>
 </button>
 <clr-datagrid>
 
  <clr-dg-column>Type</clr-dg-column>
- <clr-dg-column>MinNum</clr-dg-column>
- <clr-dg-column>MaxNum</clr-dg-column>
- <clr-dg-column>MinValue</clr-dg-column>
- <clr-dg-column>MaxValue</clr-dg-column> 
- <clr-dg-placeholder>We couldn't find any sensorsettings!</clr-dg-placeholder>
+ <clr-dg-column>Min Num</clr-dg-column>
+ <clr-dg-column>Max Num</clr-dg-column>
+ <clr-dg-column>Min Value</clr-dg-column>
+ <clr-dg-column>Max Value</clr-dg-column> 
+ <clr-dg-placeholder>We couldn't find any sensor settings!</clr-dg-placeholder>
 
 
 <clr-dg-row *ngFor="let sensorsetting of sensorsettings">
@@ -49,12 +49,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
 </clr-dg-footer>
 </clr-datagrid>
 <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
-   <h3 class="modal-title">Operation tips</h3>
+   <h3 class="modal-title">Operation Tips</h3>
    <div class="modal-body">
        <clr-alert [(clrAlertClosed)] = "clrAlertClosed"  [clrAlertType]="'alert-danger'" (clrAlertClosedChange)="onClose()">
            <div class="alert-item">
                <span class="alert-text">
-                   Operation error
+                   Operation Error
                </span>
            </div>
        </clr-alert>

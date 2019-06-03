@@ -12,7 +12,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-tab *appHasPrivilege=integrationSummary>
             <button clrTabLink (click)="getFirstPageData()">Integration Summary</button>
             <clr-tab-content *clrIfActive="true">
-                <h5>Data center Facility System</h5>
+                <h5>Data Center Facility System</h5>
                 <div class="row" style="height:43%;max-height: 200px;">
                     <div class="col-lg-3 col-sm-3 col-3">
                         <div class="card" style="height:110%;">
@@ -164,7 +164,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             </clr-tab-content>
         </clr-tab>
         <clr-tab *appHasPrivilege=syncData>
-            <button clrTabLink>SyncData</button>
+            <button clrTabLink>Sync Data</button>
             <clr-tab-content *clrIfActive>
                 <div class="row">
                     <div class="col-md-10">
@@ -252,7 +252,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </clr-tabs>
 
 <clr-modal [(clrModalOpen)]="systemSummary" [clrModalStaticBackdrop]="true" [clrModalSize]="'xl'">
-    <h3 class="modal-title">Data center Facility System</h3>
+    <h3 class="modal-title">Data Center Facility System</h3>
     <div class="modal-body" style="height: 600px;">
         <div class="row">
             <div class="col-md-12 trigger-job-text-center">
@@ -266,7 +266,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                     <clr-dg-column>SERVER</clr-dg-column>
                                     <clr-dg-column>PDU</clr-dg-column>
                                     <clr-dg-column>CABINET</clr-dg-column>
-                                    <clr-dg-column>SWITCH</clr-dg-column>
+                                    <clr-dg-column>NETWORK DEVICES</clr-dg-column>
                                     <clr-dg-column>SENSORS</clr-dg-column>
 
                                     <clr-dg-placeholder>We couldn't find any Nlyte System!</clr-dg-placeholder>

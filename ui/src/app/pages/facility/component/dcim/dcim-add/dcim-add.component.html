@@ -6,7 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-tab-content>
             <form #DcimForm="ngForm">
                 <section class="form-block">
-                        <label> Content for INTEGRATION</label>
+                        <label> Content For Integration</label>
                         <div class="form-group ">
                             <label class="required" for="gForm_3">Type</label>
                                 <div class="select" style="width:184px; ">
@@ -58,13 +58,13 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.description" id="gForm_6" placeholder="Description" size="45"/>
                         </div>  
                         <div class="form-group">
-                                <label class="required" for="empuserName">UserName</label>       
+                                <label class="required" for="empuserName">Username</label>       
                                 <label for="empuserName"
                                     aria-haspopup="true"
                                     role="tooltip"
                                     class="tooltip tooltip-validation tooltip-md"
                                     [class.invalid]="userNameInput.invalid && (userNameInput.dirty || userNameInput.touched)">                                    
-                                    <input type="text" id="empuserName" placeholder="Enter UserName" autocomplete="off"
+                                    <input type="text" id="empuserName" placeholder="Enter Username" autocomplete="off"
                                         required
                                         name="userName"
                                         [(ngModel)]="dcimConfig.userName"
@@ -91,7 +91,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             </label>
                         </div>
                         <div class="form-group">
-                            <label>VerifyCert</label>
+                            <label>Verify Cert</label>
                             
                             <div class="radio-inline">
                                 <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}" id="checkrads_11" value="true" [(ngModel)]="dcimConfig.verifyCert">
@@ -113,7 +113,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-tab-content>
             <form #DcimForm1="ngForm">
                 <section class="form-block">
-                    <label> Content for Advance Setting</label>                           
+                    <label> Content For Advance Setting</label>                           
                     <div class="form-group" *ngIf="commonAdvanceSettingShow">
                         <label>Date Format</label>
                         <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.advanceSetting.DateFormat"  placeholder="" size="45"/>

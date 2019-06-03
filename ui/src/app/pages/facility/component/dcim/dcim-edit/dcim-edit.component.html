@@ -6,14 +6,14 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-tab-content>
             <form #DcimForm="ngForm">
                 <section class="form-block">
-                    <label> Content for INTEGRATION</label>
+                    <label> Content for Integration</label>
                     <div class="form-group ">
                         <label class="required" for="gForm_3">Type</label>
                             <div class="select" style="width:184px; ">
                                 <select id="gForm_5" [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.type" disabled> 
                                         <option value="Nlyte" >Nlyte</option>
                                         <option value="PowerIQ">PowerIQ</option>
-                                        <option value="OtherDCIM">OtherDCIM</option>
+                                        <option value="OtherDCIM">Other DCIM</option>
                                 </select>
                             </div>
                     </div>
@@ -58,7 +58,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.description" id="gForm_6" placeholder="Description" size="45"/>
                     </div>  
                     <div class="form-group">
-                            <label class="required" for="empuserName">UserName</label>       
+                            <label class="required" for="empuserName">Username</label>       
                             <label for="empuserName"
                                 aria-haspopup="true"
                                 role="tooltip"
@@ -70,7 +70,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                     [(ngModel)]="dcimConfig.userName"
                                     #userNameInput="ngModel">
                                 <span class="tooltip-content">
-                                    UserName is Required.
+                                    Username is Required.
                                 </span>
                             </label>
                         </div>
@@ -91,7 +91,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         </label>
                     </div>
                     <div class="form-group">
-                        <label>VerifyCert</label>
+                        <label>Verify Cert</label>
                         
                         <div class="radio-inline">
                             <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}" id="checkrads_11" value="true" [(ngModel)]="dcimConfig.verifyCert">
@@ -242,7 +242,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 </clr-tabs>
 
 <clr-modal [(clrModalOpen)]="operatingModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
-        <h3 class="modal-title">Operation tips</h3>
+        <h3 class="modal-title">Operation Tips</h3>
         <div class="modal-body">
             <p>{{tip}}</p>
         </div>
@@ -252,7 +252,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </div>
 </clr-modal>
 <clr-modal [(clrModalOpen)]="ignoreCertificatesModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
-        <h3 class="modal-title">Operation tips</h3>
+        <h3 class="modal-title">Operation Tips</h3>
         <div class="modal-body">
             <p>{{tip}}</p>
         </div>
