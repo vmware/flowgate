@@ -75,7 +75,7 @@ public class HandleAssetUtil {
     * init MaterialsMap information
     *
     */
-   public HashMap<Integer,Material> initMaterialsMap(NlyteAPIClient nlyteAPIclient){
+   public HashMap<Integer,Material> initServerMaterialsMap(NlyteAPIClient nlyteAPIclient){
       List<Material> bladeServerMaterials = nlyteAPIclient.getMaterials(true,bladeServerMaterial);
       HashMap<Integer,Material> materialMap = new HashMap<Integer,Material>();
       for(Material material:bladeServerMaterials) {
@@ -139,6 +139,7 @@ public class HandleAssetUtil {
          asset = new Asset();
          asset.setAssetNumber(nlyteAsset.getAssetNumber());
          asset.setCabinetAssetNumber(String.valueOf(nlyteAsset.getCabinetAssetID()));
+         asset.setCabinetName(nlyteAsset.getCabinetName());
          asset.setTag(nlyteAsset.getTag());
          asset.setSerialnumber(nlyteAsset.getSerialNumber());
          asset.setAssetName(nlyteAsset.getAssetName());
@@ -249,6 +250,7 @@ public class HandleAssetUtil {
       for(Asset asset:toUpdateAssets) {
          if(exsitingaAssetMap.containsKey(asset.getAssetSource()+"_"+asset.getAssetNumber())) {
             exsitingAsset = exsitingaAssetMap.get(asset.getAssetSource()+"_"+asset.getAssetNumber());
+            exsitingAsset.setCabinetName(asset.getCabinetName());
             exsitingAsset.setTag(asset.getTag());
             exsitingAsset.setSerialnumber(asset.getSerialnumber());
             exsitingAsset.setAssetName(asset.getAssetName());

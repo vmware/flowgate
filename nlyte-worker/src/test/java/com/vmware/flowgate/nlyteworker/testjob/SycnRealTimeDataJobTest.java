@@ -29,15 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.vmware.flowgate.nlyteworker.config.ServiceKeyConfig;
-import com.vmware.flowgate.nlyteworker.model.JsonResultForPDURealtimeValue;
-import com.vmware.flowgate.nlyteworker.model.LocationGroup;
-import com.vmware.flowgate.nlyteworker.model.Manufacturer;
-import com.vmware.flowgate.nlyteworker.model.Material;
-import com.vmware.flowgate.nlyteworker.model.NlyteAsset;
-import com.vmware.flowgate.nlyteworker.model.PowerStripsRealtimeValue;
-import com.vmware.flowgate.nlyteworker.restclient.NlyteAPIClient;
-import com.vmware.flowgate.nlyteworker.scheduler.job.NlyteDataService;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetSubCategory;
@@ -48,6 +39,15 @@ import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.ValueUnit;
+import com.vmware.flowgate.nlyteworker.config.ServiceKeyConfig;
+import com.vmware.flowgate.nlyteworker.model.JsonResultForPDURealtimeValue;
+import com.vmware.flowgate.nlyteworker.model.LocationGroup;
+import com.vmware.flowgate.nlyteworker.model.Manufacturer;
+import com.vmware.flowgate.nlyteworker.model.Material;
+import com.vmware.flowgate.nlyteworker.model.NlyteAsset;
+import com.vmware.flowgate.nlyteworker.model.PowerStripsRealtimeValue;
+import com.vmware.flowgate.nlyteworker.restclient.NlyteAPIClient;
+import com.vmware.flowgate.nlyteworker.scheduler.job.NlyteDataService;
 
 import junit.framework.TestCase;
 
@@ -96,7 +96,7 @@ public class SycnRealTimeDataJobTest {
       Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("l9i8728d55368540fcba1692",AssetCategory.Server))
       .thenReturn(new ArrayList<Asset>());
 
-      List<Asset>assets = nlyteDataService.generateNewAsset("l9i8728d55368540fcba1692", nlyteAssets,
+      List<Asset>assets = nlyteDataService.generateAssets("l9i8728d55368540fcba1692", nlyteAssets,
             locationMap, manufacturerMap, materialMap, AssetCategory.Server);
       for(Asset asset:assets) {
          if("sin2-blrqeops-esxstress024".equals(asset.getAssetName())) {
@@ -121,8 +121,10 @@ public class SycnRealTimeDataJobTest {
       assetsFromFlowgate.add(preAsset);
       Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("l9i8728d55368540fcba1692", AssetCategory.Server))
       .thenReturn(assetsFromFlowgate);
-
-      List<Asset> assets = nlyteDataService.generateNewAsset("l9i8728d55368540fcba1692", nlyteAssets,
+      HashMap<Integer,String> cabinetIdAndNameMap = new HashMap<Integer, String>();
+      cabinetIdAndNameMap.put(562, "cbName");
+      nlyteAssets = nlyteDataService.supplementCabinetName(cabinetIdAndNameMap, nlyteAssets);
+      List<Asset> assets = nlyteDataService.generateAssets("l9i8728d55368540fcba1692", nlyteAssets,
             locationMap, manufacturerMap, materialMap, AssetCategory.Server);
       for(Asset asset:assets) {
          if("sin2-blrqeops-esxstress024".equals(asset.getAssetName())) {
@@ -130,6 +132,7 @@ public class SycnRealTimeDataJobTest {
             TestCase.assertEquals("SG-07-04", asset.getRoom());
             TestCase.assertEquals("Cisco 1721 Modular Access Router", asset.getModel());
             TestCase.assertEquals("Cisco", asset.getManufacturer());
+            TestCase.assertEquals("cbName", asset.getCabinetName());
          }
       }
    }
@@ -349,6 +352,7 @@ public class SycnRealTimeDataJobTest {
       nlyteAsset.setAssetNumber(197);
       nlyteAsset.setSerialNumber("FCH1709J3E6");
       nlyteAsset.setMaterialID(6251);
+      nlyteAsset.setCabinetAssetID(562);
       nlyteAsset.setLocationGroupID(8);
       nlyteAsset.setTemplateRelated(false);
       assets.add(nlyteAsset);

@@ -93,7 +93,14 @@ public class NlyteAsset {
    private int totalPlugs;
    @JsonProperty(value="UMounting")
    private UMounting uMounting;
+   private String cabinetName;
 
+   public String getCabinetName() {
+      return cabinetName;
+   }
+   public void setCabinetName(String cabinetName) {
+      this.cabinetName = cabinetName;
+   }
    public boolean isActived() {
       return "Active".equals(recordStatus) && "Operational".equals(operationalStatus);
    }
