@@ -20,7 +20,7 @@ public class NlyteAsset {
    @JsonProperty(value="UMountingID")
    private String uMountingID;
    @JsonProperty(value="CabinetAssetID")
-   private int cabinetAssetID;
+   private Integer cabinetAssetID;
    @JsonProperty(value="AssetName")
    private String assetName;
    @JsonProperty(value="PurchasePrice")
