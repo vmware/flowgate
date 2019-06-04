@@ -982,7 +982,7 @@ public class PowerIQService implements AsyncService {
             break;
          }
          SensorReading reading = sensor.getReading();
-         if (reading == null) {
+         if (reading == null || reading.getId() == 0) {
             continue;
          }
          RealTimeData realTimeData = new RealTimeData();

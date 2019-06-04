@@ -15,9 +15,9 @@ public class SensorReading {
    @JsonProperty(value = "sensor_id")
    private Long sensorId;
    @JsonProperty(value = "max_value")
-   private String maxValue;
+   private Double maxValue;
    @JsonProperty(value = "min_value")
-   private String minValue;
+   private Double minValue;
    private String uom;
 
    public void setId(long id) {
@@ -52,19 +52,19 @@ public class SensorReading {
       this.sensorId = sensorId;
    }
 
-   public String getMaxValue() {
+   public Double getMaxValue() {
       return maxValue;
    }
 
-   public void setMaxValue(String maxValue) {
+   public void setMaxValue(Double maxValue) {
       this.maxValue = maxValue;
    }
 
-   public String getMinValue() {
+   public Double getMinValue() {
       return minValue;
    }
 
-   public void setMinValue(String minValue) {
+   public void setMinValue(Double minValue) {
       this.minValue = minValue;
    }
 

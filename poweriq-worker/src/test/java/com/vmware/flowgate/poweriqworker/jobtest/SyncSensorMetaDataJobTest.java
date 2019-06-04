@@ -596,8 +596,8 @@ public class SyncSensorMetaDataJobTest {
 
    SensorReading createReading() {
        SensorReading sensorReading = new SensorReading();
-       sensorReading.setMaxValue("1");
-       sensorReading.setMinValue("0");
+       sensorReading.setMaxValue(1.0);
+       sensorReading.setMinValue(0d);
        sensorReading.setReadingTime("2019/02/14 04:31:14 +0200");
        sensorReading.setValue(100.0);
        return sensorReading;
