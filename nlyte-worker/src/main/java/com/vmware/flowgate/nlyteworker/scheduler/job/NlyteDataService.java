@@ -613,8 +613,11 @@ public class NlyteDataService implements AsyncService {
    }
 
    public List<NlyteAsset> supplementCabinetName(HashMap<Integer,String> cabinetIdAndNameMap, List<NlyteAsset> nlyteAssets){
+      if(cabinetIdAndNameMap.isEmpty()) {
+         return nlyteAssets;
+      }
       for(NlyteAsset nlyteAsset:nlyteAssets) {
-         if(nlyteAsset.getCabinetAssetID() > 0 && !cabinetIdAndNameMap.isEmpty()) {
+         if(nlyteAsset.getCabinetAssetID() > 0) {
             nlyteAsset.setCabinetName(cabinetIdAndNameMap.get(nlyteAsset.getCabinetAssetID()));
          }
       }
