@@ -185,7 +185,7 @@ public class NlyteDataService implements AsyncService {
       HandleAssetUtil assetUtil = new HandleAssetUtil();
       List<NlyteAsset> nlyteAssets = null;
       try {
-         nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Server);
+         nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Cabinet);
       } catch (HttpClientErrorException e) {
          logger.error("Failed to query data from Nlyte", e);
          IntegrationStatus integrationStatus = nlyte.getIntegrationStatus();
@@ -204,12 +204,28 @@ public class NlyteDataService implements AsyncService {
          }
       }
       HashMap<Integer, LocationGroup> locationMap = assetUtil.initLocationGroupMap(nlyteAPIclient);
-      HashMap<Integer, Manufacturer> manufacturerMap =
-            assetUtil.initManufacturersMap(nlyteAPIclient);
-      HashMap<Integer, Material> materialMap = assetUtil.initMaterialsMap(nlyteAPIclient);
-      List<Asset> newServersNeedToSave = generateNewAsset(nlyte.getId(), nlyteAssets, locationMap,
+      HashMap<Integer, Manufacturer> manufacturerMap = assetUtil.initManufacturersMap(nlyteAPIclient);
+      HashMap<Integer, Material> cabinetMaterialMap = new HashMap<Integer, Material>();
+      nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Cabinet);
+      List<Material> cabinetMaterials =
+            nlyteAPIclient.getMaterials(true, HandleAssetUtil.cabinetMaterials);
+      for (Material material : cabinetMaterials) {
+         material.setMaterialType(AssetCategory.Cabinet);
+         cabinetMaterialMap.put(material.getMaterialID(), material);
+      }
+      List<Asset> cabinetsNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,null,
+            manufacturerMap, cabinetMaterialMap, AssetCategory.Cabinet);
+      restClient.saveAssets(cabinetsNeedToSaveOrUpdate);
+      logger.info("Finish sync the cabinets data for: " + nlyte.getName());
+
+      //init cabinetIdAndNameMap
+      HashMap<Integer,String> cabinetIdAndNameMap = getCabinetIdAndNameMap(nlyteAssets);
+
+      nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Server);
+      HashMap<Integer, Material> materialMap = assetUtil.initServerMaterialsMap(nlyteAPIclient);
+      List<Asset> serversNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,cabinetIdAndNameMap,
             manufacturerMap, materialMap, AssetCategory.Server);
-      restClient.saveAssets(newServersNeedToSave);
+      restClient.saveAssets(serversNeedToSaveOrUpdate);
       logger.info("Finish sync the servers data for: " + nlyte.getName());
 
       HashMap<Integer, Material> pduMaterialMap = new HashMap<Integer, Material>();
@@ -220,23 +236,12 @@ public class NlyteDataService implements AsyncService {
          material.setMaterialType(AssetCategory.PDU);
          pduMaterialMap.put(material.getMaterialID(), material);
       }
-      List<Asset> newPDUsNeedToSave = generateNewAsset(nlyte.getId(), nlyteAssets, locationMap,
+      List<Asset> pDUsNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,cabinetIdAndNameMap,
             manufacturerMap, pduMaterialMap, AssetCategory.PDU);
-      restClient.saveAssets(newPDUsNeedToSave);
+      restClient.saveAssets(pDUsNeedToSaveOrUpdate);
       logger.info("Finish sync the pdus data for: " + nlyte.getName());
 
-      HashMap<Integer, Material> cabinetMaterialMap = new HashMap<Integer, Material>();
-      nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Cabinet);
-      List<Material> cabinetMaterials =
-            nlyteAPIclient.getMaterials(true, HandleAssetUtil.cabinetMaterials);
-      for (Material material : cabinetMaterials) {
-         material.setMaterialType(AssetCategory.Cabinet);
-         cabinetMaterialMap.put(material.getMaterialID(), material);
-      }
-      List<Asset> newCabinetsNeedToSave = generateNewAsset(nlyte.getId(), nlyteAssets, locationMap,
-            manufacturerMap, cabinetMaterialMap, AssetCategory.Cabinet);
-      restClient.saveAssets(newCabinetsNeedToSave);
-      logger.info("Finish sync the cabinets data for: " + nlyte.getName());
+
 
       HashMap<Integer, Material> networkMaterialMap = new HashMap<Integer, Material>();
       nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Networks);
@@ -246,25 +251,25 @@ public class NlyteDataService implements AsyncService {
          material.setMaterialType(AssetCategory.Networks);
          networkMaterialMap.put(material.getMaterialID(), material);
       }
-      List<Asset> newNetworkersNeedToSave = generateNewAsset(nlyte.getId(), nlyteAssets,
-            locationMap, manufacturerMap, networkMaterialMap, AssetCategory.Networks);
-      restClient.saveAssets(newNetworkersNeedToSave);
+      List<Asset> networkersNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets,
+            locationMap, cabinetIdAndNameMap, manufacturerMap, networkMaterialMap, AssetCategory.Networks);
+      restClient.saveAssets(networkersNeedToSaveOrUpdate);
       logger.info("Finish sync the networks data for: " + nlyte.getName());
    }
 
-   public List<Asset> generateNewAsset(String nlyteSource, List<NlyteAsset> nlyteAssets,
-         HashMap<Integer, LocationGroup> locationMap,
+   public List<Asset> generateAssets(String nlyteSource, List<NlyteAsset> nlyteAssets,
+         HashMap<Integer, LocationGroup> locationMap,HashMap<Integer,String> cabinetIdAndNameMap,
          HashMap<Integer, Manufacturer> manufacturerMap, HashMap<Integer, Material> materialMap,
          AssetCategory category) {
       HandleAssetUtil assetUtil = new HandleAssetUtil();
       List<Asset> oldAssetsFromWormhole = restClient.getAllAssetsBySourceAndType(nlyteSource,category);
       Map<String, Asset> assetsFromWormholeMap = assetUtil.generateAssetsMap(oldAssetsFromWormhole);
-      List<Asset> newAssetsFromNlyte = assetUtil.getAssetsFromNlyte(nlyteSource, nlyteAssets,
+      List<Asset> allAssetsFromNlyte = assetUtil.getAssetsFromNlyte(nlyteSource, nlyteAssets,cabinetIdAndNameMap,
             locationMap, materialMap, manufacturerMap);
-      return assetUtil.handleAssets(newAssetsFromNlyte, assetsFromWormholeMap);
+      return assetUtil.handleAssets(allAssetsFromNlyte, assetsFromWormholeMap);
    }
 
-   public void saveAssetForMappedData(String nlyteSource, List<NlyteAsset> nlyteAssets,
+   public void saveAssetForMappedData(String nlyteSource, List<NlyteAsset> nlyteAssets,HashMap<Integer,String>cabinetIdAndNameMap,
          HashMap<Integer, LocationGroup> locationMap, HashMap<Integer, Material> materialMap,
          HashMap<Integer, Manufacturer> manufacturerMap, AssetCategory category) {
       HandleAssetUtil assetUtil = new HandleAssetUtil();
@@ -273,7 +278,8 @@ public class NlyteDataService implements AsyncService {
          return;
       }
       assetUtil.filterAssetBySourceAndCategory(allMappedAssets, nlyteSource, category);
-      List<Asset> assetsFromNlyte = assetUtil.getAssetsFromNlyte(nlyteSource, nlyteAssets,
+
+      List<Asset> assetsFromNlyte = assetUtil.getAssetsFromNlyte(nlyteSource, nlyteAssets,cabinetIdAndNameMap,
             locationMap, materialMap, manufacturerMap);
       Map<String, Asset> assetsFromNlyteMap = assetUtil.generateAssetsMap(assetsFromNlyte);
       List<Asset> updateAssets = new ArrayList<Asset>();
@@ -567,10 +573,12 @@ public class NlyteDataService implements AsyncService {
          }
       }
       HashMap<Integer, LocationGroup> locationMap = assetUtil.initLocationGroupMap(nlyteAPIclient);
-      HashMap<Integer, Material> materialMap = assetUtil.initMaterialsMap(nlyteAPIclient);
+      HashMap<Integer, Material> materialMap = assetUtil.initServerMaterialsMap(nlyteAPIclient);
+      List<NlyteAsset> cabinets = nlyteAPIclient.getAssets(true, AssetCategory.Cabinet);
+      HashMap<Integer,String> cabinetIdAndNameMap = getCabinetIdAndNameMap(cabinets);
       HashMap<Integer, Manufacturer> manufacturerMap =
             assetUtil.initManufacturersMap(nlyteAPIclient);
-      saveAssetForMappedData(nlyte.getId(), nlyteAssets, locationMap, materialMap, manufacturerMap,
+      saveAssetForMappedData(nlyte.getId(), nlyteAssets, cabinetIdAndNameMap, locationMap, materialMap, manufacturerMap,
             AssetCategory.Server);
 
       HashMap<Integer, Material> pduMaterialMap = new HashMap<Integer, Material>();
@@ -581,7 +589,7 @@ public class NlyteDataService implements AsyncService {
          material.setMaterialType(AssetCategory.PDU);
          pduMaterialMap.put(material.getMaterialID(), material);
       }
-      saveAssetForMappedData(nlyte.getId(), nlyteAssets, locationMap, pduMaterialMap,
+      saveAssetForMappedData(nlyte.getId(), nlyteAssets, cabinetIdAndNameMap, locationMap, pduMaterialMap,
             manufacturerMap, AssetCategory.PDU);
 
       HashMap<Integer, Material> networksMaterialMap = new HashMap<Integer, Material>();
@@ -592,7 +600,15 @@ public class NlyteDataService implements AsyncService {
          material.setMaterialType(AssetCategory.Networks);
          networksMaterialMap.put(material.getMaterialID(), material);
       }
-      saveAssetForMappedData(nlyte.getId(), nlyteAssets, locationMap, networksMaterialMap,
+      saveAssetForMappedData(nlyte.getId(), nlyteAssets, cabinetIdAndNameMap, locationMap, networksMaterialMap,
             manufacturerMap, AssetCategory.Networks);
+   }
+
+   public HashMap<Integer,String> getCabinetIdAndNameMap(List<NlyteAsset> nlyteAssets){
+      HashMap<Integer,String> cabinetIdAndNameMap = new HashMap<Integer, String>();
+      for(NlyteAsset cabinet:nlyteAssets) {
+         cabinetIdAndNameMap.put(cabinet.getAssetNumber(), cabinet.getAssetName());
+      }
+      return cabinetIdAndNameMap;
    }
 }

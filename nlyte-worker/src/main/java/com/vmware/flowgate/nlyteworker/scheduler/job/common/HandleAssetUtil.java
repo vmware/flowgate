@@ -75,7 +75,7 @@ public class HandleAssetUtil {
     * init MaterialsMap information
     *
     */
-   public HashMap<Integer,Material> initMaterialsMap(NlyteAPIClient nlyteAPIclient){
+   public HashMap<Integer,Material> initServerMaterialsMap(NlyteAPIClient nlyteAPIclient){
       List<Material> bladeServerMaterials = nlyteAPIclient.getMaterials(true,bladeServerMaterial);
       HashMap<Integer,Material> materialMap = new HashMap<Integer,Material>();
       for(Material material:bladeServerMaterials) {
@@ -130,6 +130,7 @@ public class HandleAssetUtil {
     * @return
     */
    public List<Asset> getAssetsFromNlyte(String nlyteSource,List<NlyteAsset> nlyteAssets,
+                                 HashMap<Integer,String> cabinetIdAndNameMap,
                                  HashMap<Integer,LocationGroup> locationMap,
                                  HashMap<Integer,Material> materialMap,
                                  HashMap<Integer,Manufacturer> manufacturerMap) {
@@ -139,6 +140,9 @@ public class HandleAssetUtil {
          asset = new Asset();
          asset.setAssetNumber(nlyteAsset.getAssetNumber());
          asset.setCabinetAssetNumber(String.valueOf(nlyteAsset.getCabinetAssetID()));
+         if(cabinetIdAndNameMap != null) {
+            asset.setCabinetName(cabinetIdAndNameMap.get(nlyteAsset.getCabinetAssetID()));
+         }
          asset.setTag(nlyteAsset.getTag());
          asset.setSerialnumber(nlyteAsset.getSerialNumber());
          asset.setAssetName(nlyteAsset.getAssetName());
