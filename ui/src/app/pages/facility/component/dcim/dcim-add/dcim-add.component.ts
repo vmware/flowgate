@@ -38,12 +38,15 @@ export class DcimAddComponent implements OnInit {
     if(this.dcimConfig.type == "Nlyte"){
       this.nlyteAdvanceSettingShow = true;
       this.powerIQAdvanceSettingShow = false;
+      this.dcimConfig.advanceSetting.PDU_POWER_UNIT = "KW";
     }else if(this.dcimConfig.type == "PowerIQ"){
       this.powerIQAdvanceSettingShow = true;
       this.nlyteAdvanceSettingShow = false;
+      this.dcimConfig.advanceSetting.PDU_POWER_UNIT = "W";
     }else{
       this.powerIQAdvanceSettingShow = false;
       this.nlyteAdvanceSettingShow = false;
+      this.dcimConfig.advanceSetting.PDU_POWER_UNIT = "W";
     }
   }
 
