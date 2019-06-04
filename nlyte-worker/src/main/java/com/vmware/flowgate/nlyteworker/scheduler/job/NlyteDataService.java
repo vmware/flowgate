@@ -576,8 +576,6 @@ public class NlyteDataService implements AsyncService {
       }
       HashMap<Integer, LocationGroup> locationMap = assetUtil.initLocationGroupMap(nlyteAPIclient);
       HashMap<Integer, Material> materialMap = assetUtil.initServerMaterialsMap(nlyteAPIclient);
-      List<NlyteAsset> cabinets = nlyteAPIclient.getAssets(true, AssetCategory.Cabinet);
-      HashMap<Integer,String> cabinetIdAndNameMap = getCabinetIdAndNameMap(cabinets);
       HashMap<Integer, Manufacturer> manufacturerMap =
             assetUtil.initManufacturersMap(nlyteAPIclient);
       saveAssetForMappedData(nlyte.getId(), nlyteAssets, locationMap, materialMap, manufacturerMap,
