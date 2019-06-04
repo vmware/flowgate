@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +26,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.cis.tagging.CategoryModel;
 import com.vmware.cis.tagging.CategoryModel.Cardinality;
-import com.vmware.flowgate.vcworker.client.HostTagClient;
-import com.vmware.flowgate.vcworker.client.VsphereClient;
-import com.vmware.flowgate.vcworker.config.ServiceKeyConfig;
-import com.vmware.flowgate.vcworker.model.VCConstants;
 import com.vmware.cis.tagging.TagModel;
-import com.vmware.vim.binding.vim.HostSystem;
-import com.vmware.vim.binding.vim.fault.InvalidLogin;
-import com.vmware.vim.vmomi.client.exception.ConnectionException;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
@@ -51,6 +46,13 @@ import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageImpl;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 import com.vmware.flowgate.common.utils.IPAddressUtil;
+import com.vmware.flowgate.vcworker.client.HostTagClient;
+import com.vmware.flowgate.vcworker.client.VsphereClient;
+import com.vmware.flowgate.vcworker.config.ServiceKeyConfig;
+import com.vmware.flowgate.vcworker.model.VCConstants;
+import com.vmware.vim.binding.vim.HostSystem;
+import com.vmware.vim.binding.vim.fault.InvalidLogin;
+import com.vmware.vim.vmomi.client.exception.ConnectionException;
 
 @Service
 public class VCDataService implements AsyncService {
@@ -347,7 +349,7 @@ public class VCDataService implements AsyncService {
             host.setCustomValue(VCConstants.hostCustomAttrMapping.get(key),
                   String.valueOf(wrapper.getPropertyValue(key)));
          }
-         Map<String, String> idNamePortMapping = new HashMap<String, String>();
+         Map<String, String> idNamePortMapping = getPDUSwitchIDNamePortMapping(asset);
          if (asset.getPdus() != null) {
             // check pdu and port
             List<String> pduNameList = new ArrayList<String>();
@@ -375,7 +377,7 @@ public class VCDataService implements AsyncService {
                   }
                }
             }
-            host.setCustomValue(VCConstants.ASSET_SERIALNUMBER, String.join(",", switchNameList));
+            host.setCustomValue(VCConstants.ASSET_SWITCHs, String.join(",", switchNameList));
          }
       }
    }
