@@ -250,6 +250,7 @@ public class HandleAssetUtil {
       for(Asset asset:toUpdateAssets) {
          if(exsitingaAssetMap.containsKey(asset.getAssetSource()+"_"+asset.getAssetNumber())) {
             exsitingAsset = exsitingaAssetMap.get(asset.getAssetSource()+"_"+asset.getAssetNumber());
+            exsitingAsset.setCabinetName(asset.getCabinetName());
             exsitingAsset.setTag(asset.getTag());
             exsitingAsset.setSerialnumber(asset.getSerialnumber());
             exsitingAsset.setAssetName(asset.getAssetName());
