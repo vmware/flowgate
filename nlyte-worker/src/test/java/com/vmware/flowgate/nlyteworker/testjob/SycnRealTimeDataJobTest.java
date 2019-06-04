@@ -97,7 +97,7 @@ public class SycnRealTimeDataJobTest {
       .thenReturn(new ArrayList<Asset>());
 
       List<Asset>assets = nlyteDataService.generateAssets("l9i8728d55368540fcba1692", nlyteAssets,
-            locationMap, null, manufacturerMap, materialMap, AssetCategory.Server);
+            locationMap, manufacturerMap, materialMap, AssetCategory.Server);
       for(Asset asset:assets) {
          if("sin2-blrqeops-esxstress024".equals(asset.getAssetName())) {
             TestCase.assertEquals(197, asset.getAssetNumber());
@@ -123,8 +123,9 @@ public class SycnRealTimeDataJobTest {
       .thenReturn(assetsFromFlowgate);
       HashMap<Integer,String> cabinetIdAndNameMap = new HashMap<Integer, String>();
       cabinetIdAndNameMap.put(562, "cbName");
+      nlyteAssets = nlyteDataService.supplementCabinetName(cabinetIdAndNameMap, nlyteAssets);
       List<Asset> assets = nlyteDataService.generateAssets("l9i8728d55368540fcba1692", nlyteAssets,
-            locationMap, cabinetIdAndNameMap, manufacturerMap, materialMap, AssetCategory.Server);
+            locationMap, manufacturerMap, materialMap, AssetCategory.Server);
       for(Asset asset:assets) {
          if("sin2-blrqeops-esxstress024".equals(asset.getAssetName())) {
             TestCase.assertEquals(197, asset.getAssetNumber());

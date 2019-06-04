@@ -130,7 +130,6 @@ public class HandleAssetUtil {
     * @return
     */
    public List<Asset> getAssetsFromNlyte(String nlyteSource,List<NlyteAsset> nlyteAssets,
-                                 HashMap<Integer,String> cabinetIdAndNameMap,
                                  HashMap<Integer,LocationGroup> locationMap,
                                  HashMap<Integer,Material> materialMap,
                                  HashMap<Integer,Manufacturer> manufacturerMap) {
@@ -140,9 +139,7 @@ public class HandleAssetUtil {
          asset = new Asset();
          asset.setAssetNumber(nlyteAsset.getAssetNumber());
          asset.setCabinetAssetNumber(String.valueOf(nlyteAsset.getCabinetAssetID()));
-         if(cabinetIdAndNameMap != null) {
-            asset.setCabinetName(cabinetIdAndNameMap.get(nlyteAsset.getCabinetAssetID()));
-         }
+         asset.setCabinetName(nlyteAsset.getCabinetName());
          asset.setTag(nlyteAsset.getTag());
          asset.setSerialnumber(nlyteAsset.getSerialNumber());
          asset.setAssetName(nlyteAsset.getAssetName());
