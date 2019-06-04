@@ -69,7 +69,16 @@ export class UserLoginComponent implements OnInit {
                 this.tips = true;
                 this.textContent = "Invalid user name or password";
             }
-          })      
+          },error=>{
+            if(error.status == 401){
+                this.tips = true;
+                this.textContent = "Invalid user name or password";
+            }else{
+                this.tips = true;
+                this.textContent = "Internal error";
+            }
+            
+        })      
     }
   ngOnInit() {
     
