@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapper;
@@ -25,21 +24,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.ResourceAccessException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vmware.flowgate.vroworker.config.ServiceKeyConfig;
-import com.vmware.flowgate.vroworker.vro.AlertClient;
-import com.vmware.flowgate.vroworker.vro.MetricClient;
-import com.vmware.flowgate.vroworker.vro.VROConfig;
-import com.vmware.flowgate.vroworker.vro.VROConsts;
-import com.vmware.ops.api.client.exceptions.AuthException;
-import com.vmware.ops.api.model.property.PropertyContent;
-import com.vmware.ops.api.model.property.PropertyContents;
-import com.vmware.ops.api.model.resource.ResourceDto;
-import com.vmware.ops.api.model.resource.ResourceIdentifier;
-import com.vmware.ops.api.model.stat.StatContent;
-import com.vmware.ops.api.model.stat.StatContents;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
@@ -57,6 +43,18 @@ import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageImpl;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 import com.vmware.flowgate.common.utils.IPAddressUtil;
+import com.vmware.flowgate.vroworker.config.ServiceKeyConfig;
+import com.vmware.flowgate.vroworker.vro.AlertClient;
+import com.vmware.flowgate.vroworker.vro.MetricClient;
+import com.vmware.flowgate.vroworker.vro.VROConfig;
+import com.vmware.flowgate.vroworker.vro.VROConsts;
+import com.vmware.ops.api.client.exceptions.AuthException;
+import com.vmware.ops.api.model.property.PropertyContent;
+import com.vmware.ops.api.model.property.PropertyContents;
+import com.vmware.ops.api.model.resource.ResourceDto;
+import com.vmware.ops.api.model.resource.ResourceIdentifier;
+import com.vmware.ops.api.model.stat.StatContent;
+import com.vmware.ops.api.model.stat.StatContents;
 
 @Service
 public class VROAsyncJob implements AsyncService {
@@ -362,6 +360,7 @@ public class VROAsyncJob implements AsyncService {
       boolean hasNewData = false;
       logger.info(String.format("Start prepare data.%s, lastUpdateTime:%s, latencyFactor:%s",
             executionCount, lastUpdateTimeStamp, latencyFactor));
+      long newUpdateTimeStamp = lastUpdateTimeStamp;
       for (ServerMapping mapping : validMapping) {
          if (mapping.getAsset() != null) {
             ServerSensorData[] sensorDatas =
@@ -388,8 +387,8 @@ public class VROAsyncJob implements AsyncService {
             List<Long> humidityTimes = new ArrayList<Long>();
 
             for (ServerSensorData data : sensorDatas) {
-               if (data.getTimeStamp() > lastUpdateTimeStamp) {
-                  lastUpdateTimeStamp = data.getTimeStamp();
+               if (data.getTimeStamp() > newUpdateTimeStamp) {
+                  newUpdateTimeStamp = data.getTimeStamp();
                   hasNewData = true;
                }
                switch (data.getType()) {
@@ -479,17 +478,17 @@ public class VROAsyncJob implements AsyncService {
          }
       }
       if (hasNewData) {
-         Long factor = (currentTime - lastUpdateTimeStamp) / FIVE_MINUTES + 1;
+         Long factor = (currentTime - newUpdateTimeStamp) / FIVE_MINUTES + 1;
          if (factor > 24) {
             factor = 24L;
          } else if (factor < 0) {
             factor = 1L;
          }
          latencyFactorMap.put(config.getServerURL(), factor);
-         if (lastUpdateTimeStamp > currentTime) {
-            lastUpdateTimeStamp = currentTime;
+         if (newUpdateTimeStamp > currentTime) {
+            newUpdateTimeStamp = currentTime;
          }
-         lastUpdateTimeMap.put(config.getServerURL(), lastUpdateTimeStamp);
+         lastUpdateTimeMap.put(config.getServerURL(), newUpdateTimeStamp);
       } else {
          latencyFactor = latencyFactor + 1;
          if (latencyFactor > 24) {
