@@ -43,8 +43,8 @@ public class VCConstants {
    }
 
 
-   public static String categoryName = "WormholeAsset";
-   public static String categoryDescription = "All datacenter assets enhanced by Wormhole";
+   public static String categoryName = "FlowgateAsset";
+   public static String categoryDescription = "All datacenter assets enhanced by Flowgate";
    public static String locationAntiAffinityTagName = "Cluster host location anti-affinity";
    public static String locationAntiAffinityTagDescription =
          "This host in the cluster valiate location anti-affinity rules";
