@@ -83,7 +83,10 @@ public class AssetController {
    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
    public HttpHeaders create(@RequestBody Asset asset) {
       HttpHeaders httpHeaders = new HttpHeaders();
-      asset.setCreated(System.currentTimeMillis());
+      //when labsdb-worker uses this API to save asset ,the created is existed.Need refactor.
+      if(asset.getCreated() == 0) {
+         asset.setCreated(System.currentTimeMillis());
+      }
       BaseDocumentUtil.generateID(asset);
       assetRepository.save(asset);
       httpHeaders.setLocation(linkTo(AssetController.class).slash(asset.getId()).toUri());
