@@ -146,7 +146,6 @@ export class AssetChart implements AfterViewInit, OnInit{
 
                                         let node = new Node(e.vcHostName, "host", e.asset, num, linkMaps);
                                         nodes.push(node);
-                                        nodes.unshift
                                         let link = new Link(0, num, 1);
                                         links.push(link);
                                         
