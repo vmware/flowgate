@@ -289,7 +289,7 @@ public class HandleAssetUtil {
             }
             break;
          case PDU:
-            if (nlyteAsset.getCabinetAssetID() <= 0 && nlyteAsset.getuMounting() == null) {
+            if (nlyteAsset.getCabinetAssetID() <= 0 || nlyteAsset.getuMounting() == null) {
                continue;
             }
             break;
