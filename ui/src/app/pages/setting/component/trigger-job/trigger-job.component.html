@@ -152,7 +152,15 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-tab *appHasPrivilege=assetTopology>
             <button clrTabLink>Asset Topology</button>
             <clr-tab-content *clrIfActive>
+                
                 <setting-asset></setting-asset>
+            
+                <div class="row">
+                    <span class="label label-info" style="border:0px; color:white;background:#006a91;width: 75px;">vCenter</span>
+                    <span class="label label-success" style="border:0px; color:white;background:#bbcdd6;width: 75px;">Host</span>
+                    <span class="label label-warning" style="border:0px; color:white;background:#ea924c;width: 75px;">PDU</span>
+                    <span class="label label-danger" style="border:0px; color:white;background:#04273e;width: 75px;">Switch</span>
+                </div>
             </clr-tab-content>
         </clr-tab>
         <clr-tab *appHasPrivilege=syncData>
