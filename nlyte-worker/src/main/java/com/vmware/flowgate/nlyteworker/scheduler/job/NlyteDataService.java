@@ -275,6 +275,7 @@ public class NlyteDataService implements AsyncService {
          HashMap<Integer, LocationGroup> locationMap, HashMap<Integer, Material> materialMap,
          HashMap<Integer, Manufacturer> manufacturerMap, AssetCategory category) {
       HandleAssetUtil assetUtil = new HandleAssetUtil();
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       List<Asset> allMappedAssets = Arrays.asList(restClient.getMappedAsset(category).getBody());
       if (allMappedAssets.isEmpty()) {
          return;
