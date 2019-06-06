@@ -30,10 +30,15 @@ declare var d3;
                 <div class="col-lg-6 col-sm-6 col-6">\
                 </div>\
                 </div>\
-                <div class="row">\
-                    <h1>\
-                        <svg #target width="1500" height="700"></svg>\
-                    </h1>\
+                <br\>\
+                <br\>\
+                <div class="row" #target>\
+                </div>\
+                <div id="Legend" class="row">\
+                    <span class="label label-info" style="border:0px; color:white;background:#006a91;width: 75px;">vCenter</span>\
+                    <span class="label label-success" style="border:0px; color:white;background:#bbcdd6;width: 75px;">Host</span>\
+                    <span class="label label-warning" style="border:0px; color:white;background:#ea924c;width: 75px;">PDU</span>\
+                    <span class="label label-danger" style="border:0px; color:white;background:#04273e;width: 75px;">Switch</span>\
                 </div>'
 })
 
@@ -229,7 +234,42 @@ export class AssetChart implements AfterViewInit, OnInit{
         if(jsonString.links.length == 0){
             return;
         }
-        let svg = d3.select(this.target.nativeElement).append("svg");
+        /*sort nodes*/
+        let nodes_new = [];
+
+        jsonString.nodes.forEach((e, i) => {
+            if((e.id == "vcenter" || e.id == "host") && e.asset != null){
+                nodes_new.push(e);
+            }
+        });
+
+        for(var i=0; i < jsonString.nodes.length; i++){
+            var flag = 0;
+            for(var j=0; j < nodes_new.length; j++){
+                if(nodes_new[j].index == jsonString.nodes[i].index){
+                    flag = 1;
+                }
+            }
+            if(flag == 0){
+                nodes_new.push(jsonString.nodes[i]);
+            }
+        }
+
+        nodes_new.forEach((node, i) => {
+            if((parseInt(node.index) != i) && (node.id == "host") && (node.asset != null)){
+                jsonString.links.forEach((link,j) => {
+                    if(link.source == node.index){
+                        link.source = i;
+                    }
+                });
+            }
+        });
+        
+        let jsonString_new:any;
+        jsonString_new = new MetricJsonData(nodes_new, jsonString.links);
+
+
+        let svg = d3.select(this.target.nativeElement).append("svg").attr("width", 1500).attr("height", 74*jsonString_new.nodes.length);
 
         let chart = svg.chart("Sankey.Path");
         
@@ -240,7 +280,7 @@ export class AssetChart implements AfterViewInit, OnInit{
         .nodeWidth(20)
         .nodePadding(50)
         .spread(true)
-        .draw(jsonString);
+        .draw(jsonString_new);
 
         this.target.nativeElement.querySelectorAll('.node').forEach((e:any) =>{
             let nodeColor:any;
@@ -267,7 +307,7 @@ export class AssetChart implements AfterViewInit, OnInit{
         })
         
         let allDom: string;
-        jsonString.links.forEach((e, i) => {
+        jsonString_new.links.forEach((e, i) => {
             if(e.source.id == "host"){
                 if(e.source.link){
                     e.source.link.forEach(ele => {
@@ -284,6 +324,10 @@ export class AssetChart implements AfterViewInit, OnInit{
             }
         })
         this.target.nativeElement.querySelector('svg').innerHTML += '<g class="linkmaps">'+allDom+'</g>';
+        let legend = <HTMLDivElement>document.querySelector("#Legend");
+        if(jsonString_new.nodes.length > 10){
+            legend.setAttribute('style', 'margin-top: -'+1.3*jsonString_new.nodes.length+'%');
+        }
         
     }
 
