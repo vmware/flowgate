@@ -32,7 +32,7 @@ declare var d3;
                 </div>\
                 <br\>\
                 <br\>\
-                <div class="row" #target>\
+                <div class="row father_width" #target>\
                 </div>\
                 <div id="Legend" class="row">\
                     <span class="label label-info" style="border:0px; color:white;background:#006a91;width: 75px;">vCenter</span>\
@@ -268,8 +268,9 @@ export class AssetChart implements AfterViewInit, OnInit{
         let jsonString_new:any;
         jsonString_new = new MetricJsonData(nodes_new, jsonString.links);
 
-
-        let svg = d3.select(this.target.nativeElement).append("svg").attr("width", 1500).attr("height", 74*jsonString_new.nodes.length);
+        let father_width = <HTMLDivElement>document.querySelector(".father_width");
+        let svg = d3.select(this.target.nativeElement).append("svg").attr("width", father_width.clientWidth-100)
+        .attr("height", 74*jsonString_new.nodes.length);
 
         let chart = svg.chart("Sankey.Path");
         
