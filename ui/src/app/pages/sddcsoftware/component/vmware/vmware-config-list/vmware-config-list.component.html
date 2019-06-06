@@ -53,10 +53,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
        <button class="action-item" *ngIf="vmwareConfig.integrationStatus.status != 'ACTIVE'" (click)="updateSDDCStatus(vmwareConfig)" >Active</button>
     </clr-dg-action-overflow>
      <clr-dg-cell>{{vmwareConfig.type}}</clr-dg-cell>
-     <clr-dg-cell>{{vmwareConfig.serverURL}}</clr-dg-cell>
-     <clr-dg-cell>{{vmwareConfig.name}}</clr-dg-cell>
-     <clr-dg-cell>{{vmwareConfig.description}}</clr-dg-cell>    
-     <clr-dg-cell>{{vmwareConfig.userName}}</clr-dg-cell>
+     <clr-dg-cell class = "flowgate-overflow" title="{{vmwareConfig.serverURL}}">{{vmwareConfig.serverURL}}</clr-dg-cell>
+     <clr-dg-cell class = "flowgate-overflow" title="{{vmwareConfig.name}}">{{vmwareConfig.name}}</clr-dg-cell>
+     <clr-dg-cell class = "flowgate-overflow" title="{{vmwareConfig.description}}">{{vmwareConfig.description}}</clr-dg-cell>    
+     <clr-dg-cell class = "flowgate-overflow" title="{{vmwareConfig.userName}}">{{vmwareConfig.userName}}</clr-dg-cell>
      <clr-dg-cell>{{vmwareConfig.verifyCert}}</clr-dg-cell>
      <clr-dg-cell>{{vmwareConfig.integrationStatus.status}}
             <clr-icon *ngIf="vmwareConfig.integrationStatus.status == 'ERROR'" class="alert-icon" style="color: #c92100;cursor: pointer;" shape="exclamation-circle" (click)="showErrorMsg(vmwareConfig)"></clr-icon>       

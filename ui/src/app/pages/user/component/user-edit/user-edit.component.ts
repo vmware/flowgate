@@ -145,8 +145,8 @@ export class UserEditComponent implements OnInit {
           "roleName":"all",
           "privilegeNames":"",
           "enable":""
-         })
-        data.json().forEach(element => {
+         });
+         data.json().content.forEach(element => {
          var role={
          "id":"",
          "roleName":"",
