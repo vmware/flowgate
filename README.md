@@ -1,5 +1,5 @@
 # Flowgate
-FlowGate is an open source vendor-neutral project to enable facility awareness in SDDC and make IT operations management and automation better on high availability, cost saving and improved sustainability, with more information on power, cooling, environment (e.g. humidity, temperature) and security.
+FlowGate is an open source vendor-neutral project to enable facility awareness in IT management system and make IT operations management and automation better on high availability, cost saving and improved sustainability, with more information on power, cooling, environment (e.g. humidity, temperature) and security.
 <img alt="FlowGate" src="docs/images/FlowGate.png">
 # Why
 * In enterprise data centers, IT infrastructure and facility are generally managed separately, which leads to information gaps.
