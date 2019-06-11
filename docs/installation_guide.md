@@ -79,7 +79,7 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
     ...
     Creating network "mavendockerbuild_db-network" with the default driver
     Creating network "mavendockerbuild_services-network" with the default driver
-    Creating flowgate-mongo-container
+    Creating flowgate-database-container
     Creating flowgate-redis-container
     Creating flowgate-api-container
     Creating flowgate-vc-worker-container
@@ -110,7 +110,7 @@ Stopping flowgate-vc-worker-container ... done
 ...
 Removing flowgate-api-container ... done
 Removing flowgate-redis-container ... done
-Removing flowgate-mongo-container ... done
+Removing flowgate-database-container ... done
 Removing network mavendockerbuild_db-network
 Removing network mavendockerbuild_services-network
 ```  
@@ -119,7 +119,7 @@ Restarting Flowgate after stopping:
 $ sudo docker-compose -f docker-compose.run.images.yml up -d
 Creating network "mavendockerbuild_db-network" with the default driver
 Creating network "mavendockerbuild_services-network" with the default driver
-Creating flowgate-mongo-container
+Creating flowgate-database-container
 Creating flowgate-redis-container
 Creating flowgate-api-container
 Creating flowgate-aggregator-container
@@ -143,7 +143,7 @@ flowgate-api-container               sh start.sh                      Up      49
 flowgate-infoblox-worker-container   sh start.sh                      Up                                              
 flowgate-labsdb-worker-container     sh start.sh                      Up                                              
 flowgate-management-container        sh start.sh                      Up      443/tcp, 0.0.0.0:443->49611/tcp, 80/tcp 
-flowgate-mongo-container             docker-entrypoint.sh mongod      Up      27017/tcp                               
+flowgate-database-container          docker-entrypoint.sh             Up      11207/tcp, 11210/tcp, 11211/tcp,...                             
 flowgate-nlyte-worker-container      sh start.sh                      Up                                              
 flowgate-poweriq-worker-container    sh start.sh                      Up                                              
 flowgate-redis-container             docker-entrypoint.sh redis ...   Up      6379/tcp                                
