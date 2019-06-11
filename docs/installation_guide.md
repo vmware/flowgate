@@ -56,7 +56,24 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
 
 ```
 
-4. Start Flowgate
+4. Initialize Flowgate
+
+```
+    $ sudo bash flowgate_init.sh
+    ...
+    conf/management/
+    conf/management/application.properties
+    conf/aggregator/
+    conf/aggregator/application.properties
+    Creating flowgate-database-container
+    Stopping flowgate-database-container ... done
+    Removing flowgate-database-container ... done
+    Removing network mavendockerbuild_db-network
+    Removing network mavendockerbuild_services-network
+    Flowgate Initialize Success.
+```
+
+5. Start Flowgate
 
 ```
     $ sudo bash flowgate_run.sh
@@ -77,8 +94,8 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
 
 ```
 *Note*:
-1. Source Installation: the flowgate_run.sh under *flowgate/make/*.
-2. Binary Installation: the flowgate_run.sh extract from flowgate-*.tar.gz.
+1. Source Installation: the flowgate_run.sh and flowgate_init.sh under *flowgate/make/*.
+2. Binary Installation: the flowgate_run.sh and flowgate_init.sh extract from flowgate-*.tar.gz.
 
 If everything worked properly, you should be able to open a browser to visit the admin portal at **https://yourdomain** (change *yourdomain* to your server's hostname or ip). Note that the default administrator username/password are admin/Admin!23. Please change it immediately.
 

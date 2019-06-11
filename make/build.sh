@@ -131,7 +131,7 @@ saveDockerImages(){
 	mkdir flowgate
 	mkdir -p flowgate/docker-images-output
 	mkdir -p flowgate/maven-docker-build
-	cp flowgate_run.sh conf.tar.gz flowgate
+	cp flowgate_run.sh flowgate_init.sh conf.tar.gz flowgate
 	cp maven-docker-build/docker-compose.run.images.yml flowgate/maven-docker-build
 	cp docker-images-output/flowgate.tar flowgate/docker-images-output
 	tar -cvzf $RELEASES_VERSION flowgate
