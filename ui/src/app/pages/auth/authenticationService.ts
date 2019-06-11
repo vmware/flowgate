@@ -78,6 +78,10 @@ export class AuthenticationService {
   }
 
   isLoggedIn(): boolean {
+    const userStr:string = sessionStorage.getItem('currentUser');
+    if(userStr == null){
+      return false;
+    }
     const expriedTime:number = this.getExpiredTime();
     const currentTime:number = new Date().getTime();
     return expriedTime>currentTime;
