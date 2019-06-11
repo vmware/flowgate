@@ -26,7 +26,6 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
 |Port|Protocol|Description|
 |---|---|---|
 |443|HTTPS|Flowgate portal and core API will accept requests on this port for https protocol|
-|80|HTTP|Flowgate portal and core API will accept requests on this port for http protocol|
 
 ## Installation Steps
 
