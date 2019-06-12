@@ -8,6 +8,12 @@
 /opt/couchbase/bin/couchbase-cli user-manage -c localhost -u flowgate_cluster -p ADMINPASSWD_CHANGE --set --rbac-username=flowgate --rbac-password=USERPASSWD_CHANGE --roles=bucket_full_access[*] --auth-domain=local
 
 ###create index###
-cbq -u flowgate_cluster -p ADMINPASSWD_CHANGE -file /home/couchbase/initData.sh
+cbq -u flowgate_cluster -p ADMINPASSWD_CHANGE -file /home/couchbase/initData.sh > /opt/couchbase/var/couchbase_initialize.log
 
-touch /opt/couchbase/var/initDataComplete
+DATACOUNT=`cbq -u flowgate_cluster -p ADMINPASSWD_CHANGE --script="select count(*) from flowgate;" | grep -A 3 results | grep '"$1":'`
+
+if [ -n "$DATACOUNT" ] && [ ${DATACOUNT#*:} = "78" ];then
+    touch /opt/couchbase/var/initDataComplete
+else
+    touch /opt/couchbase/var/initDataFailed
+fi

@@ -3,8 +3,8 @@
 BUILDDIR=/flowgate-build
 BUILDLOG=/log/flowgate-build-log.txt
 BUILDERRORLOG=/log/flowgate-build-error-log.txt
-SOURCEDIR=$BUILDDIR/flowgate
-MAKEDIR=$BUILDDIR/flowgate/make
+SOURCEDIR=$BUILDDIR
+MAKEDIR=$BUILDDIR/make
 OUTPUTJARPATH=$MAKEDIR/jar-output
 OUTPUTJARNAME=-0.0.1-SNAPSHOT.jar
 

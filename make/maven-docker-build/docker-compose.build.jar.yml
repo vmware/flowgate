@@ -6,7 +6,7 @@ services:
       dockerfile: $PWD/maven-docker-build/Dockerfile
     image: maven-build:FLOWGATE_VERSION
     volumes:
-      - $PWD/../../:/flowgate-build
+      - $PWD/../:/flowgate-build
       - $PWD/build-log:/log
     networks:
       - build-network
