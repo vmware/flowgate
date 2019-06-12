@@ -58,9 +58,45 @@ Also, you can execute below command to verify the container images:
       flowgate/management        v1.0                939197e11efe        5 minutes ago         249MB
    ```
 ## Start Flowgate
+
+1. Initialize Flowgate
+
 ```
-$ sudo bash flowgate_run.sh
+    $ sudo bash flowgate_init.sh
+    ...
+    conf/management/
+    conf/management/application.properties
+    conf/aggregator/
+    conf/aggregator/application.properties
+    Creating flowgate-database-container
+    Stopping flowgate-database-container ... done
+    Removing flowgate-database-container ... done
+    Removing network mavendockerbuild_db-network
+    Removing network mavendockerbuild_services-network
+    Flowgate Initialize Success.
 ```
+2. Start Flowgate
+
+```
+    $ sudo bash flowgate_run.sh
+    ...
+    Creating network "mavendockerbuild_db-network" with the default driver
+    Creating network "mavendockerbuild_services-network" with the default driver
+    Creating flowgate-database-container
+    Creating flowgate-redis-container
+    Creating flowgate-api-container
+    Creating flowgate-vc-worker-container
+    Creating flowgate-nlyte-worker-container
+    Creating flowgate-poweriq-worker-container
+    Creating flowgate-aggregator-container
+    Creating flowgate-management-container
+    Creating flowgate-labsdb-worker-container
+    Creating flowgate-vro-worker-container
+    Creating flowgate-infoblox-worker-container
+
+```
+## Start Using
+**[Click here to start](https://github.com/vmware/flowgate/blob/master/docs/installation_guide.md#Start-Using)**
 ## Appendix
 * Using the build.sh
 

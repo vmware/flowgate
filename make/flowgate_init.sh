@@ -63,9 +63,15 @@ done
 SERVICEKEY=$(openssl rand 32|sha256sum|head -c 64)
 sed -i -e "s/serviceKey/$SERVICEKEY/" $DOCKERCOMPOSERUNFILE
 
+docker load < docker-images-output/flowgate.tar
+
 docker-compose -f $DOCKERCOMPOSERUNFILE up -d database
 while [ ! -f "/opt/vmware/flowgate/data/database/data/initDataComplete" ];do
     sleep 1
+    if [ -f "/opt/vmware/flowgate/data/database/data/initDataFailed" ];then
+        echo "Flowgate Initialize Data Failed."
+        exit
+    fi
 done
 docker-compose -f $DOCKERCOMPOSERUNFILE down
 echo "Flowgate Initialize Success."

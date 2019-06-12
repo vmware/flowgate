@@ -37,25 +37,7 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
     $ tar -zxvf flowgate-*.tar.gz
 ```
 
-3. Load Flowgate images:
-```
-    $ cd flowgate/
-    $ sudo docker load < docker-images-output/flowgate.tar
-    Loaded image: flowgate/infoblox-worker:v1.0
-    Loaded image: flowgate/labsdb-worker:v1.0
-    Loaded image: flowgate/api:v1.0
-    Loaded image: flowgate/database:v1.0
-    Loaded image: flowgate/vro-worker:v1.0
-    Loaded image: flowgate/vc-worker:v1.0
-    Loaded image: flowgate/poweriq-worker:v1.0
-    Loaded image: flowgate/aggregator:v1.0
-    Loaded image: flowgate/redis:v1.0
-    Loaded image: flowgate/nlyte-worker:v1.0
-    Loaded image: flowgate/management:v1.0
-
-```
-
-4. Initialize Flowgate
+3. Initialize Flowgate
 
 ```
     $ sudo bash flowgate_init.sh
@@ -72,7 +54,7 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
     Flowgate Initialize Success.
 ```
 
-5. Start Flowgate
+4. Start Flowgate
 
 ```
     $ sudo bash flowgate_run.sh
@@ -95,6 +77,8 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
 *Note*:
 1. Source Installation: the flowgate_run.sh and flowgate_init.sh under *flowgate/make/*.
 2. Binary Installation: the flowgate_run.sh and flowgate_init.sh extract from flowgate-*.tar.gz.
+
+## Start Using
 
 If everything worked properly, you should be able to open a browser to visit the admin portal at **https://yourdomain** (change *yourdomain* to your server's hostname or ip). Note that the default administrator username/password are admin/Admin!23. Please change it immediately.
 
