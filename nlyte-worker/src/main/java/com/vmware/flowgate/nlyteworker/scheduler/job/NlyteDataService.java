@@ -197,6 +197,9 @@ public class NlyteDataService implements AsyncService {
 
       //remove inactive pdus information from server and remove inactive pdus
       for(Asset pdu : pdus) {
+         if(!Isexpired(pdu)) {
+            continue;
+         }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.PDU, pdu.getAssetNumber());
          if(asset == null || !assetIsActived(asset, AssetCategory.PDU)) {
             servers = removePduFromServer(servers, pdu.getId());
@@ -207,6 +210,9 @@ public class NlyteDataService implements AsyncService {
 
       //remove inactive network information from servers and remove inactive networks
       for(Asset network : networks) {
+         if(!Isexpired(network)) {
+            continue;
+         }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Networks, network.getAssetNumber());
          if(asset == null || !assetIsActived(asset, AssetCategory.Networks)) {
             servers = removeNetworkFromServer(servers, network.getId());
@@ -217,6 +223,9 @@ public class NlyteDataService implements AsyncService {
 
       //remove cabinets
       for(Asset cabinet : cabinets) {
+         if(!Isexpired(cabinet)) {
+            continue;
+         }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Cabinet, cabinet.getAssetNumber());
          if(asset == null || !assetIsActived(asset, AssetCategory.Cabinet)) {
             restClient.removeAssetByID(cabinet.getId());
@@ -236,6 +245,9 @@ public class NlyteDataService implements AsyncService {
 
       //remove inactive asset from serverMapping and remove inactive servers
       for(Asset server : servers) {
+         if(!Isexpired(server)) {
+            continue;
+         }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Server, server.getAssetNumber());
          if(asset == null || !assetIsActived(asset, AssetCategory.Server)) {
             for(ServerMapping mapping : mappings) {
@@ -313,23 +325,20 @@ public class NlyteDataService implements AsyncService {
    }
 
 
-   public Map<Long,String> getAssetNumberAndIdMap(List<Asset> assets) {
-      Map<Long,String> assetNumberAndIdMap = new HashMap<Long,String>();
+   public boolean Isexpired(Asset asset) {
       long currentTime = System.currentTimeMillis();
       long time = 0;
-      for(Asset asset : assets) {
-         long lastUpdateTime = asset.getLastupdate();
-         long createTime = asset.getCreated();
-         if(lastUpdateTime != 0) {
-            time = lastUpdateTime;
-         }else {
-            time = createTime;
-         }
-         if(currentTime - time >= expiredTime) {
-            assetNumberAndIdMap.put(asset.getAssetNumber(), asset.getId());
-         }
+      long lastUpdateTime = asset.getLastupdate();
+      long createTime = asset.getCreated();
+      if(lastUpdateTime != 0) {
+         time = lastUpdateTime;
+      }else {
+         time = createTime;
       }
-      return assetNumberAndIdMap;
+      if(currentTime - time >= expiredTime) {
+         return true;
+      }
+      return false;
    }
 
    public boolean assetIsActived(NlyteAsset nlyteAsset, AssetCategory category) {
