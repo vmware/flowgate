@@ -5,6 +5,7 @@
 package com.vmware.flowgate.nlyteworker.testjob;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Before;
@@ -19,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.vmware.flowgate.client.WormholeAPIClient;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.nlyteworker.config.ServiceKeyConfig;
 import com.vmware.flowgate.nlyteworker.restclient.NlyteAPIClient;
@@ -50,24 +52,24 @@ public class CleanDataJobTest {
    }
 
    @Test
-   public void updatePduAndSwitchTest() {
+   public void removePduFromServerTest() {
       Asset server = new Asset();
       List<String> pdus = new ArrayList<String>();
       pdus.add("0364");
       pdus.add("po09");
+      HashMap<String, String> justifications = new HashMap<String, String>();
+      justifications.put(FlowgateConstant.PDU_PORT_FOR_SERVER,
+            "pci-2:hba:1_FIELDSPLIT_cloud-fc02-sha1_FIELDSPLIT_05_FIELDSPLIT_0364,onboard:1gb-nic:4_FIELDSPLIT_cloud-sw02-sha1_FIELDSPLIT_08_FIELDSPLIT_3fc319e50d21476684d841aa0842bd52");
+      server.setJustificationfields(justifications);
       List<String> switches = new ArrayList<String>();
       switches.add("qwe23");
       switches.add("oo09w");
       server.setPdus(pdus);
       server.setSwitches(switches);
-      List<String> switches1 = new ArrayList<String>();
-      switches1.add("qwe23");
-      switches1.add("wertd");
-      switches1.add("567uy");
-      switches1.add("adwgs");
-      server = nlyteDataService.updatePduAndSwitch(server, pdus, switches1);
-
-      TestCase.assertEquals(0, server.getPdus().size());
-      TestCase.assertEquals(1, server.getSwitches().size());
+      List<Asset> servers = new ArrayList<Asset>();
+      servers.add(server);
+      servers = nlyteDataService.removePduFromServer(servers, "0364");
+      TestCase.assertEquals(1, servers.get(0).getPdus().size());
+      TestCase.assertEquals("onboard:1gb-nic:4_FIELDSPLIT_cloud-sw02-sha1_FIELDSPLIT_08_FIELDSPLIT_3fc319e50d21476684d841aa0842bd52", servers.get(0).getJustificationfields().get(FlowgateConstant.PDU_PORT_FOR_SERVER));
    }
 }

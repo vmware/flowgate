@@ -187,30 +187,41 @@ public class NlyteDataService implements AsyncService {
    private void removeInActiveData(FacilitySoftwareConfig nlyte) {
       NlyteAPIClient nlyteAPIclient = createClient(nlyte);
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      List<String> assetIds = new ArrayList<String>();
-
       List<Asset> servers = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.Server);
-      Map<Long,String> serverAssetNumberAndIdMap = getAssetNumberAndIdMap(servers);
-      List<String> serverIds = filterAndGetAssetIds(serverAssetNumberAndIdMap, AssetCategory.Server, nlyteAPIclient);
-      assetIds.addAll(serverIds);
 
       List<Asset> pdus = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.PDU);
-      Map<Long,String> pduAssetNumberAndIdMap = getAssetNumberAndIdMap(pdus);
-      List<String> pduIds = filterAndGetAssetIds(pduAssetNumberAndIdMap, AssetCategory.PDU, nlyteAPIclient);
-      assetIds.addAll(pduIds);
 
       List<Asset> networks = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.Networks);
-      Map<Long,String> networkAssetNumberAndIdMap = getAssetNumberAndIdMap(networks);
-      List<String> switchIds = filterAndGetAssetIds(networkAssetNumberAndIdMap, AssetCategory.Networks, nlyteAPIclient);
-      assetIds.addAll(switchIds);
 
       List<Asset> cabinets = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.Cabinet);
-      Map<Long,String> cabinetkAssetNumberAndIdMap = getAssetNumberAndIdMap(cabinets);
-      assetIds.addAll(filterAndGetAssetIds(cabinetkAssetNumberAndIdMap, AssetCategory.Cabinet, nlyteAPIclient));
 
-      //remove inactive pdus&networks information from server
-      servers = cleanDependencyData(servers, pduIds, switchIds);
-      restClient.saveAssets(servers);
+      //remove inactive pdus information from server and remove inactive pdus
+      for(Asset pdu : pdus) {
+         NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.PDU, pdu.getAssetNumber());
+         if(asset == null || !assetIsActived(asset, AssetCategory.PDU)) {
+            servers = removePduFromServer(servers, pdu.getId());
+            restClient.saveAssets(servers);
+            restClient.removeAssetByID(pdu.getId());
+         }
+      }
+
+      //remove inactive network information from servers and remove inactive networks
+      for(Asset network : networks) {
+         NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Networks, network.getAssetNumber());
+         if(asset == null || !assetIsActived(asset, AssetCategory.Networks)) {
+            servers = removeNetworkFromServer(servers, network.getId());
+            restClient.saveAssets(servers);
+            restClient.removeAssetByID(network.getId());
+         }
+      }
+
+      //remove cabinets
+      for(Asset cabinet : cabinets) {
+         NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Cabinet, cabinet.getAssetNumber());
+         if(asset == null || !assetIsActived(asset, AssetCategory.Cabinet)) {
+            restClient.removeAssetByID(cabinet.getId());
+         }
+      }
 
       //get all serverMapping
       SDDCSoftwareConfig vcs[] = restClient.getVCServers().getBody();
@@ -222,81 +233,85 @@ public class NlyteDataService implements AsyncService {
       for(SDDCSoftwareConfig vro : vros) {
          mappings.addAll(new ArrayList<>(Arrays.asList(restClient.getServerMappingsByVRO(vro.getId()).getBody())));
       }
-      //remove inactive asset from serverMapping
-      for(ServerMapping mapping : mappings) {
-         if(mapping.getAsset() == null) {
-            continue;
-         }
-         if(serverIds.contains(mapping.getAsset())) {
-            mapping.setAsset(null);
-            restClient.saveServerMapping(mapping);
+
+      //remove inactive asset from serverMapping and remove inactive servers
+      for(Asset server : servers) {
+         NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Server, server.getAssetNumber());
+         if(asset == null || !assetIsActived(asset, AssetCategory.Server)) {
+            for(ServerMapping mapping : mappings) {
+               if(mapping.getAsset() == null) {
+                  continue;
+               }
+               if(server.getId().equals(mapping.getAsset())) {
+                  mapping.setAsset(null);
+                  restClient.saveServerMapping(mapping);
+               }
+            }
+            restClient.removeAssetByID(server.getId());
          }
       }
-      //remove the inactive assets
-      for(String assetid : assetIds) {
-         restClient.removeAssetByID(assetid);
-      }
+
    }
 
-   public List<Asset> cleanDependencyData(List<Asset> servers, List<String> pdus, List<String> networks) {
-      for (Asset server : servers) {
-         server = updateJustficationfields(server,pdus,networks);
-         server = updatePduAndSwitch(server,pdus,networks);
+   public List<Asset> removePduFromServer(List<Asset> servers, String pduId) {
+      for(Asset server : servers) {
+         HashMap<String, String> serverJustficationfields = server.getJustificationfields();
+         Set<String> pduDevices = new HashSet<String>();
+         String pduPortString = serverJustficationfields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
+         if(pduPortString != null) {
+            String pduPorts[] = pduPortString.split(FlowgateConstant.SPILIT_FLAG);
+            for(String pduport : pduPorts) {
+               if(!pduport.contains(pduId)) {
+                  pduDevices.add(pduport);
+               }
+            }
+            pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduDevices);
+         }
+         serverJustficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, pduPortString);
+         server.setJustificationfields(serverJustficationfields);
+         List<String> pduIds = server.getPdus();
+         Iterator<String> pduite = pduIds.iterator();
+         while(pduite.hasNext()) {
+            String pduid = pduite.next();
+            if(pduid.equals(pduId)) {
+               pduite.remove();
+            }
+         }
+         server.setPdus(pduIds);
+      }
+
+      return servers;
+   }
+
+   public List<Asset> removeNetworkFromServer(List<Asset> servers, String networkId) {
+      for(Asset server : servers) {
+         HashMap<String, String> serverJustficationfields = server.getJustificationfields();
+         Set<String> networkDevices = new HashSet<String>();
+         String networkPortString = serverJustficationfields.get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
+         if(networkPortString != null) {
+            String networkPorts[] = networkPortString.split(FlowgateConstant.SPILIT_FLAG);
+            for(String networkport : networkPorts) {
+               if(!networkport.contains(networkId)) {
+                  networkDevices.add(networkport);
+               }
+            }
+            networkPortString = String.join(FlowgateConstant.SPILIT_FLAG, networkDevices);
+         }
+         serverJustficationfields.put(FlowgateConstant.NETWORK_PORT_FOR_SERVER, networkPortString);
+         server.setJustificationfields(serverJustficationfields);
+         List<String> switchIds = server.getSwitches();
+         Iterator<String> switchite = switchIds.iterator();
+         while(switchite.hasNext()) {
+            String switchid = switchite.next();
+            if(switchid.equals(networkId)) {
+               switchite.remove();
+            }
+         }
+         server.setSwitches(switchIds);
       }
       return servers;
    }
 
-   public Asset updatePduAndSwitch(Asset server, List<String> pdus, List<String> networks) {
-      List<String> pduIds = server.getPdus();
-      List<String> switchIds = server.getSwitches();
-      Iterator<String> pduite = pduIds.iterator();
-      Iterator<String> switchite = switchIds.iterator();
-      while(pduite.hasNext()) {
-         String pduid = pduite.next();
-         if(pdus.contains(pduid)) {
-            pduite.remove();
-         }
-      }
-      while(switchite.hasNext()) {
-         String switchid = switchite.next();
-         if(networks.contains(switchid)) {
-            switchite.remove();
-         }
-      }
-      server.setPdus(pduIds);
-      server.setSwitches(switchIds);
-      return server;
-   }
-
-   public Asset updateJustficationfields(Asset server, List<String> pdus, List<String> networks) {
-      HashMap<String, String> serverJustficationfields = server.getJustificationfields();
-      Set<String> pduDevices = new HashSet<String>();
-      Set<String> networkDevices = new HashSet<String>();
-      String pduPortString = serverJustficationfields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
-      String networkPortString = serverJustficationfields.get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
-      String pduPorts[] = pduPortString.split(FlowgateConstant.SPILIT_FLAG);
-      String networkPorts[] = networkPortString.split(FlowgateConstant.SPILIT_FLAG);
-      for(String pduport : pduPorts) {
-         for(String pduid : pdus) {
-            if(!pduport.contains(pduid)) {
-               pduDevices.add(pduport);
-            }
-         }
-      }
-      for(String networkport : networkPorts) {
-         for(String networkid : networks) {
-            if(!networkport.contains(networkid)) {
-               networkDevices.add(networkport);
-            }
-         }
-      }
-      pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduDevices);
-      networkPortString = String.join(FlowgateConstant.SPILIT_FLAG, networkDevices);
-      serverJustficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, pduPortString);
-      serverJustficationfields.put(FlowgateConstant.NETWORK_PORT_FOR_SERVER, networkPortString);
-      server.setJustificationfields(serverJustficationfields);
-      return server;
-   }
 
    public Map<Long,String> getAssetNumberAndIdMap(List<Asset> assets) {
       Map<Long,String> assetNumberAndIdMap = new HashMap<Long,String>();
@@ -315,25 +330,6 @@ public class NlyteDataService implements AsyncService {
          }
       }
       return assetNumberAndIdMap;
-   }
-
-   public List<String> filterAndGetAssetIds(Map<Long,String> assetNumberAndIdMap, AssetCategory category,
-         NlyteAPIClient nlyteAPIclient){
-      List<String> assetIDs = new ArrayList<String>();
-      NlyteAsset asset = null;
-      for(Map.Entry<Long, String> map : assetNumberAndIdMap.entrySet()) {
-         long assetnumber = map.getKey();
-         asset = nlyteAPIclient.getAssetbyAssetNumber(category, assetnumber);
-         if(asset == null) {
-            assetIDs.add(map.getValue());
-            logger.error("Invalid assetNumber: +"+map.getKey());
-            continue;
-         }
-         if(!assetIsActived(asset, category)) {
-            assetIDs.add(map.getValue());
-         }
-      }
-      return assetIDs;
    }
 
    public boolean assetIsActived(NlyteAsset nlyteAsset, AssetCategory category) {
