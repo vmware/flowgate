@@ -14,10 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -42,8 +44,11 @@ public class NlyteAPIClient {
    private static final Logger logger = LoggerFactory.getLogger(NlyteAPIClient.class);
    private static final String GetManufacturersURL = "/nlyte/integration/api/odata/manufacturers";
    private static final String GetServerAssetsURL = "/nlyte/integration/api/odata/Servers?$expand=UMounting";
+   private static final String GetServerAssetByAssetNumberURL = "/nlyte/integration/api/odata/Servers(%s)";
    private static final String GetCabinetsURL = "/nlyte/integration/api/odata/Cabinets";
+   private static final String GetCabinetByAssetNumberURL = "/nlyte/integration/api/odata/Cabinets(%s)";
    private static final String GetPowerStripAssetsURL = "/nlyte/integration/api/odata/PowerStrips?$expand=UMounting";
+   private static final String GetPowerStripAssetByAssetNumberURL = "/nlyte/integration/api/odata/PowerStrips(%s)";
    private static final String GetLocationGroupsURL = "/nlyte/integration/api/odata/LocationGroups";
    private static final String GetBladeServerMaterialsURL = "/nlyte/integration/api/odata/BladeServerMaterials";
    private static final String GetCabinetMaterialsURL = "/nlyte/integration/api/odata/CabinetMaterials";
@@ -52,6 +57,7 @@ public class NlyteAPIClient {
    private static final String AuthenticateBasicURL = "/nlyte/integration/api/odata/auth/AuthenticateBasic";
    private static final String GetPowerStripRealtimeValue = "/nlyte/integration/api/odata/PowerStrips(%s)/GetRealtimeValues";
    private static final String GetNetworksURL = "/nlyte/integration/api/odata/Networks";
+   private static final String GetNetworkByAssetNumberURL = "/nlyte/integration/api/odata/Networks(%s)";
    private static final String GetNetworkMaterialsURL =
          "/nlyte/integration/api/odata/NetworkMaterials?$filter=(materialSubtypeID eq 7)";
    protected String nlyteServiceEndpoint;
@@ -241,6 +247,41 @@ public class NlyteAPIClient {
          nextLink = materialResult.getOdatanextLink();
       }
       return materials;
+   }
+
+   public NlyteAsset getAssetbyAssetNumber(AssetCategory category, long assetNumber) {
+      initAuthenticationWebToken();
+      String getAssetsUrl = null;
+      switch (category) {
+      case Server:
+         getAssetsUrl = getNlyteServiceEndpoint() + String.format(GetServerAssetByAssetNumberURL, assetNumber);
+         break;
+      case PDU:
+         getAssetsUrl = getNlyteServiceEndpoint() + String.format(GetPowerStripAssetByAssetNumberURL, assetNumber);
+         break;
+      case Cabinet:
+         getAssetsUrl = getNlyteServiceEndpoint() + String.format(GetCabinetByAssetNumberURL, assetNumber);
+         break;
+      case Networks:
+         getAssetsUrl = getNlyteServiceEndpoint() + String.format(GetNetworkByAssetNumberURL, assetNumber);
+         break;
+      default:
+         throw new NlyteWorkerException("no such assets of the category ");
+      }
+      ResponseEntity<NlyteAsset> result = null;
+      NlyteAsset asset = null;
+      try {
+         result = this.restTemplate
+         .exchange(getAssetsUrl, HttpMethod.GET, getDefaultEntity(), NlyteAsset.class);
+      }catch (HttpClientErrorException e) {
+         if(HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
+            return asset;
+         }
+      }
+      if(HttpStatus.OK.equals(result.getStatusCode())) {
+         asset = result.getBody();
+      }
+      return asset;
    }
 
    public List<NlyteAsset> getAssets(boolean isAllData, AssetCategory category) {
