@@ -70,6 +70,7 @@ while [ ! -f "/opt/vmware/flowgate/data/database/data/initDataComplete" ];do
     sleep 1
     if [ -f "/opt/vmware/flowgate/data/database/data/initDataFailed" ];then
         echo "Flowgate Initialize Data Failed."
+        docker-compose -f $DOCKERCOMPOSERUNFILE down
         exit
     fi
 done
