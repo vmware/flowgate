@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -46,6 +47,7 @@ import com.vmware.flowgate.common.model.ServerSensorData;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ValueUnit.ValueType;
+import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
@@ -73,9 +75,12 @@ public class AssetController {
    @Autowired
    AssetIPMappingRepository assetIPMappingRepository;
 
+   @Autowired
+   StringRedisTemplate template;
+
    // @Value("${}")
    private int RealtimeQueryDurationLimitation;
-   private static final int TEN_MINUTES = 605000;//add extra 5 seconds;
+   private static final long TEN_MINUTES = 605000;//add extra 5 seconds;
    private static String TIME = "time";
 
    // Create a new Asset
@@ -319,13 +324,28 @@ public class AssetController {
       realtimeDataRepository.save(data);
    }
 
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/serversensordata/{id}", method = RequestMethod.DELETE)
+   public void deleteRealTimeData(@PathVariable("id") String assetID) {
+      long currentTime = System.currentTimeMillis();
+      String expiredTimeRangeValue = template.opsForValue().get(EventMessageUtil.EXPIREDTIMERANGE);
+      Long expiredTimeRange = null;
+      if(expiredTimeRangeValue != null) {
+         expiredTimeRange = Long.valueOf(expiredTimeRangeValue);
+      }else {
+         expiredTimeRange = FlowgateConstant.DEFAULTEXPIREDTIMERANGE;
+      }
+      List<RealTimeData> realtimeDatas =
+            realtimeDataRepository.getDataByIDAndTimeRange(assetID, currentTime - expiredTimeRange, expiredTimeRange);
+      realtimeDataRepository.delete(realtimeDatas);
+   }
 
    //starttime miliseconds.
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/{id}/serversensordata", method = RequestMethod.GET)
    public List<ServerSensorData> getServerSensorData(@PathVariable("id") String assetID,
          @RequestParam(value = "starttime", required = false) Long starttime,
-         @RequestParam(value = "duration", required = false) Integer duration) {
+         @RequestParam(value = "duration", required = false) Long duration) {
       if (starttime == null || starttime <= 0) {
          starttime = System.currentTimeMillis() - TEN_MINUTES;
       }

@@ -74,8 +74,29 @@ public class AggregatorService implements AsyncService {
          case EventMessageUtil.SyncTemperatureAndHumiditySensors:
             syncHostTemperatureAndHumidySensor(false);
             break;
+         case EventMessageUtil.CleanRealtimeData:
+            cleanRealtimeData();
+            break;
          default:
             break;
+         }
+      }
+   }
+
+   public void cleanRealtimeData() {
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      SDDCSoftwareConfig[] vcs = restClient.getVCServers().getBody();
+      SDDCSoftwareConfig[] vrops = restClient.getVROServers().getBody();
+      for (SDDCSoftwareConfig vro : vrops) {
+         ServerMapping[] mappings = restClient.getServerMappingsByVRO(vro.getId()).getBody();
+         for (ServerMapping mapping : mappings) {
+            restClient.deleteRealTimeData(mapping.getAsset());
+         }
+      }
+      for (SDDCSoftwareConfig vc : vcs) {
+         ServerMapping[] mappings = restClient.getServerMappingsByVC(vc.getId()).getBody();
+         for (ServerMapping mapping : mappings) {
+            restClient.deleteRealTimeData(mapping.getAsset());
          }
       }
    }
