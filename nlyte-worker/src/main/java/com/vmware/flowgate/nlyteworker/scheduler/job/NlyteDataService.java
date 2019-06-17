@@ -76,12 +76,11 @@ public class NlyteDataService implements AsyncService {
    private ServiceKeyConfig serviceKeyConfig;
    private ObjectMapper mapper = new ObjectMapper();
    public static final String DateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-   public static final String RealtimeLoad = "RealtimeLoad";
-   public static final String RealtimePower = "RealtimePower";
-   public static final String RealtimeVoltage = "RealtimeVoltage";
-   public static Map<String, ValueType> sensorValueTypeMap = new HashMap<String, ValueType>();
-   public static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
-   public static long expiredTime = 30*24*3600*1000;//one month
+   private static final String RealtimeLoad = "RealtimeLoad";
+   private static final String RealtimePower = "RealtimePower";
+   private static final String RealtimeVoltage = "RealtimeVoltage";
+   private static Map<String, ValueType> sensorValueTypeMap = new HashMap<String, ValueType>();
+   private static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
    static {
       sensorType.add(ServerSensorType.PDU_RealtimeVoltage);
       sensorType.add(ServerSensorType.PDU_RealtimeLoad);
@@ -173,6 +172,10 @@ public class NlyteDataService implements AsyncService {
          logger.info("Sync mapped data for " + nlyte.getName());
          syncMappedData(nlyte);
          logger.info("Finish sync mapped data for " + nlyte.getName());
+      case EventMessageUtil.NLYTE_CleanInActiveAssetData:
+         logger.info("Clean inactive data for " + nlyte.getName());
+         removeInActiveData(nlyte);
+         logger.info("Finish clean inactive data for " + nlyte.getName());
       default:
          logger.warn("Not supported command");
          break;
@@ -196,8 +199,13 @@ public class NlyteDataService implements AsyncService {
       List<Asset> cabinets = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.Cabinet);
       long currentTime = System.currentTimeMillis();
       //remove inactive pdus information from server and remove inactive pdus
+      long expiredTimeRange = FlowgateConstant.DEFAULTEXPIREDTIMERANGE;
+      String expiredTimeValue = template.opsForValue().get(EventMessageUtil.EXPIREDTIMERANGE);
+      if(expiredTimeValue != null) {
+         expiredTimeRange = Long.valueOf(expiredTimeValue);
+      }
       for(Asset pdu : pdus) {
-         if(!Isexpired(pdu)) {
+         if(!pdu.isExpired(currentTime, expiredTimeRange)) {
             pdu.setLastupdate(currentTime);
             restClient.saveAssets(pdu);
             continue;
@@ -212,7 +220,7 @@ public class NlyteDataService implements AsyncService {
 
       //remove inactive network information from servers and remove inactive networks
       for(Asset network : networks) {
-         if(!Isexpired(network)) {
+         if(!network.isExpired(currentTime, expiredTimeRange)) {
             network.setLastupdate(currentTime);
             restClient.saveAssets(network);
             continue;
@@ -227,7 +235,7 @@ public class NlyteDataService implements AsyncService {
 
       //remove cabinets
       for(Asset cabinet : cabinets) {
-         if(!Isexpired(cabinet)) {
+         if(!cabinet.isExpired(currentTime, expiredTimeRange)) {
             cabinet.setLastupdate(currentTime);
             restClient.saveAssets(cabinet);
             continue;
@@ -251,7 +259,7 @@ public class NlyteDataService implements AsyncService {
 
       //remove inactive asset from serverMapping and remove inactive servers
       for(Asset server : servers) {
-         if(!Isexpired(server)) {
+         if(!server.isExpired(currentTime, expiredTimeRange)) {
             server.setLastupdate(currentTime);
             restClient.saveAssets(server);
             continue;
@@ -298,8 +306,24 @@ public class NlyteDataService implements AsyncService {
             }
          }
          server.setPdus(pduIds);
+         Map<ServerSensorType,String> sensorsformular = server.getSensorsformulars();
+         if(sensorsformular.isEmpty()) {
+            continue;
+         }
+         String realTimeLoad = sensorsformular.get(ServerSensorType.PDU_RealtimeLoad);
+         if(realTimeLoad != null && realTimeLoad.indexOf(pduId) >= 0) {
+            sensorsformular.remove(ServerSensorType.PDU_RealtimeLoad);
+         }
+         String realTimePower = sensorsformular.get(ServerSensorType.PDU_RealtimePower);
+         if(realTimePower != null && realTimePower.indexOf(pduId) >= 0) {
+            sensorsformular.remove(ServerSensorType.PDU_RealtimePower);
+         }
+         String realTimeVoltage = sensorsformular.get(ServerSensorType.PDU_RealtimeVoltage);
+         if(realTimeVoltage != null && realTimeVoltage.indexOf(pduId) >= 0) {
+            sensorsformular.remove(ServerSensorType.PDU_RealtimeVoltage);
+         }
+         server.setSensorsformulars(sensorsformular);
       }
-
       return servers;
    }
 
@@ -330,23 +354,6 @@ public class NlyteDataService implements AsyncService {
          server.setSwitches(switchIds);
       }
       return servers;
-   }
-
-
-   public boolean Isexpired(Asset asset) {
-      long currentTime = System.currentTimeMillis();
-      long time = 0;
-      long lastUpdateTime = asset.getLastupdate();
-      long createTime = asset.getCreated();
-      if(lastUpdateTime != 0) {
-         time = lastUpdateTime;
-      }else {
-         time = createTime;
-      }
-      if(currentTime - time >= expiredTime) {
-         return true;
-      }
-      return false;
    }
 
    public boolean assetIsActived(NlyteAsset nlyteAsset, AssetCategory category) {
