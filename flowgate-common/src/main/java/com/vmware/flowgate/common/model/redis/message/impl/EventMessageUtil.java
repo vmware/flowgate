@@ -76,6 +76,7 @@ public class EventMessageUtil {
    public static final String Labsdb_SyncData = "labsdb.syncdata";
    public static final String LABSDB_EXECOUNT = "labsdb.execount";
 
+   public static String EXPIREDTIMERANGE = "EXPIREDTIMERANGE";
    public static EventMessage convertToEventMessage(EventType type, String message) {
       EventMessage eventMessage =
             new EventMessageImpl(type, null, null, null, new Date().getTime(), message);
