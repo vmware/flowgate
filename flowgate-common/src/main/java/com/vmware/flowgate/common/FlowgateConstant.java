@@ -35,4 +35,6 @@ public class FlowgateConstant {
    public static int MAXNUMBEROFRETRIES = 3;
 
    public static int DEFAULTNUMBEROFRETRIES = 0;
+
+   public static long defaultExpiredTime = 30*24*3600*1000;//one month
 }
