@@ -5,7 +5,6 @@
 package com.vmware.flowgate.common.model;
 
 import java.io.Serializable;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import com.couchbase.client.java.repository.annotation.Id;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 
@@ -123,7 +123,7 @@ public class Asset implements Serializable, BaseDocument {
     * The cabinet unit number
     */
    private int cabinetUnitPosition;
-   
+
    /**
     * The cabinet unit mounting side
     */
@@ -160,8 +160,8 @@ public class Asset implements Serializable, BaseDocument {
    private List<String> pdus;
    private List<String> switches;
    private AssetStatus status;
-   
-   
+
+
    public String getId() {
       return id;
    }
@@ -337,7 +337,7 @@ public class Asset implements Serializable, BaseDocument {
    public void setCabinetUnitPosition(int cabinetUnitPosition) {
       this.cabinetUnitPosition = cabinetUnitPosition;
    }
-   
+
    public MountingSide getMountingSide() {
       return mountingSide;
    }
@@ -426,4 +426,18 @@ public class Asset implements Serializable, BaseDocument {
       this.status = status;
    }
 
+   public boolean isExpired(long currentTime) {
+      long time = 0;
+      long lastUpdateTime = this.getLastupdate();
+      long createTime = this.getCreated();
+      if(lastUpdateTime != 0) {
+         time = lastUpdateTime;
+      }else {
+         time = createTime;
+      }
+      if(currentTime - time >= FlowgateConstant.defaultExpiredTime) {
+         return true;
+      }
+      return false;
+   }
 }
