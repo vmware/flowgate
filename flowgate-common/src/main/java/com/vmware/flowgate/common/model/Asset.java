@@ -13,7 +13,6 @@ import com.couchbase.client.java.repository.annotation.Id;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
-import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 
@@ -426,7 +425,7 @@ public class Asset implements Serializable, BaseDocument {
       this.status = status;
    }
 
-   public boolean isExpired(long currentTime) {
+   public boolean isExpired(long currentTime, long expiredTime) {
       long time = 0;
       long lastUpdateTime = this.getLastupdate();
       long createTime = this.getCreated();
@@ -435,7 +434,7 @@ public class Asset implements Serializable, BaseDocument {
       }else {
          time = createTime;
       }
-      if(currentTime - time >= FlowgateConstant.defaultExpiredTime) {
+      if(currentTime - time >= expiredTime) {
          return true;
       }
       return false;
