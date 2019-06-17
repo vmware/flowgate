@@ -425,7 +425,7 @@ public class Asset implements Serializable, BaseDocument {
       this.status = status;
    }
 
-   public boolean isExpired(long currentTime, long expiredTime) {
+   public boolean isExpired(long currentTime, long expiredTimeRange) {
       long time = 0;
       long lastUpdateTime = this.getLastupdate();
       long createTime = this.getCreated();
@@ -434,7 +434,7 @@ public class Asset implements Serializable, BaseDocument {
       }else {
          time = createTime;
       }
-      if(currentTime - time >= expiredTime) {
+      if(currentTime - time >= expiredTimeRange) {
          return true;
       }
       return false;
