@@ -194,10 +194,12 @@ public class NlyteDataService implements AsyncService {
       List<Asset> networks = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.Networks);
 
       List<Asset> cabinets = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.Cabinet);
-
+      long currentTime = System.currentTimeMillis();
       //remove inactive pdus information from server and remove inactive pdus
       for(Asset pdu : pdus) {
          if(!Isexpired(pdu)) {
+            pdu.setLastupdate(currentTime);
+            restClient.saveAssets(pdu);
             continue;
          }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.PDU, pdu.getAssetNumber());
@@ -211,6 +213,8 @@ public class NlyteDataService implements AsyncService {
       //remove inactive network information from servers and remove inactive networks
       for(Asset network : networks) {
          if(!Isexpired(network)) {
+            network.setLastupdate(currentTime);
+            restClient.saveAssets(network);
             continue;
          }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Networks, network.getAssetNumber());
@@ -224,6 +228,8 @@ public class NlyteDataService implements AsyncService {
       //remove cabinets
       for(Asset cabinet : cabinets) {
          if(!Isexpired(cabinet)) {
+            cabinet.setLastupdate(currentTime);
+            restClient.saveAssets(cabinet);
             continue;
          }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Cabinet, cabinet.getAssetNumber());
@@ -246,6 +252,8 @@ public class NlyteDataService implements AsyncService {
       //remove inactive asset from serverMapping and remove inactive servers
       for(Asset server : servers) {
          if(!Isexpired(server)) {
+            server.setLastupdate(currentTime);
+            restClient.saveAssets(server);
             continue;
          }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Server, server.getAssetNumber());
