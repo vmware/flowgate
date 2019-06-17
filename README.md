@@ -1,3 +1,4 @@
+<img alt="Flowgate" src="docs/images/Flowgatelogo.png">
 # Flowgate
 FlowGate is an open source vendor-neutral project to enable facility awareness in IT management system and make IT operations management and automation better on high availability, cost saving and improved sustainability, with more information on power, cooling, environment (e.g. humidity, temperature) and security.
 <img alt="FlowGate" src="docs/images/FlowGate.png">
