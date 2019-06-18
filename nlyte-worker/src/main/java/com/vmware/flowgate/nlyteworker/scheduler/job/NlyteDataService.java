@@ -282,7 +282,9 @@ public class NlyteDataService implements AsyncService {
    }
 
    public List<Asset> removePduFromServer(List<Asset> servers, String pduId) {
+      List<Asset> needToUpdate = new ArrayList<Asset>();
       for(Asset server : servers) {
+         boolean changed = false;
          HashMap<String, String> serverJustficationfields = server.getJustificationfields();
          Set<String> pduDevices = new HashSet<String>();
          String pduPortString = serverJustficationfields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
@@ -291,18 +293,22 @@ public class NlyteDataService implements AsyncService {
             for(String pduport : pduPorts) {
                if(!pduport.contains(pduId)) {
                   pduDevices.add(pduport);
+                  changed = true;
                }
             }
-            pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduDevices);
+            if(changed) {
+               pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduDevices);
+               serverJustficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, pduPortString);
+               server.setJustificationfields(serverJustficationfields);
+            }
          }
-         serverJustficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, pduPortString);
-         server.setJustificationfields(serverJustficationfields);
          List<String> pduIds = server.getPdus();
          Iterator<String> pduite = pduIds.iterator();
          while(pduite.hasNext()) {
             String pduid = pduite.next();
             if(pduid.equals(pduId)) {
                pduite.remove();
+               changed = true;
             }
          }
          server.setPdus(pduIds);
@@ -313,22 +319,30 @@ public class NlyteDataService implements AsyncService {
          String realTimeLoad = sensorsformular.get(ServerSensorType.PDU_RealtimeLoad);
          if(realTimeLoad != null && realTimeLoad.indexOf(pduId) >= 0) {
             sensorsformular.remove(ServerSensorType.PDU_RealtimeLoad);
+            changed = true;
          }
          String realTimePower = sensorsformular.get(ServerSensorType.PDU_RealtimePower);
          if(realTimePower != null && realTimePower.indexOf(pduId) >= 0) {
             sensorsformular.remove(ServerSensorType.PDU_RealtimePower);
+            changed = true;
          }
          String realTimeVoltage = sensorsformular.get(ServerSensorType.PDU_RealtimeVoltage);
          if(realTimeVoltage != null && realTimeVoltage.indexOf(pduId) >= 0) {
             sensorsformular.remove(ServerSensorType.PDU_RealtimeVoltage);
+            changed = true;
          }
          server.setSensorsformulars(sensorsformular);
+         if(changed) {
+            needToUpdate.add(server);
+         }
       }
-      return servers;
+      return needToUpdate;
    }
 
    public List<Asset> removeNetworkFromServer(List<Asset> servers, String networkId) {
+      List<Asset> needToUpdate = new ArrayList<Asset>();
       for(Asset server : servers) {
+         boolean changed = false;
          HashMap<String, String> serverJustficationfields = server.getJustificationfields();
          Set<String> networkDevices = new HashSet<String>();
          String networkPortString = serverJustficationfields.get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
@@ -337,23 +351,30 @@ public class NlyteDataService implements AsyncService {
             for(String networkport : networkPorts) {
                if(!networkport.contains(networkId)) {
                   networkDevices.add(networkport);
+                  changed = true;
                }
             }
-            networkPortString = String.join(FlowgateConstant.SPILIT_FLAG, networkDevices);
+            if(changed) {
+               networkPortString = String.join(FlowgateConstant.SPILIT_FLAG, networkDevices);
+               serverJustficationfields.put(FlowgateConstant.NETWORK_PORT_FOR_SERVER, networkPortString);
+               server.setJustificationfields(serverJustficationfields);
+            }
          }
-         serverJustficationfields.put(FlowgateConstant.NETWORK_PORT_FOR_SERVER, networkPortString);
-         server.setJustificationfields(serverJustficationfields);
          List<String> switchIds = server.getSwitches();
          Iterator<String> switchite = switchIds.iterator();
          while(switchite.hasNext()) {
             String switchid = switchite.next();
             if(switchid.equals(networkId)) {
                switchite.remove();
+               changed = true;
             }
          }
          server.setSwitches(switchIds);
+         if(changed) {
+            needToUpdate.add(server);
+         }
       }
-      return servers;
+      return needToUpdate;
    }
 
    public boolean assetIsActived(NlyteAsset nlyteAsset, AssetCategory category) {
