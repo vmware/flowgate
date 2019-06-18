@@ -57,7 +57,7 @@ public class WormholeAPIClient extends RestClientBase {
    private static final String GetAssetBySourceAndTypeURL = "/v1/assets/source/%s/type/%s?currentPage=%s&pageSize=%s";
    private static final String GetFacilitySoftwareByTypeURL = "/v1/facilitysoftware/type/%s";
    private static final String GetMappedAssetURL = "/v1/assets/mappedasset/category/%s";
-   private static final String GetAssetByIdURL = "/v1/assets/%s";
+   private static final String AssetByIdURL = "/v1/assets/%s";
    private static final String GetAssetBySource = "/v1/assets/source/%s?currentPage=%s&pageSize=%s";
 
    private static final String RealTimeDatasURL = "/v1/assets/sensordata/batchoperation";
@@ -185,7 +185,7 @@ public class WormholeAPIClient extends RestClientBase {
 
    public ResponseEntity<Asset> getAssetByID(String assetID) {
       return this.restTemplate.exchange(
-            getAPIServiceEndpoint() + String.format(GetAssetByIdURL, assetID), HttpMethod.GET,
+            getAPIServiceEndpoint() + String.format(AssetByIdURL, assetID), HttpMethod.GET,
             getDefaultEntity(), Asset.class);
    }
 
@@ -257,6 +257,11 @@ public class WormholeAPIClient extends RestClientBase {
             new HttpEntity<Object>(assets, buildHeaders());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + AssetURL, HttpMethod.POST,
             postEntity, Void.class);
+   }
+
+   public ResponseEntity<Void> removeAssetByID(String assetId) {
+      return this.restTemplate.exchange(getAPIServiceEndpoint() + String.format(AssetByIdURL, assetId), HttpMethod.DELETE,
+            getDefaultEntity(), Void.class);
    }
 
    public ResponseEntity<Void> saveAssets(Asset asset) {

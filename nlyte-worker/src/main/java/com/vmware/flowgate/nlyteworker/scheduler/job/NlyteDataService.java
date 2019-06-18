@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,8 @@ import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.RealTimeData;
+import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
+import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
@@ -46,6 +49,7 @@ import com.vmware.flowgate.common.model.redis.message.impl.EventMessageImpl;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 import com.vmware.flowgate.common.utils.WormholeDateFormat;
 import com.vmware.flowgate.nlyteworker.config.ServiceKeyConfig;
+import com.vmware.flowgate.nlyteworker.exception.NlyteWorkerException;
 import com.vmware.flowgate.nlyteworker.model.JsonResultForPDURealtimeValue;
 import com.vmware.flowgate.nlyteworker.model.LocationGroup;
 import com.vmware.flowgate.nlyteworker.model.Manufacturer;
@@ -72,11 +76,11 @@ public class NlyteDataService implements AsyncService {
    private ServiceKeyConfig serviceKeyConfig;
    private ObjectMapper mapper = new ObjectMapper();
    public static final String DateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-   public static final String RealtimeLoad = "RealtimeLoad";
-   public static final String RealtimePower = "RealtimePower";
-   public static final String RealtimeVoltage = "RealtimeVoltage";
-   public static Map<String, ValueType> sensorValueTypeMap = new HashMap<String, ValueType>();
-   public static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
+   private static final String RealtimeLoad = "RealtimeLoad";
+   private static final String RealtimePower = "RealtimePower";
+   private static final String RealtimeVoltage = "RealtimeVoltage";
+   private static Map<String, ValueType> sensorValueTypeMap = new HashMap<String, ValueType>();
+   private static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
    static {
       sensorType.add(ServerSensorType.PDU_RealtimeVoltage);
       sensorType.add(ServerSensorType.PDU_RealtimeLoad);
@@ -168,6 +172,10 @@ public class NlyteDataService implements AsyncService {
          logger.info("Sync mapped data for " + nlyte.getName());
          syncMappedData(nlyte);
          logger.info("Finish sync mapped data for " + nlyte.getName());
+      case EventMessageUtil.NLYTE_CleanInActiveAssetData:
+         logger.info("Clean inactive data for " + nlyte.getName());
+         removeInActiveData(nlyte);
+         logger.info("Finish clean inactive data for " + nlyte.getName());
       default:
          logger.warn("Not supported command");
          break;
@@ -177,6 +185,226 @@ public class NlyteDataService implements AsyncService {
    private void updateIntegrationStatus(FacilitySoftwareConfig nlyte) {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       restClient.updateFacility(nlyte);
+   }
+
+   private void removeInActiveData(FacilitySoftwareConfig nlyte) {
+      NlyteAPIClient nlyteAPIclient = createClient(nlyte);
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      List<Asset> servers = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.Server);
+
+      List<Asset> pdus = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.PDU);
+
+      List<Asset> networks = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.Networks);
+
+      List<Asset> cabinets = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.Cabinet);
+      long currentTime = System.currentTimeMillis();
+      //remove inactive pdus information from server and remove inactive pdus
+      long expiredTimeRange = FlowgateConstant.DEFAULTEXPIREDTIMERANGE;
+      String expiredTimeValue = template.opsForValue().get(EventMessageUtil.EXPIREDTIMERANGE);
+      if(expiredTimeValue != null) {
+         expiredTimeRange = Long.valueOf(expiredTimeValue);
+      }
+      for(Asset pdu : pdus) {
+         if(!pdu.isExpired(currentTime, expiredTimeRange)) {
+            continue;
+         }
+         NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.PDU, pdu.getAssetNumber());
+         if(asset == null || !assetIsActived(asset, AssetCategory.PDU)) {
+            servers = removePduFromServer(servers, pdu.getId());
+            restClient.saveAssets(servers);
+            restClient.removeAssetByID(pdu.getId());
+         }else if(asset != null && assetIsActived(asset, AssetCategory.PDU)) {
+            pdu.setLastupdate(currentTime);
+            restClient.saveAssets(pdu);
+         }
+      }
+
+      //remove inactive network information from servers and remove inactive networks
+      for(Asset network : networks) {
+         if(!network.isExpired(currentTime, expiredTimeRange)) {
+            continue;
+         }
+         NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Networks, network.getAssetNumber());
+         if(asset == null || !assetIsActived(asset, AssetCategory.Networks)) {
+            servers = removeNetworkFromServer(servers, network.getId());
+            restClient.saveAssets(servers);
+            restClient.removeAssetByID(network.getId());
+         }else if(asset != null && assetIsActived(asset, AssetCategory.Networks)) {
+            network.setLastupdate(currentTime);
+            restClient.saveAssets(network);
+         }
+      }
+
+      //remove cabinets
+      for(Asset cabinet : cabinets) {
+         if(!cabinet.isExpired(currentTime, expiredTimeRange)) {
+            continue;
+         }
+         NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Cabinet, cabinet.getAssetNumber());
+         if(asset == null || !assetIsActived(asset, AssetCategory.Cabinet)) {
+            restClient.removeAssetByID(cabinet.getId());
+         }else if(asset != null && assetIsActived(asset, AssetCategory.Cabinet)) {
+            cabinet.setLastupdate(currentTime);
+            restClient.saveAssets(cabinet);
+         }
+      }
+
+      //get all serverMapping
+      SDDCSoftwareConfig vcs[] = restClient.getVCServers().getBody();
+      SDDCSoftwareConfig vros[] = restClient.getVROServers().getBody();
+      List<ServerMapping> mappings = new ArrayList<ServerMapping>();
+      for(SDDCSoftwareConfig vc : vcs) {
+         mappings.addAll(new ArrayList<>(Arrays.asList(restClient.getServerMappingsByVC(vc.getId()).getBody())));
+      }
+      for(SDDCSoftwareConfig vro : vros) {
+         mappings.addAll(new ArrayList<>(Arrays.asList(restClient.getServerMappingsByVRO(vro.getId()).getBody())));
+      }
+
+      //remove inactive asset from serverMapping and remove inactive servers
+      for(Asset server : servers) {
+         if(!server.isExpired(currentTime, expiredTimeRange)) {
+            continue;
+         }
+         NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Server, server.getAssetNumber());
+         if(asset == null || !assetIsActived(asset, AssetCategory.Server)) {
+            for(ServerMapping mapping : mappings) {
+               if(mapping.getAsset() == null) {
+                  continue;
+               }
+               if(server.getId().equals(mapping.getAsset())) {
+                  mapping.setAsset(null);
+                  restClient.saveServerMapping(mapping);
+               }
+            }
+            restClient.removeAssetByID(server.getId());
+         }else if(asset != null && assetIsActived(asset, AssetCategory.Server)) {
+            server.setLastupdate(currentTime);
+            restClient.saveAssets(server);
+         }
+      }
+   }
+
+   public List<Asset> removePduFromServer(List<Asset> servers, String pduId) {
+      List<Asset> needToUpdate = new ArrayList<Asset>();
+      for(Asset server : servers) {
+         boolean changed = false;
+         HashMap<String, String> serverJustficationfields = server.getJustificationfields();
+         Set<String> pduDevices = new HashSet<String>();
+         String pduPortString = serverJustficationfields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
+         if(pduPortString != null) {
+            String pduPorts[] = pduPortString.split(FlowgateConstant.SPILIT_FLAG);
+            for(String pduport : pduPorts) {
+               if(!pduport.contains(pduId)) {
+                  pduDevices.add(pduport);
+                  changed = true;
+               }
+            }
+            if(changed) {
+               pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduDevices);
+               serverJustficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, pduPortString);
+               server.setJustificationfields(serverJustficationfields);
+            }
+         }
+         List<String> pduIds = server.getPdus();
+         Iterator<String> pduite = pduIds.iterator();
+         while(pduite.hasNext()) {
+            String pduid = pduite.next();
+            if(pduid.equals(pduId)) {
+               pduite.remove();
+               changed = true;
+            }
+         }
+         server.setPdus(pduIds);
+         Map<ServerSensorType,String> sensorsformular = server.getSensorsformulars();
+         if(sensorsformular.isEmpty()) {
+            continue;
+         }
+         String realTimeLoad = sensorsformular.get(ServerSensorType.PDU_RealtimeLoad);
+         if(realTimeLoad != null && realTimeLoad.indexOf(pduId) >= 0) {
+            sensorsformular.remove(ServerSensorType.PDU_RealtimeLoad);
+            changed = true;
+         }
+         String realTimePower = sensorsformular.get(ServerSensorType.PDU_RealtimePower);
+         if(realTimePower != null && realTimePower.indexOf(pduId) >= 0) {
+            sensorsformular.remove(ServerSensorType.PDU_RealtimePower);
+            changed = true;
+         }
+         String realTimeVoltage = sensorsformular.get(ServerSensorType.PDU_RealtimeVoltage);
+         if(realTimeVoltage != null && realTimeVoltage.indexOf(pduId) >= 0) {
+            sensorsformular.remove(ServerSensorType.PDU_RealtimeVoltage);
+            changed = true;
+         }
+         server.setSensorsformulars(sensorsformular);
+         if(changed) {
+            needToUpdate.add(server);
+         }
+      }
+      return needToUpdate;
+   }
+
+   public List<Asset> removeNetworkFromServer(List<Asset> servers, String networkId) {
+      List<Asset> needToUpdate = new ArrayList<Asset>();
+      for(Asset server : servers) {
+         boolean changed = false;
+         HashMap<String, String> serverJustficationfields = server.getJustificationfields();
+         Set<String> networkDevices = new HashSet<String>();
+         String networkPortString = serverJustficationfields.get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);
+         if(networkPortString != null) {
+            String networkPorts[] = networkPortString.split(FlowgateConstant.SPILIT_FLAG);
+            for(String networkport : networkPorts) {
+               if(!networkport.contains(networkId)) {
+                  networkDevices.add(networkport);
+                  changed = true;
+               }
+            }
+            if(changed) {
+               networkPortString = String.join(FlowgateConstant.SPILIT_FLAG, networkDevices);
+               serverJustficationfields.put(FlowgateConstant.NETWORK_PORT_FOR_SERVER, networkPortString);
+               server.setJustificationfields(serverJustficationfields);
+            }
+         }
+         List<String> switchIds = server.getSwitches();
+         Iterator<String> switchite = switchIds.iterator();
+         while(switchite.hasNext()) {
+            String switchid = switchite.next();
+            if(switchid.equals(networkId)) {
+               switchite.remove();
+               changed = true;
+            }
+         }
+         server.setSwitches(switchIds);
+         if(changed) {
+            needToUpdate.add(server);
+         }
+      }
+      return needToUpdate;
+   }
+
+   public boolean assetIsActived(NlyteAsset nlyteAsset, AssetCategory category) {
+      if (nlyteAsset.isTemplateRelated() || !nlyteAsset.isActived()) {
+         return false;
+      }
+      switch (category) {
+      case Server:
+         if (nlyteAsset.getCabinetAssetID() <= 0) {
+            return false;
+         }
+         return true;
+      case PDU:
+         if (nlyteAsset.getCabinetAssetID() <= 0 && nlyteAsset.getuMounting() == null) {
+            return false;
+         }
+         return true;
+      case Networks:
+         if (nlyteAsset.getCabinetAssetID() <= 0) {
+            return false;
+         }
+         return true;
+      case Cabinet:
+         return true;
+      default:
+         throw new NlyteWorkerException("Invalid category.");
+      }
    }
 
    private void SyncAlldata(FacilitySoftwareConfig nlyte) {
