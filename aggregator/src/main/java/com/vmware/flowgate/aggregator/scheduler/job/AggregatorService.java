@@ -83,7 +83,7 @@ public class AggregatorService implements AsyncService {
       }
    }
 
-   public void cleanRealtimeData() {
+   private void cleanRealtimeData() {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       SDDCSoftwareConfig[] vcs = restClient.getVCServers().getBody();
       SDDCSoftwareConfig[] vrops = restClient.getVROServers().getBody();
