@@ -206,8 +206,6 @@ public class NlyteDataService implements AsyncService {
       }
       for(Asset pdu : pdus) {
          if(!pdu.isExpired(currentTime, expiredTimeRange)) {
-            pdu.setLastupdate(currentTime);
-            restClient.saveAssets(pdu);
             continue;
          }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.PDU, pdu.getAssetNumber());
@@ -215,14 +213,15 @@ public class NlyteDataService implements AsyncService {
             servers = removePduFromServer(servers, pdu.getId());
             restClient.saveAssets(servers);
             restClient.removeAssetByID(pdu.getId());
+         }else if(asset != null && assetIsActived(asset, AssetCategory.PDU)) {
+            pdu.setLastupdate(currentTime);
+            restClient.saveAssets(pdu);
          }
       }
 
       //remove inactive network information from servers and remove inactive networks
       for(Asset network : networks) {
          if(!network.isExpired(currentTime, expiredTimeRange)) {
-            network.setLastupdate(currentTime);
-            restClient.saveAssets(network);
             continue;
          }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Networks, network.getAssetNumber());
@@ -230,19 +229,23 @@ public class NlyteDataService implements AsyncService {
             servers = removeNetworkFromServer(servers, network.getId());
             restClient.saveAssets(servers);
             restClient.removeAssetByID(network.getId());
+         }else if(asset != null && assetIsActived(asset, AssetCategory.Networks)) {
+            network.setLastupdate(currentTime);
+            restClient.saveAssets(network);
          }
       }
 
       //remove cabinets
       for(Asset cabinet : cabinets) {
          if(!cabinet.isExpired(currentTime, expiredTimeRange)) {
-            cabinet.setLastupdate(currentTime);
-            restClient.saveAssets(cabinet);
             continue;
          }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Cabinet, cabinet.getAssetNumber());
          if(asset == null || !assetIsActived(asset, AssetCategory.Cabinet)) {
             restClient.removeAssetByID(cabinet.getId());
+         }else if(asset != null && assetIsActived(asset, AssetCategory.Cabinet)) {
+            cabinet.setLastupdate(currentTime);
+            restClient.saveAssets(cabinet);
          }
       }
 
@@ -260,8 +263,6 @@ public class NlyteDataService implements AsyncService {
       //remove inactive asset from serverMapping and remove inactive servers
       for(Asset server : servers) {
          if(!server.isExpired(currentTime, expiredTimeRange)) {
-            server.setLastupdate(currentTime);
-            restClient.saveAssets(server);
             continue;
          }
          NlyteAsset asset = nlyteAPIclient.getAssetbyAssetNumber(AssetCategory.Server, server.getAssetNumber());
@@ -276,9 +277,11 @@ public class NlyteDataService implements AsyncService {
                }
             }
             restClient.removeAssetByID(server.getId());
+         }else if(asset != null && assetIsActived(asset, AssetCategory.Server)) {
+            server.setLastupdate(currentTime);
+            restClient.saveAssets(server);
          }
       }
-
    }
 
    public List<Asset> removePduFromServer(List<Asset> servers, String pduId) {
