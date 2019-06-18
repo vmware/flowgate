@@ -100,6 +100,8 @@ public class PowerIQService implements AsyncService {
          new HashMap<String, AssetSubCategory>();
    public static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
    public static Map<String, ValueType> sensorValueType = new HashMap<String, ValueType>();
+   public static Map<AssetSubCategory, ServerSensorType> serverSensorTypeAndsubCategory =
+         new HashMap<AssetSubCategory, ServerSensorType>();
    static {
       subCategoryMap.put(HumiditySensor, AssetSubCategory.Humidity);
       subCategoryMap.put(TemperatureSensor, AssetSubCategory.Temperature);
@@ -208,6 +210,11 @@ public class PowerIQService implements AsyncService {
          syncPDUID(powerIQ);
          logger.info("Finish sync PDU ID for all PDUs");
          break;
+      case EventMessageUtil.PowerIQ_CleanInActiveAssetData:
+         logger.info("Clean sensor metadata for " + powerIQ.getName());
+         removeSensorMetaData(powerIQ);
+         logger.info("Finish clean sensor metadata for " + powerIQ.getName());
+         break;
       default:
          logger.warn("Not supported command");
          break;
@@ -217,6 +224,66 @@ public class PowerIQService implements AsyncService {
    private void updateIntegrationStatus(FacilitySoftwareConfig powerIQ) {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       restClient.updateFacility(powerIQ);
+   }
+
+   public void removeSensorMetaData(FacilitySoftwareConfig powerIQ) {
+      PowerIQAPIClient client = createClient(powerIQ);
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      List<Asset> sensors = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.Sensors);
+      List<Asset> servers = restClient.getAllAssetsByType(AssetCategory.Server);
+      long currentTime = System.currentTimeMillis();
+      String expiredTimeRangeValue = template.opsForValue().get(EventMessageUtil.EXPIREDTIMERANGE);
+      long expiredTimeRange = 0l;
+      if(expiredTimeRangeValue != null) {
+         expiredTimeRange = Long.valueOf(expiredTimeRange);
+      }else {
+         expiredTimeRange = FlowgateConstant.DEFAULTEXPIREDTIMERANGE;
+      }
+      for(Asset sensor : sensors) {
+         if(!sensor.isExpired(currentTime, expiredTimeRange)) {
+            continue;
+         }
+         Sensor sensorFromPowerIQ = client.getSensorById(String.valueOf(sensor.getAssetNumber()));
+         if(sensorFromPowerIQ == null) {
+            List<Asset> needToupdate = updateServer(servers, sensor.getId());
+            restClient.saveAssets(needToupdate);
+            restClient.removeAssetByID(sensor.getId());
+         }else {
+            sensor.setLastupdate(currentTime);
+            restClient.saveAssets(sensor);
+         }
+      }
+   }
+
+   public List<Asset> updateServer(List<Asset> servers, String sensorId){
+      List<Asset> needToUpdate = new ArrayList<Asset>();
+      for(Asset server : servers) {
+         boolean changed = false;
+         Map<ServerSensorType,String> sensorsformular = server.getSensorsformulars();
+         if(sensorsformular.isEmpty()) {
+            continue;
+         }
+         String humidity = sensorsformular.get(ServerSensorType.HUMIDITY);
+         if(humidity != null && humidity.indexOf(sensorId) >= 0) {
+            sensorsformular.remove(ServerSensorType.HUMIDITY);
+            changed = true;
+         }
+         String frontPanelTemp = sensorsformular.get(ServerSensorType.FRONTPANELTEMP);
+         if(frontPanelTemp != null && frontPanelTemp.indexOf(sensorId) >= 0) {
+            sensorsformular.remove(ServerSensorType.FRONTPANELTEMP);
+            changed = true;
+         }
+         String backPanelTemp = sensorsformular.get(ServerSensorType.BACKPANELTEMP);
+         if(backPanelTemp != null && backPanelTemp.indexOf(sensorId) >= 0) {
+            sensorsformular.remove(ServerSensorType.BACKPANELTEMP);
+            changed = true;
+         }
+         server.setSensorsformulars(sensorsformular);
+         if(changed) {
+            needToUpdate.add(server);
+         }
+      }
+      return needToUpdate;
    }
 
    public void syncSensorMetaData(FacilitySoftwareConfig powerIQ) {
