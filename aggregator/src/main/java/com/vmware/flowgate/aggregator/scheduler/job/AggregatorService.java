@@ -15,6 +15,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,9 @@ public class AggregatorService implements AsyncService {
 
    @Autowired
    private ServiceKeyConfig serviceKeyConfig;
+
+   @Autowired
+   StringRedisTemplate template;
 
    private static final String LOCATION_SEPERATOR = "-|-";
 
@@ -85,20 +89,14 @@ public class AggregatorService implements AsyncService {
 
    private void cleanRealtimeData() {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      SDDCSoftwareConfig[] vcs = restClient.getVCServers().getBody();
-      SDDCSoftwareConfig[] vrops = restClient.getVROServers().getBody();
-      for (SDDCSoftwareConfig vro : vrops) {
-         ServerMapping[] mappings = restClient.getServerMappingsByVRO(vro.getId()).getBody();
-         for (ServerMapping mapping : mappings) {
-            restClient.deleteRealTimeData(mapping.getAsset());
-         }
+      long expiredTimeRange = 0l;
+      String expiredTimeRangeValue = template.opsForValue().get(EventMessageUtil.EXPIREDTIMERANGE);
+      if(expiredTimeRangeValue != null) {
+         expiredTimeRange = Long.valueOf(expiredTimeRange);
+      }else {
+         expiredTimeRange = FlowgateConstant.DEFAULTEXPIREDTIMERANGE;
       }
-      for (SDDCSoftwareConfig vc : vcs) {
-         ServerMapping[] mappings = restClient.getServerMappingsByVC(vc.getId()).getBody();
-         for (ServerMapping mapping : mappings) {
-            restClient.deleteRealTimeData(mapping.getAsset());
-         }
-      }
+      restClient.deleteRealTimeData(expiredTimeRange);
    }
 
    public void mergeServerMapping() {
