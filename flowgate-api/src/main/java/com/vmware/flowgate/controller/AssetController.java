@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -73,9 +72,6 @@ public class AssetController {
 
    @Autowired
    AssetIPMappingRepository assetIPMappingRepository;
-
-   @Autowired
-   StringRedisTemplate template;
 
    // @Value("${}")
    private int RealtimeQueryDurationLimitation;
