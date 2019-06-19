@@ -50,11 +50,26 @@
     "karma-jasmine": "^1.0.2",
     "karma-mocha-reporter": "~2.2.1",
     "karma-remap-istanbul": "~0.6.0",
+    "node-sass": "^4.9.2",
     "protractor": "~5.1.2",
     "ts-node": "^3.0.4",
     "tslint": "^5.3.2",
     "typescript": "^2.4.2",
     "typings": "^1.4.0",
-    "webdriver-manager": "^12.0.6"
+    "webdriver-manager": "^12.0.6",
+    "js-yaml": "^3.13.1",
+    "diff": "3.5.0",
+    "http-proxy-agent": "2.1.0",
+    "https-proxy-agent": "2.2.0",
+    "querystringify": "2.0.0",
+    "handlebars": "4.0.14",
+    "ws": "3.3.1",
+    "tar": "2.2.2",
+    "deep-extend": "0.5.1",
+    "cryptiles": "4.1.2",
+    "macaddress": "0.2.9",
+    "sshpk": "1.13.2",
+    "url-parse": "1.4.3",
+    "adm-zip": "0.4.11"
   }
 }
