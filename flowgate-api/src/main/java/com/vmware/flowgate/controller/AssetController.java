@@ -676,6 +676,9 @@ public class AssetController {
    @RequestMapping(value = "/realtimedata/{expiredtimerange}", method = RequestMethod.DELETE)
    public void removeRealTimeData(@PathVariable("expiredtimerange") Long expiredtimerange) {
       long currentTime = System.currentTimeMillis();
+      if(expiredtimerange < FlowgateConstant.DEFAULTEXPIREDTIMERANGE) {
+         expiredtimerange = FlowgateConstant.DEFAULTEXPIREDTIMERANGE;
+      }
       List<RealTimeData> dataToBeDeleted = realtimeDataRepository.getRealTimeDatabtTimeRange(currentTime - expiredtimerange);
       while(!dataToBeDeleted.isEmpty()) {
          for(RealTimeData realtimedata : dataToBeDeleted) {
