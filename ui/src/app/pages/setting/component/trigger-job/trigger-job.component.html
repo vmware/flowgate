@@ -7,7 +7,47 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </span>
     </div>
   </clr-alert>
-
+  <clr-modal [(clrModalOpen)]="updateExpiredTime" [clrModalSize]="'lg'" [clrModalStaticBackdrop] = "true" [clrModalClosable] = "false">
+    <h3 class="modal-title">Update Persistent Time</h3>
+    <div class="modal-body" style="height: 8.5vw;">
+       
+            <form #timeForm="ngForm" >
+                <section class="form-block">
+                    <div class="form-group">
+                        <label class="required"  for="timeRange">Time Range</label>
+                        <label for="timeRange" style="margin-right:1px;"
+                            aria-haspopup="true"
+                            role="tooltip"
+                            class="tooltip tooltip-validation tooltip-md tooltip-bottom-right"
+                            [class.invalid]="getValidationState()">
+                            <input type="text" id="timeRange" placeholder="Confirm Password"
+                                required
+                                pattern="^\d+$|^\d+[.]?\d+$"
+                                name="timeRange"
+                                [(ngModel)]="toUpdateExpiredTimeRange"
+                                #timeRangeInput="ngModel"
+                                (input)='handleValidation("timeRange", true)' 
+                            (blur)='handleValidation("timeRange", true)'
+                            (change)='handleValidation("timeRange", true)'
+                            >
+                            
+                            <span class="tooltip-content">
+                                 Time range should only be number.And the value must more than three months (7776000000ms).
+                            </span>
+                        </label>
+                        <span>ms</span>
+                        </div>
+                        <div >
+                                <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="getValidationState()">Submit</button>
+                                <button type="button" class="btn btn-primary" on-click="reset()">Close</button>
+                        </div>
+                        
+                </section>
+            </form>
+                        
+       
+    </div>
+</clr-modal>
   <clr-tabs>
         <clr-tab *appHasPrivilege=integrationSummary>
             <button clrTabLink (click)="getFirstPageData()">Integration Summary</button>
@@ -156,7 +196,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             </clr-tab-content>
         </clr-tab>
         <clr-tab *appHasPrivilege=syncData>
-            <button clrTabLink>Sync Data</button>
+            <button (click)="getExpiredTimeRange()" clrTabLink>Sync Data</button>
             <clr-tab-content *clrIfActive>
                 <div class="row">
                     <div class="col-md-10">
@@ -208,6 +248,27 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             </clr-dg-row>
                         
                             </clr-datagrid>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-10">
+                        <h5>Data Persistent Time Setting</h5>
+                        <clr-datagrid>
+        
+                            <clr-dg-column >Time Range</clr-dg-column>
+                            <clr-dg-column>Description</clr-dg-column>
+                            <clr-dg-column>Option</clr-dg-column>
+                            
+                            <clr-dg-row>
+                            
+                                <clr-dg-cell style="margin-top: 0.5%">{{expiredTimeRange}} ms</clr-dg-cell>
+                                <clr-dg-cell style="margin-top: 0.5%">It means time range for executing the job to clear data.By default it's three month,you can modify it but the value is at least three month. </clr-dg-cell>
+                                <clr-dg-cell >
+                                <button  class="btn btn-info-outline" (click)="updateExpiredTimeRange()">Modify</button>
+                                </clr-dg-cell>
+                                
+                            </clr-dg-row>
+                         </clr-datagrid>
                     </div>
                 </div>
             </clr-tab-content>
