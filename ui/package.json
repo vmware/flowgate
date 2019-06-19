@@ -70,6 +70,15 @@
     "macaddress": "0.2.9",
     "sshpk": "1.13.2",
     "url-parse": "1.4.3",
-    "adm-zip": "0.4.11"
+    "adm-zip": "0.4.11",
+    "braces": "2.3.1",
+    "clean-css": "4.1.11",
+    "jquery": "3.4.0",
+    "extend": "3.0.2",
+    "webpack-dev-server": "3.1.11",
+    "randomatic": "3.0.0",
+    "lodash": "4.17.11",
+    "hoek": "4.2.1",
+    "ssri": "5.2.2"
   }
 }
