@@ -116,7 +116,6 @@ export class SettingService {
       return this.http.get(""+this.API_URL+"/v1/sddc/vc",this.options).map((res)=>res)
     }
     getVcenterById(id){
-      // console.log(id)
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());
       this.options = new RequestOptions({ headers: header });
@@ -127,5 +126,18 @@ export class SettingService {
       header.append("Authorization",'Bearer ' + this.auth.getToken());
       this.options = new RequestOptions({ headers: header });
       return this.http.get(""+this.API_URL+"/v1/assets/"+id,this.options).map((res)=>res)
+    }
+    getExpiredTimeRange(){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      return this.http.get(""+this.API_URL+"/v1/setting/datapersistenttime",this.options).map((res)=>res)
+    }
+    updatesTimeRange(time:number){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+     
+      return this.http.put(""+this.API_URL+"/v1/setting/datapersistenttime/"+time, null,this.options).map((res)=>res)
     }
 }

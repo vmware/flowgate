@@ -92,7 +92,7 @@ public class AggregatorService implements AsyncService {
       long expiredTimeRange = 0l;
       String expiredTimeRangeValue = template.opsForValue().get(EventMessageUtil.EXPIREDTIMERANGE);
       if(expiredTimeRangeValue != null) {
-         expiredTimeRange = Long.valueOf(expiredTimeRange);
+         expiredTimeRange = Long.valueOf(expiredTimeRangeValue);
       }else {
          expiredTimeRange = FlowgateConstant.DEFAULTEXPIREDTIMERANGE;
       }

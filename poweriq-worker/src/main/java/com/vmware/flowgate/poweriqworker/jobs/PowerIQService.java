@@ -235,7 +235,7 @@ public class PowerIQService implements AsyncService {
       String expiredTimeRangeValue = template.opsForValue().get(EventMessageUtil.EXPIREDTIMERANGE);
       long expiredTimeRange = 0l;
       if(expiredTimeRangeValue != null) {
-         expiredTimeRange = Long.valueOf(expiredTimeRange);
+         expiredTimeRange = Long.valueOf(expiredTimeRangeValue);
       }else {
          expiredTimeRange = FlowgateConstant.DEFAULTEXPIREDTIMERANGE;
       }
