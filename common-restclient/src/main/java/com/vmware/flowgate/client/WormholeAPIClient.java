@@ -60,6 +60,7 @@ public class WormholeAPIClient extends RestClientBase {
    private static final String AssetByIdURL = "/v1/assets/%s";
    private static final String GetAssetBySource = "/v1/assets/source/%s?currentPage=%s&pageSize=%s";
 
+   private static final String DeleteRealTimeDatasURL = "/v1/assets/realtimedata/%s";
    private static final String RealTimeDatasURL = "/v1/assets/sensordata/batchoperation";
    private static final String GetFacilitySoftwareById = "/v1/facilitysoftware/%s";
    private static final String UpdateFacilitySoftwareStatus = "/v1/facilitysoftware/status";
@@ -250,6 +251,11 @@ public class WormholeAPIClient extends RestClientBase {
          }
       }
       return assets;
+   }
+
+   public ResponseEntity<Void> deleteRealTimeData(long timeRange) {
+      return this.restTemplate.exchange(getAPIServiceEndpoint() + String.format(DeleteRealTimeDatasURL, String.valueOf(timeRange)), HttpMethod.DELETE,
+            getDefaultEntity(), Void.class);
    }
 
    public ResponseEntity<Void> saveAssets(List<Asset> assets) {
