@@ -46,7 +46,17 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
          } catch (IOException e) {
             logger.error("Failed to send full mapping sync command", e);
          }
-      } else {
+      }else if(execount++ % 87 == 0) {
+         try {
+            EventMessage eventMessageForCleanJob = EventMessageUtil.createEventMessage(EventType.Aggregator,
+                  EventMessageUtil.CleanRealtimeData, "");
+            String cleanJobMessage = EventMessageUtil.convertEventMessageAsString(eventMessageForCleanJob);
+            publisher.publish(EventMessageUtil.AggregatorTopic, cleanJobMessage);
+            logger.info("Send clean realtime data command");
+         }catch(IOException e) {
+            logger.error("Failed to Send clean realtime data command", e);
+         }
+      }else {
          //will execute hourly?
          try {
             EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,

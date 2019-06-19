@@ -319,7 +319,6 @@ public class AssetController {
       realtimeDataRepository.save(data);
    }
 
-
    //starttime miliseconds.
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/{id}/serversensordata", method = RequestMethod.GET)
@@ -673,6 +672,21 @@ public class AssetController {
       return assetRepository.findAll(array);
    }
 
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/realtimedata/{expiredtimerange}", method = RequestMethod.DELETE)
+   public void removeRealTimeData(@PathVariable("expiredtimerange") Long expiredtimerange) {
+      long currentTime = System.currentTimeMillis();
+      if(expiredtimerange < FlowgateConstant.DEFAULTEXPIREDTIMERANGE) {
+         expiredtimerange = FlowgateConstant.DEFAULTEXPIREDTIMERANGE;
+      }
+      List<RealTimeData> dataToBeDeleted = realtimeDataRepository.getRealTimeDatabtTimeRange(currentTime - expiredtimerange);
+      while(!dataToBeDeleted.isEmpty()) {
+         for(RealTimeData realtimedata : dataToBeDeleted) {
+            realtimeDataRepository.delete(realtimedata.getId());
+         }
+         dataToBeDeleted = realtimeDataRepository.getRealTimeDatabtTimeRange(currentTime - expiredtimerange);
+      }
+   }
 
    private void mergeMapping(ServerMapping firstMapping, ServerMapping secondMapping) {
       String firstMappingKey = null;
