@@ -49,6 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetAddress;
@@ -111,6 +112,25 @@ public class AssetControllerTest {
    public void setUp() {
       this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
             .apply(documentationConfiguration(this.restDocumentation)).build();
+   }
+
+   @Test
+   public void removeRealTimeData() throws Exception {
+      RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setAssetID("5b7d208d55368540fcba1692");
+      realTimeData.setTime(14235666666l);
+      realtimeDataRepository.save(realTimeData);
+      long time = System.currentTimeMillis();
+      List<RealTimeData> res = realtimeDataRepository.getRealTimeDatabtTimeRange(time-FlowgateConstant.DEFAULTEXPIREDTIMERANGE);
+      TestCase.assertEquals(1, res.size());
+      this.mockMvc.perform(delete("/v1/assets/realtimedata/7899999"))
+      .andExpect(status().isOk()).
+      andDo(document("realtimedata-delete-example"));
+
+      List<RealTimeData> res1 = realtimeDataRepository.getRealTimeDatabtTimeRange(time-FlowgateConstant.DEFAULTEXPIREDTIMERANGE);
+      TestCase.assertEquals(0, res1.size());
+
    }
 
    @Test

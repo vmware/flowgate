@@ -377,6 +377,24 @@ include::{snippets}/assets-getServerSensorData-example/curl-request.adoc[]
 
 include::{snippets}/assets-getServerSensorData-example/response-fields.adoc[]
 
+[[resources-assets-removeRealTimeData]]
+=== removeRealTimeData
+
+A `DELETE` request is used to access the delete Sensor realtime Data.
+
+==== Request structure
+
+include::{snippets}/realtimedata-delete-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/realtimedata-delete-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/realtimedata-delete-example/curl-request.adoc[]
+
+
 [[resources-asset-post]]
 === createAsset
 
@@ -1429,3 +1447,42 @@ include::{snippets}/AuthController-UserLogout-example/http-response.adoc[]
 
 include::{snippets}/AuthController-UserLogout-example/curl-request.adoc[]
 
+
+== /v1/setting
+
+The API provides the entry point into the service.
+
+[[resources-SystemSettingController-getExpiredTimeRange]]
+=== getExpiredTimeRange
+
+A `GET` request is used to access the SystemSettingController for get data persistent time.
+
+==== Request structure
+
+include::{snippets}/SystemSetting-getExpiredTimeRange-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SystemSetting-getExpiredTimeRange-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SystemSetting-getExpiredTimeRange-example/curl-request.adoc[]
+
+
+[[resources-SystemSettingController-updateExpiredTimeRange]]
+=== updateExpiredTimeRange
+
+A `PUT` request is used to access the SystemSettingController to update data persistent time.
+
+==== Request structure
+
+include::{snippets}/SystemSetting-updateExpiredTimeRange-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/SystemSetting-updateExpiredTimeRange-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/SystemSetting-updateExpiredTimeRange-example/curl-request.adoc[]
