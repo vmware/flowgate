@@ -46,13 +46,14 @@ export class TriggerJobComponent implements OnInit {
   systemSummary:boolean = false;
   serverSummary:boolean = false;
   sensorSummary:boolean = false;
-  expiredTimeRange:any = "";
+  expiredTimeRange:any;
   toUpdateExpiredTimeRange:any = "";
   updateExpiredTime:boolean = false;
   validExpiredTime:boolean = false;
   @ViewChild("timeForm") timeForm: NgForm;
   userFormRef:NgForm;
-
+  errorShow:boolean = false;
+  errorMsg:string = "";
   flowgateSummery={
     "assetsNum": 0,
     "facilitySystemNum": 0,
@@ -189,20 +190,28 @@ export class TriggerJobComponent implements OnInit {
     this.toUpdateExpiredTimeRange = this.expiredTimeRange;
     this.updateExpiredTime = false;
     this.validExpiredTime = false;
+    this.errorShow = false;
+    this.errorMsg = "";
   }
   save(){
-    this.service.updatesTimeRange(this.toUpdateExpiredTimeRange).subscribe(
+    let tosaveTime = this.toUpdateExpiredTimeRange*24*3600*1000;
+    this.service.updatesTimeRange(tosaveTime).subscribe(
       (data)=>{
         if(data.status == 200){
           this.updateExpiredTime = false;
+          this.errorShow = false;
+          this.errorMsg = "";
           this.getExpiredTimeRange();
         }
+      },error=>{
+        this.errorShow = true;
+        this.errorMsg = error.json().message;
       }
     )
   }
   handleValidation(key: string, flag: boolean): void {
     if(flag){
-      if(this.toUpdateExpiredTimeRange >= 7776000000){
+      if(this.toUpdateExpiredTimeRange >= 90){
         this.validExpiredTime = false;
         }else{
           this.validExpiredTime = true;
@@ -214,7 +223,8 @@ export class TriggerJobComponent implements OnInit {
     this.service.getExpiredTimeRange().subscribe(
       (data)=>{
         this.expiredTimeRange = data.text();
-        this.toUpdateExpiredTimeRange = data.text();
+        this.expiredTimeRange = this.expiredTimeRange/(3600*1000*24)
+        this.toUpdateExpiredTimeRange = this.expiredTimeRange;
       }
       )
   }

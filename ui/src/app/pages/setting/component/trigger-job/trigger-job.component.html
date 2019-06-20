@@ -32,10 +32,14 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             >
                             
                             <span class="tooltip-content">
-                                 Time range should only be number.And the value must more than three months (7776000000ms).
+                                 Time range should only be number.And the value must more than 90 days.
                             </span>
                         </label>
-                        <span>ms</span>
+                        <span>days</span>
+                        </div>
+                        <div *ngIf="errorShow" style="color: crimson">
+                                {{errorMsg}}
+                                
                         </div>
                         <div >
                                 <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="getValidationState()">Submit</button>
@@ -252,7 +256,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </div>
                 <div class="row">
                     <div class="col-md-10">
-                        <h5>Data Persistent Time Setting</h5>
+                        <h5>Sensors Metrics Data Persistent Time Setting </h5>
                         <clr-datagrid>
         
                             <clr-dg-column >Time Range</clr-dg-column>
@@ -261,8 +265,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             
                             <clr-dg-row>
                             
-                                <clr-dg-cell style="margin-top: 0.5%">{{expiredTimeRange}} ms</clr-dg-cell>
-                                <clr-dg-cell style="margin-top: 0.5%">It means time range for executing the job to clear data.By default it's three month,you can modify it but the value is at least three month. </clr-dg-cell>
+                                <clr-dg-cell style="margin-top: 0.5%">{{expiredTimeRange}} days</clr-dg-cell>
+                                <clr-dg-cell style="margin-top: 0.5%">It means time range for executing the job to clear data.<br>By default it's 90 days,you can modify it but the value is at least 90 days. </clr-dg-cell>
                                 <clr-dg-cell >
                                 <button  class="btn btn-info-outline" (click)="updateExpiredTimeRange()">Modify</button>
                                 </clr-dg-cell>
