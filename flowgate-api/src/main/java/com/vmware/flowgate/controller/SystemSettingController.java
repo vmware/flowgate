@@ -37,7 +37,7 @@ public class SystemSettingController {
    @RequestMapping(value = "/datapersistenttime/{time}", method = RequestMethod.PUT)
    public void updateExpiredTimeRange(@PathVariable("time") Long time) {
       if(time < FlowgateConstant.DEFAULTEXPIREDTIMERANGE) {
-         throw new WormholeRequestException("Expired time range must more than three months.");
+         throw new WormholeRequestException("Expired time range must more than 90 days.");
       }
       template.opsForValue().set(EventMessageUtil.EXPIREDTIMERANGE, String.valueOf(time));
    }
