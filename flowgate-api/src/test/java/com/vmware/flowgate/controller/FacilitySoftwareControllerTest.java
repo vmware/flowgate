@@ -17,7 +17,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -51,9 +53,11 @@ import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.common.model.WormholeUser;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
+import com.vmware.flowgate.repository.UserRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
 import com.vmware.flowgate.util.EncryptionGuard;
@@ -88,6 +92,10 @@ public class FacilitySoftwareControllerTest {
 
    @MockBean
    private StringRedisTemplate template;
+
+   @Autowired
+   private UserRepository userRepository;
+
    @MockBean
    private MessagePublisher publisher;
    @Rule
@@ -282,9 +290,19 @@ public class FacilitySoftwareControllerTest {
       facilitySoftwareRepository.delete(facilitySoftware.getId());
    }
 
+   //admin can find all facilitySoftwareConfigs
    @Test
    public void facilitySoftwareQueryByPageExample() throws Exception {
-      Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
+      WormholeUserDetails userDeails = createuser();
+      userDeails.setUserId("5b7d208d55368540fcba1692");
+      Mockito.doReturn(userDeails).when(tokenService).getCurrentUser(any());
+      WormholeUser user = new WormholeUser();
+      user.setId("5b7d208d55368540fcba1692");
+      List<String> roles = new ArrayList<String>();
+      roles.add("admin");
+      user.setRoleNames(roles);
+      userRepository.save(user);
+      //userId of the facilitySoftware is not '5b7d208d55368540fcba1692'
       FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
       facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
       facilitySoftwareRepository.save(facilitySoftware);
@@ -304,6 +322,43 @@ public class FacilitySoftwareControllerTest {
                               .description("The number of data displayed per page."))));
 
       facilitySoftwareRepository.delete(facilitySoftware.getId());
+      userRepository.delete(user.getId());
+   }
+
+   //query by currentUser
+   @Test
+   public void facilitySoftwareQueryByPageExample1() throws Exception {
+      WormholeUserDetails userDeails = createuser();
+      userDeails.setUserId("5b7d208d55368540fcba1692");
+      Mockito.doReturn(userDeails).when(tokenService).getCurrentUser(any());
+      WormholeUser user = new WormholeUser();
+      user.setId("5b7d208d55368540fcba1692");
+      List<String> roles = new ArrayList<String>();
+      roles.add("queryFacility");//not admin
+      user.setRoleNames(roles);
+      userRepository.save(user);
+      //userId of the facilitySoftware is '5b7d208d55368540fcba1692'
+      FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
+      facilitySoftware.setUserId("5b7d208d55368540fcba1692");
+      facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
+      facilitySoftwareRepository.save(facilitySoftware);
+      int pageNumber = 1;
+      int pageSize = 5;
+      this.mockMvc
+            .perform(
+                  get("/v1/facilitysoftware/page/" + pageNumber + "/pagesize/"
+                        + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$..content[0].name").value(facilitySoftware.getName()))
+            .andExpect(jsonPath("$..content[0].userId").value(facilitySoftware.getUserId()))
+            .andDo(document("facilitySoftware-query-example",
+                  requestFields(
+                        fieldWithPath("pageNumber").description("get datas for this page number."),
+                        fieldWithPath("pageSize")
+                              .description("The number of data displayed per page."))));
+
+      facilitySoftwareRepository.delete(facilitySoftware.getId());
+      userRepository.delete(user.getId());
    }
 
    @Test

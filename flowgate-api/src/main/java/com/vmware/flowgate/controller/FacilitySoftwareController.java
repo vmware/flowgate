@@ -31,11 +31,13 @@ import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.common.model.WormholeUser;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
+import com.vmware.flowgate.repository.UserRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
 import com.vmware.flowgate.util.BaseDocumentUtil;
@@ -58,6 +60,9 @@ public class FacilitySoftwareController {
 
    @Autowired
    private MessagePublisher publisher;
+
+   @Autowired
+   private UserRepository userRepository;
 
    private static final Logger logger = LoggerFactory.getLogger(FacilitySoftwareController.class);
    @Autowired
@@ -109,6 +114,7 @@ public class FacilitySoftwareController {
    public Page<FacilitySoftwareConfig> queryFacilitySoftwareConfigByPage(
          @PathVariable("pageNumber") int currentPage, @PathVariable("pageSize") int pageSize,
          HttpServletRequest request) {
+
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       if (currentPage < FlowgateConstant.defaultPageNumber) {
          currentPage = FlowgateConstant.defaultPageNumber;
@@ -117,16 +123,17 @@ public class FacilitySoftwareController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      try {
-
-         PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
-         Page<FacilitySoftwareConfig> result =
-               repository.findALlByUserId(user.getUserId(), pageRequest);
+      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+      WormholeUser currentUser = userRepository.findOne(user.getUserId());
+      Page<FacilitySoftwareConfig> result = null;
+      if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
+         result =  repository.findAll(pageRequest);
          decryptServerListPassword(result.getContent());
-         return result;
-      } catch (Exception e) {
-         throw new WormholeRequestException(e.getMessage());
+      } else {
+         result = repository.findALlByUserId(user.getUserId(), pageRequest);
+         decryptServerListPassword(result.getContent());
       }
+      return result;
    }
 
    // Delete

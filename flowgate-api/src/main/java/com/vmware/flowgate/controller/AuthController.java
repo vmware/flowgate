@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -28,10 +28,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.AuthToken;
-import com.vmware.flowgate.common.model.WormholePrivilege;
 import com.vmware.flowgate.common.model.WormholeRole;
 import com.vmware.flowgate.common.model.WormholeUser;
 import com.vmware.flowgate.common.security.DesensitizationUserData;
@@ -59,7 +59,6 @@ public class AuthController {
    private JwtTokenUtil jwtTokenUtil;
    @Value("${jwt.expiration:7200}")
    private int expiration;
-   private static String Role_admin = "admin";
 
    @RequestMapping(value = "/token", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
    public AuthToken getToken(@RequestBody(required = false) WormholeUser user,
@@ -74,7 +73,7 @@ public class AuthController {
          access_token = accessTokenService.createToken(user);
       } else if (InitializeConfigureData.checkServiceKey(serviceKey)) {
          List<String> roleNames = new ArrayList<String>();
-         roleNames.add(Role_admin);
+         roleNames.add(FlowgateConstant.Role_admin);
          AuthorityUtil util = new AuthorityUtil();
          WormholeUserDetails userDetails =
                new WormholeUserDetails(FlowgateConstant.systemUser, FlowgateConstant.systemUser,
@@ -156,7 +155,7 @@ public class AuthController {
       WormholeUserDetails userDetail = accessTokenService.getCurrentUser(request);
       WormholeUser currentUser = userRepository.findOne(userDetail.getUserId());
       WormholeUser old = null;
-      if (currentUser.getRoleNames().contains(Role_admin)) {
+      if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
          old = userRepository.findOne(user.getId());
       } else if (currentUser.getUserName().equals(user.getUserName())) {
          old = currentUser;
@@ -187,7 +186,7 @@ public class AuthController {
       WormholeUserDetails userDetail = accessTokenService.getCurrentUser(request);
       WormholeUser currentUser = userRepository.findOne(userDetail.getUserId());
       WormholeUser user = null;
-      if (currentUser.getRoleNames().contains(Role_admin)) {
+      if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
          user = userRepository.findOne(id);
       } else if (currentUser.getId().equals(id)) {
          user = currentUser;
@@ -207,7 +206,7 @@ public class AuthController {
       WormholeUserDetails userDetail = accessTokenService.getCurrentUser(request);
       WormholeUser currentUser = userRepository.findOne(userDetail.getUserId());
       WormholeUser user = null;
-      if (currentUser.getRoleNames().contains(Role_admin)) {
+      if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
          user = userRepository.findOneByUserName(name);
       } else if (currentUser.getUserName().equals(name)) {
          user = currentUser;
