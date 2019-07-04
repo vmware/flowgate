@@ -86,7 +86,7 @@ public class SystemSettingControllerTest {
       ValueOperations<String, String> valueOperations = Mockito.mock(ValueOperations.class);
       Mockito.doReturn(valueOperations).when(template).opsForValue();
       expectedEx.expect(WormholeRequestException.class);
-      expectedEx.expectMessage("Expired time range must more than three months.");
+      expectedEx.expectMessage("Expired time range must more than 90 days.");
          MvcResult result = this.mockMvc.perform(put("/v1/setting/datapersistenttime/900"))
                .andReturn();
          if (result.getResolvedException() != null) {
