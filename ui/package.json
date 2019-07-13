@@ -77,7 +77,7 @@
     "extend": "3.0.2",
     "webpack-dev-server": "3.1.11",
     "randomatic": "3.0.0",
-    "lodash": "4.17.11",
+    "lodash": "4.17.13",
     "hoek": "4.2.1",
     "ssri": "5.2.2"
   }
