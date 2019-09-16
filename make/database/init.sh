@@ -24,7 +24,7 @@ cbq -u flowgate_cluster -p ADMINPASSWD_CHANGE -file /home/couchbase/initData.sh 
 
 DATACOUNT=`cbq -u flowgate_cluster -p ADMINPASSWD_CHANGE --script="select count(*) from flowgate;" | grep -A 3 results | grep '"$1":'`
 
-if [ -n "$DATACOUNT" ] && [ ${DATACOUNT#*:} = "78" ];then
+if [ -n "$DATACOUNT" ] && [ ${DATACOUNT#*:} = "81" ];then
     touch /opt/couchbase/var/initDataComplete
 else
     touch /opt/couchbase/var/initDataFailed
