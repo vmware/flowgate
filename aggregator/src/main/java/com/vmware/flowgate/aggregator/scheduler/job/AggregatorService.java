@@ -240,8 +240,8 @@ public class AggregatorService implements AsyncService {
                asset.setSensorsformulars(formulas);
             }
             if (!formulas.containsKey(ServerSensorType.BACKPANELTEMP)
-                  || formulas.containsKey(ServerSensorType.FRONTPANELTEMP)
-                  || formulas.containsKey(ServerSensorType.HUMIDITY)) {
+                  || !formulas.containsKey(ServerSensorType.FRONTPANELTEMP)
+                  || !formulas.containsKey(ServerSensorType.HUMIDITY)) {
                candidateServer.add(asset);
             }
          }
@@ -306,9 +306,14 @@ public class AggregatorService implements AsyncService {
             if (tempSensors.size() > 1) {
                backPanelSensor = tempSensors.get(1);
             }
-            server.getSensorsformulars().put(ServerSensorType.FRONTPANELTEMP, frontPanelSensor);
-            server.getSensorsformulars().put(ServerSensorType.BACKPANELTEMP, backPanelSensor);
-            needUpdate = true;
+            if (!server.getSensorsformulars().containsKey(ServerSensorType.FRONTPANELTEMP)) {
+               server.getSensorsformulars().put(ServerSensorType.FRONTPANELTEMP, frontPanelSensor);
+               needUpdate = true;
+            }
+            if (!server.getSensorsformulars().containsKey(ServerSensorType.BACKPANELTEMP)) {
+               server.getSensorsformulars().put(ServerSensorType.BACKPANELTEMP, backPanelSensor);
+               needUpdate = true;
+            }
          }
          if(!humiditySensors.isEmpty()) {
             server.getSensorsformulars().put(ServerSensorType.HUMIDITY, humiditySensors.get(0));
