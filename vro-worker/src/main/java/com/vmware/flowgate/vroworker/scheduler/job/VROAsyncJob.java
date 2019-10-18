@@ -538,6 +538,7 @@ public class VROAsyncJob implements AsyncService {
       }
       VROConfig vroConf = new VROConfig(config);
       MetricClient metricClient = null;
+      logger.info("Synce predefinedMetrics for " + config.getServerURL());
       try {
          metricClient = new MetricClient(vroConf, publisher);
          metricClient.checkPredefinedMetricsandProperties();
