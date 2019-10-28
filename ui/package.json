@@ -83,6 +83,8 @@
     "lodash.template": "4.5.0",
     "lodash.mergewith": "4.6.2",
     "mem": "4.0.0",
-    "stringstream": "0.0.6"
+    "stringstream": "0.0.6",
+    "mixin-deep": "2.0.1",
+    "set-value": "2.0.1"
   }
 }
