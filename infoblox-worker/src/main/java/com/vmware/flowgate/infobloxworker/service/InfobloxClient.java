@@ -9,6 +9,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -17,10 +18,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 
-import com.vmware.flowgate.infobloxworker.model.JsonResultForQueryHostNames;
 import com.vmware.flowgate.client.RestClientBase;
 import com.vmware.flowgate.client.RestTemplateBuilder;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
+import com.vmware.flowgate.infobloxworker.model.JsonResultForQueryHostNames;
 
 
 public class InfobloxClient extends RestClientBase {
@@ -31,7 +33,7 @@ public class InfobloxClient extends RestClientBase {
    private int socketTimeout;
 
    //we should make proxy_search=GM as optional
-   private String queryHostURL = "%s/wapi/v2.5/ipv4address?ip_address=%s&_return_as_object=1&_return_type=json&_proxy_search=GM";
+   private String queryHostURL = "%s/wapi/v2.5/ipv4address?ip_address=%s&_return_as_object=1&_return_type=json";
 
 
    private String hostName;
@@ -51,6 +53,13 @@ public class InfobloxClient extends RestClientBase {
       this.hostName = config.getServerURL();
       this.userName = config.getUserName();
       this.password = config.getPassword();
+      HashMap<AdvanceSettingType, String> advanceSetting = config.getAdvanceSetting();
+      if(advanceSetting != null) {
+         String proxy_search = advanceSetting.get(AdvanceSettingType.PROXY_SEARCH);
+         if(proxy_search != null && !proxy_search.isEmpty()) {
+            this.queryHostURL = this.queryHostURL + "&_proxy_search=" + proxy_search;
+         }
+      }
    }
 
 
