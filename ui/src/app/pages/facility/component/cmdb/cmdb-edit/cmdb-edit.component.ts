@@ -38,7 +38,7 @@ export class CmdbEditComponent implements OnInit {
   cmdbConfig:FacilityModule = new FacilityModule();
   read = "";/** This property is to change the read-only attribute of the password input box*/
   advanceSetting = {
-    "PROXY_SEARCH":"LOCAL"
+    "INFOBLOX_PROXY_SEARCH":"LOCAL"
   }
   isInfoblox:boolean = false;
   enableProxySearch:boolean = false;
@@ -50,7 +50,7 @@ export class CmdbEditComponent implements OnInit {
       this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.nullValidator));
     }else if(this.cmdbConfig.type == "InfoBlox"){
       this.isInfoblox = true;
-      if(this.cmdbConfig.advanceSetting != null && this.cmdbConfig.advanceSetting.PROXY_SEARCH != ""){
+      if(this.cmdbConfig.advanceSetting != null && this.cmdbConfig.advanceSetting.INFOBLOX_PROXY_SEARCH != ""){
         this.enableProxySearch = true;
         this.advanceSetting = this.cmdbConfig.advanceSetting;
       }
@@ -64,7 +64,7 @@ export class CmdbEditComponent implements OnInit {
         if(this.enableProxySearch){
           this.cmdbConfig.advanceSetting = this.advanceSetting;
         }else{
-          this.cmdbConfig.advanceSetting.PROXY_SEARCH = ""
+          this.cmdbConfig.advanceSetting.INFOBLOX_PROXY_SEARCH = ""
         }
       }
       this.service.updateFacility(this.cmdbConfig).subscribe(
