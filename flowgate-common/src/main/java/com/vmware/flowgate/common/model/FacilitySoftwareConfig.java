@@ -34,7 +34,7 @@ public class FacilitySoftwareConfig implements Serializable, BaseDocument {
 
    public enum AdvanceSettingType {
       DateFormat, TimeZone, PDU_AMPS_UNIT, PDU_POWER_UNIT, PDU_VOLT_UNIT,
-      TEMPERATURE_UNIT, HUMIDITY_UNIT, PROXY_SEARCH
+      TEMPERATURE_UNIT, HUMIDITY_UNIT, INFOBLOX_PROXY_SEARCH
    }
 
    public String getUserName() {
