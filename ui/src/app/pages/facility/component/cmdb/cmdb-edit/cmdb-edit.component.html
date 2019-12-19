@@ -1,101 +1,136 @@
  <!-- Copyright 2019 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause -->
-<form class="form" [formGroup]="cmdbForm">
-    <section class="form-block">
-        <label> Content For Integration</label>
-              <div class="form-group">
-                  <label class="required" for="gForm_3">Type</label>
-                      <div class="select" style="width:184px; ">
-                          <select id="gForm_5"  formControlName="cmdbtype"  [(ngModel)]="cmdbConfig.type">                          
-                                  <option value="InfoBlox">InfoBlox</option>
-                                  <option value="Labsdb">Labsdb</option>
-                                  <option value="OtherCMDB">Other CMDB</option>
-                          </select>
-                      </div>
-              </div>
-  
-              <div class="form-group">
-                  <label class="required" for="empserverIP">Server Ip</label>       
-                  <label for="empserverIP"
-                      aria-haspopup="true"
-                      role="tooltip"
-                      class="tooltip tooltip-validation tooltip-md"
-                      [class.invalid]="cmdbForm.get('serverIPInput').invalid && (cmdbForm.get('serverIPInput').dirty || cmdbForm.get('serverIPInput').touched)">
-                      <input type="url" id="empserverIP" placeholder="Enter Server Ip" autocomplete="off"     
-                          formControlName="serverIPInput"
-                          [(ngModel)]="cmdbConfig.serverURL">
-                      <span class="tooltip-content">
-                              Server Ip is Required.
-                      </span>
-                  </label>
-              </div>
-              
-             <div class="form-group">
-                  <label class="required" for="empserverName">Name</label>       
-                  <label for="empserverName"
-                      aria-haspopup="true"
-                      role="tooltip"
-                      class="tooltip tooltip-validation tooltip-md"
-                      [class.invalid]="cmdbForm.get('serverName').invalid && (cmdbForm.get('serverName').dirty || cmdbForm.get('serverName').touched)">
-                      <input type="text" id="empserverName" placeholder="Enter Name" autocomplete="off" 
-                          formControlName="serverName"
-                          [(ngModel)]="cmdbConfig.name">
-                      <span class="tooltip-content">
-                               Name is Required.
-                      </span>
-                  </label>
-              </div>
-              <div class="form-group" >
-                  <label for="gForm_1">Description</label>
-                  <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="cmdbConfig.description" id="gForm_6" placeholder="Description" size="45"/>
-              </div>  
-              <div class="form-group">
-                      <label class="required" for="empuserName">Username</label>       
-                      <label for="empuserName"
-                          aria-haspopup="true"
-                          role="tooltip"
-                          class="tooltip tooltip-validation tooltip-md"
-                          [class.invalid]="cmdbForm.get('userName').invalid && (cmdbForm.get('userName').dirty || cmdbForm.get('userName').touched)">
-                          <input type="text" id="empuserName" placeholder="Enter UserName" autocomplete="off"                      
-                              formControlName="userName"
-                              [(ngModel)]="cmdbConfig.userName">
-                          <span class="tooltip-content">
-                              Username is Required.
-                          </span>
-                      </label>
-                  </div>
-              <div class="form-group">
-                  <label class="required"  for="emppassword">Password</label>
-                  <label for="emppassword"
-                      aria-haspopup="true"
-                      role="tooltip"
-                      class="tooltip tooltip-validation tooltip-md"
-                      [class.invalid]="cmdbForm.get('passwordInput').invalid && (cmdbForm.get('passwordInput').dirty || cmdbForm.get('passwordInput').touched)">
-                      <input type="password" name="password" tabindex="-1" style="width: 0px; height: 0px; position: absolute; border: 0px; padding: 0px;">
-                      <input type="password" id="emppassword" placeholder="Enter Password" autocomplete="off" [readonly]="read"
-                          formControlName="passwordInput"
-                          [(ngModel)]="cmdbConfig.password">
-                      <span class="tooltip-content">
-                          Password is Required.
-                      </span>
-                  </label>
-              </div>
-              <div class="form-group">
-                      <label>VerifyCert</label>
-                      
-                      <div class="radio-inline">
-                          <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}" id="checkrads_11" value="true" [(ngModel)]="cmdbConfig.verifyCert">
-                          <label for="checkrads_11">Yes</label>
-                      </div>
-                      <div class="radio-inline">
-                          <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}"  id="checkrads_12" value="false" [(ngModel)]="cmdbConfig.verifyCert">
-                          <label for="checkrads_12">No</label>
-                      </div>
-                  </div> 
-              <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="cmdbForm.invalid">Submit</button>
-              <button type="button" class="btn btn-primary" on-click ="cancel()">Cancel</button>
-    </section>
-  </form>
+  <clr-tabs>
+        <clr-tab>
+            <button clrTabLink>Common</button>
+            <clr-tab-content>
+                <form class="form" [formGroup]="cmdbForm">
+                    <section class="form-block">
+                        <label> Content For Integration</label>
+                                <div class="form-group">
+                                    <label class="required" for="gForm_3">Type</label>
+                                        <div class="select" style="width:184px; ">
+                                            <select id="gForm_5"  formControlName="cmdbtype"  [(ngModel)]="cmdbConfig.type">                          
+                                                    <option value="InfoBlox">InfoBlox</option>
+                                                    <option value="Labsdb">Labsdb</option>
+                                                    <option value="OtherCMDB">Other CMDB</option>
+                                            </select>
+                                        </div>
+                                </div>
+                    
+                                <div class="form-group">
+                                    <label class="required" for="empserverIP">Server Ip</label>       
+                                    <label for="empserverIP"
+                                        aria-haspopup="true"
+                                        role="tooltip"
+                                        class="tooltip tooltip-validation tooltip-md"
+                                        [class.invalid]="cmdbForm.get('serverIPInput').invalid && (cmdbForm.get('serverIPInput').dirty || cmdbForm.get('serverIPInput').touched)">
+                                        <input type="url" id="empserverIP" placeholder="Enter Server Ip" autocomplete="off"     
+                                            formControlName="serverIPInput"
+                                            [(ngModel)]="cmdbConfig.serverURL">
+                                        <span class="tooltip-content">
+                                                Server Ip is Required.
+                                        </span>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="required" for="empserverName">Name</label>       
+                                    <label for="empserverName"
+                                        aria-haspopup="true"
+                                        role="tooltip"
+                                        class="tooltip tooltip-validation tooltip-md"
+                                        [class.invalid]="cmdbForm.get('serverName').invalid && (cmdbForm.get('serverName').dirty || cmdbForm.get('serverName').touched)">
+                                        <input type="text" id="empserverName" placeholder="Enter Name" autocomplete="off" 
+                                            formControlName="serverName"
+                                            [(ngModel)]="cmdbConfig.name">
+                                        <span class="tooltip-content">
+                                                Name is Required.
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="form-group" >
+                                    <label for="gForm_1">Description</label>
+                                    <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="cmdbConfig.description" id="gForm_6" placeholder="Description" size="45"/>
+                                </div>  
+                                <div class="form-group">
+                                        <label class="required" for="empuserName">Username</label>       
+                                        <label for="empuserName"
+                                            aria-haspopup="true"
+                                            role="tooltip"
+                                            class="tooltip tooltip-validation tooltip-md"
+                                            [class.invalid]="cmdbForm.get('userName').invalid && (cmdbForm.get('userName').dirty || cmdbForm.get('userName').touched)">
+                                            <input type="text" id="empuserName" placeholder="Enter UserName" autocomplete="off"                      
+                                                formControlName="userName"
+                                                [(ngModel)]="cmdbConfig.userName">
+                                            <span class="tooltip-content">
+                                                Username is Required.
+                                            </span>
+                                        </label>
+                                    </div>
+                                <div class="form-group">
+                                    <label class="required"  for="emppassword">Password</label>
+                                    <label for="emppassword"
+                                        aria-haspopup="true"
+                                        role="tooltip"
+                                        class="tooltip tooltip-validation tooltip-md"
+                                        [class.invalid]="cmdbForm.get('passwordInput').invalid && (cmdbForm.get('passwordInput').dirty || cmdbForm.get('passwordInput').touched)">
+                                        <input type="password" name="password" tabindex="-1" style="width: 0px; height: 0px; position: absolute; border: 0px; padding: 0px;">
+                                        <input type="password" id="emppassword" placeholder="Enter Password" autocomplete="off" [readonly]="read"
+                                            formControlName="passwordInput"
+                                            [(ngModel)]="cmdbConfig.password">
+                                        <span class="tooltip-content">
+                                            Password is Required.
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                        <label>VerifyCert</label>
+                                        
+                                        <div class="radio-inline">
+                                            <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}" id="checkrads_11" value="true" [(ngModel)]="cmdbConfig.verifyCert">
+                                            <label for="checkrads_11">Yes</label>
+                                        </div>
+                                        <div class="radio-inline">
+                                            <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}"  id="checkrads_12" value="false" [(ngModel)]="cmdbConfig.verifyCert">
+                                            <label for="checkrads_12">No</label>
+                                        </div>
+                                    </div> 
+                                <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="cmdbForm.invalid">Submit</button>
+                                <button type="button" class="btn btn-primary" on-click ="cancel()">Cancel</button>
+                    </section>
+                </form>
+            </clr-tab-content>
+        </clr-tab>
+        <clr-tab>
+            <button clrTabLink>Advance Setting</button>
+            <clr-tab-content>
+                <form>
+                    <section class="form-block">
+                        <div class="form-group" *ngIf="isInfoblox">
+                            <label> <clr-checkbox
+                                    name="proxysearch"
+                                    id="proxy"
+                                    [(ngModel)]="enableProxySearch">
+                                    Enable Proxy search
+                                    </clr-checkbox>
+                            </label>     
+                            <div class="select"  style="width:184px; margin-left: 10px;">
+                                <select [ngModelOptions]="{standalone: true}"  [(ngModel)]="advanceSetting.PROXY_SEARCH" > 
+                                        <option value="GM">GM</option>
+                                        <option value='LOCAL'>Local</option>
+                                </select>
+                            </div>
+                            <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg tooltip-right">
+                                <clr-icon shape="info-circle" size="24"></clr-icon>
+                                <span class="tooltip-content">If set to ‘GM’, the request is redirected to Grid master for processing. If set to ‘LOCAL’, the request is processed locally. This option is applicable only on vConnector grid members. The default is ‘LOCAL’.</span>
+                            </a>
+                        </div>
+                    </section>
+                </form>
+            </clr-tab-content>
+        </clr-tab>
+    </clr-tabs>
 <clr-modal [(clrModalOpen)]="operatingModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
         <h3 class="modal-title">Operation Tips</h3>
         <div class="modal-body">

@@ -37,21 +37,28 @@ export class CmdbAddComponent implements OnInit {
 
   cmdbConfig:FacilityModule = new FacilityModule();
   read = "";/** This property is to change the read-only attribute of the password input box*/
-  advanceSetting:string = "";
-  
+  enableProxySearch:boolean = false;
+  isInfoblox:boolean = false;
+  advanceSetting = {
+    "PROXY_SEARCH":"LOCAL"
+  }
   checkIsLabsDB(){
+    this.cmdbForm.setControl("userName",new FormControl('',Validators.required));
+    this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.required));
     if(this.cmdbConfig.type == "Labsdb"){
       this.cmdbForm.setControl("userName",new FormControl('',Validators.nullValidator));
       this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.nullValidator));
-    }else{
-      this.cmdbForm.setControl("userName",new FormControl('',Validators.required));
-      this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.required));
+    }else if(this.cmdbConfig.type == "InfoBlox"){
+      this.isInfoblox = true;
     }
   }
 
   save(){
       this.read = "readonly";
       this.loading = true;
+      if(this.isInfoblox && this.enableProxySearch){
+        this.cmdbConfig.advanceSetting = this.advanceSetting;
+      }
       this.service.AddDcimConfig(this.cmdbConfig).subscribe(
         (data)=>{
           if(data.status == 201){
