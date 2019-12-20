@@ -55,7 +55,7 @@ public class InfobloxClient extends RestClientBase {
       this.password = config.getPassword();
       HashMap<AdvanceSettingType, String> advanceSetting = config.getAdvanceSetting();
       if(advanceSetting != null) {
-         String proxy_search = advanceSetting.get(AdvanceSettingType.PROXY_SEARCH);
+         String proxy_search = advanceSetting.get(AdvanceSettingType.INFOBLOX_PROXY_SEARCH);
          if(proxy_search != null && !proxy_search.isEmpty()) {
             this.queryHostURL = this.queryHostURL + "&_proxy_search=" + proxy_search;
          }

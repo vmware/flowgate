@@ -40,7 +40,7 @@ export class CmdbAddComponent implements OnInit {
   enableProxySearch:boolean = false;
   isInfoblox:boolean = false;
   advanceSetting = {
-    "PROXY_SEARCH":"LOCAL"
+    "INFOBLOX_PROXY_SEARCH":"LOCAL"
   }
   checkIsLabsDB(){
     this.cmdbForm.setControl("userName",new FormControl('',Validators.required));
