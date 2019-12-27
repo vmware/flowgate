@@ -40,7 +40,14 @@ sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSEBUILDJARFILE
 buildUi(){
 
 	echo "build UI..."
-
+	command -v npm
+	if [ $? -eq 0 ]
+	then
+		apt remove npm
+		echo "remove existed npm"
+	else
+		echo "npm is not exist,continue"
+	fi
 	cd $SOURCECODEDIR/ui/
 	wget https://nodejs.org/dist/v11.2.0/node-v11.2.0-linux-x64.tar.gz
 	tar zxvf node-v11.2.0-linux-x64.tar.gz
