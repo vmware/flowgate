@@ -60,7 +60,7 @@ export class CmdbEditComponent implements OnInit {
   save(){
       this.read = "readonly";
       this.loading = true;
-      if(this.isInfoblox){
+      if(this.isInfoblox && this.cmdbConfig.advanceSetting != null){
         if(this.enableProxySearch){
           this.cmdbConfig.advanceSetting = this.advanceSetting;
         }else{
