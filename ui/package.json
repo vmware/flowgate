@@ -62,7 +62,7 @@
     "http-proxy-agent": "2.1.0",
     "https-proxy-agent": "2.2.0",
     "querystringify": "2.0.0",
-    "handlebars": "4.0.14",
+    "handlebars": "4.3.5",
     "ws": "3.3.1",
     "tar": "2.2.2",
     "deep-extend": "0.5.1",
@@ -85,6 +85,7 @@
     "mem": "4.0.0",
     "stringstream": "0.0.6",
     "mixin-deep": "2.0.1",
-    "set-value": "2.0.1"
+    "set-value": "2.0.1",
+    "serialize-javascript": "2.1.1"
   }
 }
