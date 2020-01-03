@@ -64,11 +64,11 @@ export class DcimService {
       return this.http.put(""+this.API_URL+"/v1/facilitysoftware/status", body,this.options).map((res)=>res)
     }
 
-    getDcimConfigData(pageNumber,pageSize){
+    getDcimConfigData(pageNumber,pageSize,types){
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());
       this.options = new RequestOptions({ headers: header });
-      return this.http.get(""+this.API_URL+"/v1/facilitysoftware/page/"+pageNumber+"/pagesize/"+pageSize+"",this.options)
+      return this.http.get(""+this.API_URL+"/v1/facilitysoftware/page/"+pageNumber+"/pagesize/"+pageSize+"?softwaretypes="+types+"",this.options)
       .map((res)=>res)
     }
 
