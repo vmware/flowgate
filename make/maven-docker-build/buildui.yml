@@ -1,0 +1,16 @@
+version: '2'
+services:
+  nodejs-build:
+    build:
+      context: $PWD/maven-docker-build
+      dockerfile: $PWD/maven-docker-build/DockerfileUI
+    image: nodebuild:11.2.0
+    volumes:
+      - $PWD/../:/flowgate-build
+      - $PWD/log:/log
+    networks:
+      - ui-network
+    container_name: nodejs-build-container
+
+networks:
+  ui-network:
