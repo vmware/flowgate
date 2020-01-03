@@ -7,6 +7,7 @@ package com.vmware.flowgate.controller;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -113,7 +115,8 @@ public class FacilitySoftwareController {
    @RequestMapping(value = "/page/{pageNumber}/pagesize/{pageSize}", method = RequestMethod.GET)
    public Page<FacilitySoftwareConfig> queryFacilitySoftwareConfigByPage(
          @PathVariable("pageNumber") int currentPage, @PathVariable("pageSize") int pageSize,
-         HttpServletRequest request) {
+         HttpServletRequest request,
+         @RequestParam(required = false) SoftwareType[] softwaretypes) {
 
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       if (currentPage < FlowgateConstant.defaultPageNumber) {
@@ -126,13 +129,26 @@ public class FacilitySoftwareController {
       PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
       WormholeUser currentUser = userRepository.findOne(user.getUserId());
       Page<FacilitySoftwareConfig> result = null;
-      if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
-         result =  repository.findAll(pageRequest);
-         decryptServerListPassword(result.getContent());
-      } else {
-         result = repository.findALlByUserId(user.getUserId(), pageRequest);
-         decryptServerListPassword(result.getContent());
+      List<String> types = new ArrayList<String>();
+      if(softwaretypes != null && softwaretypes.length > 0) {
+         for(SoftwareType type :softwaretypes) {
+            types.add(type.name());
+         }
       }
+      if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
+         if(types.isEmpty()) {
+            result =  repository.findAll(pageRequest);
+         }else {
+            result =  repository.findAllByTypeIn(types, pageRequest);
+         }
+      } else {
+         if(types.isEmpty()) {
+            result = repository.findALlByUserId(user.getUserId(), pageRequest);
+         }else {
+            result = repository.findAllByUserIdAndTypeIn(user.getUserId(), types, pageRequest);
+         }
+      }
+      decryptServerListPassword(result.getContent());
       return result;
    }
 
