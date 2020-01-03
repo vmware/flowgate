@@ -20,6 +20,8 @@ FLOWGATEIMAGESTAR=$OUTPUTIMAGEPATH/flowgate.tar
 DOCKERCOMPOSEBUILDIMAGESFILE=$DOCKERMAVENBUILD/docker-compose.build.images.yml
 DOCKERCOMPOSEBUILDJARFILE=$DOCKERMAVENBUILD/docker-compose.build.jar.yml
 DOCKERCOMPOSERUNFILE=$DOCKERMAVENBUILD/docker-compose.run.images.yml
+DOCKERCOMPOSEBUILDUIFILE=$DOCKERMAVENBUILD/buildui.yml
+
 CONFTAR=$CURRENTPATH/conf.tar.gz
 
 
@@ -40,15 +42,11 @@ sed -i -e "s/FLOWGATE_VERSION/$FLOWGATE_VERSION/g" $DOCKERCOMPOSEBUILDJARFILE
 buildUi(){
 
 	echo "build UI..."
+	cd $CURRENTPATH
+    docker rm nodejs-build-container
+    docker-compose -f $DOCKERCOMPOSEBUILDUIFILE build --force-rm --no-cache
+    docker-compose -f $DOCKERCOMPOSEBUILDUIFILE up
 
-	cd $SOURCECODEDIR/ui/
-	wget https://nodejs.org/dist/v11.2.0/node-v11.2.0-linux-x64.tar.gz
-	tar zxvf node-v11.2.0-linux-x64.tar.gz
-	export PATH=$PATH:$PWD/node-v11.2.0-linux-x64/bin
-	npm install -g @angular/cli@latest
-	npm install --unsafe-perm
-	npm config set unsafe-perm true
-	ng build --prod -e prod -aot=false
 }
 
 buildAllJars(){
