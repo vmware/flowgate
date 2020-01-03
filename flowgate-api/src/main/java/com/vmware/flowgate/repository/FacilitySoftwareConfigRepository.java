@@ -22,4 +22,8 @@ public interface FacilitySoftwareConfigRepository extends CouchbasePagingAndSort
    List<FacilitySoftwareConfig> findAllByType(String type);
 
    Page<FacilitySoftwareConfig> findALlByUserId(String userId, Pageable page);
+
+   Page<FacilitySoftwareConfig> findAllByUserIdAndTypeIn(String userId, List<String> types, Pageable page);
+
+   Page<FacilitySoftwareConfig> findAllByTypeIn(List<String> types, Pageable page);
 }

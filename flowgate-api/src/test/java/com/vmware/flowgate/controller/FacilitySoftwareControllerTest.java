@@ -174,13 +174,15 @@ public class FacilitySoftwareControllerTest {
       FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
       facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
       facilitySoftware = facilitySoftwareRepository.save(facilitySoftware);
-      MvcResult result = this.mockMvc
-            .perform(post("/v1/facilitysoftware/syncdatabyserverid/"+facilitySoftware.getId()+""))
-            .andReturn();
-      if (result.getResolvedException() != null) {
-         throw result.getResolvedException();
+      try{
+         MvcResult result = this.mockMvc.perform(post("/v1/facilitysoftware/syncdatabyserverid/"+facilitySoftware.getId()+""))
+               .andReturn();
+         if (result.getResolvedException() != null) {
+            throw result.getResolvedException();
+         }
+      }finally {
+         facilitySoftwareRepository.delete(facilitySoftware.getId());
       }
-      facilitySoftwareRepository.delete(facilitySoftware.getId());
    }
 
    @Test
@@ -193,14 +195,17 @@ public class FacilitySoftwareControllerTest {
       facilitySoftware.setType(FacilitySoftwareConfig.SoftwareType.PowerIQ);
       facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
       facilitySoftware = facilitySoftwareRepository.save(facilitySoftware);
-      MvcResult result = this.mockMvc
-            .perform(post("/v1/facilitysoftware/syncdatabyserverid/"+facilitySoftware.getId()+""))
-            .andDo(document("facilitySoftware-syncFacilityServerData-example"))
-            .andReturn();
-      if (result.getResolvedException() != null) {
-         throw result.getResolvedException();
+      try {
+         MvcResult result = this.mockMvc
+               .perform(post("/v1/facilitysoftware/syncdatabyserverid/"+facilitySoftware.getId()+""))
+               .andDo(document("facilitySoftware-syncFacilityServerData-example"))
+               .andReturn();
+         if (result.getResolvedException() != null) {
+            throw result.getResolvedException();
+         }
+      }finally {
+         facilitySoftwareRepository.delete(facilitySoftware.getId());
       }
-      facilitySoftwareRepository.delete(facilitySoftware.getId());
    }
 
    @Test
@@ -242,10 +247,10 @@ public class FacilitySoftwareControllerTest {
                      fieldWithPath("advanceSetting").description("advanceSetting"),
                      fieldWithPath("integrationStatus").description("The status of integration."))));
       } catch (Exception e) {
-         facilitySoftwareRepository.delete(facilitySoftware.getId());
          TestCase.fail();
+      }finally {
+         facilitySoftwareRepository.delete(facilitySoftware.getId());
       }
-      facilitySoftwareRepository.delete(facilitySoftware.getId());
    }
 
    @Test
@@ -283,11 +288,10 @@ public class FacilitySoftwareControllerTest {
                      fieldWithPath("advanceSetting").description("advanceSetting"),
                      fieldWithPath("integrationStatus").description("The status of integration."))));
       } catch (Exception e) {
-         facilitySoftwareRepository.delete(facilitySoftware.getId());
          TestCase.fail();
+      }finally {
+         facilitySoftwareRepository.delete(facilitySoftware.getId());
       }
-
-      facilitySoftwareRepository.delete(facilitySoftware.getId());
    }
 
    //admin can find all facilitySoftwareConfigs
@@ -308,21 +312,63 @@ public class FacilitySoftwareControllerTest {
       facilitySoftwareRepository.save(facilitySoftware);
       int pageNumber = 1;
       int pageSize = 5;
-      this.mockMvc
-            .perform(
-                  get("/v1/facilitysoftware/page/" + pageNumber + "/pagesize/"
-                        + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$..content[0].name").value(facilitySoftware.getName()))
-            .andExpect(jsonPath("$..content[0].userId").value(facilitySoftware.getUserId()))
-            .andDo(document("facilitySoftware-query-example",
-                  requestFields(
-                        fieldWithPath("pageNumber").description("get datas for this page number."),
-                        fieldWithPath("pageSize")
-                              .description("The number of data displayed per page."))));
+      try {
+         this.mockMvc
+         .perform(
+               get("/v1/facilitysoftware/page/" + pageNumber + "/pagesize/"
+                     + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
+         .andExpect(status().isOk())
+         .andExpect(jsonPath("$..content[0].name").value(facilitySoftware.getName()))
+         .andExpect(jsonPath("$..content[0].userId").value(facilitySoftware.getUserId()))
+         .andDo(document("facilitySoftware-query-example",
+               requestFields(
+                     fieldWithPath("pageNumber").description("get datas for this page number."),
+                     fieldWithPath("pageSize")
+                           .description("The number of data displayed per page."))));
 
-      facilitySoftwareRepository.delete(facilitySoftware.getId());
-      userRepository.delete(user.getId());
+      }finally {
+         facilitySoftwareRepository.delete(facilitySoftware.getId());
+         userRepository.delete(user.getId());
+      }
+   }
+
+   //facilitySoftwareConfigsByType
+   @Test
+   public void facilitySoftwareQueryByPageAndTypeExample() throws Exception {
+      WormholeUserDetails userDeails = createuser();
+      userDeails.setUserId("5b7d208d55368540fcba1692");
+      Mockito.doReturn(userDeails).when(tokenService).getCurrentUser(any());
+      WormholeUser user = new WormholeUser();
+      user.setId("5b7d208d55368540fcba1692");
+      List<String> roles = new ArrayList<String>();
+      roles.add("admin");
+      user.setRoleNames(roles);
+      userRepository.save(user);
+      //userId of the facilitySoftware is not '5b7d208d55368540fcba1692'
+      FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
+      facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
+      facilitySoftwareRepository.save(facilitySoftware);
+      int pageNumber = 1;
+      int pageSize = 5;
+      try {
+         this.mockMvc
+         .perform(
+               get("/v1/facilitysoftware/page/" + pageNumber + "/pagesize/"
+                     + pageSize + "?softwaretypes=Nlyte").content("{\"pageNumber\":1,\"pageSize\":5}"))
+         .andExpect(status().isOk())
+         .andExpect(jsonPath("$..content[0].name").value(facilitySoftware.getName()))
+         .andExpect(jsonPath("$..content[0].userId").value(facilitySoftware.getUserId()))
+         .andExpect(jsonPath("$..content[0].type").value(facilitySoftware.getType().name()))
+         .andDo(document("facilitySoftware-query-example",
+               requestFields(
+                     fieldWithPath("pageNumber").description("get datas for this page number."),
+                     fieldWithPath("pageSize")
+                           .description("The number of data displayed per page."))));
+
+      }finally {
+         facilitySoftwareRepository.delete(facilitySoftware.getId());
+         userRepository.delete(user.getId());
+      }
    }
 
    //query by currentUser
@@ -344,21 +390,24 @@ public class FacilitySoftwareControllerTest {
       facilitySoftwareRepository.save(facilitySoftware);
       int pageNumber = 1;
       int pageSize = 5;
-      this.mockMvc
-            .perform(
-                  get("/v1/facilitysoftware/page/" + pageNumber + "/pagesize/"
-                        + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$..content[0].name").value(facilitySoftware.getName()))
-            .andExpect(jsonPath("$..content[0].userId").value(facilitySoftware.getUserId()))
-            .andDo(document("facilitySoftware-query-example",
-                  requestFields(
-                        fieldWithPath("pageNumber").description("get datas for this page number."),
-                        fieldWithPath("pageSize")
-                              .description("The number of data displayed per page."))));
+      try {
+         this.mockMvc
+         .perform(
+               get("/v1/facilitysoftware/page/" + pageNumber + "/pagesize/"
+                     + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
+         .andExpect(status().isOk())
+         .andExpect(jsonPath("$..content[0].name").value(facilitySoftware.getName()))
+         .andExpect(jsonPath("$..content[0].userId").value(facilitySoftware.getUserId()))
+         .andDo(document("facilitySoftware-query-example",
+               requestFields(
+                     fieldWithPath("pageNumber").description("get datas for this page number."),
+                     fieldWithPath("pageSize")
+                           .description("The number of data displayed per page."))));
 
-      facilitySoftwareRepository.delete(facilitySoftware.getId());
-      userRepository.delete(user.getId());
+      }finally {
+         facilitySoftwareRepository.delete(facilitySoftware.getId());
+         userRepository.delete(user.getId());
+      }
    }
 
    @Test
@@ -390,15 +439,18 @@ public class FacilitySoftwareControllerTest {
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
               };
-      this.mockMvc
+      try {
+         this.mockMvc
          .perform(get("/v1/facilitysoftware/type/" + facilitySoftware1.getType() + ""))
                 .andExpect(status().isOk())
                 .andDo(document("facilitySoftware-getFacilitySoftwareConfigByType-example",responseFields(
                         fieldWithPath("[]").description("An array of asserts"))
                         .andWithPrefix("[].", fieldpath)));
+      }finally {
+         facilitySoftwareRepository.delete(facilitySoftware1.getId());
+         facilitySoftwareRepository.delete(facilitySoftware2.getId());
+      }
 
-      facilitySoftwareRepository.delete(facilitySoftware1.getId());
-      facilitySoftwareRepository.delete(facilitySoftware2.getId());
    }
 
    @Test
