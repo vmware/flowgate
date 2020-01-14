@@ -1,0 +1,201 @@
+<form #DcimForm="ngForm">
+  <section class="form-block">
+        <label> ADD ASSET</label>
+        <!--  assetName : String -->
+        <div class="form-group">
+          <label class="required" for="empserverIP">AssetName</label>       
+          <label for="empserverIP"
+              aria-haspopup="true"
+              role="tooltip"
+              class="tooltip tooltip-validation tooltip-md"
+              [class.invalid]="serverIPInput.invalid && (serverIPInput.dirty || serverIPInput.touched)">
+              <input type="text" id="empserverIP" placeholder="Enter AssetName" autocomplete="off"
+                  required
+                  name="serverIP"
+                  [(ngModel)]="my_asset.assetName"
+                  #serverIPInput="ngModel">
+              <span class="tooltip-content">
+                AssetName is Required.
+              </span>
+          </label>
+        </div>
+        <!-- category : AssetCategory -->
+        <div class="form-group ">  
+              <label class="required" for="gForm_3">Category</label>
+              <div class="select" style="width:184px; " id="gForm_3"> 
+                <select clrSelect name="options0" [(ngModel)]="my_asset.category1" required>
+                  <option *ngFor="let item of arr" [value]="item">{{item}}</option>
+                </select>
+              </div>
+              <label  for="gForm_4" *ngIf="my_asset.category1=='Server'||my_asset.category1=='Sensors' "class="required">SubCategory</label>
+              <div class="select" style="width:184px; " id="gForm_4" *ngIf="my_asset.category1=='Server'||my_asset.category1=='Sensors' " > 
+                <select clrSelect name="options" [(ngModel)]="my_asset.subCategory" required >
+                  <option  *ngFor="let item of subarr[my_asset.category1]"  [value]="item">{{item}}</option>
+                </select>
+              </div>
+            
+        
+        </div>
+        <!-- Description -->
+        <div class="form-group" >
+          <label for="gForm_1">Description</label>
+          <textarea clrTextarea [(ngModel)]="description" name="description" id="gForm_1" placeholder="Enter Description"  style="width:184px; "></textarea>
+
+          <!-- <input style="width:184px; " class="form-control" type="checkbox" [ngModelOptions]="{standalone: true}"  [(ngModel)]="description" id="gForm_1" placeholder="Description" size="45"/> -->
+        </div>
+        <!-- assetNumber : long  -->
+        <div class="form-group">
+          <label class="required" for="empassetNumber">AssetNumber</label>       
+          <label for="empassetNumber"
+              aria-haspopup="true"
+              role="tooltip"
+              class="tooltip tooltip-validation tooltip-md"
+              [class.invalid]="assetNumber.invalid && (assetNumber.dirty || assetNumber.touched)">
+              <input   style="width:184px;"  type="number" id="empassetNumber" placeholder="Enter AssetNumber" autocomplete="off"
+                  required
+                  name="assetNumber"
+                  [(ngModel)]="my_asset.assetNumber"
+                  #assetNumber="ngModel">
+              <span class="tooltip-content">
+                AssetNumber is Required.
+              </span>
+          </label>
+        </div>
+        <!-- manufacturer -->
+        <div class="form-group">
+          <label class="required" for="empmanufacturer">Manufacturer</label>       
+          <label for="empmanufacturer"
+              aria-haspopup="true"
+              role="tooltip"
+              class="tooltip tooltip-validation tooltip-md"
+              [class.invalid]="manufacturerInput.invalid && (manufacturerInput.dirty || manufacturerInput.touched)">
+              <input type="text" id="empmanufacturer" placeholder="Enter Manufacturer" autocomplete="off"
+                  required
+                  name="manufacturer"
+                  [(ngModel)]="my_asset.manufacturer"
+                  #manufacturerInput="ngModel">
+              <span class="tooltip-content">
+                Manufacturer is Required.
+              </span>
+          </label>
+        </div>
+        <!-- model : String -->
+        <div class="form-group">
+          <label class="required" for="empmodel">Model</label>       
+          <label for="empmodel"
+              aria-haspopup="true"
+              role="tooltip"
+              class="tooltip tooltip-validation tooltip-md"
+              [class.invalid]="modelInput.invalid && (modelInput.dirty || modelInput.touched)">
+              <input type="text" id="empmodel" placeholder="Enter Model" autocomplete="off"
+                  required
+                  name="manufacturer"
+                  [(ngModel)]="my_asset.model"
+                  #modelInput="ngModel">
+              <span class="tooltip-content">
+                Model is Required.
+              </span>
+          </label>
+        </div>
+        <!--  serialnumber : String;  -->
+        <div class="form-group" >
+          <label for="gForm_2">Serialnumber</label>
+          <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.serialnumber" id="gForm_2" placeholder="Enter Serialnumber" size="45"/>
+        </div> 
+        <!--  tag : String -->
+        <div class="form-group" >
+          <label for="gForm_25">Tag</label>
+          <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.tag" id="gForm_25" placeholder="Enter Tag" size="45"/>
+        </div> 
+        <!--  assetAddress : AssetAddress-->
+        <div class="form-group" >
+          <label for="gForm_2">AssetAddress</label>
+          <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="assetAddress" id="gForm_2" placeholder="Enter AssetAddress" size="45"/>
+        </div> 
+        <!--region : String; 
+            country : String;
+            city : String -->
+        <div class="form-group" >
+          <label for="gForm_5">Region</label>
+          <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.region" id="gForm_5" placeholder="Enter Region" size="45"/>
+          <label for="gForm_33">Country</label>
+          <input   style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.country" id="gForm_33" placeholder="Enter Country" size="45"/>
+          <label for="gForm_4">City</label>
+          <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.city" id="gForm_4" placeholder="Enter City" size="45"/>
+          
+        </div> 
+        <!-- building : String;
+             floor : String
+             room : String
+             row : String
+             col : String -->
+        <div class="form-group" >
+          <label for="gForm_6">Building</label>
+          <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.building" id="gForm_6" placeholder="Enter Building" size="45"/>
+          <label for="gForm_7">Floor</label>
+          <input   style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.floor" id="gForm_7" placeholder="Enter Floor " size="45"/>
+          <label for="gForm_8">Room</label>
+          <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.room" id="gForm_8" placeholder="Enter  Room  " size="45"/>
+        </div> 
+        
+        <div class="form-group" >
+        <label for="gForm_9">   Row</label>
+        <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.row" id="gForm_9" placeholder="Enter Row" size="45"/>
+        <label for="gForm_10"> Col</label>
+        <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.col" id="gForm_10" placeholder="Enter Col" size="45"/>
+        </div>  
+        <!-- extraLocation : String -->
+        <div class="form-group" >
+          <label for="gForm_11">ExtraLocation </label>
+          <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.extraLocation" id="gForm_11" placeholder="Enter ExtraLocation" size="45"/>
+        </div> 
+        <!-- cabinetName : String 
+             cabinetUnitPosition : int-->
+        <div class="form-group"  *ngIf="my_asset.category1!='Cabinet' ">
+          <label for="gForm_12">CabinetName </label>
+          <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.cabinetName" id="gForm_12" placeholder="Enter CabinetName" size="45"/>
+          <label for="gForm_13">CabinetUnitPosition</label>
+          <input style="width:184px; " class="form-control" type="number" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.cabinetUnitPosition" id="gForm_13" placeholder="Enter  CabinetUnitPosition" size="45"/>
+  
+        </div> 
+        <!--  mountingSide : MountingSide-->
+        <div class="form-group " *ngIf="my_asset.category1!='Cabinet' ">
+          <label class="required" for="gForm_14">MountingSide</label>
+              <div class="select" style="width:184px; " id="gForm_14"> 
+                <select clrSelect name="options2" [(ngModel)]="my_asset.mountingSide" required>
+                  <option value="Front">Front</option>
+                  <option value="Back">Back</option>
+                  <option value="Unmounted">Unmounted</option>
+                </select>
+              </div>
+        </div>   
+        <!-- cabinetsize : int 
+             cabinetAssetNumber : String -->
+        <div class="form-group"  *ngIf="my_asset.category1=='Cabinet' ">
+          <label for="gForm_15">Cabinetsize</label>
+          <input style="width:184px; " class="form-control" type="number" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.cabinetsize" id="gForm_15" placeholder="Enter Cabinetsize" size="45"/>
+          <label for="gForm_16">CabinetAssetNumber</label>
+          <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.cabinetAssetNumber" id="gForm_16" placeholder="Enter CabinetAssetNumber" size="45"/>
+        </div> 
+        <!--status  -->
+        <div class="form-group ">
+          <label class="required" for="gForm_443">Status</label>
+              <div class="select" style="width:184px; " id="gForm_443"> 
+                <select clrSelect name="options3" [(ngModel)]="my_asset.status['status']" required>
+                  <option value="Planned">Planned</option>
+                  <option value="Active">Active</option>
+                  <option value="Recycled">Recycled</option>
+                  <option value="Decommissioned">Decommissioned</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+        </div>   
+        <button type="submit" class="btn btn-primary"  (click)="save()" [disabled]="DcimForm.form.invalid">Submit</button>
+        <button type="button" class="btn btn-primary" (click)="cancle()">Cancel</button>         
+  </section>
+</form>
+
+
+ 
+
+

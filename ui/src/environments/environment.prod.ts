@@ -4,7 +4,9 @@
 */
 export const environment = {
   production: true,
-  Auth_URL:"/apiservice",
-  API_URL:"/apiservice"
+  // Auth_URL:"/apiservice",
+  // API_URL:"/apiservice"
+  Auth_URL:"http://localhost:49610",
+  API_URL:"http://localhost:49610"
 };
 
