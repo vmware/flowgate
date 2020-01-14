@@ -21,6 +21,11 @@ export const routes: Routes = [
             path: 'cmdb',
             loadChildren: 'app/pages/facility/component/cmdb/cmdb.module#CmdbModule'
           }
+          ,{
+            path: 'providers',
+            loadChildren: 'app/pages/facility/component/providers/providers.module#ProvidersModule'
+          }
+          
         ]
       }
 ];

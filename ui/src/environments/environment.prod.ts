@@ -4,7 +4,8 @@
 */
 export const environment = {
   production: true,
-  Auth_URL:"/apiservice",
-  API_URL:"/apiservice"
+   Auth_URL:"/apiservice",
+   API_URL:"/apiservice"
+  
 };
 
