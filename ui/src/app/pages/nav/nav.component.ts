@@ -23,7 +23,7 @@ export class NavComponent implements OnInit {
   "readSddcSoftwareConfigByID","readSddcSoftwareConfigByVRO","readSddcSoftwareConfigByVC","readSddcSoftwareConfigByUserAndPage","readVROsSddcSoftwareConfigByUser","readSddcSoftwareConfigByTypeAndUser"];
   servermapping:string []= ["updateServerMapping","readMappingsByVROIDAndPage","readMappingsByVCIDAndPage","readSddcSoftwareConfigByTypeAndUser"];
   facility:string[] = ["createFacilitySoftwareConfig","readFacilityByType","readFacilityByPage"];
-  
+  addassetManual:string[] = ["createAnAsset"];
   setting:string[] = ["createSensorSetting","readSensorSettingsByPage","updateSensorSetting","deleteSensorSetting","startFullMappingAggregation","generateServerPDUMapping","readUnMappedServers"];
   sensorsetting:string[] = ["createSensorSetting","readSensorSettingsByPage","updateSensorSetting","deleteSensorSetting"];
   systemSetting:string[] = ["startFullMappingAggregation","generateServerPDUMapping","readUnMappedServers"];

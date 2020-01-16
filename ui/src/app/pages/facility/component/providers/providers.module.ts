@@ -7,6 +7,8 @@ import { ProvidersRoutingModule } from './providers-routing.module';
 import { ProvidersComponent } from './providers.component';
 import { ProvidersAddComponent } from './providers-add/providers-add.component';
 import { DcimService } from '../dcim/dcim.service';
+import{AssetStatusModule} from  './modules/asset-status/asset-status.module';
+import{AssetRealtimeDataSpecModule} from  './modules/asset-realtime-data-spec/asset-realtime-data-spec.module';
 @NgModule({
   imports: [
     CommonModule,
@@ -15,47 +17,41 @@ import { DcimService } from '../dcim/dcim.service';
     ReactiveFormsModule,
     FormsModule,
     PagesModule,
+    AssetStatusModule,
+    AssetRealtimeDataSpecModule,
    
   ],
   declarations: [ProvidersComponent, ProvidersAddComponent],
 
   providers:[DcimService]
 })
+//ProvidersModule is AssetModule
 export class ProvidersModule {
-  
-  public category1:string;
+
+  category:string;
   subCategory:string;
-  id:string='99';
   assetNumber:any;
   assetName :string;
   assetSource:string;
   manufacturer:string;
-  model : String;
-  serialnumber : String;
-  tag : String;
-  
-  region : String;
-  country : String;
-  city : String;
-  building : String;
-  floor : String
-  room : String
-  row : String
-  col : String
-  extraLocation : String;
-  cabinetName : String;
+  model : string;
+  serialnumber : string;
+  tag : string;
+  region : string;
+  country : string;
+  city : string;
+  building : string;
+  floor : string
+  room : string
+  row : string
+  col : string
+  extraLocation : string;
+  cabinetName : string;
   cabinetUnitPosition : number;
   mountingSide : string;
   cabinetsize : number;
-  cabinetAssetNumber : String;
-  
-  lastupdate : number;
+  cabinetAssetNumber : string;
   created : number;
-  
-   status={
-    'status':"",
-    'pduMapping':0,
-    'networkMapping':0,
-   }
-
+  assetRealtimeDataSpec : AssetRealtimeDataSpecModule=new AssetRealtimeDataSpecModule();
+  status: AssetStatusModule =new AssetStatusModule();
  }

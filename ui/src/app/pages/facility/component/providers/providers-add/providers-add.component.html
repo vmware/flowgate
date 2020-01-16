@@ -3,17 +3,17 @@
         <label> ADD ASSET</label>
         <!--  assetName : String -->
         <div class="form-group">
-          <label class="required" for="empserverIP">AssetName</label>       
-          <label for="empserverIP"
+          <label class="required" for="AssetName">AssetName</label>       
+          <label for="AssetName"
               aria-haspopup="true"
               role="tooltip"
               class="tooltip tooltip-validation tooltip-md"
-              [class.invalid]="serverIPInput.invalid && (serverIPInput.dirty || serverIPInput.touched)">
-              <input type="text" id="empserverIP" placeholder="Enter AssetName" autocomplete="off"
+              [class.invalid]="AssetName.invalid && (AssetName.dirty || AssetName.touched)">
+              <input type="text" id="AssetName" placeholder="Enter AssetName" autocomplete="off"
                   required
-                  name="serverIP"
+                  name="AssetName"
                   [(ngModel)]="my_asset.assetName"
-                  #serverIPInput="ngModel">
+                  #AssetName="ngModel">
               <span class="tooltip-content">
                 AssetName is Required.
               </span>
@@ -23,14 +23,14 @@
         <div class="form-group ">  
               <label class="required" for="gForm_3">Category</label>
               <div class="select" style="width:184px; " id="gForm_3"> 
-                <select clrSelect name="options0" [(ngModel)]="my_asset.category1" required>
-                  <option *ngFor="let item of arr" [value]="item">{{item}}</option>
+                <select clrSelect name="options0" [(ngModel)]="my_asset.category" required>
+                  <option *ngFor="let item of allcategory" [value]="item">{{item}}</option>
                 </select>
               </div>
-              <label  for="gForm_4" *ngIf="my_asset.category1=='Server'||my_asset.category1=='Sensors' "class="required">SubCategory</label>
-              <div class="select" style="width:184px; " id="gForm_4" *ngIf="my_asset.category1=='Server'||my_asset.category1=='Sensors' " > 
+              <label  for="gForm_4" *ngIf="my_asset.category=='Server'||my_asset.category=='Sensors' "class="required">SubCategory</label>
+              <div class="select" style="width:184px; " id="gForm_4" *ngIf="my_asset.category=='Server'||my_asset.category=='Sensors' " > 
                 <select clrSelect name="options" [(ngModel)]="my_asset.subCategory" required >
-                  <option  *ngFor="let item of subarr[my_asset.category1]"  [value]="item">{{item}}</option>
+                  <option  *ngFor="let item of suballcategory[my_asset.category]"  [value]="item">{{item}}</option>
                 </select>
               </div>
             
@@ -89,7 +89,7 @@
               [class.invalid]="modelInput.invalid && (modelInput.dirty || modelInput.touched)">
               <input type="text" id="empmodel" placeholder="Enter Model" autocomplete="off"
                   required
-                  name="manufacturer"
+                  name="Model"
                   [(ngModel)]="my_asset.model"
                   #modelInput="ngModel">
               <span class="tooltip-content">
@@ -151,7 +151,7 @@
         </div> 
         <!-- cabinetName : String 
              cabinetUnitPosition : int-->
-        <div class="form-group"  *ngIf="my_asset.category1!='Cabinet' ">
+        <div class="form-group"  *ngIf="my_asset.category!='Cabinet' ">
           <label for="gForm_12">CabinetName </label>
           <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.cabinetName" id="gForm_12" placeholder="Enter CabinetName" size="45"/>
           <label for="gForm_13">CabinetUnitPosition</label>
@@ -159,7 +159,7 @@
   
         </div> 
         <!--  mountingSide : MountingSide-->
-        <div class="form-group " *ngIf="my_asset.category1!='Cabinet' ">
+        <div class="form-group " *ngIf="my_asset.category!='Cabinet' ">
           <label class="required" for="gForm_14">MountingSide</label>
               <div class="select" style="width:184px; " id="gForm_14"> 
                 <select clrSelect name="options2" [(ngModel)]="my_asset.mountingSide" required>
@@ -171,17 +171,43 @@
         </div>   
         <!-- cabinetsize : int 
              cabinetAssetNumber : String -->
-        <div class="form-group"  *ngIf="my_asset.category1=='Cabinet' ">
+        <div class="form-group"  *ngIf="my_asset.category=='Cabinet' ">
           <label for="gForm_15">Cabinetsize</label>
           <input style="width:184px; " class="form-control" type="number" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.cabinetsize" id="gForm_15" placeholder="Enter Cabinetsize" size="45"/>
           <label for="gForm_16">CabinetAssetNumber</label>
           <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.cabinetAssetNumber" id="gForm_16" placeholder="Enter CabinetAssetNumber" size="45"/>
         </div> 
+
+        <!-- RealtimeDataUnit : String 
+             validNumMin : string
+            validNumMax :string  -->
+             <div class="form-group"  *ngIf="my_asset.category=='Sensors' ">
+              <label class="required" for="gForm_assetRealtimeDataSpec">RealtimeDataUnit</label>
+              <div class="select" style="width:184px; " id="gForm_assetRealtimeDataSpec"> 
+                <select clrSelect name="assetRealtimeDataSpec" [(ngModel)]="my_asset.assetRealtimeDataSpec.unit" required>
+                  <option value="Volts">Volts</option>
+                  <option value="Amps">Amps</option>
+                  <option value="KW">KW</option>
+                  <option value="Celsius">Celsius</option>
+                  <option value="Fahrenheit">Fahrenheit</option>
+                  <option value="Percent">Percent</option>
+                </select>
+              </div>
+            </div> 
+            <div class="form-group"  *ngIf="my_asset.category=='Sensors' ">
+              <label for="gForm_validNumMin">validNumMin</label>
+              <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.assetRealtimeDataSpec.validNumMin" id="gForm_validNumMin" placeholder="Enter ValidNumMin" size="45"/>
+              <label for="gForm_validNumMax">validNumMax</label>
+              <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="my_asset.assetRealtimeDataSpec.validNumMax" id="gForm_validNumMax" placeholder="Enter  ValidNumMax" size="45"/>
+  
+            </div> 
+
+
         <!--status  -->
         <div class="form-group ">
           <label class="required" for="gForm_443">Status</label>
               <div class="select" style="width:184px; " id="gForm_443"> 
-                <select clrSelect name="options3" [(ngModel)]="my_asset.status['status']" required>
+                <select clrSelect name="options3" [(ngModel)]="my_asset.status.status" required>
                   <option value="Planned">Planned</option>
                   <option value="Active">Active</option>
                   <option value="Recycled">Recycled</option>
@@ -192,7 +218,30 @@
         </div>   
         <button type="submit" class="btn btn-primary"  (click)="save()" [disabled]="DcimForm.form.invalid">Submit</button>
         <button type="button" class="btn btn-primary" (click)="cancel()">Cancel</button>         
-  </section>
+  
+      <!-- alert -->
+      <clr-modal [(clrModalOpen)]="addsuccess" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
+        <h3 class="modal-title">Operation tips</h3>
+        <div class="modal-body">
+            <p>Addasset Successful</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" (click)="closesuccessTips()">Close</button>
+        </div>
+      </clr-modal>
+      
+      <clr-modal [(clrModalOpen)]="addfail" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
+        <h3 class="modal-title">Operation tips</h3>
+        <div class="modal-body">
+            <p>Addasset Fail:</p>
+            <p>{{tip}}</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" (click)="closefailTips()">Close</button>
+        </div>
+      </clr-modal>
+
+      </section>
 </form>
 
 
