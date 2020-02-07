@@ -10,19 +10,19 @@ import java.util.Map;
 import com.vmware.flowgate.common.exception.WormholeException;
 
 public class ValueUnit {
-   private String id;//This id is used to identify a outlet of PDU
+   private String extraidentifier;//This property is used to identify a outlet of PDU
    private ValueType key;
    private String value;
    private double valueNum;
    private String unit;
    private long time;
 
-   public String getId() {
-      return id;
+   public String getExtraidentifier() {
+      return extraidentifier;
    }
 
-   public void setId(String id) {
-      this.id = id;
+   public void setExtraidentifier(String extraidentifier) {
+      this.extraidentifier = extraidentifier;
    }
 
    public String getValue() {
