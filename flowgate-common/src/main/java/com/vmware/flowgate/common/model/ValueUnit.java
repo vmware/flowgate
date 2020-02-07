@@ -10,7 +10,7 @@ import java.util.Map;
 import com.vmware.flowgate.common.exception.WormholeException;
 
 public class ValueUnit {
-   private String extraidentifier;//This property is used to identify a outlet of PDU
+   private String extraidentifier;//This property is used to describe some asset's attribute.
    private ValueType key;
    private String value;
    private double valueNum;
