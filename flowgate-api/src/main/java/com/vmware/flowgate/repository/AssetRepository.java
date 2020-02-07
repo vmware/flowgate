@@ -30,12 +30,12 @@ public interface AssetRepository
    @Query("SELECT COUNT(_class) AS count FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.Asset' And `assetName` LIKE $1 AND `category` = $2 ")
    public long getNumber(String keywords, String category);
 
-   public Page<Asset> findByAssetSource(String assetSource, Pageable page);
+   public Page<Asset> findByAssetSourceContaining(String assetSource, Pageable page);
 
    @Query("SELECT META(#{#n1ql.bucket}).id AS _ID, META(#{#n1ql.bucket}).cas AS _CAS, #{#n1ql.bucket}.* FROM #{#n1ql.bucket} use keys $1")
    public List<Asset> findAll(JsonArray assetIds);
 
    public Asset findOneByAssetName(String name);
 
-   public Page<Asset> findByAssetSourceAndCategory(String assetSource, String category,Pageable page);
+   public Page<Asset> findByAssetSourceContainingAndCategory(String assetSource, String category,Pageable page);
 }
