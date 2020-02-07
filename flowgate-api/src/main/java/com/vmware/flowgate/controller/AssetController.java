@@ -124,7 +124,7 @@ public class AssetController {
          pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
-      return assetRepository.findByAssetSource(assetSource,pageRequest);
+      return assetRepository.findByAssetSourceContaining(assetSource,pageRequest);
    }
 
    // Read Asset by source and type
@@ -142,7 +142,7 @@ public class AssetController {
       }
       PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
 
-      return assetRepository.findByAssetSourceAndCategory(assetSource, type.name(),pageRequest);
+      return assetRepository.findByAssetSourceContainingAndCategory(assetSource, type.name(),pageRequest);
    }
 
    // Read Asset by type
@@ -220,16 +220,25 @@ public class AssetController {
       long total = assetRepository.getNumber(keyWords+"%", AssetCategory.Server.name());
       PageImpl<Asset> assetPage = new PageImpl<Asset>(assets,pageable,total);
       HashMap<String, String> assetSourceIDAndAssetSourceNameMap = new HashMap<String, String>();
+
       for (Asset asset : assetPage.getContent()) {
          String assetSourceID = asset.getAssetSource();
-         if (assetSourceID != null) {
-            String assetSourceName = assetSourceIDAndAssetSourceNameMap.get(assetSourceID);
+         if(assetSourceID == null) {
+            continue;
+         }
+         String assetSource [] = assetSourceID.split(FlowgateConstant.SPILIT_FLAG);
+         List<String> assetSourceNames = new ArrayList<String>();
+         for(String sourceId : assetSource) {
+            String assetSourceName = assetSourceIDAndAssetSourceNameMap.get(sourceId);
             if (assetSourceName == null) {
                assetSourceName = facilityRepository.findOne(assetSourceID).getName();
                assetSourceIDAndAssetSourceNameMap.put(assetSourceID, assetSourceName);
             }
-            asset.setAssetSource(assetSourceName);
+            assetSourceNames.add(assetSourceName);
          }
+
+         String sourceNames = String.join(FlowgateConstant.SPILIT_FLAG, assetSourceNames);
+         asset.setAssetSource(sourceNames);
       }
       return assetPage;
    }
