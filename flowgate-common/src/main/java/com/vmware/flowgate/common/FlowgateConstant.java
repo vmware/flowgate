@@ -42,6 +42,14 @@ public class FlowgateConstant {
     */
    public static String NETWORK_PORT_FOR_SERVER = "NETWORK_PORT_FOR_SERVER";
 
+   public static String PDU_OUTLETS_FROM_POWERIQ = "PDU_OUTLETS_FROM_POWERIQ";
+
+   public static String PDU_RATE_POWER_FROM_POWERIQ = "PDU_RATE_POWER_FROM_POWERIQ";
+
+   public static String PDU_RATE_AMPS_FROM_POWERIQ = "PDU_RATE_AMPS_FROM_POWERIQ";
+
+   public static String PDU_RATE_VOLTS_FROM_POWERIQ = "PDU_RATE_VOLTS_FROM_POWERIQ";
+
    public static String SEPARATOR = "_FIELDSPLIT_";
 
    public static String SPILIT_FLAG = ",";
