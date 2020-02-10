@@ -29,6 +29,7 @@ import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.RealtimeDataUnit;
 import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.Asset;
@@ -93,15 +94,15 @@ public class PowerIQService implements AsyncService {
    public static final String SmokeSensor = "SmokeSensor";
    public static final String WaterSensor = "WaterSensor";
    public static final String Vibration = "Vibration";
-   private static final String Pdu_ID = "Pdu_ID";
    private static final String POWERIQ_SOURCE = "PDU_PowerIQ_SOURCE";
-   private static final String Sensor_ID = "Sensor_ID";
    private static Map<String, AssetSubCategory> subCategoryMap =
          new HashMap<String, AssetSubCategory>();
    public static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
    public static Map<String, ValueType> sensorValueType = new HashMap<String, ValueType>();
    public static Map<AssetSubCategory, ServerSensorType> serverSensorTypeAndsubCategory =
          new HashMap<AssetSubCategory, ServerSensorType>();
+   private static Map<String, MountingSide> sensorMountingSide =
+         new HashMap<String, MountingSide>();
    static {
       subCategoryMap.put(HumiditySensor, AssetSubCategory.Humidity);
       subCategoryMap.put(TemperatureSensor, AssetSubCategory.Temperature);
@@ -122,6 +123,9 @@ public class PowerIQService implements AsyncService {
       sensorValueType.put(SmokeSensor, ValueType.Smoke);
       sensorValueType.put(WaterSensor, ValueType.Water);
       sensorValueType.put(Vibration, ValueType.Vibration);
+      sensorMountingSide.put("INLET", MountingSide.Front);
+      sensorMountingSide.put("OUTLET", MountingSide.Back);
+      sensorMountingSide = Collections.unmodifiableMap(sensorMountingSide);
    }
 
    @Override
@@ -512,9 +516,9 @@ public class PowerIQService implements AsyncService {
          }
          //the pduId and sensorId are form the powerIQ system.
          if (sensor.getPduId() != null) {
-            justificationfieldsForSensor.put(Pdu_ID, sensor.getPduId().toString());
+            justificationfieldsForSensor.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, sensor.getPduId().toString());
          }
-         justificationfieldsForSensor.put(Sensor_ID, sensor.getId() + "");
+         justificationfieldsForSensor.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, sensor.getId() + "");
          asset.setAssetName(sensor.getName());
          asset.setJustificationfields(justificationfieldsForSensor);
          asset.setSerialnumber(sensor.getSerialNumber());
@@ -522,6 +526,9 @@ public class PowerIQService implements AsyncService {
          asset.setCategory(AssetCategory.Sensors);
          asset.setSubCategory(subCategoryMap.get(sensor.getType()));
          asset.setCreated(System.currentTimeMillis());
+         if(sensor.getPosition() != null) {
+            asset.setMountingSide(sensorMountingSide.get(sensor.getPosition().toUpperCase()));
+         }
          assets.add(asset);
       }
       restClient.saveAssets(pdus);//save pdus
@@ -660,7 +667,7 @@ public class PowerIQService implements AsyncService {
          List<Asset> assets =
                restClient.getAllAssetsBySourceAndType(assetSource, AssetCategory.Sensors);
          for (Asset asset : assets) {
-            String sensorId = asset.getJustificationfields().get(Sensor_ID);
+            String sensorId = asset.getJustificationfields().get(FlowgateConstant.SENSOR_ID_FROM_POWERIQ);
             if (sensorId == null) {
                continue;
             }
@@ -680,7 +687,7 @@ public class PowerIQService implements AsyncService {
       }
       List<Asset> assets = new ArrayList<Asset>();
       for (Asset asset : assetsFromPowerIQ) {
-         String sensorID = asset.getJustificationfields().get(Sensor_ID);
+         String sensorID = asset.getJustificationfields().get(FlowgateConstant.SENSOR_ID_FROM_POWERIQ);
          if (sensorID == null) {
             continue;
          }
@@ -696,10 +703,11 @@ public class PowerIQService implements AsyncService {
             assetToUpdate.setRegion(asset.getRegion());
             assetToUpdate.setSerialnumber(asset.getSerialnumber());
             HashMap<String, String> justificationfields = assetToUpdate.getJustificationfields();
-            justificationfields.put(Pdu_ID, asset.getJustificationfields().get(Pdu_ID));
-            justificationfields.put(Sensor_ID, asset.getJustificationfields().get(Sensor_ID));
+            justificationfields.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, asset.getJustificationfields().get(FlowgateConstant.PDU_ID_FROM_POWERIQ));
+            justificationfields.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, asset.getJustificationfields().get(FlowgateConstant.SENSOR_ID_FROM_POWERIQ));
             assetToUpdate.setJustificationfields(justificationfields);
             assetToUpdate.setLastupdate(System.currentTimeMillis());
+            assetToUpdate.setMountingSide(asset.getMountingSide());
             assets.add(assetToUpdate);
          } else {
             asset.setCreated(System.currentTimeMillis());
@@ -745,7 +753,11 @@ public class PowerIQService implements AsyncService {
       for (Asset asset : allMappedPdus) {
          String id = null;
          if (asset.getJustificationfields() != null) {
-            id = asset.getJustificationfields().get(Pdu_ID);
+            id = asset.getJustificationfields().get(FlowgateConstant.PDU_ID_FROM_POWERIQ);
+            /**
+             * In the future,the source will be stored in assetSource field,
+             * and we only need to check if the assetSource contain it.
+             */
             String source = asset.getJustificationfields().get(POWERIQ_SOURCE);
             //Only check the pdu that belong to the current PowerIQ.
             if (source == null || !source.equals(powerIQ.getId())) {
@@ -1026,7 +1038,7 @@ public class PowerIQService implements AsyncService {
       PowerIQAPIClient powerIQAPIClient = createClient(powerIQ);
       for (Asset asset : assets) {
          HashMap<String, String> sensorExtraInfo = asset.getJustificationfields();
-         String sensorId = sensorExtraInfo.get(Sensor_ID);
+         String sensorId = sensorExtraInfo.get(FlowgateConstant.SENSOR_ID_FROM_POWERIQ);
          Sensor sensor = null;
          try {
             sensor = powerIQAPIClient.getSensorById(sensorId);
@@ -1143,7 +1155,7 @@ public class PowerIQService implements AsyncService {
                   String pduIDFromFlowgate = null;
                   String dataSource = null;
                   if (!asset.getJustificationfields().isEmpty()) {
-                     pduIDFromFlowgate = asset.getJustificationfields().get(Pdu_ID);
+                     pduIDFromFlowgate = asset.getJustificationfields().get(FlowgateConstant.PDU_ID_FROM_POWERIQ);
                      dataSource = asset.getJustificationfields().get(POWERIQ_SOURCE);
                   }
                   if (!String.valueOf(pdu.getId()).equals(pduIDFromFlowgate)
@@ -1151,7 +1163,7 @@ public class PowerIQService implements AsyncService {
                      //we need to update the ID.
                      logger.info(String.format("Update Asset's PDU ID filed from %s to %s",
                            pduIDFromFlowgate, pdu.getId()));
-                     asset.getJustificationfields().put(Pdu_ID, String.valueOf(pdu.getId()));
+                     asset.getJustificationfields().put(FlowgateConstant.PDU_ID_FROM_POWERIQ, String.valueOf(pdu.getId()));
                      asset.getJustificationfields().put(POWERIQ_SOURCE, powerIQ.getId());
                      needUpdateAssets.add(asset);
                   }
