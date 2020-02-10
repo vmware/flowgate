@@ -527,7 +527,7 @@ public class PowerIQService implements AsyncService {
          asset.setSubCategory(subCategoryMap.get(sensor.getType()));
          asset.setCreated(System.currentTimeMillis());
          if(sensor.getPosition() != null) {
-            asset.setMountingSide(sensorMountingSide.get(sensor.getPosition()));
+            asset.setMountingSide(sensorMountingSide.get(sensor.getPosition().toUpperCase()));
          }
          assets.add(asset);
       }
