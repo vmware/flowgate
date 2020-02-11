@@ -44,11 +44,17 @@ public class FlowgateConstant {
 
    public static String PDU_OUTLETS_FROM_POWERIQ = "PDU_OUTLETS_FROM_POWERIQ";
 
-   public static String PDU_RATE_POWER = "PDU_RATE_POWER";
+   public static String PDU_MAX_RATE_POWER = "PDU_MAX_RATE_POWER";
+
+   public static String PDU_MIN_RATE_POWER = "PDU_MIN_RATE_POWER";
 
    public static String PDU_RATE_AMPS = "PDU_RATE_AMPS";
 
-   public static String PDU_RATE_VOLTS = "PDU_RATE_VOLTS";
+   public static String PDU_MIN_RATE_VOLTS = "PDU_MIN_RATE_VOLTS";
+
+   public static String PDU_MAX_RATE_VOLTS = "PDU_MAX_RATE_VOLTS";
+
+   public static String PDU = "PDU";
 
    public static String SEPARATOR = "_FIELDSPLIT_";
 
