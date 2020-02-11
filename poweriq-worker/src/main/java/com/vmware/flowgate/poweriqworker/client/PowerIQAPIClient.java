@@ -25,6 +25,10 @@ import com.vmware.flowgate.poweriqworker.model.DataCenter;
 import com.vmware.flowgate.poweriqworker.model.DataCentersResult;
 import com.vmware.flowgate.poweriqworker.model.Floor;
 import com.vmware.flowgate.poweriqworker.model.FloorsResult;
+import com.vmware.flowgate.poweriqworker.model.Inlet;
+import com.vmware.flowgate.poweriqworker.model.InletResult;
+import com.vmware.flowgate.poweriqworker.model.Outlet;
+import com.vmware.flowgate.poweriqworker.model.OutletsResult;
 import com.vmware.flowgate.poweriqworker.model.Pdu;
 import com.vmware.flowgate.poweriqworker.model.PduResult;
 import com.vmware.flowgate.poweriqworker.model.PdusResult;
@@ -60,6 +64,10 @@ public class PowerIQAPIClient {
    private static final String GetFloorsURL = "/api/v2/floors";
 
    private static final String GetDataCentersURL = "/api/v2/data_centers";
+
+   private static final String GetOutletsByPDUURL = "/api/v2/pdus/%s/outlets";
+
+   private static final String GetInletsByPDUURL = "/api/v2/pdus/%s/inlets";
 
    private String powerIQServiceEndpoint;
 
@@ -234,5 +242,30 @@ public class PowerIQAPIClient {
          dataCenters = dataCentersResult.getBody().getDataCenters();
       }
       return dataCenters;
+   }
+
+   public List<Outlet> getOutlets(long pduId){
+      List<Outlet> outlets = new ArrayList<Outlet>();
+      ResponseEntity<OutletsResult> outletsResult =
+            this.restTemplate.exchange(getPowerIQServiceEndpoint() + String.format(GetOutletsByPDUURL, pduId),
+                  HttpMethod.GET, getDefaultEntity(), OutletsResult.class);
+      if (outletsResult != null && outletsResult.getBody() != null
+            && outletsResult.getBody().getOutlets() != null) {
+         outlets = outletsResult.getBody().getOutlets();
+      }
+
+      return outlets;
+   }
+
+   public List<Inlet> getInlets(long pduId){
+      List<Inlet> inlets = new ArrayList<Inlet>();
+      ResponseEntity<InletResult> inletsResult =
+            this.restTemplate.exchange(getPowerIQServiceEndpoint() + String.format(GetInletsByPDUURL, pduId),
+                  HttpMethod.GET, getDefaultEntity(), InletResult.class);
+      if (inletsResult != null && inletsResult.getBody() != null
+            && inletsResult.getBody().getInlets() != null) {
+         inlets = inletsResult.getBody().getInlets();
+      }
+      return inlets;
    }
 }

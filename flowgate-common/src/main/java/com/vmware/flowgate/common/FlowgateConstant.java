@@ -44,6 +44,8 @@ public class FlowgateConstant {
 
    public static String PDU_OUTLETS_FROM_POWERIQ = "PDU_OUTLETS_FROM_POWERIQ";
 
+   public static String PDU_INLETS_FROM_POWERIQ = "PDU_INLETS_FROM_POWERIQ";
+
    public static String PDU_MAX_RATE_POWER = "PDU_MAX_RATE_POWER";
 
    public static String PDU_MIN_RATE_POWER = "PDU_MIN_RATE_POWER";
@@ -55,6 +57,10 @@ public class FlowgateConstant {
    public static String PDU_MAX_RATE_VOLTS = "PDU_MAX_RATE_VOLTS";
 
    public static String PDU = "PDU";
+
+   public static String OUTLET_NAME_PREFIX = "OUTLET";
+
+   public static String INLET_NAME_PREFIX = "INLET";
 
    public static String SEPARATOR = "_FIELDSPLIT_";
 
