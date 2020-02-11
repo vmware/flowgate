@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 VMware, Inc.
+ * Copyright 2020 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
 package com.vmware.flowgate.common.model;
@@ -10,8 +10,10 @@ public class PduInlet {
    private Long pduId;
    private Integer ordinal;
    private String formatedName;
-   private boolean pduPower;
+   private boolean powerSource;
    private Double ratedAmps;
+   private boolean pueIt;
+   private boolean pueTotal;
 
    public Long getId() {
       return id;
@@ -31,11 +33,11 @@ public class PduInlet {
    public void setOrdinal(Integer ordinal) {
       this.ordinal = ordinal;
    }
-   public boolean isPduPower() {
-      return pduPower;
+   public boolean isPowerSource() {
+      return powerSource;
    }
-   public void setPduPower(boolean pduPower) {
-      this.pduPower = pduPower;
+   public void setPowerSource(boolean powerSource) {
+      this.powerSource = powerSource;
    }
    public Double getRatedAmps() {
       return ratedAmps;
@@ -48,6 +50,18 @@ public class PduInlet {
    }
    public void setFormatedName(String formatedName) {
       this.formatedName = formatedName;
+   }
+   public boolean isPueIt() {
+      return pueIt;
+   }
+   public void setPueIt(boolean pueIt) {
+      this.pueIt = pueIt;
+   }
+   public boolean isPueTotal() {
+      return pueTotal;
+   }
+   public void setPueTotal(boolean pueTotal) {
+      this.pueTotal = pueTotal;
    }
 
 }
