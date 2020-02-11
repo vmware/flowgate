@@ -2,22 +2,18 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-package com.vmware.flowgate.poweriqworker.model;
+package com.vmware.flowgate.common.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+public class PduOutlet {
 
-public class Outlet {
    private Long id;
    private Long ordinal;
    private String name;
-   @JsonProperty(value = "device_id")
+   private String formatedName;//outlet_prefix + ordinal, eg:OUTLET1
    private Long deviceId;
-   @JsonProperty(value = "pdu_id")
    private Long pduId;
    private String state;
-   @JsonProperty(value = "rated_amps")
    private Double ratedAmps;
-   private OutletReading reading;
    public Long getId() {
       return id;
    }
@@ -35,6 +31,12 @@ public class Outlet {
    }
    public void setName(String name) {
       this.name = name;
+   }
+   public String getFormatedName() {
+      return formatedName;
+   }
+   public void setFormatedName(String formatedName) {
+      this.formatedName = formatedName;
    }
    public Long getDeviceId() {
       return deviceId;
@@ -59,12 +61,6 @@ public class Outlet {
    }
    public void setRatedAmps(Double ratedAmps) {
       this.ratedAmps = ratedAmps;
-   }
-   public OutletReading getReading() {
-      return reading;
-   }
-   public void setReading(OutletReading reading) {
-      this.reading = reading;
    }
 
 }
