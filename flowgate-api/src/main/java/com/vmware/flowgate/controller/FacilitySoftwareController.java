@@ -218,8 +218,13 @@ public class FacilitySoftwareController {
                         new FacilitySoftwareConfig[] { server }));
             template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
                   EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
+                        EventMessageUtil.PowerIQ_SyncPDUMetaData,
+                        new FacilitySoftwareConfig[] { server }));
+            template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
+                  EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
                         EventMessageUtil.PowerIQ_SyncAllPDUID,
                         new FacilitySoftwareConfig[] { server }));
+
             publisher.publish(EventMessageUtil.POWERIQTopic,
                   EventMessageUtil.generateFacilityNotifyMessage(EventType.PowerIQ));
             logger.info("Notify message sent out.");

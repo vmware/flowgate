@@ -1207,6 +1207,26 @@ public class PowerIQService implements AsyncService {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       List<Asset> pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.PDU);
       Map<String, Asset> pduIDAndAssetMap = getPDUIDAndAssetMap(pdusFromFlowgate);
+      PowerIQAPIClient client = createClient(powerIQ);
+      try {
+         client.getPdus(1, 1);
+      } catch (ResourceAccessException e1) {
+         if (e1.getCause().getCause() instanceof ConnectException) {
+            checkAndUpdateIntegrationStatus(powerIQ, e1.getMessage());
+            return;
+         }
+      } catch (HttpClientErrorException e) {
+         logger.error("Failed to query data from PowerIQ", e);
+         IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
+         if (integrationStatus == null) {
+            integrationStatus = new IntegrationStatus();
+         }
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(e.getMessage());
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         updateIntegrationStatus(powerIQ);
+         return;
+      }
       List<Asset> pdusFromPowerIQ = getAllPduAssetsFromPowerIQ(powerIQ);
       List<Asset> assetsToSave = getPduAssetsNeedtoSave(pduIDAndAssetMap,pdusFromPowerIQ);
       if(assetsToSave.isEmpty()) {
@@ -1279,46 +1299,60 @@ public class PowerIQService implements AsyncService {
       String ratePower = pdu.getRatedVa();//eg: 6.4-7.7kVA
       String rateVolts = pdu.getRatedVolts();//eg: 200-240V
       String rateAmpsValue = null;
-      int ampsIndex = rateAmps.indexOf(POWERIQ_CURRENT_UNIT);
-      if(ampsIndex != -1) {
-         rateAmpsValue = rateAmps.substring(0, ampsIndex);
-         pduRateInfo.put(FlowgateConstant.PDU_RATE_AMPS, rateAmpsValue);
-      }else {
-         logger.error(String.format("Invalid value for rate current : %s", rateAmps));
+      if(rateAmps != null) {
+         int ampsIndex = rateAmps.indexOf(POWERIQ_CURRENT_UNIT);
+         if(ampsIndex != -1) {
+            rateAmpsValue = rateAmps.substring(0, ampsIndex);
+            pduRateInfo.put(FlowgateConstant.PDU_RATE_AMPS, rateAmpsValue);
+         }else {
+            logger.error(String.format("Invalid value for rate current : %s", rateAmps));
+         }
       }
-      int powerUnitIndex = ratePower.indexOf(POWERIQ_POWER_UNIT);
-      if(powerUnitIndex != -1) {
-         String powerValue = ratePower.substring(0, powerUnitIndex);
-         int rangeFlagIndex = powerValue.indexOf(RANGE_FLAG);
-         String minPowerValue = null;
-         String maxPowerValue = null;
-         if(rangeFlagIndex != -1) {
-            minPowerValue = powerValue.substring(0, rangeFlagIndex);
-            maxPowerValue = powerValue.substring(rangeFlagIndex + 1);
-            pduRateInfo.put(FlowgateConstant.PDU_MIN_RATE_POWER, minPowerValue);
-            pduRateInfo.put(FlowgateConstant.PDU_MAX_RATE_POWER, maxPowerValue);
+      if(ratePower != null) {
+         int powerUnitIndex = ratePower.indexOf(POWERIQ_POWER_UNIT);
+         if(powerUnitIndex != -1) {
+            String powerValue = ratePower.substring(0, powerUnitIndex);
+            int rangeFlagIndex = powerValue.indexOf(RANGE_FLAG);
+            String minPowerValue = null;
+            String maxPowerValue = null;
+            if(rangeFlagIndex != -1) {
+               minPowerValue = powerValue.substring(0, rangeFlagIndex);
+               maxPowerValue = powerValue.substring(rangeFlagIndex + 1);
+               pduRateInfo.put(FlowgateConstant.PDU_MIN_RATE_POWER, minPowerValue);
+               pduRateInfo.put(FlowgateConstant.PDU_MAX_RATE_POWER, maxPowerValue);
+            }else {
+               //There is a another format of power value like 6.0kVA
+               minPowerValue = powerValue;
+               maxPowerValue = powerValue;
+               pduRateInfo.put(FlowgateConstant.PDU_MIN_RATE_POWER, minPowerValue);
+               pduRateInfo.put(FlowgateConstant.PDU_MAX_RATE_POWER, maxPowerValue);
+            }
          }else {
             logger.error(String.format("Invalid value for rate power : %s",ratePower));
          }
-      }else {
-         logger.error(String.format("Invalid value for rate power : %s",ratePower));
       }
-      int voltageUnitIndex = rateVolts.indexOf(POWERIQ_VOLTAGE_UNIT);
-      if(voltageUnitIndex != -1) {
-         String voltageValue = rateVolts.substring(0, voltageUnitIndex);
-         int rangeFlagIndex = voltageValue.indexOf(RANGE_FLAG);
-         String minVoltageValue = null;
-         String maxVoltageValue = null;
-         if(rangeFlagIndex != -1) {
-            minVoltageValue = voltageValue.substring(0, rangeFlagIndex);
-            maxVoltageValue = voltageValue.substring(rangeFlagIndex + 1);
-            pduRateInfo.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, minVoltageValue);
-            pduRateInfo.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, maxVoltageValue);
+      if(rateVolts != null) {
+         int voltageUnitIndex = rateVolts.indexOf(POWERIQ_VOLTAGE_UNIT);
+         if(voltageUnitIndex != -1) {
+            String voltageValue = rateVolts.substring(0, voltageUnitIndex);
+            int rangeFlagIndex = voltageValue.indexOf(RANGE_FLAG);
+            String minVoltageValue = null;
+            String maxVoltageValue = null;
+            if(rangeFlagIndex != -1) {
+               minVoltageValue = voltageValue.substring(0, rangeFlagIndex);
+               maxVoltageValue = voltageValue.substring(rangeFlagIndex + 1);
+               pduRateInfo.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, minVoltageValue);
+               pduRateInfo.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, maxVoltageValue);
+            }else {
+               //There is a another format of voltage value like 200V
+               minVoltageValue = voltageValue;
+               maxVoltageValue = voltageValue;
+               pduRateInfo.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, minVoltageValue);
+               pduRateInfo.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, maxVoltageValue);
+            }
          }else {
             logger.error(String.format("Invalid value for rate voltage : %s",rateVolts));
          }
-      }else {
-         logger.error(String.format("Invalid value for rate voltage : %s",rateVolts));
       }
       return pduRateInfo;
    }
