@@ -1266,7 +1266,7 @@ public class PowerIQService implements AsyncService {
       return mapper.writeValueAsString(pduInlets);
    }
 
-   private Map<String,String> generatePduRateInfoMap(Pdu pdu){
+   public Map<String,String> generatePduRateInfoMap(Pdu pdu){
       Map<String,String> pduRateInfo = new HashMap<String,String>();
       String rateAmps = pdu.getRatedAmps();//eg: 32A
       String ratePower = pdu.getRatedVa();//eg: 6.4-7.7kVA
@@ -1330,7 +1330,7 @@ public class PowerIQService implements AsyncService {
       return pduRateInfo;
    }
 
-   private List<Asset> getAllPduAssetsFromPowerIQ(String assetSource, PowerIQAPIClient client) {
+   public List<Asset> getAllPduAssetsFromPowerIQ(String assetSource, PowerIQAPIClient client) {
       int limit = 100;
       int offset = 0;
       List<Pdu> pdus = null;
