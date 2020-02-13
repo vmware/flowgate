@@ -268,4 +268,8 @@ public class PowerIQAPIClient {
       }
       return inlets;
    }
+
+   public void testConnection() {
+      getPdus(1, 1);
+   }
 }

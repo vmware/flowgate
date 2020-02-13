@@ -88,21 +88,21 @@ public class SyncSensorMetaDataJobTest {
 
    @Test
    public void testFilterAsset() {
-      List<Asset> asset = powerIQService.filterAsset(null, null);
+      List<Asset> asset = powerIQService.filterSensorAsset(null, null);
       TestCase.assertEquals(null, asset);
    }
 
    @Test
    public void testFilterAsset1() {
       Map<String, Asset> exsitingAsset = new HashMap<String, Asset>();
-      List<Asset> asset = powerIQService.filterAsset(exsitingAsset, null);
+      List<Asset> asset = powerIQService.filterSensorAsset(exsitingAsset, null);
       TestCase.assertEquals(null, asset);
    }
 
    @Test
    public void testFilterAsset2() {
       List<Asset> assetsFromPowerIQ = createAssets();
-      List<Asset> asset = powerIQService.filterAsset(null, assetsFromPowerIQ);
+      List<Asset> asset = powerIQService.filterSensorAsset(null, assetsFromPowerIQ);
       TestCase.assertEquals(12345, asset.get(0).getAssetNumber());
    }
 
@@ -112,7 +112,7 @@ public class SyncSensorMetaDataJobTest {
             powerIQService.getAssetsFromWormhole("l9i8728d55368540fcba1692");
       List<Asset> assetsFromPowerIQ = createAssets();
       assetsFromPowerIQ.get(0).setAssetName("Temp 1");
-      List<Asset> asset = powerIQService.filterAsset(assetMap, assetsFromPowerIQ);
+      List<Asset> asset = powerIQService.filterSensorAsset(assetMap, assetsFromPowerIQ);
       TestCase.assertEquals(12345, asset.get(0).getAssetNumber());
       TestCase.assertEquals("Temp 1", asset.get(0).getAssetName());
    }
@@ -123,7 +123,7 @@ public class SyncSensorMetaDataJobTest {
             powerIQService.getAssetsFromWormhole("l9i8728d55368540fcba1692");
       List<Asset> assetsFromPowerIQ = createAssets();
       assetsFromPowerIQ.get(0).setJustificationfields(new HashMap<String,String>());
-      List<Asset> asset = powerIQService.filterAsset(assetMap, assetsFromPowerIQ);
+      List<Asset> asset = powerIQService.filterSensorAsset(assetMap, assetsFromPowerIQ);
       TestCase.assertEquals(0, asset.size());
    }
 
@@ -196,6 +196,7 @@ public class SyncSensorMetaDataJobTest {
 
    @Test
    public void testGetSensorMetaData1() {
+
       Mockito.when(this.powerIQAPIClient.getSensors()).thenReturn(getSensors());
       Mockito.when(this.powerIQAPIClient.getRacks()).thenReturn(getRacks());
       Mockito.when(this.powerIQAPIClient.getRows()).thenReturn(getRows());
@@ -207,6 +208,7 @@ public class SyncSensorMetaDataJobTest {
             .thenReturn(getFacilitySoftwareByType(SoftwareType.Nlyte));
       Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("po09imkhdplbvf540fwusy67n", AssetCategory.PDU))
       .thenReturn(getAssets(AssetCategory.PDU));
+      powerIQService.getLocationInfo(this.powerIQAPIClient);
 
       Pdu pdu2 = createPdu();
       pdu2.setName("pek-pdu-02");
@@ -246,6 +248,7 @@ public class SyncSensorMetaDataJobTest {
             .thenReturn(getFacilitySoftwareByType(SoftwareType.Nlyte));
       Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("po09imkhdplbvf540fwusy67n",AssetCategory.PDU))
       .thenReturn(getAssets(AssetCategory.PDU));
+      powerIQService.getLocationInfo(this.powerIQAPIClient);
       Pdu pdu2 = createPdu();
       Mockito.when(this.powerIQAPIClient.getPduByID("2")).thenReturn(pdu2);
       List<Asset> assets = powerIQService.getSensorMetaData(powerIQAPIClient, "po09imkhdplbvf540fwusy67n");
@@ -272,7 +275,7 @@ public class SyncSensorMetaDataJobTest {
    @Test
    public void testGetSensorRealTimeData() {
       HashMap<String, String> justificationfields = new HashMap<String, String>();
-      justificationfields.put("Sensor_ID", "6566");
+      justificationfields.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, "6566");
       Asset asset = createAsset();
       asset.setId("123o89qw4jjasd0");
       asset.setJustificationfields(justificationfields);
@@ -308,7 +311,7 @@ public class SyncSensorMetaDataJobTest {
    @Test
    public void testGetSensorRealTimeData1() {
       HashMap<String, String> justificationfields = new HashMap<String, String>();
-      justificationfields.put("Sensor_ID", "6566");
+      justificationfields.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, "6566");
       Asset asset = createAsset();
       asset.setId("123o89qw4jjasd0");
       asset.setJustificationfields(justificationfields);
@@ -331,13 +334,13 @@ public class SyncSensorMetaDataJobTest {
    @Test
    public void testGetSensorRealTimeData2() {
       HashMap<String, String> justificationfields = new HashMap<String, String>();
-      justificationfields.put("Sensor_ID", "6566");
+      justificationfields.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, "6566");
       Asset asset = createAsset();
       asset.setId("123o89qw4jjasd0");
       asset.setJustificationfields(justificationfields);
 
       HashMap<String, String> justificationfields1 = new HashMap<String, String>();
-      justificationfields1.put("Sensor_ID", "6567");
+      justificationfields1.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, "6567");
       Asset asset1 = createAsset();
       asset1.setId("123o89qw4jjasd1");
       asset1.setJustificationfields(justificationfields1);
@@ -609,7 +612,7 @@ public class SyncSensorMetaDataJobTest {
       asset.setAssetSource("l9i8728d55368540fcba1692");
       asset.setCategory(AssetCategory.Sensors);
       HashMap<String, String> justificationfields = new HashMap<String, String>();
-      justificationfields.put("Sensor_ID", "106");
+      justificationfields.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, "106");
       asset.setJustificationfields(justificationfields);
       asset.setModel("Dell 750");
       asset.setManufacturer("Dell");

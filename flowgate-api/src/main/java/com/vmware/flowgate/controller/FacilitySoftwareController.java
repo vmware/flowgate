@@ -214,11 +214,7 @@ public class FacilitySoftwareController {
                         EventMessageUtil.POWERIQTopic));
             template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
                   EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
-                        EventMessageUtil.PowerIQ_SyncSensorMetaData,
-                        new FacilitySoftwareConfig[] { server }));
-            template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
-                  EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
-                        EventMessageUtil.PowerIQ_SyncPDUMetaData,
+                        EventMessageUtil.PowerIQ_SyncAssetsMetaData,
                         new FacilitySoftwareConfig[] { server }));
             template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
                   EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,

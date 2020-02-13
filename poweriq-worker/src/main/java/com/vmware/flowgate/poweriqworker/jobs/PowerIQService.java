@@ -137,6 +137,12 @@ public class PowerIQService implements AsyncService {
    private static final String POWERIQ_CURRENT_UNIT = "A";
    private static final String POWERIQ_VOLTAGE_UNIT = "V";
    private static final String RANGE_FLAG = "-";
+   private static Map<Long, Rack> racksMap = null;
+   private static Map<Long, Row> rowsMap = null;
+   private static Map<Long, Aisle> aislesMap = null;
+   private static Map<Long, Room> roomsMap = null;
+   private static Map<Long, Floor> floorsMap = null;
+   private static Map<Long, DataCenter> dataCentersMap = null;
 
    @Override
    @Async("asyncServiceExecutor")
@@ -208,10 +214,10 @@ public class PowerIQService implements AsyncService {
          return;
       }
       switch (commonId) {
-      case EventMessageUtil.PowerIQ_SyncSensorMetaData:
-         logger.info("Sync Sensor metadata " + powerIQ.getName());
-         syncSensorMetaData(powerIQ);
-         logger.info("Finish sync Sensor metadata for: " + powerIQ.getName());
+      case EventMessageUtil.PowerIQ_SyncAssetsMetaData:
+         logger.info("Sync assets metadata from" + powerIQ.getName());
+         syncPowerIQAssetsMetaData(powerIQ);
+         logger.info("Finish sync assets metadata for: " + powerIQ.getName());
          break;
       case EventMessageUtil.PowerIQ_SyncRealtimeData:
          logger.info("Sync realtime data for " + powerIQ.getName());
@@ -228,11 +234,6 @@ public class PowerIQService implements AsyncService {
          logger.info("Clean sensor metadata for " + powerIQ.getName());
          removeSensorMetaData(powerIQ);
          logger.info("Finish clean sensor metadata for " + powerIQ.getName());
-         break;
-      case EventMessageUtil.PowerIQ_SyncPDUMetaData:
-         logger.info("Sync PDU metadata " + powerIQ.getName());
-         syncPDUFromPowerIQ(powerIQ);
-         logger.info("Finish sync PDU metadata for " + powerIQ.getName());
          break;
       default:
          logger.warn("Not supported command");
@@ -305,13 +306,21 @@ public class PowerIQService implements AsyncService {
       return needToUpdate;
    }
 
-   public void syncSensorMetaData(FacilitySoftwareConfig powerIQ) {
+   public void getLocationInfo(PowerIQAPIClient client) {
+      racksMap = getRacksMap(client);
+      rowsMap = getRowsMap(client);
+      aislesMap = getAislesMap(client);
+      roomsMap = getRoomsMap(client);
+      floorsMap = getFloorsMap(client);
+      dataCentersMap = getDataCentersMap(client);
+
+   }
+
+   public void syncPowerIQAssetsMetaData(FacilitySoftwareConfig powerIQ) {
       PowerIQAPIClient client = createClient(powerIQ);
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      List<Asset> sensorsFromPower = null;
-
       try {
-         sensorsFromPower = getSensorMetaData(client, powerIQ.getId());
+         client.testConnection();
       } catch (ResourceAccessException e1) {
          if (e1.getCause().getCause() instanceof ConnectException) {
             checkAndUpdateIntegrationStatus(powerIQ, e1.getMessage());
@@ -329,17 +338,32 @@ public class PowerIQService implements AsyncService {
          updateIntegrationStatus(powerIQ);
          return;
       }
-
+      getLocationInfo(client);
+      List<Asset> sensorsFromPower = getSensorMetaData(client, powerIQ.getId());
       if (sensorsFromPower == null || sensorsFromPower.isEmpty()) {
-         return;
+         logger.info("No sensor needed to update");
+      }else {
+         Map<String, Asset> exsitingSensorAssets = getAssetsFromWormhole(powerIQ.getId());
+         List<Asset> sensorAssetsToSave = new ArrayList<Asset>();
+         sensorAssetsToSave.addAll(filterSensorAsset(exsitingSensorAssets, sensorsFromPower));
+         if (sensorAssetsToSave.isEmpty()) {
+            logger.info("No sensor needed to save");
+         }else {
+            restClient.saveAssets(sensorAssetsToSave);
+         }
+         logger.info("Finish sync Sensor metadata for: " + powerIQ.getName());
       }
-      Map<String, Asset> exsitingSensorAssets = getAssetsFromWormhole(powerIQ.getId());
-      List<Asset> assetsToSave = new ArrayList<Asset>();
-      assetsToSave.addAll(filterAsset(exsitingSensorAssets, sensorsFromPower));
-      if (assetsToSave.isEmpty()) {
-         return;
+
+      List<Asset> pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.PDU);
+      Map<String, Asset> pduIDAndAssetMap = getPDUIDAndAssetMap(pdusFromFlowgate);
+      List<Asset> pdusFromPowerIQ = getAllPduAssetsFromPowerIQ(powerIQ.getId(), client);
+      List<Asset> assetsToSave = getPduAssetsNeedtoSave(pduIDAndAssetMap,pdusFromPowerIQ);
+      if(assetsToSave.isEmpty()) {
+         logger.info("No pdu needed to update");
+      }else {
+         restClient.saveAssets(assetsToSave);
       }
-      restClient.saveAssets(assetsToSave);
+      logger.info("Finish sync PDU metadata for " + powerIQ.getName());
    }
 
    public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig powerIQ, String message) {
@@ -490,15 +514,6 @@ public class PowerIQService implements AsyncService {
          return assets;
       }
       Map<String, Asset> pduAssetMap = getPDUAssetMap();//get all pdus from flowgate
-      Map<Long, Rack> racksMap = getRacksMap(client);
-      Map<Long, Row> rowsMap = getRowsMap(client);
-      Map<Long, Aisle> aislesMap = getAislesMap(client);
-      Map<Long, Room> roomsMap = getRoomsMap(client);
-      Map<Long, Floor> floorsMap = getFloorsMap(client);
-      Map<Long, DataCenter> dataCentersMap = getDataCentersMap(client);
-
-      //Map<Integer, Pdu> pduMap = getPduMap(client);
-      //Map<Integer, Pdu> pduMap = new HashMap<Integer, Pdu>();
       for (Sensor sensor : sensors) {
          Asset asset = null;
          HashMap<String, String> justificationfieldsForSensor = new HashMap<String, String>();
@@ -508,8 +523,7 @@ public class PowerIQService implements AsyncService {
             if (pdu != null) {
                Asset pduAsset = pduAssetMap.get(pdu.getName().toLowerCase());
                if (pduAsset == null) {
-                  asset = fillLocation(sensor.getParent(), racksMap, rowsMap, aislesMap, roomsMap, floorsMap,
-                        dataCentersMap);
+                  asset = fillLocation(sensor.getParent());
                } else {
                   //If the sensor's has pdu information. Then it can use the PDU's location info.
                   asset.setRoom(pduAsset.getRoom());
@@ -526,8 +540,7 @@ public class PowerIQService implements AsyncService {
                }
             }
          } else {
-            asset = fillLocation(sensor.getParent(), racksMap, rowsMap, aislesMap, roomsMap, floorsMap,
-                  dataCentersMap);
+            asset = fillLocation(sensor.getParent());
          }
          //the pduId and sensorId are form the powerIQ system.
          if (sensor.getPduId() != null) {
@@ -586,9 +599,7 @@ public class PowerIQService implements AsyncService {
       return sensors;
    }
 
-   public Asset fillLocation(Parent parent, Map<Long, Rack> racksMap, Map<Long, Row> rowsMap,
-         Map<Long, Aisle> aislesMap, Map<Long, Room> roomsMap, Map<Long, Floor> floorsMap,
-         Map<Long, DataCenter> dataCentersMap) {
+   public Asset fillLocation(Parent parent) {
       Asset asset = null;
       StringBuilder extraLocation = new StringBuilder();
       asset = new Asset();
@@ -692,7 +703,7 @@ public class PowerIQService implements AsyncService {
       return sensors;
    }
 
-   public List<Asset> filterAsset(Map<String, Asset> exsitingAsset, List<Asset> assetsFromPowerIQ) {
+   public List<Asset> filterSensorAsset(Map<String, Asset> exsitingAsset, List<Asset> assetsFromPowerIQ) {
       if (assetsFromPowerIQ == null || assetsFromPowerIQ.isEmpty()) {
          return null;
       } else if (exsitingAsset == null || exsitingAsset.isEmpty()) {
@@ -740,11 +751,8 @@ public class PowerIQService implements AsyncService {
          return;
       }
       PowerIQAPIClient client = createClient(powerIQ);
-
-      //only used to check the connection.
-      List<DataCenter> datacenters = null;
       try {
-         datacenters = client.getDataCenters();
+         client.testConnection();
       } catch (HttpClientErrorException e) {
          logger.error("Failed to query data from PowerIQ", e);
          IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
@@ -1199,42 +1207,6 @@ public class PowerIQService implements AsyncService {
       }
    }
 
-   /**
-    * Sync PDU from PowerIQ
-    * @param powerIQ
-    */
-   public void syncPDUFromPowerIQ(FacilitySoftwareConfig powerIQ) {
-      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      List<Asset> pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.PDU);
-      Map<String, Asset> pduIDAndAssetMap = getPDUIDAndAssetMap(pdusFromFlowgate);
-      PowerIQAPIClient client = createClient(powerIQ);
-      try {
-         client.getPdus(1, 1);
-      } catch (ResourceAccessException e1) {
-         if (e1.getCause().getCause() instanceof ConnectException) {
-            checkAndUpdateIntegrationStatus(powerIQ, e1.getMessage());
-            return;
-         }
-      } catch (HttpClientErrorException e) {
-         logger.error("Failed to query data from PowerIQ", e);
-         IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
-         if (integrationStatus == null) {
-            integrationStatus = new IntegrationStatus();
-         }
-         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-         integrationStatus.setDetail(e.getMessage());
-         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-         updateIntegrationStatus(powerIQ);
-         return;
-      }
-      List<Asset> pdusFromPowerIQ = getAllPduAssetsFromPowerIQ(powerIQ);
-      List<Asset> assetsToSave = getPduAssetsNeedtoSave(pduIDAndAssetMap,pdusFromPowerIQ);
-      if(assetsToSave.isEmpty()) {
-         logger.info("No pdu needed to update");
-      }
-      restClient.saveAssets(assetsToSave);
-   }
-
    public Map<String,Asset> getPDUIDAndAssetMap(List<Asset> pdusFromFlowgate){
       Map<String,Asset> pudIdAndAssetMap = new HashMap<String,Asset>();
       if(pdusFromFlowgate.isEmpty()) {
@@ -1250,6 +1222,7 @@ public class PowerIQService implements AsyncService {
                pduInfoMap = mapper.readValue(pduInfo, new TypeReference<Map<String,String>>() {});
             } catch (IOException e) {
                logger.error("Sync PDU from PowerIQ error",e.getCause());
+               continue;
             }
             pudIdAndAssetMap.put(pduInfoMap.get(FlowgateConstant.PDU_ID_FROM_POWERIQ), pdu);
          }
@@ -1357,30 +1330,21 @@ public class PowerIQService implements AsyncService {
       return pduRateInfo;
    }
 
-   private List<Asset> getAllPduAssetsFromPowerIQ(FacilitySoftwareConfig powerIQ) {
+   private List<Asset> getAllPduAssetsFromPowerIQ(String assetSource, PowerIQAPIClient client) {
       int limit = 100;
       int offset = 0;
-      PowerIQAPIClient client = createClient(powerIQ);
       List<Pdu> pdus = null;
       List<Asset> pduAssets = new ArrayList<>();
-      Map<Long, Rack> racksMap = getRacksMap(client);
-      Map<Long, Row> rowsMap = getRowsMap(client);
-      Map<Long, Aisle> aislesMap = getAislesMap(client);
-      Map<Long, Room> roomsMap = getRoomsMap(client);
-      Map<Long, Floor> floorsMap = getFloorsMap(client);
-      Map<Long, DataCenter> dataCentersMap = getDataCentersMap(client);
 
       while ((pdus = client.getPdus(limit, offset)) != null) {
          if (pdus.isEmpty()) {
             break;
          }
          for (Pdu pdu : pdus) {
-            Asset asset = new Asset();
-            asset = fillLocation(pdu.getParent(), racksMap, rowsMap, aislesMap, roomsMap, floorsMap,
-                  dataCentersMap);
+            Asset asset = fillLocation(pdu.getParent());
             asset.setAssetName(pdu.getName());
             asset.setSerialnumber(pdu.getSerialNumber());
-            asset.setAssetSource(powerIQ.getId());
+            asset.setAssetSource(assetSource);
             asset.setCategory(AssetCategory.PDU);
             asset.setCreated(System.currentTimeMillis());
             List<Outlet> outlets = client.getOutlets(pdu.getId());
@@ -1393,6 +1357,7 @@ public class PowerIQService implements AsyncService {
                inletString = generatePduInletString(inlets);
             } catch (JsonProcessingException e) {
                logger.info(String.format("Sync pdu metadata error",e.getCause()));
+               continue;
             }
             Map<String,String> pduInfo = generatePduRateInfoMap(pdu);
             if(outletString != null) {
@@ -1438,9 +1403,6 @@ public class PowerIQService implements AsyncService {
       ObjectMapper mapper = new ObjectMapper();
       for(Asset asset : pdusFromPowerIQ) {
          HashMap<String, String> justficationfields = asset.getJustificationfields();
-         if(justficationfields == null) {
-            continue;
-         }
          String pduInfo = justficationfields.get(FlowgateConstant.PDU);
          if(pduInfo == null) {
             continue;
