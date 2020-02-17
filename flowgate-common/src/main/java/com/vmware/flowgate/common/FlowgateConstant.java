@@ -58,6 +58,8 @@ public class FlowgateConstant {
 
    public static String PDU = "PDU";
 
+   public static String SENSOR = "SENSOR";
+
    public static String OUTLET_NAME_PREFIX = "OUTLET";
 
    public static String INLET_NAME_PREFIX = "INLET";

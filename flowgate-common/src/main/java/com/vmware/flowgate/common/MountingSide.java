@@ -5,5 +5,5 @@
 package com.vmware.flowgate.common;
 
 public enum MountingSide {
-   Front,Back,Unmounted
+   Front,Back,Unmounted,External
 }
