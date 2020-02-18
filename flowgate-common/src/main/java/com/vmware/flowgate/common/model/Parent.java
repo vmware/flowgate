@@ -6,14 +6,14 @@ package com.vmware.flowgate.common.model;
 
 public class Parent {
 
-   private ParentType type;
+   private String type;
    private String parentId;
 
-   public ParentType getType() {
+   public String getType() {
       return type;
    }
 
-   public void setType(ParentType type) {
+   public void setType(String type) {
       this.type = type;
    }
 
@@ -25,7 +25,4 @@ public class Parent {
       this.parentId = parentId;
    }
 
-   public enum ParentType {
-      PDU
-   }
 }
