@@ -14,9 +14,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +28,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.xml.sax.SAXException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vmware.flowgate.labsdb.client.LabsdbClient;
-import com.vmware.flowgate.labsdb.common.EndDevice;
-import com.vmware.flowgate.labsdb.config.ServiceKeyConfig;
-import com.vmware.flowgate.labsdb.util.WiremapSaxHandler;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.NetworkMapping;
 import com.vmware.flowgate.common.PduMapping;
-import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.IntegrationStatus;
@@ -46,6 +45,10 @@ import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.EventUser;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageImpl;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
+import com.vmware.flowgate.labsdb.client.LabsdbClient;
+import com.vmware.flowgate.labsdb.common.EndDevice;
+import com.vmware.flowgate.labsdb.config.ServiceKeyConfig;
+import com.vmware.flowgate.labsdb.util.WiremapSaxHandler;
 
 @Service
 public class LabsdbService implements AsyncService{
@@ -261,6 +264,7 @@ public class LabsdbService implements AsyncService{
          if (pduId != null) {
             pduIDList.add(pduId);
             device.setEndDeviceAssetId(pduId);
+            device.setEndPort(FlowgateConstant.OUTLET_NAME_PREFIX+device.getEndPort());
             String pduDevice = device.toString();
             pduDevices.add(pduDevice);
          } else {
