@@ -159,7 +159,7 @@ public class Asset implements Serializable, BaseDocument {
    private List<String> pdus;
    private List<String> switches;
    private AssetStatus status;
-
+   private Parent parent;
 
    public String getId() {
       return id;
@@ -439,4 +439,13 @@ public class Asset implements Serializable, BaseDocument {
       }
       return false;
    }
+
+   public Parent getParent() {
+      return parent;
+   }
+
+   public void setParent(Parent parent) {
+      this.parent = parent;
+   }
+
 }
