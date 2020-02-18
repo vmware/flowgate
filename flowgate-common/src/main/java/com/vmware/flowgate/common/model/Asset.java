@@ -153,6 +153,9 @@ public class Asset implements Serializable, BaseDocument {
    private Map<ServerSensorType, String> sensorsformulars =
          new HashMap<ServerSensorType, String>();
 
+   private Map<String, Map<String, Map<String, String>>> metricsformulars =
+         new HashMap<String, Map<String, Map<String, String>>>();
+
    private long lastupdate;
    private long created;
 
@@ -446,6 +449,14 @@ public class Asset implements Serializable, BaseDocument {
 
    public void setParent(Parent parent) {
       this.parent = parent;
+   }
+
+   public Map<String, Map<String, Map<String, String>>> getMetricsformulars() {
+      return metricsformulars;
+   }
+
+   public void setMetricsformulars(Map<String, Map<String, Map<String, String>>> metricsformulars) {
+      this.metricsformulars = metricsformulars;
    }
 
 }
