@@ -42,6 +42,8 @@ public class FlowgateConstant {
     */
    public static String NETWORK_PORT_FOR_SERVER = "NETWORK_PORT_FOR_SERVER";
 
+   public static String NETWORK = "NETWORK";
+
    public static String PDU_OUTLETS_FROM_POWERIQ = "PDU_OUTLETS_FROM_POWERIQ";
 
    public static String PDU_INLETS_FROM_POWERIQ = "PDU_INLETS_FROM_POWERIQ";
@@ -57,6 +59,8 @@ public class FlowgateConstant {
    public static String PDU_MAX_RATE_VOLTS = "PDU_MAX_RATE_VOLTS";
 
    public static String PDU = "PDU";
+
+   public static String SENSOR = "SENSOR";
 
    public static String OUTLET_NAME_PREFIX = "OUTLET";
 

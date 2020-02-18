@@ -65,7 +65,7 @@ public class EventMessageUtil {
    public static final String NLYTE_EXECOUNT = "nlyte.execount";
 
    public static final String PowerIQ_SyncRealtimeData="poweriq.syncrealtimedata";
-   public static final String PowerIQ_SyncSensorMetaData="poweriq.syncsensormetadata";
+   public static final String PowerIQ_SyncAssetsMetaData="poweriq.syncassetsmetadata";
    public static final String POWERIQ_SyncData= "poweriq.syncdata";
    public static final String PowerIQ_SyncAllPDUID = "poweriq.syncallpduid";
    public static final String PowerIQ_CleanInActiveAssetData="poweriq.cleaninactiveassetdata";

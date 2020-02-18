@@ -69,7 +69,7 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
             logger.info("Send Sync PowerIQ sensor metadata command");
             template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
                   EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
-                        EventMessageUtil.PowerIQ_SyncSensorMetaData, powerIQs));
+                        EventMessageUtil.PowerIQ_SyncAssetsMetaData, powerIQs));
          }
          if (syncPDUID) {
             logger.info("Send Sync all PDU ID command");

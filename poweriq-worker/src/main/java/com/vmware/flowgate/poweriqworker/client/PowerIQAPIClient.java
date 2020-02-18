@@ -49,7 +49,7 @@ public class PowerIQAPIClient {
    private static final String GetPdusURL = "/api/v2/pdus";
    private static final String GetPduByIdURL = "/api/v2/pdus/%s";
    private static final String GetSensorsURL = "/api/v2/sensors";
-
+   private static final String GetSensorsByPageURL = "/api/v2/sensors?order=id.asc&limit=%s&offset=%s";
    private static final String GetPDUsByPageURL = "/api/v2/pdus?order=id.asc&limit=%s&offset=%s";
    private static final String GetSensorByIdURL = "/api/v2/sensors/%s";
 
@@ -153,6 +153,18 @@ public class PowerIQAPIClient {
       List<Sensor> sensors = new ArrayList<Sensor>();
       ResponseEntity<SensorsResult> sensorsResult =
             this.restTemplate.exchange(getPowerIQServiceEndpoint() + GetSensorsURL, HttpMethod.GET,
+                  getDefaultEntity(), SensorsResult.class);
+      if (sensorsResult != null && sensorsResult.getBody() != null
+            && sensorsResult.getBody().getSensors() != null) {
+         sensors = sensorsResult.getBody().getSensors();
+      }
+      return sensors;
+   }
+
+   public List<Sensor> getSensors(int limit, int offset) {
+      List<Sensor> sensors = new ArrayList<Sensor>();
+      ResponseEntity<SensorsResult> sensorsResult =
+            this.restTemplate.exchange(getPowerIQServiceEndpoint() + String.format(GetSensorsByPageURL, limit, offset), HttpMethod.GET,
                   getDefaultEntity(), SensorsResult.class);
       if (sensorsResult != null && sensorsResult.getBody() != null
             && sensorsResult.getBody().getSensors() != null) {
@@ -267,5 +279,9 @@ public class PowerIQAPIClient {
          inlets = inletsResult.getBody().getInlets();
       }
       return inlets;
+   }
+
+   public void testConnection() {
+      getPdus(1, 1);
    }
 }
