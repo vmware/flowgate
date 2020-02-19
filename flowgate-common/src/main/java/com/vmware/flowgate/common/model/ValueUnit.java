@@ -68,7 +68,8 @@ public class ValueUnit {
    public enum ValueType {
       TEMP, HUMIDITY, PDU_RealtimeVoltage, PDU_RealtimeVoltagePercent, PDU_RealtimePower,
       PDU_RealtimePowerPercent, PDU_RealtimeLoad, PDU_RealtimeLoadPercent,AirFlow,AirPressure,
-      ContactClosure,Smoke,Water,Vibration
+      ContactClosure,Smoke,Water,Vibration,RealtimeVoltage,RealtimeActivePower,RealtimeApparentPower,
+      RealtimeLoad, RealtimeFreeCapacity
    }
 
    public enum MetricUnit {
