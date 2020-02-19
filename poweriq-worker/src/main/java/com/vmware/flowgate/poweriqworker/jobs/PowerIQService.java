@@ -489,6 +489,10 @@ public class PowerIQService implements AsyncService {
                   asset = fillLocation(sensor.getParent());
                } else {
                   //If the sensor's has pdu information. Then it can use the PDU's location info.
+                  com.vmware.flowgate.common.model.Parent parent = new com.vmware.flowgate.common.model.Parent();
+                  parent.setParentId(String.valueOf(sensor.getPduId()));
+                  parent.setType(FlowgateConstant.PDU);
+                  asset.setParent(parent);
                   asset.setRoom(pduAsset.getRoom());
                   asset.setFloor(pduAsset.getFloor());
                   asset.setBuilding(pduAsset.getBuilding());
@@ -516,7 +520,7 @@ public class PowerIQService implements AsyncService {
                assetToUpdate.setCountry(asset.getCountry());
                assetToUpdate.setRegion(asset.getRegion());
                assetToUpdate.setSerialnumber(sensor.getSerialNumber());
-
+               assetToUpdate.setParent(asset.getParent());
                HashMap<String, String> oldjustificationfields = assetToUpdate.getJustificationfields();
                Map<String,String> oldSensorInfoMap = null;
                try {
