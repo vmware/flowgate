@@ -256,7 +256,7 @@ public class PowerIQAPIClient {
       return dataCenters;
    }
 
-   public List<Outlet> getOutlets(long pduId){
+   public List<Outlet> getOutlets(Long pduId){
       List<Outlet> outlets = new ArrayList<Outlet>();
       ResponseEntity<OutletsResult> outletsResult =
             this.restTemplate.exchange(getPowerIQServiceEndpoint() + String.format(GetOutletsByPDUURL, pduId),
