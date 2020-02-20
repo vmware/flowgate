@@ -11,7 +11,7 @@ import com.vmware.flowgate.common.exception.WormholeException;
 
 public class ValueUnit {
    private String extraidentifier;//This property is used to describe some asset's attribute.
-   private ValueType key;
+   private String key;
    private String value;
    private double valueNum;
    private String unit;
@@ -57,35 +57,16 @@ public class ValueUnit {
       this.time = time;
    }
 
-   public ValueType getKey() {
+   public String getKey() {
       return key;
    }
 
-   public void setKey(ValueType key) {
+   public void setKey(String key) {
       this.key = key;
    }
 
-   public enum ValueType {
-      TEMP, HUMIDITY, PDU_RealtimeVoltage, PDU_RealtimeVoltagePercent, PDU_RealtimePower,
-      PDU_RealtimePowerPercent, PDU_RealtimeLoad, PDU_RealtimeLoadPercent,AirFlow,AirPressure,
-      ContactClosure,Smoke,Water,Vibration,RealtimeVoltage,RealtimeActivePower,RealtimeApparentPower,
-      RealtimeLoad, RealtimeFreeCapacity
-   }
-
    public enum MetricUnit {
-       MV(ValueType.PDU_RealtimeVoltage), V(ValueType.PDU_RealtimeVoltage), KV(ValueType.PDU_RealtimeVoltage), VOLTS(ValueType.PDU_RealtimeVoltage),
-       MW(ValueType.PDU_RealtimePower), W(ValueType.PDU_RealtimePower), KW(ValueType.PDU_RealtimePower), KWH(ValueType.PDU_RealtimePower),
-       MA(ValueType.PDU_RealtimeLoad), A(ValueType.PDU_RealtimeLoad), KA(ValueType.PDU_RealtimeLoad), AMPS(ValueType.PDU_RealtimeLoad),
-       C(ValueType.TEMP), F(ValueType.TEMP), PERCENT(ValueType.HUMIDITY)
-       ;
-
-       private final ValueType type;
-       private MetricUnit(ValueType t) {
-          this.type =t;
-       }
-       public ValueType getType() {
-          return type;
-       }
+       MV, V, KV, VOLTS, MW, W, KW, KWH, MA, A, KA, AMPS, C, F, PERCENT
    }
    private static final Map<MetricUnit, Double> unitMap =new HashMap<MetricUnit, Double>() {{
        put(MetricUnit.MV, 0.001);
@@ -107,9 +88,6 @@ public class ValueUnit {
    public String translateUnit(String val, MetricUnit sourceUnit, MetricUnit targetUnit) throws WormholeException  {
        if(sourceUnit == null || targetUnit == null) {
            throw new WormholeException("sourceUnit or targetUnit is NULL!");
-       }
-       if(sourceUnit.getType() != targetUnit.getType()) {
-           throw new WormholeException("error, sourceUnit and targetUnit is not same type!");
        }
        switch(sourceUnit) {
        case F:
