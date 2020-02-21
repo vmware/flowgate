@@ -1,17 +1,19 @@
 package com.vmware.flowgate.common;
 
 public class MetricName {
-   public static final String TEMP = "TEMP";
-   public static final String HUMIDITY = "HUMIDITY";
-   public static final String AIRFLOW = "AIRFLOW";
-   public static final String AIRPRESSURE = "AIRPRESSURE";
-   public static final String CONTACTCLOSURE = "CONTACTCLOSURE";
-   public static final String SMOKE = "SMOKE";
-   public static final String WATER = "WATER";
-   public static final String VIBRATION = "VIBRATION";
-   public static final String VOLTAGE = "VOLTAGE";
-   public static final String ACTIVE_POWER = "ACTIVEPOWER";
-   public static final String APPARENT_POWER = "APPARENTPOWER";
-   public static final String CURRENT = "CURRENT";
-   public static final String FREE_CAPACITY = "FREECAPACITY";
+   public static final String TEMPERATURE = "Temperature";
+   public static final String HUMIDITY = "Humidity";
+   public static final String AIRPRESSURE = "Airpressure";
+   public static final String CONTACTCLOSURE = "Contactclousre";
+   public static final String SMOKE = "Smoke";
+   public static final String VIBRATION = "Vibraion";
+   public static final String PDU_VOLTAGE = "Voltage";
+   public static final String PDU_ACTIVE_POWER = "Active_Power";
+   public static final String PDU_APPARENT_POWER = "Apparent_Power";
+   public static final String PDU_CURRENT = "Current";
+   public static final String PDU_FREE_CAPACITY = "Free_Capacity";
+   public static final String PDU_TOTAL_CURRENT = "Total_Current";
+   public static final String PDU_TOTAL_POWER = "Total_Power";
+   public static final String PDU_CURRENT_LOAD = "Current_Load";
+   public static final String PDU_POWER_LOAD = "Power_Load";
 }

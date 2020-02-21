@@ -4,9 +4,6 @@
 */
 package com.vmware.flowgate.common.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.vmware.flowgate.common.exception.WormholeException;
 
 public class ValueUnit {
@@ -66,29 +63,33 @@ public class ValueUnit {
    }
 
    public enum MetricUnit {
-       MV, V, KV, VOLTS, MW, W, KW, KWH, MA, A, KA, AMPS, C, F, PERCENT
+       MV("VOLTAGE",0.001), V("VOLTAGE",1), KV("VOLTAGE",1000), VOLTS("VOLTAGE",1),
+       MW("POWER",0.001), W("POWER",1), KW("POWER",1000), KWH("POWER",1000),
+       MA("CURRRNT",0.001), A("CURRENT",1), KA("CURRENT",1000), AMPS("CURRENT",1),
+       C("TEMPRETURE",1), F("TEMPRETURE",1), PERCENT("PERCENT",1);
+
+       private final String group;
+       private final double factor;
+
+       private MetricUnit(String group, double factor) {
+          this.group = group;
+          this.factor = factor;
+       }
+      public String getGroup() {
+         return group;
+      }
+      public double getFactor() {
+         return factor;
+      }
    }
-   private static final Map<MetricUnit, Double> unitMap =new HashMap<MetricUnit, Double>() {{
-       put(MetricUnit.MV, 0.001);
-       put(MetricUnit.KV, (double) 1000);
-       put(MetricUnit.V, (double) 1);
-       put(MetricUnit.VOLTS, (double) 1);
-       put(MetricUnit.MA, 0.001);
-       put(MetricUnit.KA, (double) 1000);
-       put(MetricUnit.A, (double) 1);
-       put(MetricUnit.AMPS, (double) 1);
-       put(MetricUnit.MW, 0.001);
-       put(MetricUnit.KW, (double) 1000);
-       put(MetricUnit.KWH, (double) 1000);
-       put(MetricUnit.W, (double) 1);
-       put(MetricUnit.C, (double) 1);
-       put(MetricUnit.F, (double) 1);
-   }};
 
    public String translateUnit(String val, MetricUnit sourceUnit, MetricUnit targetUnit) throws WormholeException  {
        if(sourceUnit == null || targetUnit == null) {
            throw new WormholeException("sourceUnit or targetUnit is NULL!");
        }
+       if(sourceUnit.getGroup() != targetUnit.getGroup()) {
+          throw new WormholeException("error, sourceUnit and targetUnit is not a same group!");
+      }
        switch(sourceUnit) {
        case F:
              if(targetUnit == MetricUnit.C) {
@@ -102,21 +103,8 @@ public class ValueUnit {
              }else if(targetUnit == MetricUnit.F) {
                  return String.valueOf((Double.parseDouble(val)*9/5 +32));
              }
-       case KWH:
-       case KW:
-       case W:
-       case MW:
-       case KA:
-       case A:
-       case AMPS:
-       case MA:
-       case KV:
-       case V:
-       case VOLTS:
-       case MV:
-           return String.valueOf(Double.parseDouble(val) * (unitMap.get(sourceUnit)/unitMap.get(targetUnit)));
        default:
-           return val;
+          return String.valueOf((Double.parseDouble(val) * sourceUnit.getFactor())/targetUnit.getFactor());
        }
    }
 }
