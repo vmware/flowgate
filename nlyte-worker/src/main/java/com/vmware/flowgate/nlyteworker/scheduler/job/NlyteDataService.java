@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
@@ -39,7 +40,6 @@ import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
-import com.vmware.flowgate.common.model.ValueUnit.ValueType;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
@@ -79,15 +79,15 @@ public class NlyteDataService implements AsyncService {
    private static final String RealtimeLoad = "RealtimeLoad";
    private static final String RealtimePower = "RealtimePower";
    private static final String RealtimeVoltage = "RealtimeVoltage";
-   private static Map<String, ValueType> sensorValueTypeMap = new HashMap<String, ValueType>();
+   private static Map<String, String> sensorValueTypeMap = new HashMap<String, String>();
    private static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
    static {
       sensorType.add(ServerSensorType.PDU_RealtimeVoltage);
       sensorType.add(ServerSensorType.PDU_RealtimeLoad);
       sensorType.add(ServerSensorType.PDU_RealtimePower);
-      sensorValueTypeMap.put(RealtimeLoad, ValueType.PDU_RealtimeLoad);
-      sensorValueTypeMap.put(RealtimePower, ValueType.PDU_RealtimePower);
-      sensorValueTypeMap.put(RealtimeVoltage, ValueType.PDU_RealtimeVoltage);
+      sensorValueTypeMap.put(RealtimeLoad, MetricName.PDU_TOTAL_CURRENT);
+      sensorValueTypeMap.put(RealtimePower, MetricName.PDU_TOTAL_POWER);
+      sensorValueTypeMap.put(RealtimeVoltage, MetricName.PDU_VOLTAGE);
       sensorType = Collections.unmodifiableList(sensorType);
       sensorValueTypeMap = Collections.unmodifiableMap(sensorValueTypeMap);
    }
@@ -717,7 +717,7 @@ public class NlyteDataService implements AsyncService {
 
             MetricUnit targetUnit = null, sourceUnit = null;
             switch (sensorValueTypeMap.get(value.getName())) {
-            case PDU_RealtimeLoad:
+            case MetricName.PDU_TOTAL_CURRENT:
                if (unit != null && !unit.isEmpty()) {
                   sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
                } else {
@@ -725,7 +725,7 @@ public class NlyteDataService implements AsyncService {
                }
                targetUnit = MetricUnit.A;
                break;
-            case PDU_RealtimePower:
+            case MetricName.PDU_TOTAL_POWER:
                if (unit != null && !unit.isEmpty()) {
                   sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
                } else {
@@ -733,7 +733,7 @@ public class NlyteDataService implements AsyncService {
                }
                targetUnit = MetricUnit.KW;
                break;
-            case PDU_RealtimeVoltage:
+            case MetricName.PDU_VOLTAGE:
                if (unit != null && !unit.isEmpty()) {
                   sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
                } else {
