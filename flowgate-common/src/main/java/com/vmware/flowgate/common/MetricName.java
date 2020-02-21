@@ -16,4 +16,15 @@ public class MetricName {
    public static final String PDU_TOTAL_POWER = "Total_Power";
    public static final String PDU_CURRENT_LOAD = "Current_Load";
    public static final String PDU_POWER_LOAD = "Power_Load";
+
+   public static final String SERVER_FRONT_TEMPERATURE = "Front_Temperature";
+   public static final String SERVER_BACK_TEMPREATURE = "Back_Temperature";
+   public static final String SERVER_HUMIDITY = "Humidity";
+   public static final String SERVER_TOTAL_CURRENT = "Total_Current";
+   public static final String SERVER_TOTAL_POWER = "Total_Power";
+   public static final String SERVER_VOLTAGE = "Voltage";
+   public static final String SERVER_CONNECTED_PDU_CURRENT = "Pdu_Current";
+   public static final String SERVER_CONNECTED_PDU_POWER = "Pdu_Power";
+   public static final String SERVER_USED_PDU_OUTLET_CURRENT = "Outlet_Current";
+   public static final String SERVER_USED_PDU_OUTLET_POWER = "Outlet_Power";
 }
