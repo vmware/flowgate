@@ -44,6 +44,7 @@ public class EventMessageUtil {
    public static final String SyncTemperatureAndHumiditySensors = "tempandhumiditymapping";
    public static final String FullSyncTemperatureAndHumiditySensors = "fullsynctempandhumiditymapping";
    public static final String CleanRealtimeData = "cleanRealtimeData";
+   public static final String AggregateAndCleanPowerIQPDU = "aggregateandcleanpoweriqpdu";
 
    public static final String AGGREGATOR_EXECOUNT = "aggregator.execount";
 
