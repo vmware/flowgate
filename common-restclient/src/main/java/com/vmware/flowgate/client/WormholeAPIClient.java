@@ -121,6 +121,10 @@ public class WormholeAPIClient extends RestClientBase {
       return apiServiceEndpoint;
    }
 
+   public void setAPIServiceEndpoint(String url) {
+      this.apiServiceEndpoint = url;
+   }
+
    public void initAuthenticationWebToken() {
       long time = System.currentTimeMillis();
       if (time > expired_time) {
