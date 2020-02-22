@@ -15,7 +15,7 @@ public class VROConsts {
          "This Alert will be triggerd when the host's front or back panel temperature is above the threshold.";
    public static final String ALERT_DEFINITION_HUMIDITY_NAME = "The humidity is abnormal";
    public static final String ALERT_DEFINITION_HUMIDITY_DESCRIPTION =
-         "The envrionment huimdity is above the threshold";
+         "The environment huimdity is above the threshold";
    public static final String ALERT_DEFINITION_PDU_POWER_NAME = "The PDU load is too high";
    public static final String ALERT_DEFINITION_PDU_POWER_DESCRIPTION =
          "The alert will triggered when the PDU AMPS load is above the defined shreshold";
@@ -26,25 +26,25 @@ public class VROConsts {
    public static final String SYMPTOM_HOSTSYSTEM_BACK_TEMPERATURE_NAME =
          "Host back panel temperature is too high";
    public static final String SYMPTOM_HOSTSYSTEM_HUMIDITY_NAME =
-         "Host envrionment humidity is too high";
+         "Host environment humidity is too high";
    public static final String SYMPTOM_HOSTSYSTEM_POWER_NAME = "The connected PDU is over loaded";
 
 
    public static final String ENVRIONMENT_FRONT_TEMPERATURE_METRIC =
-         "Envrionment|FrontTemperature(°C)";
+         "Environment|FrontTemperature(°C)";
    public static final String ENVRIONMENT_BACK_TEMPERATURE_METRIC =
-         "Envrionment|BackTemperature(°C)";
+         "Environment|BackTemperature(°C)";
    public static final String ENVRIONMENT_HOSTSENSOR_TEMPERATURE_METRIC =
-         "Envrionment|BiosTemperature(°C)";
-   public static final String ENVRIONMENT_PDU_AMPS_LOAD_METRIC = "Envrionment|PDU AMPS(%)";
-   public static final String ENVRIONMENT_PDU_VOLTS_LOAD_METRIC = "Envrionment|PDU VOLTS(%)";
-   public static final String ENVRIONMENT_PDU_POWER_LOAD_METRIC = "Envrionment|PDU POWER(%)";
-   public static final String ENVRIONMENT_PDU_POWER_METRIC="Envrionment|PDU Power";
-   public static final String ENVRIONMENT_PDU_AMPS_METRIC = "Envrionment|PDU AMPS";
-   public static final String ENVRIONMENT_PDU_VOLTS_METRIC = "Envrionment|PDU VOLTS";
-   public static final String ENVRIONMENT_HOST_AMPS_METRIC = "Envrionment|AMPS(A)";
-   public static final String ENVRIONMENT_HOST_VOLTS_METRIC = "Envrionment|VOLTS(V)";
-   public static final String ENVRIONMENT_HUMIDITY_METRIC = "Envrionment|Humidity(%)";
+         "Environment|BiosTemperature(°C)";
+   public static final String ENVRIONMENT_PDU_AMPS_LOAD_METRIC = "Environment|PDU AMPS(%)";
+   public static final String ENVRIONMENT_PDU_VOLTS_LOAD_METRIC = "Environment|PDU VOLTS(%)";
+   public static final String ENVRIONMENT_PDU_POWER_LOAD_METRIC = "Environment|PDU POWER(%)";
+   public static final String ENVRIONMENT_PDU_POWER_METRIC = "Environment|PDU Power";
+   public static final String ENVRIONMENT_PDU_AMPS_METRIC = "Environment|PDU AMPS";
+   public static final String ENVRIONMENT_PDU_VOLTS_METRIC = "Environment|PDU VOLTS";
+   public static final String ENVRIONMENT_HOST_AMPS_METRIC = "Environment|AMPS(A)";
+   public static final String ENVRIONMENT_HOST_VOLTS_METRIC = "Environment|VOLTS(V)";
+   public static final String ENVRIONMENT_HUMIDITY_METRIC = "Environment|Humidity(%)";
 
    public static final String LOCATION_REGION = "Location|Region";
    public static final String LOCATION_COUNTRY = "Location|Country";
