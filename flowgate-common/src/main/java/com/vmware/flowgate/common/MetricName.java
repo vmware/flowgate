@@ -7,6 +7,8 @@ public class MetricName {
    public static final String CONTACTCLOSURE = "Contactclousre";
    public static final String SMOKE = "Smoke";
    public static final String VIBRATION = "Vibraion";
+   public static final String WATER_FLOW = "Water_Flow";
+   public static final String AIR_FLOW = "Air_Flow";
    public static final String PDU_VOLTAGE = "Voltage";
    public static final String PDU_ACTIVE_POWER = "Active_Power";
    public static final String PDU_APPARENT_POWER = "Apparent_Power";
