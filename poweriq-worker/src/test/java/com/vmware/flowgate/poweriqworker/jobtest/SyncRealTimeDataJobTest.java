@@ -73,7 +73,9 @@ public class SyncRealTimeDataJobTest {
    public void testGetValueUnits() {
       Mockito.when(this.powerIQAPIClient.getInlets(anyLong())).thenReturn(new ArrayList<Inlet>());
       Mockito.when(this.powerIQAPIClient.getOutlets(anyLong())).thenReturn(new ArrayList<Outlet>());
-      List<ValueUnit> valueUnits = powerIQService.getValueUnits("123", powerIQAPIClient, null);
+      Map<String,String> pduInfoMap = new HashMap<String,String>();
+      pduInfoMap.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, "123");
+      List<ValueUnit> valueUnits = powerIQService.getValueUnits(pduInfoMap, powerIQAPIClient, null);
       TestCase.assertEquals(true, valueUnits.isEmpty());
    }
 
@@ -81,39 +83,56 @@ public class SyncRealTimeDataJobTest {
    public void testGetValueUnits3() {
       Mockito.when(this.powerIQAPIClient.getInlets(128L)).thenReturn(getInlets());
       Mockito.when(this.powerIQAPIClient.getOutlets(128L)).thenReturn(getOutlets());
-      List<ValueUnit> valueUnits = powerIQService.getValueUnits("128", powerIQAPIClient, createAdvanceSettingMap());
-      TestCase.assertEquals(10, valueUnits.size());
+      Map<String,String> pduInfoMap = new HashMap<String,String>();
+      pduInfoMap.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, "128");
+      List<ValueUnit> valueUnits = powerIQService.getValueUnits(pduInfoMap, powerIQAPIClient, createAdvanceSettingMap());
+      TestCase.assertEquals(12, valueUnits.size());
       for(ValueUnit valueunit : valueUnits) {
-         if(valueunit.getExtraidentifier().equals(FlowgateConstant.INLET_NAME_PREFIX + 1)) {
+         String extraidentifier = valueunit.getExtraidentifier();
+         if(extraidentifier != null) {
+            if(extraidentifier.equals(FlowgateConstant.INLET_NAME_PREFIX + 1)) {
+               switch (valueunit.getKey()) {
+               case MetricName.PDU_ACTIVE_POWER:
+                  TestCase.assertEquals(getInlets().get(0).getReading().getActivePower()/1000, valueunit.getValueNum());
+                  break;
+               case MetricName.PDU_VOLTAGE:
+                  TestCase.assertEquals(getInlets().get(0).getReading().getVoltage(), valueunit.getValueNum());
+                  break;
+               case MetricName.PDU_CURRENT:
+                  TestCase.assertEquals(getInlets().get(0).getReading().getCurrent(), valueunit.getValueNum());
+                  break;
+               default:
+                  break;
+               }
+            }else if(valueunit.getExtraidentifier().equals(FlowgateConstant.OUTLET_NAME_PREFIX + 1)) {
+               switch (valueunit.getKey()) {
+               case MetricName.PDU_ACTIVE_POWER:
+                  TestCase.assertEquals(getOutlets().get(0).getReading().getActivePower()/1000, valueunit.getValueNum());
+                  break;
+               case MetricName.PDU_VOLTAGE:
+                  TestCase.assertEquals(getOutlets().get(0).getReading().getVoltage(), valueunit.getValueNum());
+                  break;
+               case MetricName.PDU_CURRENT:
+                  TestCase.assertEquals(getOutlets().get(0).getReading().getCurrent(), valueunit.getValueNum());
+                  break;
+               default:
+                  break;
+               }
+            }else {
+               TestCase.fail();
+            }
+         }else {
             switch (valueunit.getKey()) {
-            case MetricName.ACTIVE_POWER:
-               TestCase.assertEquals(getInlets().get(0).getReading().getActivePower()/1000, valueunit.getValueNum());
+            case MetricName.PDU_TOTAL_POWER:
+               TestCase.assertEquals(getInlets().get(0).getReading().getApparentPower()/1000, valueunit.getValueNum());
                break;
-            case MetricName.VOLTAGE:
-               TestCase.assertEquals(getInlets().get(0).getReading().getVoltage(), valueunit.getValueNum());
-               break;
-            case MetricName.CURRENT:
+            case MetricName.PDU_TOTAL_CURRENT:
                TestCase.assertEquals(getInlets().get(0).getReading().getCurrent(), valueunit.getValueNum());
                break;
             default:
+               TestCase.fail();
                break;
             }
-         }else if(valueunit.getExtraidentifier().equals(FlowgateConstant.OUTLET_NAME_PREFIX + 1)) {
-            switch (valueunit.getKey()) {
-            case MetricName.ACTIVE_POWER:
-               TestCase.assertEquals(getOutlets().get(0).getReading().getActivePower()/1000, valueunit.getValueNum());
-               break;
-            case MetricName.VOLTAGE:
-               TestCase.assertEquals(getOutlets().get(0).getReading().getVoltage(), valueunit.getValueNum());
-               break;
-            case MetricName.CURRENT:
-               TestCase.assertEquals(getOutlets().get(0).getReading().getCurrent(), valueunit.getValueNum());
-               break;
-            default:
-               break;
-            }
-         }else {
-            TestCase.fail();
          }
 
       }
@@ -127,8 +146,8 @@ public class SyncRealTimeDataJobTest {
 
    @Test
    public void testGetRealTimeDatas1() {
-      Map<String, String> pdus = new HashMap<String, String>();
-      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(pdus,powerIQAPIClient,null);
+      Map<String,Map<String,String>> map = new HashMap<String,Map<String,String>>();
+      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(map,powerIQAPIClient,null);
       TestCase.assertEquals(true, realTimeDatas.isEmpty());
    }
 
@@ -136,13 +155,15 @@ public class SyncRealTimeDataJobTest {
    public void testGetRealTimeDatas2() {
       Mockito.when(this.powerIQAPIClient.getInlets(128L)).thenReturn(getInlets());
       Mockito.when(this.powerIQAPIClient.getOutlets(128L)).thenReturn(getOutlets());
-      Map<String, String> pdusMap = new HashMap<String, String>();
-      pdusMap.put("123", "128");
+      Map<String,String> pduInfoMap = new HashMap<String,String>();
+      pduInfoMap.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, "128");
+      Map<String,Map<String,String>> map = new HashMap<String,Map<String,String>>();
+      map.put("123", pduInfoMap);
       HashMap<AdvanceSettingType,String> advanceSetting = createAdvanceSettingMap();
       advanceSetting.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
       advanceSetting.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.V.toString());
       advanceSetting.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
-      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(pdusMap, powerIQAPIClient, advanceSetting);
+      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(map, powerIQAPIClient, advanceSetting);
       TestCase.assertEquals("123", realTimeDatas.get(0).getAssetID());
    }
 
