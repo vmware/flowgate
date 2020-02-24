@@ -167,7 +167,6 @@ public class AggregatorService implements AsyncService {
          return;
       }
       List<Asset> pdus = restClient.getAllAssetsByType(AssetCategory.PDU);
-      List<Asset> pdusNeedToUpdate = new ArrayList<Asset>();
       ObjectMapper mapper = new ObjectMapper();
       for(Asset pdu : pdus) {
          Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pdu.getAssetName().toLowerCase());
@@ -177,7 +176,7 @@ public class AggregatorService implements AsyncService {
             pdu.setAssetSource(pdu.getAssetSource() + FlowgateConstant.SPILIT_FLAG + pduFromPowerIQ.getId());
             if(pduExtraInfo == null || pduExtraInfo.isEmpty()) {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
-               pdusNeedToUpdate.add(pdu);
+               restClient.saveAssets(pdu);
                continue;
             }
             String pduInfo = pduFromPowerIQExtraInfo.get(FlowgateConstant.PDU);
@@ -187,7 +186,7 @@ public class AggregatorService implements AsyncService {
             String oldPduInfo = pduExtraInfo.get(FlowgateConstant.PDU);
             if(oldPduInfo == null) {
                pduExtraInfo.put(FlowgateConstant.PDU, pduInfo);
-               pdusNeedToUpdate.add(pdu);
+               restClient.saveAssets(pdu);
                continue;
             }
             Map<String,String> pduInfoMap = null;
@@ -213,10 +212,9 @@ public class AggregatorService implements AsyncService {
             } catch (JsonProcessingException e) {
                logger.error("Format pdu extra info error",e.getCause());
             }
-            pdusNeedToUpdate.add(pdu);
+            restClient.saveAssets(pdu);
          }
       }
-      restClient.saveAssets(pdusNeedToUpdate);
       logger.info("Finish aggregate pdu from PowerIQ to other systems");
 
       for(Map.Entry<String, Asset> map : pdusOnlyFromPowerIQ.entrySet()) {
