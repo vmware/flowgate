@@ -4,10 +4,13 @@
 */
 package com.vmware.flowgate.poweriqworker.jobtest;
 
+import static org.mockito.Matchers.anyLong;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,20 +25,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.vmware.flowgate.poweriqworker.client.PowerIQAPIClient;
-import com.vmware.flowgate.poweriqworker.jobs.PowerIQService;
-import com.vmware.flowgate.poweriqworker.model.InletReading;
-import com.vmware.flowgate.poweriqworker.model.Pdu;
-import com.vmware.flowgate.poweriqworker.model.Reading;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
+import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
+import com.vmware.flowgate.poweriqworker.client.PowerIQAPIClient;
+import com.vmware.flowgate.poweriqworker.jobs.PowerIQService;
+import com.vmware.flowgate.poweriqworker.model.Inlet;
+import com.vmware.flowgate.poweriqworker.model.InletReading;
+import com.vmware.flowgate.poweriqworker.model.Outlet;
+import com.vmware.flowgate.poweriqworker.model.OutletReading;
+import com.vmware.flowgate.poweriqworker.model.Pdu;
 
 import junit.framework.TestCase;
 
@@ -64,129 +71,79 @@ public class SyncRealTimeDataJobTest {
 
    @Test
    public void testGetValueUnits() {
-      Pdu pdu = null;
-      List<ValueUnit> valueUnits = powerIQService.getValueUnits(pdu,null);
+      Mockito.when(this.powerIQAPIClient.getInlets(anyLong())).thenReturn(new ArrayList<Inlet>());
+      Mockito.when(this.powerIQAPIClient.getOutlets(anyLong())).thenReturn(new ArrayList<Outlet>());
+      List<ValueUnit> valueUnits = powerIQService.getValueUnits("123", powerIQAPIClient, null);
       TestCase.assertEquals(true, valueUnits.isEmpty());
-   }
-
-   @Test
-   public void testGetValueUnits1() {
-      Pdu pdu = createPdu();
-      List<ValueUnit> valueUnits = powerIQService.getValueUnits(pdu,null);
-      TestCase.assertEquals(true, valueUnits.isEmpty());
-   }
-
-   @Test
-   public void testGetValueUnits2() {
-      Pdu pdu = createPdu();
-      Reading reading = new Reading();
-      pdu.setReading(reading);
-      List<ValueUnit> valueUnits = powerIQService.getValueUnits(pdu,null);
-      TestCase.assertEquals(true, valueUnits.isEmpty());
-
    }
 
    @Test
    public void testGetValueUnits3() {
-      Pdu pdu = createPdu();
-      Reading reading = new Reading();
-      pdu.setReading(reading);
-      List<InletReading> inletReadings = new ArrayList<InletReading>();
-      reading.setInletReadings(inletReadings);
-      List<ValueUnit> valueUnits = powerIQService.getValueUnits(pdu,createAdvanceSettingMap());
-      TestCase.assertEquals(0, valueUnits.size());
-
-   }
-
-   @Test
-   public void testGetValueUnits4() {
-      Pdu pdu = createPdu();
-      Reading reading = new Reading();
-      List<InletReading> inletReadings = new ArrayList<InletReading>();
-      InletReading inletReading1 = createInletReading();
-      InletReading inletReading2 = createInletReading();
-      inletReadings.add(inletReading1);
-      inletReadings.add(inletReading2);
-      reading.setInletReadings(inletReadings);
-      pdu.setReading(reading);
-      HashMap<AdvanceSettingType,String> advanceSetting = createAdvanceSettingMap();
-      advanceSetting.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.W.toString());
-      advanceSetting.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.KV.toString());
-      advanceSetting.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
-      List<ValueUnit> valueUnits = powerIQService.getValueUnits(pdu, advanceSetting);
-      for (ValueUnit valueUnit : valueUnits) {
-         switch (valueUnit.getKey()) {
-         case PDU_RealtimeVoltage:
-            TestCase.assertEquals(200000.0, valueUnit.getValueNum());
-            continue;
-         case PDU_RealtimeLoad:
-            TestCase.assertEquals(2.4, valueUnit.getValueNum());
-            continue;
-         case PDU_RealtimePower:
-            TestCase.assertEquals(0.04, valueUnit.getValueNum());
-            continue;
-         default:
-            break;
+      Mockito.when(this.powerIQAPIClient.getInlets(128L)).thenReturn(getInlets());
+      Mockito.when(this.powerIQAPIClient.getOutlets(128L)).thenReturn(getOutlets());
+      List<ValueUnit> valueUnits = powerIQService.getValueUnits("128", powerIQAPIClient, createAdvanceSettingMap());
+      TestCase.assertEquals(10, valueUnits.size());
+      for(ValueUnit valueunit : valueUnits) {
+         if(valueunit.getExtraidentifier().equals(FlowgateConstant.INLET_NAME_PREFIX + 1)) {
+            switch (valueunit.getKey()) {
+            case MetricName.ACTIVE_POWER:
+               TestCase.assertEquals(getInlets().get(0).getReading().getActivePower()/1000, valueunit.getValueNum());
+               break;
+            case MetricName.VOLTAGE:
+               TestCase.assertEquals(getInlets().get(0).getReading().getVoltage(), valueunit.getValueNum());
+               break;
+            case MetricName.CURRENT:
+               TestCase.assertEquals(getInlets().get(0).getReading().getCurrent(), valueunit.getValueNum());
+               break;
+            default:
+               break;
+            }
+         }else if(valueunit.getExtraidentifier().equals(FlowgateConstant.OUTLET_NAME_PREFIX + 1)) {
+            switch (valueunit.getKey()) {
+            case MetricName.ACTIVE_POWER:
+               TestCase.assertEquals(getOutlets().get(0).getReading().getActivePower()/1000, valueunit.getValueNum());
+               break;
+            case MetricName.VOLTAGE:
+               TestCase.assertEquals(getOutlets().get(0).getReading().getVoltage(), valueunit.getValueNum());
+               break;
+            case MetricName.CURRENT:
+               TestCase.assertEquals(getOutlets().get(0).getReading().getCurrent(), valueunit.getValueNum());
+               break;
+            default:
+               break;
+            }
+         }else {
+            TestCase.fail();
          }
+
       }
    }
 
    @Test
    public void testGetRealTimeDatas() {
-      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(null,null);
+      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(null,powerIQAPIClient,null);
       TestCase.assertEquals(true, realTimeDatas.isEmpty());
    }
 
    @Test
    public void testGetRealTimeDatas1() {
-      Map<String, Pdu> pdus = new HashMap<String, Pdu>();
-      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(pdus,null);
+      Map<String, String> pdus = new HashMap<String, String>();
+      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(pdus,powerIQAPIClient,null);
       TestCase.assertEquals(true, realTimeDatas.isEmpty());
    }
 
    @Test
    public void testGetRealTimeDatas2() {
-      Map<String, Pdu> pdusMap = new HashMap<String, Pdu>();
-      Pdu pdu = createPdu();
-      Reading reading = new Reading();
-      List<InletReading> inletReadings = new ArrayList<InletReading>();
-      InletReading inletReading1 = createInletReading();
-      InletReading inletReading2 = createInletReading();
-      inletReadings.add(inletReading1);
-      inletReadings.add(inletReading2);
-      reading.setInletReadings(inletReadings);
-      pdu.setReading(reading);
-      pdusMap.put("123", pdu);
+      Mockito.when(this.powerIQAPIClient.getInlets(128L)).thenReturn(getInlets());
+      Mockito.when(this.powerIQAPIClient.getOutlets(128L)).thenReturn(getOutlets());
+      Map<String, String> pdusMap = new HashMap<String, String>();
+      pdusMap.put("123", "128");
       HashMap<AdvanceSettingType,String> advanceSetting = createAdvanceSettingMap();
       advanceSetting.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
-      advanceSetting.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.KV.toString());
+      advanceSetting.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.V.toString());
       advanceSetting.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
-      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(pdusMap, advanceSetting);
+      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(pdusMap, powerIQAPIClient, advanceSetting);
       TestCase.assertEquals("123", realTimeDatas.get(0).getAssetID());
-   }
-   
-   @Test
-   public void testGetRealTimeDatas3() {
-      Map<String, Pdu> pdusMap = new HashMap<String, Pdu>();
-      HashMap<AdvanceSettingType,String> advanceSetting = new HashMap<AdvanceSettingType, String>();
-      advanceSetting.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
-      advanceSetting.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.KV.toString());
-      advanceSetting.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
-      advanceSetting.put(AdvanceSettingType.DateFormat, "yyyy/MM/dd HH:mm:ss Z");
-      Pdu pdu = createPdu();
-      Reading reading = new Reading();
-      List<InletReading> inletReadings = new ArrayList<InletReading>();
-      InletReading inletReading1 = createInletReading();
-      InletReading inletReading2 = createInletReading();
-      inletReadings.add(inletReading1);
-      inletReadings.add(inletReading2);
-      reading.setInletReadings(inletReadings);
-      pdu.setReading(reading);
-      pdusMap.put("123", pdu);
-      List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(pdusMap, advanceSetting);
-      TestCase.assertEquals(40.0, realTimeDatas.get(0).getValues().get(2).getValueNum());
-      TestCase.assertEquals(2.4, realTimeDatas.get(0).getValues().get(1).getValueNum());
-      TestCase.assertEquals(200000.0, realTimeDatas.get(0).getValues().get(0).getValueNum());
    }
 
    @Test
@@ -255,7 +212,7 @@ public class SyncRealTimeDataJobTest {
       advanceSettingMap.put(AdvanceSettingType.DateFormat, "yyyy/MM/dd HH:mm:ss Z");
       return advanceSettingMap;
    }
-   
+
    Asset createAsset() {
       Asset asset = new Asset();
       asset.setAssetName("pek-wor-pdu-02");
@@ -292,5 +249,46 @@ public class SyncRealTimeDataJobTest {
       inletReading.setVoltage(200.0);
       inletReading.setReadingTime("2018/10/18 05:57:26 +0300");
       return inletReading;
+   }
+
+   List<Outlet> getOutlets() {
+      Outlet outlet = new Outlet();
+      List<Outlet> outlets = new ArrayList<Outlet>();
+      outlet.setId(12L);
+      outlet.setName("Outlet1");
+      outlet.setOrdinal(1L);
+      outlet.setPduId(128L);
+      outlet.setRatedAmps(10.2);
+      OutletReading reading = new OutletReading();
+      reading.setCurrent(24.2);
+      reading.setApparentPower(29.0);
+      reading.setVoltage(200.0);
+      reading.setReadingTime("2018/10/18 05:57:26 +0300");
+      reading.setActivePower(27.6);
+      reading.setUnutilizedCapacity(15.2);
+      outlet.setReading(reading);
+      outlets.add(outlet);
+      return outlets;
+   }
+
+   List<Inlet> getInlets() {
+      Inlet inlet = new Inlet();
+      List<Inlet> inlets = new ArrayList<Inlet>();
+      inlet.setId(23L);
+      inlet.setOrdinal(1);
+      inlet.setPduId(128L);
+      inlet.setPueIt(true);
+      inlet.setPueTotal(true);
+      inlet.setSource(true);
+      InletReading inletReading = new InletReading();
+      inletReading.setCurrent(1.2);
+      inletReading.setApparentPower(20.0);
+      inletReading.setVoltage(200.0);
+      inletReading.setReadingTime("2018/10/18 05:57:26 +0300");
+      inletReading.setActivePower(26.6);
+      inletReading.setUnutilizedCapacity(15.2);
+      inlet.setReading(inletReading);
+      inlets.add(inlet);
+      return inlets;
    }
 }

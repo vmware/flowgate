@@ -31,6 +31,7 @@ import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.RealtimeDataUnit;
 import com.vmware.flowgate.common.exception.WormholeException;
@@ -44,7 +45,6 @@ import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
-import com.vmware.flowgate.common.model.ValueUnit.ValueType;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
@@ -60,6 +60,7 @@ import com.vmware.flowgate.poweriqworker.model.Floor;
 import com.vmware.flowgate.poweriqworker.model.Inlet;
 import com.vmware.flowgate.poweriqworker.model.InletReading;
 import com.vmware.flowgate.poweriqworker.model.Outlet;
+import com.vmware.flowgate.poweriqworker.model.OutletReading;
 import com.vmware.flowgate.poweriqworker.model.Parent;
 import com.vmware.flowgate.poweriqworker.model.Pdu;
 import com.vmware.flowgate.poweriqworker.model.Rack;
@@ -103,7 +104,7 @@ public class PowerIQService implements AsyncService {
    private static Map<String, AssetSubCategory> subCategoryMap =
          new HashMap<String, AssetSubCategory>();
    public static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
-   public static Map<String, ValueType> sensorValueType = new HashMap<String, ValueType>();
+   public static Map<String, String> sensorValueType = new HashMap<String, String>();
    public static Map<AssetSubCategory, ServerSensorType> serverSensorTypeAndsubCategory =
          new HashMap<AssetSubCategory, ServerSensorType>();
    private static Map<String, MountingSide> sensorMountingSide =
@@ -120,20 +121,21 @@ public class PowerIQService implements AsyncService {
       sensorType.add(ServerSensorType.HUMIDITY);
       sensorType.add(ServerSensorType.BACKPANELTEMP);
       sensorType.add(ServerSensorType.FRONTPANELTEMP);
-      sensorValueType.put(HumiditySensor, ValueType.HUMIDITY);
-      sensorValueType.put(TemperatureSensor, ValueType.TEMP);
-      sensorValueType.put(AirFlowSensor, ValueType.AirFlow);
-      sensorValueType.put(AirPressureSensor, ValueType.AirPressure);
-      sensorValueType.put(ContactClosureSensor, ValueType.ContactClosure);
-      sensorValueType.put(SmokeSensor, ValueType.Smoke);
-      sensorValueType.put(WaterSensor, ValueType.Water);
-      sensorValueType.put(Vibration, ValueType.Vibration);
+      sensorValueType.put(HumiditySensor, MetricName.HUMIDITY);
+      sensorValueType.put(TemperatureSensor, MetricName.TEMP);
+      sensorValueType.put(AirFlowSensor, MetricName.AIRFLOW);
+      sensorValueType.put(AirPressureSensor, MetricName.AIRPRESSURE);
+      sensorValueType.put(ContactClosureSensor, MetricName.CONTACTCLOSURE);
+      sensorValueType.put(SmokeSensor, MetricName.SMOKE);
+      sensorValueType.put(WaterSensor, MetricName.WATER);
+      sensorValueType.put(Vibration, MetricName.VIBRATION);
       sensorMountingSide.put("INLET", MountingSide.Front);
       sensorMountingSide.put("OUTLET", MountingSide.Back);
       sensorMountingSide.put("EXTERNAL", MountingSide.External);
       sensorMountingSide = Collections.unmodifiableMap(sensorMountingSide);
    }
-   private static final String POWERIQ_POWER_UNIT = "kVA";
+   private static final String POWERIQ_VA_UNIT = "kVA";
+   private static final String POWERIQ_POWER_UNIT = "W";
    private static final String POWERIQ_CURRENT_UNIT = "A";
    private static final String POWERIQ_VOLTAGE_UNIT = "V";
    private static final String RANGE_FLAG = "-";
@@ -751,7 +753,7 @@ public class PowerIQService implements AsyncService {
             return;
          }
       }
-      Map<String, Pdu> matchedPdus = new HashMap<String, Pdu>();
+      Map<String, String> pduAssetIdAndPduIdMap = new HashMap<String, String>();
       for (Asset asset : allMappedPdus) {
          String id = null;
          if (asset.getJustificationfields() != null) {
@@ -764,24 +766,16 @@ public class PowerIQService implements AsyncService {
                continue;
             }
             id = pduInfoMap.get(FlowgateConstant.PDU_ID_FROM_POWERIQ);
-            /**
-             * In the future,the source will be stored in assetSource field,
-             * and we only need to check if the assetSource contain it.
-             */
-            String source = asset.getJustificationfields().get(POWERIQ_SOURCE);
             //Only check the pdu that belong to the current PowerIQ.
-            if (source == null || !source.equals(powerIQ.getId())) {
-               id = null;
+            if (!asset.getAssetSource().contains((powerIQ.getId()))) {
+               continue;
             }
          }
          if (id != null) {
-            Pdu pdu = client.getPduByID(id);
-            if (pdu != null) {
-               matchedPdus.put(asset.getId(), pdu);
-            }
+            pduAssetIdAndPduIdMap.put(asset.getId(), id);
          }
       }
-      List<RealTimeData> realTimeDatas = getRealTimeDatas(matchedPdus, getAdvanceSetting(powerIQ));
+      List<RealTimeData> realTimeDatas = getRealTimeDatas(pduAssetIdAndPduIdMap,client, getAdvanceSetting(powerIQ));
       if (!realTimeDatas.isEmpty()) {
          restClient.saveRealTimeData(realTimeDatas);
       }
@@ -865,15 +859,15 @@ public class PowerIQService implements AsyncService {
       return matchedPDUs;
    }
 
-   public List<RealTimeData> getRealTimeDatas(Map<String, Pdu> pdus,
+   public List<RealTimeData> getRealTimeDatas(Map<String, String> pduAssetIdAndPduIdMap, PowerIQAPIClient client,
          HashMap<AdvanceSettingType, String> advanceSettingMap) {
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
-      if (pdus == null || pdus.isEmpty()) {
+      if (pduAssetIdAndPduIdMap == null || pduAssetIdAndPduIdMap.isEmpty()) {
          return realTimeDatas;
       }
       try {
-         for (Map.Entry<String, Pdu> map : pdus.entrySet()) {
-            List<ValueUnit> values = getValueUnits(map.getValue(), advanceSettingMap);
+         for (Map.Entry<String, String> map : pduAssetIdAndPduIdMap.entrySet()) {
+            List<ValueUnit> values = getValueUnits(map.getValue(), client, advanceSettingMap);
             if (!values.isEmpty()) {
                RealTimeData realTimeData = new RealTimeData();
                realTimeData.setAssetID(map.getKey());
@@ -894,80 +888,153 @@ public class PowerIQService implements AsyncService {
       return realTimeDatas;
    }
 
-   public List<ValueUnit> getValueUnits(Pdu pdu,
+   public List<ValueUnit> getValueUnits(String pduIDFromPowerIQ, PowerIQAPIClient client,
          HashMap<AdvanceSettingType, String> advanceSettingMap) {
       List<ValueUnit> values = new ArrayList<ValueUnit>();
-      if (pdu == null || pdu.getReading() == null || pdu.getReading().getInletReadings() == null) {
+      Long pduId = Long.parseLong(pduIDFromPowerIQ);
+      List<Outlet> outlets = client.getOutlets(pduId);
+      List<Inlet> inlets = client.getInlets(pduId);
+      if (outlets.isEmpty() && inlets.isEmpty()) {
          return values;
       }
-      double voltage = 0.0;
-      double current = 0.0;
-      double power = 0.0;
-      String time = "";
       String dateFormat = advanceSettingMap.get(AdvanceSettingType.DateFormat);
       String timezone = advanceSettingMap.get(AdvanceSettingType.TimeZone);
       String PDU_AMPS_UNIT = advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT);
       String PDU_POWER_UNIT = advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT);
       String PDU_VOLT_UNIT = advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT);
-      String TEMPERATURE_UNIT = advanceSettingMap.get(AdvanceSettingType.TEMPERATURE_UNIT);
-      String HUMIDITY_UNIT = advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT);
 
-      try {
-         for (InletReading inletReading : pdu.getReading().getInletReadings()) {
-            time = inletReading.getReadingTime();
-            voltage = inletReading.getVoltage();
-            current += inletReading.getCurrent();
-            power += inletReading.getApparentPower();
-         }
-
+      if(PDU_AMPS_UNIT == null) {
+       //By default the Current unit in powerIQ is Amps.
+         PDU_AMPS_UNIT = POWERIQ_CURRENT_UNIT;
+      }
+      if(PDU_POWER_UNIT == null) {
+         //By default the active_power unit in powerIQ is watt.
+         PDU_POWER_UNIT = POWERIQ_POWER_UNIT;
+      }
+      if(PDU_VOLT_UNIT == null) {
+         //By default the voltage unit in powerIQ is volt.
+         PDU_VOLT_UNIT = POWERIQ_VOLTAGE_UNIT;
+      }
+      if(!inlets.isEmpty()) {
+         String time = inlets.get(0).getReading().getReadingTime();
          long valueTime = WormholeDateFormat.getLongTime(time, dateFormat, timezone);
          if (valueTime == -1) {
             logger.error("Failed to translate the time string: " + time + ".And the dateformat is "
                   + dateFormat);
-            return values;
+         }else {
+            for(Inlet inlet : inlets) {
+               InletReading reading = inlet.getReading();
+               String extraIdentifier = FlowgateConstant.INLET_NAME_PREFIX + inlet.getOrdinal();
+               ValueUnit voltageValue = new ValueUnit();
+               voltageValue.setExtraidentifier(extraIdentifier);
+               voltageValue.setKey(MetricName.VOLTAGE);
+               voltageValue.setTime(valueTime);
+               voltageValue
+                     .setValueNum(Double.parseDouble(voltageValue.translateUnit(String.valueOf(reading.getVoltage()),
+                           MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
+               voltageValue.setUnit(RealtimeDataUnit.Volts.toString());
+               values.add(voltageValue);
+
+               ValueUnit currentValue = new ValueUnit();
+               currentValue.setExtraidentifier(extraIdentifier);
+               currentValue.setKey(MetricName.CURRENT);
+               currentValue.setTime(valueTime);
+               currentValue
+                     .setValueNum(Double.parseDouble(currentValue.translateUnit(String.valueOf(reading.getCurrent()),
+                           MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+               currentValue.setUnit(RealtimeDataUnit.Amps.toString());
+               values.add(currentValue);
+
+               ValueUnit activePowerValue = new ValueUnit();
+               activePowerValue.setExtraidentifier(extraIdentifier);
+               activePowerValue.setKey(MetricName.ACTIVE_POWER);
+               activePowerValue.setTime(valueTime);
+               activePowerValue.setValueNum(Double.parseDouble(activePowerValue.translateUnit(String.valueOf(reading.getActivePower()),
+                     MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
+               activePowerValue.setUnit(RealtimeDataUnit.KW.toString());
+               values.add(activePowerValue);
+
+               ValueUnit apparentPowerValue = new ValueUnit();
+               apparentPowerValue.setExtraidentifier(extraIdentifier);
+               apparentPowerValue.setKey(MetricName.APPARENT_POWER);
+               apparentPowerValue.setTime(valueTime);
+               apparentPowerValue.setValueNum(Double.parseDouble(apparentPowerValue.translateUnit(String.valueOf(reading.getApparentPower()),
+                     MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
+               apparentPowerValue.setUnit(RealtimeDataUnit.KW.toString());
+               values.add(apparentPowerValue);
+
+               ValueUnit freeCapacityValue = new ValueUnit();
+               freeCapacityValue.setExtraidentifier(extraIdentifier);
+               freeCapacityValue.setKey(MetricName.FREE_CAPACITY);
+               freeCapacityValue.setTime(valueTime);
+               freeCapacityValue
+                     .setValueNum(Double.parseDouble(freeCapacityValue.translateUnit(String.valueOf(reading.getUnutilizedCapacity()),
+                           MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+               freeCapacityValue.setUnit(RealtimeDataUnit.Amps.toString());
+               values.add(freeCapacityValue);
+            }
          }
-         ValueUnit voltageValue = new ValueUnit();
-         voltageValue.setKey(ValueType.PDU_RealtimeVoltage);
-         voltageValue.setTime(valueTime);
-         voltageValue
-               .setValueNum(Double.parseDouble(voltageValue.translateUnit(String.valueOf(voltage),
-                     MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
-         voltageValue.setUnit(RealtimeDataUnit.Volts.toString());
-         values.add(voltageValue);
+      }
 
-         ValueUnit currentValue = new ValueUnit();
-         currentValue.setKey(ValueType.PDU_RealtimeLoad);
-         currentValue.setTime(valueTime);
-         currentValue
-               .setValueNum(Double.parseDouble(currentValue.translateUnit(String.valueOf(current),
-                     MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
-         currentValue.setUnit(RealtimeDataUnit.Amps.toString());
-         values.add(currentValue);
+      if(!outlets.isEmpty()) {
+         String time = inlets.get(0).getReading().getReadingTime();
+         long valueTime = WormholeDateFormat.getLongTime(time, dateFormat, timezone);
+         if (valueTime == -1) {
+            logger.error("Failed to translate the time string: " + time + ".And the dateformat is "
+                  + dateFormat);
+         }else {
+            for(Outlet outlet : outlets) {
+               OutletReading reading = outlet.getReading();
+               String extraIdentifier = FlowgateConstant.OUTLET_NAME_PREFIX + outlet.getOrdinal();
+               ValueUnit voltageValue = new ValueUnit();
+               voltageValue.setExtraidentifier(extraIdentifier);
+               voltageValue.setKey(MetricName.VOLTAGE);
+               voltageValue.setTime(valueTime);
+               voltageValue
+                     .setValueNum(Double.parseDouble(voltageValue.translateUnit(String.valueOf(reading.getVoltage()),
+                           MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
+               voltageValue.setUnit(RealtimeDataUnit.Volts.toString());
+               values.add(voltageValue);
 
-         if (pdu.getRatedAmps() != null) {
-            ValueUnit currentValuePercent = new ValueUnit();
-            currentValuePercent.setKey(ValueType.PDU_RealtimeLoadPercent);
-            currentValuePercent.setTime(valueTime);
-            currentValuePercent.setUnit(RealtimeDataUnit.Percent.toString());
-            // "rated_amps": "32A",
-            currentValuePercent.setValueNum(
-                  current * 100.0 / Double.parseDouble(pdu.getRatedAmps().replaceAll("A", "")));
-            values.add(currentValuePercent);
+               ValueUnit currentValue = new ValueUnit();
+               currentValue.setExtraidentifier(extraIdentifier);
+               currentValue.setKey(MetricName.CURRENT);
+               currentValue.setTime(valueTime);
+               currentValue
+                     .setValueNum(Double.parseDouble(currentValue.translateUnit(String.valueOf(reading.getCurrent()),
+                           MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+               currentValue.setUnit(RealtimeDataUnit.Amps.toString());
+               values.add(currentValue);
+
+               ValueUnit activePowerValue = new ValueUnit();
+               activePowerValue.setExtraidentifier(extraIdentifier);
+               activePowerValue.setKey(MetricName.ACTIVE_POWER);
+               activePowerValue.setTime(valueTime);
+               activePowerValue.setValueNum(Double.parseDouble(activePowerValue.translateUnit(String.valueOf(reading.getActivePower()),
+                     MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
+               activePowerValue.setUnit(RealtimeDataUnit.KW.toString());
+               values.add(activePowerValue);
+
+               ValueUnit apparentPowerValue = new ValueUnit();
+               apparentPowerValue.setExtraidentifier(extraIdentifier);
+               apparentPowerValue.setKey(MetricName.APPARENT_POWER);
+               apparentPowerValue.setTime(valueTime);
+               apparentPowerValue.setValueNum(Double.parseDouble(apparentPowerValue.translateUnit(String.valueOf(reading.getApparentPower()),
+                     MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
+               apparentPowerValue.setUnit(RealtimeDataUnit.KW.toString());
+               values.add(apparentPowerValue);
+
+               ValueUnit freeCapacityValue = new ValueUnit();
+               freeCapacityValue.setExtraidentifier(extraIdentifier);
+               freeCapacityValue.setKey(MetricName.FREE_CAPACITY);
+               freeCapacityValue.setTime(valueTime);
+               freeCapacityValue
+                     .setValueNum(Double.parseDouble(freeCapacityValue.translateUnit(String.valueOf(reading.getUnutilizedCapacity()),
+                           MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+               freeCapacityValue.setUnit(RealtimeDataUnit.Amps.toString());
+               values.add(freeCapacityValue);
+            }
          }
-
-
-         ValueUnit powerValue = new ValueUnit();
-         powerValue.setKey(ValueType.PDU_RealtimePower);
-         powerValue.setTime(valueTime);
-         powerValue.setValueNum(Double.parseDouble(powerValue.translateUnit(String.valueOf(power),
-               MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
-         powerValue.setUnit(RealtimeDataUnit.KW.toString());
-         values.add(powerValue);
-
-         //ratedVA "rated_va": "6.4-7.7kVA"
-
-      } catch (Exception e) {
-         logger.error("Failed when generate the realtime data.", e);
       }
       return values;
    }
@@ -1097,7 +1164,7 @@ public class PowerIQService implements AsyncService {
          String unit = reading.getUom();
          MetricUnit sourceUnit = null, targetUnit = null;
          switch (sensorValueType.get(sensor.getType())) {
-         case HUMIDITY:
+         case MetricName.HUMIDITY:
             if (unit != null && !unit.isEmpty()) {
                if (unit.equals("%")) {
                   sourceUnit = MetricUnit.PERCENT;
@@ -1114,7 +1181,7 @@ public class PowerIQService implements AsyncService {
             }
             targetUnit = MetricUnit.PERCENT;
             break;
-         case TEMP:
+         case MetricName.TEMP:
             if (unit != null && !unit.isEmpty()) {
                sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
             } else {
@@ -1279,7 +1346,7 @@ public class PowerIQService implements AsyncService {
          }
       }
       if(ratePower != null) {
-         int powerUnitIndex = ratePower.indexOf(POWERIQ_POWER_UNIT);
+         int powerUnitIndex = ratePower.indexOf(POWERIQ_VA_UNIT);
          if(powerUnitIndex != -1) {
             String powerValue = ratePower.substring(0, powerUnitIndex);
             int rangeFlagIndex = powerValue.indexOf(RANGE_FLAG);
