@@ -6,6 +6,7 @@ package com.vmware.flowgate.poweriqworker.jobtest;
 
 import static org.mockito.Matchers.any;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,11 +29,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
-import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
@@ -253,61 +255,79 @@ public class SyncSensorMetaDataJobTest {
    }
 
    @Test
-   public void testAggregatorSensorIdAndSourceForPdu() {
-      Asset pdu = createAsset1();
-      Sensor sensor = new Sensor();
-      sensor.setId(509);
-      sensor.setType(PowerIQService.HumiditySensor);
-      String source = "l9i8728d55368540fcba1692";
-      pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(sensor.getId()+FlowgateConstant.SEPARATOR+source,
-            pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
-   }
-
-   @Test
    public void testAggregatorSensorIdAndSourceForPdu1() {
       Asset pdu = createAsset1();
+      ObjectMapper mapper = new ObjectMapper();
       HashMap<String, String> justificationfields = new HashMap<String,String>();
-      justificationfields.put(AssetSubCategory.Humidity.toString(), "509"+FlowgateConstant.SEPARATOR+"l9i8728d55368540fcba1692");
+      Map<String,String> metricAndSensorIdMap = new HashMap<String,String>();
+
+      metricAndSensorIdMap.put(MetricName.SERVER_HUMIDITY, "509"+FlowgateConstant.SEPARATOR+"l9i8728d55368540fcba1692");
+      String sensorInfo = null;
+      try {
+         sensorInfo = mapper.writeValueAsString(metricAndSensorIdMap);
+      } catch (JsonProcessingException e) {
+         TestCase.fail();
+      }
+      justificationfields.put(FlowgateConstant.SENSOR, sensorInfo);
       pdu.setJustificationfields(justificationfields);
       Sensor sensor = new Sensor();
       sensor.setId(509);
       sensor.setType(PowerIQService.HumiditySensor);
       String source = "l9i8728d55368540fcba1692";
-      pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(sensor.getId()+FlowgateConstant.SEPARATOR+source,
-            pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
-   }
 
-   @Test
-   public void testAggregatorSensorIdAndSourceForPdu2() {
-      Asset pdu = createAsset1();
-      HashMap<String, String> justificationfields = new HashMap<String,String>();
-      String filed = "509"+FlowgateConstant.SEPARATOR+"l9i8728d55368540fcba1692,606"+FlowgateConstant.SEPARATOR+"l9i8728d55368540fcba1692";
-      justificationfields.put(AssetSubCategory.Humidity.toString(), filed);
-      pdu.setJustificationfields(justificationfields);
-      Sensor sensor = new Sensor();
-      sensor.setId(610);
-      sensor.setType(PowerIQService.HumiditySensor);
-      String source = "l9i8728d55368540fcba1692";
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(filed+FlowgateConstant.SPILIT_FLAG+sensor.getId()+FlowgateConstant.SEPARATOR+source,
-            pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
+
+      TestCase.assertEquals(sensor.getId()+FlowgateConstant.SEPARATOR+source,
+            metricAndSensorIdMap.get(MetricName.SERVER_HUMIDITY));
    }
 
    @Test
    public void testAggregatorSensorIdAndSourceForPdu3() {
       Asset pdu = createAsset1();
-      HashMap<String, String> justificationfields = new HashMap<String,String>();
-      justificationfields.put(AssetSubCategory.Temperature.toString(), "509_l9i8728d55368540fcba1692");
-      pdu.setJustificationfields(justificationfields);
+      ObjectMapper mapper = new ObjectMapper();
       Sensor sensor = new Sensor();
       sensor.setId(606);
       sensor.setType(PowerIQService.HumiditySensor);
       String source = "l9i8728d55368540fcba1692";
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
+
+      HashMap<String, String> justificationfields = pdu.getJustificationfields();
+      String sensorInfo = justificationfields.get(FlowgateConstant.SENSOR);
+      Map<String,String> metricAndSensorIdMap = null;
+      try {
+         metricAndSensorIdMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
+      }  catch (IOException e) {
+         TestCase.fail();
+      }
       TestCase.assertEquals(sensor.getId()+FlowgateConstant.SEPARATOR+source,
-            pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
+            metricAndSensorIdMap.get(MetricName.SERVER_HUMIDITY));
+   }
+
+   @Test
+   public void testUpdateServer() {
+      List<Asset> assets = new ArrayList<Asset>();
+      Asset server = createAsset();
+      server.setAssetName("pek-wor-server");
+      server.setCategory(AssetCategory.Server);
+      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String,String> sensorLocationAndId = new HashMap<String,String>();
+      sensorLocationAndId.put("Rack01", "256");
+      sensorLocationAndId.put("Rack02", "128");
+      Map<String, Map<String, String>> sensorInfo = new HashMap<String, Map<String, String>>();
+      sensorInfo.put("FRONT", sensorLocationAndId);
+      formulars.put(FlowgateConstant.SENSOR, sensorInfo);
+      server.setMetricsformulars(formulars);
+      assets.add(server);
+      List<Asset> servers = powerIQService.updateServer(assets, "128");
+      TestCase.assertEquals(assets.size(), servers.size());
+      Asset updatedServer = servers.get(0);
+
+
+      Map<String, Map<String, Map<String, String>>> formulars1 = updatedServer.getMetricsformulars();
+      Map<String, Map<String, String>> sensorInfo1 = formulars1.get(FlowgateConstant.SENSOR);
+      Map<String,String> sensorLocationAndId1 = sensorInfo1.get("FRONT");
+      TestCase.assertEquals(1, sensorLocationAndId1.size());
+      TestCase.assertEquals("256", sensorLocationAndId1.entrySet().iterator().next().getValue());
    }
 
    HashMap<AdvanceSettingType, String> createAdvanceSettingMap() {
