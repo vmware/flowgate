@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -154,19 +155,27 @@ public class AggregatorService implements AsyncService {
          return;
       }
       Map<String,Asset> pdusOnlyFromPowerIQ = new HashMap<String,Asset>();
+      Map<String,String> powerIQIDs = new HashMap<String,String>();
       for(FacilitySoftwareConfig powerIQ : powerIQs) {
-         List<Asset> pdus = restClient.getAllAssetsBySourceAndType(powerIQ.getId(),AssetCategory.PDU);
-         for(Asset pdu : pdus) {
-          if(pdu.getAssetSource().split(FlowgateConstant.SPILIT_FLAG).length == 1) {
-             pdusOnlyFromPowerIQ.put(pdu.getAssetName().toLowerCase(), pdu);
-          }
-         }
+         powerIQIDs.put(powerIQ.getId(),powerIQ.getName());
       }
-      if(pdusOnlyFromPowerIQ.isEmpty()) {
+      if(powerIQIDs.isEmpty()) {
          logger.info("No Pdu from PowerIQ server find");
          return;
       }
       List<Asset> pdus = restClient.getAllAssetsByType(AssetCategory.PDU);
+      Iterator<Asset> pduIte = pdus.iterator();
+      while(pduIte.hasNext()) {
+         Asset pdu = pduIte.next();
+         if (pdu.getAssetSource().split(FlowgateConstant.SPILIT_FLAG).length == 1 && powerIQIDs.get(pdu.getAssetSource()) != null) {
+            pdusOnlyFromPowerIQ.put(pdu.getAssetName().toLowerCase(), pdu);
+            pduIte.remove();
+         }
+      }
+      if(pdus.isEmpty()) {
+         logger.info("All pdus are from powerIQ");
+         return;
+      }
       ObjectMapper mapper = new ObjectMapper();
       for(Asset pdu : pdus) {
          Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pdu.getAssetName().toLowerCase());
