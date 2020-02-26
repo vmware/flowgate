@@ -9,10 +9,10 @@ import static org.mockito.Matchers.anyList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
@@ -32,12 +32,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetSubCategory;
+import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.RealTimeData;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.nlyteworker.config.ServiceKeyConfig;
 import com.vmware.flowgate.nlyteworker.model.JsonResultForPDURealtimeValue;
@@ -260,14 +261,19 @@ public class SycnRealTimeDataJobTest {
    public ResponseEntity<Asset[]> getMappedAsset(){
       Asset[] assets = new Asset[2];
       assets[0] = createAsset();
-      EnumMap<ServerSensorType, String> sensorsformulars =
-            new EnumMap<ServerSensorType, String>(ServerSensorType.class);
-      sensorsformulars.put(ServerSensorType.PDU_RealtimeLoad, "5x4ff46982db22e1b040e0f2");
-      sensorsformulars.put(ServerSensorType.PDU_RealtimePower, "5x4ff46982db22e1b040e0f2");
-      sensorsformulars.put(ServerSensorType.PDU_RealtimeVoltage, "5x4ff46982db22e1b040e0f2");
-      assets[0].setSensorsformulars(sensorsformulars);
+      Map<String, Map<String, Map<String, String>>> formulars =
+            new HashMap<String, Map<String, Map<String, String>>>();
+
+      Map<String, Map<String, String>> pduMap = new HashMap<String, Map<String, String>>();
+      Map<String, String> metricNameAndId = new HashMap<String, String>();
+      metricNameAndId.put(MetricName.PDU_CURRENT_LOAD, "5x4ff46982db22e1b040e0f2");
+      metricNameAndId.put(MetricName.PDU_TOTAL_POWER, "5x4ff46982db22e1b040e0f2");
+      metricNameAndId.put(MetricName.PDU_VOLTAGE, "5x4ff46982db22e1b040e0f2");
+      pduMap.put("5x4ff46982db22e1b040e0f2", metricNameAndId);
+      formulars.put(FlowgateConstant.PDU, pduMap);
+      assets[0].setMetricsformulars(formulars);
       assets[1] = createAsset();
-      assets[1].setSensorsformulars(sensorsformulars);
+      assets[1].setMetricsformulars(formulars);
       return new ResponseEntity<Asset[]>(assets,HttpStatus.OK);
    }
 

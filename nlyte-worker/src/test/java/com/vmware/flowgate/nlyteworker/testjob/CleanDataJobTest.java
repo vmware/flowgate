@@ -22,9 +22,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
-import com.vmware.flowgate.common.model.ServerSensorData;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.nlyteworker.config.ServiceKeyConfig;
 import com.vmware.flowgate.nlyteworker.restclient.NlyteAPIClient;
 import com.vmware.flowgate.nlyteworker.scheduler.job.NlyteDataService;
@@ -66,11 +65,19 @@ public class CleanDataJobTest {
       justifications.put(FlowgateConstant.PDU_PORT_FOR_SERVER,
             "pci-2:hba:1_FIELDSPLIT_cloud-fc02-sha1_FIELDSPLIT_05_FIELDSPLIT_0364,onboard:1gb-nic:4_FIELDSPLIT_cloud-sw02-sha1_FIELDSPLIT_08_FIELDSPLIT_3fc319e50d21476684d841aa0842bd52");
       server.setJustificationfields(justifications);
-      Map<ServerSensorType,String> sensorsformular = new HashMap<ServerSensorData.ServerSensorType, String>();
-      sensorsformular.put(ServerSensorType.PDU_RealtimeLoad, "0364+op00+klwd");
-      sensorsformular.put(ServerSensorType.PDU_RealtimePower, "0364+op00+klwd");
-      sensorsformular.put(ServerSensorType.PDU_RealtimeVoltage, "op00+klwd");
-      server.setSensorsformulars(sensorsformular);
+
+
+      Map<String, Map<String, Map<String, String>>> formulars =
+            new HashMap<String, Map<String, Map<String, String>>>();
+
+      Map<String, Map<String, String>> pduMap = new HashMap<String, Map<String, String>>();
+      Map<String, String> metricNameAndId = new HashMap<String, String>();
+      metricNameAndId.put(MetricName.PDU_CURRENT_LOAD, "5x4ff46982db22e1b040e0f2");
+      metricNameAndId.put(MetricName.PDU_TOTAL_POWER, "5x4ff46982db22e1b040e0f2");
+      metricNameAndId.put(MetricName.PDU_VOLTAGE, "5x4ff46982db22e1b040e0f2");
+      pduMap.put("5x4ff46982db22e1b040e0f2", metricNameAndId);
+      formulars.put(FlowgateConstant.PDU, pduMap);
+      server.setMetricsformulars(formulars);;
       servers.add(server);
 
       Asset server2 = new Asset();
@@ -83,8 +90,9 @@ public class CleanDataJobTest {
       servers = nlyteDataService.removePduFromServer(servers, "0364");
       TestCase.assertEquals(1, servers.size());
       TestCase.assertEquals(1, servers.get(0).getPdus().size());
-      TestCase.assertEquals(1, servers.get(0).getSensorsformulars().size());
-      TestCase.assertEquals("op00+klwd", servers.get(0).getSensorsformulars().get(ServerSensorType.PDU_RealtimeVoltage));
+      TestCase.assertEquals(1, servers.get(0).getMetricsformulars().size());
+
+      TestCase.assertEquals("5x4ff46982db22e1b040e0f2", servers.get(0).getMetricsformulars().get(FlowgateConstant.PDU).entrySet().iterator().next().getKey());
       TestCase.assertEquals("onboard:1gb-nic:4_FIELDSPLIT_cloud-sw02-sha1_FIELDSPLIT_08_FIELDSPLIT_3fc319e50d21476684d841aa0842bd52", servers.get(0).getJustificationfields().get(FlowgateConstant.PDU_PORT_FOR_SERVER));
    }
 }
