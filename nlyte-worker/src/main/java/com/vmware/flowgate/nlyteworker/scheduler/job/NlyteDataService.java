@@ -79,15 +79,10 @@ public class NlyteDataService implements AsyncService {
    private static final String RealtimePower = "RealtimePower";
    private static final String RealtimeVoltage = "RealtimeVoltage";
    private static Map<String, String> sensorValueTypeMap = new HashMap<String, String>();
-   private static List<String> metricsName = new ArrayList<String>();
    static {
-      metricsName.add(MetricName.PDU_VOLTAGE);
-      metricsName.add(MetricName.PDU_TOTAL_CURRENT);
-      metricsName.add(MetricName.PDU_TOTAL_POWER);
       sensorValueTypeMap.put(RealtimeLoad, MetricName.PDU_TOTAL_CURRENT);
       sensorValueTypeMap.put(RealtimePower, MetricName.PDU_TOTAL_POWER);
       sensorValueTypeMap.put(RealtimeVoltage, MetricName.PDU_VOLTAGE);
-      metricsName = Collections.unmodifiableList(metricsName);
       sensorValueTypeMap = Collections.unmodifiableMap(sensorValueTypeMap);
    }
 
@@ -682,12 +677,7 @@ public class NlyteDataService implements AsyncService {
             continue;
          }
          for(Map.Entry<String, Map<String, String>> pduFormularMap : pduFormulars.entrySet()) {
-            Map<String,String> metricNameAndPduId = pduFormularMap.getValue();
-            for(String metricName : metricsName) {
-               if(metricNameAndPduId.containsKey(metricName)) {
-                  assetIds.add(metricNameAndPduId.get(metricName));
-               }
-            }
+            assetIds.add(pduFormularMap.getKey());
          }
       }
       return assetIds;
