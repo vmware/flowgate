@@ -179,13 +179,14 @@ public class AggregatorService implements AsyncService {
       ObjectMapper mapper = new ObjectMapper();
       for(Asset pdu : pdus) {
          Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pdu.getAssetName().toLowerCase());
-         if(pduFromPowerIQ != null && !pdu.getId().equals(pduFromPowerIQ.getId())) {
+         if(pduFromPowerIQ != null) {
             HashMap<String,String> pduFromPowerIQExtraInfo = pduFromPowerIQ.getJustificationfields();
             HashMap<String,String> pduExtraInfo = pdu.getJustificationfields();
             pdu.setAssetSource(pdu.getAssetSource() + FlowgateConstant.SPILIT_FLAG + pduFromPowerIQ.getId());
             if(pduExtraInfo == null || pduExtraInfo.isEmpty()) {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
                restClient.saveAssets(pdu);
+               restClient.removeAssetByID(pduFromPowerIQ.getId());
                continue;
             }
             String pduInfo = pduFromPowerIQExtraInfo.get(FlowgateConstant.PDU);
@@ -196,6 +197,7 @@ public class AggregatorService implements AsyncService {
             if(oldPduInfo == null) {
                pduExtraInfo.put(FlowgateConstant.PDU, pduInfo);
                restClient.saveAssets(pdu);
+               restClient.removeAssetByID(pduFromPowerIQ.getId());
                continue;
             }
             Map<String,String> pduInfoMap = null;
@@ -214,6 +216,7 @@ public class AggregatorService implements AsyncService {
             oldPduInfoMap.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, pduInfoMap.get(FlowgateConstant.PDU_MAX_RATE_VOLTS));
             oldPduInfoMap.put(FlowgateConstant.PDU_OUTLETS_FROM_POWERIQ, pduInfoMap.get(FlowgateConstant.PDU_OUTLETS_FROM_POWERIQ));
             oldPduInfoMap.put(FlowgateConstant.PDU_INLETS_FROM_POWERIQ, pduInfoMap.get(FlowgateConstant.PDU_INLETS_FROM_POWERIQ));
+            oldPduInfoMap.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, pduInfoMap.get(FlowgateConstant.PDU_ID_FROM_POWERIQ));
             try {
                String newPduInfo = mapper.writeValueAsString(oldPduInfoMap);
                pduExtraInfo.put(FlowgateConstant.PDU, newPduInfo);
@@ -222,14 +225,10 @@ public class AggregatorService implements AsyncService {
                logger.error("Format pdu extra info error",e.getCause());
             }
             restClient.saveAssets(pdu);
+            restClient.removeAssetByID(pduFromPowerIQ.getId());
          }
       }
-      logger.info("Finish aggregate pdu from PowerIQ to other systems");
-
-      for(Map.Entry<String, Asset> map : pdusOnlyFromPowerIQ.entrySet()) {
-         restClient.removeAssetByID(map.getValue().getId());
-      }
-      logger.info("Finished remove pdus which are form PowerIQ");
+      logger.info("Finished aggregate pdu from PowerIQ to other systems");
    }
 
    public void aggregateServerPDU() {
