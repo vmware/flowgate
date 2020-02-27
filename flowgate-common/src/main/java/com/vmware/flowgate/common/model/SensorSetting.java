@@ -5,13 +5,12 @@
 package com.vmware.flowgate.common.model;
 
 import com.couchbase.client.java.repository.annotation.Id;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 
 public class SensorSetting implements BaseDocument {
 
    @Id
    private String id;
-   private ServerSensorType type;
+   private String type;
    private double minNum;
    private double maxNum;
    private String minValue;
@@ -25,11 +24,11 @@ public class SensorSetting implements BaseDocument {
       this.id = id;
    }
 
-   public ServerSensorType getType() {
+   public String getType() {
       return type;
    }
 
-   public void setType(ServerSensorType type) {
+   public void setType(String type) {
       this.type = type;
    }
 

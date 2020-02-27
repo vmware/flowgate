@@ -5,17 +5,17 @@
 package com.vmware.flowgate.common.model;
 
 public class ServerSensorData {
-   private ServerSensorType type;
+   private String metricName;
    private double valueNum;
    private String value;
    private long timeStamp;
 
-   public ServerSensorType getType() {
-      return type;
+   public String getMetricName() {
+      return metricName;
    }
 
-   public void setType(ServerSensorType type) {
-      this.type = type;
+   public void setMetricName(String metricName) {
+      this.metricName = metricName;
    }
 
    public double getValueNum() {
@@ -32,10 +32,6 @@ public class ServerSensorData {
 
    public void setValue(String value) {
       this.value = value;
-   }
-
-   public enum ServerSensorType {
-      FRONTPANELTEMP, BACKPANELTEMP, HUMIDITY, PDU_RealtimeVoltage, PDU_RealtimePower, PDU_RealtimeLoad,PDU_RealtimeVoltagePercent,PDU_RealtimePowerPercent,PDU_RealtimeLoadPercent
    }
 
    public long getTimeStamp() {
