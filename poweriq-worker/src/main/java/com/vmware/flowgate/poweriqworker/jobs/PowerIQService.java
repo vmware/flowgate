@@ -479,14 +479,16 @@ public class PowerIQService implements AsyncService {
       List<Sensor> sensors = null;
       int limit = 100;
       int offset = 0;
-      List<Asset> assetsNeedToSave = null;
+      List<Asset> newAssetsNeedToSave = null;
+      List<Asset> oldAssetsNeedToupdate = null;
       while ((sensors = client.getSensors(limit, offset)) != null) {
          if (sensors.isEmpty()) {
             logger.warn(
                   String.format("No sensor data from PowerIQ %s", client.getPowerIQServiceEndpoint()));
             break;
          }
-         assetsNeedToSave = new ArrayList<Asset>();
+         newAssetsNeedToSave = new ArrayList<Asset>();
+         oldAssetsNeedToupdate = new ArrayList<Asset>();
          for (Sensor sensor : sensors) {
             Asset asset = new Asset();
             Map<String,String> sensorMap = new HashMap<String,String>();
@@ -549,7 +551,7 @@ public class PowerIQService implements AsyncService {
                assetToUpdate.setLastupdate(System.currentTimeMillis());
                assetToUpdate.setMountingSide(sensorMountingSide.get(sensor.getPosition().toUpperCase()));
                //save
-               assetsNeedToSave.add(assetToUpdate);
+               oldAssetsNeedToupdate.add(assetToUpdate);
             } else {
                HashMap<String, String> justificationfieldsForSensor = new HashMap<String, String>();
                try {
@@ -568,15 +570,17 @@ public class PowerIQService implements AsyncService {
                   asset.setMountingSide(sensorMountingSide.get(sensor.getPosition().toUpperCase()));
                }
                //save
-               assetsNeedToSave.add(asset);
+               newAssetsNeedToSave.add(asset);
             }
          }
-         List<Asset> sensorSaved = Arrays.asList(restClient.saveAssets(assetsNeedToSave).getBody());
-         List<Asset> pduAssetNeedToUpdate = updatePduMetricformular(sensorSaved,pduAssetMap);
-         restClient.saveAssets(pduAssetNeedToUpdate);
+         restClient.saveAssets(oldAssetsNeedToupdate);
+         if(!newAssetsNeedToSave.isEmpty()) {
+            List<Asset> sensorAlreadySaved = Arrays.asList(restClient.saveAssets(newAssetsNeedToSave).getBody());
+            List<Asset> pduAssetNeedToUpdate = updatePduMetricformular(sensorAlreadySaved,pduAssetMap);
+            restClient.saveAssets(pduAssetNeedToUpdate);
+         }
          offset += limit;
       }
-
    }
 
    public List<Asset> updatePduMetricformular(List<Asset> sensorAssets, Map<String,Asset> pduIdAndAssetMap){
