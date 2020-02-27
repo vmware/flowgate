@@ -4,10 +4,12 @@
 */
 package com.vmware.flowgate.aggregator.scheduler.job;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,11 +21,16 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.aggregator.config.ServiceKeyConfig;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
@@ -81,6 +88,9 @@ public class AggregatorService implements AsyncService {
          case EventMessageUtil.CleanRealtimeData:
             cleanRealtimeData();
             break;
+         case EventMessageUtil.AggregateAndCleanPowerIQPDU:
+            aggregateAndCleanPDUFromPowerIQ();
+            break;
          default:
             break;
          }
@@ -135,6 +145,90 @@ public class AggregatorService implements AsyncService {
             }
          }
       }
+   }
+
+   public void aggregateAndCleanPDUFromPowerIQ() {
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
+      if(powerIQs ==null || powerIQs.length==0) {
+         logger.info("No PowerIQ server find");
+         return;
+      }
+      Map<String,Asset> pdusOnlyFromPowerIQ = new HashMap<String,Asset>();
+      Map<String,String> powerIQIDs = new HashMap<String,String>();
+      for(FacilitySoftwareConfig powerIQ : powerIQs) {
+         powerIQIDs.put(powerIQ.getId(),powerIQ.getName());
+      }
+      if(powerIQIDs.isEmpty()) {
+         logger.info("No Pdu from PowerIQ server find");
+         return;
+      }
+      List<Asset> pdus = restClient.getAllAssetsByType(AssetCategory.PDU);
+      Iterator<Asset> pduIte = pdus.iterator();
+      while(pduIte.hasNext()) {
+         Asset pdu = pduIte.next();
+         if (pdu.getAssetSource().split(FlowgateConstant.SPILIT_FLAG).length == 1 && powerIQIDs.get(pdu.getAssetSource()) != null) {
+            pdusOnlyFromPowerIQ.put(pdu.getAssetName().toLowerCase(), pdu);
+            pduIte.remove();
+         }
+      }
+      if(pdus.isEmpty()) {
+         logger.info("All pdus are from powerIQ");
+         return;
+      }
+      ObjectMapper mapper = new ObjectMapper();
+      for(Asset pdu : pdus) {
+         Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pdu.getAssetName().toLowerCase());
+         if(pduFromPowerIQ != null) {
+            HashMap<String,String> pduFromPowerIQExtraInfo = pduFromPowerIQ.getJustificationfields();
+            HashMap<String,String> pduExtraInfo = pdu.getJustificationfields();
+            pdu.setAssetSource(pdu.getAssetSource() + FlowgateConstant.SPILIT_FLAG + pduFromPowerIQ.getId());
+            if(pduExtraInfo == null || pduExtraInfo.isEmpty()) {
+               pdu.setJustificationfields(pduFromPowerIQExtraInfo);
+               restClient.saveAssets(pdu);
+               restClient.removeAssetByID(pduFromPowerIQ.getId());
+               continue;
+            }
+            String pduInfo = pduFromPowerIQExtraInfo.get(FlowgateConstant.PDU);
+            if(pduInfo == null) {
+               continue;
+            }
+            String oldPduInfo = pduExtraInfo.get(FlowgateConstant.PDU);
+            if(oldPduInfo == null) {
+               pduExtraInfo.put(FlowgateConstant.PDU, pduInfo);
+               restClient.saveAssets(pdu);
+               restClient.removeAssetByID(pduFromPowerIQ.getId());
+               continue;
+            }
+            Map<String,String> pduInfoMap = null;
+            Map<String,String> oldPduInfoMap = null;
+            try {
+               pduInfoMap = mapper.readValue(pduInfo, new TypeReference<Map<String,String>>() {});
+               oldPduInfoMap = mapper.readValue(oldPduInfo, new TypeReference<Map<String,String>>() {});
+            } catch (IOException e) {
+               logger.error("Format pdu extra info error");
+               continue;
+            }
+            oldPduInfoMap.put(FlowgateConstant.PDU_RATE_AMPS, pduInfoMap.get(FlowgateConstant.PDU_RATE_AMPS));
+            oldPduInfoMap.put(FlowgateConstant.PDU_MIN_RATE_POWER, pduInfoMap.get(FlowgateConstant.PDU_MIN_RATE_POWER));
+            oldPduInfoMap.put(FlowgateConstant.PDU_MAX_RATE_POWER, pduInfoMap.get(FlowgateConstant.PDU_MAX_RATE_POWER));
+            oldPduInfoMap.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, pduInfoMap.get(FlowgateConstant.PDU_MIN_RATE_VOLTS));
+            oldPduInfoMap.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, pduInfoMap.get(FlowgateConstant.PDU_MAX_RATE_VOLTS));
+            oldPduInfoMap.put(FlowgateConstant.PDU_OUTLETS_FROM_POWERIQ, pduInfoMap.get(FlowgateConstant.PDU_OUTLETS_FROM_POWERIQ));
+            oldPduInfoMap.put(FlowgateConstant.PDU_INLETS_FROM_POWERIQ, pduInfoMap.get(FlowgateConstant.PDU_INLETS_FROM_POWERIQ));
+            oldPduInfoMap.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, pduInfoMap.get(FlowgateConstant.PDU_ID_FROM_POWERIQ));
+            try {
+               String newPduInfo = mapper.writeValueAsString(oldPduInfoMap);
+               pduExtraInfo.put(FlowgateConstant.PDU, newPduInfo);
+               pdu.setJustificationfields(pduExtraInfo);
+            } catch (JsonProcessingException e) {
+               logger.error("Format pdu extra info error",e.getCause());
+            }
+            restClient.saveAssets(pdu);
+            restClient.removeAssetByID(pduFromPowerIQ.getId());
+         }
+      }
+      logger.info("Finished aggregate pdu from PowerIQ to other systems");
    }
 
    public void aggregateServerPDU() {

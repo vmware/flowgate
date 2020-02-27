@@ -53,6 +53,12 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
             String cleanJobMessage = EventMessageUtil.convertEventMessageAsString(eventMessageForCleanJob);
             publisher.publish(EventMessageUtil.AggregatorTopic, cleanJobMessage);
             logger.info("Send clean realtime data command");
+
+            EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
+                  EventMessageUtil.AggregateAndCleanPowerIQPDU, "");
+            String jobmessage = EventMessageUtil.convertEventMessageAsString(eventMessage);
+            publisher.publish(EventMessageUtil.AggregatorTopic, jobmessage);
+            logger.info("Send aggregate Pdu data command");
          }catch(IOException e) {
             logger.error("Failed to Send clean realtime data command", e);
          }
