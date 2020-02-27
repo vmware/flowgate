@@ -30,6 +30,6 @@ public class MetricName {
    public static final String SERVER_VOLTAGE = "Voltage";
    public static final String SERVER_CONNECTED_PDU_CURRENT = "Pdu_Current";
    public static final String SERVER_CONNECTED_PDU_POWER = "Pdu_Power";
-   public static final String SERVER_USED_PDU_OUTLET_CURRENT = "PDU_Index_Current";
-   public static final String SERVER_USED_PDU_OUTLET_POWER = "PDU_Index_Power";
+   public static final String SERVER_USED_PDU_OUTLET_CURRENT = "Connected_PDU_Outlet_Current";
+   public static final String SERVER_USED_PDU_OUTLET_POWER = "Connected_PDU_Outlet_Power";
 }
