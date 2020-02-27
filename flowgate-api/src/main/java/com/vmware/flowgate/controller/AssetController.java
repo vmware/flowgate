@@ -95,9 +95,9 @@ public class AssetController {
 
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/batchoperation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-   public void batchCreation(@RequestBody List<Asset> assets) {
+   public List<Asset> batchCreation(@RequestBody List<Asset> assets) {
       BaseDocumentUtil.generateID(assets);
-      assetRepository.save(assets);
+      return Lists.newArrayList(assetRepository.save(assets));
    }
 
    // Read a Asset
