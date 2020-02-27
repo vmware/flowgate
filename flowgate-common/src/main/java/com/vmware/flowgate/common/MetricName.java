@@ -9,6 +9,7 @@ public class MetricName {
    public static final String VIBRATION = "Vibraion";
    public static final String WATER_FLOW = "Water_Flow";
    public static final String AIR_FLOW = "Air_Flow";
+
    public static final String PDU_VOLTAGE = "Voltage";
    public static final String PDU_ACTIVE_POWER = "Active_Power";
    public static final String PDU_APPARENT_POWER = "Apparent_Power";
@@ -18,6 +19,8 @@ public class MetricName {
    public static final String PDU_TOTAL_POWER = "Total_Power";
    public static final String PDU_CURRENT_LOAD = "Current_Load";
    public static final String PDU_POWER_LOAD = "Power_Load";
+   public static final String PDU_TEMPERATURE = "Temperature";
+   public static final String PDU_HUMIDITY = "HUMIDITY";
 
    public static final String SERVER_FRONT_TEMPERATURE = "Front_Temperature";
    public static final String SERVER_BACK_TEMPREATURE = "Back_Temperature";
