@@ -14,7 +14,6 @@ import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.MountingSide;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 
 public class Asset implements Serializable, BaseDocument {
 
@@ -150,8 +149,8 @@ public class Asset implements Serializable, BaseDocument {
     */
    private HashMap<String, String> Justificationfields = new HashMap<String, String>();
 
-   private Map<ServerSensorType, String> sensorsformulars =
-         new HashMap<ServerSensorType, String>();
+//   private Map<ServerSensorType, String> sensorsformulars =
+//         new HashMap<ServerSensorType, String>();
 
    private Map<String, Map<String, Map<String, String>>> metricsformulars =
          new HashMap<String, Map<String, Map<String, String>>>();
@@ -378,14 +377,6 @@ public class Asset implements Serializable, BaseDocument {
 
    public void setJustificationfields(HashMap<String, String> justificationfields) {
       Justificationfields = justificationfields;
-   }
-
-   public Map<ServerSensorType, String> getSensorsformulars() {
-      return sensorsformulars;
-   }
-
-   public void setSensorsformulars(Map<ServerSensorType, String> sensorsformulars) {
-      this.sensorsformulars = sensorsformulars;
    }
 
    public long getLastupdate() {
