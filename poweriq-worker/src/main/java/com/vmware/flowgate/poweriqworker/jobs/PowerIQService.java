@@ -101,15 +101,6 @@ public class PowerIQService implements AsyncService {
    public static final String ContactClosureSensor = "ContactClosureSensor";
    public static final String SmokeSensor = "SmokeSensor";
    public static final String WaterSensor = "WaterSensor";
-   public static final String VibrationSensor = "Vibration";
-
-   public static final String Humidity = "Humidity";
-   public static final String Temperature = "Temperature";
-   public static final String AirFlow= "AirFlow";
-   public static final String AirPressure = "AirPressure";
-   public static final String ContactClosure = "ContactClosure";
-   public static final String Smoke = "Smoke";
-   public static final String Water = "Water";
    public static final String Vibration = "Vibration";
    private static final String POWERIQ_SOURCE = "PDU_PowerIQ_SOURCE";
    private static Map<String, AssetSubCategory> subCategoryMap =
@@ -126,7 +117,7 @@ public class PowerIQService implements AsyncService {
       subCategoryMap.put(ContactClosureSensor, AssetSubCategory.ContactClosure);
       subCategoryMap.put(SmokeSensor, AssetSubCategory.Smoke);
       subCategoryMap.put(WaterSensor, AssetSubCategory.Water);
-      subCategoryMap.put(VibrationSensor, AssetSubCategory.Vibration);
+      subCategoryMap.put(Vibration, AssetSubCategory.Vibration);
       metricsName.add(MetricName.SERVER_HUMIDITY);
       metricsName.add(MetricName.SERVER_BACK_TEMPREATURE);
       metricsName.add(MetricName.SERVER_FRONT_TEMPERATURE);
@@ -612,7 +603,7 @@ public class PowerIQService implements AsyncService {
                formulars.put(FlowgateConstant.SENSOR, sensorFormulars);
             }else {
                Map<String,String> locationAndMetricMap = null;
-               switch (sensorAsset.getSubCategory().name()) {
+               switch (sensorAsset.getSubCategory()) {
                case Humidity:
                   locationAndMetricMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
                   if(locationAndMetricMap == null) {
@@ -653,7 +644,7 @@ public class PowerIQService implements AsyncService {
       }
      Map<String, Map<String, String>> sensorFormulars = new HashMap<String, Map<String, String>>();
       Map<String, String> metricsLocationAndIdMap = new HashMap<String,String>();
-      switch (sensorAsset.getSubCategory().name()) {
+      switch (sensorAsset.getSubCategory()) {
       case Humidity:
          metricsLocationAndIdMap.put(positionInfo, sensorAsset.getId());
          sensorFormulars.put(MetricName.PDU_HUMIDITY, metricsLocationAndIdMap);
