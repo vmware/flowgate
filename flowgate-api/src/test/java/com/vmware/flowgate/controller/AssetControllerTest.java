@@ -50,6 +50,7 @@ import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetAddress;
@@ -59,9 +60,7 @@ import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.ServerSensorData;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.ValueUnit;
-import com.vmware.flowgate.common.model.ValueUnit.ValueType;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
@@ -1310,7 +1309,7 @@ public class AssetControllerTest {
    @Test
    public void getServerSensorData() throws Exception {
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("type").description("type").type(ServerSensorData.ServerSensorType.class),
+            fieldWithPath("type").description("type").type(JsonFieldType.STRING),
             fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
             fieldWithPath("value").description("value").type(JsonFieldType.NULL),
             fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
@@ -1331,11 +1330,11 @@ public class AssetControllerTest {
       String res = result1.getResponse().getContentAsString();
       ServerSensorData [] datas = mapper.readValue(res, ServerSensorData[].class);
       for(ServerSensorData serverdata:datas) {
-    	  if(serverdata.getType().name().equals("PDU_RealtimeLoad")) {
+    	  if(serverdata.getMetricName().equals(MetricName.PDU_CURRENT)) {
     		  TestCase.assertEquals(serverdata.getValueNum(), 20.0);
-    	  }else if(serverdata.getType().name().equals("PDU_RealtimePower")) {
+    	  }else if(serverdata.getMetricName().equals(MetricName.PDU_APPARENT_POWER)) {
     		  TestCase.assertEquals(serverdata.getValueNum(), 2.38);
-    	  }else if(serverdata.getType().name().equals("PDU_RealtimeVoltage")) {
+    	  }else if(serverdata.getMetricName().equals(MetricName.PDU_VOLTAGE)) {
     		  TestCase.assertEquals(serverdata.getValueNum(), 208.0);
     	  }else {
     		  TestCase.fail();
@@ -1348,19 +1347,19 @@ public class AssetControllerTest {
    RealTimeData createRealTimeData() {
       List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
       ValueUnit valueunitvoltage = new ValueUnit();
-      valueunitvoltage.setKey(ValueType.PDU_RealtimeVoltage);
+      valueunitvoltage.setKey(MetricName.PDU_VOLTAGE);
       valueunitvoltage.setUnit("Volts");
       valueunitvoltage.setValueNum(208);
       valueunitvoltage.setTime(1501981711206L);
       valueunits.add(valueunitvoltage);
       ValueUnit valueunitpower = new ValueUnit();
-      valueunitpower.setKey(ValueType.PDU_RealtimePower);
+      valueunitpower.setKey(MetricName.PDU_APPARENT_POWER);
       valueunitpower.setUnit("KW");
       valueunitpower.setValueNum(2.38);
       valueunitpower.setTime(1501981711206L);
       valueunits.add(valueunitpower);
       ValueUnit valueunit = new ValueUnit();
-      valueunit.setKey(ValueType.PDU_RealtimeLoad);
+      valueunit.setKey(MetricName.PDU_CURRENT);
       valueunit.setUnit("Amps");
       valueunit.setValueNum(20);
       valueunit.setTime(1501981711206L);
@@ -1407,12 +1406,15 @@ public class AssetControllerTest {
       asset.setSwitches(switches);
       AssetStatus status = new AssetStatus();
       asset.setStatus(status);
-      Map<ServerSensorType, String> sensorsformulars =
-            new HashMap<ServerSensorType, String>();
-      sensorsformulars.put(ServerSensorType.PDU_RealtimeLoad, "0001bdc8b25d4c2badfd045ab61aabfa");
-      sensorsformulars.put(ServerSensorType.PDU_RealtimePower, "0001bdc8b25d4c2badfd045ab61aabfa");
-      sensorsformulars.put(ServerSensorType.PDU_RealtimeVoltage, "0001bdc8b25d4c2badfd045ab61aabfa");
-      asset.setSensorsformulars(sensorsformulars);
+      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> MetricAndIdMap = new HashMap<String,String>();
+      MetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
+      MetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
+      MetricAndIdMap.put(MetricName.SERVER_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricFormulars.put("0001bdc8b25d4c2badfd045ab61aabfa", MetricAndIdMap);
+      formulars.put(FlowgateConstant.PDU, pduMetricFormulars);
+      asset.setMetricsformulars(formulars);
       return asset;
    }
 

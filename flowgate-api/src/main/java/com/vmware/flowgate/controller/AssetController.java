@@ -7,8 +7,6 @@ package com.vmware.flowgate.controller;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,9 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -43,9 +38,6 @@ import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.ServerSensorData;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
-import com.vmware.flowgate.common.model.ValueUnit;
-import com.vmware.flowgate.common.model.ValueUnit.ValueType;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
@@ -342,121 +334,121 @@ public class AssetController {
       }
       Asset server = assetRepository.findOne(assetID);
       List<ServerSensorData> result = new ArrayList<ServerSensorData>();
-      Map<ServerSensorType, String> formulars = server.getSensorsformulars();
 
-      for (ServerSensorType category : formulars.keySet()) {
-         String formular = formulars.get(category);
-         ExpressionParser parser = new SpelExpressionParser();
-         List<Map<String, String>> validDataComposeList = new ArrayList<Map<String, String>>();
-         String[] assetIDs = formular.split("\\+|-|\\*|/|\\(|\\)");
-         Map<String, List<RealTimeData>> dataSlice = new HashMap<String, List<RealTimeData>>();
-         for (String id : assetIDs) {
-            if (id.length() == FlowgateConstant.COUCHBASEIDLENGTH) {//the default uuid length is 32
-
-               List<RealTimeData> currentData =
-                     realtimeDataRepository.getDataByIDAndTimeRange(id, starttime, duration);
-               Collections.sort(currentData, new Comparator<RealTimeData>() {
-                  @Override
-                  public int compare(RealTimeData data1, RealTimeData data2) {
-                     return (int) (data1.getTime() - data2.getTime());
-                  }
-
-               });
-               dataSlice.put(id, currentData);
-            }
-         }
-         switch (category) {
-         case FRONTPANELTEMP:
-         case BACKPANELTEMP:
-            computeTemp(result, dataSlice, validDataComposeList, category, formular, parser);
-            break;
-         default:
-            //it should only has 1 item in the dataslice for other case.
-            //            if (dataSlice.size() > 1) {
-            //               throw new WormholeException(
-            //                     "The Server should only attached to 1 sensor but find multiple");
-            //            }
-            for (List<RealTimeData> value : dataSlice.values()) {
-               for (RealTimeData data : value) {
-
-                  for (ValueUnit unitData : data.getValues()) {
-                     if (compareType(unitData.getKey(), category)) {
-                        ServerSensorData sData = new ServerSensorData();
-                        sData.setType(category);
-                        sData.setTimeStamp(unitData.getTime());
-                        sData.setValue(unitData.getValue());
-                        sData.setValueNum(unitData.getValueNum());
-                        result.add(sData);
-                     }
-                  }
-               }
-            }
-         }
-      }
+//      Map<String, Map<String, Map<String, String>>> formulars = server.getMetricsformulars();
+//      for (ServerSensorType category : formulars.keySet()) {
+//         String formular = formulars.get(category);
+//         ExpressionParser parser = new SpelExpressionParser();
+//         List<Map<String, String>> validDataComposeList = new ArrayList<Map<String, String>>();
+//         String[] assetIDs = formular.split("\\+|-|\\*|/|\\(|\\)");
+//         Map<String, List<RealTimeData>> dataSlice = new HashMap<String, List<RealTimeData>>();
+//         for (String id : assetIDs) {
+//            if (id.length() == FlowgateConstant.COUCHBASEIDLENGTH) {//the default uuid length is 32
+//
+//               List<RealTimeData> currentData =
+//                     realtimeDataRepository.getDataByIDAndTimeRange(id, starttime, duration);
+//               Collections.sort(currentData, new Comparator<RealTimeData>() {
+//                  @Override
+//                  public int compare(RealTimeData data1, RealTimeData data2) {
+//                     return (int) (data1.getTime() - data2.getTime());
+//                  }
+//
+//               });
+//               dataSlice.put(id, currentData);
+//            }
+//         }
+//         switch (category) {
+//         case FRONTPANELTEMP:
+//         case BACKPANELTEMP:
+//            computeTemp(result, dataSlice, validDataComposeList, category, formular, parser);
+//            break;
+//         default:
+//            //it should only has 1 item in the dataslice for other case.
+//            //            if (dataSlice.size() > 1) {
+//            //               throw new WormholeException(
+//            //                     "The Server should only attached to 1 sensor but find multiple");
+//            //            }
+//            for (List<RealTimeData> value : dataSlice.values()) {
+//               for (RealTimeData data : value) {
+//
+//                  for (ValueUnit unitData : data.getValues()) {
+//                     if (compareType(unitData.getKey(), category)) {
+//                        ServerSensorData sData = new ServerSensorData();
+//                        sData.setType(category);
+//                        sData.setTimeStamp(unitData.getTime());
+//                        sData.setValue(unitData.getValue());
+//                        sData.setValueNum(unitData.getValueNum());
+//                        result.add(sData);
+//                     }
+//                  }
+//               }
+//            }
+//         }
+//      }
       return result;
    }
 
-   private void computeTemp(List<ServerSensorData> result,
-         Map<String, List<RealTimeData>> dataSlice, List<Map<String, String>> validDataComposeList,
-         ServerSensorType category, String formular, ExpressionParser parser) {
-      //aggregate the data.
-      for (String tempID : dataSlice.keySet()) {
-         List<RealTimeData> tempDatas = dataSlice.get(tempID);
-         for (RealTimeData rData : tempDatas) {
-            long time = rData.getTime();
-            boolean goodData = true;
-            Map<String, String> dataset = new HashMap<String, String>();
-            dataset.put(TIME, String.valueOf(time));
-            //get the tempdata.
-            for (ValueUnit data : rData.getValues()) {
-               if (data.getKey().equals(ValueType.TEMP)) {
-                  if (data.getValue() != null && !"".equals(data.getValue())) {
-                     dataset.put(tempID, data.getValue());
-                  } else {
-                     dataset.put(tempID, String.valueOf(data.getValueNum()));
-                  }
-               }
-            }
-            for (String otherID : dataSlice.keySet()) {
-               if (tempID.equals(otherID)) {
-                  continue;
-               }
-               RealTimeData clostData = getMostClostData(dataSlice.get(otherID), time);
-               if (Math.abs(clostData.getTime() - time) > 10000) {
-                  goodData = false;
-                  break;
-               }
-               for (ValueUnit cData : clostData.getValues()) {
-                  if (cData.getKey().equals(ValueType.TEMP)) {
-                     if (cData.getValue() != null && !"".equals(cData.getValue())) {
-                        dataset.put(otherID, cData.getValue());
-                     } else {
-                        dataset.put(otherID, String.valueOf(cData.getValueNum()));
-                     }
-                  }
-               }
-            }
-            if (goodData) {
-               validDataComposeList.add(dataset);
-            }
-         }
-      }
-      //now we have data and formula
-      for (Map<String, String> composeData : validDataComposeList) {
-         ServerSensorData sData = new ServerSensorData();
-         sData.setType(category);
-         sData.setTimeStamp(Long.parseLong(composeData.get(TIME)));
-         String dataFormular = formular;
-         for (String aID : composeData.keySet()) {
-            dataFormular = dataFormular.replaceAll(aID, composeData.get(aID));
-         }
-         Expression exp = parser.parseExpression(dataFormular);
-         double rValue = exp.getValue(Double.class);
-         sData.setValueNum(rValue);
-         sData.setValue(String.valueOf(rValue));
-         result.add(sData);
-      }
-   }
+//   private void computeTemp(List<ServerSensorData> result,
+//         Map<String, List<RealTimeData>> dataSlice, List<Map<String, String>> validDataComposeList,
+//         ServerSensorType category, String formular, ExpressionParser parser) {
+//      //aggregate the data.
+//      for (String tempID : dataSlice.keySet()) {
+//         List<RealTimeData> tempDatas = dataSlice.get(tempID);
+//         for (RealTimeData rData : tempDatas) {
+//            long time = rData.getTime();
+//            boolean goodData = true;
+//            Map<String, String> dataset = new HashMap<String, String>();
+//            dataset.put(TIME, String.valueOf(time));
+//            //get the tempdata.
+//            for (ValueUnit data : rData.getValues()) {
+//               if (data.getKey().equals(MetricName.TEMPERATURE)) {
+//                  if (data.getValue() != null && !"".equals(data.getValue())) {
+//                     dataset.put(tempID, data.getValue());
+//                  } else {
+//                     dataset.put(tempID, String.valueOf(data.getValueNum()));
+//                  }
+//               }
+//            }
+//            for (String otherID : dataSlice.keySet()) {
+//               if (tempID.equals(otherID)) {
+//                  continue;
+//               }
+//               RealTimeData clostData = getMostClostData(dataSlice.get(otherID), time);
+//               if (Math.abs(clostData.getTime() - time) > 10000) {
+//                  goodData = false;
+//                  break;
+//               }
+//               for (ValueUnit cData : clostData.getValues()) {
+//                  if (cData.getKey().equals(MetricName.TEMPERATURE)) {
+//                     if (cData.getValue() != null && !"".equals(cData.getValue())) {
+//                        dataset.put(otherID, cData.getValue());
+//                     } else {
+//                        dataset.put(otherID, String.valueOf(cData.getValueNum()));
+//                     }
+//                  }
+//               }
+//            }
+//            if (goodData) {
+//               validDataComposeList.add(dataset);
+//            }
+//         }
+//      }
+//      //now we have data and formula
+//      for (Map<String, String> composeData : validDataComposeList) {
+//         ServerSensorData sData = new ServerSensorData();
+//         sData.setType(category);
+//         sData.setTimeStamp(Long.parseLong(composeData.get(TIME)));
+//         String dataFormular = formular;
+//         for (String aID : composeData.keySet()) {
+//            dataFormular = dataFormular.replaceAll(aID, composeData.get(aID));
+//         }
+//         Expression exp = parser.parseExpression(dataFormular);
+//         double rValue = exp.getValue(Double.class);
+//         sData.setValueNum(rValue);
+//         sData.setValue(String.valueOf(rValue));
+//         result.add(sData);
+//      }
+//   }
 
    private RealTimeData getMostClostData(List<RealTimeData> datas, long time) {
       RealTimeData lastData = datas.get(0);
@@ -475,9 +467,9 @@ public class AssetController {
       return lastData;
    }
 
-   private boolean compareType(ValueUnit.ValueType valueType, ServerSensorType sType) {
-      return valueType.toString().equals(sType.toString());
-   }
+//   private boolean compareType(String metricName, ServerSensorType sType) {
+//      return metricName.equals(sType.toString());
+//   }
 
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/mapping", method = RequestMethod.POST)
