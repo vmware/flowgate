@@ -37,7 +37,6 @@ import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
@@ -80,15 +79,10 @@ public class NlyteDataService implements AsyncService {
    private static final String RealtimePower = "RealtimePower";
    private static final String RealtimeVoltage = "RealtimeVoltage";
    private static Map<String, String> sensorValueTypeMap = new HashMap<String, String>();
-   private static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
    static {
-      sensorType.add(ServerSensorType.PDU_RealtimeVoltage);
-      sensorType.add(ServerSensorType.PDU_RealtimeLoad);
-      sensorType.add(ServerSensorType.PDU_RealtimePower);
       sensorValueTypeMap.put(RealtimeLoad, MetricName.PDU_TOTAL_CURRENT);
       sensorValueTypeMap.put(RealtimePower, MetricName.PDU_TOTAL_POWER);
       sensorValueTypeMap.put(RealtimeVoltage, MetricName.PDU_VOLTAGE);
-      sensorType = Collections.unmodifiableList(sensorType);
       sensorValueTypeMap = Collections.unmodifiableMap(sensorValueTypeMap);
    }
 
@@ -315,26 +309,23 @@ public class NlyteDataService implements AsyncService {
             }
          }
          server.setPdus(pduIds);
-         Map<ServerSensorType,String> sensorsformular = server.getSensorsformulars();
-         if(sensorsformular.isEmpty()) {
+
+
+         Map<String, Map<String, Map<String, String>>> formulars = server.getMetricsformulars();
+         if(formulars == null || formulars.isEmpty()) {
             continue;
          }
-         String realTimeLoad = sensorsformular.get(ServerSensorType.PDU_RealtimeLoad);
-         if(realTimeLoad != null && realTimeLoad.indexOf(pduId) >= 0) {
-            sensorsformular.remove(ServerSensorType.PDU_RealtimeLoad);
-            changed = true;
-         }
-         String realTimePower = sensorsformular.get(ServerSensorType.PDU_RealtimePower);
-         if(realTimePower != null && realTimePower.indexOf(pduId) >= 0) {
-            sensorsformular.remove(ServerSensorType.PDU_RealtimePower);
-            changed = true;
-         }
-         String realTimeVoltage = sensorsformular.get(ServerSensorType.PDU_RealtimeVoltage);
-         if(realTimeVoltage != null && realTimeVoltage.indexOf(pduId) >= 0) {
-            sensorsformular.remove(ServerSensorType.PDU_RealtimeVoltage);
-            changed = true;
-         }
-         server.setSensorsformulars(sensorsformular);
+         Map<String, Map<String, String>> pduFormulars = formulars.get(FlowgateConstant.PDU);
+         Iterator<Map.Entry<String, Map<String, String>>> ite = pduFormulars.entrySet().iterator();
+         while(ite.hasNext()) {
+            Map.Entry<String, Map<String, String>> map = ite.next();
+            String pduAssetID = map.getKey();
+            if (pduAssetID.equals(pduId)) {
+               changed = true;
+               ite.remove();
+            }
+          }
+         server.setMetricsformulars(formulars);
          if(changed) {
             needToUpdate.add(server);
          }
@@ -544,17 +535,17 @@ public class NlyteDataService implements AsyncService {
 
    public void syncRealtimeData(FacilitySoftwareConfig nlyte) {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      List<Asset> allMappedAssets =
+      List<Asset> allMappedServers =
             Arrays.asList(restClient.getMappedAsset(AssetCategory.Server).getBody());
-      if (allMappedAssets.isEmpty()) {
+      if (allMappedServers.isEmpty()) {
          logger.info("No mapped server found. End sync RealTime data Job");
          return;
       }
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
       //filter and get mapped assets what are from NLYTE
-      List<Asset> mappedAssets = getNlyteMappedAsset(allMappedAssets, nlyte.getId());
+      List<Asset> mappedServersFromNlyte = getNlyteMappedAsset(allMappedServers, nlyte.getId());
       //get assetIds from asset's sensorsFromulars attribute
-      Set<String> assetIds = getAssetIdfromformular(mappedAssets);
+      Set<String> assetIds = getAssetIdfromformular(mappedServersFromNlyte);
       if (assetIds.isEmpty()) {
          return;
       }
@@ -673,20 +664,20 @@ public class NlyteDataService implements AsyncService {
       return mappedAssets;
    }
 
-   public Set<String> getAssetIdfromformular(List<Asset> nlyteMappedAssets) {
+   public Set<String> getAssetIdfromformular(List<Asset> mappedServers) {
       Set<String> assetIds = new HashSet<String>();
-      for (Asset asset : nlyteMappedAssets) {
-         Map<ServerSensorType, String> sensorsformularsmap = asset.getSensorsformulars();
-         for (Map.Entry<ServerSensorType, String> map : sensorsformularsmap.entrySet()) {
-            if (sensorType.contains(map.getKey())) {
-               String[] assetIDs = map.getValue().split("\\+|-|\\*|/|\\(|\\)");
-               for (String assetId : assetIDs) {
-                  if (assetId.equals("")) {
-                     continue;
-                  }
-                  assetIds.add(assetId);
-               }
-            }
+      for (Asset asset : mappedServers) {
+         Map<String, Map<String, Map<String, String>>> formulars = asset.getMetricsformulars();
+         if(formulars == null || formulars.isEmpty()) {
+            continue;
+         }
+         //{"pduAssetID",{"type_1","pduAssetID"}}
+         Map<String, Map<String, String>> pduFormulars = formulars.get(FlowgateConstant.PDU);
+         if(pduFormulars == null || pduFormulars.isEmpty()) {
+            continue;
+         }
+         for(Map.Entry<String, Map<String, String>> pduFormularMap : pduFormulars.entrySet()) {
+            assetIds.add(pduFormularMap.getKey());
          }
       }
       return assetIds;
