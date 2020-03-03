@@ -7,7 +7,6 @@ package com.vmware.flowgate.aggregator.scheduler.job;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,12 +27,12 @@ import com.vmware.flowgate.aggregator.config.ServiceKeyConfig;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
@@ -54,6 +53,8 @@ public class AggregatorService implements AsyncService {
    StringRedisTemplate template;
 
    private static final String LOCATION_SEPERATOR = "-|-";
+   private static final String extrnalTemperature = "extrnalTemperature";
+   private static final String extrnalHumidity = "extrnalHumidity";
 
    @Override
    @Async("asyncServiceExecutor")
@@ -231,6 +232,20 @@ public class AggregatorService implements AsyncService {
       logger.info("Finished aggregate pdu from PowerIQ to other systems");
    }
 
+   public Map<String,Map<String,String>> generatePduformularForServer (List<String> pduAssetIds){
+      Map<String,Map<String,String>> pduFormular = new HashMap<String,Map<String,String>>();
+      for(String pduAssetId : pduAssetIds) {
+         Map<String,String> metricNameAndIdMap = new HashMap<String,String>();
+         metricNameAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, pduAssetId);
+         metricNameAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, pduAssetId);
+         metricNameAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, pduAssetId);
+         metricNameAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, pduAssetId);
+         metricNameAndIdMap.put(MetricName.SERVER_VOLTAGE, pduAssetId);
+         pduFormular.put(pduAssetId, metricNameAndIdMap);
+      }
+      return pduFormular;
+   }
+
    public void aggregateServerPDU() {
       /**
        * How do we know the relation between the PDU and servers? currently we can only assume that
@@ -250,15 +265,16 @@ public class AggregatorService implements AsyncService {
        *
        */
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      /**
+       * Get all servers with pdus is not null which are mapped with IT systems.
+       */
       Asset[] incompletServers = restClient.getServersWithnoPDUInfo().getBody();
       if (incompletServers == null || incompletServers.length == 0) {
          return;
       }
       List<Asset> pdus = restClient.getAllAssetsByType(AssetCategory.PDU);
-
       // create map for PDUs base on the location.
       Map<String, List<Asset>> pduLookupMap = new HashMap<String, List<Asset>>();
-
       for (Asset pdu : pdus) {
          String key = getLocationIdentifier(pdu);
          if (pduLookupMap.containsKey(key)) {
@@ -273,25 +289,64 @@ public class AggregatorService implements AsyncService {
       for (Asset server : incompletServers) {
          String locationKey = getLocationIdentifier(server);
          if (pduLookupMap.containsKey(locationKey)) {
-            List<String> assetPdus = new ArrayList<String>();
+            List<String> assetPduIds = new ArrayList<String>();
             for (Asset pdu : pduLookupMap.get(locationKey)) {
-               assetPdus.add(pdu.getId());
+               assetPduIds.add(pdu.getId());
             }
-            server.setPdus(assetPdus);
-            //update the pdu formula
-            Map<ServerSensorType, String> formulas = server.getSensorsformulars();
-            if (formulas == null) {
-               formulas = new EnumMap<ServerSensorType, String>(ServerSensorType.class);
-            }
-            formulas.put(ServerSensorType.PDU_RealtimeLoad, assetPdus.get(0));//TODO we should consider multi pdu, and how to deal with it.
-            formulas.put(ServerSensorType.PDU_RealtimePower, assetPdus.get(0));
-            formulas.put(ServerSensorType.PDU_RealtimeVoltage, assetPdus.get(0));
-            formulas.put(ServerSensorType.PDU_RealtimeLoadPercent, assetPdus.get(0));
+            server.setPdus(assetPduIds);
             toBeUpdatedAssets.add(server);
          }
       }
       if (!toBeUpdatedAssets.isEmpty()) {
          restClient.saveAssets(toBeUpdatedAssets);
+      }
+
+      //Update metricsFormular for pdu by pdus
+      Asset[] servers = restClient.getServersWithPDUInfo().getBody();
+      /**
+       * Generate pdu metricsFormular for server,
+       * the pdus field of server is generated by other facility system.
+       * We need to create some metricsFormular to store the relations between metrics and PDUs.
+       */
+      List<Asset> needToSaveServers = new ArrayList<Asset>();
+      for(Asset server : servers) {
+         Map<String,Map<String,Map<String,String>>> metricsFormular = server.getMetricsformulars();
+         List<String> pduIds = server.getPdus();
+         if(metricsFormular == null || metricsFormular.isEmpty()) {
+            metricsFormular = new HashMap<String,Map<String,Map<String,String>>>();
+            Map<String,Map<String,String>> pduFormular = generatePduformularForServer(pduIds);
+            metricsFormular.put(FlowgateConstant.PDU, pduFormular);
+            server.setMetricsformulars(metricsFormular);
+            needToSaveServers.add(server);
+         }else {
+            Map<String,Map<String,String>> pduFormulars = metricsFormular.get(FlowgateConstant.PDU);
+            if(pduFormulars == null || pduFormulars.isEmpty()) {
+               pduFormulars = generatePduformularForServer(pduIds);
+               metricsFormular.put(FlowgateConstant.PDU, pduFormulars);
+               server.setMetricsformulars(metricsFormular);
+               needToSaveServers.add(server);
+            }else {
+               boolean isNeedUpdated = false;
+               if(pduIds.size() != pduFormulars.keySet().size()) {
+                  pduFormulars = generatePduformularForServer(pduIds);
+               }else {
+                  for(String pduAssetId : pduIds) {
+                     if(pduFormulars.get(pduAssetId) == null) {
+                        pduFormulars = generatePduformularForServer(pduIds);
+                        isNeedUpdated = true;
+                     }
+                  }
+               }
+               if(isNeedUpdated) {
+                  metricsFormular.put(FlowgateConstant.PDU, pduFormulars);
+                  server.setMetricsformulars(metricsFormular);
+                  needToSaveServers.add(server);
+               }
+            }
+         }
+      }
+      if(!needToSaveServers.isEmpty()) {
+         restClient.saveAssets(needToSaveServers);
       }
    }
 
@@ -328,15 +383,25 @@ public class AggregatorService implements AsyncService {
          candidateServer = Arrays.asList(allServers);
       } else {
          for (Asset asset : allServers) {
-            Map<ServerSensorType, String> formulas = asset.getSensorsformulars();
-            if (formulas == null) {
-               formulas = new EnumMap<ServerSensorType, String>(ServerSensorType.class);
-               asset.setSensorsformulars(formulas);
-            }
-            if (!formulas.containsKey(ServerSensorType.BACKPANELTEMP)
-                  || !formulas.containsKey(ServerSensorType.FRONTPANELTEMP)
-                  || !formulas.containsKey(ServerSensorType.HUMIDITY)) {
+            Map<String, Map<String, Map<String, String>>> metricsFormular =
+                  asset.getMetricsformulars();
+            if (metricsFormular == null) {
+               metricsFormular = new HashMap<String, Map<String, Map<String, String>>>();
+               asset.setMetricsformulars(metricsFormular);
                candidateServer.add(asset);
+            } else {
+               Map<String, Map<String, String>> sensorFormulars =
+                     metricsFormular.get(FlowgateConstant.SENSOR);
+               if (sensorFormulars == null || sensorFormulars.isEmpty()) {
+                  candidateServer.add(asset);
+               } else {
+                  if (!sensorFormulars.containsKey(MetricName.SERVER_BACK_TEMPREATURE)
+                        || !sensorFormulars.containsKey(MetricName.SERVER_FRONT_TEMPERATURE)
+                        || !sensorFormulars.containsKey(MetricName.SERVER_BACK_HUMIDITY)
+                        || !sensorFormulars.containsKey(MetricName.SERVER_FRONT_HUMIDITY)) {
+                     candidateServer.add(asset);
+                  }
+               }
             }
          }
       }
@@ -348,79 +413,177 @@ public class AggregatorService implements AsyncService {
       if (sensors.isEmpty()) {
          return;
       }
-      Map<String, ArrayList<String>> temperatureSensorMap =
-            new HashMap<String, ArrayList<String>>();
-      Map<String, ArrayList<String>> humiditySensorMap = new HashMap<String, ArrayList<String>>();
+      ObjectMapper mapper = new ObjectMapper();
+      Map<String,List<Asset>> pduAndSensorsMap = new HashMap<String,List<Asset>>();
       for (Asset sensor : sensors) {
-         if (sensor.getJustificationfields() != null) {
-            String pduAssetID = sensor.getJustificationfields().get(FlowgateConstant.PDU_ASSET_ID);
-            if (pduAssetID != null) {
-               switch (sensor.getSubCategory()) {
-               case Temperature:
-                  if (!temperatureSensorMap.containsKey(pduAssetID)) {
-                     temperatureSensorMap.put(pduAssetID, new ArrayList<String>());
-                  }
-                  temperatureSensorMap.get(pduAssetID).add(sensor.getId());
-                  break;
-               case Humidity:
-                  if (!humiditySensorMap.containsKey(pduAssetID)) {
-                     humiditySensorMap.put(pduAssetID, new ArrayList<String>());
-                  }
-                  humiditySensorMap.get(pduAssetID).add(sensor.getId());
-                  break;
-               default:
-                  break;
-               }
-            }
+         if (sensor.getJustificationfields() == null) {
+            continue;
          }
+         String sensorInfo = sensor.getJustificationfields().get(FlowgateConstant.SENSOR);
+         if(sensorInfo == null) {
+            continue;
+         }
+         Map<String, String> sensorInfoMap = null;
+         try {
+            sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
+         }  catch (IOException e) {
+            continue;
+         }
+         String pduAssetID = sensorInfoMap.get(FlowgateConstant.PDU_ASSET_ID);
+         if(pduAssetID == null) {
+            continue;
+         }
+         if (!pduAndSensorsMap.containsKey(pduAssetID)) {
+            pduAndSensorsMap.put(pduAssetID, new ArrayList<Asset>());
+         }
+         pduAndSensorsMap.get(pduAssetID).add(sensor);
       }
 
-      //now start create the sensor/server mapping.
       List<Asset> needUpdateServers = new ArrayList<Asset>();
       for (Asset server : candidateServer) {
-         List<String> pdus = server.getPdus();
-         /**
-          * bad assumption:each server have 2 pdus at most. We should change this.
-          */
-         String frontPanelSensor = null;
-         String backPanelSensor = null;
-         List<String> tempSensors = new ArrayList<String>();
-         List<String> humiditySensors = new ArrayList<String>();
-         boolean needUpdate=false;
-         for (String pduID : pdus) {
-            if (temperatureSensorMap.containsKey(pduID)) {
-               tempSensors.addAll(temperatureSensorMap.get(pduID));
-            }
-            if(humiditySensorMap.containsKey(pduID)) {
-               humiditySensors.addAll(humiditySensorMap.get(pduID));
-            }
+         List<String> pduIds = server.getPdus();
+         List<String> temperatureSensorAssetIds = new ArrayList<String>();
+         List<String> humiditySensorAssetIds = new ArrayList<String>();
+         boolean needUpdate = false;
+         Map<String, Map<String,Map<String,String>>> metricsFormular = server.getMetricsformulars();
+         Map<String,Map<String,String>> sensorMetricsNameAndIdMap = null;
+         if(metricsFormular != null) {
+            sensorMetricsNameAndIdMap = metricsFormular.get(FlowgateConstant.SENSOR);
          }
-         if (!tempSensors.isEmpty()) {
-            frontPanelSensor = backPanelSensor = tempSensors.get(0);
-            if (tempSensors.size() > 1) {
-               backPanelSensor = tempSensors.get(1);
+         if(sensorMetricsNameAndIdMap == null || sensorMetricsNameAndIdMap.isEmpty()) {
+            sensorMetricsNameAndIdMap = new HashMap<String,Map<String,String>>();
+         }
+         for (String pduID : pduIds) {
+            List<Asset> sensorAssets = pduAndSensorsMap.get(pduID);
+            if(sensorAssets == null) {
+               continue;
             }
-            if (!server.getSensorsformulars().containsKey(ServerSensorType.FRONTPANELTEMP)) {
-               server.getSensorsformulars().put(ServerSensorType.FRONTPANELTEMP, frontPanelSensor);
+            generateMetricsFormular(sensorMetricsNameAndIdMap, sensorAssets,
+                  temperatureSensorAssetIds, humiditySensorAssetIds);
+         }
+         if(sensorMetricsNameAndIdMap.isEmpty()) {
+            if(!temperatureSensorAssetIds.isEmpty()) {
+               Map<String,String> temp = new HashMap<String,String>();
+               temp.put(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, temperatureSensorAssetIds.get(0));
+               sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_TEMPERATURE, temp);
                needUpdate = true;
             }
-            if (!server.getSensorsformulars().containsKey(ServerSensorType.BACKPANELTEMP)) {
-               server.getSensorsformulars().put(ServerSensorType.BACKPANELTEMP, backPanelSensor);
+            if(!humiditySensorAssetIds.isEmpty()) {
+               Map<String,String> humidity = new HashMap<String,String>();
+               humidity.put(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, humiditySensorAssetIds.get(0));
+               sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_HUMIDITY, humidity);
                needUpdate = true;
             }
-         }
-         if(!humiditySensors.isEmpty()) {
-            server.getSensorsformulars().put(ServerSensorType.HUMIDITY, humiditySensors.get(0));
-            needUpdate = true;
          }
          if(needUpdate) {
+            metricsFormular.put(FlowgateConstant.SENSOR, sensorMetricsNameAndIdMap);
             needUpdateServers.add(server);
          }
       }
+
       if(!needUpdateServers.isEmpty()) {
          logger.info("update asset item number: "+needUpdateServers.size());
          restClient.saveAssets(needUpdateServers);
       }
+   }
+
+   public Map<String,Map<String,String>> generateMetricsFormular(Map<String,Map<String,String>> metricsNameAndSensorsMap,
+         List<Asset> sensorAssets, List<String> temperatureSensorAssetIds, List<String> humiditySensorAssetIds){
+      ObjectMapper mapper = new ObjectMapper();
+      for(Asset sensor : sensorAssets) {
+         String positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
+         Map<String,String> sensorAssetJustfication = sensor.getJustificationfields();
+         int rackUnitNumber = sensor.getCabinetUnitPosition();
+         String rackUnitInfo = null;
+         String positionFromAsset = null;
+
+         if(rackUnitNumber != 0) {
+            rackUnitInfo = FlowgateConstant.RACK_UNIT_PREFIX  + rackUnitNumber;
+         }
+         if(sensorAssetJustfication != null) {
+            String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
+            if(sensorInfo != null) {
+               try {
+                  Map<String,String> sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
+                  positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
+               } catch (IOException e) {
+                  positionFromAsset = null;
+               }
+            }
+         }
+         if(rackUnitInfo != null) {
+            positionInfo = rackUnitInfo;
+         }
+         if(positionFromAsset != null) {
+            if(positionInfo != null) {
+               positionInfo = positionInfo + FlowgateConstant.SEPARATOR + positionFromAsset;
+            }else {
+               positionInfo = positionFromAsset;
+            }
+         }
+         switch (sensor.getMountingSide()) {
+         case Front:
+            switch (sensor.getSubCategory()) {
+            case Temperature:
+               Map<String,String> frontTempMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_FRONT_TEMPERATURE);
+               if(frontTempMap == null) {
+                  frontTempMap = new HashMap<String,String>();
+               }
+               frontTempMap.put(positionInfo,sensor.getId());
+               metricsNameAndSensorsMap.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempMap);
+               break;
+            case Humidity:
+               Map<String,String> frontHumidityMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_FRONT_HUMIDITY);
+               if(frontHumidityMap == null) {
+                  frontHumidityMap = new HashMap<String,String>();
+               }
+               frontHumidityMap.put(positionInfo, sensor.getId());
+               metricsNameAndSensorsMap.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumidityMap);
+               break;
+            default:
+               break;
+            }
+            break;
+         case Back:
+            switch (sensor.getSubCategory()) {
+            case Temperature:
+               Map<String,String> backTempMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_BACK_TEMPREATURE);
+               if(backTempMap == null) {
+                  backTempMap = new HashMap<String,String>();
+               }
+               backTempMap.put(positionInfo, sensor.getId());
+               metricsNameAndSensorsMap.put(MetricName.SERVER_BACK_TEMPREATURE, backTempMap);
+               break;
+            case Humidity:
+               Map<String,String> backHumidityMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_BACK_HUMIDITY);
+               if(backHumidityMap == null) {
+                  backHumidityMap = new HashMap<String,String>();
+               }
+               backHumidityMap.put(positionInfo, sensor.getId());
+               metricsNameAndSensorsMap.put(MetricName.SERVER_BACK_HUMIDITY, backHumidityMap);
+               break;
+            default:
+               break;
+            }
+            break;
+         case External:
+         case Unmounted:
+            switch (sensor.getSubCategory()) {
+            case Temperature:
+               temperatureSensorAssetIds.add(sensor.getId());
+               break;
+            case Humidity:
+               humiditySensorAssetIds.add(sensor.getId());
+               break;
+            default:
+               break;
+            }
+            break;
+         default:
+            break;
+         }
+      }
+      return metricsNameAndSensorsMap;
    }
 
 }

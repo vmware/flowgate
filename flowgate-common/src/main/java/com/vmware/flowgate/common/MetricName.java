@@ -24,7 +24,8 @@ public class MetricName {
 
    public static final String SERVER_FRONT_TEMPERATURE = "Front_Temperature";
    public static final String SERVER_BACK_TEMPREATURE = "Back_Temperature";
-   public static final String SERVER_HUMIDITY = "Humidity";
+   public static final String SERVER_FRONT_HUMIDITY = "Front_Humidity";
+   public static final String SERVER_BACK_HUMIDITY = "Back_Humidity";
    public static final String SERVER_TOTAL_CURRENT = "Total_Current";
    public static final String SERVER_TOTAL_POWER = "Total_Power";
    public static final String SERVER_VOLTAGE = "Voltage";
