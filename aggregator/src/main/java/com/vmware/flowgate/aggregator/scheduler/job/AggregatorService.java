@@ -392,15 +392,24 @@ public class AggregatorService implements AsyncService {
          candidateServer = Arrays.asList(allServers);
       } else {
          for (Asset asset : allServers) {
-            Map<String,Map<String,Map<String,String>>> metricsFormular = asset.getMetricsformulars();
-            if(metricsFormular == null) {
-               metricsFormular = new HashMap<String,Map<String,Map<String,String>>>();
+            Map<String, Map<String, Map<String, String>>> metricsFormular =
+                  asset.getMetricsformulars();
+            if (metricsFormular == null) {
+               metricsFormular = new HashMap<String, Map<String, Map<String, String>>>();
                asset.setMetricsformulars(metricsFormular);
                candidateServer.add(asset);
-            }else {
-               Map<String,Map<String,String>> sensorFormulars = metricsFormular.get(FlowgateConstant.SENSOR);
-               if(sensorFormulars == null || sensorFormulars.isEmpty()) {
+            } else {
+               Map<String, Map<String, String>> sensorFormulars =
+                     metricsFormular.get(FlowgateConstant.SENSOR);
+               if (sensorFormulars == null || sensorFormulars.isEmpty()) {
                   candidateServer.add(asset);
+               } else {
+                  if (!sensorFormulars.containsKey(MetricName.SERVER_BACK_TEMPREATURE)
+                        || !sensorFormulars.containsKey(MetricName.SERVER_FRONT_TEMPERATURE)
+                        || !sensorFormulars.containsKey(MetricName.SERVER_BACK_HUMIDITY)
+                        || !sensorFormulars.containsKey(MetricName.SERVER_FRONT_HUMIDITY)) {
+                     candidateServer.add(asset);
+                  }
                }
             }
          }
@@ -472,12 +481,6 @@ public class AggregatorService implements AsyncService {
                      sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_TEMPERATURE, map.getValue());
                      needUpdate = true;
                   }else {
-                     /**
-                      * Suggest use cabinetAssetNumber+cabinet_unit_position as key,
-                      * because of a server may have many pdus, every pdu has itself cabinet,
-                      * the cabinet_unit_position between every cabinet may be duplicated,
-                      * if only use cabinet_unit_position as the key, there will be a problem
-                      */
                      oldFrontTempdMap.putAll(map.getValue());
                      sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_TEMPERATURE, oldFrontTempdMap);
                      needUpdate = true;
