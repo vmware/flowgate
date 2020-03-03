@@ -253,18 +253,6 @@ public class SyncSensorMetaDataJobTest {
    }
 
    @Test
-   public void testAggregatorSensorIdAndSourceForPdu() {
-      Asset pdu = createAsset1();
-      Sensor sensor = new Sensor();
-      sensor.setId(509);
-      sensor.setType(PowerIQService.HumiditySensor);
-      String source = "l9i8728d55368540fcba1692";
-      pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-      TestCase.assertEquals(sensor.getId()+FlowgateConstant.SEPARATOR+source,
-            pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
-   }
-
-   @Test
    public void testAggregatorSensorIdAndSourceForPdu1() {
       Asset pdu = createAsset1();
       HashMap<String, String> justificationfields = new HashMap<String,String>();
@@ -308,6 +296,33 @@ public class SyncSensorMetaDataJobTest {
       pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
       TestCase.assertEquals(sensor.getId()+FlowgateConstant.SEPARATOR+source,
             pdu.getJustificationfields().get(AssetSubCategory.Humidity.toString()));
+   }
+
+   @Test
+   public void testUpdateServer() {
+      List<Asset> assets = new ArrayList<Asset>();
+      Asset server = createAsset();
+      server.setAssetName("pek-wor-server");
+      server.setCategory(AssetCategory.Server);
+      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String,String> sensorLocationAndId = new HashMap<String,String>();
+      sensorLocationAndId.put("Rack01", "256");
+      sensorLocationAndId.put("Rack02", "128");
+      Map<String, Map<String, String>> sensorInfo = new HashMap<String, Map<String, String>>();
+      sensorInfo.put("FRONT", sensorLocationAndId);
+      formulars.put(FlowgateConstant.SENSOR, sensorInfo);
+      server.setMetricsformulars(formulars);
+      assets.add(server);
+      List<Asset> servers = powerIQService.updateServer(assets, "128");
+      TestCase.assertEquals(assets.size(), servers.size());
+      Asset updatedServer = servers.get(0);
+
+
+      Map<String, Map<String, Map<String, String>>> formulars1 = updatedServer.getMetricsformulars();
+      Map<String, Map<String, String>> sensorInfo1 = formulars1.get(FlowgateConstant.SENSOR);
+      Map<String,String> sensorLocationAndId1 = sensorInfo1.get("FRONT");
+      TestCase.assertEquals(1, sensorLocationAndId1.size());
+      TestCase.assertEquals("256", sensorLocationAndId1.entrySet().iterator().next().getValue());
    }
 
    HashMap<AdvanceSettingType, String> createAdvanceSettingMap() {

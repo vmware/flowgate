@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,10 +24,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
+import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
+import com.vmware.flowgate.common.model.Parent;
 import com.vmware.flowgate.poweriqworker.client.PowerIQAPIClient;
 import com.vmware.flowgate.poweriqworker.jobs.PowerIQService;
 import com.vmware.flowgate.poweriqworker.model.Pdu;
@@ -96,7 +100,116 @@ public class SyncPduAssetJobTest {
       TestCase.assertEquals("240", map.get(FlowgateConstant.PDU_MAX_RATE_VOLTS));
    }
 
+   @Test
+   public void testGetAssetIdfromformular() {
+      List<Asset> assets = new ArrayList<>();
+      Asset asset = createAsset();
+      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, Map<String, String>> sensorFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> humidityLocationAndIdMap = new HashMap<String,String>();
+      humidityLocationAndIdMap.put("1", "po09imkhdplbvf540fwusy67n");
+      Map<String, String> tempreatureLocationAndIdMap = new HashMap<String,String>();
+      tempreatureLocationAndIdMap.put("2", "asdasd2s2gxvf5wfwudwadbn");
+      sensorFormulars.put(MetricName.PDU_HUMIDITY, humidityLocationAndIdMap);
+      sensorFormulars.put(MetricName.PDU_TEMPERATURE, tempreatureLocationAndIdMap);
+      formulars.put(FlowgateConstant.SENSOR, sensorFormulars);
+      asset.setMetricsformulars(formulars);
+      assets.add(asset);
+      Set<String> assetIDs = powerIQService.getAssetIdfromformular(assets);
+      TestCase.assertEquals(2, assetIDs.size());
+      Map<String,String> map = new HashMap<String,String>();
+      map.put("po09imkhdplbvf540fwusy67n", "po09imkhdplbvf540fwusy67n");
+      map.put("asdasd2s2gxvf5wfwudwadbn", "asdasd2s2gxvf5wfwudwadbn");
+      for(String assetid : assetIDs) {
+         TestCase.assertEquals(map.get(assetid), assetid);
+      }
+   }
 
+   @Test
+   public void testUpdatePduMetricformular() {
+      List<Asset> assets = new ArrayList<>();
+      Asset asset = createAsset();
+      asset.setCabinetUnitPosition(1);
+      asset.setId("po09imkhdplbvf540fwusy67n");
+      asset.setCategory(AssetCategory.Sensors);
+      asset.setSubCategory(AssetSubCategory.Humidity);
+      Parent parent = new Parent();
+      parent.setParentId("125");
+      parent.setType("PDU");
+      asset.setParent(parent);
+      assets.add(asset);
+
+      Asset temp = createAsset();
+      temp.setCabinetUnitPosition(2);
+      temp.setId("qwerxfbsd75sda23plbswgfwusyasn");
+      temp.setCategory(AssetCategory.Sensors);
+      temp.setSubCategory(AssetSubCategory.Temperature);
+      Parent parent1 = new Parent();
+      parent1.setParentId("125");
+      parent1.setType("PDU");
+      temp.setParent(parent);
+      assets.add(temp);
+
+      Map<String,Asset> pduIdAndAssetMap = new HashMap<String,Asset>();
+      Asset pduAsset = createAsset();
+      pduIdAndAssetMap.put("125", pduAsset);
+
+      Set<Asset> pduNeedTosave = powerIQService.updatePduMetricformular(assets, pduIdAndAssetMap);
+      TestCase.assertEquals(1, pduNeedTosave.size());
+      Asset pdu = pduNeedTosave.iterator().next();
+      TestCase.assertEquals(pduAsset.getAssetName(), pdu.getAssetName());
+      try {
+         Map<String, Map<String, Map<String, String>>> formulars = pdu.getMetricsformulars();
+         Map<String, Map<String, String>> sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+         Map<String, String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
+         TestCase.assertEquals("po09imkhdplbvf540fwusy67n", humidityLocationAndIdMap.get(FlowgateConstant.RACK_UNIT_PREFIX + "1"));
+         Map<String, String> tempLocationAndIdMap = sensorFormulars.get(MetricName.PDU_TEMPERATURE);
+         TestCase.assertEquals("qwerxfbsd75sda23plbswgfwusyasn", tempLocationAndIdMap.get(FlowgateConstant.RACK_UNIT_PREFIX + "2"));
+      }catch (Exception e) {
+         TestCase.fail();
+      }
+   }
+
+   @Test
+   public void testUpdatePduMetricformular2() {
+      List<Asset> assets = new ArrayList<>();
+      Asset asset = createAsset();
+      asset.setCabinetUnitPosition(1);
+      asset.setId("po09imkhdplbvf540fwusy67n");
+      asset.setCategory(AssetCategory.Sensors);
+      asset.setSubCategory(AssetSubCategory.Humidity);
+      Map<String,String> sensorInfoMap = new HashMap<String,String>();
+      sensorInfoMap.put(FlowgateConstant.POSITION, "INLET");
+      ObjectMapper mapper = new ObjectMapper();
+      HashMap<String,String> justfication = new HashMap<String,String>();
+      try {
+         justfication.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfoMap));
+      } catch (JsonProcessingException e1) {
+         TestCase.fail();
+      }
+      asset.setJustificationfields(justfication);
+      Parent parent = new Parent();
+      parent.setParentId("125");
+      parent.setType("PDU");
+      asset.setParent(parent);
+      assets.add(asset);
+      Map<String,Asset> pduIdAndAssetMap = new HashMap<String,Asset>();
+      Asset pduAsset = createAsset();
+      pduIdAndAssetMap.put("125", pduAsset);
+
+      Set<Asset> pduNeedTosave = powerIQService.updatePduMetricformular(assets, pduIdAndAssetMap);
+      TestCase.assertEquals(1, pduNeedTosave.size());
+      Asset pdu = pduNeedTosave.iterator().next();
+      TestCase.assertEquals(pduAsset.getAssetName(), pdu.getAssetName());
+      try {
+         Map<String, Map<String, Map<String, String>>> formulars = pdu.getMetricsformulars();
+         Map<String, Map<String, String>> sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+         Map<String, String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
+         TestCase.assertEquals("po09imkhdplbvf540fwusy67n", humidityLocationAndIdMap.get(FlowgateConstant.RACK_UNIT_PREFIX + "1"+FlowgateConstant.SEPARATOR+sensorInfoMap.get(FlowgateConstant.POSITION)));
+      }catch (Exception e) {
+         TestCase.fail();
+      }
+   }
 
    List<Asset> getAssets() {
       List<Asset> assets = new ArrayList<Asset>();

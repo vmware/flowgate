@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +44,6 @@ import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.PduInlet;
 import com.vmware.flowgate.common.model.PduOutlet;
 import com.vmware.flowgate.common.model.RealTimeData;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
@@ -104,10 +104,7 @@ public class PowerIQService implements AsyncService {
    private static final String POWERIQ_SOURCE = "PDU_PowerIQ_SOURCE";
    private static Map<String, AssetSubCategory> subCategoryMap =
          new HashMap<String, AssetSubCategory>();
-   public static List<ServerSensorType> sensorType = new ArrayList<ServerSensorType>();
-   public static Map<String, String> sensorValueType = new HashMap<String, String>();
-   public static Map<AssetSubCategory, ServerSensorType> serverSensorTypeAndsubCategory =
-         new HashMap<AssetSubCategory, ServerSensorType>();
+   public static Map<String, String> sensorAndMetricMap = new HashMap<String, String>();
    private static Map<String, MountingSide> sensorMountingSide =
          new HashMap<String, MountingSide>();
    static {
@@ -119,17 +116,14 @@ public class PowerIQService implements AsyncService {
       subCategoryMap.put(SmokeSensor, AssetSubCategory.Smoke);
       subCategoryMap.put(WaterSensor, AssetSubCategory.Water);
       subCategoryMap.put(Vibration, AssetSubCategory.Vibration);
-      sensorType.add(ServerSensorType.HUMIDITY);
-      sensorType.add(ServerSensorType.BACKPANELTEMP);
-      sensorType.add(ServerSensorType.FRONTPANELTEMP);
-      sensorValueType.put(HumiditySensor, MetricName.HUMIDITY);
-      sensorValueType.put(TemperatureSensor, MetricName.TEMPERATURE);
-      sensorValueType.put(AirFlowSensor, MetricName.AIR_FLOW);
-      sensorValueType.put(AirPressureSensor, MetricName.AIRPRESSURE);
-      sensorValueType.put(ContactClosureSensor, MetricName.CONTACTCLOSURE);
-      sensorValueType.put(SmokeSensor, MetricName.SMOKE);
-      sensorValueType.put(WaterSensor, MetricName.WATER_FLOW);
-      sensorValueType.put(Vibration, MetricName.VIBRATION);
+      sensorAndMetricMap.put(HumiditySensor, MetricName.HUMIDITY);
+      sensorAndMetricMap.put(TemperatureSensor, MetricName.TEMPERATURE);
+      sensorAndMetricMap.put(AirFlowSensor, MetricName.AIR_FLOW);
+      sensorAndMetricMap.put(AirPressureSensor, MetricName.AIRPRESSURE);
+      sensorAndMetricMap.put(ContactClosureSensor, MetricName.CONTACTCLOSURE);
+      sensorAndMetricMap.put(SmokeSensor, MetricName.SMOKE);
+      sensorAndMetricMap.put(WaterSensor, MetricName.WATER_FLOW);
+      sensorAndMetricMap.put(Vibration, MetricName.VIBRATION);
       sensorMountingSide.put("INLET", MountingSide.Front);
       sensorMountingSide.put("OUTLET", MountingSide.Back);
       sensorMountingSide.put("EXTERNAL", MountingSide.External);
@@ -226,7 +220,6 @@ public class PowerIQService implements AsyncService {
       case EventMessageUtil.PowerIQ_SyncRealtimeData:
          logger.info("Sync realtime data for " + powerIQ.getName());
          syncRealtimeData(powerIQ);
-         syncSensorRealtimeData(powerIQ);
          logger.info("Finish sync realtime data for " + powerIQ.getName());
          break;
       case EventMessageUtil.PowerIQ_SyncAllPDUID:
@@ -283,26 +276,24 @@ public class PowerIQService implements AsyncService {
       List<Asset> needToUpdate = new ArrayList<Asset>();
       for(Asset server : servers) {
          boolean changed = false;
-         Map<ServerSensorType,String> sensorsformular = server.getSensorsformulars();
-         if(sensorsformular.isEmpty()) {
+         Map<String, Map<String, Map<String, String>>> formulars = server.getMetricsformulars();
+         if(formulars == null || formulars.isEmpty()) {
             continue;
          }
-         String humidity = sensorsformular.get(ServerSensorType.HUMIDITY);
-         if(humidity != null && humidity.indexOf(sensorId) >= 0) {
-            sensorsformular.remove(ServerSensorType.HUMIDITY);
-            changed = true;
+         Map<String, Map<String, String>> sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+         for(Map.Entry<String, Map<String, String>> sensorFormularMap : sensorFormulars.entrySet()) {
+            Map<String, String> sensorLocationAndIdMap = sensorFormularMap.getValue();
+            Iterator<Map.Entry<String, String>> ite = sensorLocationAndIdMap.entrySet().iterator();
+            while(ite.hasNext()) {
+               Map.Entry<String, String> map = ite.next();
+               String sensorIdFromServer = map.getValue();
+               if(sensorIdFromServer.indexOf(sensorId) != -1) {
+                  changed = true;
+                  ite.remove();
+               }
+            }
          }
-         String frontPanelTemp = sensorsformular.get(ServerSensorType.FRONTPANELTEMP);
-         if(frontPanelTemp != null && frontPanelTemp.indexOf(sensorId) >= 0) {
-            sensorsformular.remove(ServerSensorType.FRONTPANELTEMP);
-            changed = true;
-         }
-         String backPanelTemp = sensorsformular.get(ServerSensorType.BACKPANELTEMP);
-         if(backPanelTemp != null && backPanelTemp.indexOf(sensorId) >= 0) {
-            sensorsformular.remove(ServerSensorType.BACKPANELTEMP);
-            changed = true;
-         }
-         server.setSensorsformulars(sensorsformular);
+         server.setMetricsformulars(formulars);
          if(changed) {
             needToUpdate.add(server);
          }
@@ -474,18 +465,21 @@ public class PowerIQService implements AsyncService {
       List<Sensor> sensors = null;
       int limit = 100;
       int offset = 0;
-      List<Asset> assetsNeedToSave = null;
+      List<Asset> newAssetsNeedToSave = null;
+      List<Asset> oldAssetsNeedToupdate = null;
       while ((sensors = client.getSensors(limit, offset)) != null) {
          if (sensors.isEmpty()) {
             logger.warn(
                   String.format("No sensor data from PowerIQ %s", client.getPowerIQServiceEndpoint()));
             break;
          }
-         assetsNeedToSave = new ArrayList<Asset>();
+         newAssetsNeedToSave = new ArrayList<Asset>();
+         oldAssetsNeedToupdate = new ArrayList<Asset>();
          for (Sensor sensor : sensors) {
             Asset asset = new Asset();
             Map<String,String> sensorMap = new HashMap<String,String>();
             sensorMap.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, String.valueOf(sensor.getId()));
+            sensorMap.put(FlowgateConstant.POSITION, sensor.getPosition());
             if (sensor.getPduId() != null) {
                Asset pduAsset = pduAssetMap.get(String.valueOf(sensor.getPduId()));
                if (pduAsset == null) {
@@ -506,7 +500,6 @@ public class PowerIQService implements AsyncService {
                   sensorMap.put(FlowgateConstant.PDU_ASSET_ID, pduAsset.getId());
                   //Record the sensorId and sensor_source for the pdu.
                   pduAsset = aggregatorSensorIdAndSourceForPdu(pduAsset, sensor, assetSource);
-                  restClient.saveAssets(pduAsset);
                }
             } else {
                asset = fillLocation(sensor.getParent());
@@ -534,6 +527,7 @@ public class PowerIQService implements AsyncService {
                if(oldSensorInfoMap != null) {
                   oldSensorInfoMap.put(FlowgateConstant.PDU_ASSET_ID, sensorMap.get(FlowgateConstant.PDU_ASSET_ID));
                   oldSensorInfoMap.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, sensorMap.get(FlowgateConstant.SENSOR_ID_FROM_POWERIQ));
+                  oldSensorInfoMap.put(FlowgateConstant.POSITION, sensorMap.get(FlowgateConstant.POSITION));
                   try {
                      String sensorInfo  = mapper.writeValueAsString(oldSensorInfoMap);
                      oldjustificationfields.put(FlowgateConstant.SENSOR, sensorInfo);
@@ -545,7 +539,7 @@ public class PowerIQService implements AsyncService {
                assetToUpdate.setLastupdate(System.currentTimeMillis());
                assetToUpdate.setMountingSide(sensorMountingSide.get(sensor.getPosition().toUpperCase()));
                //save
-               assetsNeedToSave.add(assetToUpdate);
+               oldAssetsNeedToupdate.add(assetToUpdate);
             } else {
                HashMap<String, String> justificationfieldsForSensor = new HashMap<String, String>();
                try {
@@ -564,16 +558,134 @@ public class PowerIQService implements AsyncService {
                   asset.setMountingSide(sensorMountingSide.get(sensor.getPosition().toUpperCase()));
                }
                //save
-               assetsNeedToSave.add(asset);
+               newAssetsNeedToSave.add(asset);
             }
          }
-         restClient.saveAssets(assetsNeedToSave);
+         restClient.saveAssets(oldAssetsNeedToupdate);
+         if(!newAssetsNeedToSave.isEmpty()) {
+            List<Asset> sensorAlreadySaved = Arrays.asList(restClient.saveAssets(newAssetsNeedToSave).getBody());
+            Set<Asset> pduAssetNeedToUpdate = updatePduMetricformular(sensorAlreadySaved,pduAssetMap);
+            restClient.saveAssets(pduAssetNeedToUpdate);
+         }
          offset += limit;
       }
-
    }
 
-   //Record the sensorId and sensor source for the pdu.
+   public Set<Asset> updatePduMetricformular(List<Asset> sensorAssets, Map<String,Asset> pduIdAndAssetMap){
+      Set<Asset> pduAssets = new HashSet<Asset>();
+      for(Asset sensorAsset : sensorAssets) {
+         com.vmware.flowgate.common.model.Parent parent = sensorAsset.getParent();
+         if(parent == null) {
+            continue;
+         }
+         String pduId = parent.getParentId();
+         Asset pduAsset = pduIdAndAssetMap.get(pduId);
+         if(pduAsset == null) {
+            continue;
+         }
+         int rackUnitNumber = sensorAsset.getCabinetUnitPosition();
+         String positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
+         Map<String,String> sensorAssetJustfication = sensorAsset.getJustificationfields();
+         String rackUnitInfo = null;
+         String positionFromAsset = null;
+
+         if(rackUnitNumber != 0) {
+            rackUnitInfo = FlowgateConstant.RACK_UNIT_PREFIX + rackUnitNumber;
+         }
+         if(sensorAssetJustfication != null) {
+            String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
+            if(sensorInfo != null) {
+               try {
+                  Map<String,String> sensorInfoMap = getInfoMap(sensorInfo);
+                  positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
+               } catch (IOException e) {
+                  positionFromAsset = null;
+               }
+            }
+         }
+         //formats of position info : 1.rackUnit1 2.rackUnit1_FIELDSPLIT_INLET 3.INLET/OUTLET/EXTRNAL/COMMON
+         if(rackUnitInfo != null) {
+            positionInfo = rackUnitInfo;
+         }
+         if(positionFromAsset != null) {
+            if(positionInfo != null) {
+               positionInfo = positionInfo + FlowgateConstant.SEPARATOR + positionFromAsset;
+            }else {
+               positionInfo = positionFromAsset;
+            }
+         }
+         Map<String, Map<String, Map<String, String>>> formulars = pduAsset.getMetricsformulars();
+         if(formulars == null || formulars.isEmpty()) {
+            formulars = new HashMap<String, Map<String, Map<String, String>>>();
+            Map<String, Map<String, String>> sensorFormulars = generateNewMetricformular(sensorAsset, positionInfo);
+            if(sensorFormulars.isEmpty()) {
+               continue;
+            }
+            formulars.put(FlowgateConstant.SENSOR, sensorFormulars);
+         }else {
+            Map<String, Map<String, String>> sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+            if(sensorFormulars == null || sensorFormulars.isEmpty()) {
+               sensorFormulars = generateNewMetricformular(sensorAsset, positionInfo);
+               if(sensorFormulars.isEmpty()) {
+                  continue;
+               }
+               formulars.put(FlowgateConstant.SENSOR, sensorFormulars);
+            }else {
+               Map<String,String> locationAndMetricMap = null;
+               switch (sensorAsset.getSubCategory()) {
+               case Humidity:
+                  locationAndMetricMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
+                  if(locationAndMetricMap == null) {
+                     locationAndMetricMap = new HashMap<String,String>();
+                  }
+                  locationAndMetricMap.put(positionInfo, sensorAsset.getId());
+                  sensorFormulars.put(MetricName.PDU_HUMIDITY, locationAndMetricMap);
+                  break;
+               case Temperature:
+                  locationAndMetricMap = sensorFormulars.get(MetricName.PDU_TEMPERATURE);
+                  if(locationAndMetricMap == null) {
+                     locationAndMetricMap = new HashMap<String,String>();
+                  }
+                  locationAndMetricMap.put(positionInfo, sensorAsset.getId());
+                  sensorFormulars.put(MetricName.PDU_TEMPERATURE, locationAndMetricMap);
+                  break;
+               default:
+                  break;
+               }
+            }
+            formulars.put(FlowgateConstant.SENSOR, sensorFormulars);
+         }
+         pduAsset.setMetricsformulars(formulars);
+         pduAssets.add(pduAsset);
+      }
+      return pduAssets;
+   }
+
+   public Map<String,Map<String,String>> generateNewMetricformular(Asset sensorAsset, String positionInfo){
+      Map<String, Map<String, String>> sensorFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> metricsLocationAndIdMap = new HashMap<String,String>();
+      switch (sensorAsset.getSubCategory()) {
+      case Humidity:
+         metricsLocationAndIdMap.put(positionInfo, sensorAsset.getId());
+         sensorFormulars.put(MetricName.PDU_HUMIDITY, metricsLocationAndIdMap);
+         break;
+      case Temperature:
+         metricsLocationAndIdMap.put(positionInfo, sensorAsset.getId());
+         sensorFormulars.put(MetricName.PDU_TEMPERATURE, metricsLocationAndIdMap);
+         break;
+      default:
+         break;
+      }
+      return sensorFormulars;
+   }
+
+   /**
+    * Record the sensorId and sensor source for the pdu.
+    * @param pduAsset
+    * @param sensor
+    * @param sensorSource
+    * @return
+    */
    public Asset aggregatorSensorIdAndSourceForPdu(Asset pduAsset, Sensor sensor,
          String sensorSource) {
       HashMap<String, String> justificationfields = pduAsset.getJustificationfields();
@@ -757,7 +869,6 @@ public class PowerIQService implements AsyncService {
       Map<String, Map<String,String>> pduAssetIdAndPduInfoMap = new HashMap<String, Map<String,String>>();
       for (Asset asset : allMappedPdus) {
          String id = null;
-         String rate_current = null;
          Map<String,String> pduInfoMap = null;
          if (asset.getJustificationfields() != null) {
             HashMap<String,String> justficationfields = asset.getJustificationfields();
@@ -768,7 +879,6 @@ public class PowerIQService implements AsyncService {
                continue;
             }
             id = pduInfoMap.get(FlowgateConstant.PDU_ID_FROM_POWERIQ);
-            rate_current = pduInfoMap.get(FlowgateConstant.PDU_RATE_AMPS);
             //Only check the pdu that belong to the current PowerIQ.
             if (!asset.getAssetSource().contains((powerIQ.getId()))) {
                continue;
@@ -779,10 +889,35 @@ public class PowerIQService implements AsyncService {
          }
 
       }
-      List<RealTimeData> realTimeDatas = getRealTimeDatas(pduAssetIdAndPduInfoMap,client, getAdvanceSetting(powerIQ));
-      if (!realTimeDatas.isEmpty()) {
-         restClient.saveRealTimeData(realTimeDatas);
+      List<RealTimeData> pduMetricRealTimeDatas = getRealTimeDatas(pduAssetIdAndPduInfoMap,client, getAdvanceSetting(powerIQ));
+      if (pduMetricRealTimeDatas.isEmpty()) {
+         restClient.saveRealTimeData(pduMetricRealTimeDatas);
       }
+      logger.info("Finish sync pdu realtime data for " + powerIQ.getName());
+
+      List<Asset> allMappedServers =
+            Arrays.asList(restClient.getMappedAsset(AssetCategory.Server).getBody());
+      if (allMappedServers.isEmpty()) {
+         logger.info("No mapped server found. End sync RealTime data Job");
+         return;
+      }
+      //get sensor assetIds from pdu's metricsFormular attribute
+      Set<String> sensorAssetIds = getAssetIdfromformular(allMappedPdus);
+      //get sensor assetIds from server's metricsFromular attribute
+      Set<String> sensorAssetIdsFromServer = getAssetIdfromformular(allMappedServers);
+      sensorAssetIds.addAll(sensorAssetIdsFromServer);
+      if (sensorAssetIds.isEmpty()) {
+         return;
+      }
+      //filter sensors
+      List<Asset> sensorFromPowerIQ = filterAssetsBySource(powerIQ.getId(), sensorAssetIds);
+      List<RealTimeData> realTimeDatas = getSensorRealTimeData(powerIQ, sensorFromPowerIQ);
+      logger.info("Received new Sensor data, data item size is:" + realTimeDatas.size());
+      if (realTimeDatas.isEmpty()) {
+         return;
+      }
+      restClient.saveRealTimeData(realTimeDatas);
+      logger.info("Finish sync sensor realtime data for " + powerIQ.getName());
    }
 
    public HashMap<AdvanceSettingType, String> getAdvanceSetting(FacilitySoftwareConfig powerIQ) {
@@ -1086,38 +1221,14 @@ public class PowerIQService implements AsyncService {
    }
 
    public List<Asset> filterAssetsBySource(String source, Set<String> assetIds) {
-      List<Asset> assets = new ArrayList<Asset>();
+      List<Asset> sensorAssets = new ArrayList<Asset>();
       List<Asset> assetsFromPowerIQ = restClient.getAllAssetsBySource(source);
       for (Asset asset : assetsFromPowerIQ) {
          if (assetIds.contains(asset.getId())) {
-            assets.add(asset);
+            sensorAssets.add(asset);
          }
       }
-      return assets;
-   }
-
-   public void syncSensorRealtimeData(FacilitySoftwareConfig powerIQ) {
-      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      List<Asset> allMappedAssets =
-            Arrays.asList(restClient.getMappedAsset(AssetCategory.Server).getBody());
-      if (allMappedAssets.isEmpty()) {
-         logger.info("No mapped server found. End sync RealTime data Job");
-         return;
-      }
-      List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
-      //get assetIds from asset's sensorsFromulars attribute
-      Set<String> assetIds = getAssetIdfromformular(allMappedAssets);
-      if (assetIds.isEmpty()) {
-         return;
-      }
-      //filter sensors
-      List<Asset> sensorFromPowerIQ = filterAssetsBySource(powerIQ.getId(), assetIds);
-      realTimeDatas = getSensorRealTimeData(powerIQ, sensorFromPowerIQ);
-      logger.info("Received new Sensor data, data item size is:" + realTimeDatas.size());
-      if (realTimeDatas.isEmpty()) {
-         return;
-      }
-      restClient.saveRealTimeData(realTimeDatas);
+      return sensorAssets;
    }
 
    public List<Asset> getPowerIQMappedAsset(List<Asset> allMappedAssets, String assetSource) {
@@ -1130,20 +1241,21 @@ public class PowerIQService implements AsyncService {
       return mappedAssets;
    }
 
-   public Set<String> getAssetIdfromformular(List<Asset> powerIQMappedAssets) {
+   public Set<String> getAssetIdfromformular(List<Asset> mappedAssets) {
       Set<String> assetIds = new HashSet<String>();
-      for (Asset asset : powerIQMappedAssets) {
-         Map<ServerSensorType, String> sensorsformularsmap = asset.getSensorsformulars();
-         for (Map.Entry<ServerSensorType, String> map : sensorsformularsmap.entrySet()) {
-            if (sensorType.contains(map.getKey())) {
-               String[] assetIDs = map.getValue().split("\\+|-|\\*|/|\\(|\\)");
-               for (String assetId : assetIDs) {
-                  if (assetId.equals("")
-                        || assetId.length() != FlowgateConstant.COUCHBASEIDLENGTH) {
-                     continue;
-                  }
-                  assetIds.add(assetId);
-               }
+      for (Asset asset : mappedAssets) {
+         Map<String, Map<String, Map<String, String>>> formulars = asset.getMetricsformulars();
+         if(formulars == null || formulars.isEmpty()) {
+            continue;
+         }
+         Map<String, Map<String, String>> sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+         if(sensorFormulars == null || sensorFormulars.isEmpty()) {
+            continue;
+         }
+         for(Map.Entry<String, Map<String, String>> sensorFormularMap : sensorFormulars.entrySet()) {
+            Map<String, String> sensorLocationAndIdMap = sensorFormularMap.getValue();
+            for(String formular : sensorLocationAndIdMap.values()) {
+               assetIds.addAll(Arrays.asList(formular.split("\\+|-|\\*|/|\\(|\\)")));
             }
          }
       }
@@ -1205,11 +1317,11 @@ public class PowerIQService implements AsyncService {
          List<ValueUnit> values = new ArrayList<ValueUnit>();
          ValueUnit value = new ValueUnit();
          value.setTime(recordedTime);
-         value.setKey(sensorValueType.get(sensor.getType()));
+         value.setKey(sensorAndMetricMap.get(sensor.getType()));
 
          String unit = reading.getUom();
          MetricUnit sourceUnit = null, targetUnit = null;
-         switch (sensorValueType.get(sensor.getType())) {
+         switch (sensorAndMetricMap.get(sensor.getType())) {
          case MetricName.HUMIDITY:
             if (unit != null && !unit.isEmpty()) {
                if (unit.equals("%")) {
