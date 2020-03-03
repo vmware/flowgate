@@ -564,15 +564,15 @@ public class PowerIQService implements AsyncService {
          restClient.saveAssets(oldAssetsNeedToupdate);
          if(!newAssetsNeedToSave.isEmpty()) {
             List<Asset> sensorAlreadySaved = Arrays.asList(restClient.saveAssets(newAssetsNeedToSave).getBody());
-            List<Asset> pduAssetNeedToUpdate = updatePduMetricformular(sensorAlreadySaved,pduAssetMap);
+            Set<Asset> pduAssetNeedToUpdate = updatePduMetricformular(sensorAlreadySaved,pduAssetMap);
             restClient.saveAssets(pduAssetNeedToUpdate);
          }
          offset += limit;
       }
    }
 
-   public List<Asset> updatePduMetricformular(List<Asset> sensorAssets, Map<String,Asset> pduIdAndAssetMap){
-      List<Asset> pduAssets = new ArrayList<Asset>();
+   public Set<Asset> updatePduMetricformular(List<Asset> sensorAssets, Map<String,Asset> pduIdAndAssetMap){
+      Set<Asset> pduAssets = new HashSet<Asset>();
       for(Asset sensorAsset : sensorAssets) {
          com.vmware.flowgate.common.model.Parent parent = sensorAsset.getParent();
          if(parent == null) {
@@ -584,13 +584,13 @@ public class PowerIQService implements AsyncService {
             continue;
          }
          int rackUnitNumber = sensorAsset.getCabinetUnitPosition();
-         String positionInfo = null;
+         String positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
          Map<String,String> sensorAssetJustfication = sensorAsset.getJustificationfields();
          String rackUnitInfo = null;
          String positionFromAsset = null;
 
          if(rackUnitNumber != 0) {
-            rackUnitInfo = String.valueOf(rackUnitNumber);
+            rackUnitInfo = FlowgateConstant.RACK_UNIT_PREFIX + rackUnitNumber;
          }
          if(sensorAssetJustfication != null) {
             String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
@@ -603,13 +603,16 @@ public class PowerIQService implements AsyncService {
                }
             }
          }
+         //formats of position info : 1.rackUnit1 2.rackUnit1_FIELDSPLIT_INLET 3.INLET/OUTLET/EXTRNAL/COMMON
          if(rackUnitInfo != null) {
             positionInfo = rackUnitInfo;
          }
          if(positionFromAsset != null) {
-            positionInfo += positionFromAsset;
-         }else {
-            positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
+            if(positionInfo != null) {
+               positionInfo = positionInfo + FlowgateConstant.SEPARATOR + positionFromAsset;
+            }else {
+               positionInfo = positionFromAsset;
+            }
          }
          Map<String, Map<String, Map<String, String>>> formulars = pduAsset.getMetricsformulars();
          if(formulars == null || formulars.isEmpty()) {
