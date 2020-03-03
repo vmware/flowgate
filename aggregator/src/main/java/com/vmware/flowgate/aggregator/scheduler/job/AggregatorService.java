@@ -264,12 +264,44 @@ public class AggregatorService implements AsyncService {
        * if the PDU and server has same location. Update the server's PDU information.
        *
        */
-
-
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       /**
        * Get all servers with pdus is not null which are mapped with IT systems.
        */
+      Asset[] incompletServers = restClient.getServersWithnoPDUInfo().getBody();
+      if (incompletServers == null || incompletServers.length == 0) {
+         return;
+      }
+      List<Asset> pdus = restClient.getAllAssetsByType(AssetCategory.PDU);
+      // create map for PDUs base on the location.
+      Map<String, List<Asset>> pduLookupMap = new HashMap<String, List<Asset>>();
+      for (Asset pdu : pdus) {
+         String key = getLocationIdentifier(pdu);
+         if (pduLookupMap.containsKey(key)) {
+            pduLookupMap.get(key).add(pdu);
+         } else {
+            List<Asset> list = new ArrayList<Asset>();
+            list.add(pdu);
+            pduLookupMap.put(key, list);
+         }
+      }
+      List<Asset> toBeUpdatedAssets = new ArrayList<Asset>();
+      for (Asset server : incompletServers) {
+         String locationKey = getLocationIdentifier(server);
+         if (pduLookupMap.containsKey(locationKey)) {
+            List<String> assetPduIds = new ArrayList<String>();
+            for (Asset pdu : pduLookupMap.get(locationKey)) {
+               assetPduIds.add(pdu.getId());
+            }
+            server.setPdus(assetPduIds);
+            toBeUpdatedAssets.add(server);
+         }
+      }
+      if (!toBeUpdatedAssets.isEmpty()) {
+         restClient.saveAssets(toBeUpdatedAssets);
+      }
+
+      //Update metricsFormular for pdu by pdus
       Asset[] servers = restClient.getServersWithPDUInfo().getBody();
       /**
        * Generate pdu metricsFormular for server,
@@ -315,47 +347,6 @@ public class AggregatorService implements AsyncService {
       }
       if(!needToSaveServers.isEmpty()) {
          restClient.saveAssets(needToSaveServers);
-      }
-
-      Asset[] incompletServers = restClient.getServersWithnoPDUInfo().getBody();
-      if (incompletServers == null || incompletServers.length == 0) {
-         return;
-      }
-      List<Asset> pdus = restClient.getAllAssetsByType(AssetCategory.PDU);
-      // create map for PDUs base on the location.
-      Map<String, List<Asset>> pduLookupMap = new HashMap<String, List<Asset>>();
-      for (Asset pdu : pdus) {
-         String key = getLocationIdentifier(pdu);
-         if (pduLookupMap.containsKey(key)) {
-            pduLookupMap.get(key).add(pdu);
-         } else {
-            List<Asset> list = new ArrayList<Asset>();
-            list.add(pdu);
-            pduLookupMap.put(key, list);
-         }
-      }
-      List<Asset> toBeUpdatedAssets = new ArrayList<Asset>();
-      for (Asset server : incompletServers) {
-         String locationKey = getLocationIdentifier(server);
-         if (pduLookupMap.containsKey(locationKey)) {
-            List<String> assetPduIds = new ArrayList<String>();
-            for (Asset pdu : pduLookupMap.get(locationKey)) {
-               assetPduIds.add(pdu.getId());
-            }
-            server.setPdus(assetPduIds);
-            //update the pdu formula
-            Map<String,Map<String,Map<String,String>>> metricsFormular = server.getMetricsformulars();
-            if(metricsFormular == null || metricsFormular.isEmpty()) {
-               metricsFormular = new HashMap<String,Map<String,Map<String,String>>>();
-            }
-            Map<String,Map<String,String>> pduFormular = generatePduformularForServer(assetPduIds);
-            metricsFormular.put(FlowgateConstant.PDU, pduFormular);
-            server.setMetricsformulars(metricsFormular);
-            toBeUpdatedAssets.add(server);
-         }
-      }
-      if (!toBeUpdatedAssets.isEmpty()) {
-         restClient.saveAssets(toBeUpdatedAssets);
       }
    }
 
@@ -500,14 +491,14 @@ public class AggregatorService implements AsyncService {
          List<Asset> sensorAssets, List<String> temperatureSensorAssetIds, List<String> humiditySensorAssetIds){
       ObjectMapper mapper = new ObjectMapper();
       for(Asset sensor : sensorAssets) {
-         String positionInfo = null;
+         String positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
          Map<String,String> sensorAssetJustfication = sensor.getJustificationfields();
          int rackUnitNumber = sensor.getCabinetUnitPosition();
          String rackUnitInfo = null;
          String positionFromAsset = null;
 
          if(rackUnitNumber != 0) {
-            rackUnitInfo = String.valueOf(rackUnitNumber);
+            rackUnitInfo = FlowgateConstant.RACK_UNIT_PREFIX  + rackUnitNumber;
          }
          if(sensorAssetJustfication != null) {
             String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
@@ -520,10 +511,15 @@ public class AggregatorService implements AsyncService {
                }
             }
          }
-         if(rackUnitInfo == null && positionFromAsset == null) {
-            positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
-         }else {
-            positionInfo = rackUnitInfo + positionFromAsset;
+         if(rackUnitInfo != null) {
+            positionInfo = rackUnitInfo;
+         }
+         if(positionFromAsset != null) {
+            if(positionInfo != null) {
+               positionInfo = positionInfo + FlowgateConstant.SEPARATOR + positionFromAsset;
+            }else {
+               positionInfo = positionFromAsset;
+            }
          }
          switch (sensor.getMountingSide()) {
          case Front:
