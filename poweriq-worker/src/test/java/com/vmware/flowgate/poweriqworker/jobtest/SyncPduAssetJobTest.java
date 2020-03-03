@@ -138,6 +138,18 @@ public class SyncPduAssetJobTest {
       parent.setType("PDU");
       asset.setParent(parent);
       assets.add(asset);
+
+      Asset temp = createAsset();
+      temp.setCabinetUnitPosition(2);
+      temp.setId("qwerxfbsd75sda23plbswgfwusyasn");
+      temp.setCategory(AssetCategory.Sensors);
+      temp.setSubCategory(AssetSubCategory.Temperature);
+      Parent parent1 = new Parent();
+      parent1.setParentId("125");
+      parent1.setType("PDU");
+      temp.setParent(parent);
+      assets.add(temp);
+
       Map<String,Asset> pduIdAndAssetMap = new HashMap<String,Asset>();
       Asset pduAsset = createAsset();
       pduIdAndAssetMap.put("125", pduAsset);
@@ -151,6 +163,49 @@ public class SyncPduAssetJobTest {
          Map<String, Map<String, String>> sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
          Map<String, String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
          TestCase.assertEquals("po09imkhdplbvf540fwusy67n", humidityLocationAndIdMap.get("1"));
+         Map<String, String> tempLocationAndIdMap = sensorFormulars.get(MetricName.PDU_TEMPERATURE);
+         TestCase.assertEquals("qwerxfbsd75sda23plbswgfwusyasn", tempLocationAndIdMap.get("2"));
+      }catch (Exception e) {
+         TestCase.fail();
+      }
+   }
+
+   @Test
+   public void testUpdatePduMetricformular2() {
+      List<Asset> assets = new ArrayList<>();
+      Asset asset = createAsset();
+      asset.setCabinetUnitPosition(1);
+      asset.setId("po09imkhdplbvf540fwusy67n");
+      asset.setCategory(AssetCategory.Sensors);
+      asset.setSubCategory(AssetSubCategory.Humidity);
+      Map<String,String> sensorInfoMap = new HashMap<String,String>();
+      sensorInfoMap.put(FlowgateConstant.POSITION, "INLET");
+      ObjectMapper mapper = new ObjectMapper();
+      HashMap<String,String> justfication = new HashMap<String,String>();
+      try {
+         justfication.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfoMap));
+      } catch (JsonProcessingException e1) {
+         TestCase.fail();
+      }
+      asset.setJustificationfields(justfication);
+      Parent parent = new Parent();
+      parent.setParentId("125");
+      parent.setType("PDU");
+      asset.setParent(parent);
+      assets.add(asset);
+      Map<String,Asset> pduIdAndAssetMap = new HashMap<String,Asset>();
+      Asset pduAsset = createAsset();
+      pduIdAndAssetMap.put("125", pduAsset);
+
+      List<Asset> pduNeedTosave = powerIQService.updatePduMetricformular(assets, pduIdAndAssetMap);
+      TestCase.assertEquals(1, pduNeedTosave.size());
+      Asset pdu = pduNeedTosave.get(0);
+      TestCase.assertEquals(pduAsset.getAssetName(), pdu.getAssetName());
+      try {
+         Map<String, Map<String, Map<String, String>>> formulars = pdu.getMetricsformulars();
+         Map<String, Map<String, String>> sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+         Map<String, String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
+         TestCase.assertEquals("po09imkhdplbvf540fwusy67n", humidityLocationAndIdMap.get("1"+sensorInfoMap.get(FlowgateConstant.POSITION)));
       }catch (Exception e) {
          TestCase.fail();
       }
