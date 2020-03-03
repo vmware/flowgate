@@ -422,11 +422,8 @@ public class AggregatorService implements AsyncService {
       if (sensors.isEmpty()) {
          return;
       }
-      Map<String, Map<String,Map<String,String>>> sensorMap =
-            new HashMap<String, Map<String,Map<String,String>>>();
       ObjectMapper mapper = new ObjectMapper();
-
-      //create the relationship between PDU_Asset_ID and sensorID
+      Map<String,List<Asset>> pduAndSensorsMap = new HashMap<String,List<Asset>>();
       for (Asset sensor : sensors) {
          if (sensor.getJustificationfields() == null) {
             continue;
@@ -445,96 +442,47 @@ public class AggregatorService implements AsyncService {
          if(pduAssetID == null) {
             continue;
          }
-         if (!sensorMap.containsKey(pduAssetID)) {
-            Map<String,Map<String,String>> serverSensorMetricsNameAndIdMap =
-                  getMetricsNameAndSensorsIdMap(new HashMap<String,Map<String,String>>(), sensor);
-            sensorMap.put(pduAssetID, serverSensorMetricsNameAndIdMap);
-         }else {
-            Map<String, Map<String, String>> serverSensorMetricsNameAndIdMap =
-                  getMetricsNameAndSensorsIdMap(sensorMap.get(pduAssetID), sensor);
-            sensorMap.put(pduAssetID, serverSensorMetricsNameAndIdMap);
+         if (!pduAndSensorsMap.containsKey(pduAssetID)) {
+            pduAndSensorsMap.put(pduAssetID, new ArrayList<Asset>());
          }
+         pduAndSensorsMap.get(pduAssetID).add(sensor);
       }
 
-      //now start create the sensor/server mapping.
       List<Asset> needUpdateServers = new ArrayList<Asset>();
       for (Asset server : candidateServer) {
-         List<String> pdus = server.getPdus();
-         Map<String, String> temperatureSensorAssetIds = new HashMap<String, String>();
-         Map<String, String> humiditySensorAssetIds = new HashMap<String, String>();
+         List<String> pduIds = server.getPdus();
+         List<String> temperatureSensorAssetIds = new ArrayList<String>();
+         List<String> humiditySensorAssetIds = new ArrayList<String>();
          boolean needUpdate = false;
          Map<String, Map<String,Map<String,String>>> metricsFormular = server.getMetricsformulars();
-         Map<String,Map<String,String>> sensorMetricsNameAndIdMap = metricsFormular.get(FlowgateConstant.SENSOR);
+         Map<String,Map<String,String>> sensorMetricsNameAndIdMap = null;
+         if(metricsFormular != null) {
+            sensorMetricsNameAndIdMap = metricsFormular.get(FlowgateConstant.SENSOR);
+         }
          if(sensorMetricsNameAndIdMap == null || sensorMetricsNameAndIdMap.isEmpty()) {
             sensorMetricsNameAndIdMap = new HashMap<String,Map<String,String>>();
          }
-         for (String pduID : pdus) {
-            Map<String,Map<String,String>> metricNameAndSensorIdMap = sensorMap.get(pduID);
-            if(metricNameAndSensorIdMap == null) {
+         for (String pduID : pduIds) {
+            List<Asset> sensorAssets = pduAndSensorsMap.get(pduID);
+            if(sensorAssets == null) {
                continue;
             }
-            for(Map.Entry<String, Map<String,String>> map : metricNameAndSensorIdMap.entrySet()) {
-               switch (map.getKey()) {
-               case MetricName.SERVER_FRONT_TEMPERATURE:
-                  Map<String,String> oldFrontTempdMap = sensorMetricsNameAndIdMap.get(MetricName.SERVER_FRONT_TEMPERATURE);
-                  if(oldFrontTempdMap == null) {
-                     sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_TEMPERATURE, map.getValue());
-                     needUpdate = true;
-                  }else {
-                     oldFrontTempdMap.putAll(map.getValue());
-                     sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_TEMPERATURE, oldFrontTempdMap);
-                     needUpdate = true;
-                  }
-                  break;
-               case MetricName.SERVER_BACK_TEMPREATURE:
-                  Map<String,String> oldBackTempdMap = sensorMetricsNameAndIdMap.get(MetricName.SERVER_BACK_TEMPREATURE);
-                  if(oldBackTempdMap == null) {
-                     sensorMetricsNameAndIdMap.put(MetricName.SERVER_BACK_TEMPREATURE, map.getValue());
-                     needUpdate = true;
-                  }else {
-                     oldBackTempdMap.putAll(map.getValue());
-                     sensorMetricsNameAndIdMap.put(MetricName.SERVER_BACK_TEMPREATURE, oldBackTempdMap);
-                     needUpdate = true;
-                  }
-                  break;
-               case MetricName.SERVER_FRONT_HUMIDITY:
-                  Map<String,String> oldFrontHumiditydMap = sensorMetricsNameAndIdMap.get(MetricName.SERVER_FRONT_HUMIDITY);
-                  if(oldFrontHumiditydMap == null) {
-                     sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_HUMIDITY, map.getValue());
-                     needUpdate = true;
-                  }else {
-                     oldFrontHumiditydMap.putAll(map.getValue());
-                     sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_HUMIDITY, oldFrontHumiditydMap);
-                     needUpdate = true;
-                  }
-                  break;
-               case MetricName.SERVER_BACK_HUMIDITY:
-                  Map<String,String> oldBackHumiditydMap = sensorMetricsNameAndIdMap.get(MetricName.SERVER_BACK_HUMIDITY);
-                  if(oldBackHumiditydMap == null) {
-                     sensorMetricsNameAndIdMap.put(MetricName.SERVER_BACK_HUMIDITY, map.getValue());
-                     needUpdate = true;
-                  }else {
-                     oldBackHumiditydMap.putAll(map.getValue());
-                     sensorMetricsNameAndIdMap.put(MetricName.SERVER_BACK_HUMIDITY, oldBackHumiditydMap);
-                     needUpdate = true;
-                  }
-                  break;
-               case extrnalTemperature:
-                  temperatureSensorAssetIds.putAll(map.getValue());
-                  break;
-               case extrnalHumidity:
-                  humiditySensorAssetIds.putAll(map.getValue());
-                  break;
-               default:
-                  break;
-               }
-            }
+            generateMetricsFormular(sensorMetricsNameAndIdMap, sensorAssets,
+                  temperatureSensorAssetIds, humiditySensorAssetIds);
          }
-
          if(sensorMetricsNameAndIdMap.isEmpty()) {
-            sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_TEMPERATURE, temperatureSensorAssetIds);
-            sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_HUMIDITY, humiditySensorAssetIds);
-            needUpdate = true;
+            if(!temperatureSensorAssetIds.isEmpty()) {
+               Map<String,String> temp = new HashMap<String,String>();
+               temp.put(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, temperatureSensorAssetIds.get(0));
+               sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_TEMPERATURE, temp);
+               needUpdate = true;
+            }
+            if(!humiditySensorAssetIds.isEmpty()) {
+               Map<String,String> humidity = new HashMap<String,String>();
+               humidity.put(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, humiditySensorAssetIds.get(0));
+               sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_HUMIDITY, humidity);
+               needUpdate = true;
+            }
          }
          if(needUpdate) {
             metricsFormular.put(FlowgateConstant.SENSOR, sensorMetricsNameAndIdMap);
@@ -548,97 +496,97 @@ public class AggregatorService implements AsyncService {
       }
    }
 
-   public Map<String,Map<String,String>> getMetricsNameAndSensorsIdMap(Map<String,Map<String,String>> metricsNameAndSensorsMap,
-         Asset sensor){
-      String positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
+   public Map<String,Map<String,String>> generateMetricsFormular(Map<String,Map<String,String>> metricsNameAndSensorsMap,
+         List<Asset> sensorAssets, List<String> temperatureSensorAssetIds, List<String> humiditySensorAssetIds){
+      ObjectMapper mapper = new ObjectMapper();
+      for(Asset sensor : sensorAssets) {
+         String positionInfo = null;
+         Map<String,String> sensorAssetJustfication = sensor.getJustificationfields();
+         int rackUnitNumber = sensor.getCabinetUnitPosition();
+         String rackUnitInfo = null;
+         String positionFromAsset = null;
 
-      int position = sensor.getCabinetUnitPosition();
-      Map<String,String> sensorAssetJustfication = sensor.getJustificationfields();
-      if(position != 0) {
-         positionInfo = String.valueOf(position);
-      }else {
+         if(rackUnitNumber != 0) {
+            rackUnitInfo = String.valueOf(rackUnitNumber);
+         }
          if(sensorAssetJustfication != null) {
             String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
             if(sensorInfo != null) {
-               ObjectMapper mapper = new ObjectMapper();
                try {
                   Map<String,String> sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
-                  String positionFromPowerIQ = sensorInfoMap.get(FlowgateConstant.POSITION_FROM_POWERIQ);
-                  if(positionFromPowerIQ != null) {
-                     positionInfo = positionFromPowerIQ;
-                  }
+                  positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
                } catch (IOException e) {
-                  positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
+                  positionFromAsset = null;
                }
             }
          }
+         if(rackUnitInfo == null && positionFromAsset == null) {
+            positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
+         }else {
+            positionInfo = rackUnitInfo + positionFromAsset;
+         }
+         switch (sensor.getMountingSide()) {
+         case Front:
+            switch (sensor.getSubCategory()) {
+            case Temperature:
+               Map<String,String> frontTempMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_FRONT_TEMPERATURE);
+               if(frontTempMap == null) {
+                  frontTempMap = new HashMap<String,String>();
+               }
+               frontTempMap.put(positionInfo,sensor.getId());
+               metricsNameAndSensorsMap.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempMap);
+               break;
+            case Humidity:
+               Map<String,String> frontHumidityMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_FRONT_HUMIDITY);
+               if(frontHumidityMap == null) {
+                  frontHumidityMap = new HashMap<String,String>();
+               }
+               frontHumidityMap.put(positionInfo, sensor.getId());
+               metricsNameAndSensorsMap.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumidityMap);
+               break;
+            default:
+               break;
+            }
+            break;
+         case Back:
+            switch (sensor.getSubCategory()) {
+            case Temperature:
+               Map<String,String> backTempMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_BACK_TEMPREATURE);
+               if(backTempMap == null) {
+                  backTempMap = new HashMap<String,String>();
+               }
+               backTempMap.put(positionInfo, sensor.getId());
+               metricsNameAndSensorsMap.put(MetricName.SERVER_BACK_TEMPREATURE, backTempMap);
+               break;
+            case Humidity:
+               Map<String,String> backHumidityMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_BACK_HUMIDITY);
+               if(backHumidityMap == null) {
+                  backHumidityMap = new HashMap<String,String>();
+               }
+               backHumidityMap.put(positionInfo, sensor.getId());
+               metricsNameAndSensorsMap.put(MetricName.SERVER_BACK_HUMIDITY, backHumidityMap);
+               break;
+            default:
+               break;
+            }
+            break;
+         case External:
+         case Unmounted:
+            switch (sensor.getSubCategory()) {
+            case Temperature:
+               temperatureSensorAssetIds.add(sensor.getId());
+               break;
+            case Humidity:
+               humiditySensorAssetIds.add(sensor.getId());
+               break;
+            default:
+               break;
+            }
+            break;
+         default:
+            break;
+         }
       }
-      switch (sensor.getMountingSide()) {
-      case Front:
-         switch (sensor.getSubCategory()) {
-         case Temperature:
-            Map<String,String> frontTempMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_FRONT_TEMPERATURE);
-            if(frontTempMap == null) {
-               frontTempMap = new HashMap<String,String>();
-            }
-            frontTempMap.put(sensor.getId(), positionInfo);
-            metricsNameAndSensorsMap.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempMap);
-            break;
-         case Humidity:
-            Map<String,String> frontHumidityMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_FRONT_HUMIDITY);
-            if(frontHumidityMap == null) {
-               frontHumidityMap = new HashMap<String,String>();
-            }
-            frontHumidityMap.put(sensor.getId(), positionInfo);
-            metricsNameAndSensorsMap.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumidityMap);
-            break;
-         default:
-            break;
-         }
-         break;
-      case Back:
-         switch (sensor.getSubCategory()) {
-         case Temperature:
-            Map<String,String> backTempMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_BACK_TEMPREATURE);
-            if(backTempMap == null) {
-               backTempMap = new HashMap<String,String>();
-            }
-            backTempMap.put(sensor.getId(), positionInfo);
-            metricsNameAndSensorsMap.put(MetricName.SERVER_BACK_TEMPREATURE, backTempMap);
-            break;
-         case Humidity:
-            Map<String,String> backHumidityMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_BACK_HUMIDITY);
-            if(backHumidityMap == null) {
-               backHumidityMap = new HashMap<String,String>();
-            }
-            backHumidityMap.put(sensor.getId(), positionInfo);
-            metricsNameAndSensorsMap.put(MetricName.SERVER_BACK_HUMIDITY, backHumidityMap);
-            break;
-         default:
-            break;
-         }
-         break;
-      case External:
-      case Unmounted:
-         switch (sensor.getSubCategory()) {
-         case Temperature:
-            Map<String,String> tempMap  = new HashMap<String,String>();
-            tempMap.put(sensor.getId(), positionInfo);
-            metricsNameAndSensorsMap.put(extrnalTemperature, tempMap);
-            break;
-         case Humidity:
-            Map<String,String> humidityMap  = new HashMap<String,String>();
-            humidityMap.put(sensor.getId(), positionInfo);
-            metricsNameAndSensorsMap.put(extrnalHumidity, tempMap);
-            break;
-         default:
-            break;
-         }
-         break;
-      default:
-         break;
-      }
-
       return metricsNameAndSensorsMap;
    }
 
