@@ -252,33 +252,6 @@ public class SyncSensorMetaDataJobTest {
       TestCase.assertEquals(1550111474000l, time);
    }
 
-//   @Test
-//   public void testAggregatorSensorIdAndSourceForPdu1() {
-//      Asset pdu = createAsset1();
-//      ObjectMapper mapper = new ObjectMapper();
-//      HashMap<String, String> justificationfields = new HashMap<String,String>();
-//      Map<String,String> metricAndSensorIdMap = new HashMap<String,String>();
-//
-//      metricAndSensorIdMap.put(MetricName.SERVER_HUMIDITY, "509"+FlowgateConstant.SEPARATOR+"l9i8728d55368540fcba1692");
-//      String sensorInfo = null;
-//      try {
-//         sensorInfo = mapper.writeValueAsString(metricAndSensorIdMap);
-//      } catch (JsonProcessingException e) {
-//         TestCase.fail();
-//      }
-//      justificationfields.put(FlowgateConstant.SENSOR, sensorInfo);
-//      pdu.setJustificationfields(justificationfields);
-//      Sensor sensor = new Sensor();
-//      sensor.setId(509);
-//      sensor.setType(PowerIQService.HumiditySensor);
-//      String source = "l9i8728d55368540fcba1692";
-//
-//      pdu = powerIQService.aggregatorSensorIdAndSourceForPdu(pdu, sensor, source);
-//
-//      TestCase.assertEquals(sensor.getId()+FlowgateConstant.SEPARATOR+source,
-//            metricAndSensorIdMap.get(MetricName.SERVER_HUMIDITY));
-//   }
-
    @Test
    public void testAggregatorSensorIdAndSourceForPdu1() {
       Asset pdu = createAsset1();

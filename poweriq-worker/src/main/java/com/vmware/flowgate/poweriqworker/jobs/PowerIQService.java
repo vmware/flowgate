@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -480,7 +479,7 @@ public class PowerIQService implements AsyncService {
             Asset asset = new Asset();
             Map<String,String> sensorMap = new HashMap<String,String>();
             sensorMap.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, String.valueOf(sensor.getId()));
-            sensorMap.put(FlowgateConstant.POSITION_FROM_POWERIQ, sensor.getPosition());
+            sensorMap.put(FlowgateConstant.POSITION, sensor.getPosition());
             if (sensor.getPduId() != null) {
                Asset pduAsset = pduAssetMap.get(String.valueOf(sensor.getPduId()));
                if (pduAsset == null) {
@@ -528,7 +527,7 @@ public class PowerIQService implements AsyncService {
                if(oldSensorInfoMap != null) {
                   oldSensorInfoMap.put(FlowgateConstant.PDU_ASSET_ID, sensorMap.get(FlowgateConstant.PDU_ASSET_ID));
                   oldSensorInfoMap.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, sensorMap.get(FlowgateConstant.SENSOR_ID_FROM_POWERIQ));
-                  oldSensorInfoMap.put(FlowgateConstant.POSITION_FROM_POWERIQ, sensorMap.get(FlowgateConstant.POSITION_FROM_POWERIQ));
+                  oldSensorInfoMap.put(FlowgateConstant.POSITION, sensorMap.get(FlowgateConstant.POSITION_FROM_POWERIQ));
                   try {
                      String sensorInfo  = mapper.writeValueAsString(oldSensorInfoMap);
                      oldjustificationfields.put(FlowgateConstant.SENSOR, sensorInfo);
@@ -581,26 +580,33 @@ public class PowerIQService implements AsyncService {
          }
          String pduId = parent.getParentId();
          Asset pduAsset = pduIdAndAssetMap.get(pduId);
-         int position = sensorAsset.getCabinetUnitPosition();
-         String positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
+         if(pduAsset == null) {
+            continue;
+         }
+         int rackUnitNumber = sensorAsset.getCabinetUnitPosition();
+         String positionInfo = null;
          Map<String,String> sensorAssetJustfication = sensorAsset.getJustificationfields();
-         if(position != 0) {
-            positionInfo = String.valueOf(position);
-         }else {
-            if(sensorAssetJustfication != null) {
-               String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
-               if(sensorInfo != null) {
-                  try {
-                     Map<String,String> sensorInfoMap = getInfoMap(sensorInfo);
-                     String positionFromPowerIQ = sensorInfoMap.get(FlowgateConstant.POSITION_FROM_POWERIQ);
-                     if(positionFromPowerIQ != null) {
-                        positionInfo = positionFromPowerIQ;
-                     }
-                  } catch (IOException e) {
-                     positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
-                  }
+         String rackUnitInfo = null;
+         String positionFromAsset = null;
+
+         if(rackUnitNumber != 0) {
+            rackUnitInfo = String.valueOf(rackUnitNumber);
+         }
+         if(sensorAssetJustfication != null) {
+            String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
+            if(sensorInfo != null) {
+               try {
+                  Map<String,String> sensorInfoMap = getInfoMap(sensorInfo);
+                  positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
+               } catch (IOException e) {
+                  positionFromAsset = null;
                }
             }
+         }
+         if(rackUnitInfo == null && positionFromAsset == null) {
+            positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
+         }else {
+            positionInfo = rackUnitInfo + positionFromAsset;
          }
          Map<String, Map<String, Map<String, String>>> formulars = pduAsset.getMetricsformulars();
          if(formulars == null || formulars.isEmpty()) {
@@ -623,10 +629,6 @@ public class PowerIQService implements AsyncService {
                   if(locationAndMetricMap == null) {
                      locationAndMetricMap = new HashMap<String,String>();
                   }
-                  /**
-                   * If there are many sensor assets that them cabinet unit position is 0,
-                   * the value of assetId will may be replaced by per sensor asset which have the same category
-                   */
                   locationAndMetricMap.put(positionInfo, sensorAsset.getId());
                   sensorFormulars.put(MetricName.PDU_HUMIDITY, locationAndMetricMap);
                   break;
@@ -1216,50 +1218,13 @@ public class PowerIQService implements AsyncService {
 
    public List<Asset> filterAssetsBySource(String source, Set<String> assetIds) {
       List<Asset> sensorAssets = new ArrayList<Asset>();
-      for(String assetId : assetIds) {
-         ResponseEntity<Asset> assetEntity = restClient.getAssetByID(assetId);
-         if(assetEntity == null) {
-            continue;
+      List<Asset> assetsFromPowerIQ = restClient.getAllAssetsBySource(source);
+      for (Asset asset : assetsFromPowerIQ) {
+         if (assetIds.contains(asset.getId())) {
+            sensorAssets.add(asset);
          }
-         Asset asset = assetEntity.getBody();
-         if(!asset.getAssetSource().contains(source)) {
-            continue;
-         }
-         sensorAssets.add(asset);
       }
       return sensorAssets;
-   }
-
-   public Set<String> getSensorIdFromPdu(List<Asset> allMappedPdus, String assetSource){
-      Set<String> assetIds = new HashSet<String>();
-      for(Asset pdu : allMappedPdus) {
-         Map<String,String> justficationfields = pdu.getJustificationfields();
-         if(justficationfields.isEmpty()) {
-            continue;
-         }
-         String metricAndSensorIds =justficationfields.get(FlowgateConstant.SENSOR);
-         if(metricAndSensorIds == null) {
-            continue;
-         }
-         Map<String, String> metricAndSensorIdMap = null;
-         try {
-            metricAndSensorIdMap = getInfoMap(metricAndSensorIds);
-         } catch (IOException e) {
-            continue;
-         }
-         for(Map.Entry<String,String> map : metricAndSensorIdMap.entrySet()) {
-            String sensorIdAndSource = map.getValue();
-            String[] sensorInfos = sensorIdAndSource.split(FlowgateConstant.SPILIT_FLAG);
-            for(String sensorInfo : sensorInfos) {
-               if(sensorInfo.indexOf(assetSource) != -1) {
-                  //sensorId+source
-                  String idAndSource[] = sensorInfo.split(FlowgateConstant.SEPARATOR);
-                  assetIds.add(idAndSource[0]);
-               }
-            }
-         }
-      }
-      return assetIds;
    }
 
    public List<Asset> getPowerIQMappedAsset(List<Asset> allMappedAssets, String assetSource) {
