@@ -58,6 +58,8 @@ public class FlowgateConstant {
 
    public static String PDU_MAX_RATE_VOLTS = "PDU_MAX_RATE_VOLTS";
 
+   public static String POSITION = "POSITION";
+
    public static String PDU = "PDU";
 
    public static String SENSOR = "SENSOR";
