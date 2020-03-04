@@ -563,15 +563,21 @@ public class PowerIQService implements AsyncService {
          }
          restClient.saveAssets(oldAssetsNeedToupdate);
          if(!newAssetsNeedToSave.isEmpty()) {
-            List<Asset> sensorAlreadySaved = Arrays.asList(restClient.saveAssets(newAssetsNeedToSave).getBody());
+            //
+            //We need the assetId of sensor asset, so it should be saved first.
+            List<Asset> sensorAlreadySaved = new ArrayList<Asset>();
+            for(Asset asset : newAssetsNeedToSave) {
+               sensorAlreadySaved.add(restClient.saveAssets(asset).getBody());
+            }
             Set<Asset> pduAssetNeedToUpdate = updatePduMetricformular(sensorAlreadySaved,pduAssetMap);
-            restClient.saveAssets(pduAssetNeedToUpdate);
+            restClient.saveAssets(new ArrayList<Asset>(pduAssetNeedToUpdate));
          }
          offset += limit;
       }
    }
 
    public Set<Asset> updatePduMetricformular(List<Asset> sensorAssets, Map<String,Asset> pduIdAndAssetMap){
+      //Different sensors may have the same pduId.
       Set<Asset> pduAssets = new HashSet<Asset>();
       for(Asset sensorAsset : sensorAssets) {
          com.vmware.flowgate.common.model.Parent parent = sensorAsset.getParent();
