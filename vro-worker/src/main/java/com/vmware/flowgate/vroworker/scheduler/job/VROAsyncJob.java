@@ -372,6 +372,9 @@ public class VROAsyncJob implements AsyncService {
             StatContent humidityPercent = new StatContent();
             List<Double> humidityValues = new ArrayList<Double>();
             List<Long> humidityTimes = new ArrayList<Long>();
+            StatContent backHumidityPercent = new StatContent();
+            List<Double> backHumidityValues = new ArrayList<Double>();
+            List<Long> backHumidityTimes = new ArrayList<Long>();
 
             for (ServerSensorData data : sensorDatas) {
                if (data.getTimeStamp() > newUpdateTimeStamp) {
@@ -442,12 +445,20 @@ public class VROAsyncJob implements AsyncService {
                contents.addStatContent(pduRealtimePower);
             }
             if (!humidityValues.isEmpty()) {
-               humidityPercent.setStatKey(VROConsts.ENVRIONMENT_HUMIDITY_METRIC);
+               humidityPercent.setStatKey(VROConsts.ENVRIONMENT_FRONT_HUMIDITY_METRIC);
                humidityPercent
                      .setData(humidityValues.stream().mapToDouble(Double::valueOf).toArray());
                humidityPercent
                      .setTimestamps(humidityTimes.stream().mapToLong(Long::valueOf).toArray());
                contents.addStatContent(humidityPercent);
+            }
+            if (!backHumidityValues.isEmpty()) {
+               backHumidityPercent.setStatKey(VROConsts.ENVRIONMENT_BACK_HUMIDITY_METRIC);
+               backHumidityPercent
+                     .setData(backHumidityValues.stream().mapToDouble(Double::valueOf).toArray());
+               backHumidityPercent
+                     .setTimestamps(backHumidityTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(backHumidityPercent);
             }
 
             if (!contents.getStatContents().isEmpty()) {

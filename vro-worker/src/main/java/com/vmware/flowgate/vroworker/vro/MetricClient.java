@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.ops.api.client.controllers.ResourcesClient;
 import com.vmware.ops.api.model.property.PropertyContent;
 import com.vmware.ops.api.model.property.PropertyContents;
@@ -15,7 +16,6 @@ import com.vmware.ops.api.model.resource.ResourceDto;
 import com.vmware.ops.api.model.resource.ResourceQuery;
 import com.vmware.ops.api.model.stat.StatContent;
 import com.vmware.ops.api.model.stat.StatContents;
-import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 
 public class MetricClient extends VROBase {
    private ResourcesClient resourcesClient = null;
@@ -45,7 +45,8 @@ public class MetricClient extends VROBase {
             VROConsts.ENVRIONMENT_PDU_POWER_METRIC,
             VROConsts.ENVRIONMENT_HOSTSENSOR_TEMPERATURE_METRIC,
             VROConsts.ENVRIONMENT_FRONT_TEMPERATURE_METRIC,
-            VROConsts.ENVRIONMENT_HUMIDITY_METRIC,
+            VROConsts.ENVRIONMENT_FRONT_HUMIDITY_METRIC,
+            VROConsts.ENVRIONMENT_BACK_HUMIDITY_METRIC,
             VROConsts.ENVRIONMENT_BACK_TEMPERATURE_METRIC);
 
 

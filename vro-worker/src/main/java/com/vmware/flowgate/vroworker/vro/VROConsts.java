@@ -25,8 +25,10 @@ public class VROConsts {
          "Host front panel temperature is too high";
    public static final String SYMPTOM_HOSTSYSTEM_BACK_TEMPERATURE_NAME =
          "Host back panel temperature is too high";
-   public static final String SYMPTOM_HOSTSYSTEM_HUMIDITY_NAME =
-         "Host environment humidity is too high";
+   public static final String SYMPTOM_HOSTSYSTEM_FRONT_HUMIDITY_NAME =
+         "Host front panel humidity is too high";
+   public static final String SYMPTOM_HOSTSYSTEM_BACK_HUMIDITY_NAME =
+         "Host back panel humidity is too high";
    public static final String SYMPTOM_HOSTSYSTEM_POWER_NAME = "The connected PDU is over loaded";
 
 
@@ -44,7 +46,8 @@ public class VROConsts {
    public static final String ENVRIONMENT_PDU_VOLTS_METRIC = "Environment|PDU VOLTS";
    public static final String ENVRIONMENT_HOST_AMPS_METRIC = "Environment|AMPS(A)";
    public static final String ENVRIONMENT_HOST_VOLTS_METRIC = "Environment|VOLTS(V)";
-   public static final String ENVRIONMENT_HUMIDITY_METRIC = "Environment|Humidity(%)";
+   public static final String ENVRIONMENT_FRONT_HUMIDITY_METRIC = "Environment|FrontHumidity(%)";
+   public static final String ENVRIONMENT_BACK_HUMIDITY_METRIC = "Environment|BackHumidity(%)";
 
    public static final String LOCATION_REGION = "Location|Region";
    public static final String LOCATION_COUNTRY = "Location|Country";
