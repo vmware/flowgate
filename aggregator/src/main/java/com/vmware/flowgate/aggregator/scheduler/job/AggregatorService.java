@@ -453,14 +453,20 @@ public class AggregatorService implements AsyncService {
          if(sensorMetricsNameAndIdMap == null || sensorMetricsNameAndIdMap.isEmpty()) {
             sensorMetricsNameAndIdMap = new HashMap<String,Map<String,String>>();
          }
+         List<Asset> allSensorAssetsForServer = new ArrayList<Asset>();
          for (String pduID : pduIds) {
             List<Asset> sensorAssets = pduAndSensorsMap.get(pduID);
             if(sensorAssets == null) {
                continue;
             }
-            generateMetricsFormular(sensorMetricsNameAndIdMap, sensorAssets,
-                  temperatureSensorAssetIds, humiditySensorAssetIds);
+            allSensorAssetsForServer.addAll(sensorAssets);
          }
+         if(allSensorAssetsForServer.isEmpty()) {
+            continue;
+         }
+         generateMetricsFormular(sensorMetricsNameAndIdMap, allSensorAssetsForServer,
+               temperatureSensorAssetIds, humiditySensorAssetIds);
+
          if(sensorMetricsNameAndIdMap.isEmpty()) {
             if(!temperatureSensorAssetIds.isEmpty()) {
                Map<String,String> temp = new HashMap<String,String>();
@@ -487,7 +493,7 @@ public class AggregatorService implements AsyncService {
       }
    }
 
-   public Map<String,Map<String,String>> generateMetricsFormular(Map<String,Map<String,String>> metricsNameAndSensorsMap,
+   public void generateMetricsFormular(Map<String,Map<String,String>> metricsNameAndSensorsMap,
          List<Asset> sensorAssets, List<String> temperatureSensorAssetIds, List<String> humiditySensorAssetIds){
       ObjectMapper mapper = new ObjectMapper();
       for(Asset sensor : sensorAssets) {
@@ -525,20 +531,12 @@ public class AggregatorService implements AsyncService {
          case Front:
             switch (sensor.getSubCategory()) {
             case Temperature:
-               Map<String,String> frontTempMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_FRONT_TEMPERATURE);
-               if(frontTempMap == null) {
-                  frontTempMap = new HashMap<String,String>();
-               }
-               frontTempMap.put(positionInfo,sensor.getId());
-               metricsNameAndSensorsMap.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempMap);
+               fillingData(metricsNameAndSensorsMap, MetricName.SERVER_FRONT_TEMPERATURE,
+                     positionInfo, sensor.getId());
                break;
             case Humidity:
-               Map<String,String> frontHumidityMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_FRONT_HUMIDITY);
-               if(frontHumidityMap == null) {
-                  frontHumidityMap = new HashMap<String,String>();
-               }
-               frontHumidityMap.put(positionInfo, sensor.getId());
-               metricsNameAndSensorsMap.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumidityMap);
+               fillingData(metricsNameAndSensorsMap, MetricName.SERVER_FRONT_HUMIDITY,
+                     positionInfo, sensor.getId());
                break;
             default:
                break;
@@ -547,20 +545,12 @@ public class AggregatorService implements AsyncService {
          case Back:
             switch (sensor.getSubCategory()) {
             case Temperature:
-               Map<String,String> backTempMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_BACK_TEMPREATURE);
-               if(backTempMap == null) {
-                  backTempMap = new HashMap<String,String>();
-               }
-               backTempMap.put(positionInfo, sensor.getId());
-               metricsNameAndSensorsMap.put(MetricName.SERVER_BACK_TEMPREATURE, backTempMap);
+               fillingData(metricsNameAndSensorsMap, MetricName.SERVER_BACK_TEMPREATURE,
+                     positionInfo, sensor.getId());
                break;
             case Humidity:
-               Map<String,String> backHumidityMap  = metricsNameAndSensorsMap.get(MetricName.SERVER_BACK_HUMIDITY);
-               if(backHumidityMap == null) {
-                  backHumidityMap = new HashMap<String,String>();
-               }
-               backHumidityMap.put(positionInfo, sensor.getId());
-               metricsNameAndSensorsMap.put(MetricName.SERVER_BACK_HUMIDITY, backHumidityMap);
+               fillingData(metricsNameAndSensorsMap, MetricName.SERVER_BACK_HUMIDITY,
+                     positionInfo, sensor.getId());
                break;
             default:
                break;
@@ -568,6 +558,10 @@ public class AggregatorService implements AsyncService {
             break;
          case External:
          case Unmounted:
+            /**
+             * Save these sensor asset which are external or unmounted,
+             * When the server's metricsFormula is empty, we will use these sensor assets to create a metrics formula.
+             */
             switch (sensor.getSubCategory()) {
             case Temperature:
                temperatureSensorAssetIds.add(sensor.getId());
@@ -583,7 +577,16 @@ public class AggregatorService implements AsyncService {
             break;
          }
       }
-      return metricsNameAndSensorsMap;
+   }
+
+   public void fillingData(Map<String,Map<String,String>> metricsNameAndSensorsMap, String metricName,
+         String positionInfo, String sensorAssetId) {
+      Map<String,String> metricLocationAndAssetIdMap  = metricsNameAndSensorsMap.get(metricName);
+      if(metricLocationAndAssetIdMap == null) {
+         metricLocationAndAssetIdMap = new HashMap<String,String>();
+      }
+      metricLocationAndAssetIdMap.put(positionInfo, sensorAssetId);
+      metricsNameAndSensorsMap.put(metricName, metricLocationAndAssetIdMap);
    }
 
 }
