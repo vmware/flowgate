@@ -369,9 +369,9 @@ public class VROAsyncJob implements AsyncService {
             StatContent pduRealtimePower = new StatContent();
             List<Double> powerValues = new ArrayList<Double>();
             List<Long> powerTimes = new ArrayList<Long>();
-            StatContent humidityPercent = new StatContent();
-            List<Double> humidityValues = new ArrayList<Double>();
-            List<Long> humidityTimes = new ArrayList<Long>();
+            StatContent frontHumidityPercent = new StatContent();
+            List<Double> frontHumidityValues = new ArrayList<Double>();
+            List<Long> frontHumidityTimes = new ArrayList<Long>();
             StatContent backHumidityPercent = new StatContent();
             List<Double> backHumidityValues = new ArrayList<Double>();
             List<Long> backHumidityTimes = new ArrayList<Long>();
@@ -403,8 +403,8 @@ public class VROAsyncJob implements AsyncService {
                   powerTimes.add(data.getTimeStamp());
                   break;
                case MetricName.SERVER_FRONT_HUMIDITY:
-                  humidityValues.add(data.getValueNum());
-                  humidityTimes.add(data.getTimeStamp());
+                  frontHumidityValues.add(data.getValueNum());
+                  frontHumidityTimes.add(data.getTimeStamp());
                   break;
                default:
                   break;
@@ -444,13 +444,13 @@ public class VROAsyncJob implements AsyncService {
                      .setTimestamps(powerTimes.stream().mapToLong(Long::valueOf).toArray());
                contents.addStatContent(pduRealtimePower);
             }
-            if (!humidityValues.isEmpty()) {
-               humidityPercent.setStatKey(VROConsts.ENVRIONMENT_FRONT_HUMIDITY_METRIC);
-               humidityPercent
-                     .setData(humidityValues.stream().mapToDouble(Double::valueOf).toArray());
-               humidityPercent
-                     .setTimestamps(humidityTimes.stream().mapToLong(Long::valueOf).toArray());
-               contents.addStatContent(humidityPercent);
+            if (!frontHumidityValues.isEmpty()) {
+               frontHumidityPercent.setStatKey(VROConsts.ENVRIONMENT_FRONT_HUMIDITY_METRIC);
+               frontHumidityPercent
+                     .setData(frontHumidityValues.stream().mapToDouble(Double::valueOf).toArray());
+               frontHumidityPercent
+                     .setTimestamps(frontHumidityTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(frontHumidityPercent);
             }
             if (!backHumidityValues.isEmpty()) {
                backHumidityPercent.setStatKey(VROConsts.ENVRIONMENT_BACK_HUMIDITY_METRIC);
