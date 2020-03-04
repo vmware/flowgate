@@ -274,11 +274,11 @@ public class WormholeAPIClient extends RestClientBase {
             getDefaultEntity(), Void.class);
    }
 
-   public ResponseEntity<Void> saveAssets(Asset asset) {
+   public ResponseEntity<Asset> saveAssets(Asset asset) {
       HttpEntity<Object> postEntity =
             new HttpEntity<Object>(asset, buildHeaders());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + SaveAssetURL, HttpMethod.POST,
-            postEntity, Void.class);
+            postEntity, Asset.class);
    }
 
    public ResponseEntity<Void> saveRealTimeData(List<RealTimeData> realTimeDatas) {
