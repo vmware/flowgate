@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.flowgate.client.WormholeAPIClient;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.SensorSetting;
 import com.vmware.ops.api.client.controllers.AlertDefinitionsClient;
 import com.vmware.ops.api.client.controllers.RecommendationsClient;
@@ -271,16 +272,16 @@ public class AlertClient extends VROBase {
       Map<String, SensorSetting> result = new HashMap<String, SensorSetting>();
       for (SensorSetting setting : sensorSettings) {
          switch (setting.getType()) {
-         case FRONTPANELTEMP:
+         case MetricName.SERVER_FRONT_TEMPERATURE:
             result.put(VROConsts.SYMPTOM_HOSTSYSTEM_FRONT_TEMPERATURE_NAME, setting);
             break;
-         case BACKPANELTEMP:
+         case MetricName.SERVER_BACK_TEMPREATURE:
             result.put(VROConsts.SYMPTOM_HOSTSYSTEM_BACK_TEMPERATURE_NAME, setting);
             break;
-         case PDU_RealtimePower:
+         case MetricName.SERVER_TOTAL_POWER:
             result.put(VROConsts.SYMPTOM_HOSTSYSTEM_POWER_NAME, setting);
             break;
-         case HUMIDITY:
+         case MetricName.SERVER_FRONT_HUMIDITY:
             result.put(VROConsts.SYMPTOM_HOSTSYSTEM_HUMIDITY_NAME, setting);
             break;
          default:
