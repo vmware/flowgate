@@ -28,13 +28,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.ServerSensorData;
-import com.vmware.flowgate.common.model.ServerSensorData.ServerSensorType;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
@@ -73,7 +73,6 @@ public class VROAsyncJob implements AsyncService {
    private ObjectMapper mapper = new ObjectMapper();
 
    private static final Map<String, String> methodPropertyMapping;
-   private static final Map<ServerSensorType, String> sensorMetricMapping;
    private static final int HTTP_NOTFOUND = 404;
    static {
       Map<String, String> kvMap = new HashMap<String, String>();
@@ -88,18 +87,6 @@ public class VROAsyncJob implements AsyncService {
       kvMap.put("cabinetName", VROConsts.LOCATION_CABINET);
       kvMap.put("cabinetUnitPosition", VROConsts.LOCATION_CABINET_NUMBER);
       methodPropertyMapping = Collections.unmodifiableMap(kvMap);
-
-      Map<ServerSensorType, String> smMap = new HashMap<ServerSensorType, String>();
-      smMap.put(ServerSensorType.BACKPANELTEMP, VROConsts.ENVRIONMENT_BACK_TEMPERATURE_METRIC);
-      smMap.put(ServerSensorType.FRONTPANELTEMP, VROConsts.ENVRIONMENT_FRONT_TEMPERATURE_METRIC);
-      smMap.put(ServerSensorType.HUMIDITY, VROConsts.ENVRIONMENT_HUMIDITY_METRIC);
-      smMap.put(ServerSensorType.PDU_RealtimeLoad, VROConsts.ENVRIONMENT_PDU_AMPS_METRIC);
-      smMap.put(ServerSensorType.PDU_RealtimeVoltage, VROConsts.ENVRIONMENT_PDU_VOLTS_METRIC);
-      smMap.put(ServerSensorType.PDU_RealtimePower, VROConsts.ENVRIONMENT_PDU_POWER_METRIC);
-      smMap.put(ServerSensorType.PDU_RealtimeLoadPercent,
-            VROConsts.ENVRIONMENT_PDU_AMPS_LOAD_METRIC);
-
-      sensorMetricMapping = Collections.unmodifiableMap(smMap);
    }
    private static int executionCount = 0;
    private static HashMap<String, Long> latencyFactorMap = new HashMap<String, Long>();
@@ -382,39 +369,42 @@ public class VROAsyncJob implements AsyncService {
             StatContent pduRealtimePower = new StatContent();
             List<Double> powerValues = new ArrayList<Double>();
             List<Long> powerTimes = new ArrayList<Long>();
-            StatContent humidityPercent = new StatContent();
-            List<Double> humidityValues = new ArrayList<Double>();
-            List<Long> humidityTimes = new ArrayList<Long>();
+            StatContent frontHumidityPercent = new StatContent();
+            List<Double> frontHumidityValues = new ArrayList<Double>();
+            List<Long> frontHumidityTimes = new ArrayList<Long>();
+            StatContent backHumidityPercent = new StatContent();
+            List<Double> backHumidityValues = new ArrayList<Double>();
+            List<Long> backHumidityTimes = new ArrayList<Long>();
 
             for (ServerSensorData data : sensorDatas) {
                if (data.getTimeStamp() > newUpdateTimeStamp) {
                   newUpdateTimeStamp = data.getTimeStamp();
                   hasNewData = true;
                }
-               switch (data.getType()) {
-               case BACKPANELTEMP:
+               switch (data.getMetricName()) {
+               case MetricName.SERVER_BACK_TEMPREATURE:
                   backValues.add(data.getValueNum());
                   backTimes.add(data.getTimeStamp());
                   break;
-               case FRONTPANELTEMP:
+               case MetricName.SERVER_FRONT_TEMPERATURE:
                   frontValues.add(data.getValueNum());
                   frontTimes.add(data.getTimeStamp());
                   break;
-               case PDU_RealtimeLoad://need to more detail.
+               case MetricName.SERVER_TOTAL_CURRENT://need to more detail.
                   pduAMPSValues.add(data.getValueNum());
                   pduAMPSTimes.add(data.getTimeStamp());
                   break;
-               case PDU_RealtimeVoltage:
+               case MetricName.SERVER_VOLTAGE:
                   voltageValues.add(data.getValueNum());
                   voltageTimes.add(data.getTimeStamp());
                   break;
-               case PDU_RealtimePower:
+               case MetricName.SERVER_TOTAL_POWER:
                   powerValues.add(data.getValueNum());
                   powerTimes.add(data.getTimeStamp());
                   break;
-               case HUMIDITY:
-                  humidityValues.add(data.getValueNum());
-                  humidityTimes.add(data.getTimeStamp());
+               case MetricName.SERVER_FRONT_HUMIDITY:
+                  frontHumidityValues.add(data.getValueNum());
+                  frontHumidityTimes.add(data.getTimeStamp());
                   break;
                default:
                   break;
@@ -454,13 +444,21 @@ public class VROAsyncJob implements AsyncService {
                      .setTimestamps(powerTimes.stream().mapToLong(Long::valueOf).toArray());
                contents.addStatContent(pduRealtimePower);
             }
-            if (!humidityValues.isEmpty()) {
-               humidityPercent.setStatKey(VROConsts.ENVRIONMENT_HUMIDITY_METRIC);
-               humidityPercent
-                     .setData(humidityValues.stream().mapToDouble(Double::valueOf).toArray());
-               humidityPercent
-                     .setTimestamps(humidityTimes.stream().mapToLong(Long::valueOf).toArray());
-               contents.addStatContent(humidityPercent);
+            if (!frontHumidityValues.isEmpty()) {
+               frontHumidityPercent.setStatKey(VROConsts.ENVRIONMENT_FRONT_HUMIDITY_METRIC);
+               frontHumidityPercent
+                     .setData(frontHumidityValues.stream().mapToDouble(Double::valueOf).toArray());
+               frontHumidityPercent
+                     .setTimestamps(frontHumidityTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(frontHumidityPercent);
+            }
+            if (!backHumidityValues.isEmpty()) {
+               backHumidityPercent.setStatKey(VROConsts.ENVRIONMENT_BACK_HUMIDITY_METRIC);
+               backHumidityPercent
+                     .setData(backHumidityValues.stream().mapToDouble(Double::valueOf).toArray());
+               backHumidityPercent
+                     .setTimestamps(backHumidityTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(backHumidityPercent);
             }
 
             if (!contents.getStatContents().isEmpty()) {

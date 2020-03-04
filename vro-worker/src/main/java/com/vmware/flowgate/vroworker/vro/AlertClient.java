@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vmware.flowgate.client.WormholeAPIClient;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.SensorSetting;
 import com.vmware.ops.api.client.controllers.AlertDefinitionsClient;
 import com.vmware.ops.api.client.controllers.RecommendationsClient;
@@ -58,7 +59,8 @@ public class AlertClient extends VROBase {
    private static Set<String> predefinedSymptomNames =
          new HashSet<String>(Arrays.asList(VROConsts.SYMPTOM_HOSTSYSTEM_FRONT_TEMPERATURE_NAME,
                VROConsts.SYMPTOM_HOSTSYSTEM_BACK_TEMPERATURE_NAME,
-               VROConsts.SYMPTOM_HOSTSYSTEM_HUMIDITY_NAME,
+               VROConsts.SYMPTOM_HOSTSYSTEM_FRONT_HUMIDITY_NAME,
+               VROConsts.SYMPTOM_HOSTSYSTEM_BACK_HUMIDITY_NAME,
                VROConsts.SYMPTOM_HOSTSYSTEM_POWER_NAME));
 
 
@@ -162,9 +164,16 @@ public class AlertClient extends VROBase {
             existSymptoms.put(sym, sd);
          }
             break;
-         case VROConsts.SYMPTOM_HOSTSYSTEM_HUMIDITY_NAME: {
+         case VROConsts.SYMPTOM_HOSTSYSTEM_FRONT_HUMIDITY_NAME: {
             SymptomDefinition sd = createEnvrionmentSymptom(sym, 2, 2, Criticality.CRITICAL,
-                  VROConsts.ENVRIONMENT_HUMIDITY_METRIC, CompareOperator.GT,
+                  VROConsts.ENVRIONMENT_FRONT_HUMIDITY_METRIC, CompareOperator.GT,
+                  VROConsts.ENVRIONMENT_HUMIDITY_METRIC_MAX);
+            existSymptoms.put(sym, sd);
+         }
+            break;
+         case VROConsts.SYMPTOM_HOSTSYSTEM_BACK_HUMIDITY_NAME: {
+            SymptomDefinition sd = createEnvrionmentSymptom(sym, 2, 2, Criticality.CRITICAL,
+                  VROConsts.ENVRIONMENT_BACK_HUMIDITY_METRIC, CompareOperator.GT,
                   VROConsts.ENVRIONMENT_HUMIDITY_METRIC_MAX);
             existSymptoms.put(sym, sd);
          }
@@ -228,7 +237,9 @@ public class AlertClient extends VROBase {
                   priority);
             Set<String> symptomIds = new HashSet<String>();
             symptomIds
-                  .add(preDefinedSymptoms.get(VROConsts.SYMPTOM_HOSTSYSTEM_HUMIDITY_NAME).getId());
+                  .add(preDefinedSymptoms.get(VROConsts.SYMPTOM_HOSTSYSTEM_FRONT_HUMIDITY_NAME).getId());
+            symptomIds
+            .add(preDefinedSymptoms.get(VROConsts.SYMPTOM_HOSTSYSTEM_BACK_HUMIDITY_NAME).getId());
             existAlerts.put(alertName, createAlertDefinition(alertName,
                   VROConsts.ALERT_DEFINITION_HUMIDITY_DESCRIPTION, symptomIds, recommendationIds));
          }
@@ -271,17 +282,20 @@ public class AlertClient extends VROBase {
       Map<String, SensorSetting> result = new HashMap<String, SensorSetting>();
       for (SensorSetting setting : sensorSettings) {
          switch (setting.getType()) {
-         case FRONTPANELTEMP:
+         case MetricName.SERVER_FRONT_TEMPERATURE:
             result.put(VROConsts.SYMPTOM_HOSTSYSTEM_FRONT_TEMPERATURE_NAME, setting);
             break;
-         case BACKPANELTEMP:
+         case MetricName.SERVER_BACK_TEMPREATURE:
             result.put(VROConsts.SYMPTOM_HOSTSYSTEM_BACK_TEMPERATURE_NAME, setting);
             break;
-         case PDU_RealtimePower:
+         case MetricName.SERVER_TOTAL_POWER:
             result.put(VROConsts.SYMPTOM_HOSTSYSTEM_POWER_NAME, setting);
             break;
-         case HUMIDITY:
-            result.put(VROConsts.SYMPTOM_HOSTSYSTEM_HUMIDITY_NAME, setting);
+         case MetricName.SERVER_FRONT_HUMIDITY:
+            result.put(VROConsts.SYMPTOM_HOSTSYSTEM_FRONT_HUMIDITY_NAME, setting);
+            break;
+         case MetricName.SERVER_BACK_HUMIDITY:
+            result.put(VROConsts.SYMPTOM_HOSTSYSTEM_BACK_HUMIDITY_NAME, setting);
             break;
          default:
             break;
