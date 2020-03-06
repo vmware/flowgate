@@ -13,6 +13,7 @@ import java.util.Map;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.NetworkMapping;
 import com.vmware.flowgate.common.PduMapping;
@@ -143,11 +144,24 @@ public class HandleAssetUtil {
          asset.setTag(nlyteAsset.getTag());
          asset.setSerialnumber(nlyteAsset.getSerialNumber());
          asset.setAssetName(nlyteAsset.getAssetName());
+
+
          asset = supplementLocation(asset,nlyteAsset.getLocationGroupID(),locationMap);
          asset = supplementMaterial(asset,nlyteAsset.getMaterialID(),manufacturerMap,materialMap);
          //we need to refactor the code
          if (asset.getCategory() == null) {
             continue;
+         }
+         if(asset.getCategory().equals(AssetCategory.Cabinet)) {
+            String contiguousUSpace = nlyteAsset.getContiguousUSpace();
+            if(contiguousUSpace != null) {
+               int freeSize = 0;
+               String contiguousUSpaces[] = contiguousUSpace.split(FlowgateConstant.SPILIT_FLAG);
+               for(String uSpace : contiguousUSpaces) {
+                  freeSize += Integer.parseInt(uSpace);
+               }
+               asset.setCommonFreeCapacity(freeSize);
+            }
          }
          asset.setAssetSource(nlyteSource);
          AssetStatus status = new AssetStatus();
@@ -234,8 +248,18 @@ public class HandleAssetUtil {
       asset.setSubCategory(material.getMaterialSubtype());
       asset.setCategory(material.getMaterialType());
       Integer uHeight =  material.getuHeight();
-      if(uHeight!=null) {
-         asset.setCabinetsize(uHeight);
+      switch (asset.getCategory()) {
+      case Cabinet:
+         if(uHeight!=null) {
+            asset.setCommonTotalCapacity(uHeight);
+         }
+         break;
+      case Networks:
+         int totalSize = material.getTotalCopperPorts() + material.getTotalFibreOpticPorts() + material.getTotalUndefinedPorts();
+         asset.setCommonTotalCapacity(totalSize);
+         break;
+      default:
+         break;
       }
       return asset;
    }
