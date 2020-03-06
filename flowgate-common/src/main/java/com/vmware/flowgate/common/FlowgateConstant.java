@@ -66,9 +66,9 @@ public class FlowgateConstant {
 
    public static String DEFAULT_CABINET_UNIT_POSITION = "COMMON";
 
-   public static String OUTLET_NAME_PREFIX = "OUTLET";
+   public static String OUTLET_NAME_PREFIX = "OUTLET:";
 
-   public static String INLET_NAME_PREFIX = "INLET";
+   public static String INLET_NAME_PREFIX = "INLET:";
 
    public static String SEPARATOR = "_FIELDSPLIT_";
 

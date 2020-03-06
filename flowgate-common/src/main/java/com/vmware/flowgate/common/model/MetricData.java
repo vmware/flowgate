@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.common.model;
 
-public class ServerSensorData {
+public class MetricData {
    private String metricName;
    private double valueNum;
    private String value;
