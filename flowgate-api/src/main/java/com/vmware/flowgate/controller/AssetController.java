@@ -4,8 +4,6 @@
 */
 package com.vmware.flowgate.controller;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,9 +33,9 @@ import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
+import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.ServerSensorData;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
@@ -73,16 +71,14 @@ public class AssetController {
    // Create a new Asset
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-   public HttpHeaders create(@RequestBody Asset asset) {
+   public Asset create(@RequestBody Asset asset) {
       HttpHeaders httpHeaders = new HttpHeaders();
       //when labsdb-worker uses this API to save asset ,the created is existed.Need refactor.
       if(asset.getCreated() == 0) {
          asset.setCreated(System.currentTimeMillis());
       }
       BaseDocumentUtil.generateID(asset);
-      assetRepository.save(asset);
-      httpHeaders.setLocation(linkTo(AssetController.class).slash(asset.getId()).toUri());
-      return httpHeaders;
+      return assetRepository.save(asset);
    }
 
    @ResponseStatus(HttpStatus.CREATED)
@@ -101,6 +97,11 @@ public class AssetController {
    @RequestMapping(value = "/name/{name}", method = RequestMethod.GET)
    public Asset getAssetByName(@PathVariable String name) {
       return assetRepository.findOneByAssetName(name);
+   }
+
+   @RequestMapping(value = "/assetnumber/{number}", method = RequestMethod.GET)
+   public Asset getAssetByAssetNumber(@PathVariable Long number) {
+      return assetRepository.findOneByAssetNumber(number);
    }
 
    // Read Asset by source
@@ -323,7 +324,7 @@ public class AssetController {
    //starttime miliseconds.
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/{id}/serversensordata", method = RequestMethod.GET)
-   public List<ServerSensorData> getServerSensorData(@PathVariable("id") String assetID,
+   public List<MetricData> getServerSensorData(@PathVariable("id") String assetID,
          @RequestParam(value = "starttime", required = false) Long starttime,
          @RequestParam(value = "duration", required = false) Integer duration) {
       if (starttime == null || starttime <= 0) {
@@ -333,7 +334,7 @@ public class AssetController {
          duration = TEN_MINUTES;
       }
       Asset server = assetRepository.findOne(assetID);
-      List<ServerSensorData> result = new ArrayList<ServerSensorData>();
+      List<MetricData> result = new ArrayList<MetricData>();
 
 //      Map<String, Map<String, Map<String, String>>> formulars = server.getMetricsformulars();
 //      for (ServerSensorType category : formulars.keySet()) {

@@ -30,7 +30,7 @@ import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SensorSetting;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.ServerSensorData;
+import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.WormholeUser;
 
 @Service
@@ -338,12 +338,12 @@ public class WormholeAPIClient extends RestClientBase {
             HttpMethod.GET, getDefaultEntity(), ServerMapping[].class);
    }
 
-   public ResponseEntity<ServerSensorData[]> getServerRelatedSensorDataByServerID(String assetID,
+   public ResponseEntity<MetricData[]> getServerRelatedSensorDataByServerID(String assetID,
          long startTime, long duration) {
       return this.restTemplate.exchange(
             getAPIServiceEndpoint()
                   + String.format(fetchSensorDataURL, assetID, startTime, duration),
-            HttpMethod.GET, getDefaultEntity(), ServerSensorData[].class);
+            HttpMethod.GET, getDefaultEntity(), MetricData[].class);
    }
 
    public ResponseEntity<Void> mergMapping(String id1, String id2) {
