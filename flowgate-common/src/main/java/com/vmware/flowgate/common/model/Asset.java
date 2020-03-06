@@ -128,9 +128,14 @@ public class Asset implements Serializable, BaseDocument {
    private MountingSide mountingSide;
 
    /**
-    * The cabinet size(only for cabinet type)
+    * The total capacity of asset
     */
-   private int cabinetsize;
+   private int commonTotalCapacity;
+
+   /**
+    * The free capacity of asset
+    */
+   private int commonFreeCapacity;
 
    /**
     * The asset number of the cabinet. Will be used to search more detail information about the
@@ -347,12 +352,20 @@ public class Asset implements Serializable, BaseDocument {
       this.mountingSide = mountingSide;
    }
 
-   public int getCabinetsize() {
-      return cabinetsize;
+   public int getCommonTotalCapacity() {
+      return commonTotalCapacity;
    }
 
-   public void setCabinetsize(int cabinetsize) {
-      this.cabinetsize = cabinetsize;
+   public void setCommonTotalCapacity(int commonTotalCapacity) {
+      this.commonTotalCapacity = commonTotalCapacity;
+   }
+
+   public int getCommonFreeCapacity() {
+      return commonFreeCapacity;
+   }
+
+   public void setCommonFreeCapacity(int commonFreeCapacity) {
+      this.commonFreeCapacity = commonFreeCapacity;
    }
 
    public String getCabinetAssetNumber() {
