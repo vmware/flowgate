@@ -103,9 +103,9 @@ public class AssetController {
       return assetRepository.findOneByAssetName(name);
    }
 
-   @RequestMapping(value = "/assetnumber/{number}", method = RequestMethod.GET)
-   public Asset getAssetByAssetNumber(@PathVariable Long number) {
-      return assetRepository.findOneByAssetNumber(number);
+   @RequestMapping(value = "/assetnumber/{number}/assetname/{name}", method = RequestMethod.GET)
+   public Asset getAssetByAssetNumber(@PathVariable Long number,@PathVariable String name) {
+      return assetRepository.findOneByAssetNumberAndAssetName(number,name);
    }
 
    // Read Asset by source
