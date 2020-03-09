@@ -11,4 +11,13 @@ public class MetricKeyName {
    public static final String PDU_XLET_CURRENT = "%s|Current";
    public static final String PDU_XLET_VOLTAGE = "%s|Voltage";
    public static final String PDU_XLET_FREE_CAPACITY = "%s|FreeCapacity";
+
+   public static final String SERVER_FRONT_TEMPERATURE_LOCATIONX = "FrontTemperature|%s";
+   public static final String SERVER_BACK_TEMPREATURE_LOCATIONX = "BackTemperature|%s";
+   public static final String SERVER_FRONT_HUMIDITY_LOCATIONX = "FrontHumidity|%s";
+   public static final String SERVER_BACK_HUMIDITY_LOCATIONX = "BackHumidity|%s";
+   public static final String SERVER_CONNECTED_PDUX_TOTAL_CURRENT = "PDU:%s|Current";
+   public static final String SERVER_CONNECTED_PDUX_TOTAL_POWER = "PDU:%s|Power";
+   public static final String SERVER_CONNECTED_PDUX_OUTLETX_CURRENT = "PDU:%s|%s|Current";
+   public static final String SERVER_CONNECTED_PDUX_OUTLETX_POWER = "PDU:%s|%s|Power";
 }
