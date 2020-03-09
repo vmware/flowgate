@@ -37,5 +37,7 @@ public interface AssetRepository
 
    public Asset findOneByAssetName(String name);
 
+   public Asset findOneByAssetNumberAndAssetName(long assetNumber,String name);
+
    public Page<Asset> findByAssetSourceContainingAndCategory(String assetSource, String category,Pageable page);
 }

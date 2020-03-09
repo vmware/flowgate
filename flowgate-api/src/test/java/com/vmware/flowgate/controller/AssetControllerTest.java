@@ -59,7 +59,7 @@ import com.vmware.flowgate.common.model.AssetRealtimeDataSpec;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.ServerSensorData;
+import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
@@ -1328,8 +1328,8 @@ public class AssetControllerTest {
             .andReturn();
       ObjectMapper mapper = new ObjectMapper();
       String res = result1.getResponse().getContentAsString();
-      ServerSensorData [] datas = mapper.readValue(res, ServerSensorData[].class);
-      for(ServerSensorData serverdata:datas) {
+      MetricData [] datas = mapper.readValue(res, MetricData[].class);
+      for(MetricData serverdata:datas) {
     	  if(serverdata.getMetricName().equals(MetricName.PDU_CURRENT)) {
     		  TestCase.assertEquals(serverdata.getValueNum(), 20.0);
     	  }else if(serverdata.getMetricName().equals(MetricName.PDU_APPARENT_POWER)) {

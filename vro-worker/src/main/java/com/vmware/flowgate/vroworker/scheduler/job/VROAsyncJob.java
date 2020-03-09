@@ -34,7 +34,7 @@ import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.ServerSensorData;
+import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
@@ -350,7 +350,7 @@ public class VROAsyncJob implements AsyncService {
       long newUpdateTimeStamp = lastUpdateTimeStamp;
       for (ServerMapping mapping : validMapping) {
          if (mapping.getAsset() != null) {
-            ServerSensorData[] sensorDatas =
+            MetricData[] sensorDatas =
                   restClient.getServerRelatedSensorDataByServerID(mapping.getAsset(),
                         lastUpdateTimeStamp, FIVE_MINUTES * latencyFactor).getBody();
             StatContents contents = new StatContents();
@@ -376,7 +376,7 @@ public class VROAsyncJob implements AsyncService {
             List<Double> backHumidityValues = new ArrayList<Double>();
             List<Long> backHumidityTimes = new ArrayList<Long>();
 
-            for (ServerSensorData data : sensorDatas) {
+            for (MetricData data : sensorDatas) {
                if (data.getTimeStamp() > newUpdateTimeStamp) {
                   newUpdateTimeStamp = data.getTimeStamp();
                   hasNewData = true;
