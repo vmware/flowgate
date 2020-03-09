@@ -128,9 +128,14 @@ public class Asset implements Serializable, BaseDocument {
    private MountingSide mountingSide;
 
    /**
-    * The cabinet size(only for cabinet type)
+    * The total capacity of asset
     */
-   private int cabinetsize;
+   private int capacity;
+
+   /**
+    * The free capacity of asset
+    */
+   private int freeCapacity;
 
    /**
     * The asset number of the cabinet. Will be used to search more detail information about the
@@ -148,9 +153,6 @@ public class Asset implements Serializable, BaseDocument {
     * value.
     */
    private HashMap<String, String> Justificationfields = new HashMap<String, String>();
-
-//   private Map<ServerSensorType, String> sensorsformulars =
-//         new HashMap<ServerSensorType, String>();
 
    private Map<String, Map<String, Map<String, String>>> metricsformulars =
          new HashMap<String, Map<String, Map<String, String>>>();
@@ -347,12 +349,20 @@ public class Asset implements Serializable, BaseDocument {
       this.mountingSide = mountingSide;
    }
 
-   public int getCabinetsize() {
-      return cabinetsize;
+   public int getCapacity() {
+      return capacity;
    }
 
-   public void setCabinetsize(int cabinetsize) {
-      this.cabinetsize = cabinetsize;
+   public void setCapacity(int capacity) {
+      this.capacity = capacity;
+   }
+
+   public int getFreeCapacity() {
+      return freeCapacity;
+   }
+
+   public void setFreeCapacity(int freeCapacity) {
+      this.freeCapacity = freeCapacity;
    }
 
    public String getCabinetAssetNumber() {

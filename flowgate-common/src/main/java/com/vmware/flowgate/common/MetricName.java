@@ -7,30 +7,31 @@ public class MetricName {
    public static final String CONTACTCLOSURE = "Contactclousre";
    public static final String SMOKE = "Smoke";
    public static final String VIBRATION = "Vibraion";
-   public static final String WATER_FLOW = "Water_Flow";
-   public static final String AIR_FLOW = "Air_Flow";
+   public static final String WATER_FLOW = "WaterFlow";
+   public static final String AIR_FLOW = "AirFlow";
 
    public static final String PDU_VOLTAGE = "Voltage";
-   public static final String PDU_ACTIVE_POWER = "Active_Power";
-   public static final String PDU_APPARENT_POWER = "Apparent_Power";
+   public static final String PDU_ACTIVE_POWER = "ActivePower";
+   public static final String PDU_APPARENT_POWER = "ApparentPower";
    public static final String PDU_CURRENT = "Current";
-   public static final String PDU_FREE_CAPACITY = "Free_Capacity";
-   public static final String PDU_TOTAL_CURRENT = "Total_Current";
-   public static final String PDU_TOTAL_POWER = "Total_Power";
-   public static final String PDU_CURRENT_LOAD = "Current_Load";
-   public static final String PDU_POWER_LOAD = "Power_Load";
+   public static final String PDU_FREE_CAPACITY = "FreeCapacity";
+   public static final String PDU_TOTAL_CURRENT = "TotalCurrent";
+   public static final String PDU_TOTAL_POWER = "TotalPower";
+   public static final String PDU_CURRENT_LOAD = "CurrentLoad";
+   public static final String PDU_POWER_LOAD = "PowerLoad";
    public static final String PDU_TEMPERATURE = "Temperature";
    public static final String PDU_HUMIDITY = "HUMIDITY";
 
-   public static final String SERVER_FRONT_TEMPERATURE = "Front_Temperature";
-   public static final String SERVER_BACK_TEMPREATURE = "Back_Temperature";
-   public static final String SERVER_FRONT_HUMIDITY = "Front_Humidity";
-   public static final String SERVER_BACK_HUMIDITY = "Back_Humidity";
-   public static final String SERVER_TOTAL_CURRENT = "Total_Current";
-   public static final String SERVER_TOTAL_POWER = "Total_Power";
+   public static final String SERVER_FRONT_TEMPERATURE = "FrontTemperature";
+   public static final String SERVER_BACK_TEMPREATURE = "BackTemperature";
+   public static final String SERVER_FRONT_HUMIDITY = "FrontHumidity";
+   public static final String SERVER_BACK_HUMIDITY = "BackHumidity";
+   public static final String SERVER_TOTAL_CURRENT = "TotalCurrent";
+   public static final String SERVER_TOTAL_POWER = "TotalPower";
    public static final String SERVER_VOLTAGE = "Voltage";
-   public static final String SERVER_CONNECTED_PDU_CURRENT = "Pdu_Current";
-   public static final String SERVER_CONNECTED_PDU_POWER = "Pdu_Power";
-   public static final String SERVER_USED_PDU_OUTLET_CURRENT = "Connected_PDU_Outlet_Current";
-   public static final String SERVER_USED_PDU_OUTLET_POWER = "Connected_PDU_Outlet_Power";
+   public static final String SERVER_CONNECTED_PDU_CURRENT = "PduCurrent";
+   public static final String SERVER_CONNECTED_PDU_POWER = "PduPower";
+   public static final String SERVER_USED_PDU_OUTLET_CURRENT = "ConnectedPDUOutletCurrent";
+   public static final String SERVER_USED_PDU_OUTLET_POWER = "ConnectedPDUOutletPower";
+
 }
