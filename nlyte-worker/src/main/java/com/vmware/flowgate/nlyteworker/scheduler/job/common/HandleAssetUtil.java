@@ -160,7 +160,7 @@ public class HandleAssetUtil {
                for(String uSpace : contiguousUSpaces) {
                   freeSize += Integer.parseInt(uSpace);
                }
-               asset.setCommonFreeCapacity(freeSize);
+               asset.setFreeCapacity(freeSize);
             }
          }
          asset.setAssetSource(nlyteSource);
@@ -251,12 +251,12 @@ public class HandleAssetUtil {
       switch (asset.getCategory()) {
       case Cabinet:
          if(uHeight!=null) {
-            asset.setCommonTotalCapacity(uHeight);
+            asset.setCapacity(uHeight);
          }
          break;
       case Networks:
          int totalSize = material.getTotalCopperPorts() + material.getTotalFibreOpticPorts() + material.getTotalUndefinedPorts();
-         asset.setCommonTotalCapacity(totalSize);
+         asset.setCapacity(totalSize);
          break;
       default:
          break;
