@@ -9,6 +9,8 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.vmware.ops.api.client.Client;
 import com.vmware.ops.api.client.Client.ClientConfig;
+import com.vmware.ops.api.model.auth.AuthToken;
+import com.vmware.ops.api.model.auth.UsernamePassword;
 
 public abstract class VROBase {
    private final Client client;
@@ -20,7 +22,14 @@ public abstract class VROBase {
          config = getDefautlConfig();
       }
       try {
-         this.client = ClientConfig.builder().basicAuth(config.getUserName(), config.getPassword())
+         Client tokentClient = ClientConfig.builder().useJson().locale(config.getLocale())
+               .timezone(config.getTimeZone())
+               .serverUrl(String.format(VROConsts.VROSDKURL, config.getServerUrl()))
+               .verify(config.getVerifyCert()).ignoreHostName(config.isIgnoreHostName())
+               .useInternalApis(config.isUseInternalAPI()).build().newClient();
+         UsernamePassword up = new UsernamePassword(config.getUserName(), config.getPassword());
+         AuthToken token = tokentClient.userAndAuthManagementClient().acquireToken(up);
+         client = ClientConfig.builder().tokenAuth(token.getToken())
                .useJson().locale(config.getLocale()).timezone(config.getTimeZone())
                .serverUrl(String.format(VROConsts.VROSDKURL, config.getServerUrl()))
                .verify(config.getVerifyCert()).ignoreHostName(config.isIgnoreHostName())
