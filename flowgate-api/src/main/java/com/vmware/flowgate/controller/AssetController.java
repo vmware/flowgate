@@ -4,6 +4,8 @@
 */
 package com.vmware.flowgate.controller;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,14 +73,16 @@ public class AssetController {
    // Create a new Asset
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-   public Asset create(@RequestBody Asset asset) {
+   public HttpHeaders  create(@RequestBody Asset asset) {
       HttpHeaders httpHeaders = new HttpHeaders();
       //when labsdb-worker uses this API to save asset ,the created is existed.Need refactor.
       if(asset.getCreated() == 0) {
          asset.setCreated(System.currentTimeMillis());
       }
       BaseDocumentUtil.generateID(asset);
-      return assetRepository.save(asset);
+      assetRepository.save(asset);
+      httpHeaders.setLocation(linkTo(AssetController.class).slash(asset.getId()).toUri());
+      return httpHeaders;
    }
 
    @ResponseStatus(HttpStatus.CREATED)
