@@ -94,6 +94,8 @@ public class NlyteAsset {
    @JsonProperty(value="UMounting")
    private UMounting uMounting;
    private String cabinetName;
+   @JsonProperty(value="ContiguousUSpace")
+   private String contiguousUSpace;
 
    public String getCabinetName() {
       return cabinetName;
@@ -361,6 +363,12 @@ public class NlyteAsset {
    }
    public void setuMounting(UMounting uMounting) {
       this.uMounting = uMounting;
+   }
+   public String getContiguousUSpace() {
+      return contiguousUSpace;
+   }
+   public void setContiguousUSpace(String contiguousUSpace) {
+      this.contiguousUSpace = contiguousUSpace;
    }
 
 }
