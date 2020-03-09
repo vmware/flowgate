@@ -130,12 +130,12 @@ public class Asset implements Serializable, BaseDocument {
    /**
     * The total capacity of asset
     */
-   private int commonTotalCapacity;
+   private int capacity;
 
    /**
     * The free capacity of asset
     */
-   private int commonFreeCapacity;
+   private int freeCapacity;
 
    /**
     * The asset number of the cabinet. Will be used to search more detail information about the
@@ -153,9 +153,6 @@ public class Asset implements Serializable, BaseDocument {
     * value.
     */
    private HashMap<String, String> Justificationfields = new HashMap<String, String>();
-
-//   private Map<ServerSensorType, String> sensorsformulars =
-//         new HashMap<ServerSensorType, String>();
 
    private Map<String, Map<String, Map<String, String>>> metricsformulars =
          new HashMap<String, Map<String, Map<String, String>>>();
@@ -352,20 +349,20 @@ public class Asset implements Serializable, BaseDocument {
       this.mountingSide = mountingSide;
    }
 
-   public int getCommonTotalCapacity() {
-      return commonTotalCapacity;
+   public int getCapacity() {
+      return capacity;
    }
 
-   public void setCommonTotalCapacity(int commonTotalCapacity) {
-      this.commonTotalCapacity = commonTotalCapacity;
+   public void setCapacity(int capacity) {
+      this.capacity = capacity;
    }
 
-   public int getCommonFreeCapacity() {
-      return commonFreeCapacity;
+   public int getFreeCapacity() {
+      return freeCapacity;
    }
 
-   public void setCommonFreeCapacity(int commonFreeCapacity) {
-      this.commonFreeCapacity = commonFreeCapacity;
+   public void setFreeCapacity(int freeCapacity) {
+      this.freeCapacity = freeCapacity;
    }
 
    public String getCabinetAssetNumber() {

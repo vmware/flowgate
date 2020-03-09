@@ -6,9 +6,9 @@ package com.vmware.flowgate.common;
 
 public class MetricKeyName {
 
-   public static final String PDU_CHILD_ACTIVE_POWER = "%s|ActivePower";
-   public static final String PDU_CHILD_APPARENT_POWER = "%s|ApparentPower";
-   public static final String PDU_CHILD_CURRENT = "%s|Current";
-   public static final String PDU_CHILD_VOLTAGE = "%s|Voltage";
-   public static final String PDU_CHILD_FREE_CAPACITY = "%s|FreeCapacity";
+   public static final String PDU_XLET_ACTIVE_POWER = "%s|ActivePower";
+   public static final String PDU_XLET_APPARENT_POWER = "%s|ApparentPower";
+   public static final String PDU_XLET_CURRENT = "%s|Current";
+   public static final String PDU_XLET_VOLTAGE = "%s|Voltage";
+   public static final String PDU_XLET_FREE_CAPACITY = "%s|FreeCapacity";
 }
