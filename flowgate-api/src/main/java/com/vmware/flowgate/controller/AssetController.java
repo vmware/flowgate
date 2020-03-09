@@ -9,6 +9,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,11 +34,14 @@ import com.couchbase.client.java.document.json.JsonArray;
 import com.google.common.collect.Lists;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricKeyName;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
+import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
@@ -323,6 +327,42 @@ public class AssetController {
       }
       BaseDocumentUtil.generateID(data);
       realtimeDataRepository.save(data);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/pdu/{id}/realtimedata", method = RequestMethod.GET)
+   public List<MetricData> getPduMetricsData(@PathVariable("id") String assetID) {
+      long starttime = System.currentTimeMillis() - TEN_MINUTES;
+      List<RealTimeData> pduMetricsRealtimeDatas =
+            realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, TEN_MINUTES);
+      List<ValueUnit> valueunits = new ArrayList<>();
+      //pdu metrics data,such as power/current/voltage
+      valueunits.addAll(getValueUnits(pduMetricsRealtimeDatas));
+
+      Asset pdu = assetRepository.findOne(assetID);
+      //sensor metrics data, such as temperature or humidity
+      Map<String, Map<String, Map<String, String>>> formulars = pdu.getMetricsformulars();
+      Map<String, Map<String, String>> sensorFormulars = null;
+      if(formulars != null && !formulars.isEmpty()) {
+         sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+      }
+      if(sensorFormulars != null) {
+         Iterator<Map<String, String>> ite = sensorFormulars.values().iterator();
+         while(ite.hasNext()) {
+            Map<String, String> map = ite.next();
+            for(Map.Entry<String, String> locationInfoAndId : map.entrySet()) {
+               String formula = locationInfoAndId.getValue();
+               String location = locationInfoAndId.getKey();
+               String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
+               for(String assetId : ids) {
+                  List<RealTimeData> humidityRealtimeDatas =
+                        realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, TEN_MINUTES);
+                  valueunits.addAll(generateValueUnit(humidityRealtimeDatas, location));
+               }
+            }
+         }
+      }
+      return generateMetricsData(valueunits);
    }
 
    //starttime miliseconds.
@@ -760,5 +800,114 @@ public class AssetController {
             firstMapping.setAsset(secondMapping.getAsset());
          }
       }
+   }
+
+   public RealTimeData findLatestData(List<RealTimeData> realtimeDatas) {
+      RealTimeData latestResult = realtimeDatas.get(0);
+      for(int i=0;i<realtimeDatas.size()-1;i++) {
+         if(latestResult.getTime() < realtimeDatas.get(i+1).getTime()) {
+            latestResult = realtimeDatas.get(i+1);
+         }
+      }
+      return latestResult;
+   }
+
+   public List<ValueUnit> getValueUnits(List<RealTimeData> realtimeDatas){
+      List<ValueUnit> valueunits = null;
+      if(realtimeDatas == null || realtimeDatas.isEmpty()) {
+         return valueunits;
+      }
+      valueunits = new ArrayList<>();
+      RealTimeData realTimeData = findLatestData(realtimeDatas);
+      valueunits.addAll(realTimeData.getValues());
+      return valueunits;
+   }
+
+   public List<ValueUnit> generateValueUnit(List<RealTimeData> realtimeDatas, String locationInfo){
+      List<ValueUnit> valueunits = null;
+      if(realtimeDatas == null || realtimeDatas.isEmpty()) {
+         return valueunits;
+      }
+      valueunits = new ArrayList<>();
+      RealTimeData realTimeData = findLatestData(realtimeDatas);
+      for(ValueUnit value : realTimeData.getValues()) {
+         switch (value.getKey()) {
+         case MetricName.PDU_HUMIDITY:
+         case MetricName.PDU_TEMPERATURE:
+            value.setExtraidentifier(locationInfo);
+            valueunits.add(value);
+            break;
+         default:
+            break;
+         }
+      }
+      return valueunits;
+   }
+
+   public List<MetricData> generateMetricsData(List<ValueUnit> valueunits){
+      List<MetricData> result = new ArrayList<MetricData>();
+      for (ValueUnit valueunit : valueunits) {
+         MetricData metricData = new MetricData();
+         metricData.setTimeStamp(valueunit.getTime());
+         metricData.setValue(valueunit.getValue());
+         metricData.setValueNum(valueunit.getValueNum());
+         switch (valueunit.getKey()) {
+         case MetricName.PDU_ACTIVE_POWER:
+            //PDU|INLET:1|ActivePower
+            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,
+                  valueunit.getExtraidentifier()));
+            result.add(metricData);
+            break;
+         case MetricName.PDU_APPARENT_POWER:
+            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,
+                  valueunit.getExtraidentifier()));
+            result.add(metricData);
+            break;
+         case MetricName.PDU_CURRENT:
+            metricData.setMetricName(
+                  String.format(MetricKeyName.PDU_XLET_CURRENT, valueunit.getExtraidentifier()));
+            result.add(metricData);
+            break;
+         case MetricName.PDU_VOLTAGE:
+            metricData.setMetricName(
+                  String.format(MetricKeyName.PDU_XLET_VOLTAGE, valueunit.getExtraidentifier()));
+            result.add(metricData);
+            break;
+         case MetricName.PDU_FREE_CAPACITY:
+            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY,
+                  valueunit.getExtraidentifier()));
+            result.add(metricData);
+            break;
+         case MetricName.PDU_CURRENT_LOAD:
+            metricData.setMetricName(MetricName.PDU_CURRENT_LOAD);
+            result.add(metricData);
+            break;
+         case MetricName.PDU_POWER_LOAD:
+            metricData.setMetricName(MetricName.PDU_POWER_LOAD);
+            result.add(metricData);
+            break;
+         case MetricName.PDU_TOTAL_CURRENT:
+            metricData.setMetricName(MetricName.PDU_TOTAL_CURRENT);
+            result.add(metricData);
+            break;
+         case MetricName.PDU_TOTAL_POWER:
+            metricData.setMetricName(MetricName.PDU_TOTAL_POWER);
+            result.add(metricData);
+            break;
+         case MetricName.PDU_HUMIDITY:
+            metricData.setMetricName(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX,
+                  valueunit.getExtraidentifier()));
+            result.add(metricData);
+            break;
+         case MetricName.PDU_TEMPERATURE:
+            metricData.setMetricName(String.format(MetricKeyName.PDU_TEMPERATURE_LOCATIONX,
+                  valueunit.getExtraidentifier()));
+            result.add(metricData);
+            break;
+         default:
+            break;
+         }
+      }
+      return result;
    }
 }
