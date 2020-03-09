@@ -476,6 +476,10 @@ public class PowerIQService implements AsyncService {
          newAssetsNeedToSave = new ArrayList<Asset>();
          oldAssetsNeedToupdate = new ArrayList<Asset>();
          for (Sensor sensor : sensors) {
+            //Filter AbsoluteHumiditySensor
+            if(subCategoryMap.get(sensor.getType()) == null) {
+               continue;
+            }
             Asset asset = new Asset();
             Map<String,String> sensorMap = new HashMap<String,String>();
             sensorMap.put(FlowgateConstant.SENSOR_ID_FROM_POWERIQ, String.valueOf(sensor.getId()));
