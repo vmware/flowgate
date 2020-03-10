@@ -52,10 +52,6 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
       }
       long execount = Long.valueOf(execountString);
       boolean fullSync = execount % 288 == 0;
-      //every 3 days
-      boolean syncPDUID = execount++ % (288 * 3) == 0;
-      logger.info(String.format("Send Sync PowerIQ command, fullSync=%s, syncPDUID=%s", fullSync,
-            syncPDUID));
       FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
       if(powerIQs ==null || powerIQs.length==0) {
          logger.info("No PowerIQ server find");
@@ -70,12 +66,6 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
             template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
                   EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
                         EventMessageUtil.PowerIQ_SyncAssetsMetaData, powerIQs));
-         }
-         if (syncPDUID) {
-            logger.info("Send Sync all PDU ID command");
-            template.opsForList().leftPushAll(EventMessageUtil.powerIQJobList,
-                  EventMessageUtil.generateFacilityMessageListByType(EventType.PowerIQ,
-                        EventMessageUtil.PowerIQ_SyncAllPDUID, powerIQs));
          }
          publisher.publish(EventMessageUtil.POWERIQTopic,
                EventMessageUtil.generateFacilityNotifyMessage(EventType.PowerIQ));

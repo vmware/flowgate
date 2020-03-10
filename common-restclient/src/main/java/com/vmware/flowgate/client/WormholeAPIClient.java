@@ -25,12 +25,12 @@ import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.JobConfig;
 import com.vmware.flowgate.common.model.JobConfig.JobType;
+import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.PageModelImp;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SensorSetting;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.WormholeUser;
 
 @Service
@@ -274,11 +274,11 @@ public class WormholeAPIClient extends RestClientBase {
             getDefaultEntity(), Void.class);
    }
 
-   public ResponseEntity<Asset> saveAssets(Asset asset) {
+   public ResponseEntity<Void> saveAssets(Asset asset) {
       HttpEntity<Object> postEntity =
             new HttpEntity<Object>(asset, buildHeaders());
       return this.restTemplate.exchange(getAPIServiceEndpoint() + SaveAssetURL, HttpMethod.POST,
-            postEntity, Asset.class);
+            postEntity, Void.class);
    }
 
    public ResponseEntity<Void> saveRealTimeData(List<RealTimeData> realTimeDatas) {
