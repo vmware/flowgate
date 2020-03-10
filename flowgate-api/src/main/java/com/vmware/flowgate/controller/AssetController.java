@@ -7,6 +7,7 @@ package com.vmware.flowgate.controller;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -73,6 +74,16 @@ public class AssetController {
    private static final int TEN_MINUTES = 605000;//add extra 5 seconds;
    private static String TIME = "time";
 
+   private static Map<String,String> metricNameMap = new HashMap<String,String>();
+   static {
+      metricNameMap.put(MetricName.PDU_HUMIDITY, MetricName.HUMIDITY);
+      metricNameMap.put(MetricName.PDU_TEMPERATURE, MetricName.TEMPERATURE);
+      metricNameMap.put(MetricName.SERVER_BACK_HUMIDITY, MetricName.HUMIDITY);
+      metricNameMap.put(MetricName.SERVER_FRONT_HUMIDITY, MetricName.HUMIDITY);
+      metricNameMap.put(MetricName.SERVER_BACK_TEMPREATURE, MetricName.TEMPERATURE);
+      metricNameMap.put(MetricName.SERVER_FRONT_TEMPERATURE, MetricName.TEMPERATURE);
+      metricNameMap = Collections.unmodifiableMap(metricNameMap);
+   }
    // Create a new Asset
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -362,7 +373,7 @@ public class AssetController {
                      assetIdAndRealtimeDataMap.put(assetId, humidityRealtimeDatas);
                   }
                   humidityRealtimeDatas = assetIdAndRealtimeDataMap.get(assetId);
-                  valueunits.addAll(generateValueUnit(humidityRealtimeDatas, location, MetricName.HUMIDITY));
+                  valueunits.addAll(generateSensorValueUnit(humidityRealtimeDatas, location, MetricName.HUMIDITY));
                }
             }
          }
@@ -381,7 +392,7 @@ public class AssetController {
                      assetIdAndRealtimeDataMap.put(assetId, temRealtimeDatas);
                   }
                   temRealtimeDatas = assetIdAndRealtimeDataMap.get(assetId);
-                  valueunits.addAll(generateValueUnit(temRealtimeDatas, location, MetricName.TEMPERATURE));
+                  valueunits.addAll(generateSensorValueUnit(temRealtimeDatas, location, MetricName.TEMPERATURE));
                }
             }
          }
@@ -847,7 +858,7 @@ public class AssetController {
       return valueunits;
    }
 
-   public List<ValueUnit> generateValueUnit(List<RealTimeData> realtimeDatas,
+   public List<ValueUnit> generateSensorValueUnit(List<RealTimeData> realtimeDatas,
          String locationInfo, String metricName){
       List<ValueUnit> valueunits = null;
       if(realtimeDatas == null || realtimeDatas.isEmpty()) {
@@ -856,7 +867,7 @@ public class AssetController {
       valueunits = new ArrayList<>();
       RealTimeData realTimeData = findLatestData(realtimeDatas);
       for(ValueUnit value : realTimeData.getValues()) {
-         if(value.getKey().equals(metricName)) {
+         if(value.getKey().equals(metricNameMap.get(metricName))) {
             value.setExtraidentifier(locationInfo);
             valueunits.add(value);
          }
