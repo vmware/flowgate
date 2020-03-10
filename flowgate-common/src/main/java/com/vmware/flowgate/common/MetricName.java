@@ -20,7 +20,7 @@ public class MetricName {
    public static final String PDU_CURRENT_LOAD = "CurrentLoad";
    public static final String PDU_POWER_LOAD = "PowerLoad";
    public static final String PDU_TEMPERATURE = "Temperature";
-   public static final String PDU_HUMIDITY = "HUMIDITY";
+   public static final String PDU_HUMIDITY = "Humidity";
 
    public static final String SERVER_FRONT_TEMPERATURE = "FrontTemperature";
    public static final String SERVER_BACK_TEMPREATURE = "BackTemperature";

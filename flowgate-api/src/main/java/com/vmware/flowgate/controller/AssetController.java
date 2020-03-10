@@ -9,7 +9,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -347,17 +346,42 @@ public class AssetController {
          sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
       }
       if(sensorFormulars != null) {
-         Iterator<Map<String, String>> ite = sensorFormulars.values().iterator();
-         while(ite.hasNext()) {
-            Map<String, String> map = ite.next();
-            for(Map.Entry<String, String> locationInfoAndId : map.entrySet()) {
+         Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap = new HashMap<String,List<RealTimeData>>();
+
+         Map<String,String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
+         if(humidityLocationAndIdMap != null && !humidityLocationAndIdMap.isEmpty()) {
+            for(Map.Entry<String, String> locationInfoAndId : humidityLocationAndIdMap.entrySet()) {
                String formula = locationInfoAndId.getValue();
                String location = locationInfoAndId.getKey();
                String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
                for(String assetId : ids) {
-                  List<RealTimeData> humidityRealtimeDatas =
-                        realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, TEN_MINUTES);
-                  valueunits.addAll(generateValueUnit(humidityRealtimeDatas, location));
+                  List<RealTimeData> humidityRealtimeDatas = null;
+                  if(!assetIdAndRealtimeDataMap.containsKey(assetId)) {
+                     humidityRealtimeDatas =
+                           realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, TEN_MINUTES);
+                     assetIdAndRealtimeDataMap.put(assetId, humidityRealtimeDatas);
+                  }
+                  humidityRealtimeDatas = assetIdAndRealtimeDataMap.get(assetId);
+                  valueunits.addAll(generateValueUnit(humidityRealtimeDatas, location, MetricName.HUMIDITY));
+               }
+            }
+         }
+
+         Map<String,String> temperatureLocationAndIdMap = sensorFormulars.get(MetricName.PDU_TEMPERATURE);
+         if(temperatureLocationAndIdMap != null && !temperatureLocationAndIdMap.isEmpty()) {
+            for(Map.Entry<String, String> locationInfoAndId : temperatureLocationAndIdMap.entrySet()) {
+               String formula = locationInfoAndId.getValue();
+               String location = locationInfoAndId.getKey();
+               String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
+               for(String assetId : ids) {
+                  List<RealTimeData> temRealtimeDatas = null;
+                  if(!assetIdAndRealtimeDataMap.containsKey(assetId)) {
+                     temRealtimeDatas =
+                           realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, TEN_MINUTES);
+                     assetIdAndRealtimeDataMap.put(assetId, temRealtimeDatas);
+                  }
+                  temRealtimeDatas = assetIdAndRealtimeDataMap.get(assetId);
+                  valueunits.addAll(generateValueUnit(temRealtimeDatas, location, MetricName.TEMPERATURE));
                }
             }
          }
@@ -823,7 +847,8 @@ public class AssetController {
       return valueunits;
    }
 
-   public List<ValueUnit> generateValueUnit(List<RealTimeData> realtimeDatas, String locationInfo){
+   public List<ValueUnit> generateValueUnit(List<RealTimeData> realtimeDatas,
+         String locationInfo, String metricName){
       List<ValueUnit> valueunits = null;
       if(realtimeDatas == null || realtimeDatas.isEmpty()) {
          return valueunits;
@@ -831,14 +856,9 @@ public class AssetController {
       valueunits = new ArrayList<>();
       RealTimeData realTimeData = findLatestData(realtimeDatas);
       for(ValueUnit value : realTimeData.getValues()) {
-         switch (value.getKey()) {
-         case MetricName.PDU_HUMIDITY:
-         case MetricName.PDU_TEMPERATURE:
+         if(value.getKey().equals(metricName)) {
             value.setExtraidentifier(locationInfo);
             valueunits.add(value);
-            break;
-         default:
-            break;
          }
       }
       return valueunits;
