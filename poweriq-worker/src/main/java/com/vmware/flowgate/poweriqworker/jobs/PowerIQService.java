@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -221,11 +222,6 @@ public class PowerIQService implements AsyncService {
          logger.info("Sync realtime data for " + powerIQ.getName());
          syncRealtimeData(powerIQ);
          logger.info("Finish sync realtime data for " + powerIQ.getName());
-         break;
-      case EventMessageUtil.PowerIQ_SyncAllPDUID:
-         logger.info("Sync PDU ID for all PUDs");
-         syncPDUID(powerIQ);
-         logger.info("Finish sync PDU ID for all PDUs");
          break;
       case EventMessageUtil.PowerIQ_CleanInActiveAssetData:
          logger.info("Clean sensor metadata for " + powerIQ.getName());
@@ -470,7 +466,7 @@ public class PowerIQService implements AsyncService {
       while ((sensors = client.getSensors(limit, offset)) != null) {
          if (sensors.isEmpty()) {
             logger.warn(
-                  String.format("No sensor data from PowerIQ %s", client.getPowerIQServiceEndpoint()));
+                  String.format("No sensor data from /api/v2/sensors?limit=%s&offset=%s", limit, offset ));
             break;
          }
          newAssetsNeedToSave = new ArrayList<Asset>();
@@ -567,11 +563,16 @@ public class PowerIQService implements AsyncService {
          }
          restClient.saveAssets(oldAssetsNeedToupdate);
          if(!newAssetsNeedToSave.isEmpty()) {
-            //
             //We need the assetId of sensor asset, so it should be saved first.
             List<Asset> sensorAlreadySaved = new ArrayList<Asset>();
             for(Asset asset : newAssetsNeedToSave) {
-               sensorAlreadySaved.add(restClient.saveAssets(asset).getBody());
+               ResponseEntity<Void> res = restClient.saveAssets(asset);
+               if(res.getStatusCode().is2xxSuccessful()) {
+                  String uriPath = res.getHeaders().getLocation().getPath();
+                  String id = uriPath.substring(uriPath.lastIndexOf("/") + 1);
+                  asset.setId(id);
+                  sensorAlreadySaved.add(asset);
+               }
             }
             Set<Asset> pduAssetNeedToUpdate = updatePduMetricformular(sensorAlreadySaved,pduAssetMap);
             restClient.saveAssets(new ArrayList<Asset>(pduAssetNeedToUpdate));
@@ -1381,65 +1382,6 @@ public class PowerIQService implements AsyncService {
          realtimeDatas.add(realTimeData);
       }
       return realtimeDatas;
-   }
-
-   /**
-    * This job will be removed after the job of aggregating PowerIQ and Nlyte done
-    * @param powerIQ
-    */
-   public void syncPDUID(FacilitySoftwareConfig powerIQ) {
-      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      List<Asset> allPdusFromFlowgate = restClient.getAllAssetsByType(AssetCategory.PDU);
-      //try to get all pdus from powerIQ;
-      HashMap<String, Asset> pduAssetMapFromFlowgate = new HashMap<String, Asset>();
-      for (Asset asset : allPdusFromFlowgate) {
-         pduAssetMapFromFlowgate.put(asset.getAssetName().toLowerCase(), asset);
-      }
-      int limit = 100;
-      int offset = 0;
-      PowerIQAPIClient client = createClient(powerIQ);
-      List<Pdu> pdus = null;
-      while ((pdus = client.getPdus(limit, offset)) != null) {
-         if (pdus.isEmpty()) {
-            break;
-         }
-         List<Asset> needUpdateAssets = new ArrayList<Asset>();
-         for (Pdu pdu : pdus) {
-            if (pdu.getName() != null) {
-               if (pduAssetMapFromFlowgate.containsKey(pdu.getName().toLowerCase())) {
-                  Asset asset = pduAssetMapFromFlowgate.get(pdu.getName().toLowerCase());
-                  String pduIDFromFlowgate = null;
-                  String dataSource = null;
-                  if (!asset.getJustificationfields().isEmpty()) {
-                     pduIDFromFlowgate = asset.getJustificationfields().get(FlowgateConstant.PDU_ID_FROM_POWERIQ);
-                     dataSource = asset.getJustificationfields().get(POWERIQ_SOURCE);
-                  }
-                  if (!String.valueOf(pdu.getId()).equals(pduIDFromFlowgate)
-                        || dataSource == null) {
-                     //we need to update the ID.
-                     logger.info(String.format("Update Asset's PDU ID filed from %s to %s",
-                           pduIDFromFlowgate, pdu.getId()));
-                     asset.getJustificationfields().put(FlowgateConstant.PDU_ID_FROM_POWERIQ, String.valueOf(pdu.getId()));
-                     asset.getJustificationfields().put(POWERIQ_SOURCE, powerIQ.getId());
-                     needUpdateAssets.add(asset);
-                  }
-
-               } else {
-                  //this PDU doesn't appeared in Nlyte.
-                  logger.info(String.format("PDU with id %s from %s doesn't show up in Nlyte",
-                        pdu.getId(), powerIQ.getServerURL()));
-               }
-            } else {
-               logger.error(
-                     String.format("The pdu with id %s don't have name field!", pdu.getId()));
-            }
-         }
-         //update the asset
-         if (!needUpdateAssets.isEmpty()) {
-            restClient.saveAssets(needUpdateAssets);
-         }
-         offset += limit;
-      }
    }
 
    public Map<String,Asset> getPDUIDAndAssetMap(List<Asset> pdusFromFlowgate){
