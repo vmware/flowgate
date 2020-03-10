@@ -22,4 +22,5 @@ public class MetricKeyName {
    public static final String SERVER_CONNECTED_PDUX_TOTAL_POWER = "PDU:%s|Power";
    public static final String SERVER_CONNECTED_PDUX_OUTLETX_CURRENT = "PDU:%s|%s|Current";
    public static final String SERVER_CONNECTED_PDUX_OUTLETX_POWER = "PDU:%s|%s|Power";
+   public static final String SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE = "PDU:%s|%s|Voltage";
 }
