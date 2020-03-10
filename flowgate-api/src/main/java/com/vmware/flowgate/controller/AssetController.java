@@ -7,7 +7,6 @@ package com.vmware.flowgate.controller;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,20 +33,18 @@ import com.couchbase.client.java.document.json.JsonArray;
 import com.google.common.collect.Lists;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
-import com.vmware.flowgate.common.MetricKeyName;
-import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
+import com.vmware.flowgate.service.AssetService;
 import com.vmware.flowgate.util.BaseDocumentUtil;
 
 @RestController
@@ -69,21 +66,14 @@ public class AssetController {
    @Autowired
    AssetIPMappingRepository assetIPMappingRepository;
 
+   @Autowired
+   AssetService assetService;
+
    // @Value("${}")
    private int RealtimeQueryDurationLimitation;
    private static final int TEN_MINUTES = 605000;//add extra 5 seconds;
    private static String TIME = "time";
 
-   private static Map<String,String> metricNameMap = new HashMap<String,String>();
-   static {
-      metricNameMap.put(MetricName.PDU_HUMIDITY, MetricName.HUMIDITY);
-      metricNameMap.put(MetricName.PDU_TEMPERATURE, MetricName.TEMPERATURE);
-      metricNameMap.put(MetricName.SERVER_BACK_HUMIDITY, MetricName.HUMIDITY);
-      metricNameMap.put(MetricName.SERVER_FRONT_HUMIDITY, MetricName.HUMIDITY);
-      metricNameMap.put(MetricName.SERVER_BACK_TEMPREATURE, MetricName.TEMPERATURE);
-      metricNameMap.put(MetricName.SERVER_FRONT_TEMPERATURE, MetricName.TEMPERATURE);
-      metricNameMap = Collections.unmodifiableMap(metricNameMap);
-   }
    // Create a new Asset
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -342,40 +332,11 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/pdu/{id}/realtimedata", method = RequestMethod.GET)
    public List<MetricData> getPduMetricsData(@PathVariable("id") String assetID) {
-      long starttime = System.currentTimeMillis() - TEN_MINUTES;
-      List<RealTimeData> pduMetricsRealtimeDatas =
-            realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, TEN_MINUTES);
-      List<ValueUnit> valueunits = new ArrayList<>();
-      //pdu metrics data,such as power/current/voltage
-      valueunits.addAll(getValueUnits(pduMetricsRealtimeDatas));
-
-      Asset pdu = assetRepository.findOne(assetID);
-      //sensor metrics data, such as temperature or humidity
-      Map<String, Map<String, Map<String, String>>> formulars = pdu.getMetricsformulars();
-      Map<String, Map<String, String>> sensorFormulars = null;
-      if(formulars != null && !formulars.isEmpty()) {
-         sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
-      }
-
-      if(sensorFormulars != null) {
-         Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap = new HashMap<String,List<RealTimeData>>();
-         Map<String,String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
-         if (humidityLocationAndIdMap != null && !humidityLocationAndIdMap.isEmpty()) {
-            valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,
-                  humidityLocationAndIdMap, MetricName.PDU_HUMIDITY));
-         }
-         Map<String,String> temperatureLocationAndIdMap = sensorFormulars.get(MetricName.PDU_TEMPERATURE);
-         if(temperatureLocationAndIdMap != null && !temperatureLocationAndIdMap.isEmpty()) {
-            valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,
-                  temperatureLocationAndIdMap, MetricName.PDU_TEMPERATURE));
-         }
-      }
-      return generateMetricsData(valueunits);
+      return assetService.getPduMetricsDataById(assetID);
    }
 
    //starttime miliseconds.
-   @ResponseStatus(HttpStatus.OK)
-   @RequestMapping(value = "/{id}/serversensordata", method = RequestMethod.GET)
+   @RequestMapping(value = "server/{id}/realtimedata", method = RequestMethod.GET)
    public List<MetricData> getServerSensorData(@PathVariable("id") String assetID,
          @RequestParam(value = "starttime", required = false) Long starttime,
          @RequestParam(value = "duration", required = false) Integer duration) {
@@ -385,123 +346,8 @@ public class AssetController {
       if (duration == null || duration <= 0 || duration > TEN_MINUTES * 12) {
          duration = TEN_MINUTES;
       }
-      Asset server = assetRepository.findOne(assetID);
-      List<MetricData> result = new ArrayList<MetricData>();
-
-//      Map<String, Map<String, Map<String, String>>> formulars = server.getMetricsformulars();
-//      for (ServerSensorType category : formulars.keySet()) {
-//         String formular = formulars.get(category);
-//         ExpressionParser parser = new SpelExpressionParser();
-//         List<Map<String, String>> validDataComposeList = new ArrayList<Map<String, String>>();
-//         String[] assetIDs = formular.split("\\+|-|\\*|/|\\(|\\)");
-//         Map<String, List<RealTimeData>> dataSlice = new HashMap<String, List<RealTimeData>>();
-//         for (String id : assetIDs) {
-//            if (id.length() == FlowgateConstant.COUCHBASEIDLENGTH) {//the default uuid length is 32
-//
-//               List<RealTimeData> currentData =
-//                     realtimeDataRepository.getDataByIDAndTimeRange(id, starttime, duration);
-//               Collections.sort(currentData, new Comparator<RealTimeData>() {
-//                  @Override
-//                  public int compare(RealTimeData data1, RealTimeData data2) {
-//                     return (int) (data1.getTime() - data2.getTime());
-//                  }
-//
-//               });
-//               dataSlice.put(id, currentData);
-//            }
-//         }
-//         switch (category) {
-//         case FRONTPANELTEMP:
-//         case BACKPANELTEMP:
-//            computeTemp(result, dataSlice, validDataComposeList, category, formular, parser);
-//            break;
-//         default:
-//            //it should only has 1 item in the dataslice for other case.
-//            //            if (dataSlice.size() > 1) {
-//            //               throw new WormholeException(
-//            //                     "The Server should only attached to 1 sensor but find multiple");
-//            //            }
-//            for (List<RealTimeData> value : dataSlice.values()) {
-//               for (RealTimeData data : value) {
-//
-//                  for (ValueUnit unitData : data.getValues()) {
-//                     if (compareType(unitData.getKey(), category)) {
-//                        ServerSensorData sData = new ServerSensorData();
-//                        sData.setType(category);
-//                        sData.setTimeStamp(unitData.getTime());
-//                        sData.setValue(unitData.getValue());
-//                        sData.setValueNum(unitData.getValueNum());
-//                        result.add(sData);
-//                     }
-//                  }
-//               }
-//            }
-//         }
-//      }
-      return result;
+      return assetService.getServerMetricsDataById(assetID, starttime, duration);
    }
-
-//   private void computeTemp(List<ServerSensorData> result,
-//         Map<String, List<RealTimeData>> dataSlice, List<Map<String, String>> validDataComposeList,
-//         ServerSensorType category, String formular, ExpressionParser parser) {
-//      //aggregate the data.
-//      for (String tempID : dataSlice.keySet()) {
-//         List<RealTimeData> tempDatas = dataSlice.get(tempID);
-//         for (RealTimeData rData : tempDatas) {
-//            long time = rData.getTime();
-//            boolean goodData = true;
-//            Map<String, String> dataset = new HashMap<String, String>();
-//            dataset.put(TIME, String.valueOf(time));
-//            //get the tempdata.
-//            for (ValueUnit data : rData.getValues()) {
-//               if (data.getKey().equals(MetricName.TEMPERATURE)) {
-//                  if (data.getValue() != null && !"".equals(data.getValue())) {
-//                     dataset.put(tempID, data.getValue());
-//                  } else {
-//                     dataset.put(tempID, String.valueOf(data.getValueNum()));
-//                  }
-//               }
-//            }
-//            for (String otherID : dataSlice.keySet()) {
-//               if (tempID.equals(otherID)) {
-//                  continue;
-//               }
-//               RealTimeData clostData = getMostClostData(dataSlice.get(otherID), time);
-//               if (Math.abs(clostData.getTime() - time) > 10000) {
-//                  goodData = false;
-//                  break;
-//               }
-//               for (ValueUnit cData : clostData.getValues()) {
-//                  if (cData.getKey().equals(MetricName.TEMPERATURE)) {
-//                     if (cData.getValue() != null && !"".equals(cData.getValue())) {
-//                        dataset.put(otherID, cData.getValue());
-//                     } else {
-//                        dataset.put(otherID, String.valueOf(cData.getValueNum()));
-//                     }
-//                  }
-//               }
-//            }
-//            if (goodData) {
-//               validDataComposeList.add(dataset);
-//            }
-//         }
-//      }
-//      //now we have data and formula
-//      for (Map<String, String> composeData : validDataComposeList) {
-//         ServerSensorData sData = new ServerSensorData();
-//         sData.setType(category);
-//         sData.setTimeStamp(Long.parseLong(composeData.get(TIME)));
-//         String dataFormular = formular;
-//         for (String aID : composeData.keySet()) {
-//            dataFormular = dataFormular.replaceAll(aID, composeData.get(aID));
-//         }
-//         Expression exp = parser.parseExpression(dataFormular);
-//         double rValue = exp.getValue(Double.class);
-//         sData.setValueNum(rValue);
-//         sData.setValue(String.valueOf(rValue));
-//         result.add(sData);
-//      }
-//   }
 
    private RealTimeData getMostClostData(List<RealTimeData> datas, long time) {
       RealTimeData lastData = datas.get(0);
@@ -519,10 +365,6 @@ public class AssetController {
       }
       return lastData;
    }
-
-//   private boolean compareType(String metricName, ServerSensorType sType) {
-//      return metricName.equals(sType.toString());
-//   }
 
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/mapping", method = RequestMethod.POST)
@@ -810,122 +652,5 @@ public class AssetController {
       }
    }
 
-   public RealTimeData findLatestData(List<RealTimeData> realtimeDatas) {
-      RealTimeData latestResult = realtimeDatas.get(0);
-      for(int i=0;i<realtimeDatas.size()-1;i++) {
-         if(latestResult.getTime() < realtimeDatas.get(i+1).getTime()) {
-            latestResult = realtimeDatas.get(i+1);
-         }
-      }
-      return latestResult;
-   }
 
-   public List<ValueUnit> getValueUnits(List<RealTimeData> realtimeDatas){
-      List<ValueUnit> valueunits = null;
-      if(realtimeDatas == null || realtimeDatas.isEmpty()) {
-         return valueunits;
-      }
-      valueunits = new ArrayList<>();
-      RealTimeData realTimeData = findLatestData(realtimeDatas);
-      valueunits.addAll(realTimeData.getValues());
-      return valueunits;
-   }
-
-   public List<ValueUnit> generateSensorValueUnit(Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap,
-         long starttime, Map<String,String> locationAndIdMap, String metricName){
-      List<ValueUnit> valueunits = null;
-      for(Map.Entry<String, String> locationInfoAndId : locationAndIdMap.entrySet()) {
-         String formula = locationInfoAndId.getValue();
-         String location = locationInfoAndId.getKey();
-         String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
-         for(String assetId : ids) {
-            List<RealTimeData> realtimeDatas = null;
-            if(!assetIdAndRealtimeDataMap.containsKey(assetId)) {
-               realtimeDatas =
-                     realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, TEN_MINUTES);
-               assetIdAndRealtimeDataMap.put(assetId, realtimeDatas);
-            }
-            realtimeDatas = assetIdAndRealtimeDataMap.get(assetId);
-            if(realtimeDatas == null || realtimeDatas.isEmpty()) {
-               continue;
-            }
-            valueunits = new ArrayList<>();
-            RealTimeData realTimeData = findLatestData(realtimeDatas);
-            for(ValueUnit value : realTimeData.getValues()) {
-               if(value.getKey().equals(metricNameMap.get(metricName))) {
-                  value.setExtraidentifier(location);
-                  valueunits.add(value);
-               }
-            }
-         }
-      }
-      return valueunits;
-   }
-
-   public List<MetricData> generateMetricsData(List<ValueUnit> valueunits){
-      List<MetricData> result = new ArrayList<MetricData>();
-      for (ValueUnit valueunit : valueunits) {
-         MetricData metricData = new MetricData();
-         metricData.setTimeStamp(valueunit.getTime());
-         metricData.setValue(valueunit.getValue());
-         metricData.setValueNum(valueunit.getValueNum());
-         switch (valueunit.getKey()) {
-         case MetricName.PDU_ACTIVE_POWER:
-            //PDU|INLET:1|ActivePower
-            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,
-                  valueunit.getExtraidentifier()));
-            result.add(metricData);
-            break;
-         case MetricName.PDU_APPARENT_POWER:
-            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,
-                  valueunit.getExtraidentifier()));
-            result.add(metricData);
-            break;
-         case MetricName.PDU_CURRENT:
-            metricData.setMetricName(
-                  String.format(MetricKeyName.PDU_XLET_CURRENT, valueunit.getExtraidentifier()));
-            result.add(metricData);
-            break;
-         case MetricName.PDU_VOLTAGE:
-            metricData.setMetricName(
-                  String.format(MetricKeyName.PDU_XLET_VOLTAGE, valueunit.getExtraidentifier()));
-            result.add(metricData);
-            break;
-         case MetricName.PDU_FREE_CAPACITY:
-            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY,
-                  valueunit.getExtraidentifier()));
-            result.add(metricData);
-            break;
-         case MetricName.PDU_CURRENT_LOAD:
-            metricData.setMetricName(MetricName.PDU_CURRENT_LOAD);
-            result.add(metricData);
-            break;
-         case MetricName.PDU_POWER_LOAD:
-            metricData.setMetricName(MetricName.PDU_POWER_LOAD);
-            result.add(metricData);
-            break;
-         case MetricName.PDU_TOTAL_CURRENT:
-            metricData.setMetricName(MetricName.PDU_TOTAL_CURRENT);
-            result.add(metricData);
-            break;
-         case MetricName.PDU_TOTAL_POWER:
-            metricData.setMetricName(MetricName.PDU_TOTAL_POWER);
-            result.add(metricData);
-            break;
-         case MetricName.PDU_HUMIDITY:
-            metricData.setMetricName(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX,
-                  valueunit.getExtraidentifier()));
-            result.add(metricData);
-            break;
-         case MetricName.PDU_TEMPERATURE:
-            metricData.setMetricName(String.format(MetricKeyName.PDU_TEMPERATURE_LOCATIONX,
-                  valueunit.getExtraidentifier()));
-            result.add(metricData);
-            break;
-         default:
-            break;
-         }
-      }
-      return result;
-   }
 }
