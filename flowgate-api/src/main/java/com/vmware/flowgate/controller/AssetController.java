@@ -356,45 +356,18 @@ public class AssetController {
       if(formulars != null && !formulars.isEmpty()) {
          sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
       }
+
       if(sensorFormulars != null) {
          Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap = new HashMap<String,List<RealTimeData>>();
-
          Map<String,String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
-         if(humidityLocationAndIdMap != null && !humidityLocationAndIdMap.isEmpty()) {
-            for(Map.Entry<String, String> locationInfoAndId : humidityLocationAndIdMap.entrySet()) {
-               String formula = locationInfoAndId.getValue();
-               String location = locationInfoAndId.getKey();
-               String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
-               for(String assetId : ids) {
-                  List<RealTimeData> humidityRealtimeDatas = null;
-                  if(!assetIdAndRealtimeDataMap.containsKey(assetId)) {
-                     humidityRealtimeDatas =
-                           realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, TEN_MINUTES);
-                     assetIdAndRealtimeDataMap.put(assetId, humidityRealtimeDatas);
-                  }
-                  humidityRealtimeDatas = assetIdAndRealtimeDataMap.get(assetId);
-                  valueunits.addAll(generateSensorValueUnit(humidityRealtimeDatas, location, MetricName.HUMIDITY));
-               }
-            }
+         if (humidityLocationAndIdMap != null && !humidityLocationAndIdMap.isEmpty()) {
+            valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,
+                  humidityLocationAndIdMap, MetricName.PDU_HUMIDITY));
          }
-
          Map<String,String> temperatureLocationAndIdMap = sensorFormulars.get(MetricName.PDU_TEMPERATURE);
          if(temperatureLocationAndIdMap != null && !temperatureLocationAndIdMap.isEmpty()) {
-            for(Map.Entry<String, String> locationInfoAndId : temperatureLocationAndIdMap.entrySet()) {
-               String formula = locationInfoAndId.getValue();
-               String location = locationInfoAndId.getKey();
-               String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
-               for(String assetId : ids) {
-                  List<RealTimeData> temRealtimeDatas = null;
-                  if(!assetIdAndRealtimeDataMap.containsKey(assetId)) {
-                     temRealtimeDatas =
-                           realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, TEN_MINUTES);
-                     assetIdAndRealtimeDataMap.put(assetId, temRealtimeDatas);
-                  }
-                  temRealtimeDatas = assetIdAndRealtimeDataMap.get(assetId);
-                  valueunits.addAll(generateSensorValueUnit(temRealtimeDatas, location, MetricName.TEMPERATURE));
-               }
-            }
+            valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,
+                  temperatureLocationAndIdMap, MetricName.PDU_TEMPERATURE));
          }
       }
       return generateMetricsData(valueunits);
@@ -858,18 +831,32 @@ public class AssetController {
       return valueunits;
    }
 
-   public List<ValueUnit> generateSensorValueUnit(List<RealTimeData> realtimeDatas,
-         String locationInfo, String metricName){
+   public List<ValueUnit> generateSensorValueUnit(Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap,
+         long starttime, Map<String,String> locationAndIdMap, String metricName){
       List<ValueUnit> valueunits = null;
-      if(realtimeDatas == null || realtimeDatas.isEmpty()) {
-         return valueunits;
-      }
-      valueunits = new ArrayList<>();
-      RealTimeData realTimeData = findLatestData(realtimeDatas);
-      for(ValueUnit value : realTimeData.getValues()) {
-         if(value.getKey().equals(metricNameMap.get(metricName))) {
-            value.setExtraidentifier(locationInfo);
-            valueunits.add(value);
+      for(Map.Entry<String, String> locationInfoAndId : locationAndIdMap.entrySet()) {
+         String formula = locationInfoAndId.getValue();
+         String location = locationInfoAndId.getKey();
+         String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
+         for(String assetId : ids) {
+            List<RealTimeData> realtimeDatas = null;
+            if(!assetIdAndRealtimeDataMap.containsKey(assetId)) {
+               realtimeDatas =
+                     realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, TEN_MINUTES);
+               assetIdAndRealtimeDataMap.put(assetId, realtimeDatas);
+            }
+            realtimeDatas = assetIdAndRealtimeDataMap.get(assetId);
+            if(realtimeDatas == null || realtimeDatas.isEmpty()) {
+               continue;
+            }
+            valueunits = new ArrayList<>();
+            RealTimeData realTimeData = findLatestData(realtimeDatas);
+            for(ValueUnit value : realTimeData.getValues()) {
+               if(value.getKey().equals(metricNameMap.get(metricName))) {
+                  value.setExtraidentifier(location);
+                  valueunits.add(value);
+               }
+            }
          }
       }
       return valueunits;
