@@ -72,6 +72,8 @@ public class FlowgateConstant {
 
    public static String SEPARATOR = "_FIELDSPLIT_";
 
+   public static String UNDERLINE = "_";
+
    public static String RACK_UNIT_PREFIX = "rackUnit";
 
    public static String SPILIT_FLAG = ",";
