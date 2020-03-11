@@ -24,7 +24,7 @@ public class SDDCSoftwareConfig implements Serializable, BaseDocument {
    private IntegrationStatus integrationStatus;
 
    public enum SoftwareType {
-      VRO, VCENTER, OTHERS
+      VRO, VCENTER, OTHERS, VROSMANAGEPACK
    }
 
    public String getUserName() {
