@@ -97,13 +97,11 @@ public class AssetService {
          metricNames.add(MetricName.PDU_APPARENT_POWER);
          metricNames.add(MetricName.PDU_CURRENT);
          metricNames.add(MetricName.PDU_VOLTAGE);
-         int index = 1;
          for(String pduId : pduMetrics.keySet()) {
             List<RealTimeData> realtimedatas =
                   realtimeDataRepository.getDataByIDAndTimeRange(pduId, starttime, duration);
             List<ValueUnit> valueUnits = getValueUnits(realtimedatas, metricNames);
-            result.addAll(generateServerPduMetricData(valueUnits, index));
-            index++;
+            result.addAll(generateServerPduMetricData(valueUnits, pduId));
          }
       }
 
@@ -122,7 +120,7 @@ public class AssetService {
       return result;
    }
 
-   private List<MetricData> generateServerPduMetricData(List<ValueUnit> valueUnits, int index){
+   private List<MetricData> generateServerPduMetricData(List<ValueUnit> valueUnits, String pduAssetId){
       List<MetricData> result = new ArrayList<MetricData>();
       for(ValueUnit value : valueUnits) {
          MetricData data = new MetricData();
@@ -130,23 +128,23 @@ public class AssetService {
          data.setValueNum(value.getValueNum());
          switch (value.getKey()) {
          case MetricName.PDU_TOTAL_POWER:
-            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, index));
+            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, pduAssetId));
             result.add(data);
             break;
          case MetricName.PDU_TOTAL_CURRENT:
-            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, index));
+            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, pduAssetId));
             result.add(data);
             break;
          case MetricName.PDU_APPARENT_POWER:
-            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, index, value.getExtraidentifier()));
+            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, pduAssetId, value.getExtraidentifier()));
             result.add(data);
             break;
          case MetricName.PDU_CURRENT:
-            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, index, value.getExtraidentifier()));
+            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, pduAssetId, value.getExtraidentifier()));
             result.add(data);
             break;
          case MetricName.PDU_VOLTAGE:
-            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, index, value.getExtraidentifier()));
+            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, pduAssetId, value.getExtraidentifier()));
             result.add(data);
             break;
          default:
@@ -201,14 +199,6 @@ public class AssetService {
       return result;
    }
 
-   private void addSensorMetricDataForServer(List<MetricData> result, Map<String,String> locationAndIdMap,
-         Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap, String metricName, long starttime) {
-      if(locationAndIdMap != null && !locationAndIdMap.isEmpty()) {
-         List<ValueUnit> valueUnits = generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,
-               locationAndIdMap, metricName);
-         result.addAll(generateServerSensorMetricData(valueUnits, metricName));
-      }
-   }
    private RealTimeData findLatestData(List<RealTimeData> realtimeDatas) {
       RealTimeData latestResult = realtimeDatas.get(0);
       for(int i=0;i<realtimeDatas.size()-1;i++) {
