@@ -54,6 +54,14 @@ export class VmwareConfigListComponent implements OnInit {
      }
      return element;
    }
+
+   checkIsMp(config:SddcsoftwareModule){
+    if(config.type == "VROPSMP"){
+      return true;
+    }
+    return false;
+   }
+
    showErrorMsg(sddc:SddcsoftwareModule){
      this.isStatusErrorMsgAlertClose = false;
      this.statusErrorMsg = "The server "+sddc.name+" has an error:"+sddc.integrationStatus.detail
