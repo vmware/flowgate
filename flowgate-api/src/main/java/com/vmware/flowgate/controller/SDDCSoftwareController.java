@@ -80,6 +80,8 @@ public class SDDCSoftwareController {
       case VCENTER:
          serverValidationService.validVCServer(server);
          break;
+      case VROPSMP:
+         break;
       default:
          throw WormholeRequestException.InvalidFiled("type", server.getType().toString());
       }
@@ -261,7 +263,7 @@ public class SDDCSoftwareController {
          eventType = EventType.VROps;
          break;
       default:
-         break;
+         return;
       }
       try {
          logger.info(
