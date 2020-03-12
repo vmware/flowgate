@@ -183,7 +183,7 @@ public class AggregatorService implements AsyncService {
          if(pduFromPowerIQ != null) {
             HashMap<String,String> pduFromPowerIQExtraInfo = pduFromPowerIQ.getJustificationfields();
             HashMap<String,String> pduExtraInfo = pdu.getJustificationfields();
-            pdu.setAssetSource(pdu.getAssetSource() + FlowgateConstant.SPILIT_FLAG + pduFromPowerIQ.getId());
+            pdu.setAssetSource(pdu.getAssetSource() + FlowgateConstant.SPILIT_FLAG + pduFromPowerIQ.getAssetSource());
             if(pduExtraInfo == null || pduExtraInfo.isEmpty()) {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
                restClient.saveAssets(pdu);
@@ -427,6 +427,7 @@ public class AggregatorService implements AsyncService {
          try {
             sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
          }  catch (IOException e) {
+            logger.error("Format sensor info map error ",e.getMessage());
             continue;
          }
          String pduAssetID = sensorInfoMap.get(FlowgateConstant.PDU_ASSET_ID);
