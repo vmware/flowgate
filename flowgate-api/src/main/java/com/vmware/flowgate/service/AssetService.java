@@ -211,11 +211,10 @@ public class AssetService {
 
    private List<ValueUnit> getValueUnits(List<RealTimeData> realtimeDatas,
          List<String> metricsName){
-      List<ValueUnit> valueunits = null;
+      List<ValueUnit> valueunits = new ArrayList<>();
       if(realtimeDatas == null || realtimeDatas.isEmpty()) {
          return valueunits;
       }
-      valueunits = new ArrayList<>();
       RealTimeData realTimeData = findLatestData(realtimeDatas);
       for(ValueUnit value : realTimeData.getValues()) {
          if(metricsName.contains(value.getKey())) {
@@ -227,7 +226,7 @@ public class AssetService {
 
    private List<ValueUnit> generateSensorValueUnit(Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap,
          long starttime, Map<String,String> locationAndIdMap, String metricName){
-      List<ValueUnit> valueunits = null;
+      List<ValueUnit> valueunits = new ArrayList<>();;
       for(Map.Entry<String, String> locationInfoAndId : locationAndIdMap.entrySet()) {
          String formula = locationInfoAndId.getValue();
          String location = locationInfoAndId.getKey();
@@ -243,7 +242,7 @@ public class AssetService {
             if(realtimeDatas == null || realtimeDatas.isEmpty()) {
                continue;
             }
-            valueunits = new ArrayList<>();
+
             RealTimeData realTimeData = findLatestData(realtimeDatas);
             for(ValueUnit value : realTimeData.getValues()) {
                if(value.getKey().equals(metricNameMap.get(metricName))) {

@@ -470,15 +470,32 @@ public class AggregatorService implements AsyncService {
 
          if(sensorMetricsNameAndIdMap.isEmpty()) {
             if(!temperatureSensorAssetIds.isEmpty()) {
-               Map<String,String> temp = new HashMap<String,String>();
-               temp.put(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, temperatureSensorAssetIds.get(0));
-               sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_TEMPERATURE, temp);
+               Map<String,String> frontTemp = new HashMap<String,String>();
+               frontTemp.put(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, temperatureSensorAssetIds.get(0));
+               sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTemp);
+
+               Map<String,String> backTemp = new HashMap<String,String>();
+               String backTemperatureId = temperatureSensorAssetIds.get(0);
+               if(temperatureSensorAssetIds.size() > 1) {
+                  backTemperatureId = temperatureSensorAssetIds.get(1);
+               }
+               backTemp.put(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, backTemperatureId);
+               sensorMetricsNameAndIdMap.put(MetricName.SERVER_BACK_TEMPREATURE, backTemp);
+
                needUpdate = true;
             }
             if(!humiditySensorAssetIds.isEmpty()) {
                Map<String,String> humidity = new HashMap<String,String>();
                humidity.put(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, humiditySensorAssetIds.get(0));
                sensorMetricsNameAndIdMap.put(MetricName.SERVER_FRONT_HUMIDITY, humidity);
+
+               Map<String,String> backHumidity = new HashMap<String,String>();
+               String backHumidityId = humiditySensorAssetIds.get(0);
+               if(humiditySensorAssetIds.size() > 1) {
+                  backHumidityId = humiditySensorAssetIds.get(1);
+               }
+               backHumidity.put(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, backHumidityId);
+               sensorMetricsNameAndIdMap.put(MetricName.SERVER_BACK_HUMIDITY, backHumidity);
                needUpdate = true;
             }
          }else {
