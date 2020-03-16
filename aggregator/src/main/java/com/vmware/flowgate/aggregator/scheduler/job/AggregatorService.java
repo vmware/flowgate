@@ -179,7 +179,7 @@ public class AggregatorService implements AsyncService {
          return;
       }
       ObjectMapper mapper = new ObjectMapper();
-      List<String> pduAssetIds = new ArrayList<String>(pdusOnlyFromPowerIQ.size());
+      HashSet<String> pduAssetIds = new HashSet<String>(pdusOnlyFromPowerIQ.size());
       for(Asset pdu : pdus) {
          Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pdu.getAssetName().toLowerCase());
          if(pduFromPowerIQ != null) {
@@ -251,34 +251,10 @@ public class AggregatorService implements AsyncService {
       }
    }
 
-   public List<Asset> removePduFromServer(Asset[] servers, List<String> removedPduIds) {
+   public List<Asset> removePduFromServer(Asset[] servers, HashSet<String> removedPduIds) {
       List<Asset> needToUpdate = new ArrayList<Asset>();
       for(Asset server : servers) {
          boolean changed = false;
-         HashMap<String, String> serverJustficationfields = server.getJustificationfields();
-         String pduPortString = serverJustficationfields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
-         if(pduPortString != null) {
-            String pduPorts[] = pduPortString.split(FlowgateConstant.SPILIT_FLAG);
-            List<String> pduPortsList = new ArrayList<String>(Arrays.asList(pduPorts));
-            Iterator<String> portsIte = pduPortsList.iterator();
-            while (portsIte.hasNext()) {
-              String pduport = portsIte.next();
-              String pduAssetId = pduport.substring(pduport.lastIndexOf(FlowgateConstant.SEPARATOR) + FlowgateConstant.SEPARATOR.length());
-              if(removedPduIds.contains(pduAssetId)) {
-                 portsIte.remove();
-                 changed = true;
-              }
-            }
-            if(changed) {
-               if(pduPortsList.isEmpty()) {
-                  pduPortString =  null;
-               }else {
-                  pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduPortsList);
-               }
-               serverJustficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, pduPortString);
-               server.setJustificationfields(serverJustficationfields);
-            }
-         }
          List<String> pduIds = server.getPdus();
          Iterator<String> pduite = pduIds.iterator();
          while(pduite.hasNext()) {
@@ -290,22 +266,42 @@ public class AggregatorService implements AsyncService {
          }
          server.setPdus(pduIds);
 
-         Map<String, Map<String, Map<String, String>>> formulars = server.getMetricsformulars();
-         if(formulars == null || formulars.isEmpty()) {
-            continue;
-         }
-         Map<String, Map<String, String>> pduFormulars = formulars.get(FlowgateConstant.PDU);
-         Iterator<Map.Entry<String, Map<String, String>>> ite = pduFormulars.entrySet().iterator();
-         while(ite.hasNext()) {
-            Map.Entry<String, Map<String, String>> map = ite.next();
-            String pduAssetID = map.getKey();
-            if (removedPduIds.contains(pduAssetID)) {
-               changed = true;
-               ite.remove();
-            }
-          }
-         server.setMetricsformulars(formulars);
          if(changed) {
+            HashMap<String, String> serverJustficationfields = server.getJustificationfields();
+            String pduPortString = serverJustficationfields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
+            if(pduPortString != null) {
+               String pduPorts[] = pduPortString.split(FlowgateConstant.SPILIT_FLAG);
+               List<String> pduPortsList = new ArrayList<String>(Arrays.asList(pduPorts));
+               Iterator<String> portsIte = pduPortsList.iterator();
+               while (portsIte.hasNext()) {
+                 String pduport = portsIte.next();
+                 String pduAssetId = pduport.substring(pduport.lastIndexOf(FlowgateConstant.SEPARATOR) + FlowgateConstant.SEPARATOR.length());
+                 if(removedPduIds.contains(pduAssetId)) {
+                    portsIte.remove();
+                 }
+               }
+               if(pduPortsList.isEmpty()) {
+                  pduPortString =  null;
+               }else {
+                  pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduPortsList);
+               }
+               serverJustficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, pduPortString);
+               server.setJustificationfields(serverJustficationfields);
+            }
+            Map<String, Map<String, Map<String, String>>> formulars = server.getMetricsformulars();
+            if(formulars == null || formulars.isEmpty()) {
+               continue;
+            }
+            Map<String, Map<String, String>> pduFormulars = formulars.get(FlowgateConstant.PDU);
+            Iterator<Map.Entry<String, Map<String, String>>> ite = pduFormulars.entrySet().iterator();
+            while(ite.hasNext()) {
+               Map.Entry<String, Map<String, String>> map = ite.next();
+               String pduAssetID = map.getKey();
+               if (removedPduIds.contains(pduAssetID)) {
+                  ite.remove();
+               }
+             }
+            server.setMetricsformulars(formulars);
             needToUpdate.add(server);
          }
       }

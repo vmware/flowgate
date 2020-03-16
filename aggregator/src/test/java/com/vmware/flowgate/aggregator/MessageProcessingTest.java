@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -158,7 +159,7 @@ public class MessageProcessingTest {
       server1.setPdus(pduids1);
       servers[1] = server1;
 
-      List<String> pduAssetIDs = new ArrayList<String>();
+      HashSet<String> pduAssetIDs = new HashSet<String>();
       pduAssetIDs.add("mienoas2389asddsfqzda");
       pduAssetIDs.add("asdw2cvxcjchftyhretyv");
       List<Asset> needToUpdateServer = aggregatorService.removePduFromServer(servers, pduAssetIDs);
