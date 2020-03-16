@@ -26,7 +26,7 @@ public class AssetService {
    AssetRepository assetRepository;
    @Autowired
    AssetRealtimeDataRepository realtimeDataRepository;
-   private static final int TEN_MINUTES = 605000;//add extra 5 seconds;
+   private static final int FIFTEEN_MINUTES = 905000;//add extra 5 seconds;
    private static Map<String,String> metricNameMap = new HashMap<String,String>();
    static {
       metricNameMap.put(MetricName.PDU_HUMIDITY, MetricName.HUMIDITY);
@@ -39,9 +39,9 @@ public class AssetService {
    }
 
    public List<MetricData> getPduMetricsDataById(String assetID){
-      long starttime = System.currentTimeMillis() - TEN_MINUTES;
+      long starttime = System.currentTimeMillis() - FIFTEEN_MINUTES;
       List<RealTimeData> pduMetricsRealtimeDatas =
-            realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, TEN_MINUTES);
+            realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, FIFTEEN_MINUTES);
       List<ValueUnit> valueunits = new ArrayList<>();
 
       List<String> metricNames = new ArrayList<String>();
@@ -235,7 +235,7 @@ public class AssetService {
             List<RealTimeData> realtimeDatas = null;
             if(!assetIdAndRealtimeDataMap.containsKey(assetId)) {
                realtimeDatas =
-                     realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, TEN_MINUTES);
+                     realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, FIFTEEN_MINUTES);
                assetIdAndRealtimeDataMap.put(assetId, realtimeDatas);
             }
             realtimeDatas = assetIdAndRealtimeDataMap.get(assetId);
