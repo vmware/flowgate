@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -184,11 +183,10 @@ public class AggregatorService implements AsyncService {
          if(pduFromPowerIQ != null) {
             HashMap<String,String> pduFromPowerIQExtraInfo = pduFromPowerIQ.getJustificationfields();
             HashMap<String,String> pduExtraInfo = pdu.getJustificationfields();
-            String sources[] = pdu.getAssetSource().split(FlowgateConstant.SPILIT_FLAG);
-            HashSet<String> ids = new HashSet<String>();
-            ids.addAll(Arrays.asList(sources));
-            ids.add(pduFromPowerIQ.getAssetSource());
-            pdu.setAssetSource(String.join(FlowgateConstant.SPILIT_FLAG, ids));
+            String source = pdu.getAssetSource();
+            if(source.indexOf(pduFromPowerIQ.getAssetSource()) == -1) {
+               pdu.setAssetSource(source + FlowgateConstant.SPILIT_FLAG + pduFromPowerIQ.getAssetSource());
+            }
             if(pduExtraInfo == null || pduExtraInfo.isEmpty()) {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
                restClient.saveAssets(pdu);
