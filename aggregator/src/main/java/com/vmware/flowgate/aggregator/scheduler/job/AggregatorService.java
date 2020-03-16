@@ -179,6 +179,7 @@ public class AggregatorService implements AsyncService {
          return;
       }
       ObjectMapper mapper = new ObjectMapper();
+      List<String> pduAssetIds = new ArrayList<String>(pdusOnlyFromPowerIQ.size());
       for(Asset pdu : pdus) {
          Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pdu.getAssetName().toLowerCase());
          if(pduFromPowerIQ != null) {
@@ -192,6 +193,7 @@ public class AggregatorService implements AsyncService {
             if(pduExtraInfo == null || pduExtraInfo.isEmpty()) {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
                restClient.saveAssets(pdu);
+               pduAssetIds.add(pduFromPowerIQ.getId());
                restClient.removeAssetByID(pduFromPowerIQ.getId());
                continue;
             }
@@ -203,6 +205,7 @@ public class AggregatorService implements AsyncService {
             if(oldPduInfo == null) {
                pduExtraInfo.put(FlowgateConstant.PDU, pduInfo);
                restClient.saveAssets(pdu);
+               pduAssetIds.add(pduFromPowerIQ.getId());
                restClient.removeAssetByID(pduFromPowerIQ.getId());
                continue;
             }
@@ -212,7 +215,7 @@ public class AggregatorService implements AsyncService {
                pduInfoMap = mapper.readValue(pduInfo, new TypeReference<Map<String,String>>() {});
                oldPduInfoMap = mapper.readValue(oldPduInfo, new TypeReference<Map<String,String>>() {});
             } catch (IOException e) {
-               logger.error("Format pdu extra info error");
+               logger.error("Format pdu justficationfields error");
                continue;
             }
             oldPduInfoMap.put(FlowgateConstant.PDU_RATE_AMPS, pduInfoMap.get(FlowgateConstant.PDU_RATE_AMPS));
@@ -231,10 +234,82 @@ public class AggregatorService implements AsyncService {
                logger.error("Format pdu extra info error",e.getCause());
             }
             restClient.saveAssets(pdu);
+            pduAssetIds.add(pduFromPowerIQ.getId());
             restClient.removeAssetByID(pduFromPowerIQ.getId());
          }
       }
       logger.info("Finished aggregate pdu from PowerIQ to other systems");
+
+      if(!pduAssetIds.isEmpty()) {
+         Asset[] serversWithPduInfo = restClient.getServersWithPDUInfo().getBody();
+         if(serversWithPduInfo== null || serversWithPduInfo.length == 0) {
+            logger.info("No mapped server");
+            return;
+         }
+        List<Asset> needToUpdateServer = removePduFromServer(serversWithPduInfo,pduAssetIds);
+        restClient.saveAssets(needToUpdateServer);
+      }
+   }
+
+   public List<Asset> removePduFromServer(Asset[] servers, List<String> removedPduIds) {
+      List<Asset> needToUpdate = new ArrayList<Asset>();
+      for(Asset server : servers) {
+         boolean changed = false;
+         HashMap<String, String> serverJustficationfields = server.getJustificationfields();
+         String pduPortString = serverJustficationfields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
+         if(pduPortString != null) {
+            String pduPorts[] = pduPortString.split(FlowgateConstant.SPILIT_FLAG);
+            List<String> pduPortsList = new ArrayList<String>(Arrays.asList(pduPorts));
+            Iterator<String> portsIte = pduPortsList.iterator();
+            while (portsIte.hasNext()) {
+              String pduport = portsIte.next();
+              String pduAssetId = pduport.substring(pduport.lastIndexOf(FlowgateConstant.SEPARATOR) + FlowgateConstant.SEPARATOR.length());
+              if(removedPduIds.contains(pduAssetId)) {
+                 portsIte.remove();
+                 changed = true;
+              }
+            }
+            if(changed) {
+               if(pduPortsList.isEmpty()) {
+                  pduPortString =  null;
+               }else {
+                  pduPortString = String.join(FlowgateConstant.SPILIT_FLAG, pduPortsList);
+               }
+               serverJustficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, pduPortString);
+               server.setJustificationfields(serverJustficationfields);
+            }
+         }
+         List<String> pduIds = server.getPdus();
+         Iterator<String> pduite = pduIds.iterator();
+         while(pduite.hasNext()) {
+            String pduid = pduite.next();
+            if(removedPduIds.contains(pduid)) {
+               pduite.remove();
+               changed = true;
+            }
+         }
+         server.setPdus(pduIds);
+
+         Map<String, Map<String, Map<String, String>>> formulars = server.getMetricsformulars();
+         if(formulars == null || formulars.isEmpty()) {
+            continue;
+         }
+         Map<String, Map<String, String>> pduFormulars = formulars.get(FlowgateConstant.PDU);
+         Iterator<Map.Entry<String, Map<String, String>>> ite = pduFormulars.entrySet().iterator();
+         while(ite.hasNext()) {
+            Map.Entry<String, Map<String, String>> map = ite.next();
+            String pduAssetID = map.getKey();
+            if (removedPduIds.contains(pduAssetID)) {
+               changed = true;
+               ite.remove();
+            }
+          }
+         server.setMetricsformulars(formulars);
+         if(changed) {
+            needToUpdate.add(server);
+         }
+      }
+      return needToUpdate;
    }
 
    public Map<String,Map<String,String>> generatePduformularForServer (List<String> pduAssetIds){
