@@ -50,6 +50,7 @@ import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.model.Asset;
@@ -57,9 +58,10 @@ import com.vmware.flowgate.common.model.AssetAddress;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.AssetRealtimeDataSpec;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.MetricData;
+import com.vmware.flowgate.common.model.Parent;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
@@ -185,9 +187,6 @@ public class AssetControllerTest {
                         .type(int.class).optional(),
                   fieldWithPath("mountingSide").description("The cabinet unit number")
                         .type(MountingSide.class).optional(),
-                  fieldWithPath("cabinetsize")
-                        .description("The cabinet size(only for cabinet type)").type(int.class)
-                        .optional(),
                   fieldWithPath("cabinetAssetNumber").description(
                         "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
                         .type(long.class).optional(),
@@ -195,8 +194,12 @@ public class AssetControllerTest {
                         .description("Only valid for sensor type of asset.")
                         .type(AssetRealtimeDataSpec.class).optional(),
                   fieldWithPath("justificationfields").ignored(),
-                  fieldWithPath("sensorsformulars").ignored(),
+                  fieldWithPath("metricsformulars").ignored(),
                   fieldWithPath("lastupdate").ignored(), fieldWithPath("created").ignored(),
+                  fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
+                  fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
+                  fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
+                  .type(Parent.class).optional(),
                   fieldWithPath("pdus")
                         .description("Possible PDUs that this server connected with"),
                   fieldWithPath("switches")
@@ -231,8 +234,7 @@ public class AssetControllerTest {
                         fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
                         fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
                         fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
-                        fieldWithPath("vroResourceID").description("VROps Resource ID."))))
-            .andReturn().getResponse().getHeader("Location");
+                        fieldWithPath("vroResourceID").description("VROps Resource ID."))));
       serverMappingRepository.delete(mapping.getId());
    }
 
@@ -262,8 +264,7 @@ public class AssetControllerTest {
                   fieldWithPath("values")
                         .description("A list of sensor data. eg. Humidity , Electric... ")
                         .type(ValueUnit[].class),
-                  fieldWithPath("time").description("The time of generate sensor data."))))
-            .andReturn().getResponse().getHeader("Location");
+                  fieldWithPath("time").description("The time of generate sensor data."))));
       assetRepository.delete(asset.getId());
       realtimeDataRepository.delete(realtime.getId());
    }
@@ -323,8 +324,6 @@ public class AssetControllerTest {
                   .type(int.class).optional(),
             fieldWithPath("mountingSide").description("The cabinet unit number")
                   .type(MountingSide.class).optional(),
-            fieldWithPath("cabinetsize").description("The cabinet size(only for cabinet type)")
-                  .type(int.class).optional(),
             fieldWithPath("cabinetAssetNumber").description(
                   "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
                   .type(long.class).optional(),
@@ -333,10 +332,14 @@ public class AssetControllerTest {
                   .type(AssetRealtimeDataSpec.class).optional(),
             fieldWithPath("justificationfields")
                   .description("Justification fields that input by user."),
-            fieldWithPath("sensorsformulars")
+            fieldWithPath("metricsformulars")
                   .description("The sensor data generator logic for this asset."),
             fieldWithPath("lastupdate").description("When this asset was last upated"),
             fieldWithPath("created").description("When this asset was created"),
+            fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
+            fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
+            fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
+            .type(Parent.class).optional(),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
                   .description("Physical switchs that this host connected with") };
@@ -346,8 +349,7 @@ public class AssetControllerTest {
             .andExpect(status().isCreated())
             .andDo(document("assets-createBatch-example",
                   requestFields(fieldWithPath("[]").description("An array of asserts"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
+                        .andWithPrefix("[].", fieldpath)));
 
       assetRepository.delete(asset1.getId());
       assetRepository.delete(asset2.getId());
@@ -356,10 +358,10 @@ public class AssetControllerTest {
    @Test
    public void realTimeDatabatchCreationExample() throws JsonProcessingException, Exception {
       List<RealTimeData> realtimedatas = new ArrayList<RealTimeData>();
-      RealTimeData realtimedata1 = createRealTimeData();
+      RealTimeData realtimedata1 = createServerPDURealTimeData();
       realtimedata1.setAssetID("assetid1");
       realtimedatas.add(realtimedata1);
-      RealTimeData realtimedata2 = createRealTimeData();
+      RealTimeData realtimedata2 = createServerPDURealTimeData();
       realtimedata2.setAssetID("assetid2");
       realtimedatas.add(realtimedata2);
 
@@ -367,61 +369,64 @@ public class AssetControllerTest {
             new FieldDescriptor[] { fieldWithPath("id").description("ID of the RealTimeData"),
                   fieldWithPath("assetID").description("ID of the asset, created by flowgate"),
                   fieldWithPath("values").description("List of ValueUnit") };
-      this.mockMvc
-            .perform(post("/v1/assets/sensordata/batchoperation")
-                  .contentType(MediaType.APPLICATION_JSON_VALUE)
-                  .content(objectMapper.writeValueAsString(realtimedatas)))
-            .andExpect(status().isCreated())
-            .andDo(document("assets-realTimeDatabatchCreation-example",
-                  requestFields(fieldWithPath("[]").description("An array of RealTimeData"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
+     this.mockMvc
+     .perform(post("/v1/assets/sensordata/batchoperation")
+           .contentType(MediaType.APPLICATION_JSON_VALUE)
+           .content(objectMapper.writeValueAsString(realtimedatas)))
+     .andExpect(status().isCreated())
+     .andDo(document("assets-realTimeDatabatchCreation-example",
+           requestFields(fieldWithPath("[]").description("An array of RealTimeData"))
+                 .andWithPrefix("[].", fieldpath)));
+     realtimeDataRepository.delete(realtimedata1.getId());
+     realtimeDataRepository.delete(realtimedata2.getId());
 
-      realtimeDataRepository.delete(realtimedata1.getId());
-      realtimeDataRepository.delete(realtimedata2.getId());
    }
 
    @Test
    public void readAssetBySourceAndTypeExample() throws Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
-      MvcResult result = this.mockMvc
-            .perform(get(
-                  "/v1/assets/source/" + asset.getAssetSource() + "/type/" + asset.getCategory()+"/?currentPage=1&pageSize=5"))
-            .andExpect(status().isOk())
-            .andDo(document("assets-getBySourceAndType-example",
-                    responseFields(fieldWithPath("content").description("An assets array."),
-                            fieldWithPath("totalPages").description("content's total pages."),
-                            fieldWithPath("totalElements").description("content's total elements."),
-                            fieldWithPath("last").description("Is the last."),
-                            fieldWithPath("number").description("The page number."),
-                            fieldWithPath("size").description("The page size."),
-                            fieldWithPath("sort").description("The sort."),
-                            fieldWithPath("numberOfElements").description("The number of Elements."),
-                            fieldWithPath("first").description("Is the first."))))
-            .andReturn();
-      assetRepository.delete(asset.getId());
+      try {
+         MvcResult result = this.mockMvc
+               .perform(get(
+                     "/v1/assets/source/" + asset.getAssetSource() + "/type/" + asset.getCategory()+"/?currentPage=1&pageSize=5"))
+               .andExpect(status().isOk())
+               .andDo(document("assets-getBySourceAndType-example",
+                       responseFields(fieldWithPath("content").description("An assets array."),
+                               fieldWithPath("totalPages").description("content's total pages."),
+                               fieldWithPath("totalElements").description("content's total elements."),
+                               fieldWithPath("last").description("Is the last."),
+                               fieldWithPath("number").description("The page number."),
+                               fieldWithPath("size").description("The page size."),
+                               fieldWithPath("sort").description("The sort."),
+                               fieldWithPath("numberOfElements").description("The number of Elements."),
+                               fieldWithPath("first").description("Is the first."))))
+               .andReturn();
+      }finally {
+         assetRepository.delete(asset.getId());
+      }
    }
 
    @Test
    public void readAssetByTypeExample() throws Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
-
-      this.mockMvc.perform(get("/v1/assets/type/" + asset.getCategory()+"/?currentPage=1&pageSize=5")).andExpect(status().isOk())
-            .andDo(document("assets-getByType-example",
-                    responseFields(fieldWithPath("content").description("An assets array."),
-                            fieldWithPath("totalPages").description("content's total pages."),
-                            fieldWithPath("totalElements").description("content's total elements."),
-                            fieldWithPath("last").description("Is the last."),
-                            fieldWithPath("number").description("The page number."),
-                            fieldWithPath("size").description("The page size."),
-                            fieldWithPath("sort").description("The sort."),
-                            fieldWithPath("numberOfElements").description("The number of Elements."),
-                            fieldWithPath("first").description("Is the first."))))
-            .andReturn();
-
-      assetRepository.delete(asset.getId());
+      try {
+         this.mockMvc.perform(get("/v1/assets/type/" + asset.getCategory()+"/?currentPage=1&pageSize=5")).andExpect(status().isOk())
+         .andDo(document("assets-getByType-example",
+                 responseFields(fieldWithPath("content").description("An assets array."),
+                         fieldWithPath("totalPages").description("content's total pages."),
+                         fieldWithPath("totalElements").description("content's total elements."),
+                         fieldWithPath("last").description("Is the last."),
+                         fieldWithPath("number").description("The page number."),
+                         fieldWithPath("size").description("The page size."),
+                         fieldWithPath("sort").description("The sort."),
+                         fieldWithPath("numberOfElements").description("The number of Elements."),
+                         fieldWithPath("first").description("Is the first."))))
+         .andReturn();
+      }finally {
+         assetRepository.delete(asset.getId());
+      }
    }
 
    @Test
@@ -432,19 +437,20 @@ public class AssetControllerTest {
       AssetIPMapping mapping2 = createAssetIPMapping();
       assetIPMappingRepository.save(mapping2);
 
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("id").description("ID of the AssetIPMapping, created by flowgate"),
-            fieldWithPath("ip").description("IP of AssetIPMapping."),
-            fieldWithPath("assetname").description("name of asset.") };
-      this.mockMvc.perform(get("/v1/assets/mapping/hostnameip/ip/" + mapping1.getIp()))
-            .andExpect(status().isOk())
-            .andDo(document("assets-getHostNameByIP-example",
-                  responseFields(fieldWithPath("[]").description("An array of ServerMappings"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
-
-      assetIPMappingRepository.delete(mapping1.getId());
-      assetIPMappingRepository.delete(mapping2.getId());
+      try {
+         FieldDescriptor[] fieldpath = new FieldDescriptor[] {
+               fieldWithPath("id").description("ID of the AssetIPMapping, created by flowgate"),
+               fieldWithPath("ip").description("IP of AssetIPMapping."),
+               fieldWithPath("assetname").description("name of asset.") };
+         this.mockMvc.perform(get("/v1/assets/mapping/hostnameip/ip/" + mapping1.getIp()))
+               .andExpect(status().isOk())
+               .andDo(document("assets-getHostNameByIP-example",
+                     responseFields(fieldWithPath("[]").description("An array of ServerMappings"))
+                           .andWithPrefix("[].", fieldpath)));
+      }finally {
+         assetIPMappingRepository.delete(mapping1.getId());
+         assetIPMappingRepository.delete(mapping2.getId());
+      }
    }
 
    @Test
@@ -454,18 +460,20 @@ public class AssetControllerTest {
       serverMappingRepository.save(mapping1);
       ServerMapping mapping2 = createServerMapping();
       serverMappingRepository.save(mapping2);
+      try {
 
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-                  fieldWithPath("").description("hostname") };
+         FieldDescriptor[] fieldpath =
+               new FieldDescriptor[] { fieldWithPath("").description("hostname") };
 
-      this.mockMvc.perform(get("/v1/assets/mapping/unmappedservers")).andExpect(status().isOk())
-            .andDo(document("assets-getUnmappedServers-example",
-                  responseFields(fieldWithPath("[]").description("An array of asserts"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
+         this.mockMvc.perform(get("/v1/assets/mapping/unmappedservers")).andExpect(status().isOk())
+               .andDo(document("assets-getUnmappedServers-example",
+                     responseFields(fieldWithPath("[]").description("An array of asserts"))
+                           .andWithPrefix("[].", fieldpath)));
+      } finally {
+         serverMappingRepository.delete(mapping1.getId());
+         serverMappingRepository.delete(mapping2.getId());
+      }
 
-      serverMappingRepository.delete(mapping1.getId());
-      serverMappingRepository.delete(mapping2.getId());
    }
 
    @Test
@@ -532,8 +540,6 @@ public class AssetControllerTest {
                   .type(int.class).optional(),
             fieldWithPath("mountingSide").description("The cabinet unit number")
                   .type(MountingSide.class).optional(),
-            fieldWithPath("cabinetsize").description("The cabinet size(only for cabinet type)")
-                  .type(int.class).optional(),
             fieldWithPath("cabinetAssetNumber").description(
                   "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
                   .type(long.class).optional(),
@@ -542,23 +548,29 @@ public class AssetControllerTest {
                   .type(AssetRealtimeDataSpec.class).optional(),
             fieldWithPath("justificationfields")
                   .description("Justification fields that input by user."),
-            fieldWithPath("sensorsformulars")
+            fieldWithPath("metricsformulars")
                   .description("The sensor data generator logic for this asset."),
             fieldWithPath("lastupdate").description("When this asset was last upated"),
             fieldWithPath("created").description("When this asset was created"),
+            fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
+            fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
+            fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
+            .type(Parent.class).optional(),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
                   .description("Physical switchs that this host connected with") };
-      this.mockMvc.perform(get("/v1/assets/mappedasset/category/" + asset.getCategory()))
-            .andDo(document("assets-getMapped-example",
-                  responseFields(fieldWithPath("[]").description("An array of asserts"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
 
-      assetRepository.delete(asset.getId());
-      serverMappingRepository.delete(mapping.getId());
-      assetRepository.delete(asset2.getId());
-      serverMappingRepository.delete(mapping2.getId());
+      try {
+         this.mockMvc.perform(get("/v1/assets/mappedasset/category/" + asset.getCategory()))
+         .andDo(document("assets-getMapped-example",
+               responseFields(fieldWithPath("[]").description("An array of asserts"))
+                     .andWithPrefix("[].", fieldpath)));
+      }finally {
+         assetRepository.delete(asset.getId());
+         serverMappingRepository.delete(mapping.getId());
+         assetRepository.delete(asset2.getId());
+         serverMappingRepository.delete(mapping2.getId());
+      }
    }
 
    @Test
@@ -577,23 +589,25 @@ public class AssetControllerTest {
       facilitySoftwareRepository.save(facility);
       int pageNumber = 1;
       int pageSize = 1;
+      try {
+         this.mockMvc.perform(get("/v1/assets/page/" + pageNumber + "/pagesize/" + pageSize))
+         .andExpect(status().isOk())
+         .andDo(document("assets-getByAssetNameAndTagLik-example",
+               responseFields(fieldWithPath("content").description("ServerMapping's array."),
+                     fieldWithPath("totalPages").description("content's total pages."),
+                     fieldWithPath("totalElements").description("content's total elements."),
+                     fieldWithPath("last").description("Is the last."),
+                     fieldWithPath("number").description("The page number."),
+                     fieldWithPath("size").description("The page size."),
+                     fieldWithPath("sort").description("The sort."),
+                     fieldWithPath("numberOfElements").description("The number of Elements."),
+                     fieldWithPath("first").description("Is the first."))));
 
-      this.mockMvc.perform(get("/v1/assets/page/" + pageNumber + "/pagesize/" + pageSize))
-            .andExpect(status().isOk())
-            .andDo(document("assets-getByAssetNameAndTagLik-example",
-                  responseFields(fieldWithPath("content").description("ServerMapping's array."),
-                        fieldWithPath("totalPages").description("content's total pages."),
-                        fieldWithPath("totalElements").description("content's total elements."),
-                        fieldWithPath("last").description("Is the last."),
-                        fieldWithPath("number").description("The page number."),
-                        fieldWithPath("size").description("The page size."),
-                        fieldWithPath("sort").description("The sort."),
-                        fieldWithPath("numberOfElements").description("The number of Elements."),
-                        fieldWithPath("first").description("Is the first."))));
-
-      assetRepository.delete(asset1.getId());
-      assetRepository.delete(asset2.getId());
-      facilitySoftwareRepository.delete(facility.getId());
+      }finally {
+         assetRepository.delete(asset1.getId());
+         assetRepository.delete(asset2.getId());
+         facilitySoftwareRepository.delete(facility.getId());
+      }
    }
 
    @Test
@@ -611,25 +625,26 @@ public class AssetControllerTest {
       String keywords = "keyword";
       FacilitySoftwareConfig facility = createFacilitySoftware();
       facilitySoftwareRepository.save(facility);
-
-      this.mockMvc
-            .perform(get("/v1/assets/page/"
-                  + pageNumber + "/pagesize/" + pageSize + "/keywords/" + keywords))
-            .andExpect(status().isOk())
-            .andDo(document("assets-getByAssetNameAndTagLikAndKeywords-example",
-                  responseFields(fieldWithPath("content").description("ServerMapping's array."),
-                        fieldWithPath("totalPages").description("content's total pages."),
-                        fieldWithPath("totalElements").description("content's total elements."),
-                        fieldWithPath("last").description("Is the last."),
-                        fieldWithPath("number").description("The page number."),
-                        fieldWithPath("size").description("The page size."),
-                        fieldWithPath("sort").description("The sort."),
-                        fieldWithPath("numberOfElements").description("The number of Elements."),
-                        fieldWithPath("first").description("Is the first."))));
-
-      assetRepository.delete(asset1.getId());
-      assetRepository.delete(asset2.getId());
-      facilitySoftwareRepository.delete(facility.getId());
+      try {
+         this.mockMvc
+         .perform(get("/v1/assets/page/"
+               + pageNumber + "/pagesize/" + pageSize + "/keywords/" + keywords))
+         .andExpect(status().isOk())
+         .andDo(document("assets-getByAssetNameAndTagLikAndKeywords-example",
+               responseFields(fieldWithPath("content").description("ServerMapping's array."),
+                     fieldWithPath("totalPages").description("content's total pages."),
+                     fieldWithPath("totalElements").description("content's total elements."),
+                     fieldWithPath("last").description("Is the last."),
+                     fieldWithPath("number").description("The page number."),
+                     fieldWithPath("size").description("The page size."),
+                     fieldWithPath("sort").description("The sort."),
+                     fieldWithPath("numberOfElements").description("The number of Elements."),
+                     fieldWithPath("first").description("Is the first."))));
+      }finally {
+         assetRepository.delete(asset1.getId());
+         assetRepository.delete(asset2.getId());
+         facilitySoftwareRepository.delete(facility.getId());
+      }
    }
 
    @Test
@@ -697,8 +712,6 @@ public class AssetControllerTest {
                   .type(int.class).optional(),
             fieldWithPath("mountingSide").description("The cabinet unit number")
                   .type(MountingSide.class).optional(),
-            fieldWithPath("cabinetsize").description("The cabinet size(only for cabinet type)")
-                  .type(int.class).optional(),
             fieldWithPath("cabinetAssetNumber").description(
                   "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
                   .type(long.class).optional(),
@@ -707,24 +720,28 @@ public class AssetControllerTest {
                   .type(AssetRealtimeDataSpec.class).optional(),
             fieldWithPath("justificationfields")
                   .description("Justification fields that input by user."),
-            fieldWithPath("sensorsformulars")
-                  .description("The sensor data generator logic for this asset."),
+            fieldWithPath("metricsformulars")
+                  .description("The formula of metrics data for this asset."),
             fieldWithPath("lastupdate").description("When this asset was last upated"),
             fieldWithPath("created").description("When this asset was created"),
+            fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
+            fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
+            fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
+            .type(Parent.class).optional(),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
                   .description("Physical switchs that this host connected with") };
-      this.mockMvc.perform(get("/v1/assets/pdusisnull"))
-            .andDo(document("assets-findServersWithoutPDUInfo-example",
-                  responseFields(fieldWithPath("[]").description("An array of asserts"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse().getHeader("Location");
-
-      assetRepository.delete(asset.getId());
-      serverMappingRepository.delete(mapping.getId());
-      assetRepository.delete(asset2.getId());
-      serverMappingRepository.delete(mapping2.getId());
-
+      try {
+         this.mockMvc.perform(get("/v1/assets/pdusisnull"))
+         .andDo(document("assets-findServersWithoutPDUInfo-example",
+               responseFields(fieldWithPath("[]").description("An array of asserts"))
+                     .andWithPrefix("[].", fieldpath)));
+      }finally {
+         assetRepository.delete(asset.getId());
+         serverMappingRepository.delete(mapping.getId());
+         assetRepository.delete(asset2.getId());
+         serverMappingRepository.delete(mapping2.getId());
+      }
    }
 
    @Test
@@ -789,8 +806,6 @@ public class AssetControllerTest {
                   .type(int.class).optional(),
             fieldWithPath("mountingSide").description("The cabinet unit number")
                   .type(MountingSide.class).optional(),
-            fieldWithPath("cabinetsize").description("The cabinet size(only for cabinet type)")
-                  .type(int.class).optional(),
             fieldWithPath("cabinetAssetNumber").description(
                   "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
                   .type(long.class).optional(),
@@ -799,28 +814,33 @@ public class AssetControllerTest {
                   .type(AssetRealtimeDataSpec.class).optional(),
             fieldWithPath("justificationfields")
                   .description("Justification fields that input by user."),
-            fieldWithPath("sensorsformulars")
+            fieldWithPath("metricsformulars")
                   .description("The sensor data generator logic for this asset."),
             fieldWithPath("lastupdate").description("When this asset was last upated"),
             fieldWithPath("created").description("When this asset was created"),
+            fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
+            fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
+            fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
+            .type(Parent.class).optional(),
             fieldWithPath("pdus").description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
                   .description("Physical switchs that this host connected with") };
-      this.mockMvc.perform(get("/v1/assets/pdusisnotnull"))
-            .andExpect(jsonPath("$[0].assetNumber", is(12345)))
-            .andExpect(jsonPath("$[0].assetName", is("pek-wor-server-02")))
-            .andExpect(jsonPath("$[0].pdus", hasSize(2)))
-            .andExpect(jsonPath("$[0].pdus[0]", is("pdu1")))
-            .andDo(document("assets-findServersWithPDUInfo-example",
-                  responseFields(fieldWithPath("[]").description("An array of asserts"))
-                        .andWithPrefix("[].", fieldpath)))
-            .andReturn().getResponse();
-
-      assetRepository.delete(asset.getId());
-      serverMappingRepository.delete(mapping.getId());
-      assetRepository.delete(asset2.getId());
-      serverMappingRepository.delete(mapping2.getId());
-
+      try {
+         this.mockMvc.perform(get("/v1/assets/pdusisnotnull"))
+         .andExpect(jsonPath("$[0].assetNumber", is(12345)))
+         .andExpect(jsonPath("$[0].assetName", is("pek-wor-server-02")))
+         .andExpect(jsonPath("$[0].pdus", hasSize(2)))
+         .andExpect(jsonPath("$[0].pdus[0]", is("pdu1")))
+         .andDo(document("assets-findServersWithPDUInfo-example",
+               responseFields(fieldWithPath("[]").description("An array of asserts"))
+                     .andWithPrefix("[].", fieldpath)))
+         .andReturn().getResponse();
+      }finally {
+         assetRepository.delete(asset.getId());
+         serverMappingRepository.delete(mapping.getId());
+         assetRepository.delete(asset2.getId());
+         serverMappingRepository.delete(mapping2.getId());
+      }
    }
 
    @Test
@@ -835,19 +855,22 @@ public class AssetControllerTest {
       Asset asset = new Asset();
       asset.setId("0001bdc8b25d4c2badfd045ab61aabfa");
       assetRepository.save(asset);
-      MvcResult result = this.mockMvc
-      .perform(get("/v1/assets/vrops/90o76d5655368548d42e0fd5").content("{\"vroID\":\"90o76d5655368548d42e0fd5\"}"))
-      .andExpect(status().isOk())
-      .andDo(document("assets-getAssetsByVroId-example", requestFields(
-    		  fieldWithPath("vroID").description("ID of VROps"))))
-      .andReturn();
-      ObjectMapper mapper = new ObjectMapper();
-      String res = result.getResponse().getContentAsString();
-      Asset [] assets = mapper.readValue(res, Asset[].class);
-      TestCase.assertEquals(asset.getId(), assets[0].getId());
-      serverMappingRepository.delete(mapping1.getId());
-      serverMappingRepository.delete(mapping2.getId());
-      assetRepository.delete(asset.getId());
+      try {
+         MvcResult result = this.mockMvc
+               .perform(get("/v1/assets/vrops/90o76d5655368548d42e0fd5").content("{\"vroID\":\"90o76d5655368548d42e0fd5\"}"))
+               .andExpect(status().isOk())
+               .andDo(document("assets-getAssetsByVroId-example", requestFields(
+                    fieldWithPath("vroID").description("ID of VROps"))))
+               .andReturn();
+               ObjectMapper mapper = new ObjectMapper();
+               String res = result.getResponse().getContentAsString();
+               Asset [] assets = mapper.readValue(res, Asset[].class);
+               TestCase.assertEquals(asset.getId(), assets[0].getId());
+      }finally {
+         serverMappingRepository.delete(mapping1.getId());
+         serverMappingRepository.delete(mapping2.getId());
+         assetRepository.delete(asset.getId());
+      }
    }
 
    @Test
@@ -862,19 +885,25 @@ public class AssetControllerTest {
       Asset asset = new Asset();
       asset.setId("0001bdc8b25d4c2badfd045ab61aabfa");
       assetRepository.save(asset);
-      MvcResult result = this.mockMvc
-      .perform(get("/v1/assets/vc/5b7cfd5655368548d42e0fd5").content("{\"vcID\":\"5b7cfd5655368548d42e0fd5\"}"))
-      .andExpect(status().isOk())
-      .andDo(document("assets-getAssetsByVcId-example", requestFields(
-    		  fieldWithPath("vcID").description("ID of VCENER"))))
-      .andReturn();
-      ObjectMapper mapper = new ObjectMapper();
-      String res = result.getResponse().getContentAsString();
-      Asset [] assets = mapper.readValue(res, Asset[].class);
-      TestCase.assertEquals(asset.getId(), assets[0].getId());
-      serverMappingRepository.delete(mapping1.getId());
-      serverMappingRepository.delete(mapping2.getId());
-      assetRepository.delete(asset.getId());
+
+      try {
+         MvcResult result =
+               this.mockMvc
+                     .perform(get("/v1/assets/vc/5b7cfd5655368548d42e0fd5")
+                           .content("{\"vcID\":\"5b7cfd5655368548d42e0fd5\"}"))
+                     .andExpect(status().isOk())
+                     .andDo(document("assets-getAssetsByVcId-example",
+                           requestFields(fieldWithPath("vcID").description("ID of VCENER"))))
+                     .andReturn();
+         ObjectMapper mapper = new ObjectMapper();
+         String res = result.getResponse().getContentAsString();
+         Asset[] assets = mapper.readValue(res, Asset[].class);
+         TestCase.assertEquals(asset.getId(), assets[0].getId());
+      } finally {
+         serverMappingRepository.delete(mapping1.getId());
+         serverMappingRepository.delete(mapping2.getId());
+         assetRepository.delete(asset.getId());
+      }
    }
 
    @Test
@@ -893,24 +922,26 @@ public class AssetControllerTest {
       int pageSize = 1;
       int vropsID = 1;
 
-      this.mockMvc
-            .perform(get("/v1/assets/mapping/vrops/"
-                  + vropsID + "/page/" + pageNumber + "/pagesize/" + pageSize))
-            .andExpect(status().isOk())
-            .andDo(document("assets-getPageMappingsByVROPSId-example",
-                  responseFields(fieldWithPath("content").description("ServerMapping's array."),
-                        fieldWithPath("totalPages").description("content's total pages."),
-                        fieldWithPath("totalElements").description("content's total elements."),
-                        fieldWithPath("last").description("Is the last."),
-                        fieldWithPath("number").description("The page number."),
-                        fieldWithPath("size").description("The page size."),
-                        fieldWithPath("sort").description("The sort."),
-                        fieldWithPath("numberOfElements").description("The number of Elements."),
-                        fieldWithPath("first").description("Is the first."))));
+      try {
+         this.mockMvc
+         .perform(get("/v1/assets/mapping/vrops/"
+               + vropsID + "/page/" + pageNumber + "/pagesize/" + pageSize))
+         .andExpect(status().isOk())
+         .andDo(document("assets-getPageMappingsByVROPSId-example",
+               responseFields(fieldWithPath("content").description("ServerMapping's array."),
+                     fieldWithPath("totalPages").description("content's total pages."),
+                     fieldWithPath("totalElements").description("content's total elements."),
+                     fieldWithPath("last").description("Is the last."),
+                     fieldWithPath("number").description("The page number."),
+                     fieldWithPath("size").description("The page size."),
+                     fieldWithPath("sort").description("The sort."),
+                     fieldWithPath("numberOfElements").description("The number of Elements."),
+                     fieldWithPath("first").description("Is the first."))));
 
-
-      serverMappingRepository.delete(mapping1.getId());
-      serverMappingRepository.delete(mapping2.getId());
+      }finally {
+         serverMappingRepository.delete(mapping1.getId());
+         serverMappingRepository.delete(mapping2.getId());
+      }
    }
 
    @Test
@@ -929,23 +960,25 @@ public class AssetControllerTest {
       int pageNumber = 1;
       int pageSize = 1;
       int vcID = 1;
+      try {
+         this.mockMvc.perform(
+               get("/v1/assets/mapping/vc/" + vcID + "/page/" + pageNumber + "/pagesize/" + pageSize))
+               .andExpect(status().isOk())
+               .andDo(document("assets-getPageMappingsByVCId-example",
+                     responseFields(fieldWithPath("content").description("ServerMapping's array."),
+                           fieldWithPath("totalPages").description("content's total pages."),
+                           fieldWithPath("totalElements").description("content's total elements."),
+                           fieldWithPath("last").description("Is the last."),
+                           fieldWithPath("number").description("The page number."),
+                           fieldWithPath("size").description("The page size."),
+                           fieldWithPath("sort").description("The sort."),
+                           fieldWithPath("numberOfElements").description("The number of Elements."),
+                           fieldWithPath("first").description("Is the first."))));
 
-      this.mockMvc.perform(
-            get("/v1/assets/mapping/vc/" + vcID + "/page/" + pageNumber + "/pagesize/" + pageSize))
-            .andExpect(status().isOk())
-            .andDo(document("assets-getPageMappingsByVCId-example",
-                  responseFields(fieldWithPath("content").description("ServerMapping's array."),
-                        fieldWithPath("totalPages").description("content's total pages."),
-                        fieldWithPath("totalElements").description("content's total elements."),
-                        fieldWithPath("last").description("Is the last."),
-                        fieldWithPath("number").description("The page number."),
-                        fieldWithPath("size").description("The page size."),
-                        fieldWithPath("sort").description("The sort."),
-                        fieldWithPath("numberOfElements").description("The number of Elements."),
-                        fieldWithPath("first").description("Is the first."))));
-
-      serverMappingRepository.delete(mapping1.getId());
-      serverMappingRepository.delete(mapping2.getId());
+      }finally {
+         serverMappingRepository.delete(mapping1.getId());
+         serverMappingRepository.delete(mapping2.getId());
+      }
    }
 
    @Test
@@ -969,164 +1002,171 @@ public class AssetControllerTest {
    public void readAssetExample() throws Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
-      this.mockMvc.perform(get("/v1/assets/" + asset.getId() + "")).andExpect(status().isOk())
-            .andExpect(jsonPath("assetName", is(asset.getAssetName())))
-            .andExpect(jsonPath("assetNumber", is((int) asset.getAssetNumber())))
-            .andExpect(jsonPath("category", is(asset.getCategory().toString())))
-            .andExpect(jsonPath("model", is(asset.getModel())))
-            .andExpect(jsonPath("manufacturer", is(asset.getManufacturer())))
-            .andDo(document("assets-get-example", responseFields(
-                  fieldWithPath("id").description("ID of the asset, created by flowgate"),
-                  fieldWithPath("assetNumber").description(
-                        "A unique number that can identify an asset from third part DCIM/CMDB systems.")
-                        .type(long.class),
-                  fieldWithPath("assetName").description(
-                        "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
-                  fieldWithPath("assetSource").description(
-                        "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
-                  fieldWithPath("category").description(
-                        "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
-                        .type(AssetCategory.class),
-                  fieldWithPath("subCategory")
-                        .description("The subcategory of the asset. Only apply to some systems.")
-                        .type(AssetSubCategory.class).optional(),
-                  fieldWithPath("manufacturer").description("The manufacture name"),
-                  fieldWithPath("model").description("The model of the asset"),
-                  fieldWithPath("serialnumber").description(
-                        "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
-                        .optional(),
-                  fieldWithPath("tag").description(
-                        "Some system will use tag to identify an asset. It can be either an number or a string.")
-                        .type(String.class).optional(),
-                  fieldWithPath("assetAddress").description("The access address of the asset")
-                        .type(AssetAddress.class).optional(),
-                  fieldWithPath("region").description("The location region of the asset")
-                        .optional(),
-                  fieldWithPath("country").description("The location country of the asset")
-                        .optional(),
-                  fieldWithPath("city").description("The location city of the asset").optional(),
-                  fieldWithPath("building").description("The location building of the asset")
-                        .optional(),
-                  fieldWithPath("floor").description("The location floor of the asset").optional(),
-                  fieldWithPath("room").description("The location room of the asset"),
-                  fieldWithPath("row").description("The location row of the asset").optional(),
-                  fieldWithPath("col").description("The location col of the asset").optional(),
-                  fieldWithPath("extraLocation")
-                        .description("Extra location information. Only valid for some system.")
-                        .optional(),
-                  fieldWithPath("cabinetName").description(
-                        "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
-                        .optional(),
-                  fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
-                        .type(int.class).optional(),
-                  fieldWithPath("mountingSide").description("The cabinet unit number")
-                        .type(MountingSide.class).optional(),
-                  fieldWithPath("cabinetsize")
-                        .description("The cabinet size(only for cabinet type)").type(int.class)
-                        .optional(),
-                  fieldWithPath("cabinetAssetNumber").description(
-                        "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
-                        .type(long.class).optional(),
-                  fieldWithPath("assetRealtimeDataSpec")
-                        .description("Only valid for sensor type of asset.")
-                        .type(AssetRealtimeDataSpec.class).optional(),
-                  fieldWithPath("justificationfields")
-                        .description("Justification fields that input by user."),
-                  fieldWithPath("sensorsformulars")
-                        .description("The sensor data generator logic for this asset."),
-                  fieldWithPath("lastupdate").description("When this asset was last upated"),
-                  fieldWithPath("created").description("When this asset was created"),
-                  fieldWithPath("pdus")
-                        .description("Possible PDUs that this server connected with"),
-                  fieldWithPath("switches")
-                        .description("Physical switchs that this host connected with"),
-                  fieldWithPath("status")
-                        .description("This is a collection of states, including the state of the asset, "
-                              + "the state of the pdu mapping, and the state of the switch mapping."))));
-
-      assetRepository.delete(asset.getId());
+      try {
+         this.mockMvc.perform(get("/v1/assets/" + asset.getId() + "")).andExpect(status().isOk())
+         .andExpect(jsonPath("assetName", is(asset.getAssetName())))
+         .andExpect(jsonPath("assetNumber", is((int) asset.getAssetNumber())))
+         .andExpect(jsonPath("category", is(asset.getCategory().toString())))
+         .andExpect(jsonPath("model", is(asset.getModel())))
+         .andExpect(jsonPath("manufacturer", is(asset.getManufacturer())))
+         .andDo(document("assets-get-example", responseFields(
+               fieldWithPath("id").description("ID of the asset, created by flowgate"),
+               fieldWithPath("assetNumber").description(
+                     "A unique number that can identify an asset from third part DCIM/CMDB systems.")
+                     .type(long.class),
+               fieldWithPath("assetName").description(
+                     "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
+               fieldWithPath("assetSource").description(
+                     "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
+               fieldWithPath("category").description(
+                     "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
+                     .type(AssetCategory.class),
+               fieldWithPath("subCategory")
+                     .description("The subcategory of the asset. Only apply to some systems.")
+                     .type(AssetSubCategory.class).optional(),
+               fieldWithPath("manufacturer").description("The manufacture name"),
+               fieldWithPath("model").description("The model of the asset"),
+               fieldWithPath("serialnumber").description(
+                     "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
+                     .optional(),
+               fieldWithPath("tag").description(
+                     "Some system will use tag to identify an asset. It can be either an number or a string.")
+                     .type(String.class).optional(),
+               fieldWithPath("assetAddress").description("The access address of the asset")
+                     .type(AssetAddress.class).optional(),
+               fieldWithPath("region").description("The location region of the asset")
+                     .optional(),
+               fieldWithPath("country").description("The location country of the asset")
+                     .optional(),
+               fieldWithPath("city").description("The location city of the asset").optional(),
+               fieldWithPath("building").description("The location building of the asset")
+                     .optional(),
+               fieldWithPath("floor").description("The location floor of the asset").optional(),
+               fieldWithPath("room").description("The location room of the asset"),
+               fieldWithPath("row").description("The location row of the asset").optional(),
+               fieldWithPath("col").description("The location col of the asset").optional(),
+               fieldWithPath("extraLocation")
+                     .description("Extra location information. Only valid for some system.")
+                     .optional(),
+               fieldWithPath("cabinetName").description(
+                     "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
+                     .optional(),
+               fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
+                     .type(int.class).optional(),
+               fieldWithPath("mountingSide").description("The cabinet unit number")
+                     .type(MountingSide.class).optional(),
+               fieldWithPath("cabinetAssetNumber").description(
+                     "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
+                     .type(long.class).optional(),
+               fieldWithPath("assetRealtimeDataSpec")
+                     .description("Only valid for sensor type of asset.")
+                     .type(AssetRealtimeDataSpec.class).optional(),
+               fieldWithPath("justificationfields")
+                     .description("Justification fields that input by user."),
+               fieldWithPath("metricsformulars")
+                     .description("The sensor data generator logic for this asset."),
+               fieldWithPath("lastupdate").description("When this asset was last upated"),
+               fieldWithPath("created").description("When this asset was created"),
+               fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
+               fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
+               fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
+               .type(Parent.class).optional(),
+               fieldWithPath("pdus")
+                     .description("Possible PDUs that this server connected with"),
+               fieldWithPath("switches")
+                     .description("Physical switchs that this host connected with"),
+               fieldWithPath("status")
+                     .description("This is a collection of states, including the state of the asset, "
+                           + "the state of the pdu mapping, and the state of the switch mapping."))));
+      }finally {
+         assetRepository.delete(asset.getId());
+      }
    }
 
    @Test
    public void getAssetByNameExample() throws Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
-      this.mockMvc.perform(get("/v1/assets/name/" + asset.getAssetName() + ""))
-            .andExpect(status().isOk()).andExpect(jsonPath("assetName", is(asset.getAssetName())))
-            .andExpect(jsonPath("assetNumber", is((int) asset.getAssetNumber())))
-            .andExpect(jsonPath("category", is(asset.getCategory().toString())))
-            .andExpect(jsonPath("model", is(asset.getModel())))
-            .andExpect(jsonPath("manufacturer", is(asset.getManufacturer())))
-            .andDo(document("assets-getAssetByName-example", responseFields(
-                  fieldWithPath("id").description("ID of the asset, created by flowgate"),
-                  fieldWithPath("assetNumber").description(
-                        "A unique number that can identify an asset from third part DCIM/CMDB systems.")
-                        .type(long.class),
-                  fieldWithPath("assetName").description(
-                        "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
-                  fieldWithPath("assetSource").description(
-                        "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
-                  fieldWithPath("category").description(
-                        "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
-                        .type(AssetCategory.class),
-                  fieldWithPath("subCategory")
-                        .description("The subcategory of the asset. Only apply to some systems.")
-                        .type(AssetSubCategory.class).optional(),
-                  fieldWithPath("manufacturer").description("The manufacture name"),
-                  fieldWithPath("model").description("The model of the asset"),
-                  fieldWithPath("serialnumber").description(
-                        "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
-                        .optional(),
-                  fieldWithPath("tag").description(
-                        "Some system will use tag to identify an asset. It can be either an number or a string.")
-                        .type(String.class).optional(),
-                  fieldWithPath("assetAddress").description("The access address of the asset")
-                        .type(AssetAddress.class).optional(),
-                  fieldWithPath("region").description("The location region of the asset")
-                        .optional(),
-                  fieldWithPath("country").description("The location country of the asset")
-                        .optional(),
-                  fieldWithPath("city").description("The location city of the asset").optional(),
-                  fieldWithPath("building").description("The location building of the asset")
-                        .optional(),
-                  fieldWithPath("floor").description("The location floor of the asset").optional(),
-                  fieldWithPath("room").description("The location room of the asset"),
-                  fieldWithPath("row").description("The location row of the asset").optional(),
-                  fieldWithPath("col").description("The location col of the asset").optional(),
-                  fieldWithPath("extraLocation")
-                        .description("Extra location information. Only valid for some system.")
-                        .optional(),
-                  fieldWithPath("cabinetName").description(
-                        "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
-                        .optional(),
-                  fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
-                        .type(int.class).optional(),
-                  fieldWithPath("mountingSide").description("The cabinet unit number")
-                        .type(MountingSide.class).optional(),
-                  fieldWithPath("cabinetsize")
-                        .description("The cabinet size(only for cabinet type)").type(int.class)
-                        .optional(),
-                  fieldWithPath("cabinetAssetNumber").description(
-                        "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
-                        .type(long.class).optional(),
-                  fieldWithPath("assetRealtimeDataSpec")
-                        .description("Only valid for sensor type of asset.")
-                        .type(AssetRealtimeDataSpec.class).optional(),
-                  fieldWithPath("justificationfields")
-                        .description("Justification fields that input by user."),
-                  fieldWithPath("sensorsformulars")
-                        .description("The sensor data generator logic for this asset."),
-                  fieldWithPath("lastupdate").description("When this asset was last upated"),
-                  fieldWithPath("created").description("When this asset was created"),
-                  fieldWithPath("pdus")
-                        .description("Possible PDUs that this server connected with"),
-                  fieldWithPath("switches")
-                        .description("Physical switchs that this host connected with"),
-                  fieldWithPath("status")
-                        .description("This is a collection of states, including the state of the asset, "
-                              + "the state of the pdu mapping, and the state of the switch mapping."))));
+      try {
+         this.mockMvc.perform(get("/v1/assets/name/" + asset.getAssetName() + ""))
+         .andExpect(status().isOk()).andExpect(jsonPath("assetName", is(asset.getAssetName())))
+         .andExpect(jsonPath("assetNumber", is((int) asset.getAssetNumber())))
+         .andExpect(jsonPath("category", is(asset.getCategory().toString())))
+         .andExpect(jsonPath("model", is(asset.getModel())))
+         .andExpect(jsonPath("manufacturer", is(asset.getManufacturer())))
+         .andDo(document("assets-getAssetByName-example", responseFields(
+               fieldWithPath("id").description("ID of the asset, created by flowgate"),
+               fieldWithPath("assetNumber").description(
+                     "A unique number that can identify an asset from third part DCIM/CMDB systems.")
+                     .type(long.class),
+               fieldWithPath("assetName").description(
+                     "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
+               fieldWithPath("assetSource").description(
+                     "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
+               fieldWithPath("category").description(
+                     "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
+                     .type(AssetCategory.class),
+               fieldWithPath("subCategory")
+                     .description("The subcategory of the asset. Only apply to some systems.")
+                     .type(AssetSubCategory.class).optional(),
+               fieldWithPath("manufacturer").description("The manufacture name"),
+               fieldWithPath("model").description("The model of the asset"),
+               fieldWithPath("serialnumber").description(
+                     "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
+                     .optional(),
+               fieldWithPath("tag").description(
+                     "Some system will use tag to identify an asset. It can be either an number or a string.")
+                     .type(String.class).optional(),
+               fieldWithPath("assetAddress").description("The access address of the asset")
+                     .type(AssetAddress.class).optional(),
+               fieldWithPath("region").description("The location region of the asset")
+                     .optional(),
+               fieldWithPath("country").description("The location country of the asset")
+                     .optional(),
+               fieldWithPath("city").description("The location city of the asset").optional(),
+               fieldWithPath("building").description("The location building of the asset")
+                     .optional(),
+               fieldWithPath("floor").description("The location floor of the asset").optional(),
+               fieldWithPath("room").description("The location room of the asset"),
+               fieldWithPath("row").description("The location row of the asset").optional(),
+               fieldWithPath("col").description("The location col of the asset").optional(),
+               fieldWithPath("extraLocation")
+                     .description("Extra location information. Only valid for some system.")
+                     .optional(),
+               fieldWithPath("cabinetName").description(
+                     "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
+                     .optional(),
+               fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
+                     .type(int.class).optional(),
+               fieldWithPath("mountingSide").description("The cabinet unit number")
+                     .type(MountingSide.class).optional(),
+               fieldWithPath("cabinetAssetNumber").description(
+                     "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
+                     .type(long.class).optional(),
+               fieldWithPath("assetRealtimeDataSpec")
+                     .description("Only valid for sensor type of asset.")
+                     .type(AssetRealtimeDataSpec.class).optional(),
+               fieldWithPath("justificationfields")
+                     .description("Justification fields that input by user."),
+               fieldWithPath("metricsformulars")
+                     .description("The sensor data generator logic for this asset."),
+               fieldWithPath("lastupdate").description("When this asset was last upated"),
+               fieldWithPath("created").description("When this asset was created"),
+               fieldWithPath("pdus")
+                     .description("Possible PDUs that this server connected with"),
+               fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
+               fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
+               fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
+                     .type(Parent.class).optional(),
+               fieldWithPath("switches")
+                     .description("Physical switchs that this host connected with"),
+               fieldWithPath("status")
+                     .description("This is a collection of states, including the state of the asset, "
+                           + "the state of the pdu mapping, and the state of the switch mapping."))));
 
-      assetRepository.delete(asset.getId());
+      }finally {
+         assetRepository.delete(asset.getId());
+      }
    }
 
    @Test
@@ -1136,77 +1176,81 @@ public class AssetControllerTest {
       asset.setAssetName("pek-wor-server-04");
       asset.setManufacturer("VMware");
       asset.setAssetSource("4");
-      this.mockMvc
-            .perform(put("/v1/assets").contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(asset)))
-            .andExpect(status().isOk())
-            .andDo(document("assets-update-example", requestFields(
-                  fieldWithPath("id").description("ID of the asset, created by flowgate"),
-                  fieldWithPath("assetNumber").description(
-                        "A unique number that can identify an asset from third part DCIM/CMDB systems.")
-                        .type(long.class),
-                  fieldWithPath("assetName").description(
-                        "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
-                  fieldWithPath("assetSource").description(
-                        "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
-                  fieldWithPath("category").description(
-                        "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
-                        .type(AssetCategory.class),
-                  fieldWithPath("subCategory")
-                        .description("The subcategory of the asset. Only apply to some systems.")
-                        .type(AssetSubCategory.class).optional(),
-                  fieldWithPath("manufacturer").description("The manufacture name"),
-                  fieldWithPath("model").description("The model of the asset"),
-                  fieldWithPath("serialnumber").description(
-                        "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
-                        .optional(),
-                  fieldWithPath("tag").description(
-                        "Some system will use tag to identify an asset. It can be either an number or a string.")
-                        .type(String.class).optional(),
-                  fieldWithPath("assetAddress").description("The access address of the asset")
-                        .type(AssetAddress.class).optional(),
-                  fieldWithPath("region").description("The location region of the asset")
-                        .optional(),
-                  fieldWithPath("country").description("The location country of the asset")
-                        .optional(),
-                  fieldWithPath("city").description("The location city of the asset").optional(),
-                  fieldWithPath("building").description("The location building of the asset")
-                        .optional(),
-                  fieldWithPath("floor").description("The location floor of the asset").optional(),
-                  fieldWithPath("room").description("The location room of the asset"),
-                  fieldWithPath("row").description("The location row of the asset").optional(),
-                  fieldWithPath("col").description("The location col of the asset").optional(),
-                  fieldWithPath("extraLocation")
-                        .description("Extra location information. Only valid for some system.")
-                        .optional(),
-                  fieldWithPath("cabinetName").description(
-                        "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
-                        .optional(),
-                  fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
-                        .type(int.class).optional(),
-                  fieldWithPath("mountingSide").description("The cabinet unit number")
-                        .type(MountingSide.class).optional(),
-                  fieldWithPath("cabinetsize")
-                        .description("The cabinet size(only for cabinet type)").type(int.class)
-                        .optional(),
-                  fieldWithPath("cabinetAssetNumber").description(
-                        "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
-                        .type(long.class).optional(),
-                  fieldWithPath("assetRealtimeDataSpec")
-                        .description("Only valid for sensor type of asset.")
-                        .type(AssetRealtimeDataSpec.class).optional(),
-                  fieldWithPath("justificationfields").ignored(),
-                  fieldWithPath("sensorsformulars").ignored(),
-                  fieldWithPath("lastupdate").ignored(), fieldWithPath("created").ignored(),
-                  fieldWithPath("pdus")
-                        .description("Possible PDUs that this server connected with"),
-                  fieldWithPath("switches")
-                        .description("Physical switchs that this host connected with"),
-                  fieldWithPath("status")
-                        .description("This is a collection of states, including the state of the asset, "
-                              + "the state of the pdu mapping, and the state of the switch mapping."))));
+      try {
+         this.mockMvc
+         .perform(put("/v1/assets").contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(asset)))
+         .andExpect(status().isOk())
+         .andDo(document("assets-update-example", requestFields(
+               fieldWithPath("id").description("ID of the asset, created by flowgate"),
+               fieldWithPath("assetNumber").description(
+                     "A unique number that can identify an asset from third part DCIM/CMDB systems.")
+                     .type(long.class),
+               fieldWithPath("assetName").description(
+                     "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
+               fieldWithPath("assetSource").description(
+                     "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
+               fieldWithPath("category").description(
+                     "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
+                     .type(AssetCategory.class),
+               fieldWithPath("subCategory")
+                     .description("The subcategory of the asset. Only apply to some systems.")
+                     .type(AssetSubCategory.class).optional(),
+               fieldWithPath("manufacturer").description("The manufacture name"),
+               fieldWithPath("model").description("The model of the asset"),
+               fieldWithPath("serialnumber").description(
+                     "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
+                     .optional(),
+               fieldWithPath("tag").description(
+                     "Some system will use tag to identify an asset. It can be either an number or a string.")
+                     .type(String.class).optional(),
+               fieldWithPath("assetAddress").description("The access address of the asset")
+                     .type(AssetAddress.class).optional(),
+               fieldWithPath("region").description("The location region of the asset")
+                     .optional(),
+               fieldWithPath("country").description("The location country of the asset")
+                     .optional(),
+               fieldWithPath("city").description("The location city of the asset").optional(),
+               fieldWithPath("building").description("The location building of the asset")
+                     .optional(),
+               fieldWithPath("floor").description("The location floor of the asset").optional(),
+               fieldWithPath("room").description("The location room of the asset"),
+               fieldWithPath("row").description("The location row of the asset").optional(),
+               fieldWithPath("col").description("The location col of the asset").optional(),
+               fieldWithPath("extraLocation")
+                     .description("Extra location information. Only valid for some system.")
+                     .optional(),
+               fieldWithPath("cabinetName").description(
+                     "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
+                     .optional(),
+               fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
+                     .type(int.class).optional(),
+               fieldWithPath("mountingSide").description("The cabinet unit number")
+                     .type(MountingSide.class).optional(),
+               fieldWithPath("cabinetAssetNumber").description(
+                     "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
+                     .type(long.class).optional(),
+               fieldWithPath("assetRealtimeDataSpec")
+                     .description("Only valid for sensor type of asset.")
+                     .type(AssetRealtimeDataSpec.class).optional(),
+               fieldWithPath("justificationfields").ignored(),
+               fieldWithPath("metricsformulars").ignored(),
+               fieldWithPath("lastupdate").ignored(), fieldWithPath("created").ignored(),
+               fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
+               fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
+               fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
+               .type(Parent.class).optional(),
+               fieldWithPath("pdus")
+                     .description("Possible PDUs that this server connected with"),
+               fieldWithPath("switches")
+                     .description("Physical switchs that this host connected with"),
+               fieldWithPath("status")
+                     .description("This is a collection of states, including the state of the asset, "
+                           + "the state of the pdu mapping, and the state of the switch mapping."))));
 
-      assetRepository.delete(asset.getId());
+      }finally {
+         assetRepository.delete(asset.getId());
+      }
    }
 
    @Test
@@ -1216,31 +1260,32 @@ public class AssetControllerTest {
       serverMappingRepository.save(mapping);
       mapping.setVcClusterMobID("1");
       mapping.setVcHostName("1");
+      try {
+         this.mockMvc
+         .perform(put("/v1/assets/mapping").contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(mapping)))
+         .andExpect(status().isOk())
+         .andDo(document("assets-updateServerMapping-example",
+               requestFields(
+                     fieldWithPath("id").description("ID of the mapping, created by flowgate"),
+                     fieldWithPath("asset").description("An asset for serverMapping."),
+                     fieldWithPath("vcID").description("ID of Vcenter."),
+                     fieldWithPath("vcHostName")
+                           .description("Server's hostname display in Vcenter."),
+                     fieldWithPath("vcMobID").description("EXSI server's management object ID."),
+                     fieldWithPath("vcClusterMobID").description("MobID of Vcenter Cluster."),
+                     fieldWithPath("vcInstanceUUID").description("Vcenter's UUID."),
+                     fieldWithPath("vroID").description("ID of VROps."),
+                     fieldWithPath("vroResourceName")
+                           .description("Resource Name in VROps for this server."),
+                     fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
+                     fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
+                     fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
+                     fieldWithPath("vroResourceID").description("VROps Resource ID."))));
 
-      this.mockMvc
-            .perform(put("/v1/assets/mapping").contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(mapping)))
-            .andExpect(status().isOk())
-            .andDo(document("assets-updateServerMapping-example",
-                  requestFields(
-                        fieldWithPath("id").description("ID of the mapping, created by flowgate"),
-                        fieldWithPath("asset").description("An asset for serverMapping."),
-                        fieldWithPath("vcID").description("ID of Vcenter."),
-                        fieldWithPath("vcHostName")
-                              .description("Server's hostname display in Vcenter."),
-                        fieldWithPath("vcMobID").description("EXSI server's management object ID."),
-                        fieldWithPath("vcClusterMobID").description("MobID of Vcenter Cluster."),
-                        fieldWithPath("vcInstanceUUID").description("Vcenter's UUID."),
-                        fieldWithPath("vroID").description("ID of VROps."),
-                        fieldWithPath("vroResourceName")
-                              .description("Resource Name in VROps for this server."),
-                        fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
-                        fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
-                        fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
-                        fieldWithPath("vroResourceID").description("VROps Resource ID."))));
-
-      serverMappingRepository.delete(mapping.getId());
-
+      }finally {
+         serverMappingRepository.delete(mapping.getId());
+      }
    }
 
    @Test
@@ -1263,19 +1308,21 @@ public class AssetControllerTest {
       mappingId.FirstId = mapping1.getId();
       mappingId.SecondId = mapping2.getId();
 
-      this.mockMvc
-            .perform(put("/v1/assets/mapping/merge/" + mapping1.getId() + "/" + mapping2.getId())
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(mappingId)))
-            .andExpect(status().isOk())
-            .andDo(document("assets-mergeServerMapping-example",
-                  requestFields(
-                        fieldWithPath("FirstId")
-                              .description("ID of the mapping's firstid created by flowgate."),
-                        fieldWithPath("SecondId")
-                              .description("ID of the mapping's secondid created by flowgate."))));
-
-      serverMappingRepository.delete(mapping1.getId());
+      try {
+         this.mockMvc
+         .perform(put("/v1/assets/mapping/merge/" + mapping1.getId() + "/" + mapping2.getId())
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(mappingId)))
+         .andExpect(status().isOk())
+         .andDo(document("assets-mergeServerMapping-example",
+               requestFields(
+                     fieldWithPath("FirstId")
+                           .description("ID of the mapping's firstid created by flowgate."),
+                     fieldWithPath("SecondId")
+                           .description("ID of the mapping's secondid created by flowgate."))));
+      }finally {
+         serverMappingRepository.delete(mapping1.getId());
+      }
    }
 
    @Test
@@ -1307,20 +1354,55 @@ public class AssetControllerTest {
 
 
    @Test
-   public void getServerSensorData() throws Exception {
+   public void getServerMetricsData() throws Exception {
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-            fieldWithPath("type").description("type").type(JsonFieldType.STRING),
+            fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
             fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
             fieldWithPath("value").description("value").type(JsonFieldType.NULL),
             fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
-      RealTimeData realTimeData = createRealTimeData();
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
-      realTimeDatas.add(realTimeData);
-      Asset asset = createAsset();
-      asset = assetRepository.save(asset);
+      RealTimeData pduRealTimeData = createServerPDURealTimeData();
+      pduRealTimeData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
+      RealTimeData sensorRealTimeData = createServerSensorRealtimeData();
+      sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
+      realTimeDatas.add(pduRealTimeData);
+      realTimeDatas.add(sensorRealTimeData);
       Iterable<RealTimeData> result = realtimeDataRepository.save(realTimeDatas);
+
+      Asset asset = createAsset();
+      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
+      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricFormulars.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
+      formulars.put(FlowgateConstant.PDU, pduMetricFormulars);
+
+      Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> frontTempSensor = new HashMap<String,String>();
+      frontTempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempSensor);
+      Map<String, String> backTempSensor = new HashMap<String,String>();
+      backTempSensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_BACK_TEMPREATURE, backTempSensor);
+
+      Map<String, String> frontHumiditySensor = new HashMap<String,String>();
+      frontHumiditySensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumiditySensor);
+
+      Map<String, String> backHumiditySensor = new HashMap<String,String>();
+      backHumiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_BACK_HUMIDITY, backHumiditySensor);
+
+      formulars.put(FlowgateConstant.SENSOR, sensorMetricFormulars);
+      asset.setMetricsformulars(formulars);
+      asset = assetRepository.save(asset);
+
       MvcResult result1 = this.mockMvc
-            .perform(get("/v1/assets/" + asset.getId() + "/serversensordata").param("starttime",
+            .perform(get("/v1/assets/server/" + asset.getId() + "/realtimedata").param("starttime",
                   "1501981711206"))
             .andDo(document("assets-getServerSensorData-example",
                   responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
@@ -1329,44 +1411,111 @@ public class AssetControllerTest {
       ObjectMapper mapper = new ObjectMapper();
       String res = result1.getResponse().getContentAsString();
       MetricData [] datas = mapper.readValue(res, MetricData[].class);
-      for(MetricData serverdata:datas) {
-    	  if(serverdata.getMetricName().equals(MetricName.PDU_CURRENT)) {
-    		  TestCase.assertEquals(serverdata.getValueNum(), 20.0);
-    	  }else if(serverdata.getMetricName().equals(MetricName.PDU_APPARENT_POWER)) {
-    		  TestCase.assertEquals(serverdata.getValueNum(), 2.38);
-    	  }else if(serverdata.getMetricName().equals(MetricName.PDU_VOLTAGE)) {
-    		  TestCase.assertEquals(serverdata.getValueNum(), 208.0);
-    	  }else {
-    		  TestCase.fail();
-    	  }
+      try {
+         for(MetricData serverdata:datas) {
+            String metricName = serverdata.getMetricName();
+            if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                  equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 20.0);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                  equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 2.38);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                  equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 208.0);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 196.0);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 200.0);
+            }else if(String.format(MetricKeyName.SERVER_BACK_HUMIDITY_LOCATIONX, "OUTLET").
+                  equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 20.0);
+            }else if(String.format(MetricKeyName.SERVER_BACK_TEMPREATURE_LOCATIONX, "OUTLET").
+                  equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 32.0);
+            }else if(String.format(MetricKeyName.SERVER_FRONT_HUMIDITY_LOCATIONX, "INLET").
+                  equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 20.0);
+            }else if(String.format(MetricKeyName.SERVER_FRONT_TEMPERATURE_LOCATIONX, "INLET").
+                  equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 32.0);
+            }else {
+               TestCase.fail();
+            }
+          }
+      }finally {
+         assetRepository.delete(asset);
+         realtimeDataRepository.delete(result);
       }
-      assetRepository.delete(asset);
-      realtimeDataRepository.delete(result);
    }
 
-   RealTimeData createRealTimeData() {
+   RealTimeData createServerPDURealTimeData() {
       List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
       ValueUnit valueunitvoltage = new ValueUnit();
       valueunitvoltage.setKey(MetricName.PDU_VOLTAGE);
       valueunitvoltage.setUnit("Volts");
+      valueunitvoltage.setExtraidentifier("OUTLET:1");
       valueunitvoltage.setValueNum(208);
       valueunitvoltage.setTime(1501981711206L);
       valueunits.add(valueunitvoltage);
       ValueUnit valueunitpower = new ValueUnit();
       valueunitpower.setKey(MetricName.PDU_APPARENT_POWER);
-      valueunitpower.setUnit("KW");
+      valueunitpower.setUnit("W");
+      valueunitpower.setExtraidentifier("OUTLET:1");
       valueunitpower.setValueNum(2.38);
       valueunitpower.setTime(1501981711206L);
       valueunits.add(valueunitpower);
-      ValueUnit valueunit = new ValueUnit();
-      valueunit.setKey(MetricName.PDU_CURRENT);
-      valueunit.setUnit("Amps");
-      valueunit.setValueNum(20);
-      valueunit.setTime(1501981711206L);
-      valueunits.add(valueunit);
+      ValueUnit valueunitCurrent = new ValueUnit();
+      valueunitCurrent.setExtraidentifier("OUTLET:1");
+      valueunitCurrent.setKey(MetricName.PDU_CURRENT);
+      valueunitCurrent.setUnit("Amps");
+      valueunitCurrent.setValueNum(20);
+      valueunitCurrent.setTime(1501981711206L);
+      valueunits.add(valueunitCurrent);
+
+      ValueUnit valueunitTotalCurrent = new ValueUnit();
+      valueunitTotalCurrent.setKey(MetricName.PDU_TOTAL_CURRENT);
+      valueunitTotalCurrent.setUnit("Amps");
+      valueunitTotalCurrent.setValueNum(196);
+      valueunitTotalCurrent.setTime(1501981711206L);
+      valueunits.add(valueunitTotalCurrent);
+
+      ValueUnit valueunitTotalPower = new ValueUnit();
+      valueunitTotalPower.setExtraidentifier("OUTLET:1");
+      valueunitTotalPower.setKey(MetricName.PDU_TOTAL_POWER);
+      valueunitTotalPower.setUnit("W");
+      valueunitTotalPower.setValueNum(200);
+      valueunitTotalPower.setTime(1501981711206L);
+      valueunits.add(valueunitTotalPower);
+
       RealTimeData realTimeData = new RealTimeData();
       realTimeData.setId(UUID.randomUUID().toString());
       realTimeData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
+      realTimeData.setValues(valueunits);
+      realTimeData.setTime(valueunits.get(0).getTime());
+      return realTimeData;
+   }
+
+   RealTimeData createServerSensorRealtimeData() {
+      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+
+      ValueUnit tempValue = new ValueUnit();
+      tempValue.setValueNum(32);
+      tempValue.setTime(1501981711206L);
+      tempValue.setKey(MetricName.TEMPERATURE);
+      valueunits.add(tempValue);
+
+      ValueUnit humidityValue = new ValueUnit();
+      humidityValue.setValueNum(20);
+      humidityValue.setTime(1501981711206L);
+      humidityValue.setKey(MetricName.HUMIDITY);
+      valueunits.add(humidityValue);
+
+      RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
       realTimeData.setValues(valueunits);
       realTimeData.setTime(valueunits.get(0).getTime());
       return realTimeData;
