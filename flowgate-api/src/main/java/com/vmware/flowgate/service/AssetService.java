@@ -26,7 +26,6 @@ public class AssetService {
    AssetRepository assetRepository;
    @Autowired
    AssetRealtimeDataRepository realtimeDataRepository;
-   private static final int FIFTEEN_MINUTES = 905000;//add extra 5 seconds;
    private static Map<String,String> metricNameMap = new HashMap<String,String>();
    static {
       metricNameMap.put(MetricName.PDU_HUMIDITY, MetricName.HUMIDITY);
@@ -38,10 +37,9 @@ public class AssetService {
       metricNameMap = Collections.unmodifiableMap(metricNameMap);
    }
 
-   public List<MetricData> getPduMetricsDataById(String assetID){
-      long starttime = System.currentTimeMillis() - FIFTEEN_MINUTES;
+   public List<MetricData> getPduMetricsDataById(String assetID, long starttime, int duration){
       List<RealTimeData> pduMetricsRealtimeDatas =
-            realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, FIFTEEN_MINUTES);
+            realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
       List<ValueUnit> valueunits = new ArrayList<>();
 
       List<String> metricNames = new ArrayList<String>();
@@ -70,12 +68,12 @@ public class AssetService {
          Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap = new HashMap<String,List<RealTimeData>>();
          Map<String,String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
          if (humidityLocationAndIdMap != null && !humidityLocationAndIdMap.isEmpty()) {
-            valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,
+            valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,duration,
                   humidityLocationAndIdMap, MetricName.PDU_HUMIDITY));
          }
          Map<String,String> temperatureLocationAndIdMap = sensorFormulars.get(MetricName.PDU_TEMPERATURE);
          if(temperatureLocationAndIdMap != null && !temperatureLocationAndIdMap.isEmpty()) {
-            valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,
+            valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,duration,
                   temperatureLocationAndIdMap, MetricName.PDU_TEMPERATURE));
          }
       }
@@ -113,7 +111,7 @@ public class AssetService {
             Map<String, String> locationAndIdMap = sensorFormula.getValue();
             String metricName = sensorFormula.getKey();
             List<ValueUnit> valueUnits = generateSensorValueUnit(assetIdAndRealtimeDataMap,
-                  starttime, locationAndIdMap, metricName);
+                  starttime, duration, locationAndIdMap, metricName);
             result.addAll(generateServerSensorMetricData(valueUnits, metricName));
          }
       }
@@ -225,7 +223,7 @@ public class AssetService {
    }
 
    private List<ValueUnit> generateSensorValueUnit(Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap,
-         long starttime, Map<String,String> locationAndIdMap, String metricName){
+         long starttime, int duration, Map<String,String> locationAndIdMap, String metricName){
       List<ValueUnit> valueunits = new ArrayList<>();;
       for(Map.Entry<String, String> locationInfoAndId : locationAndIdMap.entrySet()) {
          String formula = locationInfoAndId.getValue();
@@ -235,7 +233,7 @@ public class AssetService {
             List<RealTimeData> realtimeDatas = null;
             if(!assetIdAndRealtimeDataMap.containsKey(assetId)) {
                realtimeDatas =
-                     realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, FIFTEEN_MINUTES);
+                     realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, duration);
                assetIdAndRealtimeDataMap.put(assetId, realtimeDatas);
             }
             realtimeDatas = assetIdAndRealtimeDataMap.get(assetId);

@@ -71,7 +71,7 @@ public class AssetController {
 
    // @Value("${}")
    private int RealtimeQueryDurationLimitation;
-   private static final int TEN_MINUTES = 605000;//add extra 5 seconds;
+   private static final int FIVE_MINUTES = 305000;//add extra 5 seconds;
    private static String TIME = "time";
 
    // Create a new Asset
@@ -331,8 +331,16 @@ public class AssetController {
 
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/pdu/{id}/realtimedata", method = RequestMethod.GET)
-   public List<MetricData> getPduMetricsData(@PathVariable("id") String assetID) {
-      return assetService.getPduMetricsDataById(assetID);
+   public List<MetricData> getPduMetricsData(@PathVariable("id") String assetID,
+         @RequestParam(value = "starttime", required = false) Long starttime,
+         @RequestParam(value = "duration", required = false) Integer duration) {
+      if (starttime == null || starttime <= 0) {
+         starttime = System.currentTimeMillis() - FIVE_MINUTES;
+      }
+      if (duration == null || duration <= 0 || duration > FIVE_MINUTES * 12) {
+         duration = FIVE_MINUTES;
+      }
+      return assetService.getPduMetricsDataById(assetID, starttime, duration);
    }
 
    //starttime miliseconds.
@@ -341,10 +349,10 @@ public class AssetController {
          @RequestParam(value = "starttime", required = false) Long starttime,
          @RequestParam(value = "duration", required = false) Integer duration) {
       if (starttime == null || starttime <= 0) {
-         starttime = System.currentTimeMillis() - TEN_MINUTES;
+         starttime = System.currentTimeMillis() - FIVE_MINUTES;
       }
-      if (duration == null || duration <= 0 || duration > TEN_MINUTES * 12) {
-         duration = TEN_MINUTES;
+      if (duration == null || duration <= 0 || duration > FIVE_MINUTES * 12) {
+         duration = FIVE_MINUTES;
       }
       return assetService.getServerMetricsDataById(assetID, starttime, duration);
    }
