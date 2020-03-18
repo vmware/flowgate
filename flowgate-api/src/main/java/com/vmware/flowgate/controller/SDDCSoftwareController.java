@@ -154,6 +154,9 @@ public class SDDCSoftwareController {
    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
    public SDDCSoftwareConfig getServerConfig(@PathVariable String id) {
       SDDCSoftwareConfig server = sddcRepository.findOne(id);
+      if (server == null) {
+         return null;
+      }
       decryptServerPassword(server);
       return server;
    }
