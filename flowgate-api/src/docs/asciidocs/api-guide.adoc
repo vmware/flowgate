@@ -104,6 +104,27 @@ include::{snippets}/assets-getAssetByName-example/curl-request.adoc[]
 
 include::{snippets}/assets-getAssetByName-example/response-fields.adoc[]
 
+[[resources-assets-getAssetByAssetNumberAndName]]
+=== getAssetByAssetNumberAndName
+
+A `GET` request is used to access the Asset read by assetNumber and assetName.
+
+==== Request structure
+
+include::{snippets}/assets-getAssetByAssetNumberAndName-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getAssetByAssetNumberAndName-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getAssetByAssetNumberAndName-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getAssetByAssetNumberAndName-example/response-fields.adoc[]
+
 [[resources-assets-getBySourceAndType]]
 === getAssetsBySourceAndType
 
@@ -356,26 +377,47 @@ include::{snippets}/assets-getAssetsByVroId-example/curl-request.adoc[]
 
 include::{snippets}/assets-getAssetsByVroId-example/request-fields.adoc[]
 
-[[resources-assets-getServerSensorData]]
-=== getServerSensorData
+[[resources-assets-getServerMetricsData]]
+=== getServerMetricsData
 
-A `GET` request is used to access the assets get Sensor Data.
+A `GET` request is used to get server's metrics Data.
 
 ==== Request structure
 
-include::{snippets}/assets-getServerSensorData-example/http-request.adoc[]
+include::{snippets}/assets-getServerMetricsData-example/http-request.adoc[]
 
 ==== Example response
 
-include::{snippets}/assets-getServerSensorData-example/http-response.adoc[]
+include::{snippets}/assets-getServerMetricsData-example/http-response.adoc[]
 
 ==== CURL request
 
-include::{snippets}/assets-getServerSensorData-example/curl-request.adoc[]
+include::{snippets}/assets-getServerMetricsData-example/curl-request.adoc[]
 
 ==== Response Fields
 
-include::{snippets}/assets-getServerSensorData-example/response-fields.adoc[]
+include::{snippets}/assets-getServerMetricsData-example/response-fields.adoc[]
+
+[[resources-assets-getPduMetricsData]]
+=== getPduMetricsData
+
+A `GET` request is used to get PDU metrics Data.
+
+==== Request structure
+
+include::{snippets}/assets-getPduMetricsData-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getPduMetricsData-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getPduMetricsData-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getPduMetricsData-example/response-fields.adoc[]
 
 [[resources-assets-removeRealTimeData]]
 === removeRealTimeData
