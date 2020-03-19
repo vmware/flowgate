@@ -110,7 +110,28 @@ public class AlertClient extends VROBase {
          createPredefinedSymptoms(missingSymptoms, existSymptoms);
       } else {
          //  check whether we need to update the threshold of the symptoms
-         List<SensorSetting> sensorSettings = restClient.getAllSensorThreshold();
+         List<SensorSetting> sensorSettings = new ArrayList<SensorSetting>();
+         SensorSetting backTempSetting = new SensorSetting();
+         backTempSetting.setMaxNum(35);
+         backTempSetting.setType(MetricName.SERVER_BACK_TEMPREATURE);
+         sensorSettings.add(backTempSetting);
+         SensorSetting frontTempSetting = new SensorSetting();
+         frontTempSetting.setMaxNum(35);
+         frontTempSetting.setType(MetricName.SERVER_FRONT_TEMPERATURE);
+         sensorSettings.add(frontTempSetting);
+         SensorSetting backHumiditySetting = new SensorSetting();
+         backHumiditySetting.setMaxNum(75);
+         backHumiditySetting.setType(MetricName.SERVER_BACK_HUMIDITY);
+         sensorSettings.add(backHumiditySetting);
+         SensorSetting frontHumiditySetting = new SensorSetting();
+         frontHumiditySetting.setMaxNum(75);
+         frontHumiditySetting.setType(MetricName.SERVER_FRONT_HUMIDITY);
+         sensorSettings.add(frontHumiditySetting);
+         SensorSetting currentLoadSetting = new SensorSetting();
+         currentLoadSetting.setMaxNum(67);
+         currentLoadSetting.setType(MetricName.PDU_CURRENT_LOAD);
+         sensorSettings.add(currentLoadSetting);
+
          Map<String, SensorSetting> symptomCondtionValues =
                getSymptomCondtionValues(sensorSettings);
          SymptomDefinitionsClient sd = getClient().symptomDefinitionsClient();
@@ -288,7 +309,7 @@ public class AlertClient extends VROBase {
          case MetricName.SERVER_BACK_TEMPREATURE:
             result.put(VROConsts.SYMPTOM_HOSTSYSTEM_BACK_TEMPERATURE_NAME, setting);
             break;
-         case MetricName.SERVER_TOTAL_POWER:
+         case MetricName.PDU_CURRENT_LOAD:
             result.put(VROConsts.SYMPTOM_HOSTSYSTEM_POWER_NAME, setting);
             break;
          case MetricName.SERVER_FRONT_HUMIDITY:
