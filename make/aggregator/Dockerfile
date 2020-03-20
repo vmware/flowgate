@@ -1,6 +1,7 @@
 FROM photon:2.0
 
-RUN tdnf install openjre8.x86_64 -y \
+RUN tdnf distro-sync -y
+    && tdnf install openjre8.x86_64 -y \
 	&& mkdir /jar \
 	&& mkdir /log \
 	&& mkdir /conf
