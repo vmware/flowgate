@@ -4,7 +4,7 @@ ENV GOSU_VERSION 1.10
 
 COPY docker-entrypoint.sh /usr/local/bin/
 
-RUN tdnf distro-sync -y
+RUN tdnf distro-sync -y \
     && tdnf install shadow -y \
 	&& groupadd -r -g 10000 redis \
 	&& useradd --no-log-init -m -r -g 10000 -u 10000 redis \
