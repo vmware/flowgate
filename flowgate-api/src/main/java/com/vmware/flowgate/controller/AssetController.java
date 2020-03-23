@@ -45,6 +45,7 @@ import com.vmware.flowgate.repository.AssetRepository;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
 import com.vmware.flowgate.service.AssetService;
+import com.vmware.flowgate.service.ServerMappingService;
 import com.vmware.flowgate.util.BaseDocumentUtil;
 
 @RestController
@@ -68,6 +69,9 @@ public class AssetController {
 
    @Autowired
    AssetService assetService;
+
+   @Autowired
+   ServerMappingService serverMappingService;
 
    // @Value("${}")
    private int RealtimeQueryDurationLimitation;
@@ -534,21 +538,8 @@ public class AssetController {
 
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/unmappedservers", method = RequestMethod.GET)
-   public List<String> getUnmappedServers() {
-      List<ServerMapping> mappings = serverMappingRepository.findByAssetIsNull();
-      Set<String> result = new HashSet<String>();
-      if (mappings != null && !mappings.isEmpty()) {
-         for (ServerMapping mapping : mappings) {
-            if (null != mapping.getVcHostName()) {
-               result.add(mapping.getVcHostName());
-            } else if (null != mapping.getVroVMEntityName()) {
-               result.add(mapping.getVroVMEntityName());
-            }
-         }
-      }
-      List<String> mergedList = new ArrayList<String>();
-      mergedList.addAll(result);
-      return mergedList;
+   public Set<String> getUnmappedServers() {
+      return serverMappingService.getUnmappedServer();
    }
 
    @RequestMapping(value = "/vc/{id}", method = RequestMethod.GET)
