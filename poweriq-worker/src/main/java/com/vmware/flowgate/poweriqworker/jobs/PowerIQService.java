@@ -51,6 +51,7 @@ import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.EventUser;
+import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageImpl;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 import com.vmware.flowgate.common.utils.WormholeDateFormat;
@@ -84,6 +85,9 @@ public class PowerIQService implements AsyncService {
 
    @Autowired
    private ServiceKeyConfig serviceKeyConfig;
+
+   @Autowired
+   private MessagePublisher publisher;
 
    private ObjectMapper mapper = new ObjectMapper();
 
@@ -1527,6 +1531,7 @@ public class PowerIQService implements AsyncService {
       int offset = 0;
       List<Pdu> pdus = null;
       List<Asset> assetsNeedToSave = null;
+      boolean alert = false;
       while ((pdus = client.getPdus(limit, offset)) != null) {
          if (pdus.isEmpty()) {
             break;
@@ -1614,10 +1619,24 @@ public class PowerIQService implements AsyncService {
                }
                //save
                assetsNeedToSave.add(asset);
+               if(!alert) {
+                  alert = true;
+               }
             }
          }
          restClient.saveAssets(assetsNeedToSave);
          offset += limit;
+      }
+      if(alert) {
+         try {
+            EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
+                  EventMessageUtil.AggregateAndCleanPowerIQPDU, "");
+            String jobmessage = EventMessageUtil.convertEventMessageAsString(eventMessage);
+            publisher.publish(EventMessageUtil.AggregatorTopic, jobmessage);
+            logger.info("Send aggregate Pdu data command");
+         }catch(IOException e) {
+            logger.error("Failed to Send aggregate pdu data command", e);
+         }
       }
    }
 
