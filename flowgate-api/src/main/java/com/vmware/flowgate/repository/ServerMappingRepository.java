@@ -23,6 +23,9 @@ public interface ServerMappingRepository
 
    Page<ServerMapping> findAllByVcID(String vcID, Pageable pageable);
 
+   @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND (`asset` IS MISSING OR `asset` IS NULL)")
+   List<ServerMapping> findByAssetIsNull();
+
    @Query("#{#n1ql.selectEntity} where #{#n1ql.filter} AND `vroID` = $1")
    List<ServerMapping> findAllByVroID(String vroID);
 
