@@ -1531,7 +1531,7 @@ public class PowerIQService implements AsyncService {
       int offset = 0;
       List<Pdu> pdus = null;
       List<Asset> assetsNeedToSave = null;
-      boolean alert = false;
+      boolean triggerPDUAggregation = false;
       while ((pdus = client.getPdus(limit, offset)) != null) {
          if (pdus.isEmpty()) {
             break;
@@ -1619,15 +1619,13 @@ public class PowerIQService implements AsyncService {
                }
                //save
                assetsNeedToSave.add(asset);
-               if(!alert) {
-                  alert = true;
-               }
+               triggerPDUAggregation = true;
             }
          }
          restClient.saveAssets(assetsNeedToSave);
          offset += limit;
       }
-      if(alert) {
+      if(triggerPDUAggregation) {
          try {
             EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
                   EventMessageUtil.AggregateAndCleanPowerIQPDU, "");
