@@ -37,7 +37,7 @@ public interface SystemSummaryRepository
    @Query("SELECT count(subCategory) AS count, subCategory, \""+hackid+"\" as _ID, "+cas+" as _CAS FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.Asset' AND category = 'Sensors' GROUP BY subCategory")
    List<HashMap<String,Object>> countSensorGroupByType();
 
-   @Query("SELECT count(category) AS count, category, \""+hackid+"\" as _ID, "+cas+" as _CAS FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.Asset' AND assetSource = $1 GROUP BY category")
+   @Query("SELECT count(category) AS count, category, \""+hackid+"\" as _ID, "+cas+" as _CAS FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.Asset' AND assetSource like $1 GROUP BY category")
    List<HashMap<String,Object>> countAssetGroupByTypeAndSource(String assetSource);
 
 }

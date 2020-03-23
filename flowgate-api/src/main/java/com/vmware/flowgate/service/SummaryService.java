@@ -7,14 +7,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.couchbase.core.CouchbaseTemplate;
 import org.springframework.stereotype.Component;
+
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.NlyteSummary;
 import com.vmware.flowgate.common.model.PowerIqSummary;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
+import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.SystemSummary;
 import com.vmware.flowgate.common.model.VcSummary;
 import com.vmware.flowgate.common.model.VroSummary;
-import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.SDDCSoftwareRepository;
 import com.vmware.flowgate.repository.SystemSummaryRepository;
@@ -93,7 +94,7 @@ public class SummaryService {
       PowerIqSummary powerIQSummary = new PowerIqSummary();
       powerIQSummary.setName(powerIQ.getName());
       powerIQSummary.setUrl(powerIQ.getServerURL());
-      List<HashMap<String,Object>> results = summaryRepository.countAssetGroupByTypeAndSource(powerIQ.getId());
+      List<HashMap<String,Object>> results = summaryRepository.countAssetGroupByTypeAndSource("%"+powerIQ.getId()+"%");
       if(!results.isEmpty()) {
          for(HashMap<String,Object> map :results) {
             if((String)map.get("category") == null) {
@@ -128,7 +129,7 @@ public class SummaryService {
       NlyteSummary nlyteSummary = new NlyteSummary();
       nlyteSummary.setName(nlyte.getName());
       nlyteSummary.setUrl(nlyte.getServerURL());
-      List<HashMap<String,Object>> results = summaryRepository.countAssetGroupByTypeAndSource(nlyte.getId());
+      List<HashMap<String,Object>> results = summaryRepository.countAssetGroupByTypeAndSource("%"+nlyte.getId()+"%");
       if(!results.isEmpty()) {
          for(HashMap<String,Object> map :results) {
             if((String)map.get("category") == null) {
