@@ -28,13 +28,14 @@ import org.springframework.web.client.HttpClientErrorException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
@@ -353,6 +354,9 @@ public class VROAsyncJob implements AsyncService {
             MetricData[] sensorDatas =
                   restClient.getServerRelatedSensorDataByServerID(mapping.getAsset(),
                         lastUpdateTimeStamp, FIVE_MINUTES * latencyFactor).getBody();
+            Asset server = restClient.getAssetByID(mapping.getAsset()).getBody();
+            List<String> pdus = server.getPdus();
+
             StatContents contents = new StatContents();
             StatContent frontTemp = new StatContent();
             List<Double> frontValues = new ArrayList<Double>();
@@ -375,39 +379,52 @@ public class VROAsyncJob implements AsyncService {
             StatContent backHumidityPercent = new StatContent();
             List<Double> backHumidityValues = new ArrayList<Double>();
             List<Long> backHumidityTimes = new ArrayList<Long>();
+            String pduId = null;
+            String currentMetricName = MetricName.SERVER_CONNECTED_PDU_CURRENT;
+            String powerMetricName = MetricName.SERVER_CONNECTED_PDU_POWER;
+            String voltageMetricName = MetricName.SERVER_VOLTAGE;
+
+            if(pdus!= null && !pdus.isEmpty()) {
+               pduId = pdus.get(0);
+               currentMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, pduId);
+               powerMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, pduId);
+               voltageMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, pduId,"INLET:1");
+            }
 
             for (MetricData data : sensorDatas) {
                if (data.getTimeStamp() > newUpdateTimeStamp) {
                   newUpdateTimeStamp = data.getTimeStamp();
                   hasNewData = true;
                }
-               switch (data.getMetricName()) {
-               case MetricName.SERVER_BACK_TEMPREATURE:
-                  backValues.add(data.getValueNum());
-                  backTimes.add(data.getTimeStamp());
-                  break;
-               case MetricName.SERVER_FRONT_TEMPERATURE:
-                  frontValues.add(data.getValueNum());
-                  frontTimes.add(data.getTimeStamp());
-                  break;
-               case MetricName.SERVER_TOTAL_CURRENT://need to more detail.
+               String metricName = data.getMetricName();
+               if(metricName.equals(currentMetricName)) {
                   pduAMPSValues.add(data.getValueNum());
                   pduAMPSTimes.add(data.getTimeStamp());
-                  break;
-               case MetricName.SERVER_VOLTAGE:
-                  voltageValues.add(data.getValueNum());
-                  voltageTimes.add(data.getTimeStamp());
-                  break;
-               case MetricName.SERVER_TOTAL_POWER:
+                  continue;
+               }else if(metricName.equals(powerMetricName)) {
                   powerValues.add(data.getValueNum());
                   powerTimes.add(data.getTimeStamp());
-                  break;
-               case MetricName.SERVER_FRONT_HUMIDITY:
+                  continue;
+               }else if(metricName.equals(voltageMetricName)) {
+                  voltageValues.add(data.getValueNum());
+                  voltageTimes.add(data.getTimeStamp());
+                  continue;
+               }else if(metricName.contains(MetricName.SERVER_FRONT_HUMIDITY)) {
                   frontHumidityValues.add(data.getValueNum());
                   frontHumidityTimes.add(data.getTimeStamp());
-                  break;
-               default:
-                  break;
+                  continue;
+               }else if(metricName.contains(MetricName.SERVER_FRONT_TEMPERATURE)) {
+                  frontValues.add(data.getValueNum());
+                  frontTimes.add(data.getTimeStamp());
+                  continue;
+               }else if(metricName.contains(MetricName.SERVER_BACK_TEMPREATURE)) {
+                  backValues.add(data.getValueNum());
+                  backTimes.add(data.getTimeStamp());
+                  continue;
+               }else if(metricName.contains(MetricName.SERVER_BACK_HUMIDITY)) {
+                  backHumidityValues.add(data.getValueNum());
+                  backHumidityTimes.add(data.getTimeStamp());
+                  continue;
                }
             }
             if (!frontValues.isEmpty()) {

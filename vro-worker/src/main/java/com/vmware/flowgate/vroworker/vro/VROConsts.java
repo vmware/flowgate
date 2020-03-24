@@ -69,7 +69,7 @@ public class VROConsts {
   // public static final String RECOMMENDATION_ACTION_MOVE_VM = "Move VM to other hosts";
 
    public static final String RECOMMENDATION_ACTION_ADAPTER_VCENTER =
-         "PythonRemediationVcenterAdapter";
+         "VMWARE";
    public static final String RECOMMENDATION_MOVEVM_TO_OTHERHOSTS_DESCRIPTION =
          "Move All virtual machines on this host to a different host which connect to different PDU and placed in different Cabinet unit";
    public static final String RECOMMENDATION_POWER_OFF_VM_DESCRIPTION =
