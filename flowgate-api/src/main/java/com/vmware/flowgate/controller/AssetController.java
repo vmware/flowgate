@@ -337,7 +337,7 @@ public class AssetController {
       if (starttime == null || starttime <= 0) {
          starttime = System.currentTimeMillis() - FIVE_MINUTES;
       }
-      if (duration == null || duration <= 0 || duration > FIVE_MINUTES * 12) {
+      if (duration == null || duration <= 0 || duration > FIVE_MINUTES * 24) {
          duration = FIVE_MINUTES;
       }
       return assetService.getPduMetricsDataById(assetID, starttime, duration);
@@ -351,7 +351,7 @@ public class AssetController {
       if (starttime == null || starttime <= 0) {
          starttime = System.currentTimeMillis() - FIVE_MINUTES;
       }
-      if (duration == null || duration <= 0 || duration > FIVE_MINUTES * 12) {
+      if (duration == null || duration <= 0 || duration > FIVE_MINUTES * 24) {
          duration = FIVE_MINUTES;
       }
       return assetService.getServerMetricsDataById(assetID, starttime, duration);

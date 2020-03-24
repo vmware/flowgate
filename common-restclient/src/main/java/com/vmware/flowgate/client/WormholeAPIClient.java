@@ -37,7 +37,7 @@ import com.vmware.flowgate.common.model.WormholeUser;
 public class WormholeAPIClient extends RestClientBase {
 
    private static final String fetchSensorDataURL =
-         "/v1/assets/%s/serversensordata?starttime=%d&duration=%d";
+         "/v1/assets/server/%s/realtimedata?starttime=%d&duration=%d";
 
    private static final String GetJobsURL = "/v1/jobs/type/%s";
 
