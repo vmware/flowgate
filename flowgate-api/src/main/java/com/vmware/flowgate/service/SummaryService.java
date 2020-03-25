@@ -1,13 +1,16 @@
 package com.vmware.flowgate.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.couchbase.core.CouchbaseTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.NlyteSummary;
 import com.vmware.flowgate.common.model.PowerIqSummary;
@@ -35,7 +38,29 @@ public class SummaryService {
    @Autowired
    SystemSummaryRepository summaryRepository;
 
-   public SystemSummary getSystemResult() {
+   @Autowired
+   StringRedisTemplate redisTemplate;
+
+   public static final String SUMMARY_DATA = "summarydata";
+
+   public SystemSummary getSystemResult(boolean useCache) throws IOException {
+      SystemSummary data = new SystemSummary();
+      ObjectMapper mapper = new ObjectMapper();
+      if(useCache) {
+         if(!redisTemplate.hasKey(SUMMARY_DATA)) {
+            data = generateSummaryData();
+            redisTemplate.opsForValue().set(SUMMARY_DATA, mapper.writeValueAsString(data));
+         }
+         String value = redisTemplate.opsForValue().get(SUMMARY_DATA);
+         data = mapper.readValue(value, SystemSummary.class);
+         return data;
+      }
+      data = generateSummaryData();
+      redisTemplate.opsForValue().set(SUMMARY_DATA, mapper.writeValueAsString(data));
+     return data;
+   }
+
+   public SystemSummary generateSummaryData() {
       SystemSummary data = new SystemSummary();
       data.setAssetsNum(summaryRepository.countByClass("com.vmware.flowgate.common.model.Asset"));
       data.setFacilitySystemNum(summaryRepository.countByClass("com.vmware.flowgate.common.model.FacilitySoftwareConfig"));
@@ -53,7 +78,6 @@ public class SummaryService {
       data.setVroSummary(getVroSummaryList());
       return data;
    }
-
    public List<VcSummary> getVcSummaryList() {
       List<VcSummary> vcSummary = new ArrayList<>();
       List<SDDCSoftwareConfig> sddcSoftwareConfigs = sddcrpeo.findAllByType(SoftwareType.VCENTER.name());

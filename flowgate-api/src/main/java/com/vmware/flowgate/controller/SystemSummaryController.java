@@ -4,12 +4,16 @@
 */
 package com.vmware.flowgate.controller;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vmware.flowgate.common.model.SystemSummary;
+import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.service.SummaryService;
 
 @RestController
@@ -20,7 +24,13 @@ public class SystemSummaryController {
    SummaryService summaryService;
 
    @RequestMapping(value = "/systemsummary", method = RequestMethod.GET)
-   public SystemSummary getAllDashBoardData() {
-      return summaryService.getSystemResult();
+   public SystemSummary getAllDashBoardData( @RequestParam("usecache") boolean usecache) {
+      SystemSummary result = null;
+      try {
+         result = summaryService.getSystemResult(usecache);
+      } catch (IOException e) {
+         throw  new WormholeRequestException("Failed to get summary data.");
+      }
+      return result;
    }
 }
