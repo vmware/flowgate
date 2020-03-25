@@ -24,12 +24,16 @@ public class SystemSummaryController {
    SummaryService summaryService;
 
    @RequestMapping(value = "/systemsummary", method = RequestMethod.GET)
-   public SystemSummary getAllDashBoardData( @RequestParam("usecache") boolean usecache) {
+   public SystemSummary getAllDashBoardData(
+         @RequestParam(value = "usecache", required = false) Boolean usecache) {
       SystemSummary result = null;
+      if(usecache == null) {
+         usecache = true;
+      }
       try {
          result = summaryService.getSystemResult(usecache);
       } catch (IOException e) {
-         throw  new WormholeRequestException("Failed to get summary data.");
+         throw new WormholeRequestException("Failed to get summary data.");
       }
       return result;
    }

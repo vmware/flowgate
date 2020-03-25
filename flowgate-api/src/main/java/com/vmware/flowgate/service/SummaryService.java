@@ -50,6 +50,7 @@ public class SummaryService {
          if(!redisTemplate.hasKey(SUMMARY_DATA)) {
             data = generateSummaryData();
             redisTemplate.opsForValue().set(SUMMARY_DATA, mapper.writeValueAsString(data));
+            return data;
          }
          String value = redisTemplate.opsForValue().get(SUMMARY_DATA);
          data = mapper.readValue(value, SystemSummary.class);
