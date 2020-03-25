@@ -379,16 +379,26 @@ public class VROAsyncJob implements AsyncService {
             StatContent backHumidityPercent = new StatContent();
             List<Double> backHumidityValues = new ArrayList<Double>();
             List<Long> backHumidityTimes = new ArrayList<Long>();
+            StatContent currentLoad = new StatContent();
+            List<Double> currentLoadValues = new ArrayList<Double>();
+            List<Long> currentLoadTimes = new ArrayList<Long>();
+            StatContent powerLoad = new StatContent();
+            List<Double> powerLoadValues = new ArrayList<Double>();
+            List<Long> powerLoadTimes = new ArrayList<Long>();
+
             String pduId = null;
             String currentMetricName = MetricName.SERVER_CONNECTED_PDU_CURRENT;
             String powerMetricName = MetricName.SERVER_CONNECTED_PDU_POWER;
             String voltageMetricName = MetricName.SERVER_VOLTAGE;
-
+            String currentLoadMetricName = MetricName.PDU_CURRENT_LOAD;
+            String powerLoadMetricName = MetricName.PDU_POWER_LOAD;
             if(pdus!= null && !pdus.isEmpty()) {
                pduId = pdus.get(0);
                currentMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, pduId);
                powerMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, pduId);
                voltageMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, pduId,"INLET:1");
+               currentLoadMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD, pduId);
+               powerLoadMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD, pduId);
             }
 
             for (MetricData data : sensorDatas) {
@@ -408,6 +418,14 @@ public class VROAsyncJob implements AsyncService {
                }else if(metricName.equals(voltageMetricName)) {
                   voltageValues.add(data.getValueNum());
                   voltageTimes.add(data.getTimeStamp());
+                  continue;
+               }else if(metricName.equals(currentLoadMetricName)) {
+                  currentLoadValues.add(data.getValueNum());
+                  currentLoadTimes.add(data.getTimeStamp());
+                  continue;
+               }else if(metricName.equals(powerLoadMetricName)) {
+                  powerLoadValues.add(data.getValueNum());
+                  powerLoadTimes.add(data.getTimeStamp());
                   continue;
                }else if(metricName.contains(MetricName.SERVER_FRONT_HUMIDITY)) {
                   frontHumidityValues.add(data.getValueNum());
@@ -476,6 +494,22 @@ public class VROAsyncJob implements AsyncService {
                backHumidityPercent
                      .setTimestamps(backHumidityTimes.stream().mapToLong(Long::valueOf).toArray());
                contents.addStatContent(backHumidityPercent);
+            }
+            if (!currentLoadValues.isEmpty()) {
+               currentLoad.setStatKey(VROConsts.ENVRIONMENT_PDU_AMPS_LOAD_METRIC);
+               currentLoad
+                     .setData(currentLoadValues.stream().mapToDouble(Double::valueOf).toArray());
+               currentLoad
+                     .setTimestamps(currentLoadTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(currentLoad);
+            }
+            if (!powerLoadValues.isEmpty()) {
+               powerLoad.setStatKey(VROConsts.ENVRIONMENT_PDU_POWER_LOAD_METRIC);
+               powerLoad
+                     .setData(powerLoadValues.stream().mapToDouble(Double::valueOf).toArray());
+               powerLoad
+                     .setTimestamps(powerLoadTimes.stream().mapToLong(Long::valueOf).toArray());
+               contents.addStatContent(powerLoad);
             }
 
             if (!contents.getStatContents().isEmpty()) {

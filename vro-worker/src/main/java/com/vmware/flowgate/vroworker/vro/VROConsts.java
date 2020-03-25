@@ -39,7 +39,6 @@ public class VROConsts {
    public static final String ENVRIONMENT_HOSTSENSOR_TEMPERATURE_METRIC =
          "Environment|BiosTemperature(°C)";
    public static final String ENVRIONMENT_PDU_AMPS_LOAD_METRIC = "Environment|PDU AMPS(%)";
-   public static final String ENVRIONMENT_PDU_VOLTS_LOAD_METRIC = "Environment|PDU VOLTS(%)";
    public static final String ENVRIONMENT_PDU_POWER_LOAD_METRIC = "Environment|PDU POWER(%)";
    public static final String ENVRIONMENT_PDU_POWER_METRIC = "Environment|PDU Power";
    public static final String ENVRIONMENT_PDU_AMPS_METRIC = "Environment|PDU AMPS";
