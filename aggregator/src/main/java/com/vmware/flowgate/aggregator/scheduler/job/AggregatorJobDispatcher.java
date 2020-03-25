@@ -66,6 +66,16 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
          }catch(IOException e) {
             logger.error("Failed to Send aggregate pdu data command", e);
          }
+      }else if(execount++ % 24 == 0){
+         try {
+            EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
+                  EventMessageUtil.SUMMARY_DATA, "");
+            String jobmessage = EventMessageUtil.convertEventMessageAsString(eventMessage);
+            publisher.publish(EventMessageUtil.AggregatorTopic, jobmessage);
+            logger.info("Send sync summary data command");
+         }catch(IOException e) {
+            logger.error("Failed to Send sync summary data command", e);
+         }
       }else {
          //will execute hourly?
          try {
