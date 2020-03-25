@@ -31,6 +31,7 @@ import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SensorSetting;
 import com.vmware.flowgate.common.model.ServerMapping;
+import com.vmware.flowgate.common.model.SystemSummary;
 import com.vmware.flowgate.common.model.WormholeUser;
 
 @Service
@@ -40,6 +41,7 @@ public class WormholeAPIClient extends RestClientBase {
          "/v1/assets/server/%s/realtimedata?starttime=%d&duration=%d";
 
    private static final String GetJobsURL = "/v1/jobs/type/%s";
+   private static final String GetSummaryDataURL = "/v1/summary/systemsummary?usecache=%s";
 
    private static final String SensorSettingURL = "/v1/sensors/setting/page/%s/pagesize/%s";
    private static final String ServerMappingURL = "/v1/assets/mapping";
@@ -180,6 +182,11 @@ public class WormholeAPIClient extends RestClientBase {
    public ResponseEntity<SDDCSoftwareConfig[]> getVCServers() {
       return this.restTemplate.exchange(getAPIServiceEndpoint() + GetVCServersURL, HttpMethod.GET,
             getDefaultEntity(), SDDCSoftwareConfig[].class);
+   }
+
+   public ResponseEntity<SystemSummary> getSystemSummary(boolean usecache) {
+      return this.restTemplate.exchange(getAPIServiceEndpoint() + String.format(GetSummaryDataURL, usecache), HttpMethod.GET,
+            getDefaultEntity(), SystemSummary.class);
    }
 
    public ResponseEntity<Asset[]> getAssetsByVCID(String VCServerID) {
