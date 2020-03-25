@@ -95,6 +95,8 @@ public class AssetService {
          metricNames.add(MetricName.PDU_APPARENT_POWER);
          metricNames.add(MetricName.PDU_CURRENT);
          metricNames.add(MetricName.PDU_VOLTAGE);
+         metricNames.add(MetricName.PDU_POWER_LOAD);
+         metricNames.add(MetricName.PDU_CURRENT_LOAD);
          for(String pduId : pduMetrics.keySet()) {
             List<RealTimeData> realtimedatas =
                   realtimeDataRepository.getDataByIDAndTimeRange(pduId, starttime, duration);
@@ -143,6 +145,14 @@ public class AssetService {
             break;
          case MetricName.PDU_VOLTAGE:
             data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, pduAssetId, value.getExtraidentifier()));
+            result.add(data);
+            break;
+         case MetricName.PDU_POWER_LOAD:
+            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD, pduAssetId));
+            result.add(data);
+            break;
+         case MetricName.PDU_CURRENT_LOAD:
+            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD, pduAssetId));
             result.add(data);
             break;
          default:
