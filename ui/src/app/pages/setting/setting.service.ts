@@ -107,7 +107,7 @@ export class SettingService {
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());
       this.options = new RequestOptions({ headers: header });
-      return this.http.get(""+this.API_URL+"/v1/summary/systemsummary",this.options).map((res)=>res)
+      return this.http.get(""+this.API_URL+"/v1/summary/systemsummary?usecache=true",this.options).map((res)=>res)
     }
     getAllVcenter(){
       let header = new Headers({ 'Content-Type': 'application/json' });
