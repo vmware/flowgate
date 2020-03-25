@@ -93,10 +93,19 @@ public class AggregatorService implements AsyncService {
          case EventMessageUtil.AggregateAndCleanPowerIQPDU:
             aggregateAndCleanPDUFromPowerIQ();
             break;
+         case EventMessageUtil.SUMMARY_DATA:
+            syncSummaryData();
+            break;
          default:
             break;
          }
       }
+   }
+
+   public void syncSummaryData() {
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      restClient.getSystemSummary(false);
+      logger.info("Finish sync system summary data.");
    }
 
    private void cleanRealtimeData() {
