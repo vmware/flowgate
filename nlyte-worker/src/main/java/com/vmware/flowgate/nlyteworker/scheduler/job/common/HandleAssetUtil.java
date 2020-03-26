@@ -43,14 +43,14 @@ public class HandleAssetUtil {
     *
     * @return
     */
-   public Map<String,Asset> generateAssetsMap (List<Asset> assets) {
-      Map<String,Asset> assetFromWormholeMap = null;
+   public Map<Long,Asset> generateAssetsMap (List<Asset> assets) {
+      Map<Long,Asset> assetFromWormholeMap = null;
       if(assets == null || assets.isEmpty()) {
          return null;
       }
-      assetFromWormholeMap = new HashMap<String,Asset>();
+      assetFromWormholeMap = new HashMap<Long,Asset>();
       for(Asset asset:assets) {
-         assetFromWormholeMap.put(asset.getAssetSource()+"_"+asset.getAssetNumber(), asset);
+         assetFromWormholeMap.put(asset.getAssetNumber(), asset);
       }
       return assetFromWormholeMap;
 
@@ -264,7 +264,7 @@ public class HandleAssetUtil {
       return asset;
    }
 
-   public List<Asset> handleAssets(List<Asset> toUpdateAssets,Map<String,Asset> exsitingaAssetMap){
+   public List<Asset> handleAssets(List<Asset> toUpdateAssets,Map<Long,Asset> exsitingaAssetMap){
       List<Asset> resultAsset = new ArrayList<Asset>();
       List<Asset> updateAsset = new ArrayList<Asset>();
       Asset exsitingAsset = null;
@@ -272,8 +272,8 @@ public class HandleAssetUtil {
          return toUpdateAssets;
       }
       for(Asset asset:toUpdateAssets) {
-         if(exsitingaAssetMap.containsKey(asset.getAssetSource()+"_"+asset.getAssetNumber())) {
-            exsitingAsset = exsitingaAssetMap.get(asset.getAssetSource()+"_"+asset.getAssetNumber());
+         if(exsitingaAssetMap.containsKey(asset.getAssetNumber())) {
+            exsitingAsset = exsitingaAssetMap.get(asset.getAssetNumber());
             exsitingAsset.setCabinetName(asset.getCabinetName());
             exsitingAsset.setTag(asset.getTag());
             exsitingAsset.setSerialnumber(asset.getSerialnumber());

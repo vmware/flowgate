@@ -484,7 +484,7 @@ public class NlyteDataService implements AsyncService {
          AssetCategory category) {
       HandleAssetUtil assetUtil = new HandleAssetUtil();
       List<Asset> oldAssetsFromWormhole = restClient.getAllAssetsBySourceAndType(nlyteSource,category);
-      Map<String, Asset> assetsFromWormholeMap = assetUtil.generateAssetsMap(oldAssetsFromWormhole);
+      Map<Long, Asset> assetsFromWormholeMap = assetUtil.generateAssetsMap(oldAssetsFromWormhole);
       List<Asset> allAssetsFromNlyte = assetUtil.getAssetsFromNlyte(nlyteSource, nlyteAssets,
             locationMap, materialMap, manufacturerMap);
       return assetUtil.handleAssets(allAssetsFromNlyte, assetsFromWormholeMap);
@@ -503,13 +503,13 @@ public class NlyteDataService implements AsyncService {
 
       List<Asset> assetsFromNlyte = assetUtil.getAssetsFromNlyte(nlyteSource, nlyteAssets,
             locationMap, materialMap, manufacturerMap);
-      Map<String, Asset> assetsFromNlyteMap = assetUtil.generateAssetsMap(assetsFromNlyte);
+      Map<Long, Asset> assetsFromNlyteMap = assetUtil.generateAssetsMap(assetsFromNlyte);
       List<Asset> updateAssets = new ArrayList<Asset>();
       for (Asset asset : allMappedAssets) {
          if (assetsFromNlyteMap
-               .containsKey(asset.getAssetSource() + "_" + asset.getAssetNumber())) {
+               .containsKey(asset.getAssetNumber())) {
             Asset assetFromNlyte =
-                  assetsFromNlyteMap.get(asset.getAssetSource() + "_" + asset.getAssetNumber());
+                  assetsFromNlyteMap.get(asset.getAssetNumber());
             asset.setTag(assetFromNlyte.getTag());
             asset.setSerialnumber(assetFromNlyte.getSerialnumber());
             asset.setAssetName(assetFromNlyte.getAssetName());
