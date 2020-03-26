@@ -56,7 +56,7 @@ public class NlyteAPIClient {
    private static final String GetPowerStripMaterialsURL = "/nlyte/integration/api/odata/PowerStripMaterials";
    private static final String AuthenticateBasicURL = "/nlyte/integration/api/odata/auth/AuthenticateBasic";
    private static final String GetPowerStripRealtimeValue = "/nlyte/integration/api/odata/PowerStrips(%s)/GetRealtimeValues";
-   private static final String GetNetworksURL = "/nlyte/integration/api/odata/Networks";
+   private static final String GetNetworksURL = "/nlyte/integration/api/odata/Networks?$expand=UMounting";
    private static final String GetNetworkByAssetNumberURL = "/nlyte/integration/api/odata/Networks(%s)";
    private static final String GetNetworkMaterialsURL =
          "/nlyte/integration/api/odata/NetworkMaterials?$filter=(materialSubtypeID eq 7)";
