@@ -5,9 +5,11 @@
 package com.vmware.flowgate.controller;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.data.couchbase.core.CouchbaseTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
@@ -62,7 +65,7 @@ public class SystemSummaryTest {
    SummaryService summaryService;
 
    @Test
-   public void testSummaryRepo() {
+   public void testSummaryRepo() throws IOException {
       deletedata();
 
       List<FacilitySoftwareConfig> facilities = new ArrayList<FacilitySoftwareConfig>();
@@ -155,7 +158,7 @@ public class SystemSummaryTest {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-      SystemSummary data = summaryService.getSystemResult();
+      SystemSummary data = summaryService.getSystemResult(false);
       TestCase.assertEquals(8, data.getAssetsNum());
       TestCase.assertEquals(2, data.getFacilitySystemNum());
       TestCase.assertEquals(4, data.getSddcIntegrationNum());
