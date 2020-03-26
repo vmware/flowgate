@@ -9,6 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 <select id="selects_2" [ngModelOptions]="{standalone: true}"  [(ngModel)]="serverconfig.type" on-change="changeType()" > 
                     <option value="VRO" >vRealize Operations Manager</option>
                     <option value="VCENTER">VMware vCenter</option>
+                    <option value="VROPSMP">vRealize Operations Management Pack</option>
                 </select>
             </div>
             <label for="selects_3">Server</label>
