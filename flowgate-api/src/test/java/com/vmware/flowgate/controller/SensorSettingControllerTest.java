@@ -68,42 +68,48 @@ public class SensorSettingControllerTest {
    @Test
    public void createAnSensorSetting() throws JsonProcessingException, Exception {
       SensorSetting  sensorsetting = createSensorSetting();
-      this.mockMvc
-            .perform(post("/v1/sensors/setting").contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(sensorsetting)))
-            .andExpect(status().isCreated())
-            .andDo(document("sensorSetting-create-example", requestFields(
-                  fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
-                  fieldWithPath("type").description(
-                        "The sensor type."),
-                  fieldWithPath("minNum").description("Value type is double"),
-                  fieldWithPath("maxNum").description("Value type is double"),
-                  fieldWithPath("minValue").description("Value type is string"),
-                  fieldWithPath("maxValue").description("Value type is string")
-                 )));
+      try {
+         this.mockMvc
+         .perform(post("/v1/sensors/setting").contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(sensorsetting)))
+         .andExpect(status().isCreated())
+         .andDo(document("sensorSetting-create-example", requestFields(
+               fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
+               fieldWithPath("type").description(
+                     "The sensor type."),
+               fieldWithPath("minNum").description("Value type is double"),
+               fieldWithPath("maxNum").description("Value type is double"),
+               fieldWithPath("minValue").description("Value type is string"),
+               fieldWithPath("maxValue").description("Value type is string")
+              )));
+      }finally {
+         sensorSettingRepository.delete(sensorsetting.getId());
+      }
 
-      sensorSettingRepository.delete(sensorsetting.getId());
    }
    @Test
    public void udapteAnSensorSetting() throws JsonProcessingException, Exception {
       SensorSetting  sensorsetting = createSensorSetting();
       sensorSettingRepository.save(sensorsetting);
       sensorsetting.setMaxNum(25);
-      this.mockMvc
-            .perform(put("/v1/sensors/setting").contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(sensorsetting)))
-            .andExpect(status().isOk())
-            .andDo(document("sensorSetting-update-example", requestFields(
-                  fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
-                  fieldWithPath("type").description(
-                        "The sensor type."),
-                  fieldWithPath("minNum").description("Value type is double"),
-                  fieldWithPath("maxNum").description("Value type is double"),
-                  fieldWithPath("minValue").description("Value type is string"),
-                  fieldWithPath("maxValue").description("Value type is string")
-                 )));
+      try {
+         this.mockMvc
+         .perform(put("/v1/sensors/setting").contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(sensorsetting)))
+         .andExpect(status().isOk())
+         .andDo(document("sensorSetting-update-example", requestFields(
+               fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
+               fieldWithPath("type").description(
+                     "The sensor type."),
+               fieldWithPath("minNum").description("Value type is double"),
+               fieldWithPath("maxNum").description("Value type is double"),
+               fieldWithPath("minValue").description("Value type is string"),
+               fieldWithPath("maxValue").description("Value type is string")
+              )));
+      }finally {
+         sensorSettingRepository.delete(sensorsetting.getId());
+      }
 
-      sensorSettingRepository.delete(sensorsetting.getId());
    }
    @Test
    public void sensorSettingQueryByPageExample() throws Exception {
@@ -111,44 +117,50 @@ public class SensorSettingControllerTest {
       sensorSettingRepository.save(sensorsetting);
       int pageNumber = 1;
       int pageSize = 5;
-      this.mockMvc
-            .perform(get("/v1/sensors/setting/page/" + pageNumber
-                  + "/pagesize/" + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content[0].maxNum").value(sensorsetting.getMaxNum()))
-            .andExpect(jsonPath("$..content.length()").value(1))
-            .andExpect(jsonPath("last", is(true)))
-            .andExpect(jsonPath("number", is(0)))
-            .andExpect(jsonPath("size", is(5)))
-            .andExpect(jsonPath("first", is(true)))
-            .andDo(document("sensorSetting-queryByPage-example", requestFields(
-                  fieldWithPath("pageNumber")
-                  .description("get datas for this page number."),
-                  fieldWithPath("pageSize")
-                  .description("The number of data displayed per page."))));
+      try {
+         this.mockMvc
+         .perform(get("/v1/sensors/setting/page/" + pageNumber
+               + "/pagesize/" + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
+         .andExpect(status().isOk())
+         .andExpect(jsonPath("$.content[0].maxNum").value(sensorsetting.getMaxNum()))
+         .andExpect(jsonPath("$..content.length()").value(1))
+         .andExpect(jsonPath("last", is(true)))
+         .andExpect(jsonPath("number", is(0)))
+         .andExpect(jsonPath("size", is(5)))
+         .andExpect(jsonPath("first", is(true)))
+         .andDo(document("sensorSetting-queryByPage-example", requestFields(
+               fieldWithPath("pageNumber")
+               .description("get datas for this page number."),
+               fieldWithPath("pageSize")
+               .description("The number of data displayed per page."))));
 
-      sensorSettingRepository.delete(sensorsetting.getId());
+      }finally {
+         sensorSettingRepository.delete(sensorsetting.getId());
+      }
    }
 
    @Test
    public void sensorQuerySettingByIDExample() throws Exception {
       SensorSetting  sensorsetting = createSensorSetting();
       sensorSettingRepository.save(sensorsetting);
-      this.mockMvc
-            .perform(get("/v1/sensors/setting/"+sensorsetting.getId())
-                  .content("{\"id\":\""+sensorsetting.getId()+"\"}"))
-            .andExpect(status().isOk())
-            .andDo(document("sensorSetting-querySetting-example", responseFields(
-                  fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
-                  fieldWithPath("type").description(
-                        "The sensor type."),
-                  fieldWithPath("minNum").description("Value type is double"),
-                  fieldWithPath("maxNum").description("Value type is double"),
-                  fieldWithPath("minValue").description("Value type is string"),
-                  fieldWithPath("maxValue").description("Value type is string")
-                 )));
+      try {
+         this.mockMvc
+         .perform(get("/v1/sensors/setting/"+sensorsetting.getId())
+               .content("{\"id\":\""+sensorsetting.getId()+"\"}"))
+         .andExpect(status().isOk())
+         .andDo(document("sensorSetting-querySetting-example", responseFields(
+               fieldWithPath("id").description("ID of the sensorSetting, created by flowgate"),
+               fieldWithPath("type").description(
+                     "The sensor type."),
+               fieldWithPath("minNum").description("Value type is double"),
+               fieldWithPath("maxNum").description("Value type is double"),
+               fieldWithPath("minValue").description("Value type is string"),
+               fieldWithPath("maxValue").description("Value type is string")
+              )));
 
-      sensorSettingRepository.delete(sensorsetting.getId());
+      }finally {
+         sensorSettingRepository.delete(sensorsetting.getId());
+      }
    }
 
    @Test
