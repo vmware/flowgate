@@ -62,6 +62,7 @@ import com.vmware.flowgate.poweriqworker.model.DataCenter;
 import com.vmware.flowgate.poweriqworker.model.Floor;
 import com.vmware.flowgate.poweriqworker.model.Inlet;
 import com.vmware.flowgate.poweriqworker.model.InletReading;
+import com.vmware.flowgate.poweriqworker.model.LocationInfo;
 import com.vmware.flowgate.poweriqworker.model.Outlet;
 import com.vmware.flowgate.poweriqworker.model.OutletReading;
 import com.vmware.flowgate.poweriqworker.model.Parent;
@@ -106,7 +107,6 @@ public class PowerIQService implements AsyncService {
    public static final String SmokeSensor = "SmokeSensor";
    public static final String WaterSensor = "WaterSensor";
    public static final String Vibration = "Vibration";
-   private static final String POWERIQ_SOURCE = "PDU_PowerIQ_SOURCE";
    private static Map<String, AssetSubCategory> subCategoryMap =
          new HashMap<String, AssetSubCategory>();
    public static Map<String, String> sensorAndMetricMap = new HashMap<String, String>();
@@ -139,13 +139,6 @@ public class PowerIQService implements AsyncService {
    private static final String POWERIQ_CURRENT_UNIT = "A";
    private static final String POWERIQ_VOLTAGE_UNIT = "V";
    private static final String RANGE_FLAG = "-";
-
-   private Map<Long, Rack> racksMap;
-   private Map<Long, Row> rowsMap;
-   private Map<Long, Aisle> aislesMap;
-   private Map<Long, Room> roomsMap;
-   private Map<Long, Floor> floorsMap;
-   private Map<Long, DataCenter> dataCentersMap;
 
    @Override
    @Async("asyncServiceExecutor")
@@ -301,13 +294,15 @@ public class PowerIQService implements AsyncService {
       return needToUpdate;
    }
 
-   public void getLocationInfo(PowerIQAPIClient client) {
-      this.aislesMap = getAislesMap(client);
-      this.racksMap = getRacksMap(client);
-      this.rowsMap = getRowsMap(client);
-      this.roomsMap = getRoomsMap(client);
-      this.floorsMap =  getFloorsMap(client);
-      this.dataCentersMap = getDataCentersMap(client);
+   public LocationInfo getLocationInfo(PowerIQAPIClient client) {
+      LocationInfo location = new LocationInfo();
+      location.setAislesMap(getAislesMap(client));
+      location.setRacksMap(getRacksMap(client));
+      location.setRowsMap(getRowsMap(client));
+      location.setRoomsMap(getRoomsMap(client));
+      location.setFloorsMap( getFloorsMap(client));
+      location.setDataCentersMap(getDataCentersMap(client));
+      return location;
    }
 
    public void syncPowerIQAssetsMetaData(FacilitySoftwareConfig powerIQ) {
@@ -332,15 +327,15 @@ public class PowerIQService implements AsyncService {
          updateIntegrationStatus(powerIQ);
          return;
       }
-      getLocationInfo(client);
+      LocationInfo location = getLocationInfo(client);
       List<Asset> pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.PDU);
       Map<String, Asset> pduIDAndAssetMap = getPDUIDAndAssetMap(pdusFromFlowgate);
 
-      savePduAssetsToFlowgate(pduIDAndAssetMap, powerIQ.getId(), client);
+      savePduAssetsToFlowgate(pduIDAndAssetMap, powerIQ.getId(), client, location);
       logger.info("Finish sync PDU metadata for " + powerIQ.getName());
 
       Map<String, Asset> exsitingSensorAssets = getAssetsFromWormhole(powerIQ.getId());
-      saveSensorAssetsToFlowgate(exsitingSensorAssets, client, powerIQ.getId(), pduIDAndAssetMap);
+      saveSensorAssetsToFlowgate(exsitingSensorAssets, client, powerIQ.getId(), pduIDAndAssetMap, location);
       logger.info("Finish sync Sensor metadata for: " + powerIQ.getName());
    }
 
@@ -461,7 +456,7 @@ public class PowerIQService implements AsyncService {
    }
 
    public void saveSensorAssetsToFlowgate(Map<String, Asset> exsitingSensorAssets,
-         PowerIQAPIClient client, String assetSource, Map<String, Asset> pduAssetMap) {
+         PowerIQAPIClient client, String assetSource, Map<String, Asset> pduAssetMap, LocationInfo location) {
       List<Sensor> sensors = null;
       int limit = 100;
       int offset = 0;
@@ -487,7 +482,7 @@ public class PowerIQService implements AsyncService {
             if (sensor.getPduId() != null) {
                Asset pduAsset = pduAssetMap.get(String.valueOf(sensor.getPduId()));
                if (pduAsset == null) {
-                  asset = fillLocation(sensor.getParent());
+                  asset = fillLocation(sensor.getParent(), location);
                } else {
                   //If the sensor's has pdu information. Then it can use the PDU's location info.
                   com.vmware.flowgate.common.model.Parent parent = new com.vmware.flowgate.common.model.Parent();
@@ -506,7 +501,7 @@ public class PowerIQService implements AsyncService {
                   pduAsset = aggregatorSensorIdAndSourceForPdu(pduAsset, sensor, assetSource);
                }
             } else {
-               asset = fillLocation(sensor.getParent());
+               asset = fillLocation(sensor.getParent(), location);
             }
 
             Asset assetToUpdate = exsitingSensorAssets.get(String.valueOf(sensor.getId()));
@@ -735,19 +730,19 @@ public class PowerIQService implements AsyncService {
       return sensors;
    }
 
-   public Asset fillLocation(Parent parent) {
+   public Asset fillLocation(Parent parent, LocationInfo location) {
       Asset asset = null;
       StringBuilder extraLocation = new StringBuilder();
       asset = new Asset();
       if (parent == null) {
          return asset;
       }
-      Map<Long, Rack> racksMap = this.racksMap;
-      Map<Long, Row> rowsMap = this.rowsMap;
-      Map<Long, Aisle> aislesMap = this.aislesMap;
-      Map<Long, Room> roomsMap = this.roomsMap;
-      Map<Long, Floor> floorsMap = this.floorsMap;
-      Map<Long, DataCenter> dataCentersMap = this.dataCentersMap;
+      Map<Long, Rack> racksMap = location.getRacksMap();
+      Map<Long, Row> rowsMap = location.getRowsMap();
+      Map<Long, Aisle> aislesMap = location.getAislesMap();
+      Map<Long, Room> roomsMap = location.getRoomsMap();
+      Map<Long, Floor> floorsMap = location.getFloorsMap();
+      Map<Long, DataCenter> dataCentersMap = location.getDataCentersMap();
 
       boolean rackMapisEmpty = racksMap == null || racksMap.isEmpty();
       boolean rowMapisEmpty = rowsMap == null || rowsMap.isEmpty();
@@ -768,6 +763,11 @@ public class PowerIQService implements AsyncService {
                break;
             }
             Rack rack = racksMap.get(parent.getId());
+            if(rack == null) {
+               logger.info("Invalid rack id : " + parent.getId());
+               parent = null;
+               break;
+            }
             extraLocation.append(rack_type + ":" + rack.getName() + "" + ";");
             parent = rack.getParent();
             break;
@@ -777,6 +777,11 @@ public class PowerIQService implements AsyncService {
                break;
             }
             Row row = rowsMap.get(parent.getId());
+            if(row == null) {
+               logger.info("Invalid row id : " + parent.getId());
+               parent = null;
+               break;
+            }
             asset.setRow(row.getName());
             parent = row.getParent();
             break;
@@ -786,6 +791,11 @@ public class PowerIQService implements AsyncService {
                break;
             }
             Aisle ailse = aislesMap.get(parent.getId());
+            if(ailse == null) {
+               logger.info("Invalid ailse id : " + parent.getId());
+               parent = null;
+               break;
+            }
             extraLocation.append(aisle_type + ":" + ailse.getName() + "");
             parent = ailse.getParent();
             break;
@@ -795,6 +805,11 @@ public class PowerIQService implements AsyncService {
                break;
             }
             Room room = roomsMap.get(parent.getId());
+            if(room == null) {
+               logger.info("Invalid room id : " + parent.getId());
+               parent = null;
+               break;
+            }
             asset.setRoom(room.getName());
             parent = room.getParent();
             break;
@@ -804,6 +819,11 @@ public class PowerIQService implements AsyncService {
                break;
             }
             Floor floor = floorsMap.get(parent.getId());
+            if(floor == null) {
+               logger.info("Invalid floor id : " + parent.getId());
+               parent = null;
+               break;
+            }
             asset.setFloor(floor.getName());
             parent = floor.getParent();
             break;
@@ -813,6 +833,11 @@ public class PowerIQService implements AsyncService {
                break;
             }
             DataCenter dataCenter = dataCentersMap.get(parent.getId());
+            if(dataCenter == null) {
+               logger.info("Invalid dataCenter id : " + parent.getId());
+               parent = null;
+               break;
+            }
             asset.setCity(dataCenter.getCity());
             asset.setCountry(dataCenter.getCountry());
             parent = dataCenter.getParent();
@@ -1526,7 +1551,7 @@ public class PowerIQService implements AsyncService {
    }
 
    public void savePduAssetsToFlowgate(Map<String, Asset> existedPduAssets,
-         String assetSource, PowerIQAPIClient client) {
+         String assetSource, PowerIQAPIClient client, LocationInfo location) {
       int limit = 100;
       int offset = 0;
       List<Pdu> pdus = null;
@@ -1540,7 +1565,7 @@ public class PowerIQService implements AsyncService {
          for (Pdu pdu : pdus) {
             List<Outlet> outlets = client.getOutlets(pdu.getId());
             List<Inlet> inlets = client.getInlets(pdu.getId());
-            Asset asset = fillLocation(pdu.getParent());
+            Asset asset = fillLocation(pdu.getParent(), location);
             String outletString = null;
             String inletString = null;
             try {
