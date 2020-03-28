@@ -51,7 +51,7 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
          execountString = "0";
       }
       long execount = Long.valueOf(execountString);
-      boolean fullSync = execount % 288 == 0;
+      boolean fullSync = execount++ % 288 == 0;
       FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
       if(powerIQs ==null || powerIQs.length==0) {
          logger.info("No PowerIQ server find");
