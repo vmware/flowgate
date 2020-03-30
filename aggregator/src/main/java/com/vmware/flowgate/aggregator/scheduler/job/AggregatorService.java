@@ -179,6 +179,9 @@ public class AggregatorService implements AsyncService {
       while(pduIte.hasNext()) {
          Asset pdu = pduIte.next();
          if (pdu.getAssetSource().split(FlowgateConstant.SPILIT_FLAG).length == 1 && powerIQIDs.get(pdu.getAssetSource()) != null) {
+            if(pdu.getAssetName() == null || pdu.getAssetName().isEmpty()) {
+               continue;
+            }
             pdusOnlyFromPowerIQ.put(pdu.getAssetName().toLowerCase(), pdu);
             pduIte.remove();
          }
