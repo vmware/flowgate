@@ -31,7 +31,7 @@ export class ServermappingService {
     header.append("Authorization",'Bearer ' + this.auth.getToken());
     this.options = new RequestOptions({ headers: header });
 
-    if(type == "VRO"){
+    if(type == "VRO" || type=="VROPSMP"){
       return this.http.get(""+this.API_URL+"/v1/assets/mapping/vrops/"+softwareId+"/page/"+pageNumber+"/pagesize/"+pageSize+"",this.options)
       .map((res)=>res)
     }else if(type == "VCENTER"){
