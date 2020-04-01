@@ -50,6 +50,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.6</version>
+		</dependency>
+		<dependency>
 			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>common-restclient</artifactId>
 			<version>${flowgate.version}</version>

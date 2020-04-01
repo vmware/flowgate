@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1485,6 +1486,7 @@ public class PowerIQService implements AsyncService {
       }
       return mapper.writeValueAsString(pduInletsSaveToFlowgate);
    }
+
    public Map<String,String> generatePduRateInfoMap(Pdu pdu){
 
       Map<String,String> pduRateInfo = new HashMap<String,String>();
@@ -1498,7 +1500,12 @@ public class PowerIQService implements AsyncService {
             rateAmpsValue = rateAmps.substring(0, ampsIndex);
             pduRateInfo.put(FlowgateConstant.PDU_RATE_AMPS, rateAmpsValue);
          }else {
-            logger.error(String.format("Invalid value for rate current : %s", rateAmps));
+            if(NumberUtils.isCreatable(rateAmps)) {
+               //another format : only include number eg:32
+               pduRateInfo.put(FlowgateConstant.PDU_RATE_AMPS, rateAmps);
+            }else {
+               logger.error(String.format("Invalid value for rate current : %s", rateAmps));
+            }
          }
       }
       if(ratePower != null) {
@@ -1521,7 +1528,13 @@ public class PowerIQService implements AsyncService {
                pduRateInfo.put(FlowgateConstant.PDU_MAX_RATE_POWER, maxPowerValue);
             }
          }else {
-            logger.error(String.format("Invalid value for rate power : %s",ratePower));
+            if(NumberUtils.isCreatable(ratePower)) {
+               //another format : only include number eg:6.0
+               pduRateInfo.put(FlowgateConstant.PDU_MIN_RATE_POWER, ratePower);
+               pduRateInfo.put(FlowgateConstant.PDU_MAX_RATE_POWER, ratePower);
+            }else {
+               logger.error(String.format("Invalid value for rate power : %s",ratePower));
+            }
          }
       }
       if(rateVolts != null) {
@@ -1544,7 +1557,13 @@ public class PowerIQService implements AsyncService {
                pduRateInfo.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, maxVoltageValue);
             }
          }else {
-            logger.error(String.format("Invalid value for rate voltage : %s",rateVolts));
+            if(NumberUtils.isCreatable(rateVolts)) {
+               //another format : only include number eg:220
+               pduRateInfo.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, rateVolts);
+               pduRateInfo.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, rateVolts);
+            }else {
+               logger.error(String.format("Invalid value for rate voltage : %s",rateVolts));
+            }
          }
       }
       return pduRateInfo;
