@@ -194,7 +194,8 @@ public class AggregatorService implements AsyncService {
       ObjectMapper mapper = new ObjectMapper();
       HashSet<String> pduAssetIds = new HashSet<String>(pdusOnlyFromPowerIQ.size());
       for(Asset pdu : pdus) {
-         Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pdu.getAssetName().toLowerCase());
+         String pduName = pdu.getAssetName().toLowerCase();
+         Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pduName);
          if(pduFromPowerIQ != null) {
             HashMap<String,String> pduFromPowerIQExtraInfo = pduFromPowerIQ.getJustificationfields();
             HashMap<String,String> pduExtraInfo = pdu.getJustificationfields();
@@ -206,7 +207,8 @@ public class AggregatorService implements AsyncService {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
                restClient.saveAssets(pdu);
                pduAssetIds.add(pduFromPowerIQ.getId());
-               logger.info("This pdu will be removed: " + pduFromPowerIQ.getId()+ " name: "+ pduFromPowerIQ.getAssetName());
+               //If there are more than one pdus with the same name from Nlyte system,only one from these pdus can be merged.
+               pdusOnlyFromPowerIQ.remove(pduName);
                restClient.removeAssetByID(pduFromPowerIQ.getId());
                continue;
             }
@@ -219,7 +221,7 @@ public class AggregatorService implements AsyncService {
                pduExtraInfo.put(FlowgateConstant.PDU, pduInfo);
                restClient.saveAssets(pdu);
                pduAssetIds.add(pduFromPowerIQ.getId());
-               logger.info("This pdu will be removed: " + pduFromPowerIQ.getId() + " name: "+ pduFromPowerIQ.getAssetName());
+               pdusOnlyFromPowerIQ.remove(pduName);
                restClient.removeAssetByID(pduFromPowerIQ.getId());
                continue;
             }
@@ -249,7 +251,7 @@ public class AggregatorService implements AsyncService {
             }
             restClient.saveAssets(pdu);
             pduAssetIds.add(pduFromPowerIQ.getId());
-            logger.info("This pdu will be removed: " + pduFromPowerIQ.getId() + " name: "+ pduFromPowerIQ.getAssetName());
+            pdusOnlyFromPowerIQ.remove(pduName);
             restClient.removeAssetByID(pduFromPowerIQ.getId());
          }
       }
