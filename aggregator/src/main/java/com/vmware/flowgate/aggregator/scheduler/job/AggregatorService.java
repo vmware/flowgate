@@ -159,6 +159,7 @@ public class AggregatorService implements AsyncService {
    }
 
    public void aggregateAndCleanPDUFromPowerIQ() {
+      logger.info("Start aggregate pdu from PowerIQ to other systems");
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
       if(powerIQs ==null || powerIQs.length==0) {
@@ -205,6 +206,7 @@ public class AggregatorService implements AsyncService {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
                restClient.saveAssets(pdu);
                pduAssetIds.add(pduFromPowerIQ.getId());
+               logger.info("This pdu will be removed: " + pduFromPowerIQ.getId());
                restClient.removeAssetByID(pduFromPowerIQ.getId());
                continue;
             }
@@ -217,6 +219,7 @@ public class AggregatorService implements AsyncService {
                pduExtraInfo.put(FlowgateConstant.PDU, pduInfo);
                restClient.saveAssets(pdu);
                pduAssetIds.add(pduFromPowerIQ.getId());
+               logger.info("This pdu will be removed: " + pduFromPowerIQ.getId());
                restClient.removeAssetByID(pduFromPowerIQ.getId());
                continue;
             }
@@ -246,6 +249,7 @@ public class AggregatorService implements AsyncService {
             }
             restClient.saveAssets(pdu);
             pduAssetIds.add(pduFromPowerIQ.getId());
+            logger.info("This pdu will be removed: " + pduFromPowerIQ.getId());
             restClient.removeAssetByID(pduFromPowerIQ.getId());
          }
       }
