@@ -206,7 +206,7 @@ public class AggregatorService implements AsyncService {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
                restClient.saveAssets(pdu);
                pduAssetIds.add(pduFromPowerIQ.getId());
-               logger.info("This pdu will be removed: " + pduFromPowerIQ.getId());
+               logger.info("This pdu will be removed: " + pduFromPowerIQ.getId()+ " name: "+ pduFromPowerIQ.getAssetName());
                restClient.removeAssetByID(pduFromPowerIQ.getId());
                continue;
             }
@@ -219,7 +219,7 @@ public class AggregatorService implements AsyncService {
                pduExtraInfo.put(FlowgateConstant.PDU, pduInfo);
                restClient.saveAssets(pdu);
                pduAssetIds.add(pduFromPowerIQ.getId());
-               logger.info("This pdu will be removed: " + pduFromPowerIQ.getId());
+               logger.info("This pdu will be removed: " + pduFromPowerIQ.getId() + " name: "+ pduFromPowerIQ.getAssetName());
                restClient.removeAssetByID(pduFromPowerIQ.getId());
                continue;
             }
@@ -249,7 +249,7 @@ public class AggregatorService implements AsyncService {
             }
             restClient.saveAssets(pdu);
             pduAssetIds.add(pduFromPowerIQ.getId());
-            logger.info("This pdu will be removed: " + pduFromPowerIQ.getId());
+            logger.info("This pdu will be removed: " + pduFromPowerIQ.getId() + " name: "+ pduFromPowerIQ.getAssetName());
             restClient.removeAssetByID(pduFromPowerIQ.getId());
          }
       }
