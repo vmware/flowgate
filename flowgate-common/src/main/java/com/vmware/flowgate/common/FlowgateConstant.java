@@ -64,7 +64,7 @@ public class FlowgateConstant {
 
    public static String SENSOR = "SENSOR";
 
-   public static String CABINETUS = "CabinetUs";
+   public static String CABINETUNITS = "CabinetUnits";
 
    public static String DEFAULT_CABINET_UNIT_POSITION = "COMMON";
 

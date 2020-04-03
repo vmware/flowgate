@@ -1,34 +1,31 @@
+/**
+ * Copyright 2020 VMware, Inc.
+ * SPDX-License-Identifier: BSD-2-Clause
+*/
 package com.vmware.flowgate.common.model;
 
 public class CabinetU {
 
-   private String state;
-   private int cabinetAssetID;
+   private boolean used;
    private int cabinetUNumber;
-   private String assetsOnU;
-   public String getState() {
-      return state;
-   }
-   public void setState(String state) {
-      this.state = state;
-   }
-   public int getCabinetAssetID() {
-      return cabinetAssetID;
-   }
-   public void setCabinetAssetID(int cabinetAssetID) {
-      this.cabinetAssetID = cabinetAssetID;
-   }
+   private String assetsOnUnit;
    public int getCabinetUNumber() {
       return cabinetUNumber;
    }
    public void setCabinetUNumber(int cabinetUNumber) {
       this.cabinetUNumber = cabinetUNumber;
    }
-   public String getAssetsOnU() {
-      return assetsOnU;
+   public boolean isUsed() {
+      return used;
    }
-   public void setAssetsOnU(String assetsOnU) {
-      this.assetsOnU = assetsOnU;
+   public void setUsed(boolean used) {
+      this.used = used;
+   }
+   public String getAssetsOnUnit() {
+      return assetsOnUnit;
+   }
+   public void setAssetsOnUnit(String assetsOnUnit) {
+      this.assetsOnUnit = assetsOnUnit;
    }
 
 }

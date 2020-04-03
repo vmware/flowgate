@@ -1,3 +1,7 @@
+/**
+ * Copyright 2020 VMware, Inc.
+ * SPDX-License-Identifier: BSD-2-Clause
+*/
 package com.vmware.flowgate.nlyteworker.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
