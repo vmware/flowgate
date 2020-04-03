@@ -194,6 +194,9 @@ public class AggregatorService implements AsyncService {
       ObjectMapper mapper = new ObjectMapper();
       HashSet<String> pduAssetIds = new HashSet<String>(pdusOnlyFromPowerIQ.size());
       for(Asset pdu : pdus) {
+         if(pdu.getAssetName() == null || pdu.getAssetName().isEmpty()) {
+            continue;
+         }
          String pduName = pdu.getAssetName().toLowerCase();
          Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pduName);
          if(pduFromPowerIQ != null) {
