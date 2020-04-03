@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
 */
 package com.vmware.flowgate.nlyteworker.model;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class NlyteAsset {
@@ -96,6 +98,8 @@ public class NlyteAsset {
    private String cabinetName;
    @JsonProperty(value="ContiguousUSpace")
    private String contiguousUSpace;
+   @JsonProperty(value="CabinetUs")
+   private List<CabinetU> cabinetUs;
 
    public String getCabinetName() {
       return cabinetName;
@@ -369,6 +373,12 @@ public class NlyteAsset {
    }
    public void setContiguousUSpace(String contiguousUSpace) {
       this.contiguousUSpace = contiguousUSpace;
+   }
+   public List<CabinetU> getCabinetUs() {
+      return cabinetUs;
+   }
+   public void setCabinetUs(List<CabinetU> cabinetUs) {
+      this.cabinetUs = cabinetUs;
    }
 
 }
