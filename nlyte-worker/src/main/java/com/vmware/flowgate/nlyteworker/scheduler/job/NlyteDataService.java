@@ -166,10 +166,12 @@ public class NlyteDataService implements AsyncService {
          logger.info("Sync mapped data for " + nlyte.getName());
          syncMappedData(nlyte);
          logger.info("Finish sync mapped data for " + nlyte.getName());
+         break;
       case EventMessageUtil.NLYTE_CleanInActiveAssetData:
          logger.info("Clean inactive data for " + nlyte.getName());
          removeInActiveData(nlyte);
          logger.info("Finish clean inactive data for " + nlyte.getName());
+         break;
       default:
          logger.warn("Not supported command");
          break;
