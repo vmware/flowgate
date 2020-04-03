@@ -45,7 +45,7 @@ public class NlyteAPIClient {
    private static final String GetManufacturersURL = "/nlyte/integration/api/odata/manufacturers";
    private static final String GetServerAssetsURL = "/nlyte/integration/api/odata/Servers?$expand=UMounting";
    private static final String GetServerAssetByAssetNumberURL = "/nlyte/integration/api/odata/Servers(%s)";
-   private static final String GetCabinetsURL = "/nlyte/integration/api/odata/Cabinets";
+   private static final String GetCabinetsURL = "/nlyte/integration/api/odata/Cabinets?$expand=CabinetUs";
    private static final String GetCabinetByAssetNumberURL = "/nlyte/integration/api/odata/Cabinets(%s)";
    private static final String GetPowerStripAssetsURL = "/nlyte/integration/api/odata/PowerStrips?$expand=UMounting";
    private static final String GetPowerStripAssetByAssetNumberURL = "/nlyte/integration/api/odata/PowerStrips(%s)";

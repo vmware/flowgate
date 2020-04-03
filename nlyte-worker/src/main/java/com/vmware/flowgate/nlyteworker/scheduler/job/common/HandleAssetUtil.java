@@ -10,6 +10,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
@@ -18,6 +23,7 @@ import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.NetworkMapping;
 import com.vmware.flowgate.common.PduMapping;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.nlyteworker.model.CabinetU;
 import com.vmware.flowgate.nlyteworker.model.LocationGroup;
 import com.vmware.flowgate.nlyteworker.model.Manufacturer;
 import com.vmware.flowgate.nlyteworker.model.Material;
@@ -27,6 +33,7 @@ import com.vmware.flowgate.nlyteworker.restclient.NlyteAPIClient;
 
 public class HandleAssetUtil {
 
+   private static final Logger logger = LoggerFactory.getLogger(HandleAssetUtil.class);
    public static final String locationGroupType_Region = "Region";
    public static final String locationGroupType_Country = "Country";
    public static final String locationGroupType_City = "City";
@@ -39,6 +46,8 @@ public class HandleAssetUtil {
    public static final int cabinetMaterials = 4;
    public static final int networkMaterials = 5;
    public static final int NETWORK_SUBTYPE_STANDARD = 7;
+   private static final String CabinetU_State_Full = "Full";
+   private static final String CabinetU_State_Free = "Free";
    /**
     *
     * @return
@@ -135,6 +144,7 @@ public class HandleAssetUtil {
                                  HashMap<Integer,Material> materialMap,
                                  HashMap<Integer,Manufacturer> manufacturerMap) {
       List<Asset> assetsFromNlyte = new ArrayList<Asset>();
+      ObjectMapper mapper = new ObjectMapper();
       Asset asset;
       for(NlyteAsset nlyteAsset:nlyteAssets) {
          asset = new Asset();
@@ -161,6 +171,29 @@ public class HandleAssetUtil {
                   freeSize += Integer.parseInt(uSpace);
                }
                asset.setFreeCapacity(freeSize);
+            }
+            List<CabinetU> cabinetus = nlyteAsset.getCabinetUs();
+            if(cabinetus != null && !cabinetus.isEmpty()) {
+               List<com.vmware.flowgate.common.model.CabinetU> flowgateCabinetUs = new ArrayList<com.vmware.flowgate.common.model.CabinetU>();
+               for(CabinetU cabinetu : cabinetus) {
+                  com.vmware.flowgate.common.model.CabinetU flowgateCabinetU = new com.vmware.flowgate.common.model.CabinetU();
+                  flowgateCabinetU.setAssetsOnUnit(cabinetu.getAssetsOnU());
+                  flowgateCabinetU.setCabinetUNumber(cabinetu.getCabinetUNumber());
+                  if(CabinetU_State_Full.equals(cabinetu.getCabinetUState())) {
+                     flowgateCabinetU.setUsed(true);
+                  }else if(CabinetU_State_Free.equals(cabinetu.getCabinetUState())) {
+                     flowgateCabinetU.setUsed(false);
+                  }
+                  flowgateCabinetUs.add(flowgateCabinetU);
+               }
+               try {
+                  String cabinetUsInfo = mapper.writeValueAsString(flowgateCabinetUs);
+                  HashMap<String,String> justficationfields = new HashMap<String, String>();
+                  justficationfields.put(FlowgateConstant.CABINETUNITS, cabinetUsInfo);
+                  asset.setJustificationfields(justficationfields);
+               } catch (JsonProcessingException e) {
+                  logger.error("Failed to get info of cabinetUs.");
+               }
             }
          }
          asset.setAssetSource(nlyteSource);
@@ -290,6 +323,13 @@ public class HandleAssetUtil {
             exsitingAsset.setSubCategory(asset.getSubCategory());
             exsitingAsset.setLastupdate(System.currentTimeMillis());
             exsitingAsset.setMountingSide(asset.getMountingSide());
+            if (exsitingAsset.getCategory().equals(AssetCategory.Cabinet)) {
+               if (asset.getJustificationfields() != null
+                     && asset.getJustificationfields().get(FlowgateConstant.CABINETUNITS) != null) {
+                  exsitingAsset.getJustificationfields().put(FlowgateConstant.CABINETUNITS,
+                        asset.getJustificationfields().get(FlowgateConstant.CABINETUNITS));
+               }
+            }
             updateAsset.add(exsitingAsset);
          }else {
             asset.setCreated(System.currentTimeMillis());
