@@ -202,6 +202,10 @@ public class AggregatorService implements AsyncService {
             String source = pdu.getAssetSource();
             if(source.indexOf(pduFromPowerIQ.getAssetSource()) == -1) {
                pdu.setAssetSource(source + FlowgateConstant.SPILIT_FLAG + pduFromPowerIQ.getAssetSource());
+            }else {
+               //There are some pdus from PowerIQ may have the same name, we only use one of these pdus to merge.
+               pdusOnlyFromPowerIQ.remove(pduName);
+               continue;
             }
             if(pduExtraInfo == null || pduExtraInfo.isEmpty()) {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
