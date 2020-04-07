@@ -1,6 +1,12 @@
 version: '2'
 services:
 
+  baseimage:
+    build:
+      context: $PWD/baseimage
+      dockerfile: $PWD/baseimage/Dockerfile
+    image: baseimage:1.0
+    
   database:
     build:
       context: $PWD/database
@@ -18,55 +24,73 @@ services:
       context: $PWD/flowgate-api
       dockerfile: $PWD/flowgate-api/Dockerfile
     image: flowgate/api:FLOWGATE_VERSION
+    depends_on:
+      - baseimage
       
   management:
     build:
       context: $PWD/management
       dockerfile: $PWD/management/Dockerfile
     image: flowgate/management:FLOWGATE_VERSION
-
+    depends_on:
+      - baseimage
+      
   aggregator:
     build:
       context: $PWD/aggregator
       dockerfile: $PWD/aggregator/Dockerfile
     image: flowgate/aggregator:FLOWGATE_VERSION
-
+    depends_on:
+      - baseimage
+      
   infoblox-worker:
     build:
       context: $PWD/infoblox-worker
       dockerfile: $PWD/infoblox-worker/Dockerfile
     image: flowgate/infoblox-worker:FLOWGATE_VERSION
-
+    depends_on:
+      - baseimage
+      
   nlyte-worker:
     build:
       context: $PWD/nlyte-worker
       dockerfile: $PWD/nlyte-worker/Dockerfile
     image: flowgate/nlyte-worker:FLOWGATE_VERSION
-
+    depends_on:
+      - baseimage
+      
   poweriq-worker:
     build:
       context: $PWD/poweriq-worker
       dockerfile: $PWD/poweriq-worker/Dockerfile
     image: flowgate/poweriq-worker:FLOWGATE_VERSION
-    
+    depends_on:
+      - baseimage
+      
   labsdb-worker:
     build:
       context: $PWD/labsdb-worker
       dockerfile: $PWD/labsdb-worker/Dockerfile
     image: flowgate/labsdb-worker:FLOWGATE_VERSION
-
+    depends_on:
+      - baseimage
+      
   vc-worker:
     build:
       context: $PWD/vc-worker
       dockerfile: $PWD/vc-worker/Dockerfile
     image: flowgate/vc-worker:FLOWGATE_VERSION
-
+    depends_on:
+      - baseimage
+      
   vro-worker:
     build:
       context: $PWD/vro-worker
       dockerfile: $PWD/vro-worker/Dockerfile
     image: flowgate/vro-worker:FLOWGATE_VERSION
-
+    depends_on:
+      - baseimage
+      
 networks:
   db-network:
   services-network:
