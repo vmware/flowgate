@@ -198,17 +198,29 @@ public class AggregatorService implements AsyncService {
             continue;
          }
          String pduName = pdu.getAssetName().toLowerCase();
+         String source = pdu.getAssetSource();
+         boolean isSkip = false;
+         if(source.indexOf(FlowgateConstant.SPILIT_FLAG) > -1) {
+            String[] sources = source.split(FlowgateConstant.SPILIT_FLAG);
+            for(String assetSource : sources) {
+               if(powerIQIDs.containsKey(assetSource)) {
+                  //There are some pdus from PowerIQ may have the same name, we only use one of these pdus to merge.
+                  pdusOnlyFromPowerIQ.remove(pduName);
+                  isSkip = true;
+                  break;
+               }
+            }
+         }
+         if(isSkip) {
+            continue;
+         }
          Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pduName);
          if(pduFromPowerIQ != null) {
             HashMap<String,String> pduFromPowerIQExtraInfo = pduFromPowerIQ.getJustificationfields();
             HashMap<String,String> pduExtraInfo = pdu.getJustificationfields();
-            String source = pdu.getAssetSource();
+
             if(source.indexOf(pduFromPowerIQ.getAssetSource()) == -1) {
                pdu.setAssetSource(source + FlowgateConstant.SPILIT_FLAG + pduFromPowerIQ.getAssetSource());
-            }else {
-               //There are some pdus from PowerIQ may have the same name, we only use one of these pdus to merge.
-               pdusOnlyFromPowerIQ.remove(pduName);
-               continue;
             }
             if(pduExtraInfo == null || pduExtraInfo.isEmpty()) {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
