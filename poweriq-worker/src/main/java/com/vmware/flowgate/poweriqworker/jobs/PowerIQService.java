@@ -330,7 +330,9 @@ public class PowerIQService implements AsyncService {
       }
       LocationInfo location = getLocationInfo(client);
       List<Asset> pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.PDU);
+      logger.info("Size :" + pdusFromFlowgate.size());
       Map<String, Asset> pduIDAndAssetMap = getPDUIDAndAssetMap(pdusFromFlowgate);
+      logger.info("Map Size :" + pduIDAndAssetMap.size());
 
       savePduAssetsToFlowgate(pduIDAndAssetMap, powerIQ.getId(), client, location);
       logger.info("Finish sync PDU metadata for " + powerIQ.getName());
