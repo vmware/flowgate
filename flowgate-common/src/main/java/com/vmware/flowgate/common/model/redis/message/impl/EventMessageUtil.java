@@ -70,6 +70,7 @@ public class EventMessageUtil {
    public static final String PowerIQ_SyncAssetsMetaData="poweriq.syncassetsmetadata";
    public static final String POWERIQ_SyncData= "poweriq.syncdata";
    public static final String PowerIQ_SyncAllPDUID = "poweriq.syncallpduid";
+   public static final String PowerIQ_SyncAllSensorMetricFormula = "poweriq.syncallsensormetricformula";
    public static final String PowerIQ_CleanInActiveAssetData="poweriq.cleaninactiveassetdata";
    public static final String POWERIQ_EXECOUNT = "poweriq.execount";
 
