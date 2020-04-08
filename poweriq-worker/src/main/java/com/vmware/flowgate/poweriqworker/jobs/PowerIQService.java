@@ -1204,55 +1204,71 @@ public class PowerIQService implements AsyncService {
             for(Outlet outlet : outlets) {
                OutletReading reading = outlet.getReading();
                String extraIdentifier = FlowgateConstant.OUTLET_NAME_PREFIX + outlet.getOrdinal();
-               ValueUnit voltageValue = new ValueUnit();
-               voltageValue.setExtraidentifier(extraIdentifier);
-               voltageValue.setKey(MetricName.PDU_VOLTAGE);
-               voltageValue.setTime(valueTime);
-               voltageValue
-                     .setValueNum(Double.parseDouble(voltageValue.translateUnit(String.valueOf(reading.getVoltage()),
-                           MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
-               voltageValue.setUnit(RealtimeDataUnit.Volts.toString());
-               values.add(voltageValue);
+               Double voltage = reading.getVoltage();
+               if(voltage != null) {
+                  ValueUnit voltageValue = new ValueUnit();
+                  voltageValue.setExtraidentifier(extraIdentifier);
+                  voltageValue.setKey(MetricName.PDU_VOLTAGE);
+                  voltageValue.setTime(valueTime);
+                  voltageValue
+                        .setValueNum(Double.parseDouble(voltageValue.translateUnit(String.valueOf(voltage),
+                              MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
+                  voltageValue.setUnit(RealtimeDataUnit.Volts.toString());
+                  values.add(voltageValue);
+               }
 
-               ValueUnit currentValue = new ValueUnit();
-               currentValue.setExtraidentifier(extraIdentifier);
-               currentValue.setKey(MetricName.PDU_CURRENT);
-               currentValue.setTime(valueTime);
-               currentValue
-                     .setValueNum(Double.parseDouble(currentValue.translateUnit(String.valueOf(reading.getCurrent()),
-                           MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
-               currentValue.setUnit(RealtimeDataUnit.Amps.toString());
-               values.add(currentValue);
-               totalCurrentUsed += currentValue.getValueNum();
+               Double current = reading.getCurrent();
+               if(current != null) {
+                  ValueUnit currentValue = new ValueUnit();
+                  currentValue.setExtraidentifier(extraIdentifier);
+                  currentValue.setKey(MetricName.PDU_CURRENT);
+                  currentValue.setTime(valueTime);
+                  currentValue
+                        .setValueNum(Double.parseDouble(currentValue.translateUnit(String.valueOf(current),
+                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+                  currentValue.setUnit(RealtimeDataUnit.Amps.toString());
+                  values.add(currentValue);
+                  totalCurrentUsed += currentValue.getValueNum();
+               }
 
-               ValueUnit activePowerValue = new ValueUnit();
-               activePowerValue.setExtraidentifier(extraIdentifier);
-               activePowerValue.setKey(MetricName.PDU_ACTIVE_POWER);
-               activePowerValue.setTime(valueTime);
-               activePowerValue.setValueNum(Double.parseDouble(activePowerValue.translateUnit(String.valueOf(reading.getActivePower()),
-                     MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
-               activePowerValue.setUnit(RealtimeDataUnit.KW.toString());
-               values.add(activePowerValue);
+               Double active_power = reading.getActivePower();
+               if(active_power != null) {
+                  ValueUnit activePowerValue = new ValueUnit();
+                  activePowerValue.setExtraidentifier(extraIdentifier);
+                  activePowerValue.setKey(MetricName.PDU_ACTIVE_POWER);
+                  activePowerValue.setTime(valueTime);
+                  activePowerValue.setValueNum(Double.parseDouble(activePowerValue.translateUnit(String.valueOf(active_power),
+                        MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
+                  activePowerValue.setUnit(RealtimeDataUnit.KW.toString());
+                  values.add(activePowerValue);
+               }
 
-               ValueUnit apparentPowerValue = new ValueUnit();
-               apparentPowerValue.setExtraidentifier(extraIdentifier);
-               apparentPowerValue.setKey(MetricName.PDU_APPARENT_POWER);
-               apparentPowerValue.setTime(valueTime);
-               apparentPowerValue.setValueNum(Double.parseDouble(apparentPowerValue.translateUnit(String.valueOf(reading.getApparentPower()),
-                     MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
-               apparentPowerValue.setUnit(RealtimeDataUnit.KW.toString());
-               values.add(apparentPowerValue);
-               totalPowerUsed += apparentPowerValue.getValueNum();
+               Double apparent_power = reading.getApparentPower();
+               if(apparent_power != null) {
+                  ValueUnit apparentPowerValue = new ValueUnit();
+                  apparentPowerValue.setExtraidentifier(extraIdentifier);
+                  apparentPowerValue.setKey(MetricName.PDU_APPARENT_POWER);
+                  apparentPowerValue.setTime(valueTime);
+                  apparentPowerValue.setValueNum(Double.parseDouble(apparentPowerValue.translateUnit(String.valueOf(apparent_power),
+                        MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
+                  apparentPowerValue.setUnit(RealtimeDataUnit.KW.toString());
+                  values.add(apparentPowerValue);
+                  totalPowerUsed += apparentPowerValue.getValueNum();
+               }
 
-               ValueUnit freeCapacityValue = new ValueUnit();
-               freeCapacityValue.setExtraidentifier(extraIdentifier);
-               freeCapacityValue.setKey(MetricName.PDU_FREE_CAPACITY);
-               freeCapacityValue.setTime(valueTime);
-               freeCapacityValue
-                     .setValueNum(Double.parseDouble(freeCapacityValue.translateUnit(String.valueOf(reading.getUnutilizedCapacity()),
-                           MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
-               freeCapacityValue.setUnit(RealtimeDataUnit.Amps.toString());
-               values.add(freeCapacityValue);
+               Double freeCapacity = reading.getUnutilizedCapacity();
+               if(freeCapacity != null) {
+                  ValueUnit freeCapacityValue = new ValueUnit();
+                  freeCapacityValue.setExtraidentifier(extraIdentifier);
+                  freeCapacityValue.setKey(MetricName.PDU_FREE_CAPACITY);
+                  freeCapacityValue.setTime(valueTime);
+                  freeCapacityValue
+                        .setValueNum(Double.parseDouble(freeCapacityValue.translateUnit(String.valueOf(freeCapacity),
+                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+                  freeCapacityValue.setUnit(RealtimeDataUnit.Amps.toString());
+                  values.add(freeCapacityValue);
+               }
+
             }
             String rate_current = pduInfoFromPowerIQ.get(FlowgateConstant.PDU_RATE_AMPS);
             DecimalFormat df = new DecimalFormat("#.00");
@@ -1411,9 +1427,13 @@ public class PowerIQService implements AsyncService {
             break;
          }
 
+         Double metricsValue = reading.getValue();
+         if(metricsValue == null) {
+            continue;
+         }
          try {
             value.setValueNum(Double.parseDouble(
-                  value.translateUnit(String.valueOf(reading.getValue()), sourceUnit, targetUnit)));
+                  value.translateUnit(String.valueOf(metricsValue), sourceUnit, targetUnit)));
          } catch (WormholeException e) {
             logger.error("Cannot translate Unit", e);
          }
