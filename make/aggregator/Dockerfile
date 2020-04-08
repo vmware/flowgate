@@ -1,10 +1,4 @@
-FROM photon:2.0
-
-RUN tdnf distro-sync -y \
-    && tdnf install openjre8.x86_64 -y \
-	&& mkdir /jar \
-	&& mkdir /log \
-	&& mkdir /conf
+FROM baseimage:1.0
 
 VOLUME /log /conf
 COPY start.sh /
