@@ -330,16 +330,28 @@ public class PowerIQService implements AsyncService {
       }
       LocationInfo location = getLocationInfo(client);
       List<Asset> pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.PDU);
-      logger.info("Size :" + pdusFromFlowgate.size());
       Map<String, Asset> pduIDAndAssetMap = getPDUIDAndAssetMap(pdusFromFlowgate);
-      logger.info("Map Size :" + pduIDAndAssetMap.size());
-
-      savePduAssetsToFlowgate(pduIDAndAssetMap, powerIQ.getId(), client, location);
+      boolean hasNewPduToSave =
+            savePduAssetsToFlowgate(pduIDAndAssetMap, powerIQ.getId(), client, location);
       logger.info("Finish sync PDU metadata for " + powerIQ.getName());
 
       Map<String, Asset> exsitingSensorAssets = getAssetsFromWormhole(powerIQ.getId());
+      pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.PDU);
+      pduIDAndAssetMap = getPDUIDAndAssetMap(pdusFromFlowgate);
       saveSensorAssetsToFlowgate(exsitingSensorAssets, client, powerIQ.getId(), pduIDAndAssetMap, location);
       logger.info("Finish sync Sensor metadata for: " + powerIQ.getName());
+
+      if(hasNewPduToSave) {
+         try {
+            EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
+                  EventMessageUtil.AggregateAndCleanPowerIQPDU, "");
+            String jobmessage = EventMessageUtil.convertEventMessageAsString(eventMessage);
+            publisher.publish(EventMessageUtil.AggregatorTopic, jobmessage);
+            logger.info("Send aggregate Pdu data command");
+         }catch(IOException e) {
+            logger.error("Failed to Send aggregate pdu data command", e);
+         }
+      }
    }
 
    public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig powerIQ, String message) {
@@ -1099,8 +1111,17 @@ public class PowerIQService implements AsyncService {
          PDU_VOLT_UNIT = POWERIQ_VOLTAGE_UNIT;
       }
       if(!inlets.isEmpty()) {
-         String time = inlets.get(0).getReading().getReadingTime();
-         long valueTime = WormholeDateFormat.getLongTime(time, dateFormat, timezone);
+         String time = null;
+         for(Inlet inlet : inlets) {
+            time = inlet.getReading().getReadingTime();
+            if(time != null) {
+               break;
+            }
+         }
+         long valueTime = -1;
+         if(time != null) {
+            valueTime = WormholeDateFormat.getLongTime(time, dateFormat, timezone);
+         }
          if (valueTime == -1) {
             logger.error("Failed to translate the time string: " + time + ".And the dateformat is "
                   + dateFormat);
@@ -1193,8 +1214,17 @@ public class PowerIQService implements AsyncService {
       }
 
       if(!outlets.isEmpty()) {
-         String time = inlets.get(0).getReading().getReadingTime();
-         long valueTime = WormholeDateFormat.getLongTime(time, dateFormat, timezone);
+         String time = null;
+         for(Inlet inlet : inlets) {
+            time = inlet.getReading().getReadingTime();
+            if(time != null) {
+               break;
+            }
+         }
+         long valueTime = -1;
+         if(time != null) {
+            valueTime = WormholeDateFormat.getLongTime(time, dateFormat, timezone);
+         }
          if (valueTime == -1) {
             logger.error("Failed to translate the time string: " + time + ".And the dateformat is "
                   + dateFormat);
@@ -1571,7 +1601,7 @@ public class PowerIQService implements AsyncService {
       return pduRateInfo;
    }
 
-   public void savePduAssetsToFlowgate(Map<String, Asset> existedPduAssets,
+   public boolean savePduAssetsToFlowgate(Map<String, Asset> existedPduAssets,
          String assetSource, PowerIQAPIClient client, LocationInfo location) {
       int limit = 100;
       int offset = 0;
@@ -1671,17 +1701,7 @@ public class PowerIQService implements AsyncService {
          restClient.saveAssets(assetsNeedToSave);
          offset += limit;
       }
-      if(triggerPDUAggregation) {
-         try {
-            EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
-                  EventMessageUtil.AggregateAndCleanPowerIQPDU, "");
-            String jobmessage = EventMessageUtil.convertEventMessageAsString(eventMessage);
-            publisher.publish(EventMessageUtil.AggregatorTopic, jobmessage);
-            logger.info("Send aggregate Pdu data command");
-         }catch(IOException e) {
-            logger.error("Failed to Send aggregate pdu data command", e);
-         }
-      }
+      return triggerPDUAggregation;
    }
 
    public Map<String,String> getInfoMap(String info) throws IOException{
