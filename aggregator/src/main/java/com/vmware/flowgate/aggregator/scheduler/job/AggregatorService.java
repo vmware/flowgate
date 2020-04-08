@@ -222,6 +222,10 @@ public class AggregatorService implements AsyncService {
             if(source.indexOf(pduFromPowerIQ.getAssetSource()) == -1) {
                pdu.setAssetSource(source + FlowgateConstant.SPILIT_FLAG + pduFromPowerIQ.getAssetSource());
             }
+            Map<String, Map<String, Map<String, String>>> metricsformulars = pduFromPowerIQ.getMetricsformulars();
+            if(!metricsformulars.isEmpty()) {
+               pdu.setMetricsformulars(metricsformulars);
+            }
             if(pduExtraInfo == null || pduExtraInfo.isEmpty()) {
                pdu.setJustificationfields(pduFromPowerIQExtraInfo);
                restClient.saveAssets(pdu);
