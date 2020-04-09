@@ -638,37 +638,7 @@ public class PowerIQService implements AsyncService {
          if(pduAsset == null) {
             continue;
          }
-         int rackUnitNumber = sensorAsset.getCabinetUnitPosition();
-         String positionInfo = FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION;
-         Map<String,String> sensorAssetJustfication = sensorAsset.getJustificationfields();
-         String rackUnitInfo = null;
-         String positionFromAsset = null;
-
-         if(rackUnitNumber != 0) {
-            rackUnitInfo = FlowgateConstant.RACK_UNIT_PREFIX + rackUnitNumber;
-         }
-         if(sensorAssetJustfication != null) {
-            String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
-            if(sensorInfo != null) {
-               try {
-                  Map<String,String> sensorInfoMap = getInfoMap(sensorInfo);
-                  positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
-               } catch (IOException e) {
-                  positionFromAsset = null;
-               }
-            }
-         }
-         //formats of position info : 1.rackUnit1 2.rackUnit1_FIELDSPLIT_INLET 3.INLET/OUTLET/EXTRNAL/COMMON
-         if(rackUnitInfo != null) {
-            positionInfo = rackUnitInfo;
-         }
-         if(positionFromAsset != null) {
-            if(positionInfo != null) {
-               positionInfo = positionInfo + FlowgateConstant.SEPARATOR + positionFromAsset;
-            }else {
-               positionInfo = positionFromAsset;
-            }
-         }
+         String positionInfo = getSensorPositionInfo(sensorAsset);
          Map<String, Map<String, Map<String, String>>> formulars = pduAsset.getMetricsformulars();
          if(formulars == null || formulars.isEmpty()) {
             formulars = new HashMap<String, Map<String, Map<String, String>>>();
@@ -716,6 +686,51 @@ public class PowerIQService implements AsyncService {
       return pduAssets;
    }
 
+   public String getSensorPositionInfo(Asset asset) {
+      ObjectMapper mapper = new ObjectMapper();
+      StringBuilder positionInfo = new StringBuilder();
+      Map<String,String> sensorAssetJustfication = asset.getJustificationfields();
+      int rackUnitNumber = asset.getCabinetUnitPosition();
+      String rackUnitInfo = null;
+      String positionFromAsset = null;
+
+      if(rackUnitNumber != 0) {
+         rackUnitInfo = FlowgateConstant.RACK_UNIT_PREFIX  + rackUnitNumber;
+         positionInfo.append(rackUnitInfo);
+         if(sensorAssetJustfication == null || sensorAssetJustfication.isEmpty()) {
+            return positionInfo.toString();
+         }
+         String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
+         try {
+            Map<String,String> sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
+            positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
+            if(positionFromAsset != null) {
+               positionInfo.append(FlowgateConstant.SEPARATOR + positionFromAsset);
+            }
+         } catch (IOException e) {
+            return positionInfo.toString();
+         }
+      }else {
+         if(sensorAssetJustfication == null || sensorAssetJustfication.isEmpty()) {
+            positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
+            return positionInfo.toString();
+         }
+         String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
+         try {
+            Map<String,String> sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
+            positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
+            if(positionFromAsset != null) {
+               positionInfo.append(positionFromAsset);
+            }else {
+               positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
+            }
+         } catch (IOException e) {
+            positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
+            return positionInfo.toString();
+         }
+      }
+      return positionInfo.toString();
+   }
    public Map<String,Map<String,String>> generateNewMetricformular(Asset sensorAsset, String positionInfo){
       Map<String, Map<String, String>> sensorFormulars = new HashMap<String, Map<String, String>>();
       Map<String, String> metricsLocationAndIdMap = new HashMap<String,String>();

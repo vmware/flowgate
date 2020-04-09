@@ -325,6 +325,70 @@ public class SyncSensorMetaDataJobTest {
       TestCase.assertEquals("256", sensorLocationAndId1.entrySet().iterator().next().getValue());
    }
 
+   @Test
+   public void testGetPositionInfo() {
+      Asset asset1 = new Asset();
+      TestCase.assertEquals(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, powerIQService.getSensorPositionInfo(asset1));
+
+      Asset asset2 = new Asset();
+      asset2.setCabinetUnitPosition(2);
+      TestCase.assertEquals(FlowgateConstant.RACK_UNIT_PREFIX + asset2.getCabinetUnitPosition(), powerIQService.getSensorPositionInfo(asset2));
+
+      Asset asset3 = new Asset();
+      asset3.setCabinetUnitPosition(3);
+      HashMap<String,String> sensorAssetJustfication = new HashMap<String, String>();
+      Map<String,String> sensorInfo = new HashMap<String,String>();
+      sensorInfo.put(FlowgateConstant.POSITION, "INLET");
+      ObjectMapper mapper = new ObjectMapper();
+
+      try {
+         sensorAssetJustfication.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo));
+         asset3.setJustificationfields(sensorAssetJustfication);
+      } catch (JsonProcessingException e) {
+         TestCase.fail();
+      }
+
+      TestCase.assertEquals(FlowgateConstant.RACK_UNIT_PREFIX + asset3.getCabinetUnitPosition()+FlowgateConstant.SEPARATOR+"INLET",
+            powerIQService.getSensorPositionInfo(asset3));
+
+      Asset asset4 = new Asset();
+      HashMap<String,String> justfication = new HashMap<String, String>();
+      Map<String,String> sensorInfo1 = new HashMap<String,String>();
+      sensorInfo1.put(FlowgateConstant.POSITION, "INLET");
+
+      try {
+         justfication.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo1));
+         asset4.setJustificationfields(justfication);
+      } catch (JsonProcessingException e) {
+         TestCase.fail();
+      }
+
+      Asset asset5 = new Asset();
+      asset5.setCabinetUnitPosition(3);
+      HashMap<String,String> justfication5 = new HashMap<String, String>();
+      Map<String,String> sensorInfo5 = new HashMap<String,String>();
+      try {
+         justfication5.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo5));
+         asset5.setJustificationfields(justfication5);
+      } catch (JsonProcessingException e) {
+         TestCase.fail();
+      }
+
+      TestCase.assertEquals(FlowgateConstant.RACK_UNIT_PREFIX + asset5.getCabinetUnitPosition(),powerIQService.getSensorPositionInfo(asset5));
+
+      Asset asset6 = new Asset();
+      HashMap<String,String> justfication6 = new HashMap<String, String>();
+      Map<String,String> sensorInfo6 = new HashMap<String,String>();
+      try {
+         justfication6.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo6));
+         asset5.setJustificationfields(justfication6);
+      } catch (JsonProcessingException e) {
+         TestCase.fail();
+      }
+
+      TestCase.assertEquals(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION,powerIQService.getSensorPositionInfo(asset6));
+   }
+
    HashMap<AdvanceSettingType, String> createAdvanceSettingMap() {
       HashMap<AdvanceSettingType, String> advanceSettingMap =
             new HashMap<AdvanceSettingType, String>();
