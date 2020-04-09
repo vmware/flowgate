@@ -42,7 +42,9 @@ import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.common.model.PageModelImp;
 import com.vmware.flowgate.common.model.PduInlet;
 import com.vmware.flowgate.common.model.PduOutlet;
 import com.vmware.flowgate.common.model.RealTimeData;
@@ -226,6 +228,9 @@ public class PowerIQService implements AsyncService {
          removeSensorMetaData(powerIQ);
          logger.info("Finish clean sensor metadata for " + powerIQ.getName());
          break;
+      case EventMessageUtil.PowerIQ_SyncAllSensorMetricFormula:
+         syncAllSensorMetricFormula();
+         break;
       default:
          logger.warn("Not supported command");
          break;
@@ -235,6 +240,31 @@ public class PowerIQService implements AsyncService {
    private void updateIntegrationStatus(FacilitySoftwareConfig powerIQ) {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       restClient.updateFacility(powerIQ);
+   }
+
+   public void syncAllSensorMetricFormula() {
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      FacilitySoftwareConfig[] powerIQs =
+            restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
+      for(FacilitySoftwareConfig powerIQ : powerIQs) {
+         logger.info("Start sync sensor metrics formula for " + powerIQ.getName());
+         List<Asset> pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.PDU);
+         Map<String, Asset> pduIDAndAssetMap = getPDUIDAndAssetMap(pdusFromFlowgate);
+         int pageSize = 200;
+         int pageNumber = 0;
+         List<Asset> sensors = null;
+         ResponseEntity<PageModelImp<Asset>> res =
+               restClient.getAssetsBySourceAndType(powerIQ.getId(), AssetCategory.Sensors,pageNumber,pageSize);
+         while (!res.getBody().getContent().isEmpty()) {
+            sensors = res.getBody().getContent();
+            Set<Asset> pduAssetNeedToUpdate = updatePduMetricformular(sensors,pduIDAndAssetMap);
+            restClient.saveAssets(new ArrayList<Asset>(pduAssetNeedToUpdate));
+            pageNumber++;
+            res =
+                  restClient.getAssetsBySourceAndType(powerIQ.getId(), AssetCategory.Sensors,pageNumber,pageSize);
+         }
+         logger.info("Finished sync sensor metrics formula for " + powerIQ.getName());
+      }
    }
 
    public void removeSensorMetaData(FacilitySoftwareConfig powerIQ) {
