@@ -336,9 +336,7 @@ public class PowerIQService implements AsyncService {
       logger.info("Finish sync PDU metadata for " + powerIQ.getName());
 
       Map<String, Asset> exsitingSensorAssets = getAssetsFromWormhole(powerIQ.getId());
-      pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.PDU);
-      pduIDAndAssetMap = getPDUIDAndAssetMap(pdusFromFlowgate);
-      saveSensorAssetsToFlowgate(exsitingSensorAssets, client, powerIQ.getId(), pduIDAndAssetMap, location);
+      saveSensorAssetsToFlowgate(exsitingSensorAssets, client, powerIQ.getId(), location);
       logger.info("Finish sync Sensor metadata for: " + powerIQ.getName());
 
       if(hasNewPduToSave) {
@@ -471,7 +469,9 @@ public class PowerIQService implements AsyncService {
    }
 
    public void saveSensorAssetsToFlowgate(Map<String, Asset> exsitingSensorAssets,
-         PowerIQAPIClient client, String assetSource, Map<String, Asset> pduAssetMap, LocationInfo location) {
+         PowerIQAPIClient client, String assetSource, LocationInfo location) {
+      List<Asset> pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(assetSource, AssetCategory.PDU);
+      Map<String, Asset> pduAssetMap = getPDUIDAndAssetMap(pdusFromFlowgate);
       List<Sensor> sensors = null;
       int limit = 100;
       int offset = 0;
