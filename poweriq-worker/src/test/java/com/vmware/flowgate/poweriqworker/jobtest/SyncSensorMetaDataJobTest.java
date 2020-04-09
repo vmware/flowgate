@@ -325,6 +325,48 @@ public class SyncSensorMetaDataJobTest {
       TestCase.assertEquals("256", sensorLocationAndId1.entrySet().iterator().next().getValue());
    }
 
+   @Test
+   public void testGetPositionInfo() {
+      Asset asset1 = new Asset();
+      TestCase.assertEquals(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION, powerIQService.getPositionInfo(asset1));
+
+      Asset asset2 = new Asset();
+      asset2.setCabinetUnitPosition(2);
+      TestCase.assertEquals(FlowgateConstant.RACK_UNIT_PREFIX + asset2.getCabinetUnitPosition(), powerIQService.getPositionInfo(asset2));
+
+
+      Asset asset3 = new Asset();
+      asset3.setCabinetUnitPosition(3);
+      HashMap<String,String> sensorAssetJustfication = new HashMap<String, String>();
+      Map<String,String> sensorInfo = new HashMap<String,String>();
+      sensorInfo.put(FlowgateConstant.POSITION, "INLET");
+      ObjectMapper mapper = new ObjectMapper();
+
+      try {
+         sensorAssetJustfication.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo));
+         asset3.setJustificationfields(sensorAssetJustfication);
+      } catch (JsonProcessingException e) {
+         TestCase.fail();
+      }
+
+      TestCase.assertEquals(FlowgateConstant.RACK_UNIT_PREFIX + asset3.getCabinetUnitPosition()+FlowgateConstant.SEPARATOR+"INLET",
+            powerIQService.getPositionInfo(asset3));
+
+      Asset asset4 = new Asset();
+      HashMap<String,String> justfication = new HashMap<String, String>();
+      Map<String,String> sensorInfo1 = new HashMap<String,String>();
+      sensorInfo1.put(FlowgateConstant.POSITION, "INLET");
+
+      try {
+         justfication.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo1));
+         asset4.setJustificationfields(justfication);
+      } catch (JsonProcessingException e) {
+         TestCase.fail();
+      }
+
+      TestCase.assertEquals("INLET",powerIQService.getPositionInfo(asset4));
+   }
+
    HashMap<AdvanceSettingType, String> createAdvanceSettingMap() {
       HashMap<AdvanceSettingType, String> advanceSettingMap =
             new HashMap<AdvanceSettingType, String>();
