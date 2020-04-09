@@ -1163,7 +1163,10 @@ public class PowerIQService implements AsyncService {
       if(!inlets.isEmpty()) {
          String time = null;
          for(Inlet inlet : inlets) {
-            time = inlet.getReading().getReadingTime();
+            InletReading reading = inlet.getReading();
+            if(reading != null) {
+               time = reading.getReadingTime();
+            }
             if(time != null) {
                break;
             }
@@ -1351,7 +1354,7 @@ public class PowerIQService implements AsyncService {
 
             }
             String rate_current = pduInfoFromPowerIQ.get(FlowgateConstant.PDU_RATE_AMPS);
-            DecimalFormat df = new DecimalFormat("#.00");
+            DecimalFormat df = new DecimalFormat("#.0000");
             if(totalOutletCurrentUsed == 0.0) {
                totalOutletCurrentUsed = inletTotalCurrent;
             }
