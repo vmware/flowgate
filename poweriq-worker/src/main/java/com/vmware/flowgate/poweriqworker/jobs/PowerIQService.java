@@ -1110,6 +1110,9 @@ public class PowerIQService implements AsyncService {
          //By default the voltage unit in powerIQ is volt.
          PDU_VOLT_UNIT = POWERIQ_VOLTAGE_UNIT;
       }
+      double inlteTotalPower = 0.0;
+      double inletTotalCurrent = 0.0;
+      double inletVoltage = 0.0;
       if(!inlets.isEmpty()) {
          String time = null;
          for(Inlet inlet : inlets) {
@@ -1126,8 +1129,7 @@ public class PowerIQService implements AsyncService {
             logger.error("Failed to translate the time string: " + time + ".And the dateformat is "
                   + dateFormat);
          }else {
-            double totalPower = 0.0;
-            double totalCurrent = 0.0;
+
             for(Inlet inlet : inlets) {
                InletReading reading = inlet.getReading();
                String extraIdentifier = FlowgateConstant.INLET_NAME_PREFIX + inlet.getOrdinal();
@@ -1143,6 +1145,7 @@ public class PowerIQService implements AsyncService {
                               MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
                   voltageValue.setUnit(RealtimeDataUnit.Volts.toString());
                   values.add(voltageValue);
+                  inletVoltage = voltageValue.getValueNum();
                }
 
                Double current = reading.getCurrent();
@@ -1156,7 +1159,7 @@ public class PowerIQService implements AsyncService {
                               MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
                   currentValue.setUnit(RealtimeDataUnit.Amps.toString());
                   values.add(currentValue);
-                  totalCurrent += currentValue.getValueNum();
+                  inletTotalCurrent += currentValue.getValueNum();
                }
 
                Double activePower = reading.getActivePower();
@@ -1181,7 +1184,7 @@ public class PowerIQService implements AsyncService {
                         MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
                   apparentPowerValue.setUnit(RealtimeDataUnit.KW.toString());
                   values.add(apparentPowerValue);
-                  totalPower += apparentPowerValue.getValueNum();
+                  inlteTotalPower += apparentPowerValue.getValueNum();
                }
 
                Double freeCapacity = reading.getUnutilizedCapacity();
@@ -1201,14 +1204,14 @@ public class PowerIQService implements AsyncService {
             total_current.setKey(MetricName.PDU_TOTAL_CURRENT);
             total_current.setTime(valueTime);
             total_current.setUnit(RealtimeDataUnit.Amps.toString());
-            total_current.setValueNum(totalCurrent);
+            total_current.setValueNum(inletTotalCurrent);
             values.add(total_current);
 
             ValueUnit total_power = new ValueUnit();
             total_power.setKey(MetricName.PDU_TOTAL_POWER);
             total_power.setTime(valueTime);
             total_power.setUnit(RealtimeDataUnit.KW.toString());
-            total_power.setValueNum(totalPower);
+            total_power.setValueNum(inlteTotalPower);
             values.add(total_power);
          }
       }
@@ -1229,8 +1232,8 @@ public class PowerIQService implements AsyncService {
             logger.error("Failed to translate the time string: " + time + ".And the dateformat is "
                   + dateFormat);
          }else {
-            double totalCurrentUsed = 0.0;
-            double totalPowerUsed = 0.0;
+            double totalOutletCurrentUsed = 0.0;
+            double totalOutletPowerUsed = 0.0;
             for(Outlet outlet : outlets) {
                OutletReading reading = outlet.getReading();
                String extraIdentifier = FlowgateConstant.OUTLET_NAME_PREFIX + outlet.getOrdinal();
@@ -1258,7 +1261,7 @@ public class PowerIQService implements AsyncService {
                               MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
                   currentValue.setUnit(RealtimeDataUnit.Amps.toString());
                   values.add(currentValue);
-                  totalCurrentUsed += currentValue.getValueNum();
+                  totalOutletCurrentUsed += currentValue.getValueNum();
                }
 
                Double active_power = reading.getActivePower();
@@ -1283,7 +1286,7 @@ public class PowerIQService implements AsyncService {
                         MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
                   apparentPowerValue.setUnit(RealtimeDataUnit.KW.toString());
                   values.add(apparentPowerValue);
-                  totalPowerUsed += apparentPowerValue.getValueNum();
+                  totalOutletPowerUsed += apparentPowerValue.getValueNum();
                }
 
                Double freeCapacity = reading.getUnutilizedCapacity();
@@ -1302,28 +1305,53 @@ public class PowerIQService implements AsyncService {
             }
             String rate_current = pduInfoFromPowerIQ.get(FlowgateConstant.PDU_RATE_AMPS);
             DecimalFormat df = new DecimalFormat("#.00");
+            if(totalOutletCurrentUsed == 0.0) {
+               totalOutletCurrentUsed = inletTotalCurrent;
+            }
             if(rate_current != null) {
                Double rate_current_value = Double.parseDouble(rate_current);
                ValueUnit current_load = new ValueUnit();
                current_load.setKey(MetricName.PDU_CURRENT_LOAD);
                current_load.setTime(valueTime);
                current_load.setUnit(RealtimeDataUnit.Percent.toString());
-               current_load.setValueNum(Double.parseDouble(df.format(totalCurrentUsed/rate_current_value)));
+               current_load.setValueNum(Double.parseDouble(df.format(totalOutletCurrentUsed/rate_current_value)));
                values.add(current_load);
             }
-            String rate_power = pduInfoFromPowerIQ.get(FlowgateConstant.PDU_MIN_RATE_POWER);
-            if(rate_power != null) {
-               Double rate_power_value = Double.parseDouble(rate_power);
+            String real_rate_power = getRealRatePower(inletVoltage, pduInfoFromPowerIQ);
+            if(totalOutletPowerUsed == 0.0) {
+               totalOutletPowerUsed = inlteTotalPower;
+            }
+            if(real_rate_power != null) {
+               Double rate_power_value = Double.parseDouble(real_rate_power);
                ValueUnit power_load = new ValueUnit();
                power_load.setKey(MetricName.PDU_POWER_LOAD);
                power_load.setTime(valueTime);
                power_load.setUnit(RealtimeDataUnit.Percent.toString());
-               power_load.setValueNum(Double.parseDouble(df.format(totalPowerUsed/rate_power_value)));
+               power_load.setValueNum(Double.parseDouble(df.format(totalOutletPowerUsed/rate_power_value)));
                values.add(power_load);
             }
          }
       }
       return values;
+   }
+
+   public String getRealRatePower(double inletVoltage, Map<String,String> pduInfoFromPowerIQ) {
+      String min_rate_voltage =  pduInfoFromPowerIQ.get(FlowgateConstant.PDU_MIN_RATE_VOLTS);
+      String max_rate_voltage =  pduInfoFromPowerIQ.get(FlowgateConstant.PDU_MAX_RATE_VOLTS);
+      double absoluteValueForMinVolt = 0.0;
+      double absoluteValueForMaxVolt = 0.0;
+      if(min_rate_voltage != null) {
+         Double min_rate_voltage_value = Double.parseDouble(min_rate_voltage);
+         absoluteValueForMinVolt = Math.abs(inletVoltage - min_rate_voltage_value);
+      }
+      if(max_rate_voltage != null) {
+         Double max_rate_voltage_value = Double.parseDouble(max_rate_voltage);
+         absoluteValueForMaxVolt = Math.abs(inletVoltage - max_rate_voltage_value);
+      }
+      if(absoluteValueForMinVolt < absoluteValueForMaxVolt) {
+         return pduInfoFromPowerIQ.get(FlowgateConstant.PDU_MIN_RATE_POWER);
+      }
+      return pduInfoFromPowerIQ.get(FlowgateConstant.PDU_MAX_RATE_POWER);
    }
 
    public List<Asset> filterAssetsBySource(String source, Set<String> assetIds) {
