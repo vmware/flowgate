@@ -697,7 +697,8 @@ public class PowerIQService implements AsyncService {
       if(rackUnitNumber != 0) {
          rackUnitInfo = FlowgateConstant.RACK_UNIT_PREFIX  + rackUnitNumber;
          positionInfo.append(rackUnitInfo);
-         if(sensorAssetJustfication == null || sensorAssetJustfication.isEmpty()) {
+         if(sensorAssetJustfication == null || sensorAssetJustfication.isEmpty() ||
+               sensorAssetJustfication.get(FlowgateConstant.SENSOR) == null) {
             return positionInfo.toString();
          }
          String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
@@ -711,7 +712,8 @@ public class PowerIQService implements AsyncService {
             return positionInfo.toString();
          }
       }else {
-         if(sensorAssetJustfication == null || sensorAssetJustfication.isEmpty()) {
+         if(sensorAssetJustfication == null || sensorAssetJustfication.isEmpty() ||
+               sensorAssetJustfication.get(FlowgateConstant.SENSOR) == null) {
             positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
             return positionInfo.toString();
          }
