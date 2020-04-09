@@ -215,6 +215,26 @@ public class SyncRealTimeDataJobTest {
       TestCase.assertEquals(true, pdusmap.containsKey("pek-wor-pdu-02"));
    }
 
+   @Test
+   public void testGetRealRatePower() {
+      Map<String,String> pduInfoFromPowerIQ = new HashMap<>();
+      pduInfoFromPowerIQ.put(FlowgateConstant.PDU_MAX_RATE_POWER, "6.7");
+      pduInfoFromPowerIQ.put(FlowgateConstant.PDU_MIN_RATE_POWER, "4.7");
+      String real_power = powerIQService.getRealRatePower(0.0, pduInfoFromPowerIQ);
+      TestCase.assertEquals(pduInfoFromPowerIQ.get(FlowgateConstant.PDU_MAX_RATE_POWER), real_power);
+   }
+
+   @Test
+   public void testGetRealRatePower1() {
+      Map<String,String> pduInfoFromPowerIQ = new HashMap<>();
+      pduInfoFromPowerIQ.put(FlowgateConstant.PDU_MAX_RATE_POWER, "6.7");
+      pduInfoFromPowerIQ.put(FlowgateConstant.PDU_MIN_RATE_POWER, "4.7");
+      pduInfoFromPowerIQ.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, "330");
+      pduInfoFromPowerIQ.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, "230");
+      String real_power = powerIQService.getRealRatePower(300, pduInfoFromPowerIQ);
+      TestCase.assertEquals(pduInfoFromPowerIQ.get(FlowgateConstant.PDU_MAX_RATE_POWER), real_power);
+   }
+
    public ResponseEntity<FacilitySoftwareConfig[]> getFacilitySoftwareByType() {
       FacilitySoftwareConfig[] configs = new FacilitySoftwareConfig[1];
       configs[0] = new FacilitySoftwareConfig();
