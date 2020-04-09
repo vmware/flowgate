@@ -123,6 +123,31 @@ public class MessageProcessingTest {
       }
 
       TestCase.assertEquals("INLET",aggregatorService.getPositionInfo(asset4));
+
+      Asset asset5 = new Asset();
+      asset5.setCabinetUnitPosition(3);
+      HashMap<String,String> justfication5 = new HashMap<String, String>();
+      Map<String,String> sensorInfo5 = new HashMap<String,String>();
+      try {
+         justfication5.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo5));
+         asset5.setJustificationfields(justfication5);
+      } catch (JsonProcessingException e) {
+         TestCase.fail();
+      }
+
+      TestCase.assertEquals(FlowgateConstant.RACK_UNIT_PREFIX + asset5.getCabinetUnitPosition(),aggregatorService.getPositionInfo(asset5));
+
+      Asset asset6 = new Asset();
+      HashMap<String,String> justfication6 = new HashMap<String, String>();
+      Map<String,String> sensorInfo6 = new HashMap<String,String>();
+      try {
+         justfication6.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo6));
+         asset5.setJustificationfields(justfication6);
+      } catch (JsonProcessingException e) {
+         TestCase.fail();
+      }
+
+      TestCase.assertEquals(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION,aggregatorService.getPositionInfo(asset6));
    }
 
    @Test

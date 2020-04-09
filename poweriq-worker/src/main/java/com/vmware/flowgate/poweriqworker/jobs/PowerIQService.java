@@ -638,7 +638,7 @@ public class PowerIQService implements AsyncService {
          if(pduAsset == null) {
             continue;
          }
-         String positionInfo = getPositionInfo(sensorAsset);
+         String positionInfo = getSensorPositionInfo(sensorAsset);
          Map<String, Map<String, Map<String, String>>> formulars = pduAsset.getMetricsformulars();
          if(formulars == null || formulars.isEmpty()) {
             formulars = new HashMap<String, Map<String, Map<String, String>>>();
@@ -686,7 +686,7 @@ public class PowerIQService implements AsyncService {
       return pduAssets;
    }
 
-   public String getPositionInfo(Asset asset) {
+   public String getSensorPositionInfo(Asset asset) {
       ObjectMapper mapper = new ObjectMapper();
       StringBuilder positionInfo = new StringBuilder();
       Map<String,String> sensorAssetJustfication = asset.getJustificationfields();
@@ -704,7 +704,9 @@ public class PowerIQService implements AsyncService {
          try {
             Map<String,String> sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
             positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
-            positionInfo.append(FlowgateConstant.SEPARATOR + positionFromAsset);
+            if(positionFromAsset != null) {
+               positionInfo.append(FlowgateConstant.SEPARATOR + positionFromAsset);
+            }
          } catch (IOException e) {
             return positionInfo.toString();
          }
@@ -717,7 +719,11 @@ public class PowerIQService implements AsyncService {
          try {
             Map<String,String> sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
             positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
-            positionInfo.append(positionFromAsset);
+            if(positionFromAsset != null) {
+               positionInfo.append(positionFromAsset);
+            }else {
+               positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
+            }
          } catch (IOException e) {
             positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
             return positionInfo.toString();

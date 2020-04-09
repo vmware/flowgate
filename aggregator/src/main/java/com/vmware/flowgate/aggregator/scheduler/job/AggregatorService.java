@@ -714,7 +714,9 @@ public class AggregatorService implements AsyncService {
          try {
             Map<String,String> sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
             positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
-            positionInfo.append(FlowgateConstant.SEPARATOR + positionFromAsset);
+            if(positionFromAsset != null) {
+               positionInfo.append(FlowgateConstant.SEPARATOR + positionFromAsset);
+            }
          } catch (IOException e) {
             return positionInfo.toString();
          }
@@ -727,7 +729,11 @@ public class AggregatorService implements AsyncService {
          try {
             Map<String,String> sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
             positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
-            positionInfo.append(positionFromAsset);
+            if(positionFromAsset != null) {
+               positionInfo.append(positionFromAsset);
+            }else {
+               positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
+            }
          } catch (IOException e) {
             positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
             return positionInfo.toString();
