@@ -12,7 +12,7 @@ public class MetricKeyName {
    public static final String PDU_XLET_VOLTAGE = "%s|Voltage";
    public static final String PDU_XLET_FREE_CAPACITY = "%s|FreeCapacity";
    public static final String PDU_TEMPERATURE_LOCATIONX = "Temperature|:%s";
-   public static final String PDU_HUMIDITY_LOCATIONX = "HUMIDITY|:%s";
+   public static final String PDU_HUMIDITY_LOCATIONX = "Humidity|:%s";
 
    public static final String SERVER_FRONT_TEMPERATURE_LOCATIONX = "FrontTemperature|%s";
    public static final String SERVER_BACK_TEMPREATURE_LOCATIONX = "BackTemperature|%s";
