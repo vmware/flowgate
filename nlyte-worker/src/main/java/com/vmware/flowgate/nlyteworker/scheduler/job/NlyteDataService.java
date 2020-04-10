@@ -527,6 +527,7 @@ public class NlyteDataService implements AsyncService {
             asset.setSubCategory(assetFromNlyte.getSubCategory());
             asset.setLastupdate(System.currentTimeMillis());
             asset.setMountingSide(assetFromNlyte.getMountingSide());
+            asset.setTenant(assetFromNlyte.getTenant());
             updateAssets.add(asset);
          }
       }

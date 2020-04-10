@@ -101,6 +101,10 @@ public class NlyteAsset {
    @JsonProperty(value="CabinetUs")
    private List<CabinetU> cabinetUs;
 
+   @JsonProperty(value = "CustomFields")
+   private List<CustomField> customFields;
+
+
    public String getCabinetName() {
       return cabinetName;
    }
@@ -379,6 +383,21 @@ public class NlyteAsset {
    }
    public void setCabinetUs(List<CabinetU> cabinetUs) {
       this.cabinetUs = cabinetUs;
+   }
+
+   /**
+    * @return the customFields
+    */
+   public List<CustomField> getCustomFields() {
+      return customFields;
+   }
+
+   /**
+    * @param customFields
+    *           the customFields to set
+    */
+   public void setCustomFields(List<CustomField> customFields) {
+      this.customFields = customFields;
    }
 
 }
