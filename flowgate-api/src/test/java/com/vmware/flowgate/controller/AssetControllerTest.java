@@ -1005,6 +1005,35 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void getServerMappingByID() throws Exception {
+      ServerMapping mapping = createServerMapping();
+      mapping.setVcClusterMobID("1001");
+      mapping.setVcHostName("host1");
+      serverMappingRepository.save(mapping);
+      this.mockMvc.perform(get("/v1/assets/mapping/" + mapping.getId() + "")).andExpect(status().isOk())
+                  .andExpect(jsonPath("vcClusterMobID", is(mapping.getVcClusterMobID())))
+                  .andExpect(jsonPath("vcHostName", is(mapping.getVcHostName())))
+                  .andDo(document("assets-getServerMappingByID-example",
+                        responseFields(
+                              fieldWithPath("id").description("ID of the mapping, created by flowgate"),
+                              fieldWithPath("asset").description("An asset for serverMapping."),
+                              fieldWithPath("vcID").description("ID of Vcenter."),
+                              fieldWithPath("vcHostName")
+                                    .description("Server's hostname display in Vcenter."),
+                              fieldWithPath("vcMobID").description("EXSI server's management object ID."),
+                              fieldWithPath("vcClusterMobID").description("MobID of Vcenter Cluster."),
+                              fieldWithPath("vcInstanceUUID").description("Vcenter's UUID."),
+                              fieldWithPath("vroID").description("ID of VROps."),
+                              fieldWithPath("vroResourceName")
+                                    .description("Resource Name in VROps for this server."),
+                              fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
+                              fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
+                              fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
+                              fieldWithPath("vroResourceID").description("VROps Resource ID."))));
+      serverMappingRepository.delete(mapping.getId());
+   }
+
+   @Test
    public void readAssetExample() throws Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);

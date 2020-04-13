@@ -157,8 +157,8 @@ public class HandleAssetUtil {
          asset.setTag(nlyteAsset.getTag());
          asset.setSerialnumber(nlyteAsset.getSerialNumber());
          asset.setAssetName(nlyteAsset.getAssetName());
-
-
+         asset.setRow(nlyteAsset.getGridReferenceRow());
+         asset.setCol(nlyteAsset.getGridReferenceColumn());
          asset = supplementLocation(asset,nlyteAsset.getLocationGroupID(),locationMap);
          asset = supplementMaterial(asset,nlyteAsset.getMaterialID(),manufacturerMap,materialMap);
          //we need to refactor the code
@@ -357,6 +357,8 @@ public class HandleAssetUtil {
             exsitingAsset.setCategory(asset.getCategory());
             exsitingAsset.setSubCategory(asset.getSubCategory());
             exsitingAsset.setLastupdate(System.currentTimeMillis());
+            exsitingAsset.setRow(asset.getRow());
+            exsitingAsset.setCol(asset.getCol());
             exsitingAsset.setMountingSide(asset.getMountingSide());
             exsitingAsset.setTenant(asset.getTenant());
             if (exsitingAsset.getCategory().equals(AssetCategory.Cabinet)) {

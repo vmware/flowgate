@@ -584,6 +584,27 @@ include::{snippets}/assets-updateServerMapping-example/curl-request.adoc[]
 
 include::{snippets}/assets-updateServerMapping-example/request-fields.adoc[]
 
+[[resources-assets-getServerMappingByID]]
+=== getServerMappingByID
+
+A `GET` request is used to access the ServerMApping read by ID.
+
+==== Request structure
+
+include::{snippets}/assets-getServerMappingByID-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getServerMappingByID-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getServerMappingByID-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getServerMappingByID-example/response-fields.adoc[]
+
 [[resources-asset-deleteServerMapping]]
 === deleteAssetServerMapping
 
