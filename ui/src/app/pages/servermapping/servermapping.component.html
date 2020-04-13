@@ -59,11 +59,24 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 <clr-dg-cell>{{serverMapping.vcHostName}}</clr-dg-cell>
                 <clr-dg-cell>{{serverMapping.vcMobID}}</clr-dg-cell>
                 <clr-dg-cell>{{serverMapping.asset}}</clr-dg-cell>
-                <clr-dg-cell><button class="btn btn-outline" on-click="updateAssetID(serverMapping.id)">Mapping assetID</button>
-                                <button class="btn btn-outline">Mapping sensor</button>
-                                <button class="btn btn-outline" on-click="deleteServerMapping(serverMapping.id)">Delete</button>
-                </clr-dg-cell>
-                
+                <clr-dg-cell>
+
+                        <clr-dropdown>
+                        <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
+                                Actions
+                                <clr-icon shape="caret down"></clr-icon>
+                        </button>
+                        <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+                                
+                                <button type="button" on-click="updateAssetID(serverMapping.id)" clrDropdownItem >Mapping Server asset</button>
+                                <button type="button" on-click="updateAssetID(serverMapping.id)" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping PDU asset</button>
+                                <button type="button" on-click="updateAssetID(serverMapping.id)" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Sensor asset</button>
+                                <button type="button" on-click="updateAssetID(serverMapping.id)" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Switch asset</button>
+                                
+                                <button type="button" clrDropdownItem on-click="deleteServerMapping(serverMapping.id)">Delete</button>
+                        </clr-dropdown-menu>
+                        </clr-dropdown>    
+                </clr-dg-cell>  
         </clr-dg-row>
        
       
@@ -84,7 +97,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
        </clr-dg-footer>
 </clr-datagrid>
 
-<clr-modal [(clrModalOpen)]="opend" [clrModalStaticBackdrop]="false" [clrModalSize]="'lg'" [clrModalClosable]="false">
+<clr-modal [(clrModalOpen)]="mappedServerModalOpen" [clrModalStaticBackdrop]="false" [clrModalSize]="'xl'" [clrModalClosable]="false">
         <h3 class="modal-title">Select Assets</h3>
        
         <div class="modal-body">
@@ -92,11 +105,17 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <table>
                                 <tr>
                                    <td><input type="text" id="formFields_9" placeholder="assetName" [(ngModel)]="keywords" size="35"></td>
-                                   <td style=""><button class="btn btn-sm" (click)="search();" >Search</button></td>
+                                   <td><button class="btn btn-sm" (click)="search();" >Search</button></td>
+                                   <td>MappedAsset: </td>
+                                   <td>
+                                        <clr-checkbox *ngIf ="mappedServerAsset.assetName != null" [clrChecked]="mappedServerAsset.assetName != null" [clrInline]="true">
+                                          {{mappedServerAsset.assetName}}
+                                         </clr-checkbox>
+                                   </td>
                                 </tr>
                         </table>                
                 </div>
-                <clr-datagrid [(clrDgSingleSelected)]="selectedAsset" [clDgRowSelection]="true">
+                <clr-datagrid [(clrDgSingleSelected)]="mappedServerAsset" [clDgRowSelection]="true" [clrDgLoading]="loading">
                         <clr-dg-column>AssetName</clr-dg-column>
                         <clr-dg-column>AssetSource</clr-dg-column>
                         <clr-dg-column>Serialnumber</clr-dg-column>
@@ -133,7 +152,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="cancelAsset()">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="confirmAsset(selectedAsset.id)">Ok</button>
+            <button type="button" class="btn btn-primary" (click)="confirmAsset(mappedServerAsset.id)">Ok</button>
         </div>
 </clr-modal>
 <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
