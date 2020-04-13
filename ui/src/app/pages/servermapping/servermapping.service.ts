@@ -55,6 +55,18 @@ export class ServermappingService {
     .map((res)=>res)
   }
 
+  getAssetById(id:string){
+    let header = new Headers({ 'Content-Type': 'application/json' });
+    header.append("Authorization",'Bearer ' + this.auth.getToken());
+    this.options = new RequestOptions({ headers: header });
+    return this.http.get(""+this.API_URL+"/v1/assets/"+id,this.options).map((res)=>res)
+  }
+  getMappingById(id:string){
+    let header = new Headers({ 'Content-Type': 'application/json' });
+    header.append("Authorization",'Bearer ' + this.auth.getToken());
+    this.options = new RequestOptions({ headers: header });
+    return this.http.get(""+this.API_URL+"/v1/assets/mapping/"+id,this.options).map((res)=>res)
+  }
   updateServerMapping(id,assetID){
     let header = new Headers({ 'Content-Type': 'application/json' });
     header.append("Authorization",'Bearer ' + this.auth.getToken());

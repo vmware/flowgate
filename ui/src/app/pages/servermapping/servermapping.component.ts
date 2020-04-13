@@ -5,8 +5,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ServermappingService } from './servermapping.service';
 import {Router,ActivatedRoute} from '@angular/router';
-import { error } from 'util';
-import {ClrDatagridFilterInterface} from "@clr/angular";
+import { AssetModule } from './asset.module';
 
 @Component({
   selector: 'app-servermapping',
@@ -15,7 +14,7 @@ import {ClrDatagridFilterInterface} from "@clr/angular";
 })
 export class ServermappingComponent implements OnInit {
 
-  constructor(private service:ServermappingService,private router: Router, private route: ActivatedRoute) { }
+  constructor(private service:ServermappingService,private router: Router, private route: ActivatedRoute) {  }
   modal="";
   basic=false;
   clrAlertClosed:boolean = true;
@@ -23,7 +22,8 @@ export class ServermappingComponent implements OnInit {
   totalPage:number = 1;
   pageSize:string = '5';
   info:string='';
-  opend:boolean=false;
+  mappedServerModalOpen:boolean=false;
+  mappedOtherAssetModalOpen:boolean = false;
   vrohid:boolean=false;
   hid:boolean=true;
   disabled:String="";
@@ -108,8 +108,8 @@ export class ServermappingComponent implements OnInit {
   updateServerMapping(id,assetID){
     this.service.updateServerMapping(id,assetID).subscribe((data)=>{
       if(data.status == 200){
-        this.selectedAsset.id = "";
-        this.opend = false;
+        this.mappedServerAsset.id = "";
+        this.mappedServerModalOpen = false;
         this.getServerMappings();
       }
     },
@@ -137,26 +137,61 @@ export class ServermappingComponent implements OnInit {
   serverMappingId:string="";
   disabledAsset:string="";
   keywords:string="";
-  selectedAsset={
-    id:"",
-    assetName:"",
-    assetSource:"",
-    manufacturer:"",
-    model:""
-  };
-  assets = []
-  asset={
-    id:"",
-    assetName:"",
-    assetSource:"",
-    manufacturer:"",
-    model:""
-  }
- 
-  updateAssetID(id){
-    this.serverMappingId = id;
-    this.opend = true;
+  mappedServerAsset:AssetModule = new AssetModule();
+  assets :AssetModule[] = [];
+  asset:AssetModule=new AssetModule();
+  selectedPdus:AssetModule[] = [];
+
+  updateAssetID(mappingId:string){
+    this.service.getMappingById(mappingId).subscribe(
+      data=>{
+        if(data.status == 200){
+          this.serverMapping = data.json();
+          if(this.serverMapping.asset != null){
+            this.getAssetById(this.serverMapping.asset);
+          }else{
+            this.mappedServerAsset = new AssetModule();
+          }
+        }
+      }
+    )
+    this.mappedServerModalOpen = true;
     this.getAssets();
+  }
+  getAssetById(id:string){
+    this.service.getAssetById(id).subscribe(
+      data=>{
+        if(data.status == 200){
+          this.mappedServerAsset= data.json();
+        }
+      }
+    )
+  }
+  showPduMapping(id:string){
+    let pduids:string[] = [];
+    if(this.mappedServerAsset.id != id){
+      this.service.getAssetById(id).subscribe(
+        data=>{
+          if(data.status == 200){
+            this.mappedServerAsset= data.json();
+            pduids = this.mappedServerAsset.pdus;
+          }
+        }
+      )
+    }else{
+      pduids = this.mappedServerAsset.pdus;
+    }
+    pduids.forEach(element => {
+      let pdu:AssetModule = new AssetModule();
+      this.service.getAssetById(element).subscribe(
+        data=>{
+          if(data.status == 200){
+            pdu= data.json();
+            this.selectedPdus.push(pdu);
+          }
+        }
+      )
+    });
   }
   deleteServerMapping(id){
     this.serverMappingId = id;
@@ -167,9 +202,15 @@ export class ServermappingComponent implements OnInit {
     this.currentPageAsset = 1;
     this.getAssets();
   }
+  validateMapped(mapping:any):boolean{
+    return mapping.asset == null;
+  }
+  loading:boolean = false;
   getAssets(){
+    this.loading = true;
     this.service.getAssets(this.pageSizeAsset,this.currentPageAsset,this.keywords).subscribe(data=>{
       if(data.status == 200){
+        this.loading = false;
         this.assets = data.json().content;
         this.currentPageAsset = data.json().number+1;
         this.totalPageAsset = data.json().totalPages;
@@ -182,8 +223,10 @@ export class ServermappingComponent implements OnInit {
     },
     (error)=>{
       alert(error.json().errors[0]);
+      this.loading = false;
     })
   }
+
   previousAsset(){
     if(this.currentPageAsset>1){
       this.currentPageAsset--;
@@ -197,16 +240,14 @@ export class ServermappingComponent implements OnInit {
     }
   }
   cancelAsset(){
-  
-    this.selectedAsset.id = "";
-    this.opend = false;
+    this.mappedServerModalOpen = false;
   }
-  confirmAsset(id){
+  confirmAsset(asset:AssetModule){
 
-    if(id!=""){
-      this.updateServerMapping(this.serverMappingId,id);
+    if(asset.id!=""){
+      this.updateServerMapping(this.serverMapping.id,asset.id);
     }else{
-      this.opend = false;
+      this.mappedServerModalOpen = false;
     }
    
   }
