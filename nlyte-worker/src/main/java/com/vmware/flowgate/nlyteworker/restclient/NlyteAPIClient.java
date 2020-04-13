@@ -43,7 +43,8 @@ import com.vmware.flowgate.nlyteworker.scheduler.job.common.HandleAssetUtil;
 public class NlyteAPIClient {
    private static final Logger logger = LoggerFactory.getLogger(NlyteAPIClient.class);
    private static final String GetManufacturersURL = "/nlyte/integration/api/odata/manufacturers";
-   private static final String GetServerAssetsURL = "/nlyte/integration/api/odata/Servers?$expand=UMounting";
+   private static final String GetServerAssetsURL =
+         "/nlyte/integration/api/odata/Servers?$expand=UMounting,CustomFields";
    private static final String GetServerAssetByAssetNumberURL = "/nlyte/integration/api/odata/Servers(%s)";
    private static final String GetCabinetsURL = "/nlyte/integration/api/odata/Cabinets?$expand=CabinetUs";
    private static final String GetCabinetByAssetNumberURL = "/nlyte/integration/api/odata/Cabinets(%s)";

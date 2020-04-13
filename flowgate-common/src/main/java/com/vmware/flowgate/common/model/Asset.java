@@ -165,6 +165,8 @@ public class Asset implements Serializable, BaseDocument {
    private AssetStatus status;
    private Parent parent;
 
+   private Tenant tenant;
+
    public String getId() {
       return id;
    }
@@ -458,6 +460,21 @@ public class Asset implements Serializable, BaseDocument {
 
    public void setMetricsformulars(Map<String, Map<String, Map<String, String>>> metricsformulars) {
       this.metricsformulars = metricsformulars;
+   }
+
+   /**
+    * @return the tenant
+    */
+   public Tenant getTenant() {
+      return tenant;
+   }
+
+   /**
+    * @param tenent
+    *           the tenant to set
+    */
+   public void setTenant(Tenant tenant) {
+      this.tenant = tenant;
    }
 
 }

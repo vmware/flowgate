@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +24,9 @@ import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.NetworkMapping;
 import com.vmware.flowgate.common.PduMapping;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.Tenant;
 import com.vmware.flowgate.nlyteworker.model.CabinetU;
+import com.vmware.flowgate.nlyteworker.model.CustomField;
 import com.vmware.flowgate.nlyteworker.model.LocationGroup;
 import com.vmware.flowgate.nlyteworker.model.Manufacturer;
 import com.vmware.flowgate.nlyteworker.model.Material;
@@ -161,6 +164,38 @@ public class HandleAssetUtil {
          //we need to refactor the code
          if (asset.getCategory() == null) {
             continue;
+         }
+         if (asset.getCategory() == AssetCategory.Server) {
+            //set the tenant information.
+
+            List<CustomField> fields = nlyteAsset.getCustomFields();
+            if (fields != null) {
+               Tenant tenant = new Tenant();
+               for (CustomField cf : fields) {
+                  if (cf.getDataLabel().equals(CustomField.Owner)) {
+                     String dataValue = cf.getDataValueString();
+                     if (!StringUtils.isEmpty(dataValue)) {
+                        tenant.setOwner(dataValue);
+                        tenant.setTenant(dataValue);
+                     }
+                  } else if (cf.getDataLabel().equals(CustomField.Tenant_EndUser)) {
+                     String dataValue = cf.getDataValueString();
+                     if (!StringUtils.isEmpty(dataValue)) {
+                        tenant.setTenant(dataValue);
+                     }
+                  } else if (cf.getDataLabel().equals(CustomField.HaaS_RequestedBy)) {
+                     String dataValue = cf.getDataValueString();
+                     if (!StringUtils.isEmpty(dataValue)) {
+                        tenant.setTenant(dataValue);
+                     }
+                  } else if (cf.getDataLabel().equals(CustomField.Tenant_Manager)) {
+                     String dataValue = cf.getDataValueString();
+                     if (!StringUtils.isEmpty(dataValue)) {
+                        tenant.setTenantManager(dataValue);
+                     }
+                  }
+               }
+            }
          }
          if(asset.getCategory().equals(AssetCategory.Cabinet)) {
             String contiguousUSpace = nlyteAsset.getContiguousUSpace();
@@ -323,6 +358,7 @@ public class HandleAssetUtil {
             exsitingAsset.setSubCategory(asset.getSubCategory());
             exsitingAsset.setLastupdate(System.currentTimeMillis());
             exsitingAsset.setMountingSide(asset.getMountingSide());
+            exsitingAsset.setTenant(asset.getTenant());
             if (exsitingAsset.getCategory().equals(AssetCategory.Cabinet)) {
                if (asset.getJustificationfields() != null
                      && asset.getJustificationfields().get(FlowgateConstant.CABINETUNITS) != null) {
