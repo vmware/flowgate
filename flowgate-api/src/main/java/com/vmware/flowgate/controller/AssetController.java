@@ -238,8 +238,8 @@ public class AssetController {
          for(String sourceId : assetSource) {
             String assetSourceName = assetSourceIDAndAssetSourceNameMap.get(sourceId);
             if (assetSourceName == null) {
-               assetSourceName = facilityRepository.findOne(assetSourceID).getName();
-               assetSourceIDAndAssetSourceNameMap.put(assetSourceID, assetSourceName);
+               assetSourceName = facilityRepository.findOne(sourceId).getName();
+               assetSourceIDAndAssetSourceNameMap.put(sourceId, assetSourceName);
             }
             assetSourceNames.add(assetSourceName);
          }
