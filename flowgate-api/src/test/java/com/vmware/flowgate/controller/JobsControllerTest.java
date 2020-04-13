@@ -11,6 +11,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,8 +29,10 @@ import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vmware.flowgate.common.model.JobConfig;
 import com.vmware.flowgate.common.model.JobConfig.JobType;
@@ -38,6 +41,8 @@ import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.JobsRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
+
+import junit.framework.TestCase;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
@@ -105,10 +110,13 @@ public class JobsControllerTest {
        Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
 
        String ip = "127.0.0.1";
-       this.mockMvc
+      MvcResult result = this.mockMvc
              .perform(post("/v1/jobs/synchostnamebyip/"+ip+"").contentType(MediaType.APPLICATION_JSON))
              .andDo(document("JobsController-syncHostnameByIp-example"))
              .andReturn();
+
+      TestCase
+            .assertTrue(result.getResolvedException().getMessage().equals("Invalid Ip: 127.0.0.1"));
     }
 
     @Test
