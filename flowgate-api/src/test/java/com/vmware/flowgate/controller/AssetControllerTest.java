@@ -62,6 +62,7 @@ import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.Parent;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
+import com.vmware.flowgate.common.model.Tenant;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
@@ -196,16 +197,21 @@ public class AssetControllerTest {
                   fieldWithPath("justificationfields").ignored(),
                   fieldWithPath("metricsformulars").ignored(),
                   fieldWithPath("lastupdate").ignored(), fieldWithPath("created").ignored(),
-                  fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
-                  fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
-                  fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
-                  .type(Parent.class).optional(),
+                  fieldWithPath("capacity").description("The capacity of asset.").type(int.class)
+                        .optional(),
+                  fieldWithPath("freeCapacity").description("The free capacity of asset.")
+                        .type(int.class).optional(),
+                  fieldWithPath("parent").description(
+                        "The parent of asset,it will be null unless the asset's category is Sensors")
+                        .type(Parent.class).optional(),
                   fieldWithPath("pdus")
                         .description("Possible PDUs that this server connected with"),
                   fieldWithPath("switches")
                         .description("Physical switchs that this host connected with"),
-                  fieldWithPath("status")
-                        .description("This is a collection of states, including the state of the asset, "
+                  fieldWithPath("tenant").description("Tenant information for the asset")
+                        .type(Tenant.class).optional(),
+                  fieldWithPath("status").description(
+                        "This is a collection of states, including the state of the asset, "
                               + "the state of the pdu mapping, and the state of the switch mapping."))))
             .andReturn().getResponse().getHeader("Location");
       assetRepository.delete(asset.getId());
@@ -1004,81 +1010,87 @@ public class AssetControllerTest {
       asset = assetRepository.save(asset);
       try {
          this.mockMvc.perform(get("/v1/assets/" + asset.getId() + "")).andExpect(status().isOk())
-         .andExpect(jsonPath("assetName", is(asset.getAssetName())))
-         .andExpect(jsonPath("assetNumber", is((int) asset.getAssetNumber())))
-         .andExpect(jsonPath("category", is(asset.getCategory().toString())))
-         .andExpect(jsonPath("model", is(asset.getModel())))
-         .andExpect(jsonPath("manufacturer", is(asset.getManufacturer())))
-         .andDo(document("assets-get-example", responseFields(
-               fieldWithPath("id").description("ID of the asset, created by flowgate"),
-               fieldWithPath("assetNumber").description(
-                     "A unique number that can identify an asset from third part DCIM/CMDB systems.")
-                     .type(long.class),
-               fieldWithPath("assetName").description(
-                     "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
-               fieldWithPath("assetSource").description(
-                     "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
-               fieldWithPath("category").description(
-                     "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
-                     .type(AssetCategory.class),
-               fieldWithPath("subCategory")
-                     .description("The subcategory of the asset. Only apply to some systems.")
-                     .type(AssetSubCategory.class).optional(),
-               fieldWithPath("manufacturer").description("The manufacture name"),
-               fieldWithPath("model").description("The model of the asset"),
-               fieldWithPath("serialnumber").description(
-                     "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
-                     .optional(),
-               fieldWithPath("tag").description(
-                     "Some system will use tag to identify an asset. It can be either an number or a string.")
-                     .type(String.class).optional(),
-               fieldWithPath("assetAddress").description("The access address of the asset")
-                     .type(AssetAddress.class).optional(),
-               fieldWithPath("region").description("The location region of the asset")
-                     .optional(),
-               fieldWithPath("country").description("The location country of the asset")
-                     .optional(),
-               fieldWithPath("city").description("The location city of the asset").optional(),
-               fieldWithPath("building").description("The location building of the asset")
-                     .optional(),
-               fieldWithPath("floor").description("The location floor of the asset").optional(),
-               fieldWithPath("room").description("The location room of the asset"),
-               fieldWithPath("row").description("The location row of the asset").optional(),
-               fieldWithPath("col").description("The location col of the asset").optional(),
-               fieldWithPath("extraLocation")
-                     .description("Extra location information. Only valid for some system.")
-                     .optional(),
-               fieldWithPath("cabinetName").description(
-                     "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
-                     .optional(),
-               fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
-                     .type(int.class).optional(),
-               fieldWithPath("mountingSide").description("The cabinet unit number")
-                     .type(MountingSide.class).optional(),
-               fieldWithPath("cabinetAssetNumber").description(
-                     "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
-                     .type(long.class).optional(),
-               fieldWithPath("assetRealtimeDataSpec")
-                     .description("Only valid for sensor type of asset.")
-                     .type(AssetRealtimeDataSpec.class).optional(),
-               fieldWithPath("justificationfields")
-                     .description("Justification fields that input by user."),
-               fieldWithPath("metricsformulars")
-                     .description("The sensor data generator logic for this asset."),
-               fieldWithPath("lastupdate").description("When this asset was last upated"),
-               fieldWithPath("created").description("When this asset was created"),
-               fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
-               fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
-               fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
-               .type(Parent.class).optional(),
-               fieldWithPath("pdus")
-                     .description("Possible PDUs that this server connected with"),
-               fieldWithPath("switches")
-                     .description("Physical switchs that this host connected with"),
-               fieldWithPath("status")
-                     .description("This is a collection of states, including the state of the asset, "
-                           + "the state of the pdu mapping, and the state of the switch mapping."))));
-      }finally {
+               .andExpect(jsonPath("assetName", is(asset.getAssetName())))
+               .andExpect(jsonPath("assetNumber", is((int) asset.getAssetNumber())))
+               .andExpect(jsonPath("category", is(asset.getCategory().toString())))
+               .andExpect(jsonPath("model", is(asset.getModel())))
+               .andExpect(jsonPath("manufacturer", is(asset.getManufacturer())))
+               .andDo(document("assets-get-example", responseFields(
+                     fieldWithPath("id").description("ID of the asset, created by flowgate"),
+                     fieldWithPath("assetNumber").description(
+                           "A unique number that can identify an asset from third part DCIM/CMDB systems.")
+                           .type(long.class),
+                     fieldWithPath("assetName").description(
+                           "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
+                     fieldWithPath("assetSource").description(
+                           "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
+                     fieldWithPath("category").description(
+                           "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
+                           .type(AssetCategory.class),
+                     fieldWithPath("subCategory")
+                           .description("The subcategory of the asset. Only apply to some systems.")
+                           .type(AssetSubCategory.class).optional(),
+                     fieldWithPath("manufacturer").description("The manufacture name"),
+                     fieldWithPath("model").description("The model of the asset"),
+                     fieldWithPath("serialnumber").description(
+                           "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
+                           .optional(),
+                     fieldWithPath("tag").description(
+                           "Some system will use tag to identify an asset. It can be either an number or a string.")
+                           .type(String.class).optional(),
+                     fieldWithPath("assetAddress").description("The access address of the asset")
+                           .type(AssetAddress.class).optional(),
+                     fieldWithPath("region").description("The location region of the asset")
+                           .optional(),
+                     fieldWithPath("country").description("The location country of the asset")
+                           .optional(),
+                     fieldWithPath("city").description("The location city of the asset").optional(),
+                     fieldWithPath("building").description("The location building of the asset")
+                           .optional(),
+                     fieldWithPath("floor").description("The location floor of the asset")
+                           .optional(),
+                     fieldWithPath("room").description("The location room of the asset"),
+                     fieldWithPath("row").description("The location row of the asset").optional(),
+                     fieldWithPath("col").description("The location col of the asset").optional(),
+                     fieldWithPath("extraLocation")
+                           .description("Extra location information. Only valid for some system.")
+                           .optional(),
+                     fieldWithPath("cabinetName").description(
+                           "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
+                           .optional(),
+                     fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
+                           .type(int.class).optional(),
+                     fieldWithPath("mountingSide").description("The cabinet unit number")
+                           .type(MountingSide.class).optional(),
+                     fieldWithPath("cabinetAssetNumber").description(
+                           "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
+                           .type(long.class).optional(),
+                     fieldWithPath("assetRealtimeDataSpec")
+                           .description("Only valid for sensor type of asset.")
+                           .type(AssetRealtimeDataSpec.class).optional(),
+                     fieldWithPath("justificationfields")
+                           .description("Justification fields that input by user."),
+                     fieldWithPath("metricsformulars")
+                           .description("The sensor data generator logic for this asset."),
+                     fieldWithPath("lastupdate").description("When this asset was last upated"),
+                     fieldWithPath("created").description("When this asset was created"),
+                     fieldWithPath("capacity").description("The capacity of asset.").type(int.class)
+                           .optional(),
+                     fieldWithPath("freeCapacity").description("The free capacity of asset.")
+                           .type(int.class).optional(),
+                     fieldWithPath("parent").description(
+                           "The parent of asset,it will be null unless the asset's category is Sensors")
+                           .type(Parent.class).optional(),
+                     fieldWithPath("pdus")
+                           .description("Possible PDUs that this server connected with"),
+                     fieldWithPath("switches")
+                           .description("Physical switchs that this host connected with"),
+                     fieldWithPath("tenant").description("Tenant information for the asset")
+                           .type(Tenant.class).optional(),
+                     fieldWithPath("status").description(
+                           "This is a collection of states, including the state of the asset, "
+                                 + "the state of the pdu mapping, and the state of the switch mapping."))));
+      } finally {
          assetRepository.delete(asset.getId());
       }
    }
@@ -1089,82 +1101,89 @@ public class AssetControllerTest {
       asset = assetRepository.save(asset);
       try {
          this.mockMvc.perform(get("/v1/assets/name/" + asset.getAssetName() + ""))
-         .andExpect(status().isOk()).andExpect(jsonPath("assetName", is(asset.getAssetName())))
-         .andExpect(jsonPath("assetNumber", is((int) asset.getAssetNumber())))
-         .andExpect(jsonPath("category", is(asset.getCategory().toString())))
-         .andExpect(jsonPath("model", is(asset.getModel())))
-         .andExpect(jsonPath("manufacturer", is(asset.getManufacturer())))
-         .andDo(document("assets-getAssetByName-example", responseFields(
-               fieldWithPath("id").description("ID of the asset, created by flowgate"),
-               fieldWithPath("assetNumber").description(
-                     "A unique number that can identify an asset from third part DCIM/CMDB systems.")
-                     .type(long.class),
-               fieldWithPath("assetName").description(
-                     "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
-               fieldWithPath("assetSource").description(
-                     "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
-               fieldWithPath("category").description(
-                     "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
-                     .type(AssetCategory.class),
-               fieldWithPath("subCategory")
-                     .description("The subcategory of the asset. Only apply to some systems.")
-                     .type(AssetSubCategory.class).optional(),
-               fieldWithPath("manufacturer").description("The manufacture name"),
-               fieldWithPath("model").description("The model of the asset"),
-               fieldWithPath("serialnumber").description(
-                     "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
-                     .optional(),
-               fieldWithPath("tag").description(
-                     "Some system will use tag to identify an asset. It can be either an number or a string.")
-                     .type(String.class).optional(),
-               fieldWithPath("assetAddress").description("The access address of the asset")
-                     .type(AssetAddress.class).optional(),
-               fieldWithPath("region").description("The location region of the asset")
-                     .optional(),
-               fieldWithPath("country").description("The location country of the asset")
-                     .optional(),
-               fieldWithPath("city").description("The location city of the asset").optional(),
-               fieldWithPath("building").description("The location building of the asset")
-                     .optional(),
-               fieldWithPath("floor").description("The location floor of the asset").optional(),
-               fieldWithPath("room").description("The location room of the asset"),
-               fieldWithPath("row").description("The location row of the asset").optional(),
-               fieldWithPath("col").description("The location col of the asset").optional(),
-               fieldWithPath("extraLocation")
-                     .description("Extra location information. Only valid for some system.")
-                     .optional(),
-               fieldWithPath("cabinetName").description(
-                     "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
-                     .optional(),
-               fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
-                     .type(int.class).optional(),
-               fieldWithPath("mountingSide").description("The cabinet unit number")
-                     .type(MountingSide.class).optional(),
-               fieldWithPath("cabinetAssetNumber").description(
-                     "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
-                     .type(long.class).optional(),
-               fieldWithPath("assetRealtimeDataSpec")
-                     .description("Only valid for sensor type of asset.")
-                     .type(AssetRealtimeDataSpec.class).optional(),
-               fieldWithPath("justificationfields")
-                     .description("Justification fields that input by user."),
-               fieldWithPath("metricsformulars")
-                     .description("The sensor data generator logic for this asset."),
-               fieldWithPath("lastupdate").description("When this asset was last upated"),
-               fieldWithPath("created").description("When this asset was created"),
-               fieldWithPath("pdus")
-                     .description("Possible PDUs that this server connected with"),
-               fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
-               fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
-               fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
-                     .type(Parent.class).optional(),
-               fieldWithPath("switches")
-                     .description("Physical switchs that this host connected with"),
-               fieldWithPath("status")
-                     .description("This is a collection of states, including the state of the asset, "
-                           + "the state of the pdu mapping, and the state of the switch mapping."))));
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("assetName", is(asset.getAssetName())))
+               .andExpect(jsonPath("assetNumber", is((int) asset.getAssetNumber())))
+               .andExpect(jsonPath("category", is(asset.getCategory().toString())))
+               .andExpect(jsonPath("model", is(asset.getModel())))
+               .andExpect(jsonPath("manufacturer", is(asset.getManufacturer())))
+               .andDo(document("assets-getAssetByName-example", responseFields(
+                     fieldWithPath("id").description("ID of the asset, created by flowgate"),
+                     fieldWithPath("assetNumber").description(
+                           "A unique number that can identify an asset from third part DCIM/CMDB systems.")
+                           .type(long.class),
+                     fieldWithPath("assetName").description(
+                           "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
+                     fieldWithPath("assetSource").description(
+                           "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
+                     fieldWithPath("category").description(
+                           "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
+                           .type(AssetCategory.class),
+                     fieldWithPath("subCategory")
+                           .description("The subcategory of the asset. Only apply to some systems.")
+                           .type(AssetSubCategory.class).optional(),
+                     fieldWithPath("manufacturer").description("The manufacture name"),
+                     fieldWithPath("model").description("The model of the asset"),
+                     fieldWithPath("serialnumber").description(
+                           "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
+                           .optional(),
+                     fieldWithPath("tag").description(
+                           "Some system will use tag to identify an asset. It can be either an number or a string.")
+                           .type(String.class).optional(),
+                     fieldWithPath("assetAddress").description("The access address of the asset")
+                           .type(AssetAddress.class).optional(),
+                     fieldWithPath("region").description("The location region of the asset")
+                           .optional(),
+                     fieldWithPath("country").description("The location country of the asset")
+                           .optional(),
+                     fieldWithPath("city").description("The location city of the asset").optional(),
+                     fieldWithPath("building").description("The location building of the asset")
+                           .optional(),
+                     fieldWithPath("floor").description("The location floor of the asset")
+                           .optional(),
+                     fieldWithPath("room").description("The location room of the asset"),
+                     fieldWithPath("row").description("The location row of the asset").optional(),
+                     fieldWithPath("col").description("The location col of the asset").optional(),
+                     fieldWithPath("extraLocation")
+                           .description("Extra location information. Only valid for some system.")
+                           .optional(),
+                     fieldWithPath("cabinetName").description(
+                           "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
+                           .optional(),
+                     fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
+                           .type(int.class).optional(),
+                     fieldWithPath("mountingSide").description("The cabinet unit number")
+                           .type(MountingSide.class).optional(),
+                     fieldWithPath("cabinetAssetNumber").description(
+                           "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
+                           .type(long.class).optional(),
+                     fieldWithPath("assetRealtimeDataSpec")
+                           .description("Only valid for sensor type of asset.")
+                           .type(AssetRealtimeDataSpec.class).optional(),
+                     fieldWithPath("justificationfields")
+                           .description("Justification fields that input by user."),
+                     fieldWithPath("metricsformulars")
+                           .description("The sensor data generator logic for this asset."),
+                     fieldWithPath("lastupdate").description("When this asset was last upated"),
+                     fieldWithPath("created").description("When this asset was created"),
+                     fieldWithPath("pdus")
+                           .description("Possible PDUs that this server connected with"),
+                     fieldWithPath("capacity").description("The capacity of asset.").type(int.class)
+                           .optional(),
+                     fieldWithPath("freeCapacity").description("The free capacity of asset.")
+                           .type(int.class).optional(),
+                     fieldWithPath("parent").description(
+                           "The parent of asset,it will be null unless the asset's category is Sensors")
+                           .type(Parent.class).optional(),
+                     fieldWithPath("switches")
+                           .description("Physical switchs that this host connected with"),
+                     fieldWithPath("tenant").description("Tenant information for the asset")
+                           .type(Tenant.class).optional(),
+                     fieldWithPath("status").description(
+                           "This is a collection of states, including the state of the asset, "
+                                 + "the state of the pdu mapping, and the state of the switch mapping."))));
 
-      }finally {
+      } finally {
          assetRepository.delete(asset.getId());
       }
    }
@@ -1178,77 +1197,83 @@ public class AssetControllerTest {
       asset.setAssetSource("4");
       try {
          this.mockMvc
-         .perform(put("/v1/assets").contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(asset)))
-         .andExpect(status().isOk())
-         .andDo(document("assets-update-example", requestFields(
-               fieldWithPath("id").description("ID of the asset, created by flowgate"),
-               fieldWithPath("assetNumber").description(
-                     "A unique number that can identify an asset from third part DCIM/CMDB systems.")
-                     .type(long.class),
-               fieldWithPath("assetName").description(
-                     "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
-               fieldWithPath("assetSource").description(
-                     "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
-               fieldWithPath("category").description(
-                     "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
-                     .type(AssetCategory.class),
-               fieldWithPath("subCategory")
-                     .description("The subcategory of the asset. Only apply to some systems.")
-                     .type(AssetSubCategory.class).optional(),
-               fieldWithPath("manufacturer").description("The manufacture name"),
-               fieldWithPath("model").description("The model of the asset"),
-               fieldWithPath("serialnumber").description(
-                     "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
-                     .optional(),
-               fieldWithPath("tag").description(
-                     "Some system will use tag to identify an asset. It can be either an number or a string.")
-                     .type(String.class).optional(),
-               fieldWithPath("assetAddress").description("The access address of the asset")
-                     .type(AssetAddress.class).optional(),
-               fieldWithPath("region").description("The location region of the asset")
-                     .optional(),
-               fieldWithPath("country").description("The location country of the asset")
-                     .optional(),
-               fieldWithPath("city").description("The location city of the asset").optional(),
-               fieldWithPath("building").description("The location building of the asset")
-                     .optional(),
-               fieldWithPath("floor").description("The location floor of the asset").optional(),
-               fieldWithPath("room").description("The location room of the asset"),
-               fieldWithPath("row").description("The location row of the asset").optional(),
-               fieldWithPath("col").description("The location col of the asset").optional(),
-               fieldWithPath("extraLocation")
-                     .description("Extra location information. Only valid for some system.")
-                     .optional(),
-               fieldWithPath("cabinetName").description(
-                     "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
-                     .optional(),
-               fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
-                     .type(int.class).optional(),
-               fieldWithPath("mountingSide").description("The cabinet unit number")
-                     .type(MountingSide.class).optional(),
-               fieldWithPath("cabinetAssetNumber").description(
-                     "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
-                     .type(long.class).optional(),
-               fieldWithPath("assetRealtimeDataSpec")
-                     .description("Only valid for sensor type of asset.")
-                     .type(AssetRealtimeDataSpec.class).optional(),
-               fieldWithPath("justificationfields").ignored(),
-               fieldWithPath("metricsformulars").ignored(),
-               fieldWithPath("lastupdate").ignored(), fieldWithPath("created").ignored(),
-               fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
-               fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
-               fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
-               .type(Parent.class).optional(),
-               fieldWithPath("pdus")
-                     .description("Possible PDUs that this server connected with"),
-               fieldWithPath("switches")
-                     .description("Physical switchs that this host connected with"),
-               fieldWithPath("status")
-                     .description("This is a collection of states, including the state of the asset, "
-                           + "the state of the pdu mapping, and the state of the switch mapping."))));
+               .perform(put("/v1/assets").contentType(MediaType.APPLICATION_JSON)
+                     .content(objectMapper.writeValueAsString(asset)))
+               .andExpect(status().isOk())
+               .andDo(document("assets-update-example", requestFields(
+                     fieldWithPath("id").description("ID of the asset, created by flowgate"),
+                     fieldWithPath("assetNumber").description(
+                           "A unique number that can identify an asset from third part DCIM/CMDB systems.")
+                           .type(long.class),
+                     fieldWithPath("assetName").description(
+                           "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
+                     fieldWithPath("assetSource").description(
+                           "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
+                     fieldWithPath("category").description(
+                           "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
+                           .type(AssetCategory.class),
+                     fieldWithPath("subCategory")
+                           .description("The subcategory of the asset. Only apply to some systems.")
+                           .type(AssetSubCategory.class).optional(),
+                     fieldWithPath("manufacturer").description("The manufacture name"),
+                     fieldWithPath("model").description("The model of the asset"),
+                     fieldWithPath("serialnumber").description(
+                           "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
+                           .optional(),
+                     fieldWithPath("tag").description(
+                           "Some system will use tag to identify an asset. It can be either an number or a string.")
+                           .type(String.class).optional(),
+                     fieldWithPath("assetAddress").description("The access address of the asset")
+                           .type(AssetAddress.class).optional(),
+                     fieldWithPath("region").description("The location region of the asset")
+                           .optional(),
+                     fieldWithPath("country").description("The location country of the asset")
+                           .optional(),
+                     fieldWithPath("city").description("The location city of the asset").optional(),
+                     fieldWithPath("building").description("The location building of the asset")
+                           .optional(),
+                     fieldWithPath("floor").description("The location floor of the asset")
+                           .optional(),
+                     fieldWithPath("room").description("The location room of the asset"),
+                     fieldWithPath("row").description("The location row of the asset").optional(),
+                     fieldWithPath("col").description("The location col of the asset").optional(),
+                     fieldWithPath("extraLocation")
+                           .description("Extra location information. Only valid for some system.")
+                           .optional(),
+                     fieldWithPath("cabinetName").description(
+                           "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
+                           .optional(),
+                     fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
+                           .type(int.class).optional(),
+                     fieldWithPath("mountingSide").description("The cabinet unit number")
+                           .type(MountingSide.class).optional(),
+                     fieldWithPath("cabinetAssetNumber").description(
+                           "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
+                           .type(long.class).optional(),
+                     fieldWithPath("assetRealtimeDataSpec")
+                           .description("Only valid for sensor type of asset.")
+                           .type(AssetRealtimeDataSpec.class).optional(),
+                     fieldWithPath("justificationfields").ignored(),
+                     fieldWithPath("metricsformulars").ignored(),
+                     fieldWithPath("lastupdate").ignored(), fieldWithPath("created").ignored(),
+                     fieldWithPath("capacity").description("The capacity of asset.").type(int.class)
+                           .optional(),
+                     fieldWithPath("freeCapacity").description("The free capacity of asset.")
+                           .type(int.class).optional(),
+                     fieldWithPath("parent").description(
+                           "The parent of asset,it will be null unless the asset's category is Sensors")
+                           .type(Parent.class).optional(),
+                     fieldWithPath("pdus")
+                           .description("Possible PDUs that this server connected with"),
+                     fieldWithPath("switches")
+                           .description("Physical switchs that this host connected with"),
+                     fieldWithPath("tenant").description("Tenant information for the asset")
+                           .type(Tenant.class).optional(),
+                     fieldWithPath("status").description(
+                           "This is a collection of states, including the state of the asset, "
+                                 + "the state of the pdu mapping, and the state of the switch mapping."))));
 
-      }finally {
+      } finally {
          assetRepository.delete(asset.getId());
       }
    }
@@ -1360,79 +1385,85 @@ public class AssetControllerTest {
       asset = assetRepository.save(asset);
       try {
          this.mockMvc.perform(get("/v1/assets/assetnumber/53968/assetname/SHA-pdu1"))
-         .andExpect(status().isOk()).andExpect(jsonPath("assetName", is("SHA-pdu1")))
-         .andExpect(jsonPath("assetNumber", is(53968)))
-         .andDo(document("assets-getAssetByAssetNumberAndName-example", responseFields(
-               fieldWithPath("id").description("ID of the asset, created by flowgate"),
-               fieldWithPath("assetNumber").description(
-                     "A unique number that can identify an asset from third part DCIM/CMDB systems.")
-                     .type(long.class),
-               fieldWithPath("assetName").description(
-                     "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
-               fieldWithPath("assetSource").description(
-                     "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
-               fieldWithPath("category").description(
-                     "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
-                     .type(AssetCategory.class),
-               fieldWithPath("subCategory")
-                     .description("The subcategory of the asset. Only apply to some systems.")
-                     .type(AssetSubCategory.class).optional(),
-               fieldWithPath("manufacturer").description("The manufacture name"),
-               fieldWithPath("model").description("The model of the asset"),
-               fieldWithPath("serialnumber").description(
-                     "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
-                     .optional(),
-               fieldWithPath("tag").description(
-                     "Some system will use tag to identify an asset. It can be either an number or a string.")
-                     .type(String.class).optional(),
-               fieldWithPath("assetAddress").description("The access address of the asset")
-                     .type(AssetAddress.class).optional(),
-               fieldWithPath("region").description("The location region of the asset")
-                     .optional(),
-               fieldWithPath("country").description("The location country of the asset")
-                     .optional(),
-               fieldWithPath("city").description("The location city of the asset").optional(),
-               fieldWithPath("building").description("The location building of the asset")
-                     .optional(),
-               fieldWithPath("floor").description("The location floor of the asset").optional(),
-               fieldWithPath("room").description("The location room of the asset"),
-               fieldWithPath("row").description("The location row of the asset").optional(),
-               fieldWithPath("col").description("The location col of the asset").optional(),
-               fieldWithPath("extraLocation")
-                     .description("Extra location information. Only valid for some system.")
-                     .optional(),
-               fieldWithPath("cabinetName").description(
-                     "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
-                     .optional(),
-               fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
-                     .type(int.class).optional(),
-               fieldWithPath("mountingSide").description("The cabinet unit number")
-                     .type(MountingSide.class).optional(),
-               fieldWithPath("cabinetAssetNumber").description(
-                     "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
-                     .type(long.class).optional(),
-               fieldWithPath("assetRealtimeDataSpec")
-                     .description("Only valid for sensor type of asset.")
-                     .type(AssetRealtimeDataSpec.class).optional(),
-               fieldWithPath("justificationfields")
-                     .description("Justification fields that input by user."),
-               fieldWithPath("metricsformulars")
-                     .description("The sensor data generator logic for this asset."),
-               fieldWithPath("lastupdate").description("When this asset was last upated"),
-               fieldWithPath("created").description("When this asset was created"),
-               fieldWithPath("pdus")
-                     .description("Possible PDUs that this server connected with"),
-               fieldWithPath("capacity").description("The capacity of asset.").type(int.class).optional(),
-               fieldWithPath("freeCapacity").description("The free capacity of asset.").type(int.class).optional(),
-               fieldWithPath("parent").description("The parent of asset,it will be null unless the asset's category is Sensors")
-                     .type(Parent.class).optional(),
-               fieldWithPath("switches")
-                     .description("Physical switchs that this host connected with"),
-               fieldWithPath("status")
-                     .description("This is a collection of states, including the state of the asset, "
-                           + "the state of the pdu mapping, and the state of the switch mapping."))));
+               .andExpect(status().isOk()).andExpect(jsonPath("assetName", is("SHA-pdu1")))
+               .andExpect(jsonPath("assetNumber", is(53968)))
+               .andDo(document("assets-getAssetByAssetNumberAndName-example", responseFields(
+                     fieldWithPath("id").description("ID of the asset, created by flowgate"),
+                     fieldWithPath("assetNumber").description(
+                           "A unique number that can identify an asset from third part DCIM/CMDB systems.")
+                           .type(long.class),
+                     fieldWithPath("assetName").description(
+                           "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
+                     fieldWithPath("assetSource").description(
+                           "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
+                     fieldWithPath("category").description(
+                           "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
+                           .type(AssetCategory.class),
+                     fieldWithPath("subCategory")
+                           .description("The subcategory of the asset. Only apply to some systems.")
+                           .type(AssetSubCategory.class).optional(),
+                     fieldWithPath("manufacturer").description("The manufacture name"),
+                     fieldWithPath("model").description("The model of the asset"),
+                     fieldWithPath("serialnumber").description(
+                           "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
+                           .optional(),
+                     fieldWithPath("tag").description(
+                           "Some system will use tag to identify an asset. It can be either an number or a string.")
+                           .type(String.class).optional(),
+                     fieldWithPath("assetAddress").description("The access address of the asset")
+                           .type(AssetAddress.class).optional(),
+                     fieldWithPath("region").description("The location region of the asset")
+                           .optional(),
+                     fieldWithPath("country").description("The location country of the asset")
+                           .optional(),
+                     fieldWithPath("city").description("The location city of the asset").optional(),
+                     fieldWithPath("building").description("The location building of the asset")
+                           .optional(),
+                     fieldWithPath("floor").description("The location floor of the asset")
+                           .optional(),
+                     fieldWithPath("room").description("The location room of the asset"),
+                     fieldWithPath("row").description("The location row of the asset").optional(),
+                     fieldWithPath("col").description("The location col of the asset").optional(),
+                     fieldWithPath("extraLocation")
+                           .description("Extra location information. Only valid for some system.")
+                           .optional(),
+                     fieldWithPath("cabinetName").description(
+                           "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
+                           .optional(),
+                     fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
+                           .type(int.class).optional(),
+                     fieldWithPath("mountingSide").description("The cabinet unit number")
+                           .type(MountingSide.class).optional(),
+                     fieldWithPath("cabinetAssetNumber").description(
+                           "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
+                           .type(long.class).optional(),
+                     fieldWithPath("assetRealtimeDataSpec")
+                           .description("Only valid for sensor type of asset.")
+                           .type(AssetRealtimeDataSpec.class).optional(),
+                     fieldWithPath("justificationfields")
+                           .description("Justification fields that input by user."),
+                     fieldWithPath("metricsformulars")
+                           .description("The sensor data generator logic for this asset."),
+                     fieldWithPath("lastupdate").description("When this asset was last upated"),
+                     fieldWithPath("created").description("When this asset was created"),
+                     fieldWithPath("pdus")
+                           .description("Possible PDUs that this server connected with"),
+                     fieldWithPath("capacity").description("The capacity of asset.").type(int.class)
+                           .optional(),
+                     fieldWithPath("freeCapacity").description("The free capacity of asset.")
+                           .type(int.class).optional(),
+                     fieldWithPath("parent").description(
+                           "The parent of asset,it will be null unless the asset's category is Sensors")
+                           .type(Parent.class).optional(),
+                     fieldWithPath("switches")
+                           .description("Physical switchs that this host connected with"),
+                     fieldWithPath("tenant").description("Tenant information for the asset")
+                           .type(Tenant.class).optional(),
+                     fieldWithPath("status").description(
+                           "This is a collection of states, including the state of the asset, "
+                                 + "the state of the pdu mapping, and the state of the switch mapping."))));
 
-      }finally {
+      } finally {
          assetRepository.delete(asset.getId());
       }
    }
