@@ -204,9 +204,15 @@ public class AssetController {
    @RequestMapping(value = { "/page/{pageNumber}/pagesize/{pageSize}/keywords/{keyWords}",
          "/page/{pageNumber}/pagesize/{pageSize}" }, method = RequestMethod.GET)
    public Page<Asset> searchAssetsByAssetNameAndTagLike(@PathVariable("pageNumber") int pageNumber,
-         @PathVariable("pageSize") int pageSize, @PathVariable(required = false) String keyWords) {
+         @PathVariable("pageSize") int pageSize, @PathVariable(required = false) String keyWords,
+         @RequestParam(required = false) AssetCategory category) {
       if (keyWords == null) {
-         keyWords = "";
+         keyWords = "%%";
+      }else {
+         keyWords = "%"+keyWords+"%";
+      }
+      if(category == null) {
+         category = AssetCategory.Server;
       }
       if (pageNumber < FlowgateConstant.defaultPageNumber) {
          pageNumber = FlowgateConstant.defaultPageNumber;
@@ -217,8 +223,8 @@ public class AssetController {
       }
       PageRequest pageable = new PageRequest(pageNumber - 1, pageSize);
       List<Asset> assets = assetRepository.findByAssetNameLikeAndCategoryOrTagLikeAndCategory(
-            keyWords+"%", AssetCategory.Server.name(), pageSize, pageSize*(pageNumber - 1));
-      long total = assetRepository.getNumber(keyWords+"%", AssetCategory.Server.name());
+            keyWords, category.name(), pageSize, pageSize*(pageNumber - 1));
+      long total = assetRepository.getNumber(keyWords, category.name());
       PageImpl<Asset> assetPage = new PageImpl<Asset>(assets,pageable,total);
       HashMap<String, String> assetSourceIDAndAssetSourceNameMap = new HashMap<String, String>();
 
@@ -468,6 +474,12 @@ public class AssetController {
    }
 
    @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/mapping/{id}", method = RequestMethod.GET)
+   public ServerMapping getMappingById(@PathVariable("id") String id) {
+      return serverMappingRepository.findOne(id);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/vrops/{vropsID}/page/{pageNumber}/pagesize/{pageSize}", method = RequestMethod.GET)
    public Page<ServerMapping> getPageMappingsByVROPSId(@PathVariable("vropsID") String vropsID,
          @PathVariable("pageNumber") int pageNumber, @PathVariable("pageSize") int pageSize) {
@@ -659,6 +671,5 @@ public class AssetController {
          }
       }
    }
-
 
 }
