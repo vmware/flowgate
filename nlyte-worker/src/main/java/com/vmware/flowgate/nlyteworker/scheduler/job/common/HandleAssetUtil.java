@@ -195,6 +195,7 @@ public class HandleAssetUtil {
                      }
                   }
                }
+               asset.setTenant(tenant);
             }
          }
          if(asset.getCategory().equals(AssetCategory.Cabinet)) {
