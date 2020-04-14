@@ -1406,10 +1406,13 @@ public class PowerIQService implements AsyncService {
 
    public List<Asset> filterAssetsBySource(String source, Set<String> assetIds) {
       List<Asset> sensorAssets = new ArrayList<Asset>();
-      List<Asset> assetsFromPowerIQ = restClient.getAllAssetsBySource(source);
-      for (Asset asset : assetsFromPowerIQ) {
-         if (assetIds.contains(asset.getId())) {
-            sensorAssets.add(asset);
+      for(String id : assetIds) {
+         ResponseEntity<Asset> assetEntity = restClient.getAssetByID(id);
+         if(assetEntity.getStatusCode().is2xxSuccessful()) {
+            Asset sensor = assetEntity.getBody();
+            if(sensor.getAssetSource().indexOf(source) != -1) {
+               sensorAssets.add(sensor);
+            }
          }
       }
       return sensorAssets;
