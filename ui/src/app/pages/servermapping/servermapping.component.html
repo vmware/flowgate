@@ -69,9 +69,9 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
                                 
                                 <button type="button" on-click="updateAssetID(serverMapping.id)" clrDropdownItem >Mapping Server asset</button>
-                                <button type="button" on-click="updateAssetID(serverMapping.id)" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping PDU asset</button>
-                                <button type="button" on-click="updateAssetID(serverMapping.id)" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Sensor asset</button>
-                                <button type="button" on-click="updateAssetID(serverMapping.id)" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Switch asset</button>
+                                <button type="button" on-click="showOtherAssetMapping(serverMapping.id,'PDU')" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping PDU asset</button>
+                                <button type="button" on-click="updateAssetID(serverMapping.id,'Sensors')" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Sensor asset</button>
+                                <button type="button" on-click="showOtherAssetMapping(serverMapping.id,'Networks')" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Switch asset</button>
                                 
                                 <button type="button" clrDropdownItem on-click="deleteServerMapping(serverMapping.id)">Delete</button>
                         </clr-dropdown-menu>
@@ -153,6 +153,72 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="cancelAsset()">Cancel</button>
             <button type="button" class="btn btn-primary" (click)="confirmAsset(mappedServerAsset.id)">Ok</button>
+        </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="mappedOtherAssetModalOpen" [clrModalStaticBackdrop]="false" [clrModalSize]="'xl'" [clrModalClosable]="false">
+        <h3 class="modal-title">Select Assets</h3>
+       
+        <div class="modal-body">
+                <clr-alert [clrAlertClosable]="true" *ngIf="updateAssetModalErrorShow" [clrAlertType]="'danger'">
+                        <clr-alert-item>
+                            <span class="alert-text">
+                                {{updateAssetError}}
+                            </span>
+                        </clr-alert-item>
+                    </clr-alert>
+                <div class="form-group">
+                        <table>
+                                <tr>
+                                   <td><input type="text" id="formFields_8" placeholder="assetName" [(ngModel)]="keywords" size="35"></td>
+                                   <td><button class="btn btn-sm" (click)="search();" >Search</button></td>
+                                   <td>MappedAsset: </td>
+                                   <td>
+                                       
+                                        <clr-checkbox *ngFor="let asset of mappedOtherAssets"  [ngModelOptions]="{standalone: true}"
+                                        [(ngModel)]="asset.enable" [clrInline]="true">
+                                                {{asset.assetName}}
+                                        </clr-checkbox>
+                                        
+                                   </td>
+                                </tr>
+                        </table>                
+                </div>
+                <clr-datagrid [(clrDgSelected)]="selectedOtherAssets" [clDgRowSelection]="true" [clrDgLoading]="loading">
+                        <clr-dg-column>AssetName</clr-dg-column>
+                        <clr-dg-column>AssetSource</clr-dg-column>
+                        <clr-dg-column>Serialnumber</clr-dg-column>
+                        <clr-dg-column>Tag</clr-dg-column>
+                        <clr-dg-column>Manufacturer</clr-dg-column>
+                        <clr-dg-column>Model</clr-dg-column>
+                        <clr-dg-column>Location</clr-dg-column>
+                        <clr-dg-column>CabinetName</clr-dg-column>
+                        <clr-dg-column>CabinetUnitPosition</clr-dg-column>
+                        <clr-dg-placeholder>We couldn't find any assets!</clr-dg-placeholder>
+
+                       <clr-dg-row *clrDgItems="let asset of assets" [clrDgItem]="asset">
+                            <clr-dg-cell>{{asset.assetName}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.assetSource}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.serialnumber}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.tag}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.manufacturer}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.model}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.region}},{{asset.country}},{{asset.city}},{{asset.building}},{{asset.floor}},{{asset.room}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.cabinetName}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.cabinetUnitPosition}}</clr-dg-cell>
+                       </clr-dg-row>
+                      
+                       <clr-dg-footer>
+                                <ul class="pagination">
+                                     <li ><button class="pagination-previous" type="button" on-click="previousAsset()" ></button></li>
+                                     <li class="pagination-current">{{currentPageAsset}}/{{totalPageAsset}}</li>
+                                     <li> <button class="pagination-next" type="button" disabled="{{disabledAsset}}" on-click="nextAsset()"></button></li>
+                                 </ul>
+                       </clr-dg-footer>
+                </clr-datagrid>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" (click)="closeSelectOtherAsset()">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="confirmUpdateServerAsset()">Ok</button>
         </div>
 </clr-modal>
 <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
