@@ -15,7 +15,6 @@ FlowGate is an open source vendor-neutral project to enable facility awareness i
   - Infoblox 
   - Labsdb
   - IBIS(TODO)
-  - Pulse IoT Center (TODO)
   - Open for other facility system integration.
 * **Built-in adapter for multiple IT stack systems**
   - vCenter Server
