@@ -6,6 +6,9 @@ import { Component, OnInit } from '@angular/core';
 import { ServermappingService } from './servermapping.service';
 import {Router,ActivatedRoute} from '@angular/router';
 import { AssetModule } from './asset.module';
+import { forkJoin } from 'rxjs/observable/forkJoin';
+import { Observable } from 'rxjs';
+import { SubscribableOrPromise } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-servermapping',
@@ -14,7 +17,9 @@ import { AssetModule } from './asset.module';
 })
 export class ServermappingComponent implements OnInit {
 
-  constructor(private service:ServermappingService,private router: Router, private route: ActivatedRoute) {  }
+  constructor(private service:ServermappingService,private router: Router, private route: ActivatedRoute) {  
+    this.selectedOtherAssets = [];
+  }
   modal="";
   basic=false;
   clrAlertClosed:boolean = true;
@@ -140,7 +145,10 @@ export class ServermappingComponent implements OnInit {
   mappedServerAsset:AssetModule = new AssetModule();
   assets :AssetModule[] = [];
   asset:AssetModule=new AssetModule();
-  selectedPdus:AssetModule[] = [];
+  mappedOtherAssets:AssetModule[] = [];
+  selectedOtherAssets:AssetModule[];
+  category:string = "Server";
+  showOtherCategory:string="";
 
   updateAssetID(mappingId:string){
     this.service.getMappingById(mappingId).subscribe(
@@ -155,10 +163,14 @@ export class ServermappingComponent implements OnInit {
         }
       }
     )
+    this.category = "Server";
+    this.currentPage = 1;
+    this.keywords="";
     this.mappedServerModalOpen = true;
     this.getAssets();
   }
-  getAssetById(id:string){
+  getAssetById(id:string):AssetModule{
+    let asset:AssetModule = new AssetModule();
     this.service.getAssetById(id).subscribe(
       data=>{
         if(data.status == 200){
@@ -166,32 +178,72 @@ export class ServermappingComponent implements OnInit {
         }
       }
     )
+    return asset;
   }
-  showPduMapping(id:string){
-    let pduids:string[] = [];
-    if(this.mappedServerAsset.id != id){
-      this.service.getAssetById(id).subscribe(
-        data=>{
-          if(data.status == 200){
-            this.mappedServerAsset= data.json();
-            pduids = this.mappedServerAsset.pdus;
-          }
-        }
-      )
-    }else{
-      pduids = this.mappedServerAsset.pdus;
+  updateAssetModalErrorShow:boolean = false;
+  updateAssetError:string = "";
+  showOtherAssetMapping(id:string,category:string){
+    this.mappedOtherAssetModalOpen = true;
+    this.loading = true;
+    this.category = category;
+    if(category == "PDU"){
+      this.showOtherCategory = "PDUs";
+    }else if(category == "Networks"){
+      this.showOtherCategory = "Switches";
     }
-    pduids.forEach(element => {
-      let pdu:AssetModule = new AssetModule();
-      this.service.getAssetById(element).subscribe(
+      this.service.getMappingById(id).subscribe(
         data=>{
-          if(data.status == 200){
-            pdu= data.json();
-            this.selectedPdus.push(pdu);
+          if(data.status == 200 && data.text() != ""){
+            this.serverMapping = data.json();
+            let assetId = this.serverMapping.asset;
+            this.service.getAssetById(assetId).subscribe(
+              data=>{
+                if(data.status == 200){
+                  this.mappedServerAsset= data.json();
+                  let reqList:SubscribableOrPromise<any>[] = [];
+                  let assetIDs:string[] = [];
+                  if(category == "PDU"){
+                    assetIDs = this.mappedServerAsset.pdus;
+                  }else if(category == "Sensors"){
+                    //sensor
+                  }else if(category == "Networks"){
+                    //switch
+                    assetIDs = this.mappedServerAsset.switches;
+                  }
+                  for(let i=0;i<assetIDs.length; i++){
+                    reqList.push(this.service.getAssetById(assetIDs[i]));
+                  }
+                  forkJoin(reqList).map((data)=>data).subscribe((res)=>{
+                    res.forEach(element => {
+                      if(element._body != null && element._body != ""){
+                        let pduAsset:AssetModule = new AssetModule();
+                        pduAsset = element.json();
+                        pduAsset.enable = true;
+                        this.mappedOtherAssets.push(pduAsset)
+                      }
+                    });
+                  })
+                  this.currentPage = 1;
+                  this.keywords="";
+                  this.getAssets();
+                }
+              },error=>{
+                this.loading = false;
+                this.updateAssetError = error.json().message();
+                this.updateAssetModalErrorShow = true;
+              }
+            )   
+          }else{
+            this.loading = false;
+            this.updateAssetError = "Not found server mapping";
+            this.updateAssetModalErrorShow = true;
           }
+        },error=>{
+          this.loading = false;
+          this.updateAssetError = error.json().message();
+          this.updateAssetModalErrorShow = true;
         }
       )
-    });
   }
   deleteServerMapping(id){
     this.serverMappingId = id;
@@ -208,7 +260,7 @@ export class ServermappingComponent implements OnInit {
   loading:boolean = false;
   getAssets(){
     this.loading = true;
-    this.service.getAssets(this.pageSizeAsset,this.currentPageAsset,this.keywords).subscribe(data=>{
+    this.service.getAssets(this.pageSizeAsset,this.currentPageAsset,this.keywords,this.category).subscribe(data=>{
       if(data.status == 200){
         this.loading = false;
         this.assets = data.json().content;
@@ -239,17 +291,95 @@ export class ServermappingComponent implements OnInit {
       this.getAssets();
     }
   }
+  closeSelectOtherAsset(){
+    this.mappedOtherAssets = [];
+    this.mappedOtherAssetModalOpen = false;
+    this.updateAssetModalErrorShow = false;
+    this.updateAssetError = "";
+  }
+ 
+  confirmUpdateServerAsset(){
+    this.loading = true;
+    let update:boolean = false;
+    if(this.category == "PDU"){
+      let pduids:string[] = [];
+      this.mappedOtherAssets.forEach(element => {
+        if(element.enable){
+          pduids.push(element.id);
+        }
+      }); 
+      this.selectedOtherAssets.forEach(element1 => {
+        if(pduids.indexOf(element1.id) == -1){
+          pduids.push(element1.id);
+        }
+      });
+      if(this.mappedServerAsset.pdus.length != pduids.length){
+        update = true;
+        this.mappedServerAsset.pdus = pduids;
+      }else{
+        pduids.forEach(element => {
+          if(!update){
+            if(this.mappedServerAsset.pdus.indexOf(element) == -1){
+              update = true;
+              this.mappedServerAsset.pdus = pduids;
+            }
+          }
+        });
+      }
+    }else if(this.category == "Networks"){
+      let switchids:string[] = [];
+      this.mappedOtherAssets.forEach(element => {
+        if(element.enable){
+          switchids.push(element.id);
+        }
+      }); 
+      this.selectedOtherAssets.forEach(element1 => {
+        if(switchids.indexOf(element1.id) == -1){
+          switchids.push(element1.id);
+        }
+      });
+      if(this.mappedServerAsset.switches.length != switchids.length){
+        update = true;
+        this.mappedServerAsset.switches = switchids;
+      }else{
+        switchids.forEach(element => {
+          if(!update){
+            if(this.mappedServerAsset.switches.indexOf(element) == -1){
+              update = true;
+              this.mappedServerAsset.switches = switchids;
+            }
+          }
+        });
+      }
+    }
+    if(update){
+      this.service.updateAsset(this.mappedServerAsset).subscribe(data=>{
+        if(data.status == 200){
+          this.loading = false;
+          this.mappedOtherAssetModalOpen = false;
+          this.mappedOtherAssets = [];
+        }
+      },error=>{
+        this.loading = false;
+        this.updateAssetModalErrorShow = true;
+        this.updateAssetError = error.json().message;
+      })
+    }else{
+      this.loading = false;
+      this.mappedOtherAssets = [];
+      this.mappedOtherAssetModalOpen = false;
+    }
+  
+  }
   cancelAsset(){
     this.mappedServerModalOpen = false;
   }
   confirmAsset(asset:AssetModule){
-
     if(asset.id!=""){
       this.updateServerMapping(this.serverMapping.id,asset.id);
     }else{
       this.mappedServerModalOpen = false;
     }
-   
   }
 
   ngOnInit() {
@@ -262,7 +392,6 @@ export class ServermappingComponent implements OnInit {
   }
   confirm(){
     this.service.deleteServerMapping(this.serverMappingId).subscribe(data=>{
-      
       if(data.status == 200){
         this.basic = false;
         this.getServerMappings();
