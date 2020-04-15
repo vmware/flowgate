@@ -206,6 +206,7 @@ public class AssetController {
    public Page<Asset> searchAssetsByAssetNameAndTagLike(@PathVariable("pageNumber") int pageNumber,
          @PathVariable("pageSize") int pageSize, @PathVariable(required = false) String keyWords,
          @RequestParam(required = false) AssetCategory category) {
+
       if (keyWords == null) {
          keyWords = "%%";
       }else {
@@ -222,7 +223,7 @@ public class AssetController {
          pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageable = new PageRequest(pageNumber - 1, pageSize);
-      List<Asset> assets = assetRepository.findByAssetNameLikeAndCategoryOrTagLikeAndCategory(
+      List<Asset> assets = assetRepository.findByAssetNameLikeAndCategory(
             keyWords, category.name(), pageSize, pageSize*(pageNumber - 1));
       long total = assetRepository.getNumber(keyWords, category.name());
       PageImpl<Asset> assetPage = new PageImpl<Asset>(assets,pageable,total);
