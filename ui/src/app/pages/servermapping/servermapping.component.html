@@ -116,15 +116,15 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         </table>                
                 </div>
                 <clr-datagrid [(clrDgSingleSelected)]="mappedServerAsset" [clDgRowSelection]="true" [clrDgLoading]="loading">
-                        <clr-dg-column>AssetName</clr-dg-column>
-                        <clr-dg-column>AssetSource</clr-dg-column>
-                        <clr-dg-column>Serialnumber</clr-dg-column>
+                        <clr-dg-column>Asset Name</clr-dg-column>
+                        <clr-dg-column>Asset Source</clr-dg-column>
+                        <clr-dg-column>Serial Number</clr-dg-column>
                         <clr-dg-column>Tag</clr-dg-column>
                         <clr-dg-column>Manufacturer</clr-dg-column>
                         <clr-dg-column>Model</clr-dg-column>
                         <clr-dg-column>Location</clr-dg-column>
-                        <clr-dg-column>CabinetName</clr-dg-column>
-                        <clr-dg-column>CabinetUnitPosition</clr-dg-column>
+                        <clr-dg-column>Cabinet Name</clr-dg-column>
+                        <clr-dg-column>Cabinet Unit Position</clr-dg-column>
                         <clr-dg-column>Pdus</clr-dg-column>
                         <clr-dg-placeholder>We couldn't find any assets!</clr-dg-placeholder>
 
@@ -156,7 +156,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </div>
 </clr-modal>
 <clr-modal [(clrModalOpen)]="mappedOtherAssetModalOpen" [clrModalStaticBackdrop]="false" [clrModalSize]="'xl'" [clrModalClosable]="false">
-        <h3 class="modal-title">Select Assets</h3>
+        <h3 class="modal-title">Select {{showOtherCategory}}</h3>
        
         <div class="modal-body">
                 <clr-alert [clrAlertClosable]="true" *ngIf="updateAssetModalErrorShow" [clrAlertType]="'danger'">
@@ -171,7 +171,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 <tr>
                                    <td><input type="text" id="formFields_8" placeholder="assetName" [(ngModel)]="keywords" size="35"></td>
                                    <td><button class="btn btn-sm" (click)="search();" >Search</button></td>
-                                   <td>MappedAsset: </td>
+                                   <td>Mapped Asset: </td>
                                    <td>
                                        
                                         <clr-checkbox *ngFor="let asset of mappedOtherAssets"  [ngModelOptions]="{standalone: true}"
@@ -184,15 +184,15 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         </table>                
                 </div>
                 <clr-datagrid [(clrDgSelected)]="selectedOtherAssets" [clDgRowSelection]="true" [clrDgLoading]="loading">
-                        <clr-dg-column>AssetName</clr-dg-column>
-                        <clr-dg-column>AssetSource</clr-dg-column>
-                        <clr-dg-column>Serialnumber</clr-dg-column>
+                        <clr-dg-column>Asset Name</clr-dg-column>
+                        <clr-dg-column>Asset Source</clr-dg-column>
+                        <clr-dg-column>Serial Number</clr-dg-column>
                         <clr-dg-column>Tag</clr-dg-column>
                         <clr-dg-column>Manufacturer</clr-dg-column>
                         <clr-dg-column>Model</clr-dg-column>
                         <clr-dg-column>Location</clr-dg-column>
-                        <clr-dg-column>CabinetName</clr-dg-column>
-                        <clr-dg-column>CabinetUnitPosition</clr-dg-column>
+                        <clr-dg-column>Cabinet Name</clr-dg-column>
+                        <clr-dg-column>Cabinet Unit Position</clr-dg-column>
                         <clr-dg-placeholder>We couldn't find any assets!</clr-dg-placeholder>
 
                        <clr-dg-row *clrDgItems="let asset of assets" [clrDgItem]="asset">

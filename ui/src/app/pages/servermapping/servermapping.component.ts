@@ -148,6 +148,7 @@ export class ServermappingComponent implements OnInit {
   mappedOtherAssets:AssetModule[] = [];
   selectedOtherAssets:AssetModule[];
   category:string = "Server";
+  showOtherCategory:string="";
 
   updateAssetID(mappingId:string){
     this.service.getMappingById(mappingId).subscribe(
@@ -185,6 +186,11 @@ export class ServermappingComponent implements OnInit {
     this.mappedOtherAssetModalOpen = true;
     this.loading = true;
     this.category = category;
+    if(category == "PDU"){
+      this.showOtherCategory = "PDUs";
+    }else if(category == "Networks"){
+      this.showOtherCategory = "Switches";
+    }
       this.service.getMappingById(id).subscribe(
         data=>{
           if(data.status == 200 && data.text() != ""){
