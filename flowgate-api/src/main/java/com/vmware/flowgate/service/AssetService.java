@@ -1,5 +1,6 @@
 package com.vmware.flowgate.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
@@ -16,6 +20,7 @@ import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ValueUnit;
+import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
 
@@ -331,5 +336,116 @@ public class AssetService {
          }
       }
       return result;
+   }
+
+   public void mappingFacilityForServerAsset(Asset asset) {
+      Asset oldAsset = assetRepository.findOne(asset.getId());
+      if (oldAsset == null) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Asset not found", null);
+      }
+      List<String> pdus = asset.getPdus();
+      if(pdus != null) {
+         oldAsset.setPdus(pdus);
+      }
+      List<String> switchs = asset.getSwitches();
+      if(switchs != null) {
+         oldAsset.setSwitches(switchs);
+      }
+      Map<String, Map<String, Map<String, String>>> newMetricsformulas =
+            asset.getMetricsformulars();
+      if(newMetricsformulas != null && newMetricsformulas.containsKey(FlowgateConstant.SENSOR)) {
+         Map<String, Map<String, Map<String, String>>> oldMetricsformulas = oldAsset.getMetricsformulars();
+         Map<String, Map<String, String>> oldSensorformulas = null;
+         if(oldMetricsformulas.containsKey(FlowgateConstant.SENSOR)) {
+            oldSensorformulas = oldMetricsformulas.get(FlowgateConstant.SENSOR);
+         }else {
+            oldSensorformulas = new HashMap<String,Map<String, String>>();
+         }
+         generateSensorFormula(oldSensorformulas, newMetricsformulas.get(FlowgateConstant.SENSOR));
+         oldMetricsformulas.put(FlowgateConstant.SENSOR, oldSensorformulas);
+         oldAsset.setMetricsformulars(oldMetricsformulas);
+      }
+      oldAsset.setLastupdate(System.currentTimeMillis());
+      assetRepository.save(oldAsset);
+   }
+
+
+   private void generateSensorFormula(Map<String, Map<String, String>> oldMetricsformulas,Map<String, Map<String, String>> newMetricsformulas){
+       for(Map.Entry<String,Map<String, String>> metricNameMap : newMetricsformulas.entrySet()) {
+          switch (metricNameMap.getKey()) {
+          case MetricName.SERVER_FRONT_TEMPERATURE:
+             oldMetricsformulas.put(MetricName.SERVER_FRONT_TEMPERATURE, generatePositionAndIdMap(metricNameMap.getValue()));
+             break;
+          case MetricName.SERVER_BACK_TEMPREATURE:
+             oldMetricsformulas.put(MetricName.SERVER_BACK_TEMPREATURE, generatePositionAndIdMap(metricNameMap.getValue()));
+             break;
+          case MetricName.SERVER_FRONT_HUMIDITY:
+             oldMetricsformulas.put(MetricName.SERVER_FRONT_HUMIDITY, generatePositionAndIdMap(metricNameMap.getValue()));
+             break;
+          case MetricName.SERVER_BACK_HUMIDITY:
+             oldMetricsformulas.put(MetricName.SERVER_BACK_HUMIDITY, generatePositionAndIdMap(metricNameMap.getValue()));
+             break;
+          default:
+             break;
+          }
+       }
+   }
+
+   private Map<String,String> generatePositionAndIdMap(Map<String,String> sensorIdMap){
+      Map<String,String> positionAndSensorIdMap = new HashMap<String,String>();
+      for(String sensorId : sensorIdMap.keySet()) {
+         Asset sensor = assetRepository.findOne(sensorId);
+         String position = getSensorPositionInfo(sensor);
+         positionAndSensorIdMap.put(position, sensorId);
+      }
+      return positionAndSensorIdMap;
+   }
+
+   private String getSensorPositionInfo(Asset asset) {
+      ObjectMapper mapper = new ObjectMapper();
+      StringBuilder positionInfo = new StringBuilder();
+      Map<String,String> sensorAssetJustfication = asset.getJustificationfields();
+      int rackUnitNumber = asset.getCabinetUnitPosition();
+      String rackUnitInfo = null;
+      String positionFromAsset = null;
+
+      if(rackUnitNumber != 0) {
+         rackUnitInfo = FlowgateConstant.RACK_UNIT_PREFIX  + rackUnitNumber;
+         positionInfo.append(rackUnitInfo);
+         if(sensorAssetJustfication == null || sensorAssetJustfication.isEmpty() ||
+               sensorAssetJustfication.get(FlowgateConstant.SENSOR) == null) {
+            return positionInfo.toString();
+         }
+         String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
+         try {
+            Map<String,String> sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
+            positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
+            if(positionFromAsset != null) {
+               positionInfo.append(FlowgateConstant.SEPARATOR + positionFromAsset);
+            }
+         } catch (IOException e) {
+            return positionInfo.toString();
+         }
+      }else {
+         if(sensorAssetJustfication == null || sensorAssetJustfication.isEmpty() ||
+               sensorAssetJustfication.get(FlowgateConstant.SENSOR) == null) {
+            positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
+            return positionInfo.toString();
+         }
+         String sensorInfo = sensorAssetJustfication.get(FlowgateConstant.SENSOR);
+         try {
+            Map<String,String> sensorInfoMap = mapper.readValue(sensorInfo, new TypeReference<Map<String,String>>() {});
+            positionFromAsset = sensorInfoMap.get(FlowgateConstant.POSITION);
+            if(positionFromAsset != null) {
+               positionInfo.append(positionFromAsset);
+            }else {
+               positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
+            }
+         } catch (IOException e) {
+            positionInfo.append(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION);
+            return positionInfo.toString();
+         }
+      }
+      return positionInfo.toString();
    }
 }

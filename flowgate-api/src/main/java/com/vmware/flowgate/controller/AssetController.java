@@ -311,6 +311,13 @@ public class AssetController {
       assetRepository.save(old);
    }
 
+   //Update
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/mappingfacility", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+   public void updateMetricsFormular(@RequestBody Asset asset) {
+      assetService.mappingFacilityForServerAsset(asset);
+   }
+
    // Delete a asset
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
