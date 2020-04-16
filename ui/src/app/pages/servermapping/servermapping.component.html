@@ -70,7 +70,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 
                                 <button type="button" on-click="updateAssetID(serverMapping.id)" clrDropdownItem >Mapping Server asset</button>
                                 <button type="button" on-click="showOtherAssetMapping(serverMapping.id,'PDU')" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping PDU asset</button>
-                                <button type="button" on-click="updateAssetID(serverMapping.id,'Sensors')" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Sensor asset</button>
+                                <button type="button" on-click="showSensors(serverMapping.id,'Sensors')" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Sensor asset</button>
                                 <button type="button" on-click="showOtherAssetMapping(serverMapping.id,'Networks')" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Switch asset</button>
                                 
                                 <button type="button" clrDropdownItem on-click="deleteServerMapping(serverMapping.id)">Delete</button>
@@ -101,11 +101,18 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <h3 class="modal-title">Select Assets</h3>
        
         <div class="modal-body">
+                <clr-alert [clrAlertClosable]="true" *ngIf="updateAssetModalErrorShow" [clrAlertType]="'danger'">
+                        <clr-alert-item>
+                            <span class="alert-text">
+                                {{updateAssetError}}
+                            </span>
+                        </clr-alert-item>
+                    </clr-alert>
                 <div class="form-group">
                         <table>
                                 <tr>
-                                   <td><input type="text" id="formFields_9" placeholder="assetName" [(ngModel)]="keywords" size="35"></td>
-                                   <td><button class="btn btn-sm" (click)="search();" >Search</button></td>
+                                   <td><input type="text" id="formFields_9" placeholder="assetName" [(ngModel)]="keywords" (keyup)="($event.which === 13) ? search() : 0" size="35"></td>
+                                   <td><button [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled" class="btn btn-sm" (click)="search();" >Search</button></td>
                                    <td>MappedAsset: </td>
                                    <td>
                                         <clr-checkbox *ngIf ="mappedServerAsset.assetName != null" [clrChecked]="mappedServerAsset.assetName != null" [clrInline]="true">
@@ -152,7 +159,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="cancelAsset()">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="confirmAsset(mappedServerAsset.id)">Ok</button>
+            <button type="button" class="btn btn-primary" (click)="confirmAsset(mappedServerAsset)">Ok</button>
         </div>
 </clr-modal>
 <clr-modal [(clrModalOpen)]="mappedOtherAssetModalOpen" [clrModalStaticBackdrop]="false" [clrModalSize]="'xl'" [clrModalClosable]="false">
@@ -169,8 +176,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 <div class="form-group">
                         <table>
                                 <tr>
-                                   <td><input type="text" id="formFields_8" placeholder="assetName" [(ngModel)]="keywords" size="35"></td>
-                                   <td><button class="btn btn-sm" (click)="search();" >Search</button></td>
+                                   <td><input type="text" id="formFields_8" placeholder="assetName" [(ngModel)]="keywords" (keyup)="($event.which === 13) ? search() : 0" size="35"></td>
+                                   <td><button [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled" class="btn btn-sm" (click)="search();" >Search</button></td>
                                    <td>Mapped Asset: </td>
                                    <td>
                                        
@@ -229,5 +236,105 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <div class="modal-footer">
                 <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
                 <button type="button" class="btn btn-primary" (click)="confirm()">Ok</button>
+        </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="mappedSensorAssetModalOpen" [clrModalStaticBackdrop]="false" [clrModalSize]="'xl'" [clrModalClosable]="false">
+         <h3 class="modal-title">Mapping Sensors</h3>
+        
+        <div class="modal-body">
+
+                <clr-alert [clrAlertClosable]="true" *ngIf="updateAssetModalErrorShow" [clrAlertType]="'danger'">
+                        <clr-alert-item>
+                                <span class="alert-text">
+                                {{updateAssetError}}
+                                </span>
+                        </clr-alert-item>
+                </clr-alert>
+                    <clr-datagrid>
+                        <clr-dg-column>Metric Name</clr-dg-column>
+                        <clr-dg-column>Mapped Sensors</clr-dg-column>
+                        <clr-dg-column>Option</clr-dg-column>
+                    
+                        <clr-dg-row *ngFor="let metric of metricsDatas">
+                            <clr-dg-cell>{{metric.metricName}}</clr-dg-cell>
+                            <clr-dg-cell>
+                             
+                                <div >
+                                        <p *ngFor="let asset of metric.sensors" style="margin-top: 0px;"> {{asset.assetName}} </p>
+                                </div>
+                           </clr-dg-cell>
+                            <clr-dg-cell><button class="btn btn-sm" (click)="selectSensor(metric.metricName)">Mapping Sensor</button></clr-dg-cell>
+                        </clr-dg-row>
+                    </clr-datagrid>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" (click)="closeMappingSensor()">Close</button>
+        </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="selectSensorShow" [clrModalStaticBackdrop]="false" [clrModalSize]="'xl'" [clrModalClosable]="false">
+        <h3 class="modal-title">Select Sensors</h3>
+       
+        <div class="modal-body">
+
+                <clr-alert [clrAlertClosable]="true" *ngIf="updateAssetModalErrorShow" [clrAlertType]="'danger'">
+                        <clr-alert-item>
+                            <span class="alert-text">
+                                {{updateAssetError}}
+                            </span>
+                        </clr-alert-item>
+                    </clr-alert>
+                <div class="form-group">
+                        <table>
+                                <tr>
+                                   <td><input type="text" id="formFields_8" placeholder="assetName" [(ngModel)]="keywords" (keyup)="($event.which === 13) ? search() : 0" size="35"></td>
+                                   <td><button class="btn btn-sm" (click)="search();" [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled">Search</button></td>
+                                   <td>MappedAsset: </td>
+                                   <td>
+                                       
+                                        <clr-checkbox *ngFor="let asset of mappedSensors"  [ngModelOptions]="{standalone: true}"
+                                        [(ngModel)]="asset.enable" [clrInline]="true">
+                                                {{asset.assetName}}
+                                        </clr-checkbox>
+                                        
+                                   </td>
+                                </tr>
+                        </table>                
+                </div>
+                <clr-datagrid [(clrDgSelected)]="selectedSensors" [clDgRowSelection]="true" [clrDgLoading]="loading">
+                        <clr-dg-column>Asset Name</clr-dg-column>
+                        <clr-dg-column>Asset Source</clr-dg-column>
+                        <clr-dg-column>Serial Number</clr-dg-column>
+                        <clr-dg-column>Tag</clr-dg-column>
+                        <clr-dg-column>Manufacturer</clr-dg-column>
+                        <clr-dg-column>Model</clr-dg-column>
+                        <clr-dg-column>Location</clr-dg-column>
+                        <clr-dg-column>Cabinet Name</clr-dg-column>
+                        <clr-dg-column>Cabine tUnit Position</clr-dg-column>
+                        <clr-dg-placeholder>We couldn't find any assets!</clr-dg-placeholder>
+
+                       <clr-dg-row *clrDgItems="let asset of assets" [clrDgItem]="asset">
+                            <clr-dg-cell>{{asset.assetName}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.assetSource}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.serialnumber}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.tag}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.manufacturer}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.model}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.region}},{{asset.country}},{{asset.city}},{{asset.building}},{{asset.floor}},{{asset.room}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.cabinetName}}</clr-dg-cell>
+                            <clr-dg-cell>{{asset.cabinetUnitPosition}}</clr-dg-cell>
+                       </clr-dg-row>
+                      
+                       <clr-dg-footer>
+                                <ul class="pagination">
+                                     <li ><button class="pagination-previous" type="button" on-click="previousAsset()" ></button></li>
+                                     <li class="pagination-current">{{currentPageAsset}}/{{totalPageAsset}}</li>
+                                     <li> <button class="pagination-next" type="button" disabled="{{disabledAsset}}" on-click="nextAsset()"></button></li>
+                                 </ul>
+                       </clr-dg-footer>
+                </clr-datagrid>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" (click)="closeSelectSelectSensor()">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="confirmUpdateServerAsset()">Ok</button>
         </div>
 </clr-modal>

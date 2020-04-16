@@ -41,6 +41,6 @@ export class AssetModule {
   status:any;
   pdus:string[];
   switches:string[];
-  metricsformulars:{};
+  metricsformulars:any;
   enable:boolean=false;
  }
