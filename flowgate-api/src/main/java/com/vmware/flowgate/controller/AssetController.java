@@ -225,8 +225,7 @@ public class AssetController {
       PageRequest pageable = new PageRequest(pageNumber - 1, pageSize);
       List<Asset> assets = assetRepository.findByAssetNameLikeAndCategory(
             keyWords, category.name(), pageSize, pageSize*(pageNumber - 1));
-      long total = assetRepository.getNumber(keyWords, category.name());
-      PageImpl<Asset> assetPage = new PageImpl<Asset>(assets,pageable,total);
+      PageImpl<Asset> assetPage = new PageImpl<Asset>(assets,pageable,0);
       HashMap<String, String> assetSourceIDAndAssetSourceNameMap = new HashMap<String, String>();
 
       for (Asset asset : assetPage.getContent()) {

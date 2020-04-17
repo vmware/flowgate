@@ -263,32 +263,39 @@ export class ServermappingComponent implements OnInit {
     return mapping.asset == null;
   }
   loading:boolean = false;
+  emptyResult:boolean = false;
   getAssets(){
     this.searchBtnDisabled = true;
     this.searchBtnState = true;
     this.loading = true;
-    this.service.getAssets(this.pageSizeAsset,this.currentPageAsset,this.keywords,this.category).subscribe(data=>{
-      if(data.status == 200){
+    if(!this.emptyResult){
+      this.service.getAssets(this.pageSizeAsset,this.currentPageAsset,this.keywords,this.category).subscribe(data=>{
+        if(data.status == 200){
+          this.searchBtnDisabled = false;
+          this.searchBtnState = false;
+          this.loading = false;
+          if(data.json().content.length != 0){
+            this.assets = data.json().content;
+            this.emptyResult = false;
+          }else{
+            this.emptyResult = true;
+          }
+          this.currentPageAsset = data.json().number+1;
+        }
+      },
+      (error)=>{
+        this.updateAssetModalErrorShow = true;
+        this.updateAssetError = error.json().message
+        this.loading = false;
         this.searchBtnDisabled = false;
         this.searchBtnState = false;
-        this.loading = false;
-        this.assets = data.json().content;
-        this.currentPageAsset = data.json().number+1;
-        this.totalPageAsset = data.json().totalPages;
-        if(this.totalPageAsset == 1){
-          this.disabledAsset = "disabled";
-        }else{
-          this.disabledAsset = "";
-        }
-      }
-    },
-    (error)=>{
-      this.updateAssetModalErrorShow = true;
-      this.updateAssetError = error.json().message
+      })
+    }else{
       this.loading = false;
       this.searchBtnDisabled = false;
       this.searchBtnState = false;
-    })
+    }
+    
   }
 
   previousAsset(){
@@ -298,10 +305,10 @@ export class ServermappingComponent implements OnInit {
     }
   }
   nextAsset(){
-    if(this.currentPageAsset < this.totalPageAsset){
-      this.currentPageAsset++;
+      if(!this.emptyResult){
+        this.currentPageAsset++;
+      }
       this.getAssets();
-    }
   }
   closeSelectOtherAsset(){
     this.mappedOtherAssets = [];
