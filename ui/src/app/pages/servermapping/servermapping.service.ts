@@ -70,7 +70,7 @@ export class ServermappingService {
     this.options = new RequestOptions({ headers: header });
     let body = JSON.stringify(asset);
   
-    return this.http.put(""+this.API_URL+"/v1/assets", body,this.options).map((res)=>res)
+    return this.http.put(""+this.API_URL+"/v1/assets/mappingfacility", body,this.options).map((res)=>res)
   }
   getMappingById(id:string){
     let header = new Headers({ 'Content-Type': 'application/json' });

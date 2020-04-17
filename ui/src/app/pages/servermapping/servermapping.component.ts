@@ -7,19 +7,25 @@ import { ServermappingService } from './servermapping.service';
 import {Router,ActivatedRoute} from '@angular/router';
 import { AssetModule } from './asset.module';
 import { forkJoin } from 'rxjs/observable/forkJoin';
-import { Observable } from 'rxjs';
 import { SubscribableOrPromise } from 'rxjs/Observable';
+
 
 @Component({
   selector: 'app-servermapping',
   templateUrl: './servermapping.component.html',
   styleUrls: ['./servermapping.component.scss']
 })
+
 export class ServermappingComponent implements OnInit {
 
   constructor(private service:ServermappingService,private router: Router, private route: ActivatedRoute) {  
     this.selectedOtherAssets = [];
   }
+ xah_obj_to_map = ( obj => {
+    const mp = new Map;
+    Object.keys ( obj ). forEach (k => { mp.set(k, obj[k]) });
+    return mp;
+  });
   modal="";
   basic=false;
   clrAlertClosed:boolean = true;
@@ -149,7 +155,8 @@ export class ServermappingComponent implements OnInit {
   selectedOtherAssets:AssetModule[];
   category:string = "Server";
   showOtherCategory:string="";
-
+  searchBtnState:boolean = false;
+  searchBtnDisabled:boolean = false;
   updateAssetID(mappingId:string){
     this.service.getMappingById(mappingId).subscribe(
       data=>{
@@ -167,7 +174,6 @@ export class ServermappingComponent implements OnInit {
     this.currentPage = 1;
     this.keywords="";
     this.mappedServerModalOpen = true;
-    this.getAssets();
   }
   getAssetById(id:string):AssetModule{
     let asset:AssetModule = new AssetModule();
@@ -181,10 +187,11 @@ export class ServermappingComponent implements OnInit {
     return asset;
   }
   updateAssetModalErrorShow:boolean = false;
-  updateAssetError:string = "";
+  updateAssetError:string = "Internal error";
+  
   showOtherAssetMapping(id:string,category:string){
-    this.mappedOtherAssetModalOpen = true;
-    this.loading = true;
+  this.mappedOtherAssetModalOpen = true;
+    this.assets = [];
     this.category = category;
     if(category == "PDU"){
       this.showOtherCategory = "PDUs";
@@ -204,15 +211,16 @@ export class ServermappingComponent implements OnInit {
                   let assetIDs:string[] = [];
                   if(category == "PDU"){
                     assetIDs = this.mappedServerAsset.pdus;
-                  }else if(category == "Sensors"){
-                    //sensor
                   }else if(category == "Networks"){
                     //switch
                     assetIDs = this.mappedServerAsset.switches;
                   }
-                  for(let i=0;i<assetIDs.length; i++){
-                    reqList.push(this.service.getAssetById(assetIDs[i]));
+                  if(assetIDs != null){
+                    for(let i=0;i<assetIDs.length; i++){
+                      reqList.push(this.service.getAssetById(assetIDs[i]));
+                    }
                   }
+                 
                   forkJoin(reqList).map((data)=>data).subscribe((res)=>{
                     res.forEach(element => {
                       if(element._body != null && element._body != ""){
@@ -225,21 +233,18 @@ export class ServermappingComponent implements OnInit {
                   })
                   this.currentPage = 1;
                   this.keywords="";
-                  this.getAssets();
                 }
               },error=>{
-                this.loading = false;
                 this.updateAssetError = error.json().message();
                 this.updateAssetModalErrorShow = true;
               }
             )   
           }else{
-            this.loading = false;
             this.updateAssetError = "Not found server mapping";
             this.updateAssetModalErrorShow = true;
           }
         },error=>{
-          this.loading = false;
+
           this.updateAssetError = error.json().message();
           this.updateAssetModalErrorShow = true;
         }
@@ -259,9 +264,13 @@ export class ServermappingComponent implements OnInit {
   }
   loading:boolean = false;
   getAssets(){
+    this.searchBtnDisabled = true;
+    this.searchBtnState = true;
     this.loading = true;
     this.service.getAssets(this.pageSizeAsset,this.currentPageAsset,this.keywords,this.category).subscribe(data=>{
       if(data.status == 200){
+        this.searchBtnDisabled = false;
+        this.searchBtnState = false;
         this.loading = false;
         this.assets = data.json().content;
         this.currentPageAsset = data.json().number+1;
@@ -274,8 +283,11 @@ export class ServermappingComponent implements OnInit {
       }
     },
     (error)=>{
-      alert(error.json().errors[0]);
+      this.updateAssetModalErrorShow = true;
+      this.updateAssetError = error.json().message
       this.loading = false;
+      this.searchBtnDisabled = false;
+      this.searchBtnState = false;
     })
   }
 
@@ -295,12 +307,174 @@ export class ServermappingComponent implements OnInit {
     this.mappedOtherAssets = [];
     this.mappedOtherAssetModalOpen = false;
     this.updateAssetModalErrorShow = false;
-    this.updateAssetError = "";
+    this.updateAssetError = "Internal error";
   }
- 
+
+  //map sensor
+  
+  metricsDatas:any[]=[];
+  mappedSensorAssetModalOpen:boolean = false; 
+  fronTemIds:string[] = [];
+  backTempIds:string[] = [];
+  frontHumIds:string[] = [];
+  backHumIds:string[] = [];
+  mappingId:string = "";
+  showSensors(id:string, category:string,fillData){
+    this.mappedSensorAssetModalOpen = true;
+    this.category = category;
+    this.mappingId = id;
+    this.service.getMappingById(id).subscribe(
+      data=>{
+        if(data.status == 200 && data.text() != ""){
+          this.serverMapping = data.json();
+          let assetId = this.serverMapping.asset;
+          this.service.getAssetById(assetId).subscribe(
+            data=>{
+              if(data.status == 200){
+                this.mappedServerAsset= data.json();
+                let sensorformular = this.xah_obj_to_map(this.mappedServerAsset.metricsformulars).get('SENSOR');
+                if(sensorformular != null){
+                  let sensorMap = this.xah_obj_to_map(sensorformular);
+                  if(sensorMap.has("FrontTemperature")){
+                    let frontTemMap = this.xah_obj_to_map(sensorMap.get("FrontTemperature"));
+                    this.fronTemIds = [];
+                    frontTemMap.forEach((value: string, key: any)  => {
+                      this.fronTemIds.push(value);
+                    });
+                    this.getSensors("Front Temperature",this.fronTemIds);
+                  }
+                  if(sensorMap.has("BackTemperature")){
+                    let backTempMap = this.xah_obj_to_map(sensorMap.get("BackTemperature"));
+                    this.backTempIds = [];
+                    backTempMap.forEach((value: string, key: any)  => {
+                      this.backTempIds.push(value);
+                    });
+                    this.getSensors("Back Temperature",this.backTempIds);
+                  }
+                  if(sensorMap.has("FrontHumidity")){
+                    let frontHumMap = this.xah_obj_to_map(sensorMap.get("FrontHumidity"));
+                    this.frontHumIds = [];
+                    frontHumMap.forEach((value: string, key: any)  => {
+                      this.frontHumIds.push(value);
+                    });
+                    this.getSensors("Front Humidity",this.frontHumIds);
+                  }
+                  if(sensorMap.has("BackHumidity")){
+                    let backHumMap = this.xah_obj_to_map(sensorMap.get("BackHumidity"));
+                    this.backHumIds = [];
+                    backHumMap.forEach((value: string, key: any)  => {
+                      this.backHumIds.push(value);
+                    });
+                    this.getSensors("Back Humidity",this.backHumIds);
+                  }
+                }
+                this.fillData();
+              }
+            },error=>{
+              this.updateAssetError = error.json().message();
+              this.updateAssetModalErrorShow = true;
+            }
+          )   
+        }else{
+          this.updateAssetError = "Not found server mapping";
+          this.updateAssetModalErrorShow = true;
+        }
+      },error=>{
+        this.updateAssetError = error.json().message();
+        this.updateAssetModalErrorShow = true;
+      }
+    )
+  }
+  frontTemSensors:AssetModule[] = [];
+  backTemSensors:AssetModule[] = [];
+  frontHumSensors:AssetModule[] = [];
+  bsckHumSensors:AssetModule[] = [];
+  
+  getSensors(metricName:string, ids:string[]){
+    let reqList:SubscribableOrPromise<any>[] = [];
+    for(let i=0;i<ids.length; i++){
+      reqList.push(this.service.getAssetById(ids[i]));
+    }
+     forkJoin(reqList).map((data)=>data).subscribe((res)=>{
+      res.forEach(element => {
+        if(element._body != null && element._body != ""){
+          let sensorAsset:AssetModule = new AssetModule();
+          sensorAsset = element.json();
+          sensorAsset.enable = true;
+          if(metricName == "Front Temperature"){
+            this.frontTemSensors.push(sensorAsset);
+          }else if(metricName == "Back Temperature"){
+            this.backTemSensors.push(sensorAsset);
+          }else if(metricName == "Front Humidity"){
+            this.frontHumSensors.push(sensorAsset);
+          }else if(metricName == "Back Humidity"){
+            this.bsckHumSensors.push(sensorAsset);
+          }
+        }
+      });
+    })
+  }
+  fillData(){
+    this.metricsDatas = [];
+    this.metricsDatas.push({"metricName":"Front Temperature","sensors":this.frontTemSensors});
+    this.metricsDatas.push({"metricName":"Back Temperature","sensors":this.backTemSensors});
+    this.metricsDatas.push({"metricName":"Front Humidity","sensors":this.frontHumSensors});
+    this.metricsDatas.push({"metricName":"Back Humidity","sensors":this.bsckHumSensors});
+  }
+  closeMappingSensor(){
+    this.mappedSensorAssetModalOpen = false;
+    this.frontTemSensors = [];
+    this.backTemSensors = [];
+    this.frontHumSensors = [];
+    this.bsckHumSensors = [];
+    this.metricsDatas = [];
+  }
+  updateMappedSensor(metricName:string, asset:AssetModule){
+    this.metricsDatas.forEach(element => {
+      if(element.metricName == "Front Temperature"){
+       
+        
+      }
+    });
+   
+  }
+  selectSensorShow:boolean = false;
+  mappedSensors:AssetModule[] = [];
+  metricName:string="";
+  selectedSensors:AssetModule[] = []
+  selectSensor(metricName:string){
+    this.metricName = metricName;
+    this.selectSensorShow = true;
+    this.assets = [];
+    if(metricName == "Front Temperature"){
+      this.mappedSensors = this.frontTemSensors;
+    }else if(metricName == "Back Temperature"){
+      this.mappedSensors =  this.backTemSensors;
+    }else if(metricName == "Front Humidity"){
+      this.mappedSensors = this.frontHumSensors;
+    }else if(metricName == "Back Humidity"){
+      this.mappedSensors =  this.bsckHumSensors;
+    }
+  }
+  closeSelectSelectSensor(){
+    this.loading = false;
+    this.keywords = "";
+    this.selectedSensors = [];
+    this.selectSensorShow = false;
+    this.frontTemSensors = [];
+    this.backTemSensors = [];
+    this.frontHumSensors = [];
+    this.bsckHumSensors = [];
+    this.showSensors(this.mappingId,this.category,this.fillData);
+    this.mappedSensors.forEach(element => {
+      element.enable = true;
+    });
+  }
   confirmUpdateServerAsset(){
     this.loading = true;
     let update:boolean = false;
+    let assetToUpdate:AssetModule = new AssetModule();
+    assetToUpdate.id = this.mappedServerAsset.id;
     if(this.category == "PDU"){
       let pduids:string[] = [];
       this.mappedOtherAssets.forEach(element => {
@@ -313,18 +487,23 @@ export class ServermappingComponent implements OnInit {
           pduids.push(element1.id);
         }
       });
-      if(this.mappedServerAsset.pdus.length != pduids.length){
+      if(this.mappedServerAsset.pdus == null || this.mappedServerAsset.pdus.length == 0){
         update = true;
-        this.mappedServerAsset.pdus = pduids;
+        assetToUpdate.pdus = pduids;
       }else{
-        pduids.forEach(element => {
-          if(!update){
-            if(this.mappedServerAsset.pdus.indexOf(element) == -1){
-              update = true;
-              this.mappedServerAsset.pdus = pduids;
+        if(this.mappedServerAsset.pdus.length != pduids.length){
+          update = true;
+          assetToUpdate.pdus = pduids;
+        }else{
+          pduids.forEach(element => {
+            if(!update){
+              if(this.mappedServerAsset.pdus.indexOf(element) == -1){
+                update = true;
+                assetToUpdate.pdus = pduids;
+              }
             }
-          }
-        });
+          });
+        }
       }
     }else if(this.category == "Networks"){
       let switchids:string[] = [];
@@ -338,26 +517,81 @@ export class ServermappingComponent implements OnInit {
           switchids.push(element1.id);
         }
       });
-      if(this.mappedServerAsset.switches.length != switchids.length){
+      if(this.mappedServerAsset.switches == null || this.mappedServerAsset.switches.length == 0){
         update = true;
-        this.mappedServerAsset.switches = switchids;
+        assetToUpdate.switches = switchids;
       }else{
-        switchids.forEach(element => {
+        if( this.mappedServerAsset.switches.length != switchids.length){
+          update = true;
+          assetToUpdate.switches = switchids;
+        }else{
+          switchids.forEach(element => {
+            if(!update){
+              if(this.mappedServerAsset.switches.indexOf(element) == -1){
+                update = true;
+                assetToUpdate.switches = switchids;
+              }
+            }
+          });
+        }
+      }
+      
+    }else if(this.category == "Sensors"){
+      let sensorids:string[] = [];
+      this.mappedSensors.forEach(element => {
+        if(element.enable){
+          sensorids.push(element.id);
+        }
+      }); 
+      this.selectedSensors.forEach(element1 => {
+        if(sensorids.indexOf(element1.id) == -1){
+          sensorids.push(element1.id);
+        }
+      });
+      let oldsensorId:string[] = [];
+      let metricName:string = "";
+      if(this.metricName == "Front Temperature"){
+        metricName = "FrontTemperature";
+        oldsensorId = this.fronTemIds;
+      }else if(this.metricName == "Back Temperature"){
+        metricName = "BackTemperature";
+        oldsensorId = this.backTempIds;
+      }else if(this.metricName == "Front Humidity"){
+        metricName = "FrontHumidity";
+        oldsensorId = this.frontHumIds;
+      }else if(this.metricName == "Back Humidity"){
+        metricName = "BackHumidity";
+        oldsensorId = this.backHumIds;
+      }
+      if(sensorids.length != oldsensorId.length){
+        update = true;
+        let positionMap:Map<string,string> = new Map<string,string>();
+        sensorids.forEach(element =>{
+          positionMap.set(element,element);
+        })
+        assetToUpdate.metricsformulars = this.generateMetricFormula(positionMap,metricName);
+      }else{
+        sensorids.forEach(element => {
+          let positionMap:Map<string,string> = new Map<string,string>();
+          positionMap.set(element,element);
           if(!update){
-            if(this.mappedServerAsset.switches.indexOf(element) == -1){
+            if(oldsensorId.indexOf(element) == -1){
               update = true;
-              this.mappedServerAsset.switches = switchids;
+              assetToUpdate.metricsformulars = this.generateMetricFormula(positionMap,metricName);
             }
           }
         });
       }
     }
     if(update){
-      this.service.updateAsset(this.mappedServerAsset).subscribe(data=>{
+      this.service.updateAsset(assetToUpdate).subscribe(data=>{
         if(data.status == 200){
           this.loading = false;
           this.mappedOtherAssetModalOpen = false;
           this.mappedOtherAssets = [];
+          if(this.category == "Sensors"){
+            this.closeSelectSelectSensor();
+          }
         }
       },error=>{
         this.loading = false;
@@ -368,8 +602,34 @@ export class ServermappingComponent implements OnInit {
       this.loading = false;
       this.mappedOtherAssets = [];
       this.mappedOtherAssetModalOpen = false;
+      if(this.category == 'Sensors'){
+        this.selectSensorShow = false;
+        this.mappedSensors = [];
+        this.metricName="";
+        this.selectedSensors = []
+      }
     }
   
+  }
+  generateMetricFormula(positionMap:Map<string,string>,metricName:string):{}{
+    let metricsFormulaMap:Map<string,{}> = new Map<string,{}>();
+    let positinoMapjsonObject = {};  
+    positionMap.forEach((value, key) => {  
+      positinoMapjsonObject[key] = value  
+    });  
+    let sensorMap:Map<string,{}> = new Map<string,{}>();
+    sensorMap.set(metricName,positinoMapjsonObject);
+    let sensorMapjsonObject = this.convertToJsonObject(sensorMap);  
+    metricsFormulaMap.set('SENSOR',sensorMapjsonObject);
+    let metricMapjsonObject = this.convertToJsonObject(metricsFormulaMap);   
+    return metricMapjsonObject;
+  }
+  convertToJsonObject(map:Map<string,{}>):{}{
+    let jsonObject = {};  
+    map.forEach((value, key) => {  
+      jsonObject[key] = value  
+        });  
+    return jsonObject;
   }
   cancelAsset(){
     this.mappedServerModalOpen = false;
@@ -381,7 +641,7 @@ export class ServermappingComponent implements OnInit {
       this.mappedServerModalOpen = false;
     }
   }
-
+  
   ngOnInit() {
     this.getServerConfigs();
   }
