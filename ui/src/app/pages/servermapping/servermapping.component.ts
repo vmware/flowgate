@@ -158,6 +158,7 @@ export class ServermappingComponent implements OnInit {
   searchBtnState:boolean = false;
   searchBtnDisabled:boolean = false;
   updateAssetID(mappingId:string){
+    this.currentPageAsset = 1;
     this.service.getMappingById(mappingId).subscribe(
       data=>{
         if(data.status == 200){
@@ -181,6 +182,7 @@ export class ServermappingComponent implements OnInit {
       data=>{
         if(data.status == 200){
           this.mappedServerAsset= data.json();
+          this.mappedServerAsset.enable = true;
         }
       }
     )
@@ -190,9 +192,12 @@ export class ServermappingComponent implements OnInit {
   updateAssetError:string = "Internal error";
   
   showOtherAssetMapping(id:string,category:string){
-  this.mappedOtherAssetModalOpen = true;
+    this.keywords = "";
+    this.mappedOtherAssetModalOpen = true;
     this.assets = [];
     this.category = category;
+    this.currentPageAsset = 1;
+    this.mappedOtherAssets = [];
     if(category == "PDU"){
       this.showOtherCategory = "PDUs";
     }else if(category == "Networks"){
@@ -244,7 +249,6 @@ export class ServermappingComponent implements OnInit {
             this.updateAssetModalErrorShow = true;
           }
         },error=>{
-
           this.updateAssetError = error.json().message();
           this.updateAssetModalErrorShow = true;
         }
@@ -264,23 +268,31 @@ export class ServermappingComponent implements OnInit {
   }
   loading:boolean = false;
   emptyResult:boolean = false;
+  notEnoughOnepage:boolean = false;
   getAssets(){
     this.searchBtnDisabled = true;
     this.searchBtnState = true;
     this.loading = true;
-    if(!this.emptyResult){
       this.service.getAssets(this.pageSizeAsset,this.currentPageAsset,this.keywords,this.category).subscribe(data=>{
         if(data.status == 200){
           this.searchBtnDisabled = false;
           this.searchBtnState = false;
           this.loading = false;
-          if(data.json().content.length != 0){
-            this.assets = data.json().content;
+          this.assets = data.json().content;
+          this.assets.forEach(element => {
+            element.enable = true;
+          });
+          if(data.json().content.length == this.pageSizeAsset){
             this.emptyResult = false;
+            this.currentPageAsset = data.json().number+1;
+            this.disabledAsset = "";
           }else{
             this.emptyResult = true;
+            this.disabledAsset = "disabled";
+            if(this.currentPageAsset >1){
+              this.currentPageAsset -= this.currentPageAsset;
+            }
           }
-          this.currentPageAsset = data.json().number+1;
         }
       },
       (error)=>{
@@ -290,11 +302,6 @@ export class ServermappingComponent implements OnInit {
         this.searchBtnDisabled = false;
         this.searchBtnState = false;
       })
-    }else{
-      this.loading = false;
-      this.searchBtnDisabled = false;
-      this.searchBtnState = false;
-    }
     
   }
 
@@ -315,10 +322,10 @@ export class ServermappingComponent implements OnInit {
     this.mappedOtherAssetModalOpen = false;
     this.updateAssetModalErrorShow = false;
     this.updateAssetError = "Internal error";
+    this.keywords = "";
   }
 
   //map sensor
-  
   metricsDatas:any[]=[];
   mappedSensorAssetModalOpen:boolean = false; 
   fronTemIds:string[] = [];
@@ -327,6 +334,10 @@ export class ServermappingComponent implements OnInit {
   backHumIds:string[] = [];
   mappingId:string = "";
   showSensors(id:string, category:string,fillData){
+    this.fronTemIds = [];
+    this.backTempIds = [];
+    this.fronTemIds = [];
+    this.frontHumIds = [];
     this.mappedSensorAssetModalOpen = true;
     this.category = category;
     this.mappingId = id;
@@ -398,6 +409,7 @@ export class ServermappingComponent implements OnInit {
   bsckHumSensors:AssetModule[] = [];
   
   getSensors(metricName:string, ids:string[]){
+    this.currentPageAsset = 1;
     let reqList:SubscribableOrPromise<any>[] = [];
     for(let i=0;i<ids.length; i++){
       reqList.push(this.service.getAssetById(ids[i]));
@@ -436,20 +448,14 @@ export class ServermappingComponent implements OnInit {
     this.bsckHumSensors = [];
     this.metricsDatas = [];
   }
-  updateMappedSensor(metricName:string, asset:AssetModule){
-    this.metricsDatas.forEach(element => {
-      if(element.metricName == "Front Temperature"){
-       
-        
-      }
-    });
-   
-  }
+
   selectSensorShow:boolean = false;
   mappedSensors:AssetModule[] = [];
   metricName:string="";
   selectedSensors:AssetModule[] = []
   selectSensor(metricName:string){
+    this.keywords = "";
+    this.currentPageAsset = 1;
     this.metricName = metricName;
     this.selectSensorShow = true;
     this.assets = [];
@@ -512,6 +518,7 @@ export class ServermappingComponent implements OnInit {
           });
         }
       }
+
     }else if(this.category == "Networks"){
       let switchids:string[] = [];
       this.mappedOtherAssets.forEach(element => {
@@ -595,18 +602,20 @@ export class ServermappingComponent implements OnInit {
         if(data.status == 200){
           this.loading = false;
           this.mappedOtherAssetModalOpen = false;
-          this.mappedOtherAssets = [];
           if(this.category == "Sensors"){
             this.closeSelectSelectSensor();
+            this.mappedOtherAssets = [];
           }
         }
       },error=>{
         this.loading = false;
         this.updateAssetModalErrorShow = true;
         this.updateAssetError = error.json().message;
+        this.mappedOtherAssets = [];
       })
     }else{
       this.loading = false;
+      this.keywords = "";
       this.mappedOtherAssets = [];
       this.mappedOtherAssetModalOpen = false;
       if(this.category == 'Sensors'){
@@ -614,6 +623,7 @@ export class ServermappingComponent implements OnInit {
         this.mappedSensors = [];
         this.metricName="";
         this.selectedSensors = []
+        this.mappedOtherAssets = [];
       }
     }
   
@@ -642,10 +652,10 @@ export class ServermappingComponent implements OnInit {
     this.mappedServerModalOpen = false;
   }
   confirmAsset(asset:AssetModule){
-    if(asset.id!=""){
+    if(asset.enable){
       this.updateServerMapping(this.serverMapping.id,asset.id);
     }else{
-      this.mappedServerModalOpen = false;
+      this.updateServerMapping(this.serverMapping.id,null);
     }
   }
   
