@@ -563,6 +563,27 @@ include::{snippets}/assets-update-example/curl-request.adoc[]
 
 include::{snippets}/assets-update-example/request-fields.adoc[]
 
+[[resources-asset-mappingfacility]]
+=== mappingfacility
+
+A `PUT` request is used to access the Asset update mapping.
+
+==== Request structure
+
+include::{snippets}/assets-mappingFacility-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-mappingFacility-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-mappingFacility-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/assets-mappingFacility-example/request-fields.adoc[]
+
 [[resources-asset-updateServerMapping]]
 === updateAssetServerMapping
 

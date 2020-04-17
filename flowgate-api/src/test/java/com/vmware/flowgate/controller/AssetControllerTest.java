@@ -245,6 +245,132 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void mappingFacility() throws JsonProcessingException, Exception {
+      Asset asset = createAsset();
+      asset = assetRepository.save(asset);
+      Asset newAsset = new Asset();
+      newAsset.setId(asset.getId());
+      List<String> pdus = new ArrayList<String>();
+      pdus.add("oqwen812321093asdmgtqawee1");
+      newAsset.setPdus(pdus);
+      List<String> switches = new ArrayList<String>();
+      switches.add("ow23aw312e3nr3d2a57788i");
+      newAsset.setSwitches(switches);
+      Map<String, Map<String, Map<String, String>>> metricsformulars =
+            new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, Map<String, String>> sensorMap =
+            new HashMap<String, Map<String, String>>();
+      Map<String, String> positionInfo = new HashMap<String, String>();
+
+      Asset humiditySensorAsset = createAsset();
+      humiditySensorAsset.setCategory(AssetCategory.Sensors);
+      humiditySensorAsset.setSubCategory(AssetSubCategory.Humidity);
+      humiditySensorAsset.setCabinetUnitPosition(12);
+      HashMap<String,String> sensorAssetJustfication = new HashMap<String, String>();
+      Map<String,String> sensorInfo = new HashMap<String,String>();
+      sensorInfo.put(FlowgateConstant.POSITION, "INLET");
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         sensorAssetJustfication.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo));
+         humiditySensorAsset.setJustificationfields(sensorAssetJustfication);
+      } catch (JsonProcessingException e) {
+         TestCase.fail();
+      }
+      humiditySensorAsset = assetRepository.save(humiditySensorAsset);
+      positionInfo.put(humiditySensorAsset.getId(), humiditySensorAsset.getId());
+      sensorMap.put(MetricName.SERVER_FRONT_HUMIDITY, positionInfo);
+      metricsformulars.put(FlowgateConstant.SENSOR, sensorMap);
+      newAsset.setMetricsformulars(metricsformulars);
+
+      this.mockMvc
+      .perform(put("/v1/assets/mappingfacility").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(newAsset)))
+      .andExpect(status().isOk())
+      .andDo(document("assets-mappingFacility-example", requestFields(
+            fieldWithPath("id").description("ID of the asset, created by flowgate"),
+            fieldWithPath("assetNumber").description(
+                  "A unique number that can identify an asset from third part DCIM/CMDB systems.")
+                  .type(long.class),
+            fieldWithPath("assetName").description(
+                  "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"),
+            fieldWithPath("assetSource").description(
+                  "From which third part systems does this asset comes from. It will refer to a source collection which contains all the thirdpart systems"),
+            fieldWithPath("category").description(
+                  "The category of the asset. Can only be one of :Server, PDU, Cabinet, Networks, Sensors, UPS")
+                  .type(AssetCategory.class),
+            fieldWithPath("subCategory")
+                  .description("The subcategory of the asset. Only apply to some systems.")
+                  .type(AssetSubCategory.class).optional(),
+            fieldWithPath("manufacturer").description("The manufacture name"),
+            fieldWithPath("model").description("The model of the asset"),
+            fieldWithPath("serialnumber").description(
+                  "The SN number of the asset, this number can be used to identify an asset. But only some systems have this number.")
+                  .optional(),
+            fieldWithPath("tag").description(
+                  "Some system will use tag to identify an asset. It can be either an number or a string.")
+                  .type(String.class).optional(),
+            fieldWithPath("assetAddress").description("The access address of the asset")
+                  .type(AssetAddress.class).optional(),
+            fieldWithPath("region").description("The location region of the asset")
+                  .optional(),
+            fieldWithPath("country").description("The location country of the asset")
+                  .optional(),
+            fieldWithPath("city").description("The location city of the asset").optional(),
+            fieldWithPath("building").description("The location building of the asset")
+                  .optional(),
+            fieldWithPath("floor").description("The location floor of the asset").optional(),
+            fieldWithPath("room").description("The location room of the asset"),
+            fieldWithPath("row").description("The location row of the asset").optional(),
+            fieldWithPath("col").description("The location col of the asset").optional(),
+            fieldWithPath("extraLocation")
+                  .description("Extra location information. Only valid for some system.")
+                  .optional(),
+            fieldWithPath("cabinetName").description(
+                  "The cabinet name where this asset is located. If the asset is cabinet then this filed is empty.")
+                  .optional(),
+            fieldWithPath("cabinetUnitPosition").description("The cabinet unit number")
+                  .type(int.class).optional(),
+            fieldWithPath("mountingSide").description("The cabinet unit number")
+                  .type(MountingSide.class).optional(),
+            fieldWithPath("cabinetAssetNumber").description(
+                  "The asset number of the cabinet. Will be used to search more detail information about the cabinet.")
+                  .type(long.class).optional(),
+            fieldWithPath("assetRealtimeDataSpec")
+                  .description("Only valid for sensor type of asset.")
+                  .type(AssetRealtimeDataSpec.class).optional(),
+            fieldWithPath("justificationfields").ignored(),
+            fieldWithPath("metricsformulars").description("Possible PDUs And sensors that this server connected with"),
+            fieldWithPath("pdus")
+                  .description("Possible PDUs that this server connected with"),
+            fieldWithPath("switches")
+                  .description("Physical switchs that this host connected with"),
+            fieldWithPath("lastupdate").ignored(), fieldWithPath("created").ignored(),
+            fieldWithPath("capacity").description("The capacity of asset.").type(int.class)
+                  .optional(),
+            fieldWithPath("freeCapacity").description("The free capacity of asset.")
+                  .type(int.class).optional(),
+            fieldWithPath("parent").description(
+                  "The parent of asset,it will be null unless the asset's category is Sensors")
+                  .type(Parent.class).optional(),
+            fieldWithPath("tenant").description("Tenant information for the asset")
+                  .type(Tenant.class).optional(),
+            fieldWithPath("status").description(
+                        "This is a collection of states, including the state of the asset, "
+                              + "the state of the pdu mapping, and the state of the switch mapping."))));
+      Asset testAsset = assetRepository.findOne(asset.getId());
+      TestCase.assertEquals(1, testAsset.getPdus().size());
+      TestCase.assertEquals("oqwen812321093asdmgtqawee1", testAsset.getPdus().get(0));
+
+      TestCase.assertEquals(1, testAsset.getSwitches().size());
+      TestCase.assertEquals("ow23aw312e3nr3d2a57788i", testAsset.getSwitches().get(0));
+
+      TestCase.assertEquals(FlowgateConstant.RACK_UNIT_PREFIX + humiditySensorAsset.getCabinetUnitPosition()+FlowgateConstant.SEPARATOR+"INLET",
+            testAsset.getMetricsformulars().get(FlowgateConstant.SENSOR).get(MetricName.SERVER_FRONT_HUMIDITY).keySet().iterator().next());
+      assetRepository.delete(testAsset.getId());
+      assetRepository.delete(humiditySensorAsset.getId());
+   }
+
+   @Test
    public void insertRealtimeDataExample() throws JsonProcessingException, Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
