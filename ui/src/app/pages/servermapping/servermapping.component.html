@@ -115,7 +115,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                    <td><button [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled" class="btn btn-sm" (click)="search();" >Search</button></td>
                                    <td>MappedAsset: </td>
                                    <td>
-                                        <clr-checkbox *ngIf ="mappedServerAsset.assetName != null" [clrChecked]="mappedServerAsset.assetName != null" [clrInline]="true">
+                                        <clr-checkbox *ngIf ="mappedServerAsset.assetName != null"[ngModelOptions]="{standalone: true}"
+                                        [(ngModel)]="mappedServerAsset.enable"  [clrInline]="true">
                                           {{mappedServerAsset.assetName}}
                                          </clr-checkbox>
                                    </td>
