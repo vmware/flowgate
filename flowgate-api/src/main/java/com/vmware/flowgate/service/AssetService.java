@@ -127,6 +127,8 @@ public class AssetService {
 
    private List<MetricData> generateServerPduMetricData(List<ValueUnit> valueUnits, String pduAssetId){
       List<MetricData> result = new ArrayList<MetricData>();
+      Double serverVoltage = null;
+      long serverVoltageReadTime = 0;
       for(ValueUnit value : valueUnits) {
          MetricData data = new MetricData();
          data.setTimeStamp(value.getTime());
@@ -149,8 +151,17 @@ public class AssetService {
             result.add(data);
             break;
          case MetricName.PDU_VOLTAGE:
-            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, pduAssetId, value.getExtraidentifier()));
-            result.add(data);
+            String extraidentifier = value.getExtraidentifier();
+            serverVoltageReadTime = data.getTimeStamp();
+            //some pdus without outlet metrics,but have inlet metrics
+            if(serverVoltage == null) {
+               serverVoltage = data.getValueNum();
+            }
+            if(extraidentifier.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
+               data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, pduAssetId, value.getExtraidentifier()));
+               result.add(data);
+               serverVoltage = data.getValueNum();
+            }
             break;
          case MetricName.PDU_POWER_LOAD:
             data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD, pduAssetId));
@@ -163,6 +174,13 @@ public class AssetService {
          default:
             break;
          }
+      }
+      if(serverVoltage != null) {
+         MetricData data = new MetricData();
+         data.setMetricName(MetricName.SERVER_VOLTAGE);
+         data.setTimeStamp(serverVoltageReadTime);
+         data.setValueNum(serverVoltage);
+         result.add(data);
       }
       return result;
    }
