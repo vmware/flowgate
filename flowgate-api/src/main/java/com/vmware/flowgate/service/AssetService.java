@@ -127,6 +127,10 @@ public class AssetService {
 
    private List<MetricData> generateServerPduMetricData(List<ValueUnit> valueUnits, String pduAssetId){
       List<MetricData> result = new ArrayList<MetricData>();
+      boolean server_inlet_voltage_existed = false;
+      boolean server_outlet_voltage_existed = false;
+      boolean server_pdu_voltage_existed = false;
+      Map<String,MetricData> voltages = new HashMap<String,MetricData>();
       for(ValueUnit value : valueUnits) {
          MetricData data = new MetricData();
          data.setTimeStamp(value.getTime());
@@ -151,6 +155,31 @@ public class AssetService {
          case MetricName.PDU_VOLTAGE:
             data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, pduAssetId, value.getExtraidentifier()));
             result.add(data);
+            String extraidentifier = value.getExtraidentifier();
+            if(!server_inlet_voltage_existed && extraidentifier.contains(FlowgateConstant.INLET_NAME_PREFIX)) {
+               MetricData serverVoltage = new MetricData();
+               serverVoltage.setTimeStamp(value.getTime());
+               serverVoltage.setValueNum(value.getValueNum());
+               serverVoltage.setMetricName(MetricName.SERVER_VOLTAGE);
+               voltages.put(FlowgateConstant.INLET_NAME_PREFIX, serverVoltage);
+               server_inlet_voltage_existed = true;
+            }
+            if(!server_outlet_voltage_existed && extraidentifier.contains(FlowgateConstant.INLET_NAME_PREFIX)) {
+               MetricData serverVoltage = new MetricData();
+               serverVoltage.setTimeStamp(value.getTime());
+               serverVoltage.setValueNum(value.getValueNum());
+               serverVoltage.setMetricName(MetricName.SERVER_VOLTAGE);
+               voltages.put(FlowgateConstant.OUTLET_NAME_PREFIX, serverVoltage);
+               server_outlet_voltage_existed = true;
+            }
+            if(!server_pdu_voltage_existed && extraidentifier.contains(FlowgateConstant.INLET_NAME_PREFIX)) {
+               MetricData serverPduVoltage = new MetricData();
+               serverPduVoltage.setTimeStamp(value.getTime());
+               serverPduVoltage.setValueNum(value.getValueNum());
+               serverPduVoltage.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_VOLTAGE, pduAssetId));
+               result.add(serverPduVoltage);
+               server_pdu_voltage_existed = true;
+            }
             break;
          case MetricName.PDU_POWER_LOAD:
             data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD, pduAssetId));
@@ -163,6 +192,13 @@ public class AssetService {
          default:
             break;
          }
+      }
+      if(voltages.containsKey(FlowgateConstant.OUTLET_NAME_PREFIX)) {
+         MetricData data = voltages.get(FlowgateConstant.OUTLET_NAME_PREFIX);
+         result.add(data);
+      }else {
+         MetricData data = voltages.get(FlowgateConstant.INLET_NAME_PREFIX);
+         result.add(data);
       }
       return result;
    }
