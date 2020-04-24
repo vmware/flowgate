@@ -1,3 +1,7 @@
+/**
+ * Copyright 2020 VMware, Inc.
+ * SPDX-License-Identifier: BSD-2-Clause
+*/
 package com.vmware.flowgate.service;
 
 import java.io.IOException;
@@ -8,11 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
@@ -123,6 +130,18 @@ public class AssetService {
          }
       }
       return result;
+   }
+
+   public Page<Asset> getAssetByCategory(AssetCategory category,int pageSize, int pageNumber){
+      if (pageNumber < FlowgateConstant.defaultPageNumber) {
+         pageNumber = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
+      }
+      PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
+      return assetRepository.findAssetByCategory(category.name(), pageRequest);
    }
 
    private List<MetricData> generateServerPduMetricData(List<ValueUnit> valueUnits, String pduAssetId){
