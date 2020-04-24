@@ -8,12 +8,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.ScanOptions.ScanOptionsBuilder;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -24,20 +31,32 @@ import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.exception.WormholeRequestException;
+import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
 
 @Component
 public class AssetService {
+   private static final Logger logger = LoggerFactory.getLogger(AssetService.class);
+
+   public static final String SERVER_ASSET_NAME_LIST = "asset:servernamelist";
+   private static final int SERVER_ASSET_NAME_TIME_OUT = 7200;
+   private static final int LIMIT_RESULT = 100;
 
    @Autowired
-   AssetRepository assetRepository;
+   private AssetIPMappingRepository assetIPMappingRepository;
    @Autowired
-   AssetRealtimeDataRepository realtimeDataRepository;
+   private AssetRepository assetRepository;
+   @Autowired
+   private AssetRealtimeDataRepository realtimeDataRepository;
+   @Autowired
+   private StringRedisTemplate redisTemplate;
+
    private static Map<String,String> metricNameMap = new HashMap<String,String>();
    static {
       metricNameMap.put(MetricName.PDU_HUMIDITY, MetricName.HUMIDITY);
@@ -132,16 +151,62 @@ public class AssetService {
       return result;
    }
 
-   public Page<Asset> getAssetByCategory(AssetCategory category,int pageSize, int pageNumber){
-      if (pageNumber < FlowgateConstant.defaultPageNumber) {
-         pageNumber = FlowgateConstant.defaultPageNumber;
-      } else if (pageSize <= 0) {
-         pageSize = FlowgateConstant.defaultPageSize;
-      } else if (pageSize > FlowgateConstant.maxPageSize) {
-         pageSize = FlowgateConstant.maxPageSize;
+   public boolean isAssetNameValidate(AssetIPMapping mapping) {
+      if(redisTemplate.hasKey(SERVER_ASSET_NAME_LIST)) {
+         String assetName =  mapping.getAssetname();
+         if(!redisTemplate.opsForSet().isMember(SERVER_ASSET_NAME_LIST, assetName)) {
+            logger.error("Not found this item in redis : " + assetName);
+            return false;
+         }
+      }else {
+         Set<String> assetNames = getAssetNamesAndUpdateCache();
+         if(!assetNames.contains(mapping.getAssetname())) {
+            logger.error("Not found this item : " + mapping.getAssetname());
+            return false;
+         }
       }
-      PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
-      return assetRepository.findAssetByCategory(category.name(), pageRequest);
+      return true;
+   }
+
+   public List<String> searchServerAssetName(String content){
+      if(redisTemplate.hasKey(SERVER_ASSET_NAME_LIST)) {
+         ScanOptionsBuilder builder = ScanOptions.scanOptions();
+         builder.count(redisTemplate.opsForSet().size(SERVER_ASSET_NAME_LIST));
+         builder.match("*"+content+"*");
+         List<String> matchResult = new ArrayList<String>();
+         Cursor<String> curosr = redisTemplate.opsForSet().scan(SERVER_ASSET_NAME_LIST, builder.build());
+         while (curosr.hasNext()) {
+            if(matchResult.size() > LIMIT_RESULT) {
+               break;
+            }
+            matchResult.add(curosr.next());
+         }
+         return matchResult;
+      }
+      Set<String> assetNames = getAssetNamesAndUpdateCache();
+      List<String> serverNames = new ArrayList<String>(LIMIT_RESULT+1);
+      for(String assetName : assetNames) {
+         if(!assetName.contains(content)) {
+            continue;
+         }
+         if(serverNames.size() < LIMIT_RESULT + 1) {
+            serverNames.add(assetName);
+         }
+      }
+      return serverNames;
+   }
+
+   private Set<String> getAssetNamesAndUpdateCache() {
+      List<Asset> assets = assetRepository.findAssetNameByCategory(AssetCategory.Server.name());
+      Set<String> assetNames = new LinkedHashSet<String>();
+      for(Asset asset : assets) {
+         assetNames.add(asset.getAssetName());
+      }
+      redisTemplate.opsForSet().add(SERVER_ASSET_NAME_LIST, assetNames.toArray(new String[assetNames.size()]));
+      if(redisTemplate.hasKey(SERVER_ASSET_NAME_LIST)) {
+         redisTemplate.expire(SERVER_ASSET_NAME_LIST, SERVER_ASSET_NAME_TIME_OUT, TimeUnit.SECONDS);
+      }
+      return assetNames;
    }
 
    private List<MetricData> generateServerPduMetricData(List<ValueUnit> valueUnits, String pduAssetId){

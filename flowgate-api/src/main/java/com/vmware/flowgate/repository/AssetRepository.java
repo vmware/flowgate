@@ -40,4 +40,7 @@ public interface AssetRepository
    public Asset findOneByAssetNumberAndAssetName(long assetNumber,String name);
 
    public Page<Asset> findByAssetSourceContainingAndCategory(String assetSource, String category,Pageable page);
+
+   @Query("SELECT META(#{#n1ql.bucket}).id AS _ID, META(#{#n1ql.bucket}).cas AS _CAS, #{#n1ql.bucket}.assetName FROM #{#n1ql.bucket} where _class = 'com.vmware.flowgate.common.model.Asset' AND `category` = $1")
+   public List<Asset> findAssetNameByCategory(String category);
 }
