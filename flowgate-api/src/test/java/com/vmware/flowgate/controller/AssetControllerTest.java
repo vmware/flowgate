@@ -1199,6 +1199,15 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void deleteAssetIPAndNameMappingExample() throws Exception {
+      AssetIPMapping assetipmapping = createAssetIPMapping();
+      assetipmapping.setAssetname("cloud-server");
+      assetipmapping = assetIPMappingRepository.save(assetipmapping);
+      this.mockMvc.perform(delete("/v1/assets/mapping/hostnameip/" + assetipmapping.getId()))
+            .andExpect(status().isOk()).andDo(document("assets-deleteAssetIPAndNameMapping-example"));
+   }
+
+   @Test
    public void updateHostNameIPMappingExample() throws Exception {
       SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
       when(template.hasKey(anyString())).thenReturn(false);
