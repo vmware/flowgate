@@ -575,8 +575,8 @@ public class AssetController {
 
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.GET)
-   public Page<AssetIPMapping> getHostNameByRange(@RequestParam("pagesize") int pageSize,
-         @RequestParam("pagenumber") int pageNumber) {
+   public Page<AssetIPMapping> getHostNameByRange(@RequestParam(value = "pagesize",required = false, defaultValue = "20") Integer pageSize,
+         @RequestParam(value = "pagenumber",required = false, defaultValue = "1") Integer pageNumber) {
       if (pageNumber < FlowgateConstant.defaultPageNumber) {
          pageNumber = FlowgateConstant.defaultPageNumber;
       } else if (pageSize <= 0) {

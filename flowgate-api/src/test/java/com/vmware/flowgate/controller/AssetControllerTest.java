@@ -26,10 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -1133,7 +1131,6 @@ public class AssetControllerTest {
    @Test
    public void createHostNameIPMappingExample() throws Exception {
       SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
-      Set<String> topicgroups = new HashSet<String>();
       when(template.hasKey(anyString())).thenReturn(false);
       when(template.opsForSet()).thenReturn(setOperations);
       when(setOperations.add(anyString(), any())).thenReturn(1l);
@@ -1181,7 +1178,6 @@ public class AssetControllerTest {
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("Invalid asset name");
       SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
-      Set<String> topicgroups = new HashSet<String>();
       when(template.hasKey(anyString())).thenReturn(false);
       when(template.opsForSet()).thenReturn(setOperations);
       when(setOperations.add(anyString(), any())).thenReturn(1l);
@@ -1205,7 +1201,6 @@ public class AssetControllerTest {
    @Test
    public void updateHostNameIPMappingExample() throws Exception {
       SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
-      Set<String> topicgroups = new HashSet<String>();
       when(template.hasKey(anyString())).thenReturn(false);
       when(template.opsForSet()).thenReturn(setOperations);
       when(setOperations.add(anyString(), any())).thenReturn(1l);
@@ -1228,7 +1223,7 @@ public class AssetControllerTest {
             .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(newAssetIPMapping)))
             .andExpect(status().isCreated())
-            .andDo(document("assets-createHostNameIPMapping-example", requestFields(
+            .andDo(document("assets-updateHostNameIPMapping-example", requestFields(
                   fieldWithPath("id").description("ID of the asset, created by flowgate"),
                   fieldWithPath("ip").description("ip of hostname"),
                   fieldWithPath("assetname").description(
@@ -1245,7 +1240,6 @@ public class AssetControllerTest {
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("Invalid asset name");
       SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
-      Set<String> topicgroups = new HashSet<String>();
       when(template.hasKey(anyString())).thenReturn(false);
       when(template.opsForSet()).thenReturn(setOperations);
       when(setOperations.add(anyString(), any())).thenReturn(1l);
@@ -1276,7 +1270,30 @@ public class AssetControllerTest {
       }
    }
 
-
+   @Test
+   public void getHostNameIPMappingByPage() throws Exception {
+      AssetIPMapping assetipmapping = createAssetIPMapping();
+      assetipmapping.setAssetname("cloud-sha2-esx2");
+      assetIPMappingRepository.deleteAll();
+      assetipmapping = assetIPMappingRepository.save(assetipmapping);
+      this.mockMvc
+      .perform(get("/v1/assets/mapping/hostnameip?pagesize=10&pagenumber=1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$..totalPages").value(1))
+      .andExpect(jsonPath("$..content[0].ip").value(assetipmapping.getIp()))
+      .andExpect(jsonPath("$..content[0].assetname").value(assetipmapping.getAssetname()))
+      .andDo(document("assets-getHostNameIPMappingByPage-example",
+            responseFields(fieldWithPath("content").description("AssetIPMapping's array."),
+                  fieldWithPath("totalPages").description("content's total pages."),
+                  fieldWithPath("totalElements").description("content's total elements."),
+                  fieldWithPath("last").description("Is the last."),
+                  fieldWithPath("number").description("The page number."),
+                  fieldWithPath("size").description("The page size."),
+                  fieldWithPath("sort").description("The sort."),
+                  fieldWithPath("numberOfElements").description("The number of Elements."),
+                  fieldWithPath("first").description("Is the first."))));
+      assetIPMappingRepository.delete(assetipmapping.getId());
+   }
 
    @Test
    public void getServerMappingByID() throws Exception {
@@ -1859,6 +1876,8 @@ public class AssetControllerTest {
             }else if(String.format(MetricKeyName.SERVER_FRONT_TEMPERATURE_LOCATIONX, "INLET").
                   equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 32.0);
+            }else if(MetricName.SERVER_VOLTAGE.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 208.0);
             }else {
                TestCase.fail();
             }
