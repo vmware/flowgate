@@ -46,6 +46,7 @@ import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
 import com.vmware.flowgate.service.AssetService;
 import com.vmware.flowgate.util.BaseDocumentUtil;
+import com.vmware.flowgate.util.HandleURL;
 
 @RestController
 @RequestMapping("/v1/assets")
@@ -548,7 +549,55 @@ public class AssetController {
    @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.POST)
    public void createHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
       BaseDocumentUtil.generateID(mapping);
+      String ip = mapping.getIp();
+      if(ip == null || ip.isEmpty() || !ip.matches(HandleURL.IP_REGX)) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid ip address",
+               null);
+      }
+      if (!assetService.isAssetNameValidate(mapping)) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid asset name",
+               null);
+      }
       assetIPMappingRepository.save(mapping);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.PUT)
+   public void updateHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
+      BaseDocumentUtil.generateID(mapping);
+      AssetIPMapping oldMapping = assetIPMappingRepository.findOne(mapping.getId());
+      if(!assetService.isAssetNameValidate(mapping)) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Invalid asset name",null);
+      }
+      oldMapping.setAssetname(mapping.getAssetname());
+      assetIPMappingRepository.save(oldMapping);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.GET)
+   public Page<AssetIPMapping> getHostNameByRange(@RequestParam("pagesize") int pageSize,
+         @RequestParam("pagenumber") int pageNumber) {
+      if (pageNumber < FlowgateConstant.defaultPageNumber) {
+         pageNumber = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
+      }
+      PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
+      return assetIPMappingRepository.findAll(pageRequest);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/mapping/hostnameip/{id}", method = RequestMethod.DELETE)
+   public void deleteHostNameByID(@PathVariable("id") String id) {
+      assetIPMappingRepository.delete(id);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/name/keywords/{keywords}", method = RequestMethod.GET)
+   public List<String> searchAssetName(@PathVariable("keywords") String keywords){
+      return assetService.searchServerAssetName(keywords);
    }
 
    @ResponseStatus(HttpStatus.OK)
