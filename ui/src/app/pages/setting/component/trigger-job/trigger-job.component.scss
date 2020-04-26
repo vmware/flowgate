@@ -122,7 +122,9 @@ h5{
     font-size: 13px;
     color:#c3c2c2;
 }
-li:hover{
-    background:#007cbb;
-    color: white;
+.lihover{
+    li:hover{
+        background:#007cbb;
+        color: white;
+    }
 }
