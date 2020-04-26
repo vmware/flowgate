@@ -46,6 +46,12 @@
 			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>flowgate-common</artifactId>
 			<version>${flowgate.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.couchbase.client</groupId>
+					<artifactId>java-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 
