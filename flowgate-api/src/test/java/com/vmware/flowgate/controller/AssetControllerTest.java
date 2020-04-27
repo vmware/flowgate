@@ -1140,7 +1140,7 @@ public class AssetControllerTest {
       server = assetRepository.save(server);
       AssetIPMapping assetipmapping = createAssetIPMapping();
       assetipmapping.setAssetname(server.getAssetName());
-
+      assetipmapping.setIp("192.168.0.1");
       this.mockMvc
             .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(assetipmapping)))
@@ -1185,6 +1185,7 @@ public class AssetControllerTest {
       assetRepository.save(server);
       AssetIPMapping mapping = createAssetIPMapping();
       mapping.setAssetname("cloud-sha1-esx8");
+      mapping.setIp("192.168.0.1");
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("The Asset name is not exist : " + mapping.getAssetname());
       MvcResult result = this.mockMvc
@@ -1228,6 +1229,7 @@ public class AssetControllerTest {
       AssetIPMapping newAssetIPMapping = createAssetIPMapping();
       newAssetIPMapping.setAssetname(server1.getAssetName());
       newAssetIPMapping.setId(assetipmapping.getId());
+      newAssetIPMapping.setIp("192.168.0.1");
       this.mockMvc
             .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(newAssetIPMapping)))
@@ -1264,6 +1266,7 @@ public class AssetControllerTest {
       AssetIPMapping newAssetIPMapping = createAssetIPMapping();
       newAssetIPMapping.setId(assetipmapping.getId());
       newAssetIPMapping.setAssetname("cloud-server1");
+      newAssetIPMapping.setIp("192.168.0.1");
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("The Asset name is not exist : " + newAssetIPMapping.getAssetname());
       MvcResult result = this.mockMvc

@@ -550,7 +550,7 @@ public class AssetController {
    public void createHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
       BaseDocumentUtil.generateID(mapping);
       String ip = mapping.getIp();
-      if(ip == null || ip.isEmpty() || !IPAddressUtil.isValidIp(ip)) {
+      if(!IPAddressUtil.isValidIp(ip)) {
          throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid ip address",
                null);
       }
@@ -569,11 +569,11 @@ public class AssetController {
          throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"The dd is not exist : " + mapping.getId(),null);
       }
       String assetName = mapping.getAssetname();
-      if(assetName == null || !assetService.isAssetNameValidate(assetName)) {
-         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"The Asset name is not exist : " + mapping.getAssetname(),null);
-      }
-      if(assetName.equals(oldMapping.getAssetname())) {
+      if(oldMapping.getAssetname().equals(assetName)) {
          return;
+      }
+      if(!assetService.isAssetNameValidate(assetName)) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"The Asset name is not exist : " + mapping.getAssetname(),null);
       }
       oldMapping.setAssetname(mapping.getAssetname());
       assetIPMappingRepository.save(oldMapping);
