@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +31,6 @@ import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
-import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ValueUnit;
@@ -151,17 +150,19 @@ public class AssetService {
       return result;
    }
 
-   public boolean isAssetNameValidate(AssetIPMapping mapping) {
+   public boolean isAssetNameValidate(String assetName) {
+      if(assetName == null) {
+         return false;
+      }
       if(redisTemplate.hasKey(SERVER_ASSET_NAME_LIST)) {
-         String assetName =  mapping.getAssetname();
          if(!redisTemplate.opsForSet().isMember(SERVER_ASSET_NAME_LIST, assetName)) {
-            logger.error("Not found this item in redis : " + assetName);
+            logger.info("Not found this item in redis : " + assetName);
             return false;
          }
       }else {
          Set<String> assetNames = getAssetNamesAndUpdateCache();
-         if(!assetNames.contains(mapping.getAssetname())) {
-            logger.error("Not found this item : " + mapping.getAssetname());
+         if(!assetNames.contains(assetName)) {
+            logger.info("Not found this item : " + assetName);
             return false;
          }
       }
@@ -198,7 +199,7 @@ public class AssetService {
 
    private Set<String> getAssetNamesAndUpdateCache() {
       List<Asset> assets = assetRepository.findAssetNameByCategory(AssetCategory.Server.name());
-      Set<String> assetNames = new LinkedHashSet<String>();
+      Set<String> assetNames = new HashSet<String>();
       for(Asset asset : assets) {
          assetNames.add(asset.getAssetName());
       }
