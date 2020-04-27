@@ -38,6 +38,7 @@ import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
+import com.vmware.flowgate.common.utils.IPAddressUtil;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
@@ -46,7 +47,6 @@ import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
 import com.vmware.flowgate.service.AssetService;
 import com.vmware.flowgate.util.BaseDocumentUtil;
-import com.vmware.flowgate.util.HandleURL;
 
 @RestController
 @RequestMapping("/v1/assets")
@@ -550,12 +550,12 @@ public class AssetController {
    public void createHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
       BaseDocumentUtil.generateID(mapping);
       String ip = mapping.getIp();
-      if(ip == null || ip.isEmpty() || !ip.matches(HandleURL.IP_REGX)) {
+      if(ip == null || ip.isEmpty() || !IPAddressUtil.isValidIp(ip)) {
          throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid ip address",
                null);
       }
-      if (!assetService.isAssetNameValidate(mapping)) {
-         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid asset name",
+      if (!assetService.isAssetNameValidate(mapping.getAssetname())) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "The Asset name is not exist : " + mapping.getAssetname(),
                null);
       }
       assetIPMappingRepository.save(mapping);
@@ -564,10 +564,16 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.PUT)
    public void updateHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
-      BaseDocumentUtil.generateID(mapping);
       AssetIPMapping oldMapping = assetIPMappingRepository.findOne(mapping.getId());
-      if(!assetService.isAssetNameValidate(mapping)) {
-         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Invalid asset name",null);
+      if(oldMapping == null) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"The dd is not exist : " + mapping.getId(),null);
+      }
+      String assetName = mapping.getAssetname();
+      if(assetName == null || !assetService.isAssetNameValidate(assetName)) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"The Asset name is not exist : " + mapping.getAssetname(),null);
+      }
+      if(assetName.equals(oldMapping.getAssetname())) {
+         return;
       }
       oldMapping.setAssetname(mapping.getAssetname());
       assetIPMappingRepository.save(oldMapping);
@@ -575,7 +581,7 @@ public class AssetController {
 
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.GET)
-   public Page<AssetIPMapping> getHostNameByRange(@RequestParam(value = "pagesize",required = false, defaultValue = "20") Integer pageSize,
+   public Page<AssetIPMapping> getAssetIPMappingByPage(@RequestParam(value = "pagesize",required = false, defaultValue = "20") Integer pageSize,
          @RequestParam(value = "pagenumber",required = false, defaultValue = "1") Integer pageNumber) {
       if (pageNumber < FlowgateConstant.defaultPageNumber) {
          pageNumber = FlowgateConstant.defaultPageNumber;
@@ -595,9 +601,9 @@ public class AssetController {
    }
 
    @ResponseStatus(HttpStatus.OK)
-   @RequestMapping(value = "/name/keywords/{keywords}", method = RequestMethod.GET)
-   public List<String> searchAssetName(@PathVariable("keywords") String keywords){
-      return assetService.searchServerAssetName(keywords);
+   @RequestMapping(value = "/names", method = RequestMethod.GET)
+   public List<String> searchAssetName(@RequestParam("queryParam") String content){
+      return assetService.searchServerAssetName(content);
    }
 
    @ResponseStatus(HttpStatus.OK)

@@ -1175,8 +1175,6 @@ public class AssetControllerTest {
 
    @Test
    public void createHostNameAndIPMappingFailureExample2() throws Exception {
-      expectedEx.expect(WormholeRequestException.class);
-      expectedEx.expectMessage("Invalid asset name");
       SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
       when(template.hasKey(anyString())).thenReturn(false);
       when(template.opsForSet()).thenReturn(setOperations);
@@ -1187,6 +1185,8 @@ public class AssetControllerTest {
       assetRepository.save(server);
       AssetIPMapping mapping = createAssetIPMapping();
       mapping.setAssetname("cloud-sha1-esx8");
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("The Asset name is not exist : " + mapping.getAssetname());
       MvcResult result = this.mockMvc
       .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(mapping)))
@@ -1246,8 +1246,6 @@ public class AssetControllerTest {
 
    @Test
    public void updateHostNameIPMappingFailureExample() throws Exception {
-      expectedEx.expect(WormholeRequestException.class);
-      expectedEx.expectMessage("Invalid asset name");
       SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
       when(template.hasKey(anyString())).thenReturn(false);
       when(template.opsForSet()).thenReturn(setOperations);
@@ -1263,9 +1261,11 @@ public class AssetControllerTest {
       AssetIPMapping assetipmapping = createAssetIPMapping();
       assetipmapping.setAssetname(server.getAssetName());
       assetipmapping = assetIPMappingRepository.save(assetipmapping);
-
       AssetIPMapping newAssetIPMapping = createAssetIPMapping();
       newAssetIPMapping.setId(assetipmapping.getId());
+      newAssetIPMapping.setAssetname("cloud-server1");
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("The Asset name is not exist : " + newAssetIPMapping.getAssetname());
       MvcResult result = this.mockMvc
             .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(newAssetIPMapping)))
