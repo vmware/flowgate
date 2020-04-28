@@ -555,7 +555,7 @@ public class AssetController {
                null);
       }
       if (!assetService.isAssetNameValidate(mapping.getAssetname())) {
-         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "The Asset name is not exist : " + mapping.getAssetname(),
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't found any asset with the name : " + mapping.getAssetname(),
                null);
       }
       assetIPMappingRepository.save(mapping);
@@ -566,14 +566,14 @@ public class AssetController {
    public void updateHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
       AssetIPMapping oldMapping = assetIPMappingRepository.findOne(mapping.getId());
       if(oldMapping == null) {
-         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"The dd is not exist : " + mapping.getId(),null);
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't found any mapping with the id: " + mapping.getId(),null);
       }
       String assetName = mapping.getAssetname();
       if(oldMapping.getAssetname().equals(assetName)) {
          return;
       }
       if(!assetService.isAssetNameValidate(assetName)) {
-         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"The Asset name is not exist : " + mapping.getAssetname(),null);
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't found any asset with the name : " + mapping.getAssetname(),null);
       }
       oldMapping.setAssetname(mapping.getAssetname());
       assetIPMappingRepository.save(oldMapping);
