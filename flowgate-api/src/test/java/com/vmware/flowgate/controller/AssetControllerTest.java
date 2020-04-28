@@ -7,6 +7,9 @@ package com.vmware.flowgate.controller;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -30,10 +33,15 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.redis.core.SetOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -64,6 +72,7 @@ import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.Tenant;
 import com.vmware.flowgate.common.model.ValueUnit;
+import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
@@ -109,6 +118,12 @@ public class AssetControllerTest {
 
    @Autowired
    AssetIPMappingRepository assetIPMappingRepository;
+
+   @MockBean
+   private StringRedisTemplate template;
+
+   @Rule
+   public ExpectedException expectedEx = ExpectedException.none();
 
    @Before
    public void setUp() {
@@ -1115,7 +1130,17 @@ public class AssetControllerTest {
 
    @Test
    public void createHostNameIPMappingExample() throws Exception {
+      SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
+      when(template.hasKey(anyString())).thenReturn(false);
+      when(template.opsForSet()).thenReturn(setOperations);
+      when(setOperations.add(anyString(), any())).thenReturn(1l);
+      Asset server = createAsset();
+      server.setCategory(AssetCategory.Server);
+      server.setAssetName("cloud-sha1-esx2");
+      server = assetRepository.save(server);
       AssetIPMapping assetipmapping = createAssetIPMapping();
+      assetipmapping.setAssetname(server.getAssetName());
+      assetipmapping.setIp("192.168.0.1");
       this.mockMvc
             .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(assetipmapping)))
@@ -1124,10 +1149,162 @@ public class AssetControllerTest {
                   fieldWithPath("id").description("ID of the asset, created by flowgate"),
                   fieldWithPath("ip").description("ip of hostname"),
                   fieldWithPath("assetname").description(
-                        "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"))))
-            .andReturn().getResponse().getHeader("Location");
+                        "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"))));
+      assetipmapping = assetIPMappingRepository.findOne(assetipmapping.getId());
+      assetRepository.delete(server.getId());
+      assetIPMappingRepository.delete(assetipmapping.getId());
+      TestCase.assertEquals(server.getAssetName(), assetipmapping.getAssetname());
+   }
 
-      assetRepository.delete(assetipmapping.getId());
+   @Test
+   public void createHostNameAndIPMappingFailureExample() throws Exception {
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("Invalid ip address");
+      AssetIPMapping mapping = new AssetIPMapping();
+      mapping.setAssetname("cloud-sha1-esx2");
+      mapping.setIp("10.15");
+      MvcResult result = this.mockMvc
+      .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(mapping)))
+      .andExpect(status().is5xxServerError())
+      .andReturn();
+      if (result.getResolvedException() != null) {
+         throw result.getResolvedException();
+      }
+   }
+
+   @Test
+   public void createHostNameAndIPMappingFailureExample2() throws Exception {
+      SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
+      when(template.hasKey(anyString())).thenReturn(false);
+      when(template.opsForSet()).thenReturn(setOperations);
+      when(setOperations.add(anyString(), any())).thenReturn(1l);
+      Asset server = createAsset();
+      server.setCategory(AssetCategory.Server);
+      server.setAssetName("cloud-sha1-esx2");
+      assetRepository.save(server);
+      AssetIPMapping mapping = createAssetIPMapping();
+      mapping.setAssetname("cloud-sha1-esx8");
+      mapping.setIp("192.168.0.1");
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("The Asset name is not exist : " + mapping.getAssetname());
+      MvcResult result = this.mockMvc
+      .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(mapping)))
+      .andExpect(status().is5xxServerError())
+      .andReturn();
+      if (result.getResolvedException() != null) {
+         assetRepository.delete(server.getId());
+         throw result.getResolvedException();
+      }
+   }
+
+   @Test
+   public void deleteAssetIPAndNameMappingExample() throws Exception {
+      AssetIPMapping assetipmapping = createAssetIPMapping();
+      assetipmapping.setAssetname("cloud-server");
+      assetipmapping = assetIPMappingRepository.save(assetipmapping);
+      this.mockMvc.perform(delete("/v1/assets/mapping/hostnameip/" + assetipmapping.getId()))
+            .andExpect(status().isOk()).andDo(document("assets-deleteAssetIPAndNameMapping-example"));
+   }
+
+   @Test
+   public void updateHostNameIPMappingExample() throws Exception {
+      SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
+      when(template.hasKey(anyString())).thenReturn(false);
+      when(template.opsForSet()).thenReturn(setOperations);
+      when(setOperations.add(anyString(), any())).thenReturn(1l);
+      Asset server = createAsset();
+      server.setCategory(AssetCategory.Server);
+      server.setAssetName("cloud-sha1-esx2");
+      server = assetRepository.save(server);
+      Asset server1 = createAsset();
+      server1.setCategory(AssetCategory.Server);
+      server1.setAssetName("cloud-sha1-esx8");
+      server1 = assetRepository.save(server1);
+      AssetIPMapping assetipmapping = createAssetIPMapping();
+      assetipmapping.setAssetname(server.getAssetName());
+      assetipmapping = assetIPMappingRepository.save(assetipmapping);
+
+      AssetIPMapping newAssetIPMapping = createAssetIPMapping();
+      newAssetIPMapping.setAssetname(server1.getAssetName());
+      newAssetIPMapping.setId(assetipmapping.getId());
+      newAssetIPMapping.setIp("192.168.0.1");
+      this.mockMvc
+            .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(newAssetIPMapping)))
+            .andExpect(status().isCreated())
+            .andDo(document("assets-updateHostNameIPMapping-example", requestFields(
+                  fieldWithPath("id").description("ID of the asset, created by flowgate"),
+                  fieldWithPath("ip").description("ip of hostname"),
+                  fieldWithPath("assetname").description(
+                        "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"))));
+      assetipmapping = assetIPMappingRepository.findOne(assetipmapping.getId());
+      assetRepository.delete(server.getId());
+      assetRepository.delete(server1.getId());
+      assetIPMappingRepository.delete(assetipmapping.getId());
+      TestCase.assertEquals(server1.getAssetName(), assetipmapping.getAssetname());
+   }
+
+   @Test
+   public void updateHostNameIPMappingFailureExample() throws Exception {
+      SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
+      when(template.hasKey(anyString())).thenReturn(false);
+      when(template.opsForSet()).thenReturn(setOperations);
+      when(setOperations.add(anyString(), any())).thenReturn(1l);
+      Asset server = createAsset();
+      server.setCategory(AssetCategory.Server);
+      server.setAssetName("cloud-sha1-esx2");
+      server = assetRepository.save(server);
+      Asset server1 = createAsset();
+      server1.setCategory(AssetCategory.Server);
+      server1.setAssetName("cloud-sha1-esx8");
+      server1 = assetRepository.save(server1);
+      AssetIPMapping assetipmapping = createAssetIPMapping();
+      assetipmapping.setAssetname(server.getAssetName());
+      assetipmapping = assetIPMappingRepository.save(assetipmapping);
+      AssetIPMapping newAssetIPMapping = createAssetIPMapping();
+      newAssetIPMapping.setId(assetipmapping.getId());
+      newAssetIPMapping.setAssetname("cloud-server1");
+      newAssetIPMapping.setIp("192.168.0.1");
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("The Asset name is not exist : " + newAssetIPMapping.getAssetname());
+      MvcResult result = this.mockMvc
+            .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(newAssetIPMapping)))
+            .andExpect(status().is5xxServerError())
+            .andReturn();
+      if (result.getResolvedException() != null) {
+         assetRepository.delete(server.getId());
+         assetRepository.delete(server1.getId());
+         assetIPMappingRepository.delete(assetipmapping.getId());
+         throw result.getResolvedException();
+      }
+   }
+
+   @Test
+   public void getHostNameIPMappingByPage() throws Exception {
+      AssetIPMapping assetipmapping = createAssetIPMapping();
+      assetipmapping.setAssetname("cloud-sha2-esx2");
+      assetIPMappingRepository.deleteAll();
+      assetipmapping = assetIPMappingRepository.save(assetipmapping);
+      this.mockMvc
+      .perform(get("/v1/assets/mapping/hostnameip?pagesize=10&pagenumber=1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$..totalPages").value(1))
+      .andExpect(jsonPath("$..content[0].ip").value(assetipmapping.getIp()))
+      .andExpect(jsonPath("$..content[0].assetname").value(assetipmapping.getAssetname()))
+      .andDo(document("assets-getHostNameIPMappingByPage-example",
+            responseFields(fieldWithPath("content").description("AssetIPMapping's array."),
+                  fieldWithPath("totalPages").description("content's total pages."),
+                  fieldWithPath("totalElements").description("content's total elements."),
+                  fieldWithPath("last").description("Is the last."),
+                  fieldWithPath("number").description("The page number."),
+                  fieldWithPath("size").description("The page size."),
+                  fieldWithPath("sort").description("The sort."),
+                  fieldWithPath("numberOfElements").description("The number of Elements."),
+                  fieldWithPath("first").description("Is the first."))));
+      assetIPMappingRepository.delete(assetipmapping.getId());
    }
 
    @Test
@@ -1711,6 +1888,8 @@ public class AssetControllerTest {
             }else if(String.format(MetricKeyName.SERVER_FRONT_TEMPERATURE_LOCATIONX, "INLET").
                   equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 32.0);
+            }else if(MetricName.SERVER_VOLTAGE.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 208.0);
             }else {
                TestCase.fail();
             }

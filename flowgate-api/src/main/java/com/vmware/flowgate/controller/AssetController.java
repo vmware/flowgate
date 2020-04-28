@@ -38,6 +38,7 @@ import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
+import com.vmware.flowgate.common.utils.IPAddressUtil;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
@@ -548,7 +549,61 @@ public class AssetController {
    @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.POST)
    public void createHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
       BaseDocumentUtil.generateID(mapping);
+      String ip = mapping.getIp();
+      if(!IPAddressUtil.isValidIp(ip)) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid ip address",
+               null);
+      }
+      if (!assetService.isAssetNameValidate(mapping.getAssetname())) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't found any asset with the name : " + mapping.getAssetname(),
+               null);
+      }
       assetIPMappingRepository.save(mapping);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.PUT)
+   public void updateHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
+      AssetIPMapping oldMapping = assetIPMappingRepository.findOne(mapping.getId());
+      if(oldMapping == null) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't found any mapping with the id: " + mapping.getId(),null);
+      }
+      String assetName = mapping.getAssetname();
+      if(oldMapping.getAssetname().equals(assetName)) {
+         return;
+      }
+      if(!assetService.isAssetNameValidate(assetName)) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't found any asset with the name : " + mapping.getAssetname(),null);
+      }
+      oldMapping.setAssetname(mapping.getAssetname());
+      assetIPMappingRepository.save(oldMapping);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.GET)
+   public Page<AssetIPMapping> getAssetIPMappingByPage(@RequestParam(value = "pagesize",required = false, defaultValue = "20") Integer pageSize,
+         @RequestParam(value = "pagenumber",required = false, defaultValue = "1") Integer pageNumber) {
+      if (pageNumber < FlowgateConstant.defaultPageNumber) {
+         pageNumber = FlowgateConstant.defaultPageNumber;
+      } else if (pageSize <= 0) {
+         pageSize = FlowgateConstant.defaultPageSize;
+      } else if (pageSize > FlowgateConstant.maxPageSize) {
+         pageSize = FlowgateConstant.maxPageSize;
+      }
+      PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
+      return assetIPMappingRepository.findAll(pageRequest);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/mapping/hostnameip/{id}", method = RequestMethod.DELETE)
+   public void deleteHostNameByID(@PathVariable("id") String id) {
+      assetIPMappingRepository.delete(id);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/names", method = RequestMethod.GET)
+   public List<String> searchAssetName(@RequestParam("queryParam") String content){
+      return assetService.searchServerAssetName(content);
    }
 
    @ResponseStatus(HttpStatus.OK)
