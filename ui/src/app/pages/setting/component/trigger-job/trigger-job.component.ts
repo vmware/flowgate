@@ -526,6 +526,7 @@ export class TriggerJobComponent implements OnInit {
   uploadError:boolean = false;
   uploadErrorMsg:string = "";
   failureMappings:HostNameAndIpmappingModule[] = [];
+  failureMappingsShow:boolean = false;
   uploader:FileUploader = new FileUploader({
     url: ""+this.API_URL+"/v1/assets/mapping/hostnameip/batch",
     method: "POST", 
@@ -557,10 +558,12 @@ export class TriggerJobComponent implements OnInit {
   cancelUpload(){
     this.uploadMappingFile = false;
     this.cleanUploadQueue();
+    this.failureMappingsShow = false;
     this.failureMappings = [];
   }
 
   uploadFile() {
+    this.failureMappingsShow = false;
     this.failureMappings = [];
     let upload = <HTMLInputElement>document.querySelector("#selectMappingFile");
     if(upload.value == null || upload.value == ""){
@@ -584,6 +587,9 @@ export class TriggerJobComponent implements OnInit {
       this.failureMappings = JSON.parse(response);
       if(this.failureMappings.length == 0){
         this.uploadMappingFile = false;
+        this.failureMappingsShow = false;
+      }else{
+        this.failureMappingsShow = true;
       }
     }
   }

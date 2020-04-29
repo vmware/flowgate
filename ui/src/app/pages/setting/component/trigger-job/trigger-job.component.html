@@ -617,36 +617,39 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-alert [clrAlertClosable]="false" [clrAlertType]="'info'" >
             <clr-alert-item>
                 <span class="alert-text" style="font-size: 14px;">
-                    1.The content the file should contain IP and asset name,and only one pair of ip and asset name can appear in each line.<br>
-                    2.Each line of data should put IP in front, and there must be a space between ip and asset name.<br>
-                    3.Format of each line data should be like this: *.*.*.*&nbsp;asset_name 
+                    Each line of the file contains an IP and assetName pair, they should be seperated by a whitespace, for example:<br>
+                    IP1&nbsp;assetName1<br>
+                    IP2&nbsp;assetName2
                 </span>
             </clr-alert-item>
         </clr-alert>
         <div style="margin-top: 10px;">
             <input id ="selectMappingFile" type="file" accept=".txt" [disabled]="uploadBtnLoading" ng2FileSelect [uploader]="uploader" (change)="selectMappingFileOnChanged($event)" />
         </div>
-        <h6>Unsaved Mappings</h6>
-        <clr-alert [clrAlertClosable]="false" [clrAlertType]="'info'" >
-            <clr-alert-item>
-                <span class="alert-text">
-                    Reasons for mapping failure:<br>
-                    1.The data format of the uploaded file may be incorrect.<br>
-                    2.Can't find any asset with the name in the file.<br>
-                    3.Ip is invalid 
-                </span>
-            </clr-alert-item>
-        </clr-alert>
-        <clr-datagrid>
-            <clr-dg-column>IP</clr-dg-column>
-            <clr-dg-column>Asset Name</clr-dg-column>
-            <clr-dg-placeholder>We couldn't find any failure mapping!</clr-dg-placeholder>
+        <div *ngIf="failureMappingsShow">
+            <clr-alert [clrAlertClosable]="false" [clrAlertType]="'info'" >
+                <clr-alert-item>
+                    <span class="alert-text">
+                        The follow items cannot be saved into Flowgate. There are some possible reasons that prevent it from saving:<br>
+                        * IP is not valid.<br>
+                        * AssetName cannot be founded. Since there is a latency between the cache and database, it will take up to 2 hours to <br> &nbsp;&nbsp;sync the assetName, so if you believe the assetName should be there then please try it later. <br>
+                        * It's better to make the assetName in lowcase.<br>
+                        * The IP and AssetName are not seperate by whitespace.<br>
+                    </span>
+                </clr-alert-item>
+            </clr-alert>
+            <clr-datagrid>
+                <clr-dg-column>IP</clr-dg-column>
+                <clr-dg-column>Asset Name</clr-dg-column>
+                <clr-dg-placeholder>We couldn't find any failure mapping!</clr-dg-placeholder>
+    
+                <clr-dg-row *clrDgItems="let mapping of failureMappings" [clrDgItem]="mapping">
+                    <clr-dg-cell>{{mapping.ip}}</clr-dg-cell>
+                    <clr-dg-cell>{{mapping.assetname}}</clr-dg-cell>
+                </clr-dg-row>
+            </clr-datagrid>
+        </div>
 
-            <clr-dg-row *clrDgItems="let mapping of failureMappings" [clrDgItem]="mapping">
-                <clr-dg-cell>{{mapping.ip}}</clr-dg-cell>
-                <clr-dg-cell>{{mapping.assetname}}</clr-dg-cell>
-            </clr-dg-row>
-    </clr-datagrid>
     </div>
     <div class="modal-footer">
             <button type="button" class="btn btn-outline" [disabled]="uploadBtnLoading" (click)="cancelUpload()">Cancel</button>
@@ -713,7 +716,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     </span>
                 </label>
               </div>
-            <div style="width: 280px; background-color: white;position: absolute; top: 8.5rem;left: 29.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px #ccc;" [hidden]="hidden">
+            <div style="width: 280px; background-color: #ccc;position: absolute; top: 8.5rem;left: 29.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px #ccc;" [hidden]="hidden">
                 <span *ngIf="searchAssetNameloading" class="spinner spinner-md" style="margin-left: 43%; margin-bottom: -26%;">
                     Loading...
                 </span>
