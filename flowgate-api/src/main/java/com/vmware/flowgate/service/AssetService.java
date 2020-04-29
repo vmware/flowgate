@@ -4,7 +4,10 @@
 */
 package com.vmware.flowgate.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +26,7 @@ import org.springframework.data.redis.core.ScanOptions.ScanOptionsBuilder;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,13 +35,16 @@ import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ValueUnit;
+import com.vmware.flowgate.common.utils.IPAddressUtil;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
+import com.vmware.flowgate.util.BaseDocumentUtil;
 
 @Component
 public class AssetService {
@@ -53,6 +60,10 @@ public class AssetService {
    private AssetRepository assetRepository;
    @Autowired
    private AssetRealtimeDataRepository realtimeDataRepository;
+   private static final int CONTENT_LENGTH_PER_LINE = 2;
+   private static final String SPACE = " ";
+   private static final String TAB = "\t";
+
    @Autowired
    private StringRedisTemplate redisTemplate;
 
@@ -208,6 +219,49 @@ public class AssetService {
          redisTemplate.expire(SERVER_ASSET_NAME_LIST, SERVER_ASSET_NAME_TIME_OUT, TimeUnit.SECONDS);
       }
       return assetNames;
+   }
+
+   public List<AssetIPMapping> batchCreateMappingFromFile(MultipartFile multipartFile)
+         throws IOException {
+      List<AssetIPMapping> failureMappings = new ArrayList<AssetIPMapping>();
+      InputStream inputStream = multipartFile.getInputStream();
+      try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+            BufferedReader br = new BufferedReader(inputStreamReader);) {
+         String assetIPMappingString = null;
+         while ((assetIPMappingString = br.readLine()) != null) {
+            AssetIPMapping mapping = null;
+            if(assetIPMappingString.contains(TAB)) {
+               String contentsArray[] = assetIPMappingString.trim().split(TAB);
+               mapping = generateAssetIPMapping(contentsArray);
+            }else {
+               String contentsArray[] = assetIPMappingString.trim().split(SPACE);
+               mapping = generateAssetIPMapping(contentsArray);
+            }
+            if(isAssetNameValidate(mapping.getAssetname()) && IPAddressUtil.isValidIp(mapping.getIp())) {
+               BaseDocumentUtil.generateID(mapping);
+               assetIPMappingRepository.save(mapping);
+            }else {
+               failureMappings.add(mapping);
+            }
+         }
+      }
+      return failureMappings;
+   }
+
+   public static AssetIPMapping generateAssetIPMapping(String contentsArray[]) {
+      AssetIPMapping mapping = new AssetIPMapping();
+      for(String content : contentsArray) {
+         String contentString = content.trim();
+         if(!content.equals(TAB) && !contentString.isEmpty() && mapping.getIp() == null) {
+            mapping.setIp(content);
+            continue;
+         }
+         if(!content.equals(TAB) && !contentString.isEmpty() && mapping.getIp() != null) {
+            mapping.setAssetname(content);
+            break;
+         }
+      }
+      return mapping;
    }
 
    private List<MetricData> generateServerPduMetricData(List<ValueUnit> valueUnits, String pduAssetId){
