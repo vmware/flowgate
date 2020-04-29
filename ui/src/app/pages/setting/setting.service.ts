@@ -141,11 +141,15 @@ export class SettingService {
      
       return this.http.put(""+this.API_URL+"/v1/setting/datapersistenttime/"+time, null,this.options).map((res)=>res)
     }
-    getHostNameAndIPMapping(pageNumber:number,pagesize:number){
+    getHostNameAndIPMapping(pageNumber:number,pagesize:number,searchIP:string){
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());
       this.options = new RequestOptions({ headers: header });
-      return this.http.get(""+this.API_URL+"/v1/assets/mapping/hostnameip?pagesize="+pagesize+"&pagenumber="+pageNumber,this.options).map((res)=>res)
+      let url = ""+this.API_URL+"/v1/assets/mapping/hostnameip?pagesize="+pagesize+"&pagenumber="+pageNumber;
+      if(searchIP != null){
+        url = ""+this.API_URL+"/v1/assets/mapping/hostnameip?pagesize="+pagesize+"&pagenumber="+pageNumber+"&ip="+searchIP+"";
+      }
+      return this.http.get(url,this.options).map((res)=>res)
     }
     saveHostNameAndIPMapping(mapping:HostNameAndIpmappingModule){
       let header = new Headers({ 'Content-Type': 'application/json' });

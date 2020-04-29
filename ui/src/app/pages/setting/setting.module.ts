@@ -15,7 +15,7 @@ import { SettingService } from './setting.service';
 import { PagesModule } from '../../pages/pages.module';
 import { TriggerJobComponent } from '../setting/component/trigger-job/trigger-job.component';
 import { AssetChart } from './component/trigger-job/sankey.chart';
-
+import { FileUploadModule } from 'ng2-file-upload';
 
 @NgModule({
   imports: [
@@ -24,7 +24,8 @@ import { AssetChart } from './component/trigger-job/sankey.chart';
     FormsModule,
     PagesModule,
     routing,
-    AssetChart
+    AssetChart,
+    FileUploadModule
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
   declarations: [SettingComponent,SensorsettingListComponent,SensorsettingEditComponent,SensorsettingAddComponent,TriggerJobComponent,AssetChart],

@@ -4,12 +4,14 @@
 */
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { SettingService } from '../../setting.service';
-import { NodeLogger } from '@angular/core/src/view';
 import { NgForm } from '@angular/forms';
 import { HostNameAndIpmappingModule } from '../../host-name-and-ipmapping/host-name-and-ipmapping.module';
 import { fromEvent } from 'rxjs/observable/fromEvent';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs/observable/of';
+import { FileUploader, ParsedResponseHeaders, FileItem } from 'ng2-file-upload';
+import {environment} from '../../../../../environments/environment.prod';
+import { AuthenticationService } from '../../../auth/authenticationService';
 
 @Component({
   selector: 'app-trigger-job',
@@ -17,8 +19,11 @@ import { of } from 'rxjs/observable/of';
   styleUrls: ['./trigger-job.component.scss']
 })
 export class TriggerJobComponent implements OnInit {
-
-  constructor(private service:SettingService) { }
+  constructor(private service:SettingService, private auth:AuthenticationService) { 
+    this.uploader.onSuccessItem = this.successItem.bind(this);
+    this.uploader.onErrorItem = this.errorItem.bind(this);
+    // this.uploader.onBuildItemForm = this.onBuildItemForm.bind(this);
+  }
   triggerTipBox:boolean=false;
   syncData:string[]=["startFullMappingAggregation","generateServerPDUMapping"];
   syncUnMappedServers:string[]=["readUnMappedServers"];
@@ -292,36 +297,61 @@ export class TriggerJobComponent implements OnInit {
   disabled:string="";
   selectedAssetName:string="";
   changePageSize(){
-    this.getHostNameAndIPMappings(this.pageSize,this.pageNumber)
+    this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
   }
   previous(){
     if(this.pageNumber>1){
       this.pageNumber--;
-      this.getHostNameAndIPMappings(this.pageSize,this.pageNumber)
+      this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
     }
   }
   next(){
     if(this.pageNumber < this.mappingsTotalPage){
       this.pageNumber++
-      this.getHostNameAndIPMappings(this.pageSize,this.pageNumber)
+      this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
     }
   }
-  getHostNameAndIPMappings(pagesize:number,pagenumber:number){
+  searchIP:string = null;
+  searchBtnState:boolean = false;
+  searchBtnDisabled:boolean = false;
+  searchErrorShow:boolean = false;
+  searchErrorMsg:string = "";
+  search(){
+    if(this.searchIP != null){
+      let ip = this.searchIP.trim();
+      if(ip == ""){
+        this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,null);
+      }else{
+        if(ip.match(this.ipRegx)){
+          this.pageSize = 10;
+          this.pageNumber = 1;
+          this.searchErrorShow = false;
+          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,ip);
+        }else{
+          this.searchErrorShow = true;
+          this.searchErrorMsg = "Please enter a valid IP";
+        }
+      }
+    }
+  }
+  getHostNameAndIPMappings(pagesize:number,pagenumber:number,searchIP:string){
     this.loading = true;
-    this.service.getHostNameAndIPMapping(pagenumber,pagesize).subscribe(
-      (data)=>{
+    this.service.getHostNameAndIPMapping(pagenumber,pagesize,searchIP).subscribe(
+      data=>{
         if(data.status == 200){
-          this.hostNameAndIPMappings = data.json().content;
-          this.mappingsTotalPage = data.json()
-          this.pageNumber = data.json().number+1;
-          this.mappingsTotalPage = data.json().totalPages
-          if(this.mappingsTotalPage == 1){
-            this.disabled = "disabled";
-          }else{
-            this.disabled = "";
+          this.loading = false;
+          if(data.text() != null){
+            this.hostNameAndIPMappings = data.json().content;
+            this.mappingsTotalPage = data.json()
+            this.pageNumber = data.json().number+1;
+            this.mappingsTotalPage = data.json().totalPages
+            if(this.mappingsTotalPage == 1){
+              this.disabled = "disabled";
+            }else{
+              this.disabled = "";
+            }
           }
         }
-        this.loading = false;
       },(error)=>{
         this.loading = false;
       }
@@ -342,7 +372,7 @@ export class TriggerJobComponent implements OnInit {
     this.service.deleteHostNameAndIPMapping(this.selectedHostNameAndIPMappings[0].id).subscribe(
       data=>{
         if(data.status == 200){
-          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber)
+          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
         }
       }
     )
@@ -436,7 +466,7 @@ export class TriggerJobComponent implements OnInit {
           this.saveMappingLoading = false;
           this.AddHostNameAndIPMapping = false;
           this.assetNames = [];
-          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber) 
+          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP) 
         }
       },error=>{
         this.saveMappingLoading = false;
@@ -457,7 +487,7 @@ export class TriggerJobComponent implements OnInit {
           this.saveMappingLoading = false;
           this.editHostNameAndIPMapping = false;
           this.assetNames = [];
-          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber)
+          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
         }
       },error=>{
         this.saveMappingLoading = false;
@@ -468,25 +498,107 @@ export class TriggerJobComponent implements OnInit {
     )
   }
   invalidIP = false;
+  ipRegx:string =  "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
+
+  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+  
+  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+  
+  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$";
   getIPValidationState(){
     return this.invalidIP;
   }
   handleIPValidation(flag: boolean): void {
-    let regx = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
-
-    +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
-    
-    +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
-    
-    +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$";
     if(flag){
       if(this.hostNameAndIPMapping.ip != null && this.hostNameAndIPMapping.ip !='' 
-        && this.hostNameAndIPMapping.ip.match(regx)){
+        && this.hostNameAndIPMapping.ip.match(this.ipRegx)){
         this.invalidIP = false;
       }else{
         this.invalidIP = true;
       }
     }
+  }
+
+  private API_URL = environment.API_URL;
+  
+  uploadMappingFile:boolean = false;
+  uploadBtnLoading:boolean = false;
+  uploadError:boolean = false;
+  uploadErrorMsg:string = "";
+  failureMappings:HostNameAndIpmappingModule[] = [];
+  uploader:FileUploader = new FileUploader({
+    url: ""+this.API_URL+"/v1/assets/mapping/hostnameip/batch",
+    method: "POST", 
+    itemAlias: "file", 
+    headers:[
+      {name:"Authorization",value:'Bearer '+this.auth.getToken()}
+    ]
+  });
+
+  openUpload(){
+    this.uploadMappingFile = true;
+  }
+
+  selectMappingFileOnChanged(event: any) {
+    let eventNameArr:string[] = event.target.value.split(".");
+    let upload = <HTMLInputElement>document.getElementById("selectMappingFile");
+    if(eventNameArr[eventNameArr.length-1].toLocaleLowerCase() != "txt"){
+      this.searchErrorShow = true;
+      this.searchErrorMsg = "Please select an txt file";
+      this.uploader.clearQueue();
+      if(upload != null){
+        upload.value = null;
+      }
+    }else{
+      this.uploadError = false;
+    }
+  }
+
+  cancelUpload(){
+    this.uploadMappingFile = false;
+    this.cleanUploadQueue();
+    this.failureMappings = [];
+  }
+
+  uploadFile() {
+    this.failureMappings = [];
+    let upload = <HTMLInputElement>document.querySelector("#selectMappingFile");
+    if(upload.value == null || upload.value == ""){
+      this.uploadError = true;
+      this.uploadErrorMsg = "Please select a file first";
+    }else{
+      this.uploader.queue[0].upload();
+      this.loading = true;
+      this.uploadBtnLoading = true;
+    }
+  }
+
+  successItem(item: FileItem, response: string, status: number, headers: ParsedResponseHeaders){
+    this.loading = false;
+    this.uploadBtnLoading = false;
+    this.cleanUploadQueue();
+    if (status != 200) {
+      this.uploadError = true;
+      this.uploadErrorMsg = "Upload failure";
+    }else{
+      this.failureMappings = JSON.parse(response);
+      if(this.failureMappings.length == 0){
+        this.uploadMappingFile = false;
+      }
+    }
+  }
+  errorItem(item: FileItem, response: string, status: number, headers: ParsedResponseHeaders){
+    this.cleanUploadQueue();
+    this.loading = false;
+    this.uploadBtnLoading = false;
+    this.uploadError = true;
+    this.uploadErrorMsg = "Upload failure";
+  }
+
+  cleanUploadQueue(){
+    this.uploader.clearQueue();
+    let upload = <HTMLInputElement>document.querySelector("#selectMappingFile");
+    upload.value = "";
   }
   ngOnInit() {
     this.getFirstPageData();
