@@ -599,7 +599,7 @@ public class AssetController {
       }else if(IPAddressUtil.isValidIp(ip)) {
          return assetIPMappingRepository.findByIp(ip, pageRequest);
       }
-      throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid ip address",
+      throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid ip address: "+ip,
             null);
    }
 
@@ -609,7 +609,7 @@ public class AssetController {
       assetIPMappingRepository.delete(id);
    }
 
-   @RequestMapping(value = "/mapping/hostnameip/batch",method = RequestMethod.POST)
+   @RequestMapping(value = "/mapping/hostnameip/file",method = RequestMethod.POST)
    public List<AssetIPMapping> batchCreateMapping(@RequestParam("file") MultipartFile file) {
        try {
          return assetService.batchCreateMappingFromFile(file);

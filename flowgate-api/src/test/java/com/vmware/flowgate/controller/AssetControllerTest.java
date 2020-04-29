@@ -2001,9 +2001,9 @@ public class AssetControllerTest {
    }
 
    @Test
-   public void testGenerateAssetIPMapping() {
-      String contents[] = {"\t"," "," ","\t","192.168.1.1","\t"," ","cloud_server1","\t","cloud_server2"};
-      AssetIPMapping mapping = AssetService.generateAssetIPMapping(contents);
+   public void testParseAssetIPMapingByString() {
+      String contentString = "\t"+"\t"+"192.168.1.1"+" "+"\t"+" "+"cloud_server1";
+      AssetIPMapping mapping = AssetService.parseAssetIPMapingByString(contentString);
       TestCase.assertEquals("192.168.1.1", mapping.getIp());
       TestCase.assertEquals("cloud_server1", mapping.getAssetname());
    }

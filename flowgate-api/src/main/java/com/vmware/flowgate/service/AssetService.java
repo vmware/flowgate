@@ -60,9 +60,6 @@ public class AssetService {
    private AssetRepository assetRepository;
    @Autowired
    private AssetRealtimeDataRepository realtimeDataRepository;
-   private static final int CONTENT_LENGTH_PER_LINE = 2;
-   private static final String SPACE = " ";
-   private static final String TAB = "\t";
 
    @Autowired
    private StringRedisTemplate redisTemplate;
@@ -229,14 +226,7 @@ public class AssetService {
             BufferedReader br = new BufferedReader(inputStreamReader);) {
          String assetIPMappingString = null;
          while ((assetIPMappingString = br.readLine()) != null) {
-            AssetIPMapping mapping = null;
-            if(assetIPMappingString.contains(TAB)) {
-               String contentsArray[] = assetIPMappingString.trim().split(TAB);
-               mapping = generateAssetIPMapping(contentsArray);
-            }else {
-               String contentsArray[] = assetIPMappingString.trim().split(SPACE);
-               mapping = generateAssetIPMapping(contentsArray);
-            }
+            AssetIPMapping mapping = parseAssetIPMapingByString(assetIPMappingString);
             if(isAssetNameValidate(mapping.getAssetname()) && IPAddressUtil.isValidIp(mapping.getIp())) {
                BaseDocumentUtil.generateID(mapping);
                assetIPMappingRepository.save(mapping);
@@ -248,15 +238,15 @@ public class AssetService {
       return failureMappings;
    }
 
-   public static AssetIPMapping generateAssetIPMapping(String contentsArray[]) {
+   public static AssetIPMapping parseAssetIPMapingByString(String contentString) {
+      String contentsArray[] = contentString.trim().split("\\s+");
       AssetIPMapping mapping = new AssetIPMapping();
       for(String content : contentsArray) {
-         String contentString = content.trim();
-         if(!content.equals(TAB) && !contentString.isEmpty() && mapping.getIp() == null) {
+         if(!content.isEmpty() && mapping.getIp() == null) {
             mapping.setIp(content);
             continue;
          }
-         if(!content.equals(TAB) && !contentString.isEmpty() && mapping.getIp() != null) {
+         if(!content.isEmpty() && mapping.getAssetname() == null) {
             mapping.setAssetname(content);
             break;
          }
