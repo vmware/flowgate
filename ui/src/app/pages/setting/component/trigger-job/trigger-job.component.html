@@ -627,7 +627,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <input id ="selectMappingFile" type="file" accept=".txt" [disabled]="uploadBtnLoading" ng2FileSelect [uploader]="uploader" (change)="selectMappingFileOnChanged($event)" />
         </div>
         <div *ngIf="failureMappingsShow">
-            <clr-alert [clrAlertClosable]="false" [clrAlertType]="'info'" >
+            <clr-alert [clrAlertClosable]="false" [clrAlertType]="'danger'" >
                 <clr-alert-item>
                     <span class="alert-text">
                         The follow items cannot be saved into Flowgate. There are some possible reasons that prevent it from saving:<br>

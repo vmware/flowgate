@@ -175,6 +175,6 @@ export class SettingService {
       let header = new Headers({ 'Content-Type': 'application/json' });
       header.append("Authorization",'Bearer ' + this.auth.getToken());
       this.options = new RequestOptions({ headers: header });
-      return this.http.get(""+this.API_URL+"/v1/assets/name/keywords/"+content,this.options);
+      return this.http.get(""+this.API_URL+"/v1/assets/names/?queryParam="+content,this.options);
     }
 }
