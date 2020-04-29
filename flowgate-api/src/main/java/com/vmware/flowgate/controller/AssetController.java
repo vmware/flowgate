@@ -6,6 +6,7 @@ package com.vmware.flowgate.controller;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.couchbase.client.java.document.json.JsonArray;
 import com.google.common.collect.Lists;
@@ -555,7 +557,7 @@ public class AssetController {
                null);
       }
       if (!assetService.isAssetNameValidate(mapping.getAssetname())) {
-         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't found any asset with the name : " + mapping.getAssetname(),
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't find any asset with the name : " + mapping.getAssetname(),
                null);
       }
       assetIPMappingRepository.save(mapping);
@@ -566,14 +568,14 @@ public class AssetController {
    public void updateHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
       AssetIPMapping oldMapping = assetIPMappingRepository.findOne(mapping.getId());
       if(oldMapping == null) {
-         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't found any mapping with the id: " + mapping.getId(),null);
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't find any mapping with the id: " + mapping.getId(),null);
       }
       String assetName = mapping.getAssetname();
       if(oldMapping.getAssetname().equals(assetName)) {
          return;
       }
       if(!assetService.isAssetNameValidate(assetName)) {
-         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't found any asset with the name : " + mapping.getAssetname(),null);
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't find any asset with the name : " + mapping.getAssetname(),null);
       }
       oldMapping.setAssetname(mapping.getAssetname());
       assetIPMappingRepository.save(oldMapping);
@@ -582,7 +584,8 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.GET)
    public Page<AssetIPMapping> getAssetIPMappingByPage(@RequestParam(value = "pagesize",required = false, defaultValue = "20") Integer pageSize,
-         @RequestParam(value = "pagenumber",required = false, defaultValue = "1") Integer pageNumber) {
+         @RequestParam(value = "pagenumber",required = false, defaultValue = "1") Integer pageNumber,
+         @RequestParam(value = "ip",required = false) String ip) {
       if (pageNumber < FlowgateConstant.defaultPageNumber) {
          pageNumber = FlowgateConstant.defaultPageNumber;
       } else if (pageSize <= 0) {
@@ -591,13 +594,28 @@ public class AssetController {
          pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
-      return assetIPMappingRepository.findAll(pageRequest);
+      if(ip == null) {
+         return assetIPMappingRepository.findAll(pageRequest);
+      }else if(IPAddressUtil.isValidIp(ip)) {
+         return assetIPMappingRepository.findByIp(ip, pageRequest);
+      }
+      throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid ip address: "+ip,
+            null);
    }
 
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/hostnameip/{id}", method = RequestMethod.DELETE)
    public void deleteHostNameByID(@PathVariable("id") String id) {
       assetIPMappingRepository.delete(id);
+   }
+
+   @RequestMapping(value = "/mapping/hostnameip/file",method = RequestMethod.POST)
+   public List<AssetIPMapping> batchCreateMapping(@RequestParam("file") MultipartFile file) {
+       try {
+         return assetService.batchCreateMappingFromFile(file);
+      } catch (IOException e) {
+         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(),e);
+      }
    }
 
    @ResponseStatus(HttpStatus.OK)

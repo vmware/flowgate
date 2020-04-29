@@ -78,6 +78,7 @@ import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
 import com.vmware.flowgate.repository.AssetRepository;
 import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 import com.vmware.flowgate.repository.ServerMappingRepository;
+import com.vmware.flowgate.service.AssetService;
 import com.vmware.flowgate.util.BaseDocumentUtil;
 
 import junit.framework.TestCase;
@@ -1187,7 +1188,7 @@ public class AssetControllerTest {
       mapping.setAssetname("cloud-sha1-esx8");
       mapping.setIp("192.168.0.1");
       expectedEx.expect(WormholeRequestException.class);
-      expectedEx.expectMessage("The Asset name is not exist : " + mapping.getAssetname());
+      expectedEx.expectMessage("Can't find any asset with the name : " + mapping.getAssetname());
       MvcResult result = this.mockMvc
       .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(mapping)))
@@ -1268,7 +1269,7 @@ public class AssetControllerTest {
       newAssetIPMapping.setAssetname("cloud-server1");
       newAssetIPMapping.setIp("192.168.0.1");
       expectedEx.expect(WormholeRequestException.class);
-      expectedEx.expectMessage("The Asset name is not exist : " + newAssetIPMapping.getAssetname());
+      expectedEx.expectMessage("Can't find any asset with the name : " + newAssetIPMapping.getAssetname());
       MvcResult result = this.mockMvc
             .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(newAssetIPMapping)))
@@ -1997,6 +1998,14 @@ public class AssetControllerTest {
          assetRepository.delete(asset);
          realtimeDataRepository.delete(result);
       }
+   }
+
+   @Test
+   public void testParseAssetIPMapingByString() {
+      String contentString = "\t"+"\t"+"192.168.1.1"+" "+"\t"+" "+"cloud_server1";
+      AssetIPMapping mapping = AssetService.parseAssetIPMapingByString(contentString);
+      TestCase.assertEquals("192.168.1.1", mapping.getIp());
+      TestCase.assertEquals("cloud_server1", mapping.getAssetname());
    }
 
    RealTimeData createPduRealTimeData() {
