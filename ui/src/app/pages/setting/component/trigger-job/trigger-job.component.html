@@ -641,8 +641,6 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <clr-datagrid>
                 <clr-dg-column>IP</clr-dg-column>
                 <clr-dg-column>Asset Name</clr-dg-column>
-                <clr-dg-placeholder>We couldn't find any failure mapping!</clr-dg-placeholder>
-    
                 <clr-dg-row *clrDgItems="let mapping of failureMappings" [clrDgItem]="mapping">
                     <clr-dg-cell>{{mapping.ip}}</clr-dg-cell>
                     <clr-dg-cell>{{mapping.assetname}}</clr-dg-cell>
