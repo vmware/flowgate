@@ -4,8 +4,14 @@
 */
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { SettingService } from '../../setting.service';
-import { NodeLogger } from '@angular/core/src/view';
 import { NgForm } from '@angular/forms';
+import { HostNameAndIpmappingModule } from '../../host-name-and-ipmapping/host-name-and-ipmapping.module';
+import { fromEvent } from 'rxjs/observable/fromEvent';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs/observable/of';
+import { FileUploader, ParsedResponseHeaders, FileItem } from 'ng2-file-upload';
+import {environment} from '../../../../../environments/environment.prod';
+import { AuthenticationService } from '../../../auth/authenticationService';
 
 @Component({
   selector: 'app-trigger-job',
@@ -13,8 +19,11 @@ import { NgForm } from '@angular/forms';
   styleUrls: ['./trigger-job.component.scss']
 })
 export class TriggerJobComponent implements OnInit {
-
-  constructor(private service:SettingService) { }
+  constructor(private service:SettingService, private auth:AuthenticationService) { 
+    this.uploader.onSuccessItem = this.successItem.bind(this);
+    this.uploader.onErrorItem = this.errorItem.bind(this);
+    // this.uploader.onBuildItemForm = this.onBuildItemForm.bind(this);
+  }
   triggerTipBox:boolean=false;
   syncData:string[]=["startFullMappingAggregation","generateServerPDUMapping"];
   syncUnMappedServers:string[]=["readUnMappedServers"];
@@ -277,8 +286,334 @@ export class TriggerJobComponent implements OnInit {
   getAllDataWhenClickTab(){
     this.getFirstPageData();
   }
+
+  //assetNameAndIPMapping
+  hostNameAndIPMappings:HostNameAndIpmappingModule[] = [];
+  selectedHostNameAndIPMappings:HostNameAndIpmappingModule[] = [];
+  pageSize:number = 10;
+  pageNumber:number = 1;
+  mappingsTotalPage:number = 0;
+  loading:boolean = false;
+  disabled:string="";
+  selectedAssetName:string="";
+  changePageSize(){
+    this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
+  }
+  previous(){
+    if(this.pageNumber>1){
+      this.pageNumber--;
+      this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
+    }
+  }
+  next(){
+    if(this.pageNumber < this.mappingsTotalPage){
+      this.pageNumber++
+      this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
+    }
+  }
+  searchIP:string = null;
+  searchBtnState:boolean = false;
+  searchBtnDisabled:boolean = false;
+  searchErrorShow:boolean = false;
+  searchErrorMsg:string = "";
+  search(){
+    if(this.searchIP != null){
+      let ip = this.searchIP.trim();
+      if(ip == ""){
+        this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,null);
+      }else{
+        if(ip.match(this.ipRegx)){
+          this.pageSize = 10;
+          this.pageNumber = 1;
+          this.searchErrorShow = false;
+          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,ip);
+        }else{
+          this.searchErrorShow = true;
+          this.searchErrorMsg = "Please enter a valid IP";
+        }
+      }
+    }
+  }
+  getHostNameAndIPMappings(pagesize:number,pagenumber:number,searchIP:string){
+    this.loading = true;
+    this.service.getHostNameAndIPMapping(pagenumber,pagesize,searchIP).subscribe(
+      data=>{
+        if(data.status == 200){
+          this.loading = false;
+          if(data.text() != null){
+            this.hostNameAndIPMappings = data.json().content;
+            this.mappingsTotalPage = data.json()
+            this.pageNumber = data.json().number+1;
+            this.mappingsTotalPage = data.json().totalPages
+            if(this.mappingsTotalPage == 1){
+              this.disabled = "disabled";
+            }else{
+              this.disabled = "";
+            }
+          }
+        }
+      },(error)=>{
+        this.loading = false;
+      }
+    )
+  }
+  deleteHostNameAndIPMapping:boolean=false;
+  AddHostNameAndIPMapping:boolean = false;
+  hostNameAndIPMapping:HostNameAndIpmappingModule = new HostNameAndIpmappingModule();
+  editHostNameAndIPMapping:boolean = false;
+  onDelete(){
+    this.deleteHostNameAndIPMapping = true;
+  }
+  cancelDelete(){
+    this.deleteHostNameAndIPMapping = false;
+  }
+  confirmDelete(){
+    this.deleteHostNameAndIPMapping = false;
+    this.service.deleteHostNameAndIPMapping(this.selectedHostNameAndIPMappings[0].id).subscribe(
+      data=>{
+        if(data.status == 200){
+          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
+        }
+      }
+    )
+  }
+  onAdd(){
+    this.AddHostNameAndIPMapping = true;
+    this.hostNameAndIPMapping = new HostNameAndIpmappingModule();
+    setTimeout(() => {
+      const input = document.querySelector('#hostname');
+      const input$ = fromEvent(input, 'input');
+      input$.pipe(
+        debounceTime(700),
+        distinctUntilChanged(),
+        switchMap(
+          e => this.searchAssetName(this.hostNameAndIPMapping.assetname)
+        )
+      ).subscribe(
+        (response)=>{
+          this.searchAssetNameloading = false;
+          if(response != null){
+            this.assetNames = response.json();
+          }
+        }
+      )   
+      }, 100);
+  }
+  onEdit(){
+    this.editHostNameAndIPMapping = true;
+    this.hostNameAndIPMapping = this.selectedHostNameAndIPMappings[0];
+    this.selectedAssetName = this.hostNameAndIPMapping.assetname;
+    setTimeout(() => {
+      const input = document.querySelector('#hostnameedit');
+      const input$ = fromEvent(input, 'input');
+      input$.pipe(
+        debounceTime(700),
+        distinctUntilChanged(),
+        switchMap(
+          e => this.searchAssetName(this.hostNameAndIPMapping.assetname)
+        )
+      ).subscribe(
+        (response)=>{
+          this.searchAssetNameloading = false;
+          if(response != null){
+            this.assetNames = response.json();
+          }
+        }
+      )   
+      }, 100);
+  }
+  selectItem(item:any){
+    this.hostNameAndIPMapping.assetname = item;
+    this.selectedAssetName = item;
+  }
+  hidden:boolean = true;
+  focus(){
+    this.hidden = false;
+    this.hostNameAndIPMapping.assetname = this.selectedAssetName;
+    
+  }
+  blur(){
+    setTimeout(() => {
+    this.hidden = true;
+    this.hostNameAndIPMapping.assetname = this.selectedAssetName;
+    }, 150);
+  }
+  searchAssetNameloading:boolean = false;
+  assetNames:string[] = [];
+  searchAssetName(content:string){
+    if(content == ""){
+      return of(null);
+    }else{
+      this.searchAssetNameloading = true;
+      return this.service.searchAssetNameList(content);
+    }
+  }
+  cancelSave(){
+    this.AddHostNameAndIPMapping = false;
+    this.selectedAssetName = "";
+    this.editHostNameAndIPMapping = false;
+    this.assetNames = [];
+  }
+  saveMappingErrorShow:boolean = false;
+  saveMappingError:string = "";
+  saveMappingLoading:boolean = false;
+  confirmSave(){
+    this.saveMappingLoading = true;
+    this.service.saveHostNameAndIPMapping(this.hostNameAndIPMapping).subscribe(
+      (data)=>{
+        if(data.status == 201){
+          this.selectedAssetName = "";
+          this.saveMappingLoading = false;
+          this.AddHostNameAndIPMapping = false;
+          this.assetNames = [];
+          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP) 
+        }
+      },error=>{
+        this.saveMappingLoading = false;
+        this.saveMappingErrorShow = true;
+        this.assetNames = [];
+        this.saveMappingError = error.json().message;
+      }
+    )
+  }
+
+  confirmUpdate(){
+    this.saveMappingLoading = true;
+    this.service.updateHostNameAndIPMapping(this.hostNameAndIPMapping).subscribe(
+      (data)=>{
+        console.info(data)
+        if(data.status == 200){
+          this.selectedAssetName = "";
+          this.saveMappingLoading = false;
+          this.editHostNameAndIPMapping = false;
+          this.assetNames = [];
+          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
+        }
+      },error=>{
+        this.saveMappingLoading = false;
+        this.saveMappingErrorShow = true;
+        this.assetNames = [];
+        this.saveMappingError = error.json().message;
+      }
+    )
+  }
+  invalidIP = false;
+  ipRegx:string =  "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
+
+  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+  
+  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+  
+  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$";
+  getIPValidationState(){
+    return this.invalidIP;
+  }
+  handleIPValidation(flag: boolean): void {
+    if(flag){
+      if(this.hostNameAndIPMapping.ip != null && this.hostNameAndIPMapping.ip !='' 
+        && this.hostNameAndIPMapping.ip.match(this.ipRegx)){
+        this.invalidIP = false;
+      }else{
+        this.invalidIP = true;
+      }
+    }
+  }
+
+  private API_URL = environment.API_URL;
+  
+  uploadMappingFile:boolean = false;
+  uploadBtnLoading:boolean = false;
+  uploadError:boolean = false;
+  uploadErrorMsg:string = "";
+  failureMappings:HostNameAndIpmappingModule[] = [];
+  failureMappingsShow:boolean = false;
+  uploader:FileUploader = new FileUploader({
+    url: ""+this.API_URL+"/v1/assets/mapping/hostnameip/file",
+    method: "POST", 
+    itemAlias: "file", 
+    headers:[
+      {name:"Authorization",value:'Bearer '+this.auth.getToken()}
+    ]
+  });
+
+  openUpload(){
+    this.uploadMappingFile = true;
+    this.uploadError = false;
+  }
+
+  selectMappingFileOnChanged(event: any) {
+    let eventNameArr:string[] = event.target.value.split(".");
+    let upload = <HTMLInputElement>document.getElementById("selectMappingFile");
+    if(eventNameArr[eventNameArr.length-1].toLocaleLowerCase() != "txt"){
+      this.searchErrorShow = true;
+      this.searchErrorMsg = "Please select an txt file";
+      this.uploader.clearQueue();
+      if(upload != null){
+        upload.value = null;
+      }
+    }else{
+      this.uploadError = false;
+    }
+  }
+
+  cancelUpload(){
+    this.uploadMappingFile = false;
+    this.cleanUploadQueue();
+    this.failureMappingsShow = false;
+    this.failureMappings = [];
+  }
+
+  uploadFile() {
+    this.failureMappingsShow = false;
+    this.failureMappings = [];
+    let upload = <HTMLInputElement>document.querySelector("#selectMappingFile");
+    if(upload.value == null || upload.value == ""){
+      this.uploadError = true;
+      this.uploadErrorMsg = "Please select a file first";
+    }else{
+      this.uploader.queue[0].upload();
+      this.loading = true;
+      this.uploadBtnLoading = true;
+    }
+  }
+
+  successItem(item: FileItem, response: string, status: number, headers: ParsedResponseHeaders){
+    this.loading = false;
+    this.uploadBtnLoading = false;
+    this.cleanUploadQueue();
+    if (status != 200) {
+      this.uploadError = true;
+      this.uploadErrorMsg = "Upload failure" + response;
+    }else{
+      this.pageSize = 10;
+      this.pageNumber = 1;
+      this.searchIP = null;
+      this.changePageSize();
+      this.failureMappings = JSON.parse(response);
+      if(this.failureMappings.length == 0){
+        this.uploadMappingFile = false;
+        this.failureMappingsShow = false;
+      }else{
+        this.failureMappingsShow = true;
+      }
+    }
+  }
+  errorItem(item: FileItem, response: string, status: number, headers: ParsedResponseHeaders){
+    this.cleanUploadQueue();
+    this.loading = false;
+    this.uploadBtnLoading = false;
+    this.uploadError = true;
+    this.uploadErrorMsg = "Upload failure";
+  }
+
+  cleanUploadQueue(){
+    this.uploader.clearQueue();
+    let upload = <HTMLInputElement>document.querySelector("#selectMappingFile");
+    upload.value = "";
+  }
   ngOnInit() {
     this.getFirstPageData();
+   
   }
 
 }

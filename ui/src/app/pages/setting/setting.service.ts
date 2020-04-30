@@ -8,6 +8,7 @@ import { Headers, URLSearchParams } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { AuthenticationService } from '../auth/authenticationService';
 import {environment} from 'environments/environment.prod';
+import { HostNameAndIpmappingModule } from './host-name-and-ipmapping/host-name-and-ipmapping.module';
 @Injectable()
 export class SettingService {
 
@@ -139,5 +140,41 @@ export class SettingService {
       this.options = new RequestOptions({ headers: header });
      
       return this.http.put(""+this.API_URL+"/v1/setting/datapersistenttime/"+time, null,this.options).map((res)=>res)
+    }
+    getHostNameAndIPMapping(pageNumber:number,pagesize:number,searchIP:string){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      let url = ""+this.API_URL+"/v1/assets/mapping/hostnameip?pagesize="+pagesize+"&pagenumber="+pageNumber;
+      if(searchIP != null){
+        url = ""+this.API_URL+"/v1/assets/mapping/hostnameip?pagesize="+pagesize+"&pagenumber="+pageNumber+"&ip="+searchIP+"";
+      }
+      return this.http.get(url,this.options).map((res)=>res)
+    }
+    saveHostNameAndIPMapping(mapping:HostNameAndIpmappingModule){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      let body = JSON.stringify(mapping);
+      return this.http.post(""+this.API_URL+"/v1/assets/mapping/hostnameip", body,this.options).map((res)=>res)
+    }
+    deleteHostNameAndIPMapping(id:string){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      return this.http.delete(""+this.API_URL+"/v1/assets/mapping/hostnameip/"+id,this.options).map((res)=>res)
+    }
+    updateHostNameAndIPMapping(mapping:HostNameAndIpmappingModule){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      let body = JSON.stringify(mapping);
+      return this.http.put(""+this.API_URL+"/v1/assets/mapping/hostnameip", body,this.options).map((res)=>res)
+    }
+    searchAssetNameList(content:string){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      return this.http.get(""+this.API_URL+"/v1/assets/names/?queryParam="+content,this.options);
     }
 }
