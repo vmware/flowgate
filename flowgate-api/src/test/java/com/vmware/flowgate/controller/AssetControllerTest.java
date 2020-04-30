@@ -2008,6 +2008,26 @@ public class AssetControllerTest {
       TestCase.assertEquals("cloud_server1", mapping.getAssetname());
    }
 
+   @Test
+   public void testSearchAssetNames() throws Exception {
+      SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
+      when(template.hasKey(anyString())).thenReturn(false);
+      when(template.opsForSet()).thenReturn(setOperations);
+      when(template.opsForSet().add(anyString(), any())).thenReturn(0l);
+      assetRepository.deleteAll();
+      Asset asset = createAsset();
+      asset.setAssetName("cloud_server_01");
+      assetRepository.save(asset);
+      this.mockMvc
+            .perform(get("/v1/assets/names?queryParam=cloud"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0]").value("cloud_server_01"))
+            .andDo(document("assets-fuzzyQueryServerAssetNames-example",
+                  responseFields(fieldWithPath("[]").description("An array of server names"))))
+            .andReturn();
+      assetRepository.delete(asset.getId());
+   }
+
    RealTimeData createPduRealTimeData() {
       RealTimeData realTimeData = createServerPDURealTimeData();
       List<ValueUnit> valueunits = realTimeData.getValues();

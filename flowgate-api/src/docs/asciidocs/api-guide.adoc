@@ -293,10 +293,82 @@ include::{snippets}/assets-getPageMappingsByVCId-example/curl-request.adoc[]
 
 include::{snippets}/assets-getPageMappingsByVCId-example/response-fields.adoc[]
 
+[[resources-assets-createHostNameIPMapping]]
+=== createHostNameIPMapping
+
+A `POST` request is used to create an assetIPMapping.
+
+==== Request structure
+
+include::{snippets}/assets-createHostNameIPMapping-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-createHostNameIPMapping-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-createHostNameIPMapping-example/curl-request.adoc[]
+
+[[resources-assets-updateHostNameIPMapping]]
+=== updateHostNameIPMapping
+
+A `PUT` request is used to update an assetIPMapping.
+
+==== Request structure
+
+include::{snippets}/assets-updateHostNameIPMapping-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-updateHostNameIPMapping-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-updateHostNameIPMapping-example/curl-request.adoc[]
+
+[[resources-assets-deleteAssetIPAndNameMapping]]
+=== updateHostNameIPMapping
+
+A `DELETE` request is used to delete an assetIPMapping by Id.
+
+==== Request structure
+
+include::{snippets}/assets-deleteAssetIPAndNameMapping-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-deleteAssetIPAndNameMapping-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-deleteAssetIPAndNameMapping-example/curl-request.adoc[]
+
+[[resources-assets-getHostNameIPMappingByPage]]
+=== getHostNameIPMappingByPage
+
+A `GET` request is used to access the assetIPMapping by IP.
+
+==== Request structure
+
+include::{snippets}/assets-getHostNameIPMappingByPage-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getHostNameIPMappingByPage-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getHostNameIPMappingByPage-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getHostNameIPMappingByPage-example/response-fields.adoc[]
+
 [[resources-assets-getHostNameByIP]]
 === getAssetNameIPMappingByIP
 
-A `GET` request is used to access the assetIPMapping GET HostName By IP.
+A `GET` request is used to access the assetIPMapping By IP.
 
 ==== Request structure
 
@@ -313,6 +385,27 @@ include::{snippets}/assets-getHostNameByIP-example/curl-request.adoc[]
 ==== Response Fields
 
 include::{snippets}/assets-getHostNameByIP-example/response-fields.adoc[]
+
+[[resources-assets-fuzzyQueryServerAssetNames]]
+=== fuzzyQueryServerAssetNames
+
+A `GET` request is used to fuzzy query server names.
+
+==== Request structure
+
+include::{snippets}/assets-fuzzyQueryServerAssetNames-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-fuzzyQueryServerAssetNames-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-fuzzyQueryServerAssetNames-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-fuzzyQueryServerAssetNames-example/response-fields.adoc[]
 
 [[resources-assets-getUnmappedServers]]
 === getUnmappedServers
