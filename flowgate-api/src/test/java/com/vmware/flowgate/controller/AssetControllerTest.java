@@ -1287,7 +1287,6 @@ public class AssetControllerTest {
    public void getHostNameIPMappingByPage() throws Exception {
       AssetIPMapping assetipmapping = createAssetIPMapping();
       assetipmapping.setAssetname("cloud-sha2-esx2");
-      assetIPMappingRepository.deleteAll();
       assetipmapping = assetIPMappingRepository.save(assetipmapping);
       this.mockMvc
       .perform(get("/v1/assets/mapping/hostnameip?pagesize=10&pagenumber=1"))
@@ -2014,7 +2013,6 @@ public class AssetControllerTest {
       when(template.hasKey(anyString())).thenReturn(false);
       when(template.opsForSet()).thenReturn(setOperations);
       when(template.opsForSet().add(anyString(), any())).thenReturn(0l);
-      assetRepository.deleteAll();
       Asset asset = createAsset();
       asset.setAssetName("cloud_server_01");
       assetRepository.save(asset);
