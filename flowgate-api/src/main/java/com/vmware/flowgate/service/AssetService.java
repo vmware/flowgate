@@ -272,12 +272,18 @@ public class AssetService {
             result.add(data);
             break;
          case MetricName.PDU_APPARENT_POWER:
-            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, pduAssetId, value.getExtraidentifier()));
-            result.add(data);
+            String outlet_pdu_power_extraidentifier = value.getExtraidentifier();
+            if(outlet_pdu_power_extraidentifier.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
+               data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, pduAssetId, value.getExtraidentifier()));
+               result.add(data);
+            }
             break;
          case MetricName.PDU_CURRENT:
-            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, pduAssetId, value.getExtraidentifier()));
-            result.add(data);
+            String outlet_pdu_current_extraidentifier = value.getExtraidentifier();
+            if(outlet_pdu_current_extraidentifier.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
+               data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, pduAssetId, value.getExtraidentifier()));
+               result.add(data);
+            }
             break;
          case MetricName.PDU_VOLTAGE:
             String extraidentifier = value.getExtraidentifier();
