@@ -211,6 +211,9 @@ public class AssetService {
       for(Asset asset : assets) {
          assetNames.add(asset.getAssetName());
       }
+      if(assetNames.isEmpty()) {
+         return assetNames;
+      }
       redisTemplate.opsForSet().add(SERVER_ASSET_NAME_LIST, assetNames.toArray(new String[assetNames.size()]));
       if(redisTemplate.hasKey(SERVER_ASSET_NAME_LIST)) {
          redisTemplate.expire(SERVER_ASSET_NAME_LIST, SERVER_ASSET_NAME_TIME_OUT, TimeUnit.SECONDS);

@@ -1408,7 +1408,7 @@ public class PowerIQService implements AsyncService {
       List<Asset> sensorAssets = new ArrayList<Asset>();
       for(String id : assetIds) {
          ResponseEntity<Asset> assetEntity = restClient.getAssetByID(id);
-         if(assetEntity.getStatusCode().is2xxSuccessful()) {
+         if(assetEntity.getStatusCode().is2xxSuccessful() && assetEntity.getBody() != null) {
             Asset sensor = assetEntity.getBody();
             if(sensor.getAssetSource().indexOf(source) != -1) {
                sensorAssets.add(sensor);
