@@ -292,7 +292,7 @@ public class AssetService {
             if(serverVoltage == null) {
                serverVoltage = data.getValueNum();
             }
-            if(extraidentifier.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
+            if(extraidentifier != null && extraidentifier.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
                data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, pduAssetId, value.getExtraidentifier()));
                result.add(data);
                serverVoltage = data.getValueNum();
