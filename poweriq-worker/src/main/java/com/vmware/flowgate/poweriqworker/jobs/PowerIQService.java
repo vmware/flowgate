@@ -945,58 +945,58 @@ public class PowerIQService implements AsyncService {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       List<Asset> allMappedPdus =
             Arrays.asList(restClient.getMappedAsset(AssetCategory.PDU).getBody());
-      if (allMappedPdus == null || allMappedPdus.isEmpty()) {
-         return;
-      }
-      PowerIQAPIClient client = createClient(powerIQ);
-      try {
-         client.testConnection();
-      } catch (HttpClientErrorException e) {
-         logger.error("Failed to query data from PowerIQ", e);
-         IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
-         if (integrationStatus == null) {
-            integrationStatus = new IntegrationStatus();
-         }
-         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-         integrationStatus.setDetail(e.getMessage());
-         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-         updateIntegrationStatus(powerIQ);
-         return;
-      } catch (ResourceAccessException e1) {
-         if (e1.getCause().getCause() instanceof ConnectException) {
-            checkAndUpdateIntegrationStatus(powerIQ, e1.getMessage());
+      if (!allMappedPdus.isEmpty()) {
+         //return;
+         PowerIQAPIClient client = createClient(powerIQ);
+         try {
+            client.testConnection();
+         } catch (HttpClientErrorException e) {
+            logger.error("Failed to query data from PowerIQ", e);
+            IntegrationStatus integrationStatus = powerIQ.getIntegrationStatus();
+            if (integrationStatus == null) {
+               integrationStatus = new IntegrationStatus();
+            }
+            integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+            integrationStatus.setDetail(e.getMessage());
+            integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+            updateIntegrationStatus(powerIQ);
             return;
-         }
-      }
-      Map<String, Map<String,String>> pduAssetIdAndPduInfoMap = new HashMap<String, Map<String,String>>();
-      for (Asset asset : allMappedPdus) {
-         String id = null;
-         Map<String,String> pduInfoMap = null;
-         if (asset.getJustificationfields() != null) {
-            HashMap<String,String> justficationfields = asset.getJustificationfields();
-            String pduInfo = justficationfields.get(FlowgateConstant.PDU);
-            try {
-              pduInfoMap = getInfoMap(pduInfo);
-            } catch (IOException e) {
-               continue;
-            }
-            id = pduInfoMap.get(FlowgateConstant.PDU_ID_FROM_POWERIQ);
-            //Only check the pdu that belong to the current PowerIQ.
-            if (!asset.getAssetSource().contains((powerIQ.getId()))) {
-               continue;
+         } catch (ResourceAccessException e1) {
+            if (e1.getCause().getCause() instanceof ConnectException) {
+               checkAndUpdateIntegrationStatus(powerIQ, e1.getMessage());
+               return;
             }
          }
-         if (id != null) {
-            pduAssetIdAndPduInfoMap.put(asset.getId(), pduInfoMap);
-         }
+         Map<String, Map<String,String>> pduAssetIdAndPduInfoMap = new HashMap<String, Map<String,String>>();
+         for (Asset asset : allMappedPdus) {
+            String id = null;
+            Map<String,String> pduInfoMap = null;
+            if (asset.getJustificationfields() != null) {
+               HashMap<String,String> justficationfields = asset.getJustificationfields();
+               String pduInfo = justficationfields.get(FlowgateConstant.PDU);
+               try {
+                 pduInfoMap = getInfoMap(pduInfo);
+               } catch (IOException e) {
+                  continue;
+               }
+               id = pduInfoMap.get(FlowgateConstant.PDU_ID_FROM_POWERIQ);
+               //Only check the pdu that belong to the current PowerIQ.
+               if (!asset.getAssetSource().contains((powerIQ.getId()))) {
+                  continue;
+               }
+            }
+            if (id != null) {
+               pduAssetIdAndPduInfoMap.put(asset.getId(), pduInfoMap);
+            }
 
+         }
+         List<RealTimeData> pduMetricRealTimeDatas = getRealTimeDatas(pduAssetIdAndPduInfoMap,client, getAdvanceSetting(powerIQ));
+         if (!pduMetricRealTimeDatas.isEmpty()) {
+            restClient.saveRealTimeData(pduMetricRealTimeDatas);
+            logger.info("Finish sync pdu realtime data for " + powerIQ.getName());
+         }
+         logger.info("Not found any pdu realtime data from " + powerIQ.getName());
       }
-      List<RealTimeData> pduMetricRealTimeDatas = getRealTimeDatas(pduAssetIdAndPduInfoMap,client, getAdvanceSetting(powerIQ));
-      if (!pduMetricRealTimeDatas.isEmpty()) {
-         restClient.saveRealTimeData(pduMetricRealTimeDatas);
-         logger.info("Finish sync pdu realtime data for " + powerIQ.getName());
-      }
-      logger.info("Not found any pdu realtime data from " + powerIQ.getName());
 
       List<Asset> allMappedServers =
             Arrays.asList(restClient.getMappedAsset(AssetCategory.Server).getBody());
@@ -1408,7 +1408,7 @@ public class PowerIQService implements AsyncService {
       List<Asset> sensorAssets = new ArrayList<Asset>();
       for(String id : assetIds) {
          ResponseEntity<Asset> assetEntity = restClient.getAssetByID(id);
-         if(assetEntity.getStatusCode().is2xxSuccessful()) {
+         if(assetEntity.getStatusCode().is2xxSuccessful() && assetEntity.getBody() != null) {
             Asset sensor = assetEntity.getBody();
             if(sensor.getAssetSource().indexOf(source) != -1) {
                sensorAssets.add(sensor);
