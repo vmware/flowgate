@@ -46,7 +46,7 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
          } catch (IOException e) {
             logger.error("Failed to send full mapping sync command", e);
          }
-      }else if(execount++ % 87 == 0) {
+      }else if(execount % 87 == 0) {
          try {
             EventMessage eventMessageForCleanJob = EventMessageUtil.createEventMessage(EventType.Aggregator,
                   EventMessageUtil.CleanRealtimeData, "");
@@ -66,7 +66,7 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
          }catch(IOException e) {
             logger.error("Failed to Send aggregate pdu data command", e);
          }
-      }else if(execount++ % 24 == 0){
+      }else if(execount % 24 == 0){
          try {
             EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
                   EventMessageUtil.SUMMARY_DATA, "");
