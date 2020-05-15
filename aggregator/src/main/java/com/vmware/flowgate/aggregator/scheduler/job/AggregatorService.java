@@ -80,6 +80,7 @@ public class AggregatorService implements AsyncService {
             break;
          case EventMessageUtil.PDUServerMappingCommand:
             aggregateServerPDU();
+            logger.info("Finish PDUServerMapping job.");
             break;
          case EventMessageUtil.FullSyncTemperatureAndHumiditySensors:
             syncHostTemperatureAndHumidySensor(true);
@@ -416,7 +417,7 @@ public class AggregatorService implements AsyncService {
          }
       }
 
-      //Update metricsFormular for pdu by pdus
+      //Update metricsFormular for server by pdus
       Asset[] servers = restClient.getServersWithPDUInfo().getBody();
       /**
        * Generate pdu metricsFormular for server,
@@ -444,6 +445,7 @@ public class AggregatorService implements AsyncService {
                boolean isNeedUpdated = false;
                if(pduIds.size() != pduFormulars.keySet().size()) {
                   pduFormulars = generatePduformularForServer(pduIds);
+                  isNeedUpdated = true;
                }else {
                   for(String pduAssetId : pduIds) {
                      if(pduFormulars.get(pduAssetId) == null) {
