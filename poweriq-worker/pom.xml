@@ -23,12 +23,19 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<flowgate.version>0.0.1-SNAPSHOT</flowgate.version>
+		<jackson.version>2.10.0</jackson.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-hateoas</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -38,6 +45,12 @@
 			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>flowgate-common</artifactId>
 			<version>${flowgate.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.couchbase.client</groupId>
+					<artifactId>java-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -59,7 +72,6 @@
 			<artifactId>common-restclient</artifactId>
 			<version>${flowgate.version}</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -70,6 +82,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-
 </project>

@@ -30,12 +30,19 @@
 		<jwt.version>3.3.0</jwt.version>
 		<commons-io.version>2.4</commons-io.version>
 		<couchbase-java-client.version>2.4.7</couchbase-java-client.version>
+		<jackson.version>2.10.0</jackson.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -50,29 +57,45 @@
 			<artifactId>spring-boot-starter-data-couchbase</artifactId>
 			<exclusions>
 				<exclusion>
-				<groupId>com.couchbase.client</groupId>
-        		<artifactId>java-client</artifactId>
+					<groupId>com.couchbase.client</groupId>
+					<artifactId>java-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
-		 <dependency>
-        	<groupId>com.couchbase.client</groupId>
-        	<artifactId>java-client</artifactId>
-        	<version>${couchbase-java-client.version}</version>
-      	</dependency>
-		<dependency> 
-			<groupId>org.springframework.boot</groupId> 
-			<artifactId>spring-boot-starter-security</artifactId> 
-		</dependency> 
 		<dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-            <version>${jwt.version}</version>
-        </dependency>
-        <dependency>
-	    	<groupId>commons-io</groupId>
-		    <artifactId>commons-io</artifactId>
-		    <version>${commons-io.version}</version>
+			<groupId>com.couchbase.client</groupId>
+			<artifactId>java-client</artifactId>
+			<version>${couchbase-java-client.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>${jwt.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vmware.flowgate</groupId>
@@ -80,8 +103,8 @@
 			<version>${flowgate.version}</version>
 			<exclusions>
 				<exclusion>
-				<groupId>com.couchbase.client</groupId>
-        		<artifactId>java-client</artifactId>
+					<groupId>com.couchbase.client</groupId>
+					<artifactId>java-client</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -139,8 +162,6 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
 		</dependency>
-		<!-- <dependency> <groupId>com.vmware</groupId> <artifactId>vcops-suiteapi-client</artifactId> 
-			<version>${vrops.version}</version> <classifier>all</classifier> </dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

@@ -11,7 +11,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<jackson.version>2.9.10.3</jackson.version>
+		<jackson.version>2.10.0</jackson.version>
 		<couchbase.version>2.2.8</couchbase.version>
 	</properties>
 	<dependencies>
@@ -24,6 +24,16 @@
 			<groupId>com.couchbase.client</groupId>
 			<artifactId>java-client</artifactId>
 			<version>${couchbase.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.couchbase.client</groupId>
+					<artifactId>core-io</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 </project>

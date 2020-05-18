@@ -24,12 +24,19 @@
 		<java.version>1.8</java.version>
 		<quartz.version>2.2.3</quartz.version>
 		<flowgate.version>0.0.1-SNAPSHOT</flowgate.version>
+		<jackson.version>2.10.0</jackson.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-hateoas</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -48,11 +55,12 @@
 			<groupId>com.vmware.flowgate</groupId>
 			<artifactId>flowgate-common</artifactId>
 			<version>${flowgate.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.quartz-scheduler</groupId>
-			<artifactId>quartz</artifactId>
-			<version>${quartz.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.couchbase.client</groupId>
+					<artifactId>java-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.vmware.flowgate</groupId>
@@ -67,11 +75,6 @@
 		<dependency>
 			<groupId>org.springframework.restdocs</groupId>
 			<artifactId>spring-restdocs-mockmvc</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
