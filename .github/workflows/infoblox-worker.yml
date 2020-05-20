@@ -27,3 +27,5 @@ jobs:
         sudo mvn clean install
         cd $FLOWGATEPWD/infoblox-worker
         sudo mvn clean test
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1    

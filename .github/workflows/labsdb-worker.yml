@@ -29,3 +29,5 @@ jobs:
         sudo mvn clean install
         cd $FLOWGATEPWD/labsdb-worker
         sudo mvn clean test
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1    
