@@ -28,3 +28,5 @@ jobs:
         cd $FLOWGATEPWD/vc-worker
         sudo mvn clean initialize
         sudo mvn test
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1    
