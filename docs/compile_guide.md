@@ -24,7 +24,7 @@ git                   | latest is preferred
 
    ```
       $ cd flowgate/make/
-      $ sudo bash build.sh all -version v1.0
+      $ sudo bash build.sh all -version v1.1
    ```
 
 ### Step 4: Verify build
@@ -45,17 +45,17 @@ Also, you can execute below command to verify the container images:
    ```
       $ sudo docker images
       REPOSITORY                 TAG                 IMAGE ID            CREATED             SIZE
-      flowgate/labsdb-worker     v1.0                b751b1e55ec9        5 minutes ago         228MB
-      flowgate/nlyte-worker      v1.0                4c1b5c0c1893        5 minutes ago         226MB
-      flowgate/aggregator        v1.0                a6ada87420a8        5 minutes ago         229MB
-      flowgate/poweriq-worker    v1.0                b1d6997bd8c8        5 minutes ago         226MB
-      flowgate/vro-worker        v1.0                6910c721130c        5 minutes ago         231MB
-      flowgate/vc-worker         v1.0                81c255461862        5 minutes ago         255MB
-      flowgate/redis             v1.0                b0d6035edaf6        5 minutes ago         102MB
-      flowgate/api               v1.0                0b71d1eea75b        5 minutes ago         238MB
-      flowgate/database          v1.0                a56dcb8f1dad        5 minutes ago         271MB
-      flowgate/infoblox-worker   v1.0                227b8304775d        5 minutes ago         221MB
-      flowgate/management        v1.0                939197e11efe        5 minutes ago         249MB
+      flowgate/labsdb-worker     v1.1                b751b1e55ec9        5 minutes ago         228MB
+      flowgate/nlyte-worker      v1.1                4c1b5c0c1893        5 minutes ago         226MB
+      flowgate/aggregator        v1.1                a6ada87420a8        5 minutes ago         229MB
+      flowgate/poweriq-worker    v1.1                b1d6997bd8c8        5 minutes ago         226MB
+      flowgate/vro-worker        v1.1                6910c721130c        5 minutes ago         231MB
+      flowgate/vc-worker         v1.1                81c255461862        5 minutes ago         255MB
+      flowgate/redis             v1.1                b0d6035edaf6        5 minutes ago         102MB
+      flowgate/api               v1.1                0b71d1eea75b        5 minutes ago         238MB
+      flowgate/database          v1.1                a56dcb8f1dad        5 minutes ago         271MB
+      flowgate/infoblox-worker   v1.1                227b8304775d        5 minutes ago         221MB
+      flowgate/management        v1.1                939197e11efe        5 minutes ago         249MB
    ```
 ## Start Flowgate
 
@@ -117,7 +117,7 @@ version            | Specify a version number for Flowgate.
 
    ```sh
       $ sudo bash build.sh
-      eg. 'bash build.sh ( ui | jar | image | save | all ) -version v1.0'
+      eg. 'bash build.sh ( ui | jar | image | save | all ) -version v1.1'
    ```
 ## Troubleshooting
 1. When Flowgate build timeout:

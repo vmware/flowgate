@@ -31,7 +31,7 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
 
 ### Binary Installation
 
-1. Download the installer "flowgate-v1.0-offline-installer.tar.gz" from **[official release](https://github.com/vmware/flowgate/releases)** pages.
+1. Download the installer "flowgate-v1.1-offline-installer.tar.gz" from **[official release](https://github.com/vmware/flowgate/releases)** pages.
 2. unzip the binary package.
 ```
     $ tar -zxvf flowgate-*.tar.gz
