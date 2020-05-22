@@ -396,7 +396,6 @@ public class VROAsyncJob implements AsyncService {
                pduId = pdus.get(0);
                currentMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, pduId);
                powerMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, pduId);
-               voltageMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, pduId,"INLET:1");
                currentLoadMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD, pduId);
                powerLoadMetricName = String.format(MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD, pduId);
             }
