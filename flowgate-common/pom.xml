@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vmware.flowgate</groupId>
 	<artifactId>flowgate-common</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.1.0</version>
 	<name>flowgate common data model</name>
 	<description>flowgate common data model</description>
 	<properties>
