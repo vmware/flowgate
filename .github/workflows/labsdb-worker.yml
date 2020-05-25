@@ -2,8 +2,6 @@ name: test labsdb-worker
 
 on:
   pull_request:
-    branches:
-      - master
     paths:
       - 'labsdb-worker/**'
 
@@ -30,4 +28,4 @@ jobs:
         cd $FLOWGATEPWD/labsdb-worker
         sudo mvn clean test
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1    
+      uses: codecov/codecov-action@v1
