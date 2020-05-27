@@ -289,9 +289,6 @@ export class ServermappingComponent implements OnInit {
           }else{
             this.emptyResult = true;
             this.disabledAsset = "disabled";
-            if(this.currentPageAsset >1){
-              this.currentPageAsset -= this.currentPageAsset;
-            }
           }
         }
       },
