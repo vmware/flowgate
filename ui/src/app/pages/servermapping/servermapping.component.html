@@ -4,15 +4,15 @@ SPDX-License-Identifier: BSD-2-Clause -->
 <section class="form-block">
     <label> Content For Server Mapping</label>          
     <div class="form-group">
-            <label for="selects_3" >Server Type</label>
-            <div class="select" style="margin-left: -135px;">
+            <label for="selects_3" >Integration Type:</label>
+            <div class="select" style="margin-left: -110px;">
                 <select id="selects_2" [ngModelOptions]="{standalone: true}"  [(ngModel)]="serverconfig.type" on-change="changeType()" > 
                     <option value="VRO" >vRealize Operations Manager</option>
                     <option value="VCENTER">VMware vCenter</option>
                     <option value="VROPSMP">vRealize Operations Management Pack</option>
                 </select>
             </div>
-            <label for="selects_3">Server</label>
+            <label for="selects_3">Server:</label>
             <div class="select">
                 <select id="selects_3" [ngModelOptions]="{standalone: true}"  [(ngModel)]="serverconfig.id" on-change="change()" > 
                     <option value="">Please Select</option>
