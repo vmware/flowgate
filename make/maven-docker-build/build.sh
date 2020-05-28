@@ -6,7 +6,7 @@ BUILDERRORLOG=/log/flowgate-build-error-log.txt
 SOURCEDIR=$BUILDDIR
 MAKEDIR=$BUILDDIR/make
 OUTPUTJARPATH=$MAKEDIR/jar-output
-OUTPUTJARNAME=-0.0.1-SNAPSHOT.jar
+OUTPUTJARNAME=-*.jar
 
 commonproject=("flowgate-common" "common-restclient" "worker-jobs")
 serviceproject=("nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "labsdb-worker")
@@ -60,7 +60,7 @@ do
 	cd $SOURCEDIR/$k
 	mvn clean initialize  >> $BUILDLOG
 	mvn package  >> $BUILDLOG
-	if [ -f "target/$k$OUTPUTJARNAME" ];then
+	if ls target/$k$OUTPUTJARNAME 1> /dev/null 2>&1;then
 		cp target/*.jar $OUTPUTJARPATH/
 	else
 		echo "build $k$OUTPUTJARNAME failure" >> $BUILDERRORLOG
@@ -79,7 +79,7 @@ for j in "${serviceproject[@]}"
 do
 	cd $SOURCEDIR/$j
 	mvn clean package >> $BUILDLOG
-	if [ -f "target/$j$OUTPUTJARNAME" ];then
+	if ls target/$j$OUTPUTJARNAME 1> /dev/null 2>&1;then
 		cp target/*.jar $OUTPUTJARPATH/
 	else
 		echo "build $j$OUTPUTJARNAME failure" >> $BUILDERRORLOG
