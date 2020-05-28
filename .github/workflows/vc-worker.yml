@@ -26,7 +26,29 @@ jobs:
         cd $FLOWGATEPWD/worker-jobs
         sudo mvn clean install
         cd $FLOWGATEPWD/vc-worker
-        sudo mvn clean initialize
+        sudo mvn install:install-file -Dfile=./libs/vim25.jar -DgroupId=com.vmware.vim -DartifactId=vim25 -Dversion=6.0.0-2561048 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/bcprov-ext-jdk15on-150.jar -DgroupId=org.bouncycastle -DartifactId=bcprov-ext-jdk15on -Dversion=1.50 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/bcpkix-jdk15on-150.jar -DgroupId=org.bouncycastle -DartifactId=bcpkix-jdk15on -Dversion=1.50 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/bcprov-jdk15on-150.jar -DgroupId=org.bouncycastle -DartifactId=bcprov-jdk15on -Dversion=1.50 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/query-vmodl.jar -DgroupId=com.vmware.vlsi -DartifactId=query-vmodl -Dversion=6.5.0-4258493 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/reflect-vmodl.jar -DgroupId=com.vmware.vlsi -DartifactId=reflect-vmodl -Dversion=6.5.0-4258493 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/samples-annotations-1.0.0.jar -DgroupId=com.vmware.vsphere.samples.annotations -DartifactId=vsphere-samples-annotations -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/samples-core-1.0.0.jar -DgroupId=com.vmware.vsphere.samples.core -DartifactId=vsphere-samples-core -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/sblim-cim-client2-2.1.1.jar -DgroupId=net.sourceforge.sblim -DartifactId=sblim-cim-client2 -Dversion=2.1.1 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/ssoclient.jar -DgroupId=com.vmware.flowgate -DartifactId=ssoclient -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/ssosamples.jar -DgroupId=com.vmware.flowgate -DartifactId=ssosamples -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vapi-authentication-2.9.0.jar -DgroupId=com.vmware.flowgate -DartifactId=vapi-authentication -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vapi-runtime-2.9.0.jar -DgroupId=com.vmware.flowgate -DartifactId=vapi-runtime -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vapi-samltoken-2.9.0.jar -DgroupId=com.vmware.flowgate -DartifactId=vapi-samltoken -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vim-vmodl.jar -DgroupId=com.vmware.flowgate -DartifactId=vim-vmodl -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vlsi-client.jar -DgroupId=com.vmware.vlsi -DartifactId=vlsi-client -Dversion=6.5.0-4258493 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vlsi-core.jar -DgroupId=com.vmware.vlsi -DartifactId=vlsi-core -Dversion=6.5.0-4258493 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vmc-bindings-1.1.0.jar -DgroupId=com.vmware.flowgate -DartifactId=vmc-bindings -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vmc-sdk-common-1.1.0.jar -DgroupId=com.vmware.flowgate -DartifactId=vmc-sdk-common -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vsphereautomation-client-sdk-1.2.0.jar -DgroupId=com.vmware.flowgate -DartifactId=vsphereautomation-client -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vsphereautomation-lookupservice-1.0.0.jar -DgroupId=com.vmware.flowgate -DartifactId=vsphereautomation-lookupservice -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vsphere-samples-6.7.0.jar -DgroupId=com.vmware.flowgate -DartifactId=vsphereautomation-sample -Dversion=6.7.0 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn initialize
         sudo mvn test
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1    
+      uses: codecov/codecov-action@v1
