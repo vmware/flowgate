@@ -16,8 +16,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.UUID;
+
 import javax.net.ssl.SSLException;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,6 +43,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.auth.AuthVcUser;
@@ -355,9 +359,9 @@ public class SDDCSoftwareControllerTest {
       sddcRepository.save(sddc1Create);
       sddcRepository.save(sddc2Create);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
-              fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description("The facilitySoftware description."),
+              fieldWithPath("id").description("ID of SDDCSoftwareConfig, created by flowgate"),
+              fieldWithPath("name").description("The SDDCSoftwareConfig name."),
+              fieldWithPath("description").description("The SDDCSoftwareConfig description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -365,7 +369,7 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("serverURL").description(
                       "The server's address, it can be an IP or FQDN."),
               fieldWithPath("type").description(
-                      "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
+                      "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS, VROPSMP").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
                       "userId"),
               fieldWithPath("verifyCert").description(
@@ -374,7 +378,7 @@ public class SDDCSoftwareControllerTest {
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/vrops"))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-getVROServerConfigs-example", responseFields(
-                    fieldWithPath("[]").description("An array of asserts"))
+                    fieldWithPath("[]").description("An array of VROPs server configs"))
                     .andWithPrefix("[].", fieldpath)))
             .andReturn();
       ObjectMapper mapper = new ObjectMapper();
@@ -403,9 +407,9 @@ public class SDDCSoftwareControllerTest {
        sddcRepository.save(sddc1Create);
        sddcRepository.save(sddc2Create);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
-              fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description("The facilitySoftware description."),
+              fieldWithPath("id").description("ID of SDDCSoftwareConfig, created by flowgate"),
+              fieldWithPath("name").description("The SDDCSoftwareConfig name."),
+              fieldWithPath("description").description("The SDDCSoftwareConfig description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -413,7 +417,7 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("serverURL").description(
                       "The server's address, it can be an IP or FQDN."),
               fieldWithPath("type").description(
-                      "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
+                      "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS, VROPSMP").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
                       "userId"),
               fieldWithPath("verifyCert").description(
@@ -422,7 +426,7 @@ public class SDDCSoftwareControllerTest {
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/user/vrops"))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-getVROServerConfigsByUser-example", responseFields(
-                    fieldWithPath("[]").description("An array of asserts"))
+                    fieldWithPath("[]").description("An array of VROPS server configs"))
                     .andWithPrefix("[].", fieldpath)))
             .andReturn();
       String res = result.getResponse().getContentAsString();
@@ -449,9 +453,9 @@ public class SDDCSoftwareControllerTest {
       sddcRepository.save(sddc1Create);
       sddcRepository.save(sddc2Create);
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-              fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
-              fieldWithPath("name").description("The facilitySoftware name."),
-              fieldWithPath("description").description("The facilitySoftware description."),
+              fieldWithPath("id").description("ID of SDDCSoftwareConfig, created by flowgate"),
+              fieldWithPath("name").description("The SDDCSoftwareConfig name."),
+              fieldWithPath("description").description("The SDDCSoftwareConfig description."),
               fieldWithPath("userName").description(
                     "An username used to obtain authorization"),
               fieldWithPath("password").description(
@@ -459,7 +463,7 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("serverURL").description(
                       "The server's address, it can be an IP or FQDN."),
               fieldWithPath("type").description(
-                      "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
+                      "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS, VROPSMP").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
                       "userId"),
               fieldWithPath("verifyCert").description(
@@ -469,7 +473,7 @@ public class SDDCSoftwareControllerTest {
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/vc"))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-getVCServerConfigs-example", responseFields(
-                    fieldWithPath("[]").description("An array of asserts"))
+                    fieldWithPath("[]").description("An array of vCenter server configs"))
                     .andWithPrefix("[].", fieldpath))).andReturn();
       String res = result.getResponse().getContentAsString();
 
