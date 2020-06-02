@@ -14,3 +14,4 @@ public class LabsdbApplication {
 		SpringApplication.run(LabsdbApplication.class, args);
 	}
 }
+

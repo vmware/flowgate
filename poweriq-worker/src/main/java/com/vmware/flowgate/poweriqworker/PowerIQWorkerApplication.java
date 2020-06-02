@@ -14,3 +14,4 @@ public class PowerIQWorkerApplication {
 		SpringApplication.run(PowerIQWorkerApplication.class, args);
 	}
 }
+
