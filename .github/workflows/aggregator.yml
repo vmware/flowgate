@@ -1,9 +1,6 @@
 name: test aggregator
 
-on:
-  pull_request:
-    paths:
-      - 'aggregator/**'
+on: [push]
 
 jobs:
   build:
