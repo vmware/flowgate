@@ -428,22 +428,22 @@ include::{snippets}/assets-getUnmappedServers-example/curl-request.adoc[]
 
 include::{snippets}/assets-getUnmappedServers-example/response-fields.adoc[]
 
-[[resources-assets-getAssetsByVCId]]
+[[resources-assets-getAssetsByVcId]]
 === getMappedAssetsByvCenterID
 
-A `GET` request is used to access the assert read by VCId.
+A `GET` request is used to access the asset read by VCId.
 
 ==== Request structure
 
-include::{snippets}/assets-getAssetsByVCId-example/http-request.adoc[]
+include::{snippets}/assets-getAssetsByVcId-example/http-request.adoc[]
 
 ==== Example response
 
-include::{snippets}/assets-getAssetsByVCId-example/http-response.adoc[]
+include::{snippets}/assets-getAssetsByVcId-example/http-response.adoc[]
 
 ==== CURL request
 
-include::{snippets}/assets-getAssetsByVCId-example/curl-request.adoc[]
+include::{snippets}/assets-getAssetsByVcId-example/curl-request.adoc[]
 
 ==== Request Fields
 
@@ -452,7 +452,7 @@ include::{snippets}/assets-getAssetsByVCId-example/request-fields.adoc[]
 [[resources-assets-getAssetsByVroId]]
 === getMappedAssetsByvroID
 
-A `GET` request is used to access the assert read by VroId.
+A `GET` request is used to access the asset read by VroId.
 
 ==== Request structure
 

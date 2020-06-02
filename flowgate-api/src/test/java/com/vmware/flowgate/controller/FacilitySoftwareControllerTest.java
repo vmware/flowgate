@@ -444,7 +444,7 @@ public class FacilitySoftwareControllerTest {
          .perform(get("/v1/facilitysoftware/type/" + facilitySoftware1.getType() + ""))
                 .andExpect(status().isOk())
                 .andDo(document("facilitySoftware-getFacilitySoftwareConfigByType-example",responseFields(
-                        fieldWithPath("[]").description("An array of asserts"))
+                        fieldWithPath("[]").description("An array of facility software configs"))
                         .andWithPrefix("[].", fieldpath)));
       }finally {
          facilitySoftwareRepository.delete(facilitySoftware1.getId());

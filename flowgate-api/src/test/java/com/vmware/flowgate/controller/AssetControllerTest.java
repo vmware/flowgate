@@ -496,7 +496,7 @@ public class AssetControllerTest {
                   .content(objectMapper.writeValueAsString(assets)))
             .andExpect(status().isCreated())
             .andDo(document("assets-createBatch-example",
-                  requestFields(fieldWithPath("[]").description("An array of asserts"))
+                  requestFields(fieldWithPath("[]").description("An array of assets"))
                         .andWithPrefix("[].", fieldpath)));
 
       assetRepository.delete(asset1.getId());
@@ -615,7 +615,7 @@ public class AssetControllerTest {
 
          this.mockMvc.perform(get("/v1/assets/mapping/unmappedservers")).andExpect(status().isOk())
                .andDo(document("assets-getUnmappedServers-example",
-                     responseFields(fieldWithPath("[]").description("An array of asserts"))
+                     responseFields(fieldWithPath("[]").description("An array of assets"))
                            .andWithPrefix("[].", fieldpath)));
       } finally {
          serverMappingRepository.delete(mapping1.getId());
@@ -711,7 +711,7 @@ public class AssetControllerTest {
       try {
          this.mockMvc.perform(get("/v1/assets/mappedasset/category/" + asset.getCategory()))
          .andDo(document("assets-getMapped-example",
-               responseFields(fieldWithPath("[]").description("An array of asserts"))
+               responseFields(fieldWithPath("[]").description("An array of assets"))
                      .andWithPrefix("[].", fieldpath)));
       }finally {
          assetRepository.delete(asset.getId());
@@ -882,7 +882,7 @@ public class AssetControllerTest {
       try {
          this.mockMvc.perform(get("/v1/assets/pdusisnull"))
          .andDo(document("assets-findServersWithoutPDUInfo-example",
-               responseFields(fieldWithPath("[]").description("An array of asserts"))
+               responseFields(fieldWithPath("[]").description("An array of assets"))
                      .andWithPrefix("[].", fieldpath)));
       }finally {
          assetRepository.delete(asset.getId());
@@ -980,7 +980,7 @@ public class AssetControllerTest {
          .andExpect(jsonPath("$[0].pdus", hasSize(2)))
          .andExpect(jsonPath("$[0].pdus[0]", is("pdu1")))
          .andDo(document("assets-findServersWithPDUInfo-example",
-               responseFields(fieldWithPath("[]").description("An array of asserts"))
+               responseFields(fieldWithPath("[]").description("An array of assets"))
                      .andWithPrefix("[].", fieldpath)))
          .andReturn().getResponse();
       }finally {

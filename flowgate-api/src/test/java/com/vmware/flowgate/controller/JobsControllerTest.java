@@ -153,7 +153,7 @@ public class JobsControllerTest {
              .perform(get("/v1/jobs/vrojobs"))
              .andExpect(status().isOk())
              .andDo(document("JobsController-getVROJobs-example", responseFields(
-                     fieldWithPath("[]").description("An array of asserts"))
+                     fieldWithPath("[]").description("An array of vro jobs"))
                      .andWithPrefix("[].", fieldpath)));
 
         jobsRepository.delete(jobconfig1);
@@ -194,7 +194,7 @@ public class JobsControllerTest {
              .perform(get("/v1/jobs/vcjobs"))
              .andExpect(status().isOk())
              .andDo(document("JobsController-getVCJobs-example", responseFields(
-                     fieldWithPath("[]").description("An array of asserts"))
+                     fieldWithPath("[]").description("An array of vc jobs"))
                      .andWithPrefix("[].", fieldpath)));
 
         jobsRepository.delete(jobconfig1);
@@ -236,7 +236,7 @@ public class JobsControllerTest {
              .perform(get("/v1/jobs/type/"+ jobtype +""))
              .andExpect(status().isOk())
              .andDo(document("JobsController-getJobsByType-example", responseFields(
-                     fieldWithPath("[]").description("An array of asserts"))
+                     fieldWithPath("[]").description("An array of jobs"))
                      .andWithPrefix("[].", fieldpath)));
 
         jobsRepository.delete(jobconfig1);
