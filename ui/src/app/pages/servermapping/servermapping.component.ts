@@ -71,7 +71,7 @@ export class ServermappingComponent implements OnInit {
     this.getServerMappings();
   }
   changeType(){
-    if(this.serverconfig.type == "VRO"){
+    if(this.serverconfig.type == "VRO" || this.serverconfig.type == "VROPSMP"){
       this.vrohid = false;
       this.hid = true;
     }else if(this.serverconfig.type == "VCENTER"){
