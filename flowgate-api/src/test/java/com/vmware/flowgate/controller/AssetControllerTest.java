@@ -7,8 +7,8 @@ package com.vmware.flowgate.controller;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -230,7 +230,7 @@ public class AssetControllerTest {
                         "This is a collection of states, including the state of the asset, "
                               + "the state of the pdu mapping, and the state of the switch mapping."))))
             .andReturn().getResponse().getHeader("Location");
-      assetRepository.delete(asset.getId());
+      assetRepository.deleteById(asset.getId());
    }
 
    @Test
@@ -257,7 +257,7 @@ public class AssetControllerTest {
                         fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
                         fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
                         fieldWithPath("vroResourceID").description("VROps Resource ID."))));
-      serverMappingRepository.delete(mapping.getId());
+      serverMappingRepository.deleteById(mapping.getId());
    }
 
    @Test
@@ -373,7 +373,7 @@ public class AssetControllerTest {
             fieldWithPath("status").description(
                         "This is a collection of states, including the state of the asset, "
                               + "the state of the pdu mapping, and the state of the switch mapping."))));
-      Asset testAsset = assetRepository.findOne(asset.getId());
+      Asset testAsset = assetRepository.findById(asset.getId()).get();
       TestCase.assertEquals(1, testAsset.getPdus().size());
       TestCase.assertEquals("oqwen812321093asdmgtqawee1", testAsset.getPdus().get(0));
 
@@ -382,8 +382,8 @@ public class AssetControllerTest {
 
       TestCase.assertEquals(FlowgateConstant.RACK_UNIT_PREFIX + humiditySensorAsset.getCabinetUnitPosition()+FlowgateConstant.SEPARATOR+"INLET",
             testAsset.getMetricsformulars().get(FlowgateConstant.SENSOR).get(MetricName.SERVER_FRONT_HUMIDITY).keySet().iterator().next());
-      assetRepository.delete(testAsset.getId());
-      assetRepository.delete(humiditySensorAsset.getId());
+      assetRepository.deleteById(testAsset.getId());
+      assetRepository.deleteById(humiditySensorAsset.getId());
    }
 
    @Test
@@ -413,8 +413,8 @@ public class AssetControllerTest {
                         .description("A list of sensor data. eg. Humidity , Electric... ")
                         .type(ValueUnit[].class),
                   fieldWithPath("time").description("The time of generate sensor data."))));
-      assetRepository.delete(asset.getId());
-      realtimeDataRepository.delete(realtime.getId());
+      assetRepository.deleteById(asset.getId());
+      realtimeDataRepository.deleteById(realtime.getId());
    }
 
    @Test
@@ -499,8 +499,8 @@ public class AssetControllerTest {
                   requestFields(fieldWithPath("[]").description("An array of assets"))
                         .andWithPrefix("[].", fieldpath)));
 
-      assetRepository.delete(asset1.getId());
-      assetRepository.delete(asset2.getId());
+      assetRepository.deleteById(asset1.getId());
+      assetRepository.deleteById(asset2.getId());
    }
 
    @Test
@@ -525,8 +525,8 @@ public class AssetControllerTest {
      .andDo(document("assets-realTimeDatabatchCreation-example",
            requestFields(fieldWithPath("[]").description("An array of RealTimeData"))
                  .andWithPrefix("[].", fieldpath)));
-     realtimeDataRepository.delete(realtimedata1.getId());
-     realtimeDataRepository.delete(realtimedata2.getId());
+     realtimeDataRepository.deleteById(realtimedata1.getId());
+     realtimeDataRepository.deleteById(realtimedata2.getId());
 
    }
 
@@ -551,7 +551,7 @@ public class AssetControllerTest {
                                fieldWithPath("first").description("Is the first."))))
                .andReturn();
       }finally {
-         assetRepository.delete(asset.getId());
+         assetRepository.deleteById(asset.getId());
       }
    }
 
@@ -573,7 +573,7 @@ public class AssetControllerTest {
                          fieldWithPath("first").description("Is the first."))))
          .andReturn();
       }finally {
-         assetRepository.delete(asset.getId());
+         assetRepository.deleteById(asset.getId());
       }
    }
 
@@ -596,8 +596,8 @@ public class AssetControllerTest {
                      responseFields(fieldWithPath("[]").description("An array of ServerMappings"))
                            .andWithPrefix("[].", fieldpath)));
       }finally {
-         assetIPMappingRepository.delete(mapping1.getId());
-         assetIPMappingRepository.delete(mapping2.getId());
+         assetIPMappingRepository.deleteById(mapping1.getId());
+         assetIPMappingRepository.deleteById(mapping2.getId());
       }
    }
 
@@ -618,8 +618,8 @@ public class AssetControllerTest {
                      responseFields(fieldWithPath("[]").description("An array of assets"))
                            .andWithPrefix("[].", fieldpath)));
       } finally {
-         serverMappingRepository.delete(mapping1.getId());
-         serverMappingRepository.delete(mapping2.getId());
+         serverMappingRepository.deleteById(mapping1.getId());
+         serverMappingRepository.deleteById(mapping2.getId());
       }
 
    }
@@ -714,10 +714,10 @@ public class AssetControllerTest {
                responseFields(fieldWithPath("[]").description("An array of assets"))
                      .andWithPrefix("[].", fieldpath)));
       }finally {
-         assetRepository.delete(asset.getId());
-         serverMappingRepository.delete(mapping.getId());
-         assetRepository.delete(asset2.getId());
-         serverMappingRepository.delete(mapping2.getId());
+         assetRepository.deleteById(asset.getId());
+         serverMappingRepository.deleteById(mapping.getId());
+         assetRepository.deleteById(asset2.getId());
+         serverMappingRepository.deleteById(mapping2.getId());
       }
    }
 
@@ -752,9 +752,9 @@ public class AssetControllerTest {
                      fieldWithPath("first").description("Is the first."))));
 
       }finally {
-         assetRepository.delete(asset1.getId());
-         assetRepository.delete(asset2.getId());
-         facilitySoftwareRepository.delete(facility.getId());
+         assetRepository.deleteById(asset1.getId());
+         assetRepository.deleteById(asset2.getId());
+         facilitySoftwareRepository.deleteById(facility.getId());
       }
    }
 
@@ -789,9 +789,9 @@ public class AssetControllerTest {
                      fieldWithPath("numberOfElements").description("The number of Elements."),
                      fieldWithPath("first").description("Is the first."))));
       }finally {
-         assetRepository.delete(asset1.getId());
-         assetRepository.delete(asset2.getId());
-         facilitySoftwareRepository.delete(facility.getId());
+         assetRepository.deleteById(asset1.getId());
+         assetRepository.deleteById(asset2.getId());
+         facilitySoftwareRepository.deleteById(facility.getId());
       }
    }
 
@@ -885,10 +885,10 @@ public class AssetControllerTest {
                responseFields(fieldWithPath("[]").description("An array of assets"))
                      .andWithPrefix("[].", fieldpath)));
       }finally {
-         assetRepository.delete(asset.getId());
-         serverMappingRepository.delete(mapping.getId());
-         assetRepository.delete(asset2.getId());
-         serverMappingRepository.delete(mapping2.getId());
+         assetRepository.deleteById(asset.getId());
+         serverMappingRepository.deleteById(mapping.getId());
+         assetRepository.deleteById(asset2.getId());
+         serverMappingRepository.deleteById(mapping2.getId());
       }
    }
 
@@ -984,10 +984,10 @@ public class AssetControllerTest {
                      .andWithPrefix("[].", fieldpath)))
          .andReturn().getResponse();
       }finally {
-         assetRepository.delete(asset.getId());
-         serverMappingRepository.delete(mapping.getId());
-         assetRepository.delete(asset2.getId());
-         serverMappingRepository.delete(mapping2.getId());
+         assetRepository.deleteById(asset.getId());
+         serverMappingRepository.deleteById(mapping.getId());
+         assetRepository.deleteById(asset2.getId());
+         serverMappingRepository.deleteById(mapping2.getId());
       }
    }
 
@@ -1015,9 +1015,9 @@ public class AssetControllerTest {
                Asset [] assets = mapper.readValue(res, Asset[].class);
                TestCase.assertEquals(asset.getId(), assets[0].getId());
       }finally {
-         serverMappingRepository.delete(mapping1.getId());
-         serverMappingRepository.delete(mapping2.getId());
-         assetRepository.delete(asset.getId());
+         serverMappingRepository.deleteById(mapping1.getId());
+         serverMappingRepository.deleteById(mapping2.getId());
+         assetRepository.deleteById(asset.getId());
       }
    }
 
@@ -1048,9 +1048,9 @@ public class AssetControllerTest {
          Asset[] assets = mapper.readValue(res, Asset[].class);
          TestCase.assertEquals(asset.getId(), assets[0].getId());
       } finally {
-         serverMappingRepository.delete(mapping1.getId());
-         serverMappingRepository.delete(mapping2.getId());
-         assetRepository.delete(asset.getId());
+         serverMappingRepository.deleteById(mapping1.getId());
+         serverMappingRepository.deleteById(mapping2.getId());
+         assetRepository.deleteById(asset.getId());
       }
    }
 
@@ -1087,8 +1087,8 @@ public class AssetControllerTest {
                      fieldWithPath("first").description("Is the first."))));
 
       }finally {
-         serverMappingRepository.delete(mapping1.getId());
-         serverMappingRepository.delete(mapping2.getId());
+         serverMappingRepository.deleteById(mapping1.getId());
+         serverMappingRepository.deleteById(mapping2.getId());
       }
    }
 
@@ -1124,8 +1124,8 @@ public class AssetControllerTest {
                            fieldWithPath("first").description("Is the first."))));
 
       }finally {
-         serverMappingRepository.delete(mapping1.getId());
-         serverMappingRepository.delete(mapping2.getId());
+         serverMappingRepository.deleteById(mapping1.getId());
+         serverMappingRepository.deleteById(mapping2.getId());
       }
    }
 
@@ -1151,9 +1151,9 @@ public class AssetControllerTest {
                   fieldWithPath("ip").description("ip of hostname"),
                   fieldWithPath("assetname").description(
                         "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"))));
-      assetipmapping = assetIPMappingRepository.findOne(assetipmapping.getId());
-      assetRepository.delete(server.getId());
-      assetIPMappingRepository.delete(assetipmapping.getId());
+      assetipmapping = assetIPMappingRepository.findById(assetipmapping.getId()).get();
+      assetRepository.deleteById(server.getId());
+      assetIPMappingRepository.deleteById(assetipmapping.getId());
       TestCase.assertEquals(server.getAssetName(), assetipmapping.getAssetname());
    }
 
@@ -1195,7 +1195,7 @@ public class AssetControllerTest {
       .andExpect(status().is5xxServerError())
       .andReturn();
       if (result.getResolvedException() != null) {
-         assetRepository.delete(server.getId());
+         assetRepository.deleteById(server.getId());
          throw result.getResolvedException();
       }
    }
@@ -1240,10 +1240,10 @@ public class AssetControllerTest {
                   fieldWithPath("ip").description("ip of hostname"),
                   fieldWithPath("assetname").description(
                         "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"))));
-      assetipmapping = assetIPMappingRepository.findOne(assetipmapping.getId());
-      assetRepository.delete(server.getId());
-      assetRepository.delete(server1.getId());
-      assetIPMappingRepository.delete(assetipmapping.getId());
+      assetipmapping = assetIPMappingRepository.findById(assetipmapping.getId()).get();
+      assetRepository.deleteById(server.getId());
+      assetRepository.deleteById(server1.getId());
+      assetIPMappingRepository.deleteById(assetipmapping.getId());
       TestCase.assertEquals(server1.getAssetName(), assetipmapping.getAssetname());
    }
 
@@ -1276,9 +1276,9 @@ public class AssetControllerTest {
             .andExpect(status().is5xxServerError())
             .andReturn();
       if (result.getResolvedException() != null) {
-         assetRepository.delete(server.getId());
-         assetRepository.delete(server1.getId());
-         assetIPMappingRepository.delete(assetipmapping.getId());
+         assetRepository.deleteById(server.getId());
+         assetRepository.deleteById(server1.getId());
+         assetIPMappingRepository.deleteById(assetipmapping.getId());
          throw result.getResolvedException();
       }
    }
@@ -1304,7 +1304,7 @@ public class AssetControllerTest {
                   fieldWithPath("sort").description("The sort."),
                   fieldWithPath("numberOfElements").description("The number of Elements."),
                   fieldWithPath("first").description("Is the first."))));
-      assetIPMappingRepository.delete(assetipmapping.getId());
+      assetIPMappingRepository.deleteById(assetipmapping.getId());
    }
 
    @Test
@@ -1333,7 +1333,7 @@ public class AssetControllerTest {
                               fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
                               fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
                               fieldWithPath("vroResourceID").description("VROps Resource ID."))));
-      serverMappingRepository.delete(mapping.getId());
+      serverMappingRepository.deleteById(mapping.getId());
    }
 
    @Test
@@ -1423,7 +1423,7 @@ public class AssetControllerTest {
                            "This is a collection of states, including the state of the asset, "
                                  + "the state of the pdu mapping, and the state of the switch mapping."))));
       } finally {
-         assetRepository.delete(asset.getId());
+         assetRepository.deleteById(asset.getId());
       }
    }
 
@@ -1516,7 +1516,7 @@ public class AssetControllerTest {
                                  + "the state of the pdu mapping, and the state of the switch mapping."))));
 
       } finally {
-         assetRepository.delete(asset.getId());
+         assetRepository.deleteById(asset.getId());
       }
    }
 
@@ -1606,7 +1606,7 @@ public class AssetControllerTest {
                                  + "the state of the pdu mapping, and the state of the switch mapping."))));
 
       } finally {
-         assetRepository.delete(asset.getId());
+         assetRepository.deleteById(asset.getId());
       }
    }
 
@@ -1641,7 +1641,7 @@ public class AssetControllerTest {
                      fieldWithPath("vroResourceID").description("VROps Resource ID."))));
 
       }finally {
-         serverMappingRepository.delete(mapping.getId());
+         serverMappingRepository.deleteById(mapping.getId());
       }
    }
 
@@ -1678,7 +1678,7 @@ public class AssetControllerTest {
                      fieldWithPath("SecondId")
                            .description("ID of the mapping's secondid created by flowgate."))));
       }finally {
-         serverMappingRepository.delete(mapping1.getId());
+         serverMappingRepository.deleteById(mapping1.getId());
       }
    }
 
@@ -1796,7 +1796,7 @@ public class AssetControllerTest {
                                  + "the state of the pdu mapping, and the state of the switch mapping."))));
 
       } finally {
-         assetRepository.delete(asset.getId());
+         assetRepository.deleteById(asset.getId());
       }
    }
 
@@ -1814,7 +1814,7 @@ public class AssetControllerTest {
       sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
       realTimeDatas.add(pduRealTimeData);
       realTimeDatas.add(sensorRealTimeData);
-      Iterable<RealTimeData> result = realtimeDataRepository.save(realTimeDatas);
+      Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
 
       Asset asset = createAsset();
       Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
@@ -1895,8 +1895,9 @@ public class AssetControllerTest {
             }
           }
       }finally {
-         assetRepository.delete(asset);
-         realtimeDataRepository.delete(result);
+         assetRepository.deleteById(asset.getId());
+         realtimeDataRepository.deleteById(pduRealTimeData.getId());
+         realtimeDataRepository.deleteById(sensorRealTimeData.getId());
       }
    }
 
@@ -1915,7 +1916,7 @@ public class AssetControllerTest {
       sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
       realTimeDatas.add(pduRealTimeData);
       realTimeDatas.add(sensorRealTimeData);
-      Iterable<RealTimeData> result = realtimeDataRepository.save(realTimeDatas);
+      Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
 
       Asset asset = createAsset();
       Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
@@ -1994,8 +1995,9 @@ public class AssetControllerTest {
             }
           }
       }finally {
-         assetRepository.delete(asset);
-         realtimeDataRepository.delete(result);
+         assetRepository.deleteById(asset.getId());
+         realtimeDataRepository.deleteById(pduRealTimeData.getId());
+         realtimeDataRepository.deleteById(sensorRealTimeData.getId());
       }
    }
 
@@ -2023,7 +2025,7 @@ public class AssetControllerTest {
             .andDo(document("assets-fuzzyQueryServerAssetNames-example",
                   responseFields(fieldWithPath("[]").description("An array of server names"))))
             .andReturn();
-      assetRepository.delete(asset.getId());
+      assetRepository.deleteById(asset.getId());
    }
 
    RealTimeData createPduRealTimeData() {
