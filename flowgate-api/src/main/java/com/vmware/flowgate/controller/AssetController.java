@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.controller;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,7 @@ import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
@@ -96,13 +98,14 @@ public class AssetController {
    @RequestMapping(value = "/batchoperation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void batchCreation(@RequestBody List<Asset> assets) {
       BaseDocumentUtil.generateID(assets);
-      assetRepository.save(assets);
+      assetRepository.saveAll(assets);
    }
 
    // Read a Asset
    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
    public Asset read(@PathVariable String id) {
-      return assetRepository.findOne(id);
+      Optional<Asset> assetOptional = assetRepository.findById(id);
+      return assetOptional.get();
    }
 
    @RequestMapping(value = "/name/{name}", method = RequestMethod.GET)
@@ -127,7 +130,7 @@ public class AssetController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+      PageRequest pageRequest = PageRequest.of(currentPage - 1, pageSize);
       return assetRepository.findByAssetSourceContaining(assetSource,pageRequest);
    }
 
@@ -144,7 +147,7 @@ public class AssetController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+      PageRequest pageRequest = PageRequest.of(currentPage - 1, pageSize);
 
       return assetRepository.findByAssetSourceContainingAndCategory(assetSource, type.name(),pageRequest);
    }
@@ -162,7 +165,7 @@ public class AssetController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+      PageRequest pageRequest = PageRequest.of(currentPage - 1, pageSize);
 
       return assetRepository.findAssetByCategory(type.name(),pageRequest);
    }
@@ -225,7 +228,7 @@ public class AssetController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      PageRequest pageable = new PageRequest(pageNumber - 1, pageSize);
+      PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
       List<Asset> assets = assetRepository.findByAssetNameLikeAndCategory(
             keyWords, category.name(), pageSize, pageSize*(pageNumber - 1));
       PageImpl<Asset> assetPage = new PageImpl<Asset>(assets,pageable,0);
@@ -241,12 +244,14 @@ public class AssetController {
          for(String sourceId : assetSource) {
             String assetSourceName = assetSourceIDAndAssetSourceNameMap.get(sourceId);
             if (assetSourceName == null) {
-               assetSourceName = facilityRepository.findOne(sourceId).getName();
-               assetSourceIDAndAssetSourceNameMap.put(sourceId, assetSourceName);
+               Optional<FacilitySoftwareConfig> facilityOptional = facilityRepository.findById(sourceId);
+               if(facilityOptional.isPresent()) {
+                  assetSourceName = facilityOptional.get().getName();
+                  assetSourceIDAndAssetSourceNameMap.put(sourceId, assetSourceName);
+               }
             }
             assetSourceNames.add(assetSourceName);
          }
-
          String sourceNames = String.join(FlowgateConstant.SPILIT_FLAG, assetSourceNames);
          asset.setAssetSource(sourceNames);
       }
@@ -300,17 +305,18 @@ public class AssetController {
    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void update(@RequestBody Asset asset) {
 
-      Asset old = assetRepository.findOne(asset.getId());
-      if (old == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND, "Asset not found", null);
+      Optional<Asset> oldAssetOptional = assetRepository.findById(asset.getId());
+      if (!oldAssetOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("Asset", "id", asset.getId());
       }
+      Asset oldAsset = oldAssetOptional.get();
       try {
-         BaseDocumentUtil.applyChanges(old, asset);
+         BaseDocumentUtil.applyChanges(oldAsset, asset);
       } catch (Exception e) {
          throw new WormholeRequestException("Failed to update the Asset", e);
       }
-      old.setLastupdate(System.currentTimeMillis());
-      assetRepository.save(old);
+      oldAsset.setLastupdate(System.currentTimeMillis());
+      assetRepository.save(oldAsset);
    }
 
    //Update
@@ -324,14 +330,14 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
    public void delete(@PathVariable String id) {
-      assetRepository.delete(id);
+      assetRepository.deleteById(id);
    }
 
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/sensordata/batchoperation", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void realTimeDatabatchCreation(@RequestBody List<RealTimeData> realtimedatas) {
       BaseDocumentUtil.generateID(realtimedatas);
-      realtimeDataRepository.save(realtimedatas);
+      realtimeDataRepository.saveAll(realtimedatas);
    }
 
    @ResponseStatus(HttpStatus.OK)
@@ -339,7 +345,7 @@ public class AssetController {
    public void insertRealtimeData(@PathVariable("id") String assetID,
          @RequestBody RealTimeData data) {
       if (!data.getAssetID().equals(assetID)) {
-         throw new WormholeRequestException("Invalid AssetID.");
+         throw WormholeRequestException.InvalidFiled("assetID", assetID);
       }
       BaseDocumentUtil.generateID(data);
       realtimeDataRepository.save(data);
@@ -401,13 +407,13 @@ public class AssetController {
    public List<Asset> getAssetsByVROPSId(@PathVariable("id") String vropsID) {
       List<ServerMapping> mappings = new ArrayList<ServerMapping>();
       int currentPage = FlowgateConstant.defaultPageNumber;
-      PageRequest pageRequest = new PageRequest(currentPage-1, FlowgateConstant.maxPageSize);
+      PageRequest pageRequest = PageRequest.of(currentPage-1, FlowgateConstant.maxPageSize);
       Page<ServerMapping> mappingPage =
             serverMappingRepository.findAllByVroID(vropsID, pageRequest);
       mappings.addAll(mappingPage.getContent());
       while(!mappingPage.isLast()) {
     	  currentPage++;
-    	  pageRequest = new PageRequest(currentPage-1, FlowgateConstant.maxPageSize);
+    	  pageRequest = PageRequest.of(currentPage-1, FlowgateConstant.maxPageSize);
     	  mappingPage = serverMappingRepository.findAllByVroID(vropsID, pageRequest);
     	  mappings.addAll(mappingPage.getContent());
       }
@@ -426,10 +432,11 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateServerMapping(@RequestBody ServerMapping serverMaping) {
-      ServerMapping mapping = serverMappingRepository.findOne(serverMaping.getId());
-      if (mapping == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND, "ServerMapping not found", null);
+      Optional<ServerMapping> mappingOptional = serverMappingRepository.findById(serverMaping.getId());
+      if (!mappingOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("ServerMapping", "id", serverMaping.getId());
       }
+      ServerMapping mapping = mappingOptional.get();
       try {
          mapping.setAsset(serverMaping.getAsset());
          serverMappingRepository.save(mapping);
@@ -442,7 +449,7 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/{id}", method = RequestMethod.DELETE)
    public void deleteServerMapping(@PathVariable String id) {
-      serverMappingRepository.delete(id);
+      serverMappingRepository.deleteById(id);
    }
 
    @ResponseStatus(HttpStatus.OK)
@@ -450,18 +457,18 @@ public class AssetController {
    public void mergeServerMapping(@PathVariable("firstid") String id1,
          @PathVariable("secondid") String id2) {
       if (id1 == id2) {
-         throw new WormholeRequestException("Invalid mapping ids");
+         WormholeRequestException.InvalidFiled("ids", id1+":"+id2);
       }
-      ServerMapping firstMapping = serverMappingRepository.findOne(id1);
-      if (firstMapping == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND,
-               String.format("ServerMapping for %s not found", id1), null);
+      Optional<ServerMapping> firstMappingOptional = serverMappingRepository.findById(id1);
+      if (!firstMappingOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("ServerMapping", "id", id1);
       }
-      ServerMapping secondMapping = serverMappingRepository.findOne(id2);
-      if (secondMapping == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND,
-               String.format("ServerMapping for %s not found", id2), null);
+      Optional<ServerMapping> secondMappingOptional = serverMappingRepository.findById(id2);
+      if (!secondMappingOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("ServerMapping", "id", id2);
       }
+      ServerMapping firstMapping = firstMappingOptional.get();
+      ServerMapping secondMapping = secondMappingOptional.get();
       mergeMapping(firstMapping, secondMapping);
       serverMappingRepository.save(firstMapping);
       serverMappingRepository.delete(secondMapping);
@@ -486,7 +493,8 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/{id}", method = RequestMethod.GET)
    public ServerMapping getMappingById(@PathVariable("id") String id) {
-      return serverMappingRepository.findOne(id);
+      Optional<ServerMapping> serverMappingOptional = serverMappingRepository.findById(id);
+      return serverMappingOptional.get();
    }
 
    @ResponseStatus(HttpStatus.OK)
@@ -501,7 +509,7 @@ public class AssetController {
          pageSize = FlowgateConstant.maxPageSize;
       }
 
-      PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
+      PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize);
       Page<ServerMapping> mappings =
             serverMappingRepository.findAllByVroID(vropsID, pageRequest);
       return replaceAssetIDwithAssetName(mappings);
@@ -518,7 +526,7 @@ public class AssetController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
+      PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize);
       Page<ServerMapping> mappings =
             serverMappingRepository.findAllByVcID(vcID, pageRequest);
       return replaceAssetIDwithAssetName(mappings);
@@ -553,8 +561,7 @@ public class AssetController {
       BaseDocumentUtil.generateID(mapping);
       String ip = mapping.getIp();
       if(!IPAddressUtil.isValidIp(ip)) {
-         throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid ip address",
-               null);
+         throw WormholeRequestException.InvalidFiled("ip", ip);
       }
       if (!assetService.isAssetNameValidate(mapping.getAssetname())) {
          throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't find any asset with the name : " + mapping.getAssetname(),
@@ -566,10 +573,11 @@ public class AssetController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/hostnameip", method = RequestMethod.PUT)
    public void updateHostNameIPMapping(@RequestBody AssetIPMapping mapping) {
-      AssetIPMapping oldMapping = assetIPMappingRepository.findOne(mapping.getId());
-      if(oldMapping == null) {
+      Optional<AssetIPMapping> oldMappingOptional = assetIPMappingRepository.findById(mapping.getId());
+      if(!oldMappingOptional.isPresent()) {
          throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't find any mapping with the id: " + mapping.getId(),null);
       }
+      AssetIPMapping oldMapping = oldMappingOptional.get();
       String assetName = mapping.getAssetname();
       if(oldMapping.getAssetname().equals(assetName)) {
          return;
@@ -593,20 +601,19 @@ public class AssetController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      PageRequest pageRequest = new PageRequest(pageNumber - 1, pageSize);
+      PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize);
       if(ip == null) {
          return assetIPMappingRepository.findAll(pageRequest);
       }else if(IPAddressUtil.isValidIp(ip)) {
          return assetIPMappingRepository.findByIp(ip, pageRequest);
       }
-      throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid ip address: "+ip,
-            null);
+      throw WormholeRequestException.InvalidFiled("ip", ip);
    }
 
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/mapping/hostnameip/{id}", method = RequestMethod.DELETE)
    public void deleteHostNameByID(@PathVariable("id") String id) {
-      assetIPMappingRepository.delete(id);
+      assetIPMappingRepository.deleteById(id);
    }
 
    @RequestMapping(value = "/mapping/hostnameip/file",method = RequestMethod.POST)
@@ -647,13 +654,13 @@ public class AssetController {
    public List<Asset> getAssetsByVCId(@PathVariable("id") String vcID) {
       List<ServerMapping> mappings = new ArrayList<ServerMapping>();
       int currentPage = FlowgateConstant.defaultPageNumber;
-      PageRequest pageRequest = new PageRequest(currentPage-1, FlowgateConstant.maxPageSize);
+      PageRequest pageRequest = PageRequest.of(currentPage-1, FlowgateConstant.maxPageSize);
       Page<ServerMapping> mappingPage =
             serverMappingRepository.findAllByVcID(vcID, pageRequest);
       mappings.addAll(mappingPage.getContent());
       while(!mappingPage.isLast()) {
     	  currentPage++;
-    	  pageRequest = new PageRequest(currentPage - 1, FlowgateConstant.maxPageSize);
+    	  pageRequest = PageRequest.of(currentPage - 1, FlowgateConstant.maxPageSize);
     	  mappingPage = serverMappingRepository.findAllByVcID(vcID, pageRequest);
     	  mappings.addAll(mappingPage.getContent());
       }
@@ -678,7 +685,7 @@ public class AssetController {
       List<RealTimeData> dataToBeDeleted = realtimeDataRepository.getRealTimeDatabtTimeRange(currentTime - expiredtimerange);
       while(!dataToBeDeleted.isEmpty()) {
          for(RealTimeData realtimedata : dataToBeDeleted) {
-            realtimeDataRepository.delete(realtimedata.getId());
+            realtimeDataRepository.deleteById(realtimedata.getId());
          }
          dataToBeDeleted = realtimeDataRepository.getRealTimeDatabtTimeRange(currentTime - expiredtimerange);
       }

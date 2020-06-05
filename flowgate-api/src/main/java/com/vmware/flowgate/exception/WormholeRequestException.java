@@ -75,4 +75,9 @@ public final class WormholeRequestException extends RuntimeException {
       return new WormholeRequestException(message);
    }
 
+   public static WormholeRequestException NotFound(String item, String queryParam, String value) {
+      String message =  String.format("Failed to find %s with field: %s  and value: %s", item, queryParam, value);
+      return new WormholeRequestException(HttpStatus.NOT_FOUND, message, null);
+   }
+
 }
