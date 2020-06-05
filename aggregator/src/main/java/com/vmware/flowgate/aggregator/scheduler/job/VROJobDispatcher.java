@@ -49,6 +49,7 @@ public class VROJobDispatcher extends BaseJob implements Job {
       boolean syncMetriAlertPropertyDefinition = (execount++ % 288000 == 0);//Will you run 1000 days?
       logger.info("Send Sync VRO metric data commands");
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      template.opsForValue().set(EventMessageUtil.VRO_EXECOUNT, String.valueOf(execount));
       SDDCSoftwareConfig[] vroServers = restClient.getVROServers().getBody();
       if(vroServers == null || vroServers.length==0) {
          logger.info("No VROps server find");
@@ -66,7 +67,6 @@ public class VROJobDispatcher extends BaseJob implements Job {
          }
          publisher.publish(EventMessageUtil.VROTopic,
                EventMessageUtil.generateSDDCNotifyMessage(EventType.VROps));
-         template.opsForValue().set(EventMessageUtil.VRO_EXECOUNT, String.valueOf(execount));
       } catch (IOException e) {
          logger.error("Failed to sendout VRO jobs", e);
       }

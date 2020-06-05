@@ -58,6 +58,7 @@ public class NlyteJobDispatcher extends BaseJob implements Job {
          mappedSync = false;
       }
       logger.info("Send Sync command for Nlyte");
+      template.opsForValue().set(EventMessageUtil.NLYTE_EXECOUNT, String.valueOf(execount));
       FacilitySoftwareConfig[] nlytes =
             restClient.getFacilitySoftwareByType(SoftwareType.Nlyte).getBody();
       if (nlytes == null || nlytes.length == 0) {
@@ -81,7 +82,6 @@ public class NlyteJobDispatcher extends BaseJob implements Job {
          }
          publisher.publish(EventMessageUtil.NLYTETOPIC,
                EventMessageUtil.generateFacilityNotifyMessage(EventType.Nlyte));
-         template.opsForValue().set(EventMessageUtil.NLYTE_EXECOUNT, String.valueOf(execount));
       } catch (IOException e) {
          logger.error("Failed to send out message", e);
       }
