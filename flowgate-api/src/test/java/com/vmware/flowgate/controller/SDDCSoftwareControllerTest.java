@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.controller;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -12,6 +12,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -113,9 +114,10 @@ public class SDDCSoftwareControllerTest {
             .getVcAuth(Mockito.any(SDDCSoftwareConfig.class));
       Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
       try {
-         MvcResult result = this.mockMvc
+          this.mockMvc
                .perform(post("/v1/sddc/").contentType(MediaType.APPLICATION_JSON)
                      .content(objectMapper.writeValueAsString(sddc)))
+               .andExpect(status().isCreated())
                .andDo(document("SDDCSoftware-create-example", requestFields(
                      fieldWithPath("id")
                            .description("ID of the SDDCSoftwareConfig, created by flowgate"),
@@ -134,13 +136,12 @@ public class SDDCSoftwareControllerTest {
                      fieldWithPath("userId").description("userId"),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
-                     fieldWithPath("integrationStatus").description("The status of integration."))))
+                     subsectionWithPath("integrationStatus").description("The status of integration."))))
                .andReturn();
-         TestCase.assertEquals(201, result.getResponse().getStatus());
       } catch (Exception e) {
-         TestCase.fail();
+         TestCase.fail(e.getMessage());
       }
-      sddcRepository.delete(sddc.getId());
+      sddcRepository.deleteById(sddc.getId());
    }
    @Test
    public void syncSDDCServerDataExample() throws JsonProcessingException, Exception {
@@ -166,7 +167,7 @@ public class SDDCSoftwareControllerTest {
       } catch (Exception e) {
          TestCase.fail();
       }
-      sddcRepository.delete(sddc.getId());
+      sddcRepository.deleteById(sddc.getId());
    }
 
    /**
@@ -208,7 +209,7 @@ public class SDDCSoftwareControllerTest {
                      fieldWithPath("userId").description("userId"),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
-                     fieldWithPath("integrationStatus").description("The status of integration."))))
+                     subsectionWithPath("integrationStatus").description("The status of integration."))))
                .andReturn();
          if (result.getResolvedException() != null) {
             throw result.getResolvedException();
@@ -216,7 +217,7 @@ public class SDDCSoftwareControllerTest {
       } catch (Exception e) {
          throw e;
       } finally {
-         sddcRepository.delete(sddc.getId());
+         sddcRepository.deleteById(sddc.getId());
       }
    }
 
@@ -249,7 +250,7 @@ public class SDDCSoftwareControllerTest {
       } catch (Exception e) {
          TestCase.fail();
       }
-      sddcRepository.delete(sddc.getId());
+      sddcRepository.deleteById(sddc.getId());
    }
 
    /**
@@ -272,7 +273,7 @@ public class SDDCSoftwareControllerTest {
                   .content(objectMapper.writeValueAsString(sddc)))
             .andExpect(status().isOk())
             .andReturn();
-      sddcRepository.delete(sddc.getId());
+      sddcRepository.deleteById(sddc.getId());
    }
 
    @Test
@@ -283,23 +284,25 @@ public class SDDCSoftwareControllerTest {
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       int pageNumber = 1;
       int pageSize = 5;
-      this.mockMvc
-            .perform(get("/v1/sddc/page/" + pageNumber + "/pagesize/" + pageSize + ""))
+      this.mockMvc.perform(get("/v1/sddc/page/" + pageNumber + "/pagesize/" + pageSize + ""))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$..content[0].name").value(sddc.getName()))
             .andExpect(jsonPath("$..content[0].userId").value(sddc.getUserId()))
-            .andDo(document("SDDCSoftware-query-example",responseFields(
-                    fieldWithPath("content").description("SDDCSoftwareConfig's array."),
-                    fieldWithPath("totalPages").description("content's total pages."),
-                      fieldWithPath("totalElements").description("content's total elements."),
-                      fieldWithPath("last").description("Is the last."),
-                      fieldWithPath("number").description("The page number."),
-                      fieldWithPath("size").description("The page size."),
-                      fieldWithPath("sort").description("The sort."),
-                      fieldWithPath("numberOfElements").description("The number of Elements."),
-                      fieldWithPath("first").description("Is the first.")
-                     )));
-      sddcRepository.delete(sddc.getId());
+            .andDo(document("SDDCSoftware-query-example", responseFields(
+                  subsectionWithPath("content").type(JsonFieldType.ARRAY)
+                        .description("SDDCSoftwareConfig's array."),
+                  fieldWithPath("totalPages").description("content's total pages."),
+                  fieldWithPath("totalElements").description("content's total elements."),
+                  fieldWithPath("last").description("Is the last."),
+                  fieldWithPath("number").description("The page number."),
+                  fieldWithPath("size").description("The page size."),
+                  fieldWithPath("sort").description("The sort."),
+                  fieldWithPath("numberOfElements").description("The number of Elements."),
+                  fieldWithPath("first").description("Is the first."),
+                  subsectionWithPath("pageable").description("pageable.").ignored(),
+                  subsectionWithPath("sort").description("sorted.").ignored(),
+                  fieldWithPath("empty").description("Is empty.").ignored())));
+      sddcRepository.deleteById(sddc.getId());
    }
 
    @Test
@@ -326,8 +329,9 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("userId").description(
                       "userId"),
               fieldWithPath("verifyCert").description(
-                      "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
-              };
+                      "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
+              subsectionWithPath("integrationStatus").description("The status of integration.").optional(),
+      };
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/type/" + SoftwareType.VCENTER + ""))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-queryByType-example",
@@ -343,7 +347,7 @@ public class SDDCSoftwareControllerTest {
             TestCase.assertEquals("flowgate cluster", sddc.getDescription());
          }
       }
-      sddcRepository.delete(sddcCreate.getId());
+      sddcRepository.deleteById(sddcCreate.getId());
    }
 
    @Test
@@ -373,7 +377,8 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("userId").description(
                       "userId"),
               fieldWithPath("verifyCert").description(
-                      "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
+                      "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
+              subsectionWithPath("integrationStatus").description("The status of integration.").optional()
               };
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/vrops"))
             .andExpect(status().isOk())
@@ -389,8 +394,8 @@ public class SDDCSoftwareControllerTest {
             TestCase.assertEquals("flowgate cluster", sddc.getDescription());
          }
       }
-      sddcRepository.delete(sddc1Create.getId());
-      sddcRepository.delete(sddc2Create.getId());
+      sddcRepository.deleteById(sddc1Create.getId());
+      sddcRepository.deleteById(sddc2Create.getId());
    }
 
    @Test
@@ -421,7 +426,8 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("userId").description(
                       "userId"),
               fieldWithPath("verifyCert").description(
-                      "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
+                      "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
+              subsectionWithPath("integrationStatus").description("The status of integration.").optional()
               };
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/user/vrops"))
             .andExpect(status().isOk())
@@ -437,8 +443,8 @@ public class SDDCSoftwareControllerTest {
             TestCase.assertEquals("flowgate cluster", sddc.getDescription());
          }
       }
-      sddcRepository.delete(sddc1Create.getId());
-      sddcRepository.delete(sddc2Create.getId());
+      sddcRepository.deleteById(sddc1Create.getId());
+      sddcRepository.deleteById(sddc2Create.getId());
    }
    @Test
    public void getVCServerConfigsExample() throws Exception {
@@ -467,7 +473,8 @@ public class SDDCSoftwareControllerTest {
               fieldWithPath("userId").description(
                       "userId"),
               fieldWithPath("verifyCert").description(
-                      "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
+                      "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
+              subsectionWithPath("integrationStatus").description("The status of integration.").optional()
               };
 
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/vc"))
@@ -484,8 +491,8 @@ public class SDDCSoftwareControllerTest {
             TestCase.assertEquals("flowgate cluster", sddc.getDescription());
          }
       }
-      sddcRepository.delete(sddc1Create.getId());
-      sddcRepository.delete(sddc2Create.getId());
+      sddcRepository.deleteById(sddc1Create.getId());
+      sddcRepository.deleteById(sddc2Create.getId());
    }
 
    @Test
