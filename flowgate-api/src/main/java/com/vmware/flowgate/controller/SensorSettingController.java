@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.controller;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Lists;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.SensorSetting;
 import com.vmware.flowgate.exception.WormholeRequestException;
@@ -46,7 +45,8 @@ public class SensorSettingController {
    //get
    @RequestMapping(value="/setting/{id}",method = RequestMethod.GET)
    public SensorSetting getSensorSetting(@PathVariable("id") String id) {
-      return repository.findOne(id);
+      Optional<SensorSetting> sensorSettingOptional = repository.findById(id);
+      return sensorSettingOptional.get();
    }
 
    //get
@@ -62,7 +62,7 @@ public class SensorSettingController {
          pageSize = FlowgateConstant.maxPageSize;
       }
       try{
-         PageRequest pageRequest = new PageRequest(pageNumber-1,pageSize);
+         PageRequest pageRequest = PageRequest.of(pageNumber-1,pageSize);
          return repository.findAll(pageRequest);
       }catch(Exception e) {
          throw new WormholeRequestException(e.getMessage());
@@ -73,10 +73,11 @@ public class SensorSettingController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value="/setting",method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateSensorSetting(@RequestBody SensorSetting sensorSetting) {
-      SensorSetting old = repository.findOne(sensorSetting.getId());
-      if (old == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND, "SensorSetting not found", null);
+      Optional<SensorSetting> oldSensorSettingOptional = repository.findById(sensorSetting.getId());
+      if(!oldSensorSettingOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("SensorSetting", "id", sensorSetting.getId());
       }
+      SensorSetting old = oldSensorSettingOptional.get();
       try {
          BaseDocumentUtil.applyChanges(old, sensorSetting);
       } catch (Exception e) {
@@ -89,7 +90,7 @@ public class SensorSettingController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/setting/{id}", method = RequestMethod.DELETE)
    public void delete(@PathVariable String id) {
-      repository.delete(id);
+      repository.deleteById(id);
    }
 
 }

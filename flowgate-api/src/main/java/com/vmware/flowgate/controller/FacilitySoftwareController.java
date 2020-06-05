@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -97,7 +98,8 @@ public class FacilitySoftwareController {
 
    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
    public FacilitySoftwareConfig getFacilitySoftwareConfigByID(@PathVariable String id) {
-      FacilitySoftwareConfig server = repository.findOne(id);
+      Optional<FacilitySoftwareConfig> serverOptional = repository.findById(id);
+      FacilitySoftwareConfig server = serverOptional.get();
       decryptServerPassword(server);
       return server;
    }
@@ -126,8 +128,9 @@ public class FacilitySoftwareController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
-      WormholeUser currentUser = userRepository.findOne(user.getUserId());
+      PageRequest pageRequest = PageRequest.of(currentPage - 1, pageSize);
+      Optional<WormholeUser> currentUserOptional = userRepository.findById(user.getUserId());
+      WormholeUser currentUser = currentUserOptional.get();
       Page<FacilitySoftwareConfig> result = null;
       List<String> types = new ArrayList<String>();
       if(softwaretypes != null && softwaretypes.length > 0) {
@@ -156,18 +159,18 @@ public class FacilitySoftwareController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
    public void delete(@PathVariable String id) {
-      repository.delete(id);
+      repository.deleteById(id);
    }
 
    //only modify the status of integration,and not verify information of server.
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/status", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateStatus(@RequestBody FacilitySoftwareConfig server) {
-      FacilitySoftwareConfig old = repository.findOne(server.getId());
-      if (old == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND,
-               "FacilitySoftwareConfig not found", null);
+      Optional<FacilitySoftwareConfig> oldServerOptional = repository.findById(server.getId());
+      if(!oldServerOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("FacilitySoftwareConfig", "id", server.getId());
       }
+      FacilitySoftwareConfig old = oldServerOptional.get();
       old.setIntegrationStatus(server.getIntegrationStatus());
       repository.save(old);
    }
@@ -176,11 +179,11 @@ public class FacilitySoftwareController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateFacilitySoftwareConfig(@RequestBody FacilitySoftwareConfig config) {
-      FacilitySoftwareConfig old = repository.findOne(config.getId());
-      if (old == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND,
-               "FacilitySoftwareConfig not found", null);
+      Optional<FacilitySoftwareConfig> oldServerOptional = repository.findById(config.getId());
+      if(!oldServerOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("FacilitySoftwareConfig", "id", config.getId());
       }
+      FacilitySoftwareConfig old = oldServerOptional.get();
       old.setName(config.getName());
       old.setDescription(config.getDescription());
       old.setUserName(config.getUserName());
@@ -196,10 +199,11 @@ public class FacilitySoftwareController {
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/syncdatabyserverid/{id}", method = RequestMethod.POST)
    public void syncFacilityServerData(@PathVariable("id") String id, HttpServletRequest request) {
-      FacilitySoftwareConfig server = repository.findOne(id);
-      if (server == null) {
-         throw new WormholeRequestException("Invalid ID");
+      Optional<FacilitySoftwareConfig> serverOptional = repository.findById(id);
+      if(!serverOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("FacilitySoftwareConfig", "id", id);
       }
+      FacilitySoftwareConfig server = serverOptional.get();
       decryptServerPassword(server);
       notifyFacilityWorker(server);
    }
