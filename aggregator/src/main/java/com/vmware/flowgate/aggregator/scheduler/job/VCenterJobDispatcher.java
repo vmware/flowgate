@@ -53,7 +53,11 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       boolean syncCustomerMetric = execount++ % 10 == 0;
       logger.info("Send Sync VC customer attributes data commands");
-      template.opsForValue().set(EventMessageUtil.VCENTER_EXECOUNT, String.valueOf(execount));
+      try {
+         template.opsForValue().set(EventMessageUtil.VCENTER_EXECOUNT, String.valueOf(execount));
+      }catch(Exception e) {
+         logger.error("Failed to set execount", e);
+      }
       SDDCSoftwareConfig[] vcServers = restClient.getVCServers().getBody();
       if (vcServers == null || vcServers.length == 0) {
          logger.info("No vcenter server find");

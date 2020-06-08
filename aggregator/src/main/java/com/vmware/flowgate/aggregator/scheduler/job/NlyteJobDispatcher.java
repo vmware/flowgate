@@ -58,7 +58,11 @@ public class NlyteJobDispatcher extends BaseJob implements Job {
          mappedSync = false;
       }
       logger.info("Send Sync command for Nlyte");
-      template.opsForValue().set(EventMessageUtil.NLYTE_EXECOUNT, String.valueOf(execount));
+      try {
+         template.opsForValue().set(EventMessageUtil.NLYTE_EXECOUNT, String.valueOf(execount));
+      }catch(Exception e) {
+         logger.error("Failed to set execount", e);
+      }
       FacilitySoftwareConfig[] nlytes =
             restClient.getFacilitySoftwareByType(SoftwareType.Nlyte).getBody();
       if (nlytes == null || nlytes.length == 0) {
