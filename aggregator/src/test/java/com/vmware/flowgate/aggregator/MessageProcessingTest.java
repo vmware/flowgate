@@ -67,21 +67,7 @@ public class MessageProcessingTest {
       }
    }
 
-   @Test
-   public void testVC() throws Exception{
-      ObjectMapper mapper = new ObjectMapper();
-      SDDCSoftwareConfig vc = new SDDCSoftwareConfig();
-      vc.setDescription("good vc");
-      vc.setName("Test VC");
-      vc.setServerURL("10.10.10.10");
-      vc.setPassword("fake password");
-      vc.setType(SoftwareType.VCENTER);
-      String payload = mapper.writeValueAsString(vc);
-//      EventMessage message =
-//            EventMessageUtil.createEventMessage(EventType.VCenter, EventMessageUtil.VCENTER_SyncCustomerAttrs, payload);
-      EventMessage message = EventMessageUtil.createEventMessage(EventType.VCenter, EventMessageUtil.VCENTER_SyncData, "");
-      System.out.println(mapper.writeValueAsString(message));
-   }
+
 
    @Test
    public void testGetPositionInfo() {
