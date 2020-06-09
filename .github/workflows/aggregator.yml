@@ -30,6 +30,6 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-          flags: unittests #Flag the upload to group coverage metrics (unittests, uitests, etc.). Multiple flags are separated by a comma (ui,chrome)
-          name: codecov-umbrella #Custom defined name for the upload
+          flags: aggregator #Flag the upload to group coverage metrics (unittests, uitests, etc.). Multiple flags are separated by a comma (ui,chrome)
+          name: codecov-aggregator #Custom defined name for the upload
           fail_ci_if_error: true #Specify if CI pipeline should fail when Codecov runs into errors during upload. Defaults to false
