@@ -103,7 +103,10 @@ public class NlyteAsset {
 
    @JsonProperty(value = "CustomFields")
    private List<CustomField> customFields;
-
+   @JsonProperty(value = "ChassisSlots")
+   private List<ChassisSlot> chassisSlots;
+   @JsonProperty(value = "ChassisMountedAssetMaps")
+   private List<ChassisMountedAssetMap> chassisMountedAssetMaps;
 
    public String getCabinetName() {
       return cabinetName;
@@ -398,6 +401,18 @@ public class NlyteAsset {
     */
    public void setCustomFields(List<CustomField> customFields) {
       this.customFields = customFields;
+   }
+   public List<ChassisSlot> getChassisSlots() {
+      return chassisSlots;
+   }
+   public void setChassisSlots(List<ChassisSlot> chassisSlots) {
+      this.chassisSlots = chassisSlots;
+   }
+   public List<ChassisMountedAssetMap> getChassisMountedAssetMaps() {
+      return chassisMountedAssetMaps;
+   }
+   public void setChassisMountedAssetMaps(List<ChassisMountedAssetMap> chassisMountedAssetMaps) {
+      this.chassisMountedAssetMaps = chassisMountedAssetMaps;
    }
 
 }

@@ -5,5 +5,5 @@
 package com.vmware.flowgate.common;
 
 public enum AssetCategory {
-   Server, PDU, Cabinet, Networks, Sensors, UPS
+   Server, PDU, Cabinet, Networks, Sensors, UPS, Chassis
 }
