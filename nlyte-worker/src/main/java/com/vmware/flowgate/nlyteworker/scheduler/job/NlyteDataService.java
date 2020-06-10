@@ -449,6 +449,20 @@ public class NlyteDataService implements AsyncService {
       restClient.saveAssets(serversNeedToSaveOrUpdate);
       logger.info("Finish sync the servers data for: " + nlyte.getName());
 
+      nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Chassis);
+      nlyteAssets = supplementCabinetName(cabinetIdAndNameMap, nlyteAssets);
+      List<Material> chassisMaterials =
+            nlyteAPIclient.getMaterials(true, HandleAssetUtil.chassisMaterials);
+      HashMap<Integer, Material> chassisMaterialMap = new HashMap<Integer, Material>();
+      for (Material material : chassisMaterials) {
+         material.setMaterialType(AssetCategory.Chassis);
+         chassisMaterialMap.put(material.getMaterialID(), material);
+      }
+      List<Asset> chassisNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,
+            manufacturerMap, chassisMaterialMap, AssetCategory.Chassis);
+      restClient.saveAssets(chassisNeedToSaveOrUpdate);
+      logger.info("Finish sync the chassis data for: " + nlyte.getName());
+
       HashMap<Integer, Material> pduMaterialMap = new HashMap<Integer, Material>();
       nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.PDU);
       nlyteAssets = supplementCabinetName(cabinetIdAndNameMap, nlyteAssets);
@@ -462,8 +476,6 @@ public class NlyteDataService implements AsyncService {
             manufacturerMap, pduMaterialMap, AssetCategory.PDU);
       restClient.saveAssets(pDUsNeedToSaveOrUpdate);
       logger.info("Finish sync the pdus data for: " + nlyte.getName());
-
-
 
       HashMap<Integer, Material> networkMaterialMap = new HashMap<Integer, Material>();
       nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Networks);
