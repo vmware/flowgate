@@ -435,8 +435,13 @@ public class NlyteDataService implements AsyncService {
       }
       List<Asset> cabinetsNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,
             manufacturerMap, cabinetMaterialMap, AssetCategory.Cabinet);
-      restClient.saveAssets(cabinetsNeedToSaveOrUpdate);
-      logger.info("Finish sync the cabinets data for: " + nlyte.getName());
+      if(cabinetsNeedToSaveOrUpdate.isEmpty()) {
+         logger.info("No cabinet asset need to save");
+      }else {
+         restClient.saveAssets(cabinetsNeedToSaveOrUpdate);
+         logger.info("Finish sync the cabinets data for: " + nlyte.getName()+", size: " +cabinetsNeedToSaveOrUpdate.size());
+      }
+
 
       //init cabinetIdAndNameMap
       HashMap<Integer,String> cabinetIdAndNameMap = getCabinetIdAndNameMap(nlyteAssets);
@@ -446,8 +451,13 @@ public class NlyteDataService implements AsyncService {
       HashMap<Integer, Material> materialMap = assetUtil.initServerMaterialsMap(nlyteAPIclient);
       List<Asset> serversNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,
             manufacturerMap, materialMap, AssetCategory.Server);
-      restClient.saveAssets(serversNeedToSaveOrUpdate);
-      logger.info("Finish sync the servers data for: " + nlyte.getName());
+      if(serversNeedToSaveOrUpdate.isEmpty()) {
+         logger.info("No server asset need to save");
+      }else {
+         restClient.saveAssets(serversNeedToSaveOrUpdate);
+         logger.info("Finish sync the servers data for: " + nlyte.getName()+", size: "+serversNeedToSaveOrUpdate.size());
+      }
+
 
       nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Chassis);
       nlyteAssets = supplementCabinetName(cabinetIdAndNameMap, nlyteAssets);
@@ -460,8 +470,12 @@ public class NlyteDataService implements AsyncService {
       }
       List<Asset> chassisNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,
             manufacturerMap, chassisMaterialMap, AssetCategory.Chassis);
-      restClient.saveAssets(chassisNeedToSaveOrUpdate);
-      logger.info("Finish sync the chassis data for: " + nlyte.getName());
+      if(chassisNeedToSaveOrUpdate.isEmpty()) {
+         logger.info("No chassis asset need to save");
+      }else {
+         restClient.saveAssets(chassisNeedToSaveOrUpdate);
+         logger.info("Finish sync the chassis data for: " + nlyte.getName()+", size: "+chassisNeedToSaveOrUpdate.size());
+      }
 
       HashMap<Integer, Material> pduMaterialMap = new HashMap<Integer, Material>();
       nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.PDU);
@@ -474,8 +488,12 @@ public class NlyteDataService implements AsyncService {
       }
       List<Asset> pDUsNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,
             manufacturerMap, pduMaterialMap, AssetCategory.PDU);
-      restClient.saveAssets(pDUsNeedToSaveOrUpdate);
-      logger.info("Finish sync the pdus data for: " + nlyte.getName());
+      if(pDUsNeedToSaveOrUpdate.isEmpty()) {
+         logger.info("No pdu asset need to save");
+      }else {
+         restClient.saveAssets(pDUsNeedToSaveOrUpdate);
+         logger.info("Finish sync the pdus data for: " + nlyte.getName()+", size: "+pDUsNeedToSaveOrUpdate.size());
+      }
 
       HashMap<Integer, Material> networkMaterialMap = new HashMap<Integer, Material>();
       nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Networks);
@@ -488,8 +506,13 @@ public class NlyteDataService implements AsyncService {
       }
       List<Asset> networkersNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets,
             locationMap, manufacturerMap, networkMaterialMap, AssetCategory.Networks);
-      restClient.saveAssets(networkersNeedToSaveOrUpdate);
-      logger.info("Finish sync the networks data for: " + nlyte.getName());
+      if(networkersNeedToSaveOrUpdate.isEmpty()) {
+         logger.info("No network asset need to save");
+      }else {
+         restClient.saveAssets(networkersNeedToSaveOrUpdate);
+         logger.info("Finish sync the networks data for: " + nlyte.getName()+", size: "+networkersNeedToSaveOrUpdate.size());
+      }
+
    }
 
    public List<Asset> generateAssets(String nlyteSource, List<NlyteAsset> nlyteAssets,
