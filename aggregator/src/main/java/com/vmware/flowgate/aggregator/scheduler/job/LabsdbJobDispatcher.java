@@ -48,6 +48,11 @@ public class LabsdbJobDispatcher extends BaseJob implements Job {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       boolean fullSync = execount++ % 7 == 0;
       logger.info("Send Sync command for Labsdb");
+      try {
+         template.opsForValue().set(EventMessageUtil.LABSDB_EXECOUNT, String.valueOf(execount));
+      }catch(Exception e) {
+         logger.error("Failed to set execount", e);
+      }
       FacilitySoftwareConfig[] labsdbs =
             restClient.getFacilitySoftwareByType(SoftwareType.Labsdb).getBody();
       if (labsdbs == null || labsdbs.length == 0) {
@@ -68,7 +73,6 @@ public class LabsdbJobDispatcher extends BaseJob implements Job {
          }
          publisher.publish(EventMessageUtil.LabsdbTopic,
                EventMessageUtil.generateFacilityNotifyMessage(EventType.Labsdb));
-         template.opsForValue().set(EventMessageUtil.LABSDB_EXECOUNT, String.valueOf(execount));
       } catch (IOException e) {
          logger.error("Failed to send out message", e);
       }
