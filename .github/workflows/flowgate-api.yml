@@ -39,3 +39,7 @@ jobs:
         sudo mvn clean test
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
+      with:
+          flags: api
+          name: codecov-flowgate-api
+          fail_ci_if_error: true
