@@ -66,6 +66,8 @@ public class FlowgateConstant {
 
    public static String CABINETUNITS = "CabinetUnits";
 
+   public static String CHASSISSLOTS = "ChassisSlots";
+
    public static String DEFAULT_CABINET_UNIT_POSITION = "COMMON";
 
    public static String OUTLET_NAME_PREFIX = "OUTLET:";

@@ -77,6 +77,19 @@ public class Material {
    private double consumerPowerFactor;
    private AssetCategory materialType;
    private AssetSubCategory materialSubtype;
+   @JsonProperty(value = "MaxA")
+   private Double maxA;
+   @JsonProperty(value = "MaxV")
+   private Double maxV;
+   @JsonProperty(value = "NumberOfColumnsBack")
+   private Integer numberOfColumnsBack;
+   @JsonProperty(value = "NumberOfColumnsFront")
+   private Integer numberOfColumnsFront;
+   @JsonProperty(value = "NumberOfRowsBack")
+   private Integer numberOfRowsBack;
+   @JsonProperty(value = "NumberOfRowsFront")
+   private Integer numberOfRowsFront;
+
    public String getOdataType() {
       return odataType;
    }
@@ -287,5 +300,41 @@ public class Material {
    public void setuHeight(Integer uHeight) {
       this.uHeight = uHeight;
    }
-   
+   public Double getMaxA() {
+      return maxA;
+   }
+   public void setMaxA(Double maxA) {
+      this.maxA = maxA;
+   }
+   public Double getMaxV() {
+      return maxV;
+   }
+   public void setMaxV(Double maxV) {
+      this.maxV = maxV;
+   }
+   public Integer getNumberOfColumnsBack() {
+      return numberOfColumnsBack;
+   }
+   public void setNumberOfColumnsBack(Integer numberOfColumnsBack) {
+      this.numberOfColumnsBack = numberOfColumnsBack;
+   }
+   public Integer getNumberOfColumnsFront() {
+      return numberOfColumnsFront;
+   }
+   public void setNumberOfColumnsFront(Integer numberOfColumnsFront) {
+      this.numberOfColumnsFront = numberOfColumnsFront;
+   }
+   public Integer getNumberOfRowsBack() {
+      return numberOfRowsBack;
+   }
+   public void setNumberOfRowsBack(Integer numberOfRowsBack) {
+      this.numberOfRowsBack = numberOfRowsBack;
+   }
+   public Integer getNumberOfRowsFront() {
+      return numberOfRowsFront;
+   }
+   public void setNumberOfRowsFront(Integer numberOfRowsFront) {
+      this.numberOfRowsFront = numberOfRowsFront;
+   }
+
 }
