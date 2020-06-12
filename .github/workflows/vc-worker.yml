@@ -52,3 +52,7 @@ jobs:
         sudo mvn test
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
+      with:
+          flags: vc
+          name: codecov-vc-worker
+          fail_ci_if_error: true

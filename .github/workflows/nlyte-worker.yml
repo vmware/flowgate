@@ -29,3 +29,7 @@ jobs:
         sudo mvn clean test
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
+      with:
+          flags: nlyte
+          name: codecov-nlyte-worker
+          fail_ci_if_error: true
