@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
@@ -35,8 +36,10 @@ import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.PduOutlet;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
+import com.vmware.flowgate.common.model.PduInlet;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.utils.WormholeDateFormat;
 import com.vmware.flowgate.poweriqworker.client.PowerIQAPIClient;
@@ -44,6 +47,8 @@ import com.vmware.flowgate.poweriqworker.jobs.PowerIQService;
 import com.vmware.flowgate.poweriqworker.model.Aisle;
 import com.vmware.flowgate.poweriqworker.model.DataCenter;
 import com.vmware.flowgate.poweriqworker.model.Floor;
+import com.vmware.flowgate.poweriqworker.model.Inlet;
+import com.vmware.flowgate.poweriqworker.model.Outlet;
 import com.vmware.flowgate.poweriqworker.model.Parent;
 import com.vmware.flowgate.poweriqworker.model.Pdu;
 import com.vmware.flowgate.poweriqworker.model.Rack;
@@ -389,6 +394,63 @@ public class SyncSensorMetaDataJobTest {
       TestCase.assertEquals(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION,powerIQService.getSensorPositionInfo(asset6));
    }
 
+   @Test
+   public void testGeneratePduOutletString() throws JsonProcessingException {
+		List<Outlet> outlets = new ArrayList<Outlet>();
+		Outlet outlet1 = new Outlet();
+		outlet1.setId((long) 13);
+		outlet1.setOrdinal((long) 2);
+		outlet1.setName("name1");
+		outlet1.setDeviceId((long) 934534224);
+		outlet1.setPduId((long) 4544);
+		outlet1.setState("test");
+		outlet1.setRatedAmps(3234.53);
+		outlet1.setReading(null);
+		outlets.add(outlet1);
+		String ans = powerIQService.generatePduOutletString(outlets);
+		ObjectMapper mapper = new ObjectMapper();
+		List<PduOutlet> pduOutlets = mapper.readValue(ans, new TypeReference<List<PduOutlet>>() {
+		});
+		TestCase.assertEquals(pduOutlets.get(0).getId(), outlet1.getId());
+		TestCase.assertEquals(pduOutlets.get(0).getOrdinal(), outlet1.getOrdinal());
+		TestCase.assertEquals(pduOutlets.get(0).getName(), outlet1.getName());
+		TestCase.assertEquals(pduOutlets.get(0).getDeviceId(), outlet1.getDeviceId());
+		TestCase.assertEquals(pduOutlets.get(0).getPduId(), outlet1.getPduId());
+		TestCase.assertEquals(pduOutlets.get(0).getState(), outlet1.getState());
+		TestCase.assertEquals(pduOutlets.get(0).getRatedAmps(), outlet1.getRatedAmps());
+		TestCase.assertEquals(pduOutlets.get(0).getFormatedName(),
+				FlowgateConstant.OUTLET_NAME_PREFIX + outlet1.getOrdinal());
+	}
+   
+   @Test
+   public void testGeneratePduInletString() throws JsonProcessingException {
+		List<Inlet> inlets = new ArrayList<Inlet>();
+		Inlet inlet = new Inlet();
+		inlet.setId((long) 13);
+		inlet.setPduId((long) 2345342);
+		inlet.setOrdinal(5);
+		inlet.setPueIt(false);
+		inlet.setPueTotal(true);
+		inlet.setSource(true);
+		inlet.setRatedAmps(2345.44);
+		inlet.setReading(null);
+		inlets.add(inlet);
+		String ans = powerIQService.generatePduInletString(inlets);
+		ObjectMapper mapper = new ObjectMapper();
+		List<PduInlet> pduInlets = mapper.readValue(ans, new TypeReference<List<PduInlet>>() {
+		});
+		TestCase.assertEquals(pduInlets.get(0).getId(), inlet.getId());
+		TestCase.assertEquals(pduInlets.get(0).getPduId(), inlet.getPduId());
+		TestCase.assertEquals(pduInlets.get(0).getOrdinal(), inlet.getOrdinal());
+		TestCase.assertEquals(pduInlets.get(0).getFormatedName(),
+				FlowgateConstant.INLET_NAME_PREFIX + inlet.getOrdinal());
+		TestCase.assertEquals(pduInlets.get(0).isPowerSource(), inlet.isSource());
+		TestCase.assertEquals(pduInlets.get(0).getRatedAmps(), inlet.getRatedAmps());
+		TestCase.assertEquals(pduInlets.get(0).isPueIt(), inlet.isPueIt());
+		TestCase.assertEquals(pduInlets.get(0).isPueTotal(), inlet.isPueTotal());
+	}
+   
+   
    HashMap<AdvanceSettingType, String> createAdvanceSettingMap() {
       HashMap<AdvanceSettingType, String> advanceSettingMap =
             new HashMap<AdvanceSettingType, String>();
