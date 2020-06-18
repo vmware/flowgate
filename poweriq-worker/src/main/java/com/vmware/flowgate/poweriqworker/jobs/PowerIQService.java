@@ -64,6 +64,7 @@ import com.vmware.flowgate.poweriqworker.model.Aisle;
 import com.vmware.flowgate.poweriqworker.model.DataCenter;
 import com.vmware.flowgate.poweriqworker.model.Floor;
 import com.vmware.flowgate.poweriqworker.model.Inlet;
+import com.vmware.flowgate.poweriqworker.model.InletPoleReading;
 import com.vmware.flowgate.poweriqworker.model.InletReading;
 import com.vmware.flowgate.poweriqworker.model.LocationInfo;
 import com.vmware.flowgate.poweriqworker.model.Outlet;
@@ -71,6 +72,7 @@ import com.vmware.flowgate.poweriqworker.model.OutletReading;
 import com.vmware.flowgate.poweriqworker.model.Parent;
 import com.vmware.flowgate.poweriqworker.model.Pdu;
 import com.vmware.flowgate.poweriqworker.model.Rack;
+import com.vmware.flowgate.poweriqworker.model.Reading;
 import com.vmware.flowgate.poweriqworker.model.Room;
 import com.vmware.flowgate.poweriqworker.model.Row;
 import com.vmware.flowgate.poweriqworker.model.Sensor;
@@ -110,11 +112,15 @@ public class PowerIQService implements AsyncService {
    public static final String SmokeSensor = "SmokeSensor";
    public static final String WaterSensor = "WaterSensor";
    public static final String Vibration = "Vibration";
+   private static final String PDU_SINGLE_PHASE = "SINGLE_PHASE";
+   public static final String PDU_THREE_PHASE = "THREE_PHASE";
+   public static final String PDU_UNKNOWN_PHASE = "UNKNOWN";
    private static Map<String, AssetSubCategory> subCategoryMap =
          new HashMap<String, AssetSubCategory>();
    public static Map<String, String> sensorAndMetricMap = new HashMap<String, String>();
    private static Map<String, MountingSide> sensorMountingSide =
          new HashMap<String, MountingSide>();
+   private static Map<String,String> phaseMap = new HashMap<String,String>();
    static {
       subCategoryMap.put(HumiditySensor, AssetSubCategory.Humidity);
       subCategoryMap.put(TemperatureSensor, AssetSubCategory.Temperature);
@@ -136,12 +142,17 @@ public class PowerIQService implements AsyncService {
       sensorMountingSide.put("OUTLET", MountingSide.Back);
       sensorMountingSide.put("EXTERNAL", MountingSide.External);
       sensorMountingSide = Collections.unmodifiableMap(sensorMountingSide);
+      phaseMap.put(PDU_SINGLE_PHASE, FlowgateConstant.PDU_SINGLE_PHASE);
+      phaseMap.put(PDU_THREE_PHASE, FlowgateConstant.PDU_THREE_PHASE);
+      phaseMap.put(PDU_UNKNOWN_PHASE, FlowgateConstant.PDU_UNKNOWN_PHASE);
+      phaseMap = Collections.unmodifiableMap(phaseMap);
    }
    private static final String POWERIQ_VA_UNIT = "kVA";
    private static final String POWERIQ_POWER_UNIT = "W";
    private static final String POWERIQ_CURRENT_UNIT = "A";
    private static final String POWERIQ_VOLTAGE_UNIT = "V";
    private static final String RANGE_FLAG = "-";
+
 
    @Override
    @Async("asyncServiceExecutor")
@@ -995,8 +1006,9 @@ public class PowerIQService implements AsyncService {
       if (!pduMetricRealTimeDatas.isEmpty()) {
          restClient.saveRealTimeData(pduMetricRealTimeDatas);
          logger.info("Finish sync pdu realtime data for " + powerIQ.getName());
+      }else {
+         logger.info("Not found any pdu realtime data from " + powerIQ.getName());
       }
-      logger.info("Not found any pdu realtime data from " + powerIQ.getName());
 
       List<Asset> allMappedServers =
             Arrays.asList(restClient.getMappedAsset(AssetCategory.Server).getBody());
@@ -1017,6 +1029,7 @@ public class PowerIQService implements AsyncService {
       List<RealTimeData> realTimeDatas = getSensorRealTimeData(powerIQ, sensorFromPowerIQ);
       logger.info("Received new Sensor data, data item size is:" + realTimeDatas.size());
       if (realTimeDatas.isEmpty()) {
+         logger.info("Not found any sensor realtime data from " + powerIQ.getName());
          return;
       }
       restClient.saveRealTimeData(realTimeDatas);
@@ -1135,8 +1148,8 @@ public class PowerIQService implements AsyncService {
       List<ValueUnit> values = new ArrayList<ValueUnit>();
       Long pduId = Long.parseLong(pduInfoFromPowerIQ.get(FlowgateConstant.PDU_ID_FROM_POWERIQ));
       List<Outlet> outlets = client.getOutlets(pduId);
-      List<Inlet> inlets = client.getInlets(pduId);
-      if (outlets.isEmpty() && inlets.isEmpty()) {
+      Pdu pdu = client.getPduByID(pduId);
+      if (outlets.isEmpty() && pdu.getReading() == null) {
          return values;
       }
       String dateFormat = advanceSettingMap.get(AdvanceSettingType.DateFormat);
@@ -1160,13 +1173,17 @@ public class PowerIQService implements AsyncService {
       double inlteTotalPower = 0.0;
       double inletTotalCurrent = 0.0;
       double inletVoltage = 0.0;
-      if(!inlets.isEmpty()) {
+      Reading pduReading = pdu.getReading();
+      List<InletReading> inletReadings = null;
+      List<InletPoleReading> inletPoleReadings = null;
+      if(pduReading != null) {
+         inletReadings = pduReading.getInletReadings();
+         inletPoleReadings = pduReading.getInletPoleReadings();
+      }
+      if(inletReadings != null && !inletReadings.isEmpty()) {
          String time = null;
-         for(Inlet inlet : inlets) {
-            InletReading reading = inlet.getReading();
-            if(reading != null) {
-               time = reading.getReadingTime();
-            }
+         for(InletReading inletReading : inletReadings) {
+            time = inletReading.getReadingTime();
             if(time != null) {
                break;
             }
@@ -1180,9 +1197,8 @@ public class PowerIQService implements AsyncService {
                   + dateFormat);
          }else {
 
-            for(Inlet inlet : inlets) {
-               InletReading reading = inlet.getReading();
-               String extraIdentifier = FlowgateConstant.INLET_NAME_PREFIX + inlet.getOrdinal();
+            for(InletReading reading : inletReadings) {
+               String extraIdentifier = FlowgateConstant.INLET_NAME_PREFIX + reading.getInletOrdinal();
 
                Double voltage = reading.getVoltage();
                if(voltage != null) {
@@ -1266,10 +1282,72 @@ public class PowerIQService implements AsyncService {
          }
       }
 
+      if(inletPoleReadings != null && !inletPoleReadings.isEmpty()) {
+         String inletPoleReadingTime = null;
+         for(InletPoleReading inletPoleReading : inletPoleReadings) {
+            inletPoleReadingTime = inletPoleReading.getReadingTime();
+            if(inletPoleReadingTime != null) {
+               break;
+            }
+         }
+         long valueTime = -1;
+         if(inletPoleReadingTime != null) {
+            valueTime = WormholeDateFormat.getLongTime(inletPoleReadingTime, dateFormat, timezone);
+         }
+         if (valueTime == -1) {
+            logger.error("Failed to translate the time string: " + inletPoleReadingTime + ".And the dateformat is "
+                  + dateFormat);
+         }else {
+            for (InletPoleReading reading : inletPoleReadings) {
+               String extraIdentifier = FlowgateConstant.INLET_NAME_PREFIX + reading.getInletOrdinal()
+                     + FlowgateConstant.INLET_POLE_NAME_PREFIX + reading.getInletPoleOrdinal();
+
+               Double currentValue = reading.getCurrent();
+               if(currentValue != null) {
+                  ValueUnit current = new ValueUnit();
+                  current.setExtraidentifier(extraIdentifier);
+                  current.setKey(MetricName.PDU_CURRENT);
+                  current.setTime(valueTime);
+                  current
+                        .setValueNum(Double.parseDouble(current.translateUnit(String.valueOf(currentValue),
+                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+                  current.setUnit(RealtimeDataUnit.Amps.toString());
+                  values.add(current);
+               }
+
+               Double voltageValue = reading.getVoltage();
+               if(voltageValue != null) {
+                  ValueUnit voltage = new ValueUnit();
+                  voltage.setExtraidentifier(extraIdentifier);
+                  voltage.setKey(MetricName.PDU_VOLTAGE);
+                  voltage.setTime(valueTime);
+                  voltage
+                        .setValueNum(Double.parseDouble(voltage.translateUnit(String.valueOf(voltageValue),
+                              MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
+                  voltage.setUnit(RealtimeDataUnit.Volts.toString());
+                  values.add(voltage);
+               }
+
+               Double freeCapacityValue = reading.getUnutilizedCapacity();
+               if(freeCapacityValue != null) {
+                  ValueUnit freeCapacity = new ValueUnit();
+                  freeCapacity.setExtraidentifier(extraIdentifier);
+                  freeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
+                  freeCapacity.setTime(valueTime);
+                  freeCapacity
+                        .setValueNum(Double.parseDouble(freeCapacity.translateUnit(String.valueOf(freeCapacityValue),
+                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+                  freeCapacity.setUnit(RealtimeDataUnit.Amps.toString());
+                  values.add(freeCapacity);
+               }
+            }
+         }
+      }
+
       if(!outlets.isEmpty()) {
          String time = null;
-         for(Inlet inlet : inlets) {
-            time = inlet.getReading().getReadingTime();
+         for(Outlet outlet : outlets) {
+            time = outlet.getReading().getReadingTime();
             if(time != null) {
                break;
             }
@@ -1627,6 +1705,11 @@ public class PowerIQService implements AsyncService {
       String ratePower = pdu.getRatedVa();//eg: 6.4-7.7kVA
       String rateVolts = pdu.getRatedVolts();//eg: 200-240V
       String rateAmpsValue = null;
+      String pduPhase = pdu.getPhase();
+      if(pduPhase != null) {
+         pduPhase = phaseMap.get(pduPhase);
+         pduRateInfo.put(FlowgateConstant.PDU_PHASE, pduPhase);
+      }
       if(rateAmps != null) {
          int ampsIndex = rateAmps.indexOf(POWERIQ_CURRENT_UNIT);
          if(ampsIndex != -1) {
@@ -1752,6 +1835,7 @@ public class PowerIQService implements AsyncService {
                oldPduMap.put(FlowgateConstant.PDU_MAX_RATE_POWER, pduInfo.get(FlowgateConstant.PDU_MAX_RATE_POWER));
                oldPduMap.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, pduInfo.get(FlowgateConstant.PDU_MIN_RATE_VOLTS));
                oldPduMap.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, pduInfo.get(FlowgateConstant.PDU_MAX_RATE_VOLTS));
+               oldPduMap.put(FlowgateConstant.PDU_PHASE, pduInfo.get(FlowgateConstant.PDU_PHASE));
                try {
                   String newPduInfo = mapper.writeValueAsString(oldPduMap);
                   oldJustficationfields.put(FlowgateConstant.PDU, newPduInfo);

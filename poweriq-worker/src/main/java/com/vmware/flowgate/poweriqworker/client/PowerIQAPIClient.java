@@ -139,7 +139,7 @@ public class PowerIQAPIClient {
       return null;
    }
 
-   public Pdu getPduByID(String id) {
+   public Pdu getPduByID(long id) {
       ResponseEntity<PduResult> pduResult = this.restTemplate.exchange(
             getPowerIQServiceEndpoint() + String.format(GetPduByIdURL, id), HttpMethod.GET,
             getDefaultEntity(), PduResult.class);

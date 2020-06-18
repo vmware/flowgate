@@ -58,6 +58,14 @@ public class FlowgateConstant {
 
    public static String PDU_MAX_RATE_VOLTS = "PDU_MAX_RATE_VOLTS";
 
+   public static String PDU_PHASE = "PHASE";
+
+   public static String PDU_SINGLE_PHASE = "SinglePhase";
+
+   public static String PDU_THREE_PHASE = "ThreePhase";
+
+   public static String PDU_UNKNOWN_PHASE = "Unkown";
+
    public static String POSITION = "POSITION";
 
    public static String PDU = "PDU";
@@ -77,6 +85,8 @@ public class FlowgateConstant {
    public static String OUTLET_NAME_PREFIX = "OUTLET:";
 
    public static String INLET_NAME_PREFIX = "INLET:";
+
+   public static String INLET_POLE_NAME_PREFIX = "|L";
 
    public static String SEPARATOR = "_FIELDSPLIT_";
 
