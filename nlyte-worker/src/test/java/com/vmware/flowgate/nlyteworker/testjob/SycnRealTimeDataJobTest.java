@@ -29,18 +29,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricName;
+import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
+import com.vmware.flowgate.common.model.FlowgateChassisSlot;
 import com.vmware.flowgate.common.model.RealTimeData;
+import com.vmware.flowgate.common.model.Tenant;
 import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.nlyteworker.config.ServiceKeyConfig;
+import com.vmware.flowgate.nlyteworker.model.ChassisMountedAssetMap;
+import com.vmware.flowgate.nlyteworker.model.ChassisSlot;
 import com.vmware.flowgate.nlyteworker.model.JsonResultForPDURealtimeValue;
 import com.vmware.flowgate.nlyteworker.model.LocationGroup;
 import com.vmware.flowgate.nlyteworker.model.Manufacturer;
@@ -49,6 +57,7 @@ import com.vmware.flowgate.nlyteworker.model.NlyteAsset;
 import com.vmware.flowgate.nlyteworker.model.PowerStripsRealtimeValue;
 import com.vmware.flowgate.nlyteworker.restclient.NlyteAPIClient;
 import com.vmware.flowgate.nlyteworker.scheduler.job.NlyteDataService;
+import com.vmware.flowgate.nlyteworker.scheduler.job.common.HandleAssetUtil;
 
 import junit.framework.TestCase;
 
@@ -246,6 +255,552 @@ public class SycnRealTimeDataJobTest {
       TestCase.assertEquals("5x4ff46982db22e1b040e0f2", realTimeDatas.get(0).getAssetID());
    }
 
+   @Test
+   public void testHandleChassisSolts() {
+      Asset asset = createAsset();
+      List<ChassisSlot> chassisSolts = new ArrayList<ChassisSlot>();
+      NlyteAsset nlyteAsset = getNlyteAsset().get(0);
+      HandleAssetUtil util = new HandleAssetUtil();
+      util.handleChassisSolts(asset, nlyteAsset);
+      TestCase.assertEquals(true, asset.getJustificationfields().isEmpty());
+   }
+
+   @Test
+   public void testHandleChassisSolts1() {
+      Asset asset = createAsset();
+      List<ChassisSlot> chassisSolts = new ArrayList<ChassisSlot>();
+      ChassisSlot slot = new ChassisSlot();
+      slot.setChassisAssetID(105);
+      slot.setColumnPosition(1);
+      slot.setRowPosition(1);
+      slot.setMountingSide("Front");
+      slot.setSlotName("1");
+      slot.setId(78);
+      chassisSolts.add(slot);
+      ChassisSlot slot2 = new ChassisSlot();
+      slot2.setChassisAssetID(105);
+      slot2.setColumnPosition(1);
+      slot2.setRowPosition(2);
+      slot2.setMountingSide("Back");
+      slot2.setSlotName("2");
+      slot2.setId(79);
+      chassisSolts.add(slot2);
+      NlyteAsset nlyteAsset = getNlyteAsset().get(0);
+      nlyteAsset.setChassisSlots(chassisSolts);
+      HandleAssetUtil util = new HandleAssetUtil();
+      util.handleChassisSolts(asset, nlyteAsset);
+      TestCase.assertEquals(2, asset.getCapacity());
+      TestCase.assertEquals(2, asset.getFreeCapacity());
+      String chassisInfo = asset.getJustificationfields().get(FlowgateConstant.CHASSIS);
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         Map<String, String> chassisInfoMap = mapper.readValue(chassisInfo, new TypeReference<Map<String,String>>() {});
+         List<FlowgateChassisSlot> slots = mapper.readValue(chassisInfoMap.get(FlowgateConstant.CHASSISSLOTS), new TypeReference<List<FlowgateChassisSlot>>() {});
+         for(FlowgateChassisSlot chassisslot : slots) {
+            if(chassisslot.getSlotName().equals("1")) {
+               TestCase.assertEquals("Front", chassisslot.getMountingSide());
+            }else if(chassisslot.getSlotName().equals("2")) {
+               TestCase.assertEquals("Back", chassisslot.getMountingSide());
+            }else {
+               TestCase.fail();
+            }
+         }
+      } catch (JsonProcessingException e) {
+        TestCase.fail(e.getMessage());
+      }
+   }
+
+   @Test
+   public void testHandleChassisSolts2() {
+      Asset asset = createAsset();
+      List<ChassisSlot> chassisSolts = new ArrayList<ChassisSlot>();
+      ChassisSlot slot = new ChassisSlot();
+      slot.setChassisAssetID(105);
+      slot.setColumnPosition(1);
+      slot.setRowPosition(1);
+      slot.setMountingSide("Front");
+      slot.setSlotName("1");
+      slot.setId(78);
+      chassisSolts.add(slot);
+      ChassisSlot slot2 = new ChassisSlot();
+      slot2.setChassisAssetID(105);
+      slot2.setColumnPosition(1);
+      slot2.setRowPosition(2);
+      slot2.setMountingSide("Back");
+      slot2.setSlotName("2");
+      slot2.setId(79);
+      chassisSolts.add(slot2);
+      List<ChassisMountedAssetMap> cmAssets = new ArrayList<ChassisMountedAssetMap>();
+      ChassisMountedAssetMap cmAsset = new ChassisMountedAssetMap();
+      cmAsset.setMountedAssetID(197);
+      cmAsset.setMountingSide("Front");
+      cmAsset.setSlotName("1");
+      cmAssets.add(cmAsset);
+      ChassisMountedAssetMap cmAsset2 = new ChassisMountedAssetMap();
+      cmAsset2.setMountedAssetID(198);
+      cmAsset2.setMountingSide("Back");
+      cmAsset2.setSlotName("2");
+      cmAssets.add(cmAsset2);
+      NlyteAsset nlyteAsset = getNlyteAsset().get(0);
+      nlyteAsset.setChassisSlots(chassisSolts);
+      nlyteAsset.setChassisMountedAssetMaps(cmAssets);
+      HandleAssetUtil util = new HandleAssetUtil();
+      util.handleChassisSolts(asset, nlyteAsset);
+      TestCase.assertEquals(2, asset.getCapacity());
+      TestCase.assertEquals(0, asset.getFreeCapacity());
+      String chassisInfo = asset.getJustificationfields().get(FlowgateConstant.CHASSIS);
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         Map<String, String> chassisInfoMap = mapper.readValue(chassisInfo, new TypeReference<Map<String,String>>() {});
+         List<FlowgateChassisSlot> slots = mapper.readValue(chassisInfoMap.get(FlowgateConstant.CHASSISSLOTS), new TypeReference<List<FlowgateChassisSlot>>() {});
+         for(FlowgateChassisSlot chassisslot : slots) {
+            if(chassisslot.getSlotName().equals("1")) {
+               TestCase.assertEquals("Front", chassisslot.getMountingSide());
+               TestCase.assertEquals(Integer.valueOf(197), chassisslot.getMountedAssetNumber());
+            }else if(chassisslot.getSlotName().equals("2")) {
+               TestCase.assertEquals("Back", chassisslot.getMountingSide());
+               TestCase.assertEquals(Integer.valueOf(198), chassisslot.getMountedAssetNumber());
+            }else {
+               TestCase.fail();
+            }
+         }
+      } catch (JsonProcessingException e) {
+        TestCase.fail(e.getMessage());
+      }
+   }
+
+   @Test
+   public void testSupplementChassisInfo() {
+      Asset asset = createAsset();
+      HandleAssetUtil util = new HandleAssetUtil();
+      util.supplementChassisInfo(asset, FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, null);
+      TestCase.assertEquals(true, asset.getJustificationfields().isEmpty());
+   }
+
+   @Test
+   public void testSupplementChassisInfo1() {
+      Asset asset = createAsset();
+      HashMap<String,String> justficationMap = new HashMap<String,String>();
+      Map<String, String> chassisInfoMap = new HashMap<String,String>();
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         chassisInfoMap.put(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, "frontToBack");
+         String chassisInfo = mapper.writeValueAsString(chassisInfoMap);
+         justficationMap.put(FlowgateConstant.CHASSIS, chassisInfo);
+         asset.setJustificationfields(justficationMap);
+         HandleAssetUtil util = new HandleAssetUtil();
+         util.supplementChassisInfo(asset, FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, "backToFront");
+
+         justficationMap = asset.getJustificationfields();
+         chassisInfo = justficationMap.get(FlowgateConstant.CHASSIS);
+         chassisInfoMap = mapper.readValue(chassisInfo, new TypeReference<Map<String,String>>() {});
+         TestCase.assertEquals("backToFront", chassisInfoMap.get(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE));
+      } catch (Exception e) {
+         TestCase.fail(e.getMessage());
+      }
+   }
+
+   @Test
+   public void testCompareValueIsNotEqual() {
+      String value1 = null;
+      String value2 = null;
+      HandleAssetUtil util = new HandleAssetUtil();
+      TestCase.assertEquals(false, util.valueIsChanged(value1, value2));
+   }
+
+   @Test
+   public void testCompareValueIsNotEqual2() {
+      Integer value1 = null;
+      Integer value2 = null;
+      HandleAssetUtil util = new HandleAssetUtil();
+      TestCase.assertEquals(false, util.valueIsChanged(value1, value2));
+   }
+
+   @Test
+   public void testChassisSlotsIsChanged() {
+      List<FlowgateChassisSlot> oldFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot = createFlowgateChassisSlot();
+      oldFlowgateChassisSlots.add(slot);
+
+      List<FlowgateChassisSlot> newFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot1 = createFlowgateChassisSlot();
+      newFlowgateChassisSlots.add(slot1);
+
+      HandleAssetUtil util = new HandleAssetUtil();
+      TestCase.assertEquals(false, util.chassisSlotsIsChanged(oldFlowgateChassisSlots, newFlowgateChassisSlots));
+   }
+
+   @Test
+   public void testChassisSlotsIsChanged2() {
+      List<FlowgateChassisSlot> oldFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot = createFlowgateChassisSlot();
+      oldFlowgateChassisSlots.add(slot);
+
+      HandleAssetUtil util = new HandleAssetUtil();
+      TestCase.assertEquals(true, util.chassisSlotsIsChanged(oldFlowgateChassisSlots, new ArrayList<FlowgateChassisSlot>()));
+   }
+
+   @Test
+   public void testChassisSlotsIsChanged3() {
+      List<FlowgateChassisSlot> oldFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot = createFlowgateChassisSlot();
+      oldFlowgateChassisSlots.add(slot);
+
+      List<FlowgateChassisSlot> newFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot1 = createFlowgateChassisSlot();
+      slot1.setMountingSide("front");
+      newFlowgateChassisSlots.add(slot1);
+      HandleAssetUtil util = new HandleAssetUtil();
+      TestCase.assertEquals(true, util.chassisSlotsIsChanged(oldFlowgateChassisSlots, newFlowgateChassisSlots));
+   }
+
+   @Test
+   public void testChassisSlotsIsChanged4() {
+      List<FlowgateChassisSlot> oldFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot = createFlowgateChassisSlot();
+      oldFlowgateChassisSlots.add(slot);
+
+      List<FlowgateChassisSlot> newFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot1 = createFlowgateChassisSlot();
+      slot1.setMountedAssetNumber(125);
+      newFlowgateChassisSlots.add(slot1);
+      HandleAssetUtil util = new HandleAssetUtil();
+      TestCase.assertEquals(true, util.chassisSlotsIsChanged(oldFlowgateChassisSlots, newFlowgateChassisSlots));
+   }
+
+   @Test
+   public void testChassisSlotsIsChanged5() {
+      List<FlowgateChassisSlot> oldFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot = createFlowgateChassisSlot();
+      oldFlowgateChassisSlots.add(slot);
+
+      List<FlowgateChassisSlot> newFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot1 = createFlowgateChassisSlot();
+      slot1.setColumnPosition(2);
+      newFlowgateChassisSlots.add(slot1);
+      HandleAssetUtil util = new HandleAssetUtil();
+      TestCase.assertEquals(true, util.chassisSlotsIsChanged(oldFlowgateChassisSlots, newFlowgateChassisSlots));
+   }
+
+   @Test
+   public void testChassisSlotsIsChanged6() {
+      List<FlowgateChassisSlot> oldFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot = createFlowgateChassisSlot();
+      oldFlowgateChassisSlots.add(slot);
+
+      List<FlowgateChassisSlot> newFlowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot1 = createFlowgateChassisSlot();
+      slot1.setRowPosition(2);
+      newFlowgateChassisSlots.add(slot1);
+      HandleAssetUtil util = new HandleAssetUtil();
+      TestCase.assertEquals(true, util.chassisSlotsIsChanged(oldFlowgateChassisSlots, newFlowgateChassisSlots));
+   }
+
+   /**
+    * New asset have chassis info but old assets none
+    *
+    */
+   @Test
+   public void testHandleAssets() {
+      List<Asset> toUpdateAssets = new ArrayList<Asset>();
+      Map<Long,Asset> exsitingaAssetMap = new HashMap<Long,Asset>();
+      Asset asset = createAsset();
+      asset.setAssetNumber(127);
+      asset.setTag("tag1");
+      toUpdateAssets.add(asset);
+      Asset asset2 = createAsset();
+      asset2.setAssetNumber(128);
+      asset2.setTag("tag2");
+      asset2.setCabinetName("cabinet1");
+      Tenant tenant = new Tenant();
+      tenant.setOwner("admin");
+      tenant.setTenant("tenant");
+      tenant.setTenantManager("manager");
+      asset2.setTenant(tenant);
+      asset2.setRoom("room1");
+      asset2.setRow("r2");
+      asset2.setCol("c2");
+      asset2.setMountingSide(MountingSide.Front);
+      asset2.setCategory(AssetCategory.Chassis);
+      HashMap<String,String> justficationMap = new HashMap<String,String>();
+      List<FlowgateChassisSlot> slots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot1 = createFlowgateChassisSlot();
+      slots.add(slot1);
+      Map<String,String> chassisInfoMap = new HashMap<String,String>();
+      chassisInfoMap.put(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, "frontToBack");
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         String slotsString = mapper.writeValueAsString(slots);
+         chassisInfoMap.put(FlowgateConstant.CHASSISSLOTS, slotsString);
+         String chassisInfo = mapper.writeValueAsString(chassisInfoMap);
+         justficationMap.put(FlowgateConstant.CHASSIS, chassisInfo);
+         asset2.setJustificationfields(justficationMap);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      toUpdateAssets.add(asset2);
+
+      Asset oldAsset1 = createAsset();
+      oldAsset1.setAssetNumber(127);
+      oldAsset1.setTag("oldtag1");
+      exsitingaAssetMap.put(oldAsset1.getAssetNumber(), oldAsset1);
+      Asset oldAsset2 = createAsset();
+      oldAsset2.setAssetNumber(128);
+      oldAsset2.setTag("oldtag2");
+      exsitingaAssetMap.put(oldAsset2.getAssetNumber(), oldAsset2);
+      HandleAssetUtil util = new HandleAssetUtil();
+      List<Asset> assets = util.handleAssets(toUpdateAssets, exsitingaAssetMap);
+      for (Asset assetTosave : assets) {
+         if (assetTosave.getAssetNumber() == 128) {
+            TestCase.assertEquals(asset2.getTag(), assetTosave.getTag());
+            TestCase.assertEquals(asset2.getRoom(), assetTosave.getRoom());
+            TestCase.assertEquals(asset2.getRow(), assetTosave.getRow());
+            TestCase.assertEquals(asset2.getCol(), assetTosave.getCol());
+            TestCase.assertEquals(asset2.getMountingSide(), assetTosave.getMountingSide());
+            TestCase.assertEquals(asset2.getTenant().getOwner(),
+                  assetTosave.getTenant().getOwner());
+            HashMap<String, String> justfications = assetTosave.getJustificationfields();
+            String chassisInfo = justfications.get(FlowgateConstant.CHASSIS);
+            try {
+               Map<String, String> newChassisInfoMap =
+                     mapper.readValue(chassisInfo, new TypeReference<Map<String, String>>() {
+                     });
+               TestCase.assertEquals(chassisInfoMap.get(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE),
+                     newChassisInfoMap.get(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE));
+               String chassisSlots = newChassisInfoMap.get(FlowgateConstant.CHASSISSLOTS);
+               List<FlowgateChassisSlot> flowgateSlots = mapper.readValue(chassisSlots, new TypeReference<List<FlowgateChassisSlot>>() {});
+               TestCase.assertEquals(slot1.getMountingSide(), flowgateSlots.get(0).getMountingSide());
+               TestCase.assertEquals(slot1.getMountedAssetNumber(), flowgateSlots.get(0).getMountedAssetNumber());
+               TestCase.assertEquals(slot1.getColumnPosition(), flowgateSlots.get(0).getColumnPosition());
+               TestCase.assertEquals(slot1.getRowPosition(), flowgateSlots.get(0).getRowPosition());
+               TestCase.assertEquals(slot1.getSlotName(), flowgateSlots.get(0).getSlotName());
+            } catch (Exception e) {
+               TestCase.fail(e.getMessage());
+            }
+         }else if(assetTosave.getAssetNumber() == 127) {
+            TestCase.assertEquals(asset.getTag(), assetTosave.getTag());
+         }else {
+            TestCase.fail("Invalid assetNumber");
+         }
+      }
+   }
+
+   /**
+    * CHASSIS_AIR_FLOW_TYPE changed
+    */
+   @Test
+   public void testHandleAssets1() {
+      List<Asset> toUpdateAssets = new ArrayList<Asset>();
+      Map<Long,Asset> exsitingaAssetMap = new HashMap<Long,Asset>();
+      Asset asset = createAsset();
+      asset.setAssetNumber(127);
+      asset.setTag("tag1");
+      toUpdateAssets.add(asset);
+      Asset asset2 = createAsset();
+      asset2.setAssetNumber(128);
+      asset2.setTag("tag2");
+      asset2.setCabinetName("cabinet1");
+      Tenant tenant = new Tenant();
+      tenant.setOwner("admin");
+      tenant.setTenant("tenant");
+      tenant.setTenantManager("manager");
+      asset2.setTenant(tenant);
+      asset2.setRoom("room1");
+      asset2.setRow("r2");
+      asset2.setCol("c2");
+      asset2.setMountingSide(MountingSide.Front);
+      asset2.setCategory(AssetCategory.Chassis);
+      HashMap<String,String> justficationMap = new HashMap<String,String>();
+      List<FlowgateChassisSlot> slots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot1 = createFlowgateChassisSlot();
+      slots.add(slot1);
+      Map<String,String> chassisInfoMap = new HashMap<String,String>();
+      chassisInfoMap.put(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, "frontToBack");
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         String slotsString = mapper.writeValueAsString(slots);
+         chassisInfoMap.put(FlowgateConstant.CHASSISSLOTS, slotsString);
+         String chassisInfo = mapper.writeValueAsString(chassisInfoMap);
+         justficationMap.put(FlowgateConstant.CHASSIS, chassisInfo);
+         asset2.setJustificationfields(justficationMap);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      toUpdateAssets.add(asset2);
+
+      Asset oldAsset1 = createAsset();
+      oldAsset1.setAssetNumber(127);
+      oldAsset1.setTag("oldtag1");
+      exsitingaAssetMap.put(oldAsset1.getAssetNumber(), oldAsset1);
+      Asset oldAsset2 = createAsset();
+      oldAsset2.setAssetNumber(128);
+      oldAsset2.setTag("oldtag2");
+      HashMap<String,String> oldjustficationMap = new HashMap<String,String>();
+      List<FlowgateChassisSlot> oldslots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot oldslot1 = createFlowgateChassisSlot();
+      oldslot1.setMountingSide("Back");
+      oldslot1.setMountedAssetNumber(5523);
+      oldslots.add(oldslot1);
+      Map<String,String> oldChassisInfoMap = new HashMap<String,String>();
+      oldChassisInfoMap.put(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, "leftToRight");
+      try {
+         String oldSlotsString = mapper.writeValueAsString(oldslots);
+         oldChassisInfoMap.put(FlowgateConstant.CHASSISSLOTS, oldSlotsString);
+         String oldChassisInfo = mapper.writeValueAsString(oldChassisInfoMap);
+         oldjustficationMap.put(FlowgateConstant.CHASSIS, oldChassisInfo);
+         oldAsset2.setJustificationfields(oldjustficationMap);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      exsitingaAssetMap.put(oldAsset2.getAssetNumber(), oldAsset2);
+      HandleAssetUtil util = new HandleAssetUtil();
+      List<Asset> assets = util.handleAssets(toUpdateAssets, exsitingaAssetMap);
+      for (Asset assetTosave : assets) {
+         if (assetTosave.getAssetNumber() == 128) {
+            TestCase.assertEquals(asset2.getTag(), assetTosave.getTag());
+            TestCase.assertEquals(asset2.getRoom(), assetTosave.getRoom());
+            TestCase.assertEquals(asset2.getRow(), assetTosave.getRow());
+            TestCase.assertEquals(asset2.getCol(), assetTosave.getCol());
+            TestCase.assertEquals(asset2.getMountingSide(), assetTosave.getMountingSide());
+            TestCase.assertEquals(asset2.getTenant().getOwner(),
+                  assetTosave.getTenant().getOwner());
+            HashMap<String, String> justfications = assetTosave.getJustificationfields();
+            String chassisInfo = justfications.get(FlowgateConstant.CHASSIS);
+            try {
+               Map<String, String> newChassisInfoMap =
+                     mapper.readValue(chassisInfo, new TypeReference<Map<String, String>>() {
+                     });
+               TestCase.assertEquals(chassisInfoMap.get(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE),
+                     newChassisInfoMap.get(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE));
+               String chassisSlots = newChassisInfoMap.get(FlowgateConstant.CHASSISSLOTS);
+               List<FlowgateChassisSlot> flowgateSlots = mapper.readValue(chassisSlots, new TypeReference<List<FlowgateChassisSlot>>() {});
+               TestCase.assertEquals(slot1.getMountingSide(), flowgateSlots.get(0).getMountingSide());
+               TestCase.assertEquals(slot1.getMountedAssetNumber(), flowgateSlots.get(0).getMountedAssetNumber());
+               TestCase.assertEquals(slot1.getColumnPosition(), flowgateSlots.get(0).getColumnPosition());
+               TestCase.assertEquals(slot1.getRowPosition(), flowgateSlots.get(0).getRowPosition());
+               TestCase.assertEquals(slot1.getSlotName(), flowgateSlots.get(0).getSlotName());
+            } catch (Exception e) {
+               TestCase.fail(e.getMessage());
+            }
+         }else if(assetTosave.getAssetNumber() == 127) {
+            TestCase.assertEquals(asset.getTag(), assetTosave.getTag());
+         }else {
+            TestCase.fail("Invalid assetNumber");
+         }
+      }
+   }
+
+   @Test
+   public void testHandleAssets2() {
+      List<Asset> toUpdateAssets = new ArrayList<Asset>();
+      Map<Long,Asset> exsitingaAssetMap = new HashMap<Long,Asset>();
+      Asset asset = createAsset();
+      asset.setAssetNumber(127);
+      asset.setTag("tag1");
+      toUpdateAssets.add(asset);
+      Asset asset2 = createAsset();
+      asset2.setAssetNumber(128);
+      asset2.setTag("tag2");
+      asset2.setCabinetName("cabinet1");
+      Tenant tenant = new Tenant();
+      tenant.setOwner("admin");
+      tenant.setTenant("tenant");
+      tenant.setTenantManager("manager");
+      asset2.setTenant(tenant);
+      asset2.setRoom("room1");
+      asset2.setRow("r2");
+      asset2.setCol("c2");
+      asset2.setMountingSide(MountingSide.Front);
+      asset2.setCategory(AssetCategory.Chassis);
+      HashMap<String,String> justficationMap = new HashMap<String,String>();
+      List<FlowgateChassisSlot> slots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot1 = createFlowgateChassisSlot();
+      slots.add(slot1);
+      Map<String,String> chassisInfoMap = new HashMap<String,String>();
+      chassisInfoMap.put(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, "frontToBack");
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         String slotsString = mapper.writeValueAsString(slots);
+         chassisInfoMap.put(FlowgateConstant.CHASSISSLOTS, slotsString);
+         String chassisInfo = mapper.writeValueAsString(chassisInfoMap);
+         justficationMap.put(FlowgateConstant.CHASSIS, chassisInfo);
+         asset2.setJustificationfields(justficationMap);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      toUpdateAssets.add(asset2);
+
+      Asset oldAsset1 = createAsset();
+      oldAsset1.setAssetNumber(127);
+      oldAsset1.setTag("oldtag1");
+      exsitingaAssetMap.put(oldAsset1.getAssetNumber(), oldAsset1);
+      Asset oldAsset2 = createAsset();
+      oldAsset2.setAssetNumber(128);
+      oldAsset2.setTag("oldtag2");
+      HashMap<String,String> oldjustficationMap = new HashMap<String,String>();
+      List<FlowgateChassisSlot> oldslots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot oldslot1 = createFlowgateChassisSlot();
+      oldslot1.setMountingSide("Back");
+      oldslot1.setMountedAssetNumber(5523);
+      oldslots.add(oldslot1);
+      Map<String,String> oldChassisInfoMap = new HashMap<String,String>();
+      oldChassisInfoMap.put(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, "frontToBack");
+      try {
+         String oldSlotsString = mapper.writeValueAsString(oldslots);
+         oldChassisInfoMap.put(FlowgateConstant.CHASSISSLOTS, oldSlotsString);
+         String oldChassisInfo = mapper.writeValueAsString(oldChassisInfoMap);
+         oldjustficationMap.put(FlowgateConstant.CHASSIS, oldChassisInfo);
+         oldAsset2.setJustificationfields(oldjustficationMap);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      exsitingaAssetMap.put(oldAsset2.getAssetNumber(), oldAsset2);
+      HandleAssetUtil util = new HandleAssetUtil();
+      List<Asset> assets = util.handleAssets(toUpdateAssets, exsitingaAssetMap);
+      for (Asset assetTosave : assets) {
+         if (assetTosave.getAssetNumber() == 128) {
+            TestCase.assertEquals(asset2.getTag(), assetTosave.getTag());
+            TestCase.assertEquals(asset2.getRoom(), assetTosave.getRoom());
+            TestCase.assertEquals(asset2.getRow(), assetTosave.getRow());
+            TestCase.assertEquals(asset2.getCol(), assetTosave.getCol());
+            TestCase.assertEquals(asset2.getMountingSide(), assetTosave.getMountingSide());
+            TestCase.assertEquals(asset2.getTenant().getOwner(),
+                  assetTosave.getTenant().getOwner());
+            HashMap<String, String> justfications = assetTosave.getJustificationfields();
+            String chassisInfo = justfications.get(FlowgateConstant.CHASSIS);
+            try {
+               Map<String, String> newChassisInfoMap =
+                     mapper.readValue(chassisInfo, new TypeReference<Map<String, String>>() {
+                     });
+               TestCase.assertEquals(chassisInfoMap.get(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE),
+                     newChassisInfoMap.get(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE));
+               String chassisSlots = newChassisInfoMap.get(FlowgateConstant.CHASSISSLOTS);
+               List<FlowgateChassisSlot> flowgateSlots = mapper.readValue(chassisSlots, new TypeReference<List<FlowgateChassisSlot>>() {});
+               TestCase.assertEquals(slot1.getMountingSide(), flowgateSlots.get(0).getMountingSide());
+               TestCase.assertEquals(slot1.getMountedAssetNumber(), flowgateSlots.get(0).getMountedAssetNumber());
+               TestCase.assertEquals(slot1.getColumnPosition(), flowgateSlots.get(0).getColumnPosition());
+               TestCase.assertEquals(slot1.getRowPosition(), flowgateSlots.get(0).getRowPosition());
+               TestCase.assertEquals(slot1.getSlotName(), flowgateSlots.get(0).getSlotName());
+            } catch (Exception e) {
+               TestCase.fail(e.getMessage());
+            }
+         }else if(assetTosave.getAssetNumber() == 127) {
+            TestCase.assertEquals(asset.getTag(), assetTosave.getTag());
+         }else {
+            TestCase.fail("Invalid assetNumber");
+         }
+      }
+   }
+
+   public FlowgateChassisSlot createFlowgateChassisSlot() {
+      FlowgateChassisSlot slot = new FlowgateChassisSlot();
+      slot.setMountingSide("Back");
+      slot.setColumnPosition(1);
+      slot.setMountedAssetNumber(127);
+      slot.setRowPosition(1);
+      slot.setSlotName("1");
+      return slot;
+   }
    public ResponseEntity<FacilitySoftwareConfig []> getFacilitySoftwareByType(){
       HashMap<AdvanceSettingType, String> advanceSettingMap = new HashMap<AdvanceSettingType, String>();
       advanceSettingMap.put(AdvanceSettingType.DateFormat, NlyteDataService.DateFormat);

@@ -61,6 +61,8 @@ public class NlyteAPIClient {
    private static final String GetNetworkByAssetNumberURL = "/nlyte/integration/api/odata/Networks(%s)";
    private static final String GetNetworkMaterialsURL =
          "/nlyte/integration/api/odata/NetworkMaterials?$filter=(materialSubtypeID eq 7)";
+   private static final String GetChassisURL = "/nlyte/integration/api/odata/Chassis?$expand=ChassisMountedAssetMaps,ChassisSlots";
+   private static final String GetChassisMaterialsURL = "/nlyte/integration/api/odata/ChassisMaterials";
    protected String nlyteServiceEndpoint;
 
    protected String username;
@@ -219,6 +221,9 @@ public class NlyteAPIClient {
       case HandleAssetUtil.networkMaterials:
          getMaterialsURL = getNlyteServiceEndpoint() + GetNetworkMaterialsURL;
          break;
+      case HandleAssetUtil.chassisMaterials:
+         getMaterialsURL = getNlyteServiceEndpoint() + GetChassisMaterialsURL;
+         break;
       default:
          throw new NlyteWorkerException(
                "category should be 'Blade' or 'Standard' for server matreial");
@@ -300,6 +305,9 @@ public class NlyteAPIClient {
          break;
       case Networks:
          getAssetsUrl = getNlyteServiceEndpoint() + GetNetworksURL;
+         break;
+      case Chassis:
+         getAssetsUrl = getNlyteServiceEndpoint() + GetChassisURL;
          break;
       default:
          throw new NlyteWorkerException("no such assets of the category ");

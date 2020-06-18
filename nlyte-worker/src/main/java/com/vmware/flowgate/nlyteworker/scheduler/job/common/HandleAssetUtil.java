@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
@@ -24,8 +25,11 @@ import com.vmware.flowgate.common.MountingSide;
 import com.vmware.flowgate.common.NetworkMapping;
 import com.vmware.flowgate.common.PduMapping;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.FlowgateChassisSlot;
 import com.vmware.flowgate.common.model.Tenant;
 import com.vmware.flowgate.nlyteworker.model.CabinetU;
+import com.vmware.flowgate.nlyteworker.model.ChassisMountedAssetMap;
+import com.vmware.flowgate.nlyteworker.model.ChassisSlot;
 import com.vmware.flowgate.nlyteworker.model.CustomField;
 import com.vmware.flowgate.nlyteworker.model.LocationGroup;
 import com.vmware.flowgate.nlyteworker.model.Manufacturer;
@@ -48,9 +52,12 @@ public class HandleAssetUtil {
    public static final int powerStripMaterial = 3;
    public static final int cabinetMaterials = 4;
    public static final int networkMaterials = 5;
+   public static final int chassisMaterials = 6;
    public static final int NETWORK_SUBTYPE_STANDARD = 7;
    private static final String CabinetU_State_Full = "Full";
    private static final String CabinetU_State_Free = "Free";
+
+   private ObjectMapper mapper = new ObjectMapper();
    /**
     *
     * @return
@@ -147,7 +154,6 @@ public class HandleAssetUtil {
                                  HashMap<Integer,Material> materialMap,
                                  HashMap<Integer,Manufacturer> manufacturerMap) {
       List<Asset> assetsFromNlyte = new ArrayList<Asset>();
-      ObjectMapper mapper = new ObjectMapper();
       Asset asset;
       for(NlyteAsset nlyteAsset:nlyteAssets) {
          asset = new Asset();
@@ -232,6 +238,9 @@ public class HandleAssetUtil {
                }
             }
          }
+         if(asset.getCategory().equals(AssetCategory.Chassis)) {
+            handleChassisSolts(asset,nlyteAsset);
+         }
          asset.setAssetSource(nlyteSource);
          AssetStatus status = new AssetStatus();
          status.setNetworkMapping(NetworkMapping.UNMAPPED);
@@ -259,6 +268,41 @@ public class HandleAssetUtil {
          assetsFromNlyte.add(asset);
       }
       return assetsFromNlyte;
+   }
+
+   public void handleChassisSolts(Asset asset, NlyteAsset nlyteAsset) {
+      List<ChassisSlot> chassisSolts = nlyteAsset.getChassisSlots();
+      if(chassisSolts == null || chassisSolts.isEmpty()) {
+         return;
+      }
+      int toltalSolts = nlyteAsset.getChassisSlots().size();
+      asset.setCapacity(toltalSolts);
+      List<ChassisMountedAssetMap> chassisMountedAssets = nlyteAsset.getChassisMountedAssetMaps();
+      int usedSolts = 0;
+      HashMap<String, Integer> soltsAndmountedAssetNumberMap = new HashMap<String, Integer>();
+      if(chassisMountedAssets != null && !chassisMountedAssets.isEmpty()) {
+         usedSolts = chassisMountedAssets.size();
+         for(ChassisMountedAssetMap caMap : chassisMountedAssets) {
+            soltsAndmountedAssetNumberMap.put(caMap.getMountingSide()+caMap.getSlotName(), caMap.getMountedAssetID());
+         }
+      }
+      asset.setFreeCapacity(toltalSolts - usedSolts);
+      List<FlowgateChassisSlot> flowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
+      for(ChassisSlot chassisSolt : chassisSolts) {
+         FlowgateChassisSlot solt = new FlowgateChassisSlot();
+         solt.setColumnPosition(chassisSolt.getColumnPosition());
+         solt.setMountingSide(chassisSolt.getMountingSide());
+         solt.setRowPosition(chassisSolt.getRowPosition());
+         solt.setSlotName(chassisSolt.getSlotName());
+         solt.setMountedAssetNumber(soltsAndmountedAssetNumberMap.get(solt.getMountingSide()+solt.getSlotName()));
+         flowgateChassisSlots.add(solt);
+      }
+      try {
+         String chassisSoltsInfo = mapper.writeValueAsString(flowgateChassisSlots);
+         supplementChassisInfo(asset, FlowgateConstant.CHASSISSLOTS, chassisSoltsInfo);
+      } catch (JsonProcessingException e) {
+         logger.error("Failed to get info of chassisSolts.");
+      }
    }
 
    /**
@@ -327,10 +371,35 @@ public class HandleAssetUtil {
          int totalSize = material.getTotalCopperPorts() + material.getTotalFibreOpticPorts() + material.getTotalUndefinedPorts();
          asset.setCapacity(totalSize);
          break;
+      case Chassis:
+         supplementChassisInfo(asset, FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, material.getAirflowTypeID());
+         break;
       default:
          break;
       }
       return asset;
+   }
+
+   public void supplementChassisInfo(Asset asset, String key, String value) {
+      if(value == null) {
+         return;
+      }
+      HashMap<String, String> justficationMap = asset.getJustificationfields();
+      String chassisInfo = justficationMap.get(FlowgateConstant.CHASSIS);
+      Map<String, String> chassisInfoMap = null;
+      try {
+         if(chassisInfo != null) {
+            chassisInfoMap = mapper.readValue(chassisInfo, new TypeReference<Map<String,String>>() {});
+         }else {
+            chassisInfoMap = new HashMap<String,String>();
+         }
+         chassisInfoMap.put(key, value);
+         String newChassisInfo = mapper.writeValueAsString(chassisInfoMap);
+         justficationMap.put(FlowgateConstant.CHASSIS, newChassisInfo);
+         asset.setJustificationfields(justficationMap);
+      } catch (Exception e) {
+         logger.error("Failed to update the value: "+value+" with key: "+key+".");
+      }
    }
 
    public List<Asset> handleAssets(List<Asset> toUpdateAssets,Map<Long,Asset> exsitingaAssetMap){
@@ -341,10 +410,17 @@ public class HandleAssetUtil {
          return toUpdateAssets;
       }
       for(Asset asset:toUpdateAssets) {
+         boolean isUpdated = false;
          if(exsitingaAssetMap.containsKey(asset.getAssetNumber())) {
             exsitingAsset = exsitingaAssetMap.get(asset.getAssetNumber());
-            exsitingAsset.setCabinetName(asset.getCabinetName());
-            exsitingAsset.setTag(asset.getTag());
+            if(valueIsChanged(exsitingAsset.getCabinetName(), asset.getCabinetName())) {
+               exsitingAsset.setCabinetName(asset.getCabinetName());
+               isUpdated = true;
+            }
+            if(valueIsChanged(exsitingAsset.getTag(),asset.getTag())) {
+               exsitingAsset.setTag(asset.getTag());
+               isUpdated = true;
+            }
             exsitingAsset.setSerialnumber(asset.getSerialnumber());
             exsitingAsset.setAssetName(asset.getAssetName());
             exsitingAsset.setRegion(asset.getRegion());
@@ -352,24 +428,126 @@ public class HandleAssetUtil {
             exsitingAsset.setCity(asset.getCity());
             exsitingAsset.setBuilding(asset.getBuilding());
             exsitingAsset.setFloor(asset.getFloor());
-            exsitingAsset.setRoom(asset.getRoom());
+            if(valueIsChanged(exsitingAsset.getRoom(), asset.getRoom())) {
+               exsitingAsset.setRoom(asset.getRoom());
+               isUpdated = true;
+            }
             exsitingAsset.setModel(asset.getModel());
             exsitingAsset.setManufacturer(asset.getManufacturer());
             exsitingAsset.setCategory(asset.getCategory());
             exsitingAsset.setSubCategory(asset.getSubCategory());
             exsitingAsset.setLastupdate(System.currentTimeMillis());
-            exsitingAsset.setRow(asset.getRow());
-            exsitingAsset.setCol(asset.getCol());
-            exsitingAsset.setMountingSide(asset.getMountingSide());
-            exsitingAsset.setTenant(asset.getTenant());
+            if(valueIsChanged(exsitingAsset.getRow(), asset.getRow())) {
+               exsitingAsset.setRow(asset.getRow());
+               isUpdated = true;
+            }
+            if(valueIsChanged(exsitingAsset.getCol(), asset.getCol())) {
+               exsitingAsset.setCol(asset.getCol());
+               isUpdated = true;
+            }
+            if(exsitingAsset.getMountingSide() != asset.getMountingSide()) {
+               exsitingAsset.setMountingSide(asset.getMountingSide());
+               isUpdated = true;
+            }
+            String oldOwner = null;
+            String newOwner = null;
+            String oldTenantValue = null;
+            String newTenantValue = null;
+            String oldTenantManager = null;
+            String newTenantManager = null;
+            Tenant oldTenant = exsitingAsset.getTenant();
+            Tenant newTenant = asset.getTenant();
+            if(oldTenant != null) {
+               oldOwner = oldTenant.getOwner();
+               oldTenantValue = oldTenant.getTenant();
+               oldTenantManager = oldTenant.getTenantManager();
+            }
+            if(newTenant != null) {
+               newOwner = newTenant.getOwner();
+               newTenantValue = newTenant.getTenant();
+               newTenantManager = newTenant.getTenantManager();
+            }
+            if (valueIsChanged(oldOwner,newOwner)
+                  || valueIsChanged(oldTenantValue,newTenantValue)
+                  || valueIsChanged(oldTenantManager,newTenantManager)) {
+               exsitingAsset.setTenant(asset.getTenant());
+               isUpdated = true;
+            }
             if (exsitingAsset.getCategory().equals(AssetCategory.Cabinet)) {
                if (asset.getJustificationfields() != null
                      && asset.getJustificationfields().get(FlowgateConstant.CABINETUNITS) != null) {
                   exsitingAsset.getJustificationfields().put(FlowgateConstant.CABINETUNITS,
                         asset.getJustificationfields().get(FlowgateConstant.CABINETUNITS));
+                  isUpdated = true;
                }
             }
-            updateAsset.add(exsitingAsset);
+            if(exsitingAsset.getCategory().equals(AssetCategory.Chassis)) {
+               if (asset.getJustificationfields() != null
+                     && asset.getJustificationfields().get(FlowgateConstant.CHASSIS) != null) {
+
+                  HashMap<String, String> newJustficationMap = asset.getJustificationfields();
+                  HashMap<String, String> oldJustficationMap = exsitingAsset.getJustificationfields();
+                  String newChassisInfo = newJustficationMap.get(FlowgateConstant.CHASSIS);
+                  String oldChassisInfo = oldJustficationMap.get(FlowgateConstant.CHASSIS);
+                  Map<String, String> newChassisInfoMap = null;
+                  Map<String, String> oldChassisInfoMap = null;
+                  try {
+                     if(newChassisInfo != null) {
+                        newChassisInfoMap = mapper.readValue(newChassisInfo, new TypeReference<Map<String,String>>() {});
+                     }
+                     if(oldChassisInfo != null) {
+                        oldChassisInfoMap = mapper.readValue(oldChassisInfo, new TypeReference<Map<String,String>>() {});
+                     }
+                  } catch (Exception e) {
+                     logger.error("Failed to read the data of chassis");
+                  }
+                  if(oldChassisInfoMap == null) {
+                     if(newChassisInfoMap != null) {
+                        oldJustficationMap.put(FlowgateConstant.CHASSIS, newChassisInfo);
+                        exsitingAsset.setJustificationfields(oldJustficationMap);
+                        isUpdated = true;
+                     }
+                  }else {
+                     if(newChassisInfoMap != null) {
+                        if (valueIsChanged(
+                              oldChassisInfoMap.get(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE),
+                              newChassisInfoMap.get(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE))) {
+                           oldJustficationMap.put(FlowgateConstant.CHASSIS, newChassisInfo);
+                           exsitingAsset.setJustificationfields(oldJustficationMap);
+                           isUpdated = true;
+                        }else {
+                           String newChassisSlots = newChassisInfoMap.get(FlowgateConstant.CHASSISSLOTS);
+                           String oldChassisSlots = oldChassisInfoMap.get(FlowgateConstant.CHASSISSLOTS);
+                           List<FlowgateChassisSlot> newFlowgateChassisSlots = null;
+                           List<FlowgateChassisSlot> oldFlowgateChassisSlots = null;
+                           if(newChassisSlots != null) {
+                              if(oldChassisSlots != null) {
+                                 try {
+                                    newFlowgateChassisSlots = mapper.readValue(newChassisSlots, new TypeReference<List<FlowgateChassisSlot>>() {});
+                                    oldFlowgateChassisSlots = mapper.readValue(oldChassisSlots, new TypeReference<List<FlowgateChassisSlot>>() {});
+                                 } catch (Exception e) {
+                                    logger.error("Failed to read the data of chassis");
+                                 }
+                                 if (chassisSlotsIsChanged(oldFlowgateChassisSlots,
+                                       newFlowgateChassisSlots)) {
+                                    oldJustficationMap.put(FlowgateConstant.CHASSIS, newChassisInfo);
+                                    exsitingAsset.setJustificationfields(oldJustficationMap);
+                                    isUpdated = true;
+                                 }
+                              }else {
+                                 oldJustficationMap.put(FlowgateConstant.CHASSIS, newChassisInfo);
+                                 exsitingAsset.setJustificationfields(oldJustficationMap);
+                                 isUpdated = true;
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+            if(isUpdated) {
+               updateAsset.add(exsitingAsset);
+            }
          }else {
             asset.setCreated(System.currentTimeMillis());
             resultAsset.add(asset);
@@ -377,6 +555,62 @@ public class HandleAssetUtil {
       }
       resultAsset.addAll(updateAsset);
       return resultAsset;
+   }
+
+   public boolean chassisSlotsIsChanged(List<FlowgateChassisSlot> oldFlowgateChassisSlots,
+         List<FlowgateChassisSlot> newFlowgateChassisSlots) {
+      Map<String, FlowgateChassisSlot> oldSlotsMap = new HashMap<String, FlowgateChassisSlot>();
+      if(oldFlowgateChassisSlots != null) {
+         for(FlowgateChassisSlot slot : oldFlowgateChassisSlots) {
+            oldSlotsMap.put(slot.getMountingSide()+slot.getSlotName(), slot);
+         }
+      }
+      Map<String, FlowgateChassisSlot> newSlotsMap = new HashMap<String, FlowgateChassisSlot>();
+      if(newFlowgateChassisSlots != null) {
+         for(FlowgateChassisSlot slot : newFlowgateChassisSlots) {
+            newSlotsMap.put(slot.getMountingSide()+slot.getSlotName(), slot);
+         }
+      }
+      if(oldSlotsMap.size() != newSlotsMap.size()) {
+         return true;
+      }
+      for(Map.Entry<String, FlowgateChassisSlot> newSlotMap : newSlotsMap.entrySet()) {
+         String key = newSlotMap.getKey();
+         if(!oldSlotsMap.containsKey(key)) {
+            return true;
+         }else {
+            FlowgateChassisSlot newSlot = newSlotMap.getValue();
+            FlowgateChassisSlot oldSlot = oldSlotsMap.get(key);
+            if(valueIsChanged(oldSlot.getMountedAssetNumber(), newSlot.getMountedAssetNumber())) {
+               return true;
+            }
+            if(valueIsChanged(oldSlot.getColumnPosition(), newSlot.getColumnPosition())) {
+               return true;
+            }
+            if(valueIsChanged(oldSlot.getRowPosition(), newSlot.getRowPosition())) {
+               return true;
+            }
+         }
+      }
+      return false;
+   }
+
+   public boolean valueIsChanged(Integer oldValue, Integer newValue) {
+      Integer value = oldValue == null ? -1 : oldValue;
+      Integer comparedValue = newValue == null ? -1 : newValue;
+      if(value.equals(comparedValue)) {
+         return false;
+      }
+      return true;
+   }
+
+   public boolean valueIsChanged(String oldValue, String newValue) {
+      String value = oldValue == null ? "" : oldValue;
+      String comparedValue = newValue == null ? "" : newValue;
+      if(value.equals(comparedValue)) {
+         return false;
+      }
+      return true;
    }
 
    public List<NlyteAsset> filterUnActivedAsset(List<NlyteAsset> nlyteAssets, AssetCategory category) {

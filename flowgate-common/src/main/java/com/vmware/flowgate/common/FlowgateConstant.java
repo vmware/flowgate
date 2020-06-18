@@ -66,7 +66,11 @@ public class FlowgateConstant {
 
    public static String CABINETUNITS = "CabinetUnits";
 
+   public static String CHASSIS = "Chassis";
+
    public static String CHASSISSLOTS = "ChassisSlots";
+
+   public static String CHASSIS_AIR_FLOW_TYPE = "ChassisAirFlowType";
 
    public static String DEFAULT_CABINET_UNIT_POSITION = "COMMON";
 
