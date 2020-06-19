@@ -434,32 +434,63 @@ public class AssetService {
          metricData.setTimeStamp(valueunit.getTime());
          metricData.setValue(valueunit.getValue());
          metricData.setValueNum(valueunit.getValueNum());
+         String extraidentifier = valueunit.getExtraidentifier();
+
          switch (valueunit.getKey()) {
          case MetricName.PDU_ACTIVE_POWER:
             //PDU|INLET:1|ActivePower
-            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,
-                  valueunit.getExtraidentifier()));
+            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER, extraidentifier));
             result.add(metricData);
             break;
          case MetricName.PDU_APPARENT_POWER:
             metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,
-                  valueunit.getExtraidentifier()));
+                  extraidentifier));
             result.add(metricData);
             break;
          case MetricName.PDU_CURRENT:
-            metricData.setMetricName(
-                  String.format(MetricKeyName.PDU_XLET_CURRENT, valueunit.getExtraidentifier()));
-            result.add(metricData);
+            if(extraidentifier != null) {
+               String extraidentifierList[] = extraidentifier.split("\\|");
+               if(extraidentifierList.length == 1) {
+                  metricData.setMetricName(
+                        String.format(MetricKeyName.PDU_XLET_CURRENT, extraidentifier));
+               }else if(extraidentifierList.length == 2) {
+                  String inlet = extraidentifierList[0];
+                  String pole = extraidentifierList[1];
+                  metricData.setMetricName(
+                        String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, inlet, pole));
+               }
+               result.add(metricData);
+            }
             break;
          case MetricName.PDU_VOLTAGE:
-            metricData.setMetricName(
-                  String.format(MetricKeyName.PDU_XLET_VOLTAGE, valueunit.getExtraidentifier()));
-            result.add(metricData);
+            if(extraidentifier != null) {
+               String extraidentifierList[] = extraidentifier.split("\\|");
+               if(extraidentifierList.length == 1) {
+                  metricData.setMetricName(
+                        String.format(MetricKeyName.PDU_XLET_VOLTAGE, extraidentifier));
+               }else if(extraidentifierList.length == 2) {
+                  String inlet = extraidentifierList[0];
+                  String pole = extraidentifierList[1];
+                  metricData.setMetricName(
+                        String.format(MetricKeyName.PDU_INLET_POLE_VOLTAGE, inlet, pole));
+               }
+               result.add(metricData);
+            }
             break;
          case MetricName.PDU_FREE_CAPACITY:
-            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY,
-                  valueunit.getExtraidentifier()));
-            result.add(metricData);
+            if(extraidentifier != null) {
+               String extraidentifierList[] = extraidentifier.split("\\|");
+               if(extraidentifierList.length == 1) {
+                  metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY,
+                        extraidentifier));
+               }else if(extraidentifierList.length == 2) {
+                  String inlet = extraidentifierList[0];
+                  String pole = extraidentifierList[1];
+                  metricData.setMetricName(
+                        String.format(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, inlet, pole));
+               }
+               result.add(metricData);
+            }
             break;
          case MetricName.PDU_CURRENT_LOAD:
             metricData.setMetricName(MetricName.PDU_CURRENT_LOAD);
@@ -479,12 +510,12 @@ public class AssetService {
             break;
          case MetricName.PDU_HUMIDITY:
             metricData.setMetricName(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX,
-                  valueunit.getExtraidentifier()));
+                  extraidentifier));
             result.add(metricData);
             break;
          case MetricName.PDU_TEMPERATURE:
             metricData.setMetricName(String.format(MetricKeyName.PDU_TEMPERATURE_LOCATIONX,
-                  valueunit.getExtraidentifier()));
+                  extraidentifier));
             result.add(metricData);
             break;
          default:
