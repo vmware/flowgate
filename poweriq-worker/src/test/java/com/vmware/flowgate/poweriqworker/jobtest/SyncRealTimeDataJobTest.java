@@ -39,10 +39,12 @@ import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
 import com.vmware.flowgate.poweriqworker.client.PowerIQAPIClient;
 import com.vmware.flowgate.poweriqworker.jobs.PowerIQService;
 import com.vmware.flowgate.poweriqworker.model.Inlet;
+import com.vmware.flowgate.poweriqworker.model.InletPoleReading;
 import com.vmware.flowgate.poweriqworker.model.InletReading;
 import com.vmware.flowgate.poweriqworker.model.Outlet;
 import com.vmware.flowgate.poweriqworker.model.OutletReading;
 import com.vmware.flowgate.poweriqworker.model.Pdu;
+import com.vmware.flowgate.poweriqworker.model.Reading;
 
 import junit.framework.TestCase;
 
@@ -71,7 +73,7 @@ public class SyncRealTimeDataJobTest {
 
    @Test
    public void testGetValueUnits() {
-      Mockito.when(this.powerIQAPIClient.getInlets(anyLong())).thenReturn(new ArrayList<Inlet>());
+      Mockito.when(this.powerIQAPIClient.getPduByID(anyLong())).thenReturn(new Pdu());
       Mockito.when(this.powerIQAPIClient.getOutlets(anyLong())).thenReturn(new ArrayList<Outlet>());
       Map<String,String> pduInfoMap = new HashMap<String,String>();
       pduInfoMap.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, "123");
@@ -81,14 +83,15 @@ public class SyncRealTimeDataJobTest {
 
    @Test
    public void testGetValueUnits3() {
-      Mockito.when(this.powerIQAPIClient.getInlets(128L)).thenReturn(getInlets());
+      Mockito.when(this.powerIQAPIClient.getPduByID(128L)).thenReturn(createPdu());
       Mockito.when(this.powerIQAPIClient.getOutlets(128L)).thenReturn(getOutlets());
       Map<String,String> pduInfoMap = new HashMap<String,String>();
       pduInfoMap.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, "128");
       List<ValueUnit> valueUnits = powerIQService.getValueUnits(pduInfoMap, powerIQAPIClient, createAdvanceSettingMap());
-      TestCase.assertEquals(12, valueUnits.size());
+      TestCase.assertEquals(21, valueUnits.size());
       for(ValueUnit valueunit : valueUnits) {
          String extraidentifier = valueunit.getExtraidentifier();
+         String inlet1InletPoleExtraIdentifier = FlowgateConstant.INLET_NAME_PREFIX + 1 + FlowgateConstant.INLET_POLE_NAME_PREFIX;
          if(extraidentifier != null) {
             if(extraidentifier.equals(FlowgateConstant.INLET_NAME_PREFIX + 1)) {
                switch (valueunit.getKey()) {
@@ -114,6 +117,48 @@ public class SyncRealTimeDataJobTest {
                   break;
                case MetricName.PDU_CURRENT:
                   TestCase.assertEquals(getOutlets().get(0).getReading().getCurrent(), valueunit.getValueNum());
+                  break;
+               default:
+                  break;
+               }
+            }else if(valueunit.getExtraidentifier().equals(inlet1InletPoleExtraIdentifier + 1)) {
+               switch (valueunit.getKey()) {
+               case MetricName.PDU_FREE_CAPACITY:
+                  TestCase.assertEquals(7.38, valueunit.getValueNum());
+                  break;
+               case MetricName.PDU_VOLTAGE:
+                  TestCase.assertEquals(122.1, valueunit.getValueNum());
+                  break;
+               case MetricName.PDU_CURRENT:
+                  TestCase.assertEquals(1.62, valueunit.getValueNum());
+                  break;
+               default:
+                  break;
+               }
+            }else if(valueunit.getExtraidentifier().equals(inlet1InletPoleExtraIdentifier + 2)) {
+               switch (valueunit.getKey()) {
+               case MetricName.PDU_FREE_CAPACITY:
+                  TestCase.assertEquals(5.38, valueunit.getValueNum());
+                  break;
+               case MetricName.PDU_VOLTAGE:
+                  TestCase.assertEquals(112.1, valueunit.getValueNum());
+                  break;
+               case MetricName.PDU_CURRENT:
+                  TestCase.assertEquals(3.62, valueunit.getValueNum());
+                  break;
+               default:
+                  break;
+               }
+            }else if(valueunit.getExtraidentifier().equals(inlet1InletPoleExtraIdentifier + 3)) {
+               switch (valueunit.getKey()) {
+               case MetricName.PDU_FREE_CAPACITY:
+                  TestCase.assertEquals(8.38, valueunit.getValueNum());
+                  break;
+               case MetricName.PDU_VOLTAGE:
+                  TestCase.assertEquals(102.1, valueunit.getValueNum());
+                  break;
+               case MetricName.PDU_CURRENT:
+                  TestCase.assertEquals(0.62, valueunit.getValueNum());
                   break;
                default:
                   break;
@@ -153,7 +198,7 @@ public class SyncRealTimeDataJobTest {
 
    @Test
    public void testGetRealTimeDatas2() {
-      Mockito.when(this.powerIQAPIClient.getInlets(128L)).thenReturn(getInlets());
+      Mockito.when(this.powerIQAPIClient.getPduByID(128L)).thenReturn(createPdu());
       Mockito.when(this.powerIQAPIClient.getOutlets(128L)).thenReturn(getOutlets());
       Map<String,String> pduInfoMap = new HashMap<String,String>();
       pduInfoMap.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, "128");
@@ -268,6 +313,48 @@ public class SyncRealTimeDataJobTest {
    Pdu createPdu() {
       Pdu pdu = new Pdu();
       pdu.setName("pek-wor-pdu-02");
+      pdu.setPhase("THREE_PHASE");
+      InletReading inletReading = new InletReading();
+      inletReading.setCurrent(1.2);
+      inletReading.setApparentPower(20.0);
+      inletReading.setVoltage(200.0);
+      inletReading.setReadingTime("2018/10/18 05:57:26 +0300");
+      inletReading.setActivePower(26.6);
+      inletReading.setUnutilizedCapacity(15.2);
+      inletReading.setInletId(127);
+      inletReading.setInletOrdinal(1);
+      List<InletReading> inletReadings = new ArrayList<InletReading>();
+      inletReadings.add(inletReading);
+      Reading pduReading = new Reading();
+      pduReading.setInletReadings(inletReadings);
+
+      List<InletPoleReading> inletPoleReadings = new ArrayList<InletPoleReading>();
+      InletPoleReading poleReadingL1 = new InletPoleReading();
+      poleReadingL1.setCurrent(1.62);
+      poleReadingL1.setInletPoleOrdinal(1);
+      poleReadingL1.setInletOrdinal(1);
+      poleReadingL1.setReadingTime("2018/10/18 05:57:26 +0300");
+      poleReadingL1.setUnutilizedCapacity(7.38);
+      poleReadingL1.setVoltage(122.1);
+      InletPoleReading poleReadingL2 = new InletPoleReading();
+      poleReadingL2.setCurrent(3.62);
+      poleReadingL2.setInletPoleOrdinal(2);
+      poleReadingL2.setInletOrdinal(1);
+      poleReadingL2.setReadingTime("2018/10/18 05:57:26 +0300");
+      poleReadingL2.setUnutilizedCapacity(5.38);
+      poleReadingL2.setVoltage(112.1);
+      InletPoleReading poleReadingL3 = new InletPoleReading();
+      poleReadingL3.setCurrent(0.62);
+      poleReadingL3.setInletPoleOrdinal(3);
+      poleReadingL3.setInletOrdinal(1);
+      poleReadingL3.setReadingTime("2018/10/18 05:57:26 +0300");
+      poleReadingL3.setUnutilizedCapacity(8.38);
+      poleReadingL3.setVoltage(102.1);
+      inletPoleReadings.add(poleReadingL1);
+      inletPoleReadings.add(poleReadingL2);
+      inletPoleReadings.add(poleReadingL3);
+      pduReading.setInletPoleReadings(inletPoleReadings);
+      pdu.setReading(pduReading);
       return pdu;
    }
 
