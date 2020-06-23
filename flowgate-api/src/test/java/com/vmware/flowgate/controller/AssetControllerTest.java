@@ -506,10 +506,11 @@ public class AssetControllerTest {
    @Test
    public void realTimeDatabatchCreationExample() throws JsonProcessingException, Exception {
       List<RealTimeData> realtimedatas = new ArrayList<RealTimeData>();
-      RealTimeData realtimedata1 = createServerPDURealTimeData();
+      long currentTime = System.currentTimeMillis();
+      RealTimeData realtimedata1 = createServerPDURealTimeData(currentTime);
       realtimedata1.setAssetID("assetid1");
       realtimedatas.add(realtimedata1);
-      RealTimeData realtimedata2 = createServerPDURealTimeData();
+      RealTimeData realtimedata2 = createServerPDURealTimeData(currentTime);
       realtimedata2.setAssetID("assetid2");
       realtimedatas.add(realtimedata2);
 
@@ -1808,9 +1809,10 @@ public class AssetControllerTest {
             fieldWithPath("value").description("value").type(JsonFieldType.NULL),
             fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
-      RealTimeData pduRealTimeData = createServerPDURealTimeData();
+      Long currentTime = System.currentTimeMillis();
+      RealTimeData pduRealTimeData = createServerPDURealTimeData(currentTime);
       pduRealTimeData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
-      RealTimeData sensorRealTimeData = createSensorRealtimeData();
+      RealTimeData sensorRealTimeData = createSensorRealtimeData(currentTime);
       sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
       realTimeDatas.add(pduRealTimeData);
       realTimeDatas.add(sensorRealTimeData);
@@ -1850,7 +1852,7 @@ public class AssetControllerTest {
 
       MvcResult result1 = this.mockMvc
             .perform(get("/v1/assets/server/" + asset.getId() + "/realtimedata").param("starttime",
-                  "1501981711206").param("duration", "300000"))
+                  String.valueOf(currentTime)).param("duration", "300000"))
             .andDo(document("assets-getServerMetricsData-example",
                   responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
                         .andWithPrefix("[].", fieldpath)))
@@ -1908,10 +1910,11 @@ public class AssetControllerTest {
             fieldWithPath("value").description("value").type(JsonFieldType.NULL),
             fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
-      RealTimeData pduRealTimeData = createPduRealTimeData();
+      Long currentTime = System.currentTimeMillis();
+      RealTimeData pduRealTimeData = createPduRealTimeData(currentTime);
       pduRealTimeData.setAssetID("00040717c4154b5b924ced78eafcea7a");
 
-      RealTimeData sensorRealTimeData = createSensorRealtimeData();
+      RealTimeData sensorRealTimeData = createSensorRealtimeData(currentTime);
       sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
       realTimeDatas.add(pduRealTimeData);
       realTimeDatas.add(sensorRealTimeData);
@@ -1919,19 +1922,6 @@ public class AssetControllerTest {
 
       Asset asset = createAsset();
       Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
-      Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
-      Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
-      pduMetricAndIdMap.put(MetricName.PDU_ACTIVE_POWER, "00040717c4154b5b924ced78eafcea7a");
-      pduMetricAndIdMap.put(MetricName.PDU_APPARENT_POWER, "00040717c4154b5b924ced78eafcea7a");
-      pduMetricAndIdMap.put(MetricName.PDU_CURRENT, "00040717c4154b5b924ced78eafcea7a");
-      pduMetricAndIdMap.put(MetricName.PDU_CURRENT_LOAD, "00040717c4154b5b924ced78eafcea7a");
-      pduMetricAndIdMap.put(MetricName.PDU_FREE_CAPACITY, "00040717c4154b5b924ced78eafcea7a");
-      pduMetricAndIdMap.put(MetricName.PDU_POWER_LOAD, "00040717c4154b5b924ced78eafcea7a");
-      pduMetricAndIdMap.put(MetricName.PDU_TOTAL_CURRENT, "00040717c4154b5b924ced78eafcea7a");
-      pduMetricAndIdMap.put(MetricName.PDU_TOTAL_POWER, "00040717c4154b5b924ced78eafcea7a");
-      pduMetricAndIdMap.put(MetricName.PDU_VOLTAGE, "00040717c4154b5b924ced78eafcea7a");
-      pduMetricFormulars.put("00040717c4154b5b924ced78eafcea7a", pduMetricAndIdMap);
-      formulars.put(FlowgateConstant.PDU, pduMetricFormulars);
 
       Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
       Map<String, String> tempSensor = new HashMap<String,String>();
@@ -1943,13 +1933,14 @@ public class AssetControllerTest {
       sensorMetricFormulars.put(MetricName.PDU_HUMIDITY, humiditySensor);
 
       formulars.put(FlowgateConstant.SENSOR, sensorMetricFormulars);
+      asset.setCategory(AssetCategory.PDU);
       asset.setMetricsformulars(formulars);
       asset.setId("00040717c4154b5b924ced78eafcea7a");
       asset = assetRepository.save(asset);
 
       MvcResult result1 = this.mockMvc
             .perform(get("/v1/assets/pdu/" + asset.getId() + "/realtimedata").param("starttime",
-                  "1501981711206").param("duration", "300000"))
+                  String.valueOf(currentTime)).param("duration", "300000"))
             .andDo(document("assets-getPduMetricsData-example",
                   responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
                         .andWithPrefix("[].", fieldpath)))
@@ -1989,8 +1980,26 @@ public class AssetControllerTest {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 196.0);
             }else if(MetricName.PDU_TOTAL_POWER.equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 200.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, "INLET:1","L1").
+                  equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, "INLET:1","L1").
+                  equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 34.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_VOLTAGE, "INLET:1","L1").
+                  equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 220.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, "INLET:2","L1").
+                  equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, "INLET:2","L1").
+                  equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 24.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_VOLTAGE, "INLET:2","L1").
+                  equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 240.0);
             }else {
-               TestCase.fail();
+               TestCase.fail("Unkown metric");
             }
           }
       }finally {
@@ -2026,8 +2035,8 @@ public class AssetControllerTest {
       assetRepository.delete(asset.getId());
    }
 
-   RealTimeData createPduRealTimeData() {
-      RealTimeData realTimeData = createServerPDURealTimeData();
+   RealTimeData createPduRealTimeData(Long time) {
+      RealTimeData realTimeData = createServerPDURealTimeData(time);
       List<ValueUnit> valueunits = realTimeData.getValues();
 
       ValueUnit valueunitActivePower = new ValueUnit();
@@ -2035,7 +2044,7 @@ public class AssetControllerTest {
       valueunitActivePower.setUnit("W");
       valueunitActivePower.setExtraidentifier("OUTLET:1");
       valueunitActivePower.setValueNum(2);
-      valueunitActivePower.setTime(1501981711206L);
+      valueunitActivePower.setTime(time);
       valueunits.add(valueunitActivePower);
 
       ValueUnit valueunitFreeCapacity = new ValueUnit();
@@ -2043,7 +2052,7 @@ public class AssetControllerTest {
       valueunitFreeCapacity.setUnit("Amps");
       valueunitFreeCapacity.setExtraidentifier("OUTLET:1");
       valueunitFreeCapacity.setValueNum(20);
-      valueunitFreeCapacity.setTime(1501981711206L);
+      valueunitFreeCapacity.setTime(time);
       valueunits.add(valueunitFreeCapacity);
 
       ValueUnit valueunitCurrentLoad = new ValueUnit();
@@ -2051,7 +2060,7 @@ public class AssetControllerTest {
       valueunitCurrentLoad.setUnit("%");
       valueunitCurrentLoad.setExtraidentifier("OUTLET:1");
       valueunitCurrentLoad.setValueNum(20);
-      valueunitCurrentLoad.setTime(1501981711206L);
+      valueunitCurrentLoad.setTime(time);
       valueunits.add(valueunitCurrentLoad);
 
       ValueUnit valueunitPowerLoad = new ValueUnit();
@@ -2059,44 +2068,92 @@ public class AssetControllerTest {
       valueunitPowerLoad.setUnit("%");
       valueunitPowerLoad.setExtraidentifier("OUTLET:1");
       valueunitPowerLoad.setValueNum(20);
-      valueunitPowerLoad.setTime(1501981711206L);
+      valueunitPowerLoad.setTime(time);
       valueunits.add(valueunitPowerLoad);
+
+      ValueUnit valueunitL1FreeCapacity = new ValueUnit();
+      valueunitL1FreeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
+      valueunitL1FreeCapacity.setUnit("Amps");
+      valueunitL1FreeCapacity.setExtraidentifier("INLET:1"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
+      valueunitL1FreeCapacity.setValueNum(34);
+      valueunitL1FreeCapacity.setTime(time);
+      valueunits.add(valueunitL1FreeCapacity);
+
+      ValueUnit valueunitL1Current = new ValueUnit();
+      valueunitL1Current.setKey(MetricName.PDU_CURRENT);
+      valueunitL1Current.setUnit("Amps");
+      valueunitL1Current.setExtraidentifier("INLET:1"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
+      valueunitL1Current.setValueNum(6);
+      valueunitL1Current.setTime(time);
+      valueunits.add(valueunitL1Current);
+
+      ValueUnit valueunitL1Voltage = new ValueUnit();
+      valueunitL1Voltage.setKey(MetricName.PDU_VOLTAGE);
+      valueunitL1Voltage.setUnit("Volts");
+      valueunitL1Voltage.setExtraidentifier("INLET:1"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
+      valueunitL1Voltage.setValueNum(220);
+      valueunitL1Voltage.setTime(time);
+      valueunits.add(valueunitL1Voltage);
+
+      ValueUnit valueunit1L1FreeCapacity = new ValueUnit();
+      valueunit1L1FreeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
+      valueunit1L1FreeCapacity.setUnit("Amps");
+      valueunit1L1FreeCapacity.setExtraidentifier("INLET:2"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
+      valueunit1L1FreeCapacity.setValueNum(24);
+      valueunit1L1FreeCapacity.setTime(time);
+      valueunits.add(valueunit1L1FreeCapacity);
+
+      ValueUnit valueunit1L1Current = new ValueUnit();
+      valueunit1L1Current.setKey(MetricName.PDU_CURRENT);
+      valueunit1L1Current.setUnit("Amps");
+      valueunit1L1Current.setExtraidentifier("INLET:2"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
+      valueunit1L1Current.setValueNum(6);
+      valueunit1L1Current.setTime(time);
+      valueunits.add(valueunit1L1Current);
+
+      ValueUnit valueunit1L1Voltage = new ValueUnit();
+      valueunit1L1Voltage.setKey(MetricName.PDU_VOLTAGE);
+      valueunit1L1Voltage.setUnit("Volts");
+      valueunit1L1Voltage.setExtraidentifier("INLET:2"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
+      valueunit1L1Voltage.setValueNum(240);
+      valueunit1L1Voltage.setTime(time);
+      valueunits.add(valueunit1L1Voltage);
 
       realTimeData.setId(UUID.randomUUID().toString());
       realTimeData.setValues(valueunits);
-      realTimeData.setTime(System.currentTimeMillis() - 1000);
+      realTimeData.setTime(time);
       return realTimeData;
    }
 
-   RealTimeData createServerPDURealTimeData() {
+   RealTimeData createServerPDURealTimeData(long time) {
       List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
       ValueUnit valueunitvoltage = new ValueUnit();
       valueunitvoltage.setKey(MetricName.PDU_VOLTAGE);
       valueunitvoltage.setUnit("Volts");
       valueunitvoltage.setExtraidentifier("OUTLET:1");
       valueunitvoltage.setValueNum(208);
-      valueunitvoltage.setTime(1501981711206L);
+      valueunitvoltage.setTime(time);
       valueunits.add(valueunitvoltage);
       ValueUnit valueunitpower = new ValueUnit();
       valueunitpower.setKey(MetricName.PDU_APPARENT_POWER);
       valueunitpower.setUnit("W");
       valueunitpower.setExtraidentifier("OUTLET:1");
       valueunitpower.setValueNum(2.38);
-      valueunitpower.setTime(1501981711206L);
+      valueunitpower.setTime(time);
       valueunits.add(valueunitpower);
       ValueUnit valueunitCurrent = new ValueUnit();
       valueunitCurrent.setExtraidentifier("OUTLET:1");
       valueunitCurrent.setKey(MetricName.PDU_CURRENT);
       valueunitCurrent.setUnit("Amps");
       valueunitCurrent.setValueNum(20);
-      valueunitCurrent.setTime(1501981711206L);
+      valueunitCurrent.setTime(time);
       valueunits.add(valueunitCurrent);
 
       ValueUnit valueunitTotalCurrent = new ValueUnit();
       valueunitTotalCurrent.setKey(MetricName.PDU_TOTAL_CURRENT);
       valueunitTotalCurrent.setUnit("Amps");
       valueunitTotalCurrent.setValueNum(196);
-      valueunitTotalCurrent.setTime(1501981711206L);
+      valueunitTotalCurrent.setTime(time);
       valueunits.add(valueunitTotalCurrent);
 
       ValueUnit valueunitTotalPower = new ValueUnit();
@@ -2104,29 +2161,29 @@ public class AssetControllerTest {
       valueunitTotalPower.setKey(MetricName.PDU_TOTAL_POWER);
       valueunitTotalPower.setUnit("W");
       valueunitTotalPower.setValueNum(200);
-      valueunitTotalPower.setTime(1501981711206L);
+      valueunitTotalPower.setTime(time);
       valueunits.add(valueunitTotalPower);
 
       RealTimeData realTimeData = new RealTimeData();
       realTimeData.setId(UUID.randomUUID().toString());
       realTimeData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
       realTimeData.setValues(valueunits);
-      realTimeData.setTime(valueunits.get(0).getTime());
+      realTimeData.setTime(time);
       return realTimeData;
    }
 
-   RealTimeData createSensorRealtimeData() {
+   RealTimeData createSensorRealtimeData(long time) {
       List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
 
       ValueUnit tempValue = new ValueUnit();
       tempValue.setValueNum(32);
-      tempValue.setTime(1501981711206L);
+      tempValue.setTime(time);
       tempValue.setKey(MetricName.TEMPERATURE);
       valueunits.add(tempValue);
 
       ValueUnit humidityValue = new ValueUnit();
       humidityValue.setValueNum(20);
-      humidityValue.setTime(1501981711206L);
+      humidityValue.setTime(time);
       humidityValue.setKey(MetricName.HUMIDITY);
       valueunits.add(humidityValue);
 
@@ -2134,7 +2191,7 @@ public class AssetControllerTest {
       realTimeData.setId(UUID.randomUUID().toString());
       realTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
       realTimeData.setValues(valueunits);
-      realTimeData.setTime(valueunits.get(0).getTime());
+      realTimeData.setTime(time);
       return realTimeData;
    }
 
