@@ -26,6 +26,7 @@ import com.vmware.flowgate.common.NetworkMapping;
 import com.vmware.flowgate.common.PduMapping;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FlowgateChassisSlot;
+import com.vmware.flowgate.common.model.Parent;
 import com.vmware.flowgate.common.model.Tenant;
 import com.vmware.flowgate.nlyteworker.model.CabinetU;
 import com.vmware.flowgate.nlyteworker.model.ChassisMountedAssetMap;
@@ -152,7 +153,8 @@ public class HandleAssetUtil {
    public List<Asset> getAssetsFromNlyte(String nlyteSource,List<NlyteAsset> nlyteAssets,
                                  HashMap<Integer,LocationGroup> locationMap,
                                  HashMap<Integer,Material> materialMap,
-                                 HashMap<Integer,Manufacturer> manufacturerMap) {
+                                 HashMap<Integer,Manufacturer> manufacturerMap,
+                                 HashMap<Long,String> chassisMountedAssetNumberAndChassisIdMap) {
       List<Asset> assetsFromNlyte = new ArrayList<Asset>();
       Asset asset;
       for(NlyteAsset nlyteAsset:nlyteAssets) {
@@ -172,8 +174,13 @@ public class HandleAssetUtil {
             continue;
          }
          if (asset.getCategory() == AssetCategory.Server) {
+            if(chassisMountedAssetNumberAndChassisIdMap != null && chassisMountedAssetNumberAndChassisIdMap.containsKey(asset.getAssetNumber())) {
+               Parent parent = new Parent();
+               parent.setType(AssetCategory.Chassis.name());
+               parent.setParentId(chassisMountedAssetNumberAndChassisIdMap.get(asset.getAssetNumber()));
+               asset.setParent(parent);
+            }
             //set the tenant information.
-
             List<CustomField> fields = nlyteAsset.getCustomFields();
             if (fields != null) {
                Tenant tenant = new Tenant();
@@ -240,6 +247,14 @@ public class HandleAssetUtil {
          }
          if(asset.getCategory().equals(AssetCategory.Chassis)) {
             handleChassisSolts(asset,nlyteAsset);
+         }
+         if(asset.getCategory().equals(AssetCategory.Networks)) {
+            if(chassisMountedAssetNumberAndChassisIdMap != null && chassisMountedAssetNumberAndChassisIdMap.containsKey(asset.getAssetNumber())) {
+               Parent parent = new Parent();
+               parent.setType(AssetCategory.Chassis.name());
+               parent.setParentId(chassisMountedAssetNumberAndChassisIdMap.get(asset.getAssetNumber()));
+               asset.setParent(parent);
+            }
          }
          asset.setAssetSource(nlyteSource);
          AssetStatus status = new AssetStatus();
@@ -543,6 +558,28 @@ public class HandleAssetUtil {
                         }
                      }
                   }
+               }
+            }
+            if(exsitingAsset.getCategory().equals(AssetCategory.Server) ||
+                  exsitingAsset.getCategory().equals(AssetCategory.Networks)) {
+               Parent oldParent = exsitingAsset.getParent();
+               String oldParentId = null;
+               String oldParentType = null;
+               if(oldParent != null) {
+                  oldParentId = oldParent.getParentId();
+                  oldParentType = oldParent.getType();
+               }
+               Parent newParent = asset.getParent();
+               String newParentId = null;
+               String newParentType = null;
+               if(newParent != null) {
+                  newParentId = newParent.getParentId();
+                  newParentType = newParent.getType();
+               }
+               if(valueIsChanged(oldParentId, newParentId) ||
+                     valueIsChanged(oldParentType, newParentType)) {
+                  exsitingAsset.setParent(newParent);
+                  isUpdated = true;
                }
             }
             if(isUpdated) {

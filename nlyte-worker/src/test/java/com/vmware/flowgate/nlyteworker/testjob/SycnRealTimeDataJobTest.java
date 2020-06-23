@@ -43,6 +43,7 @@ import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.FlowgateChassisSlot;
+import com.vmware.flowgate.common.model.Parent;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.Tenant;
 import com.vmware.flowgate.common.model.ValueUnit;
@@ -101,19 +102,33 @@ public class SycnRealTimeDataJobTest {
    public void testGenerateNewAsset() {
       List<NlyteAsset> nlyteAssets = getNlyteAsset();
       HashMap<Integer, LocationGroup> locationMap = getLocationMap();
-      HashMap<Integer, Material> materialMap = getMaterialMap();
-      HashMap<Integer, Manufacturer> manufacturerMap = getManufacturerMap();
+      HashMap<Integer, Material> materialMap = new HashMap<Integer, Material>();
+      Material material = new Material();
+      material.setMaterialID(6251);
+      material.setManufacturerID(14);
+      material.setMaterialName("Cisco 1721 Modular Access Router");
+      material.setMaterialType(AssetCategory.Server);
+      material.setMaterialSubtype(AssetSubCategory.Blade);
+      materialMap.put(6251, material);
+      HashMap<Integer,Manufacturer> manufacturerMap = new HashMap<Integer,Manufacturer>();
+      Manufacturer manufacturer = new Manufacturer();
+      manufacturer.setManufacturerID(14);
+      manufacturer.setDetail("Cisco");
+      manufacturerMap.put(14, manufacturer);
       Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("l9i8728d55368540fcba1692",AssetCategory.Server))
       .thenReturn(new ArrayList<Asset>());
-
+      HashMap<Long,String> chassisMountedAssetNumberAndChassisIDMap = new HashMap<Long,String>();
+      chassisMountedAssetNumberAndChassisIDMap.put(197L, "asdqe945kjsdf09uw45ms");
       List<Asset>assets = nlyteDataService.generateAssets("l9i8728d55368540fcba1692", nlyteAssets,
-            locationMap, manufacturerMap, materialMap, AssetCategory.Server);
+            locationMap, manufacturerMap, materialMap, AssetCategory.Server, chassisMountedAssetNumberAndChassisIDMap);
+
       for(Asset asset:assets) {
          if("sin2-blrqeops-esxstress024".equals(asset.getAssetName())) {
             TestCase.assertEquals(197, asset.getAssetNumber());
             TestCase.assertEquals("SG-07-04", asset.getRoom());
             TestCase.assertEquals("Cisco 1721 Modular Access Router", asset.getModel());
             TestCase.assertEquals("Cisco", asset.getManufacturer());
+            TestCase.assertEquals("asdqe945kjsdf09uw45ms", asset.getParent().getParentId());
          }
       }
    }
@@ -135,7 +150,7 @@ public class SycnRealTimeDataJobTest {
       cabinetIdAndNameMap.put(562, "cbName");
       nlyteAssets = nlyteDataService.supplementCabinetName(cabinetIdAndNameMap, nlyteAssets);
       List<Asset> assets = nlyteDataService.generateAssets("l9i8728d55368540fcba1692", nlyteAssets,
-            locationMap, manufacturerMap, materialMap, AssetCategory.Server);
+            locationMap, manufacturerMap, materialMap, AssetCategory.Server, new HashMap<Long,String>());
       for(Asset asset:assets) {
          if("sin2-blrqeops-esxstress024".equals(asset.getAssetName())) {
             TestCase.assertEquals(197, asset.getAssetNumber());
@@ -143,6 +158,40 @@ public class SycnRealTimeDataJobTest {
             TestCase.assertEquals("Cisco 1721 Modular Access Router", asset.getModel());
             TestCase.assertEquals("Cisco", asset.getManufacturer());
             TestCase.assertEquals("cbName", asset.getCabinetName());
+         }
+      }
+   }
+
+   @Test
+   public void testGenerateNewAsset2() {
+      List<NlyteAsset> nlyteAssets = getNlyteAsset();
+      HashMap<Integer, LocationGroup> locationMap = getLocationMap();
+      HashMap<Integer, Material> materialMap = new HashMap<Integer, Material>();
+      Material material = new Material();
+      material.setMaterialID(6251);
+      material.setManufacturerID(14);
+      material.setMaterialName("Cisco 1721 Modular Access Router");
+      material.setMaterialType(AssetCategory.Networks);
+      materialMap.put(6251, material);
+      HashMap<Integer,Manufacturer> manufacturerMap = new HashMap<Integer,Manufacturer>();
+      Manufacturer manufacturer = new Manufacturer();
+      manufacturer.setManufacturerID(14);
+      manufacturer.setDetail("Cisco");
+      manufacturerMap.put(14, manufacturer);
+      Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("l9i8728d55368540fcba1692",AssetCategory.Server))
+      .thenReturn(new ArrayList<Asset>());
+      HashMap<Long,String> chassisMountedAssetNumberAndChassisIDMap = new HashMap<Long,String>();
+      chassisMountedAssetNumberAndChassisIDMap.put(197L, "asdqe945kjsdf09uw45ms");
+      List<Asset>assets = nlyteDataService.generateAssets("l9i8728d55368540fcba1692", nlyteAssets,
+            locationMap, manufacturerMap, materialMap, AssetCategory.Networks, chassisMountedAssetNumberAndChassisIDMap);
+
+      for(Asset asset:assets) {
+         if("sin2-blrqeops-esxstress024".equals(asset.getAssetName())) {
+            TestCase.assertEquals(197, asset.getAssetNumber());
+            TestCase.assertEquals("SG-07-04", asset.getRoom());
+            TestCase.assertEquals("Cisco 1721 Modular Access Router", asset.getModel());
+            TestCase.assertEquals("Cisco", asset.getManufacturer());
+            TestCase.assertEquals("asdqe945kjsdf09uw45ms", asset.getParent().getParentId());
          }
       }
    }
@@ -790,6 +839,151 @@ public class SycnRealTimeDataJobTest {
             TestCase.fail("Invalid assetNumber");
          }
       }
+   }
+
+   @Test
+   public void testHandleAssets3() {
+      List<Asset> toUpdateAssets = new ArrayList<Asset>();
+      Map<Long,Asset> exsitingaAssetMap = new HashMap<Long,Asset>();
+      Asset asset = createAsset();
+      asset.setAssetNumber(127);
+      asset.setTag("tag1");
+      toUpdateAssets.add(asset);
+      Asset asset2 = createAsset();
+      asset2.setAssetNumber(128);
+      asset2.setTag("tag2");
+      asset2.setCabinetName("cabinet1");
+      Tenant tenant = new Tenant();
+      tenant.setOwner("admin");
+      tenant.setTenant("tenant");
+      tenant.setTenantManager("manager");
+      asset2.setTenant(tenant);
+      asset2.setRoom("room1");
+      asset2.setRow("r2");
+      asset2.setCol("c2");
+      asset2.setMountingSide(MountingSide.Front);
+      asset2.setCategory(AssetCategory.Server);
+      Parent parent = new Parent();
+      parent.setParentId("ouqwenkja72hoas9034a");
+      parent.setType("Chassis");
+      asset2.setParent(parent);
+      toUpdateAssets.add(asset2);
+
+      Asset oldAsset1 = createAsset();
+      oldAsset1.setAssetNumber(127);
+      oldAsset1.setTag("oldtag1");
+      exsitingaAssetMap.put(oldAsset1.getAssetNumber(), oldAsset1);
+      Asset oldAsset2 = createAsset();
+      oldAsset2.setAssetNumber(128);
+      oldAsset2.setTag("oldtag2");
+      exsitingaAssetMap.put(oldAsset2.getAssetNumber(), oldAsset2);
+      HandleAssetUtil util = new HandleAssetUtil();
+      List<Asset> assets = util.handleAssets(toUpdateAssets, exsitingaAssetMap);
+      for (Asset assetTosave : assets) {
+         if (assetTosave.getAssetNumber() == 128) {
+            TestCase.assertEquals(asset2.getTag(), assetTosave.getTag());
+            TestCase.assertEquals(asset2.getRoom(), assetTosave.getRoom());
+            TestCase.assertEquals(asset2.getRow(), assetTosave.getRow());
+            TestCase.assertEquals(asset2.getCol(), assetTosave.getCol());
+            TestCase.assertEquals(asset2.getMountingSide(), assetTosave.getMountingSide());
+            TestCase.assertEquals(asset2.getTenant().getOwner(),
+                  assetTosave.getTenant().getOwner());
+            HashMap<String, String> justfications = assetTosave.getJustificationfields();
+            TestCase.assertEquals("ouqwenkja72hoas9034a", assetTosave.getParent().getParentId());
+         }else if(assetTosave.getAssetNumber() == 127) {
+            TestCase.assertEquals(asset.getTag(), assetTosave.getTag());
+         }else {
+            TestCase.fail("Invalid assetNumber");
+         }
+      }
+   }
+
+   @Test
+   public void testHandleAssets4() {
+      List<Asset> toUpdateAssets = new ArrayList<Asset>();
+      Map<Long,Asset> exsitingaAssetMap = new HashMap<Long,Asset>();
+      Asset asset = createAsset();
+      asset.setAssetNumber(127);
+      asset.setTag("tag1");
+      toUpdateAssets.add(asset);
+      Asset asset2 = createAsset();
+      asset2.setAssetNumber(128);
+      asset2.setTag("tag2");
+      asset2.setCabinetName("cabinet1");
+      Tenant tenant = new Tenant();
+      tenant.setOwner("admin");
+      tenant.setTenant("tenant");
+      tenant.setTenantManager("manager");
+      asset2.setTenant(tenant);
+      asset2.setRoom("room1");
+      asset2.setRow("r2");
+      asset2.setCol("c2");
+      asset2.setMountingSide(MountingSide.Front);
+      asset2.setCategory(AssetCategory.Networks);
+      Parent parent = new Parent();
+      parent.setParentId("ouqwenkja72hoas9034a");
+      parent.setType("Chassis");
+      asset2.setParent(parent);
+      toUpdateAssets.add(asset2);
+
+      Asset oldAsset1 = createAsset();
+      oldAsset1.setAssetNumber(127);
+      oldAsset1.setTag("oldtag1");
+      exsitingaAssetMap.put(oldAsset1.getAssetNumber(), oldAsset1);
+      Asset oldAsset2 = createAsset();
+      oldAsset2.setAssetNumber(128);
+      oldAsset2.setTag("oldtag2");
+      exsitingaAssetMap.put(oldAsset2.getAssetNumber(), oldAsset2);
+      HandleAssetUtil util = new HandleAssetUtil();
+      List<Asset> assets = util.handleAssets(toUpdateAssets, exsitingaAssetMap);
+      for (Asset assetTosave : assets) {
+         if (assetTosave.getAssetNumber() == 128) {
+            TestCase.assertEquals(asset2.getTag(), assetTosave.getTag());
+            TestCase.assertEquals(asset2.getRoom(), assetTosave.getRoom());
+            TestCase.assertEquals(asset2.getRow(), assetTosave.getRow());
+            TestCase.assertEquals(asset2.getCol(), assetTosave.getCol());
+            TestCase.assertEquals(asset2.getMountingSide(), assetTosave.getMountingSide());
+            TestCase.assertEquals(asset2.getTenant().getOwner(),
+                  assetTosave.getTenant().getOwner());
+            HashMap<String, String> justfications = assetTosave.getJustificationfields();
+            TestCase.assertEquals("ouqwenkja72hoas9034a", assetTosave.getParent().getParentId());
+         }else if(assetTosave.getAssetNumber() == 127) {
+            TestCase.assertEquals(asset.getTag(), assetTosave.getTag());
+         }else {
+            TestCase.fail("Invalid assetNumber");
+         }
+      }
+   }
+
+   @Test
+   public void testGenerateMountedAssetNumberAndChassisAssetIdMap() {
+      List<Asset> assets = new ArrayList<Asset>();
+      Asset chassisAsset = createAsset();
+      chassisAsset.setAssetNumber(127);
+      chassisAsset.setTag("oldtag1");
+      chassisAsset.setId("asdoiqawe129012fdsfpa");
+      HashMap<String,String> justficationMap = new HashMap<String,String>();
+      List<FlowgateChassisSlot> slots = new ArrayList<FlowgateChassisSlot>();
+      FlowgateChassisSlot slot = createFlowgateChassisSlot();
+      slot.setMountingSide("Back");
+      slot.setMountedAssetNumber(5523);
+      slots.add(slot);
+      Map<String,String> chassisInfoMap = new HashMap<String,String>();
+      chassisInfoMap.put(FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, "frontToBack");
+      try {
+         ObjectMapper mapper = new ObjectMapper();
+         String slotsString = mapper.writeValueAsString(slots);
+         chassisInfoMap.put(FlowgateConstant.CHASSISSLOTS, slotsString);
+         String oldChassisInfo = mapper.writeValueAsString(chassisInfoMap);
+         justficationMap.put(FlowgateConstant.CHASSIS, oldChassisInfo);
+         chassisAsset.setJustificationfields(justficationMap);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      assets.add(chassisAsset);
+      HashMap<Long,String> map = nlyteDataService.generateMountedAssetNumberAndChassisAssetIdMap(assets);
+      TestCase.assertEquals(true, map.containsKey(slot.getMountedAssetNumber().longValue()));
+      TestCase.assertEquals(chassisAsset.getId(), map.get(slot.getMountedAssetNumber().longValue()));
    }
 
    public FlowgateChassisSlot createFlowgateChassisSlot() {
