@@ -56,7 +56,15 @@ public class AggregatorService implements AsyncService {
    private static final String LOCATION_SEPERATOR = "-|-";
    private static final String extrnalTemperature = "extrnalTemperature";
    private static final String extrnalHumidity = "extrnalHumidity";
-
+   public void forTestFunc(int d) {
+	   int a = 1;
+	   int b = 2;
+	   int c = a + b;
+	   for(int i=0; i<10; i++) {
+	     c ++;
+	     d ++;
+	   }
+	 }
    @Override
    @Async("asyncServiceExecutor")
    public void executeAsync(EventMessage message) {
