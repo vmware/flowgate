@@ -42,7 +42,10 @@ public class MessageProcessingTest {
    @Spy
    @InjectMocks
    private AggregatorService aggregatorService = new AggregatorService();
-
+   @Test
+   public void testForTestFunc() {
+     aggregatorService.forTestFunc(0);
+   }
    @Test
    public void testMessage() {
       ObjectMapper mapper = new ObjectMapper();
@@ -65,22 +68,6 @@ public class MessageProcessingTest {
       }catch(IOException e) {
         Assert.fail();
       }
-   }
-
-   @Test
-   public void testVC() throws Exception{
-      ObjectMapper mapper = new ObjectMapper();
-      SDDCSoftwareConfig vc = new SDDCSoftwareConfig();
-      vc.setDescription("good vc");
-      vc.setName("Test VC");
-      vc.setServerURL("10.10.10.10");
-      vc.setPassword("fake password");
-      vc.setType(SoftwareType.VCENTER);
-      String payload = mapper.writeValueAsString(vc);
-//      EventMessage message =
-//            EventMessageUtil.createEventMessage(EventType.VCenter, EventMessageUtil.VCENTER_SyncCustomerAttrs, payload);
-      EventMessage message = EventMessageUtil.createEventMessage(EventType.VCenter, EventMessageUtil.VCENTER_SyncData, "");
-      System.out.println(mapper.writeValueAsString(message));
    }
 
    @Test
