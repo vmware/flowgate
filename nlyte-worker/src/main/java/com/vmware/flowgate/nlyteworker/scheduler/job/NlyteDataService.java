@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
@@ -33,6 +34,7 @@ import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
+import com.vmware.flowgate.common.model.FlowgateChassisSlot;
 import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
@@ -424,6 +426,7 @@ public class NlyteDataService implements AsyncService {
             return;
          }
       }
+      HashMap<Long,String> chassisMountedAssetNumberAndChassisIdMap = null;
       HashMap<Integer, LocationGroup> locationMap = assetUtil.initLocationGroupMap(nlyteAPIclient);
       HashMap<Integer, Manufacturer> manufacturerMap = assetUtil.initManufacturersMap(nlyteAPIclient);
       HashMap<Integer, Material> cabinetMaterialMap = new HashMap<Integer, Material>();
@@ -434,7 +437,7 @@ public class NlyteDataService implements AsyncService {
          cabinetMaterialMap.put(material.getMaterialID(), material);
       }
       List<Asset> cabinetsNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,
-            manufacturerMap, cabinetMaterialMap, AssetCategory.Cabinet);
+            manufacturerMap, cabinetMaterialMap, AssetCategory.Cabinet, chassisMountedAssetNumberAndChassisIdMap);
       if(cabinetsNeedToSaveOrUpdate.isEmpty()) {
          logger.info("No cabinet asset need to save");
       }else {
@@ -442,22 +445,8 @@ public class NlyteDataService implements AsyncService {
          logger.info("Finish sync the cabinets data for: " + nlyte.getName()+", size: " +cabinetsNeedToSaveOrUpdate.size());
       }
 
-
       //init cabinetIdAndNameMap
       HashMap<Integer,String> cabinetIdAndNameMap = getCabinetIdAndNameMap(nlyteAssets);
-
-      nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Server);
-      nlyteAssets = supplementCabinetName(cabinetIdAndNameMap, nlyteAssets);
-      HashMap<Integer, Material> materialMap = assetUtil.initServerMaterialsMap(nlyteAPIclient);
-      List<Asset> serversNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,
-            manufacturerMap, materialMap, AssetCategory.Server);
-      if(serversNeedToSaveOrUpdate.isEmpty()) {
-         logger.info("No server asset need to save");
-      }else {
-         restClient.saveAssets(serversNeedToSaveOrUpdate);
-         logger.info("Finish sync the servers data for: " + nlyte.getName()+", size: "+serversNeedToSaveOrUpdate.size());
-      }
-
 
       nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Chassis);
       nlyteAssets = supplementCabinetName(cabinetIdAndNameMap, nlyteAssets);
@@ -469,12 +458,27 @@ public class NlyteDataService implements AsyncService {
          chassisMaterialMap.put(material.getMaterialID(), material);
       }
       List<Asset> chassisNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,
-            manufacturerMap, chassisMaterialMap, AssetCategory.Chassis);
+            manufacturerMap, chassisMaterialMap, AssetCategory.Chassis, chassisMountedAssetNumberAndChassisIdMap);
       if(chassisNeedToSaveOrUpdate.isEmpty()) {
          logger.info("No chassis asset need to save");
       }else {
          restClient.saveAssets(chassisNeedToSaveOrUpdate);
          logger.info("Finish sync the chassis data for: " + nlyte.getName()+", size: "+chassisNeedToSaveOrUpdate.size());
+      }
+
+      List<Asset> chassisFromFlowgate = restClient.getAllAssetsBySourceAndType(nlyte.getId(), AssetCategory.Chassis);
+      chassisMountedAssetNumberAndChassisIdMap = generateMountedAssetNumberAndChassisAssetIdMap(chassisFromFlowgate);
+
+      nlyteAssets = nlyteAPIclient.getAssets(true, AssetCategory.Server);
+      nlyteAssets = supplementCabinetName(cabinetIdAndNameMap, nlyteAssets);
+      HashMap<Integer, Material> materialMap = assetUtil.initServerMaterialsMap(nlyteAPIclient);
+      List<Asset> serversNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,
+            manufacturerMap, materialMap, AssetCategory.Server,chassisMountedAssetNumberAndChassisIdMap);
+      if(serversNeedToSaveOrUpdate.isEmpty()) {
+         logger.info("No server asset need to save");
+      }else {
+         restClient.saveAssets(serversNeedToSaveOrUpdate);
+         logger.info("Finish sync the servers data for: " + nlyte.getName()+", size: "+serversNeedToSaveOrUpdate.size());
       }
 
       HashMap<Integer, Material> pduMaterialMap = new HashMap<Integer, Material>();
@@ -487,7 +491,7 @@ public class NlyteDataService implements AsyncService {
          pduMaterialMap.put(material.getMaterialID(), material);
       }
       List<Asset> pDUsNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets, locationMap,
-            manufacturerMap, pduMaterialMap, AssetCategory.PDU);
+            manufacturerMap, pduMaterialMap, AssetCategory.PDU, chassisMountedAssetNumberAndChassisIdMap);
       if(pDUsNeedToSaveOrUpdate.isEmpty()) {
          logger.info("No pdu asset need to save");
       }else {
@@ -505,7 +509,7 @@ public class NlyteDataService implements AsyncService {
          networkMaterialMap.put(material.getMaterialID(), material);
       }
       List<Asset> networkersNeedToSaveOrUpdate = generateAssets(nlyte.getId(), nlyteAssets,
-            locationMap, manufacturerMap, networkMaterialMap, AssetCategory.Networks);
+            locationMap, manufacturerMap, networkMaterialMap, AssetCategory.Networks,chassisMountedAssetNumberAndChassisIdMap);
       if(networkersNeedToSaveOrUpdate.isEmpty()) {
          logger.info("No network asset need to save");
       }else {
@@ -515,15 +519,45 @@ public class NlyteDataService implements AsyncService {
 
    }
 
+   public HashMap<Long,String> generateMountedAssetNumberAndChassisAssetIdMap(List<Asset> chassisFromFlowgate){
+      HashMap<Long,String> chassisMountedAssetNumberAndChassisIdMap = new HashMap<Long,String>();
+      for(Asset asset : chassisFromFlowgate) {
+         HashMap<String, String> justficationMap = asset.getJustificationfields();
+         String chassisInfo = justficationMap.get(FlowgateConstant.CHASSIS);
+         Map<String, String> chassisInfoMap = null;
+         List<FlowgateChassisSlot> flowgateChassisSlots = null;
+         if(chassisInfo != null) {
+            try {
+               chassisInfoMap = mapper.readValue(chassisInfo, new TypeReference<Map<String,String>>() {});
+               String chassisSlots = chassisInfoMap.get(FlowgateConstant.CHASSISSLOTS);
+               flowgateChassisSlots = mapper.readValue(chassisSlots, new TypeReference<List<FlowgateChassisSlot>>() {});
+            } catch (Exception e) {
+               logger.error("Failed to read the data of chassis slots, error: "+ e.getMessage());
+               continue;
+            }
+            if(flowgateChassisSlots != null && !flowgateChassisSlots.isEmpty()) {
+               for(FlowgateChassisSlot slot: flowgateChassisSlots) {
+                  if(slot.getMountedAssetNumber() != null) {
+                     chassisMountedAssetNumberAndChassisIdMap.put(slot.getMountedAssetNumber().longValue(), asset.getId());
+                  }
+               }
+            }
+         }else {
+            continue;
+         }
+      }
+      return chassisMountedAssetNumberAndChassisIdMap;
+   }
+
    public List<Asset> generateAssets(String nlyteSource, List<NlyteAsset> nlyteAssets,
          HashMap<Integer, LocationGroup> locationMap,
          HashMap<Integer, Manufacturer> manufacturerMap, HashMap<Integer, Material> materialMap,
-         AssetCategory category) {
+         AssetCategory category,HashMap<Long,String> chassisMountedAssetNumberAndChassisIdMap) {
       HandleAssetUtil assetUtil = new HandleAssetUtil();
       List<Asset> oldAssetsFromWormhole = restClient.getAllAssetsBySourceAndType(nlyteSource,category);
       Map<Long, Asset> assetsFromWormholeMap = assetUtil.generateAssetsMap(oldAssetsFromWormhole);
       List<Asset> allAssetsFromNlyte = assetUtil.getAssetsFromNlyte(nlyteSource, nlyteAssets,
-            locationMap, materialMap, manufacturerMap);
+            locationMap, materialMap, manufacturerMap, chassisMountedAssetNumberAndChassisIdMap);
       return assetUtil.handleAssets(allAssetsFromNlyte, assetsFromWormholeMap);
    }
 
@@ -539,7 +573,7 @@ public class NlyteDataService implements AsyncService {
       assetUtil.filterAssetBySourceAndCategory(allMappedAssets, nlyteSource, category);
 
       List<Asset> assetsFromNlyte = assetUtil.getAssetsFromNlyte(nlyteSource, nlyteAssets,
-            locationMap, materialMap, manufacturerMap);
+            locationMap, materialMap, manufacturerMap, null);
       Map<Long, Asset> assetsFromNlyteMap = assetUtil.generateAssetsMap(assetsFromNlyte);
       List<Asset> updateAssets = new ArrayList<Asset>();
       for (Asset asset : allMappedAssets) {
