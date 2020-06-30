@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -76,6 +77,10 @@ public class AssetService {
    }
 
    public List<MetricData> getPduMetricsDataById(String assetID, long starttime, int duration){
+      Optional<Asset> pduAssetOptional = assetRepository.findById(assetID);
+      if(!pduAssetOptional.isPresent()) {
+         return null;
+      }
       List<RealTimeData> pduMetricsRealtimeDatas =
             realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
       List<ValueUnit> valueunits = new ArrayList<>();
@@ -94,7 +99,7 @@ public class AssetService {
       //pdu metrics data,such as power/current/voltage
       valueunits.addAll(getValueUnits(pduMetricsRealtimeDatas, metricNames));
 
-      Asset pdu = assetRepository.findOne(assetID);
+      Asset pdu = pduAssetOptional.get();
       //sensor metrics data, such as temperature or humidity
       Map<String, Map<String, Map<String, String>>> formulars = pdu.getMetricsformulars();
       Map<String, Map<String, String>> sensorFormulars = null;
@@ -119,7 +124,11 @@ public class AssetService {
    }
 
    public List<MetricData> getServerMetricsDataById(String assetID, long starttime, int duration){
-      Asset server = assetRepository.findOne(assetID);
+      Optional<Asset> serverAssetOptional = assetRepository.findById(assetID);
+      if(!serverAssetOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("asset", "id", assetID);
+      }
+      Asset server = serverAssetOptional.get();
       List<MetricData> result = new ArrayList<MetricData>();
       Map<String, Map<String, Map<String, String>>> metricFormula = server.getMetricsformulars();
       if(metricFormula == null || metricFormula.isEmpty()) {
@@ -495,10 +504,11 @@ public class AssetService {
    }
 
    public void mappingFacilityForServerAsset(Asset asset) {
-      Asset oldAsset = assetRepository.findOne(asset.getId());
-      if (oldAsset == null) {
+      Optional<Asset> oldAssetOptional = assetRepository.findById(asset.getId());
+      if(!oldAssetOptional.isPresent()) {
          throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "Asset not found", null);
       }
+      Asset oldAsset = oldAssetOptional.get();
       List<String> pdus = asset.getPdus();
       if(pdus != null) {
          oldAsset.setPdus(pdus);
@@ -550,9 +560,11 @@ public class AssetService {
    private Map<String,String> generatePositionAndIdMap(Map<String,String> sensorIdMap){
       Map<String,String> positionAndSensorIdMap = new HashMap<String,String>();
       for(String sensorId : sensorIdMap.keySet()) {
-         Asset sensor = assetRepository.findOne(sensorId);
-         String position = getSensorPositionInfo(sensor);
-         positionAndSensorIdMap.put(position, sensorId);
+         Optional<Asset> sensorOptional = assetRepository.findById(sensorId);
+         if(sensorOptional.isPresent()) {
+            String position = getSensorPositionInfo(sensorOptional.get());
+            positionAndSensorIdMap.put(position, sensorId);
+         }
       }
       return positionAndSensorIdMap;
    }

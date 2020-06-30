@@ -28,6 +28,7 @@ import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Service;
+
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.PrivilegeResourceMapping;
 import com.vmware.flowgate.common.model.WormholeResources;
@@ -61,7 +62,7 @@ public class PrepareSecurityMetadataSourceService
    @PostConstruct
    public void loadResourceDefine(){
       logger.info("Initialization security resource.");
-      PageRequest pageRequest = new PageRequest(FlowgateConstant.defaultPageNumber-1, FlowgateConstant.maxPageSize);
+      PageRequest pageRequest = PageRequest.of(FlowgateConstant.defaultPageNumber-1, FlowgateConstant.maxPageSize);
       Page<PrivilegeResourceMapping> mappings = mappingReposity.findAll(pageRequest);
       List<PrivilegeResourceMapping> privilegeResourceMappings = mappings.getContent();
       HashMap<String,List<Map<AntPathRequestMatcher,Collection<ConfigAttribute>>>> resourceMappings = initResourceMap(privilegeResourceMappings);
@@ -155,12 +156,12 @@ public class PrepareSecurityMetadataSourceService
 
    public HashMap<String, List<String>> prepareRolePrivilegeMap() {
       List<WormholeRole> roles = new ArrayList<WormholeRole>();
-      PageRequest pageRequest = new PageRequest(FlowgateConstant.defaultPageNumber-1, FlowgateConstant.maxPageSize);
+      PageRequest pageRequest = PageRequest.of(FlowgateConstant.defaultPageNumber-1, FlowgateConstant.maxPageSize);
       Page<WormholeRole> flwogateRoles = roleRepository.findAll(pageRequest);
       roles.addAll(flwogateRoles.getContent());
       if(flwogateRoles.getTotalPages()>1) {
          for(int i = 1; i<flwogateRoles.getTotalPages(); i++) {
-            PageRequest page = new PageRequest(i, FlowgateConstant.maxPageSize);
+            PageRequest page = PageRequest.of(i, FlowgateConstant.maxPageSize);
             Page<WormholeRole> rolePage = roleRepository.findAll(page);
             roles.addAll(rolePage.getContent());
          }
