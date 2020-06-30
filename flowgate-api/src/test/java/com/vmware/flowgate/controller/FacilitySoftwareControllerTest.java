@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.controller;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -12,6 +12,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,6 +54,7 @@ import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.common.model.IntegrationStatus.Status;
 import com.vmware.flowgate.common.model.WormholeUser;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.exception.WormholeRequestException;
@@ -141,7 +143,7 @@ public class FacilitySoftwareControllerTest {
                   fieldWithPath("verifyCert").description(
                         "Whether to verify the certificate when accessing the serverURL."),
                   fieldWithPath("advanceSetting").description("advanceSetting"),
-                  fieldWithPath("integrationStatus").description("The status of integration."))))
+                  subsectionWithPath("integrationStatus").description("The status of integration."))))
             .andReturn();
       if (result.getResolvedException() != null) {
          throw result.getResolvedException();
@@ -154,7 +156,7 @@ public class FacilitySoftwareControllerTest {
    @Test
    public void syncFacilityServerDataExample() throws JsonProcessingException, Exception {
       expectedEx.expect(WormholeRequestException.class);
-      expectedEx.expectMessage("Invalid ID");
+      expectedEx.expectMessage("Failed to find FacilitySoftwareConfig with field: id  and value: 5c3704c69662e37c30a8db2f");
       MvcResult result = this.mockMvc
             .perform(post("/v1/facilitysoftware/syncdatabyserverid/5c3704c69662e37c30a8db2f"))
             .andReturn();
@@ -181,7 +183,7 @@ public class FacilitySoftwareControllerTest {
             throw result.getResolvedException();
          }
       }finally {
-         facilitySoftwareRepository.delete(facilitySoftware.getId());
+         facilitySoftwareRepository.deleteById(facilitySoftware.getId());
       }
    }
 
@@ -204,7 +206,7 @@ public class FacilitySoftwareControllerTest {
             throw result.getResolvedException();
          }
       }finally {
-         facilitySoftwareRepository.delete(facilitySoftware.getId());
+         facilitySoftwareRepository.deleteById(facilitySoftware.getId());
       }
    }
 
@@ -245,11 +247,11 @@ public class FacilitySoftwareControllerTest {
                      fieldWithPath("userId").description("userId"),
                      fieldWithPath("verifyCert").description("Whether to verify the certificate when accessing the serverURL."),
                      fieldWithPath("advanceSetting").description("advanceSetting"),
-                     fieldWithPath("integrationStatus").description("The status of integration."))));
+                     subsectionWithPath("integrationStatus").description("The status of integration."))));
       } catch (Exception e) {
          TestCase.fail();
       }finally {
-         facilitySoftwareRepository.delete(facilitySoftware.getId());
+         facilitySoftwareRepository.deleteById(facilitySoftware.getId());
       }
    }
 
@@ -286,11 +288,13 @@ public class FacilitySoftwareControllerTest {
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
                      fieldWithPath("advanceSetting").description("advanceSetting"),
-                     fieldWithPath("integrationStatus").description("The status of integration."))));
+                     fieldWithPath("integrationStatus.status").type(IntegrationStatus.Status.class).description("The status of integration.").optional(),
+                     fieldWithPath("integrationStatus.detail").type(String.class).description("If the status is error, it means error message").optional(),
+                     fieldWithPath("integrationStatus.retryCounter").type(JsonFieldType.NUMBER).description("Retry counter").optional())));
       } catch (Exception e) {
          TestCase.fail();
       }finally {
-         facilitySoftwareRepository.delete(facilitySoftware.getId());
+         facilitySoftwareRepository.deleteById(facilitySoftware.getId());
       }
    }
 
@@ -327,8 +331,8 @@ public class FacilitySoftwareControllerTest {
                            .description("The number of data displayed per page."))));
 
       }finally {
-         facilitySoftwareRepository.delete(facilitySoftware.getId());
-         userRepository.delete(user.getId());
+         facilitySoftwareRepository.deleteById(facilitySoftware.getId());
+         userRepository.deleteById(user.getId());
       }
    }
 
@@ -366,8 +370,8 @@ public class FacilitySoftwareControllerTest {
                            .description("The number of data displayed per page."))));
 
       }finally {
-         facilitySoftwareRepository.delete(facilitySoftware.getId());
-         userRepository.delete(user.getId());
+         facilitySoftwareRepository.deleteById(facilitySoftware.getId());
+         userRepository.deleteById(user.getId());
       }
    }
 
@@ -405,8 +409,8 @@ public class FacilitySoftwareControllerTest {
                            .description("The number of data displayed per page."))));
 
       }finally {
-         facilitySoftwareRepository.delete(facilitySoftware.getId());
-         userRepository.delete(user.getId());
+         facilitySoftwareRepository.deleteById(facilitySoftware.getId());
+         userRepository.deleteById(user.getId());
       }
    }
 
@@ -437,7 +441,9 @@ public class FacilitySoftwareControllerTest {
               fieldWithPath("userId").description(
                       "userId"),
               fieldWithPath("verifyCert").description(
-                      "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN)
+                      "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
+              subsectionWithPath("integrationStatus").description("The status of integration."),
+              fieldWithPath("advanceSetting").description("Advance setting.").type(JsonFieldType.OBJECT)
               };
       try {
          this.mockMvc
@@ -447,8 +453,8 @@ public class FacilitySoftwareControllerTest {
                         fieldWithPath("[]").description("An array of facility software configs"))
                         .andWithPrefix("[].", fieldpath)));
       }finally {
-         facilitySoftwareRepository.delete(facilitySoftware1.getId());
-         facilitySoftwareRepository.delete(facilitySoftware2.getId());
+         facilitySoftwareRepository.deleteById(facilitySoftware1.getId());
+         facilitySoftwareRepository.deleteById(facilitySoftware2.getId());
       }
 
    }
@@ -480,6 +486,9 @@ public class FacilitySoftwareControllerTest {
       HashMap advanceSetting = new HashMap<AdvanceSettingType, String>();
       example.setAdvanceSetting(advanceSetting);
       IntegrationStatus integrationStatus = new IntegrationStatus();
+      integrationStatus.setDetail("");
+      integrationStatus.setRetryCounter(0);
+      integrationStatus.setStatus(Status.ACTIVE);
       example.setIntegrationStatus(integrationStatus);
       return example;
    }

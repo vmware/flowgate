@@ -82,7 +82,7 @@ public class SensorSettingControllerTest {
                   fieldWithPath("maxValue").description("Value type is string")
                  )));
 
-      sensorSettingRepository.delete(sensorsetting.getId());
+      sensorSettingRepository.deleteById(sensorsetting.getId());
    }
    @Test
    public void udapteAnSensorSetting() throws JsonProcessingException, Exception {
@@ -103,7 +103,7 @@ public class SensorSettingControllerTest {
                   fieldWithPath("maxValue").description("Value type is string")
                  )));
 
-      sensorSettingRepository.delete(sensorsetting.getId());
+      sensorSettingRepository.deleteById(sensorsetting.getId());
    }
    @Test
    public void sensorSettingQueryByPageExample() throws Exception {
@@ -127,7 +127,7 @@ public class SensorSettingControllerTest {
                   fieldWithPath("pageSize")
                   .description("The number of data displayed per page."))));
 
-      sensorSettingRepository.delete(sensorsetting.getId());
+      sensorSettingRepository.deleteById(sensorsetting.getId());
    }
 
    @Test
@@ -148,7 +148,7 @@ public class SensorSettingControllerTest {
                   fieldWithPath("maxValue").description("Value type is string")
                  )));
 
-      sensorSettingRepository.delete(sensorsetting.getId());
+      sensorSettingRepository.deleteById(sensorsetting.getId());
    }
 
    @Test

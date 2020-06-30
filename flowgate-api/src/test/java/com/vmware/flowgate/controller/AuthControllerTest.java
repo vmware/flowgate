@@ -4,18 +4,18 @@
 */
 package com.vmware.flowgate.controller;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.relaxedRequestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +40,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
-import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -124,7 +123,7 @@ public class AuthControllerTest {
       fieldWithPath("userName").description("A user name for flowgate Project"),
       fieldWithPath("password").description("A password for flowgate Project."))))
       .andReturn();
-      userRepository.delete(wormholeuser.getId());
+      userRepository.deleteById(wormholeuser.getId());
    }
 
    @Test
@@ -152,8 +151,6 @@ public class AuthControllerTest {
       wormholeuser.setPassword("$2a$10$Vm8MLIkGwinuICfcqW5RDOoE.aJqnvsaPhnxl7.N4H7oLKVIu3o0.");
       wormholeuser.setRoleNames(Arrays.asList("admin"));
       userRepository.save(wormholeuser);
-//      Thread.sleep(3000);
-      System.out.println("create user time : "+wormholeuser.getLastPasswordResetDate());
       MvcResult result = this.mockMvc
       .perform(post("/v1/auth/token").contentType(MediaType.APPLICATION_JSON)
       .content("{\"userName\":\"tomRefresh\",\"password\":\"123456\"}"))
@@ -186,7 +183,7 @@ public class AuthControllerTest {
       //JwtTokenUtil jwtUtil = new JwtTokenUtil();
       DecodedJWT jwt = jwtUtil.getDecodedJwt(result1.getResponse().getHeader("Authorization"));
       TestCase.assertEquals("tomRefresh", jwt.getSubject());
-      userRepository.delete(wormholeuser.getId());
+      userRepository.deleteById(wormholeuser.getId());
    }
 
    @Test
@@ -226,7 +223,7 @@ public class AuthControllerTest {
                       fieldWithPath("userGroupIDs").description("userGroupIDs").type(List.class),
                       fieldWithPath("lastPasswordResetDate").description("lastPasswordResetDate").type(JsonFieldType.NUMBER))))
               .andReturn();
-       userRepository.delete(user.getId());
+       userRepository.deleteById(user.getId());
    }
    @Test
    public void deleteUserExample() throws Exception {
@@ -248,6 +245,7 @@ public class AuthControllerTest {
       List<String> rolenames = new ArrayList<String>();
       rolenames.add("admin");
       WormholeUser adminUser = new WormholeUser();
+      adminUser.setUserName("admin");
       adminUser.setRoleNames(rolenames);
       adminUser.setId(userId);
       userRepository.save(adminUser);
@@ -278,8 +276,8 @@ public class AuthControllerTest {
                               .type(JsonFieldType.NUMBER))))
             .andReturn();
 
-      userRepository.delete(user.getId());
-      userRepository.delete(adminUser.getId());
+      userRepository.deleteById(user.getId());
+      userRepository.deleteById(adminUser.getId());
    }
 
    @Test
@@ -290,6 +288,7 @@ public class AuthControllerTest {
       List<String> rolenames = new ArrayList<String>();
       rolenames.add("admin");
       WormholeUser adminUser = new WormholeUser();
+      adminUser.setUserName("admin");
       adminUser.setRoleNames(rolenames);
       adminUser.setId(userId);
       userRepository.save(adminUser);
@@ -320,8 +319,8 @@ public class AuthControllerTest {
                               .type(JsonFieldType.NUMBER))))
             .andReturn();
 
-      userRepository.delete(user.getId());
-      userRepository.delete(adminUser.getId());
+      userRepository.deleteById(user.getId());
+      userRepository.deleteById(adminUser.getId());
    }
 
    @Test
@@ -355,8 +354,8 @@ public class AuthControllerTest {
                       fieldWithPath("lastPasswordResetDate").description("lastPasswordResetDate").type(JsonFieldType.NUMBER))))
               .andReturn();
 
-       userRepository.delete(user.getId());
-       userRepository.delete(adminUser.getId());
+       userRepository.deleteById(user.getId());
+       userRepository.deleteById(adminUser.getId());
    }
 
    @Test
@@ -374,7 +373,7 @@ public class AuthControllerTest {
       this.mockMvc.perform(get("/v1/auth/user/"+sysuser.getId()+""))
               .andExpect(status().isOk())
               .andReturn();
-      userRepository.delete(sysuser.getId());
+      userRepository.deleteById(sysuser.getId());
    }
 
    @Test
@@ -395,7 +394,7 @@ public class AuthControllerTest {
               .andExpect(status().isForbidden())
               .andReturn();
       if (result.getResolvedException() != null) {
-         userRepository.delete(userId);
+         userRepository.deleteById(userId);
          throw result.getResolvedException();
       }
    }
@@ -429,8 +428,8 @@ public class AuthControllerTest {
                     fieldWithPath("userGroupIDs").description("userGroupIDs").type(List.class),
                     fieldWithPath("lastPasswordResetDate").description("lastPasswordResetDate").type(JsonFieldType.NUMBER))))
               .andReturn();
-      userRepository.delete(userId);
-      userRepository.delete(user.getId());
+      userRepository.deleteById(userId);
+      userRepository.deleteById(user.getId());
    }
 
    @Test
@@ -449,7 +448,7 @@ public class AuthControllerTest {
       this.mockMvc.perform(get("/v1/auth/user/username/"+sysuser.getUserName()+""))
               .andExpect(status().isOk())
               .andReturn();
-      userRepository.delete(sysuser.getId());
+      userRepository.deleteById(sysuser.getId());
    }
 
    @Test
@@ -471,7 +470,7 @@ public class AuthControllerTest {
               .andExpect(status().isForbidden())
               .andReturn();
       if (result.getResolvedException() != null) {
-         userRepository.delete(sysuser.getId());
+         userRepository.deleteById(sysuser.getId());
          throw result.getResolvedException();
       }
    }
@@ -488,7 +487,7 @@ public class AuthControllerTest {
                       fieldWithPath("pageSize")
                             .description("The number of data displayed per page."))));
 
-       userRepository.delete(user1.getId());
+       userRepository.deleteById(user1.getId());
 
    }
 
@@ -502,7 +501,7 @@ public class AuthControllerTest {
                       fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
                       fieldWithPath("roleName").description("roleName."),
                       fieldWithPath("privilegeNames").description("list of privilegeNames").type(List.class))));
-       roleRepository.delete(role.getId());
+       roleRepository.deleteById(role.getId());
    }
 
    @Test
@@ -516,7 +515,7 @@ public class AuthControllerTest {
                       fieldWithPath("roleName").description("roleName."),
                       fieldWithPath("privilegeNames").description("list of privilegeNames").type(List.class))));
 
-       roleRepository.delete(role.getId());
+       roleRepository.deleteById(role.getId());
    }
    @Test
    public void readRoleByPageExample() throws Exception {
@@ -531,7 +530,7 @@ public class AuthControllerTest {
                             .description("The number of data displayed per page."))));
 
 
-       roleRepository.delete(role.getId());
+       roleRepository.deleteById(role.getId());
    }
 
    @Test
@@ -563,9 +562,9 @@ public class AuthControllerTest {
                 fieldWithPath("roleName").description("roleName."),
                 fieldWithPath("privilegeNames").description("privilegeNames").type(String.class))))
               .andReturn();
-       WormholeRole role1 =  roleRepository.findOne(role.getId());
+       WormholeRole role1 =  roleRepository.findById(role.getId()).get();
        TestCase.assertEquals("sddcuser", role1.getRoleName());
-       roleRepository.delete(role.getId());
+       roleRepository.deleteById(role.getId());
    }
 
    AuthToken createToken(){

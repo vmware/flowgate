@@ -165,25 +165,25 @@ public class SystemSummaryTest {
          TestCase.assertEquals(2, data.getVroNum());
          TestCase.assertEquals(2, data.getVcNum());
       }finally {
-         facilityrepo.delete(nlyte1.getId());
-         facilityrepo.delete(powerIQ1.getId());
-         assetrepo.delete(nlyteServer1.getId());
-         assetrepo.delete(nlyteServer2.getId());
-         assetrepo.delete(nlytePDU1.getId());
-         assetrepo.delete(nlytePDU2.getId());
-         assetrepo.delete(powerIQSensor1.getId());
-         assetrepo.delete(powerIQSensor2.getId());
-         assetrepo.delete(powerIQSensor3.getId());
-         assetrepo.delete(powerIQSensor4.getId());
-         sddcrepo.delete(vc1.getId());
-         sddcrepo.delete(vc2.getId());
-         sddcrepo.delete(vro1.getId());
-         sddcrepo.delete(vro2.getId());
-         mappingrepo.delete(server1.getId());
-         mappingrepo.delete(server2.getId());
-         mappingrepo.delete(server3.getId());
-         mappingrepo.delete(server4.getId());
-         mappingrepo.delete(server5.getId());
+         facilityrepo.deleteById(nlyte1.getId());
+         facilityrepo.deleteById(powerIQ1.getId());
+         assetrepo.deleteById(nlyteServer1.getId());
+         assetrepo.deleteById(nlyteServer2.getId());
+         assetrepo.deleteById(nlytePDU1.getId());
+         assetrepo.deleteById(nlytePDU2.getId());
+         assetrepo.deleteById(powerIQSensor1.getId());
+         assetrepo.deleteById(powerIQSensor2.getId());
+         assetrepo.deleteById(powerIQSensor3.getId());
+         assetrepo.deleteById(powerIQSensor4.getId());
+         sddcrepo.deleteById(vc1.getId());
+         sddcrepo.deleteById(vc2.getId());
+         sddcrepo.deleteById(vro1.getId());
+         sddcrepo.deleteById(vro2.getId());
+         mappingrepo.deleteById(server1.getId());
+         mappingrepo.deleteById(server2.getId());
+         mappingrepo.deleteById(server3.getId());
+         mappingrepo.deleteById(server4.getId());
+         mappingrepo.deleteById(server5.getId());
       }
    }
 
