@@ -7,6 +7,7 @@ package com.vmware.flowgate.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.servlet.http.Cookie;
@@ -142,10 +143,10 @@ public class AuthController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/user/{id}", method = RequestMethod.DELETE)
    public void deleteUser(@PathVariable String id) {
-      if (userRepository.findOne(id) == null) {
+      if (!userRepository.findById(id).isPresent()) {
          throw new WormholeRequestException(HttpStatus.NOT_FOUND, "User not found", null);
       }
-      userRepository.delete(id);
+      userRepository.deleteById(id);
    }
 
    //Update a user
@@ -153,12 +154,14 @@ public class AuthController {
    @RequestMapping(value = "/user", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateUser(@RequestBody WormholeUser user, HttpServletRequest request) {
       WormholeUserDetails userDetail = accessTokenService.getCurrentUser(request);
-      WormholeUser currentUser = userRepository.findOne(userDetail.getUserId());
+      Optional<WormholeUser> currentUserOptional = userRepository.findById(userDetail.getUserId());
+      WormholeUser currentUser = currentUserOptional.get();
       WormholeUser old = null;
-      if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
-         old = userRepository.findOne(user.getId());
-      } else if (currentUser.getUserName().equals(user.getUserName())) {
+      if (currentUser.getUserName().equals(user.getUserName())) {
          old = currentUser;
+      }else if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
+         Optional<WormholeUser> oldUserOptional = userRepository.findById(user.getId());
+         old = oldUserOptional.get();
       } else {
          throw new WormholeRequestException(HttpStatus.FORBIDDEN, "Forbidden", null);
       }
@@ -184,12 +187,14 @@ public class AuthController {
    public WormholeUser readUser(@PathVariable(required = false) String id,
          HttpServletRequest request) {
       WormholeUserDetails userDetail = accessTokenService.getCurrentUser(request);
-      WormholeUser currentUser = userRepository.findOne(userDetail.getUserId());
+      Optional<WormholeUser> currentUserOptional = userRepository.findById(userDetail.getUserId());
       WormholeUser user = null;
-      if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
-         user = userRepository.findOne(id);
-      } else if (currentUser.getId().equals(id)) {
+      WormholeUser currentUser = currentUserOptional.get();
+      if (currentUser.getId().equals(id)) {
          user = currentUser;
+      }else if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
+         Optional<WormholeUser> userOptional = userRepository.findById(id);
+         user = userOptional.get();
       } else {
          throw new WormholeRequestException(HttpStatus.FORBIDDEN, "Forbidden", null);
       }
@@ -204,8 +209,9 @@ public class AuthController {
    public WormholeUser readUserByName(@PathVariable(required = false) String name,
          HttpServletRequest request) {
       WormholeUserDetails userDetail = accessTokenService.getCurrentUser(request);
-      WormholeUser currentUser = userRepository.findOne(userDetail.getUserId());
+      Optional<WormholeUser> currentUserOptional = userRepository.findById(userDetail.getUserId());
       WormholeUser user = null;
+      WormholeUser currentUser = currentUserOptional.get();
       if (currentUser.getRoleNames().contains(FlowgateConstant.Role_admin)) {
          user = userRepository.findOneByUserName(name);
       } else if (currentUser.getUserName().equals(name)) {
@@ -231,7 +237,7 @@ public class AuthController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+      PageRequest pageRequest = PageRequest.of(currentPage - 1, pageSize);
       Page<WormholeUser> pageUsers = userRepository.findAll(pageRequest);
       DesensitizationUserData.desensitizationUser(pageUsers.getContent());
       return pageUsers;
@@ -253,7 +259,8 @@ public class AuthController {
    // Read a role
    @RequestMapping(value = "/role/{id}", method = RequestMethod.GET)
    public WormholeRole readRole(@PathVariable String id) {
-      return roleRepository.findOne(id);
+      Optional<WormholeRole> roleOptional = roleRepository.findById(id);
+      return roleOptional.get();
    }
 
    // Read roles
@@ -268,7 +275,7 @@ public class AuthController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+      PageRequest pageRequest = PageRequest.of(currentPage - 1, pageSize);
       return roleRepository.findAll(pageRequest);
    }
 
@@ -276,17 +283,18 @@ public class AuthController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/role/{id}", method = RequestMethod.DELETE)
    public void deleteRole(@PathVariable String id) {
-      roleRepository.delete(id);
+      roleRepository.deleteById(id);
    }
 
    //update a role
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/role", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateRole(@RequestBody WormholeRole role) {
-      WormholeRole old = roleRepository.findOne(role.getId());
-      if (old == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND, "Role not found", null);
+      Optional<WormholeRole> oldRoleOptional = roleRepository.findById(role.getId());
+      if(!oldRoleOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("Role", "id", role.getId());
       }
+      WormholeRole old = oldRoleOptional.get();
       if (role.getRoleName() != null && !"".equals(role.getRoleName().trim())) {
          old.setRoleName(role.getRoleName());
       }
