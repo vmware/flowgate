@@ -7,7 +7,6 @@
 	<name>flowgate common data model</name>
 	<description>flowgate common data model</description>
 	<properties>
-		<spring.data.mongodb.version>1.4.7.RELEASE</spring.data.mongodb.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
