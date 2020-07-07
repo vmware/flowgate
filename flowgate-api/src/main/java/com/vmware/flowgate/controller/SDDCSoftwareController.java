@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -104,17 +105,18 @@ public class SDDCSoftwareController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
    public void delete(@PathVariable String id) {
-      sddcRepository.delete(id);
+      sddcRepository.deleteById(id);
    }
 
    //only modify the status of integration,and not verify information of server.
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/status", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateStatus(@RequestBody SDDCSoftwareConfig server) {
-      SDDCSoftwareConfig old = sddcRepository.findOne(server.getId());
-      if (old == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND, "SDDCSoftware not found", null);
+      Optional<SDDCSoftwareConfig> oldSddcOptional = sddcRepository.findById(server.getId());
+      if (!oldSddcOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("SDDCSoftwareConfig", "id", server.getId());
       }
+      SDDCSoftwareConfig old = oldSddcOptional.get();
       old.setIntegrationStatus(server.getIntegrationStatus());
       sddcRepository.save(old);
    }
@@ -123,11 +125,11 @@ public class SDDCSoftwareController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
    public void updateSDDCSoftwareConfig(@RequestBody SDDCSoftwareConfig server) {
-      SDDCSoftwareConfig old = sddcRepository.findOne(server.getId());
-      if (old == null) {
-         throw new WormholeRequestException(HttpStatus.NOT_FOUND, "SDDCSoftware not found", null);
+      Optional<SDDCSoftwareConfig> oldSddcOptional = sddcRepository.findById(server.getId());
+      if (!oldSddcOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("SDDCSoftwareConfig", "id", server.getId());
       }
-
+      SDDCSoftwareConfig old = oldSddcOptional.get();
       switch (server.getType()) {
       case VRO:
          serverValidationService.validateVROServer(server);
@@ -153,7 +155,8 @@ public class SDDCSoftwareController {
    //get a server
    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
    public SDDCSoftwareConfig getServerConfig(@PathVariable String id) {
-      SDDCSoftwareConfig server = sddcRepository.findOne(id);
+      Optional<SDDCSoftwareConfig> sddcOptional = sddcRepository.findById(id);
+      SDDCSoftwareConfig server = sddcOptional.get();
       if (server == null) {
          return null;
       }
@@ -190,7 +193,7 @@ public class SDDCSoftwareController {
       } else if (pageSize > FlowgateConstant.maxPageSize) {
          pageSize = FlowgateConstant.maxPageSize;
       }
-      PageRequest pageRequest = new PageRequest(currentPage - 1, pageSize);
+      PageRequest pageRequest = PageRequest.of(currentPage - 1, pageSize);
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       try {
          Page<SDDCSoftwareConfig> result =
@@ -231,7 +234,8 @@ public class SDDCSoftwareController {
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/syncdatabyserverid/{id}", method = RequestMethod.POST)
    public void syncSDDCServerData(@PathVariable("id") String id, HttpServletRequest request) {
-      SDDCSoftwareConfig server = sddcRepository.findOne(id);
+      Optional<SDDCSoftwareConfig> sddcOptional = sddcRepository.findById(id);
+      SDDCSoftwareConfig server = sddcOptional.get();
       String userID =  getCurrentUserID(request);
       if(!userID.equals(server.getUserId())){
          return;

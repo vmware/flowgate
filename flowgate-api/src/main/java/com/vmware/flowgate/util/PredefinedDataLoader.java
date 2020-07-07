@@ -23,7 +23,7 @@ public class PredefinedDataLoader implements CommandLineRunner {
    }
 
    private void syncPredefinedJobs() {
-      jobsRepository.save(PredefinedSDDCJobs.ALLJobs);
+      jobsRepository.saveAll(PredefinedSDDCJobs.ALLJobs);
    }
 
 

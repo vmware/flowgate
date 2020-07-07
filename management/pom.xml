@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.4.7.RELEASE</version>
+		<version>2.2.7.RELEASE</version>
 	</parent>
 
 	<properties>
@@ -24,8 +24,9 @@
 		<quartz.version>2.2.3</quartz.version>
 		<flowgate.version>1.1.0</flowgate.version>
 		<vrops.version>1.6</vrops.version>
-		<cloud.version>Camden.SR6</cloud.version>
+		<cloud.version>Hoxton.SR4</cloud.version>
 		<jackson.version>2.10.0</jackson.version>
+		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
 	</properties>
 
 	<dependencyManagement>
@@ -43,7 +44,7 @@
 
 	  	<dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-zuul</artifactId>
+            <artifactId>spring-cloud-starter-netflix-zuul</artifactId>
             <exclusions>
 				<exclusion>
 					<groupId>com.fasterxml.jackson.core</groupId>
