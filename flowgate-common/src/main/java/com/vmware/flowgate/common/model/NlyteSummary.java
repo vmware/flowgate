@@ -12,6 +12,7 @@ public class NlyteSummary {
    private int cabinetNum = 0;
    private int switchNum = 0;
    private int sensorNum = 0;
+   private int chassisNum;
 
    public String getName() {
       return name;
@@ -67,6 +68,14 @@ public class NlyteSummary {
 
    public void setSensorNum(int sensorNum) {
       this.sensorNum = sensorNum;
+   }
+
+   public int getChassisNum() {
+      return chassisNum;
+   }
+
+   public void setChassisNum(int chassisNum) {
+      this.chassisNum = chassisNum;
    }
 
 }

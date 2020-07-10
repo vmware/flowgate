@@ -176,6 +176,9 @@ public class SummaryService {
             case "Networks":
                nlyteSummary.setSwitchNum((Integer)map.get("count"));
                break;
+            case "Chassis":
+               nlyteSummary.setChassisNum((Integer)map.get("count"));
+               break;
             default:
                break;
             }
@@ -206,6 +209,9 @@ public class SummaryService {
                break;
             case "Networks":
                data.setSwitchNum((Integer)map.get("count"));
+               break;
+            case "Chassis":
+               data.setChassisNum((Integer)map.get("count"));
                break;
             default:
                break;
