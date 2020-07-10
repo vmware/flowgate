@@ -333,7 +333,7 @@ export class ServermappingComponent implements OnInit {
   showSensors(id:string, category:string,fillData){
     this.fronTemIds = [];
     this.backTempIds = [];
-    this.fronTemIds = [];
+    this.backHumIds = [];
     this.frontHumIds = [];
     this.mappedSensorAssetModalOpen = true;
     this.category = category;
@@ -403,7 +403,7 @@ export class ServermappingComponent implements OnInit {
   frontTemSensors:AssetModule[] = [];
   backTemSensors:AssetModule[] = [];
   frontHumSensors:AssetModule[] = [];
-  bsckHumSensors:AssetModule[] = [];
+  backHumSensors:AssetModule[] = [];
   
   getSensors(metricName:string, ids:string[]){
     this.currentPageAsset = 1;
@@ -424,7 +424,7 @@ export class ServermappingComponent implements OnInit {
           }else if(metricName == "Front Humidity"){
             this.frontHumSensors.push(sensorAsset);
           }else if(metricName == "Back Humidity"){
-            this.bsckHumSensors.push(sensorAsset);
+            this.backHumSensors.push(sensorAsset);
           }
         }
       });
@@ -435,14 +435,14 @@ export class ServermappingComponent implements OnInit {
     this.metricsDatas.push({"metricName":"Front Temperature","sensors":this.frontTemSensors});
     this.metricsDatas.push({"metricName":"Back Temperature","sensors":this.backTemSensors});
     this.metricsDatas.push({"metricName":"Front Humidity","sensors":this.frontHumSensors});
-    this.metricsDatas.push({"metricName":"Back Humidity","sensors":this.bsckHumSensors});
+    this.metricsDatas.push({"metricName":"Back Humidity","sensors":this.backHumSensors});
   }
   closeMappingSensor(){
     this.mappedSensorAssetModalOpen = false;
     this.frontTemSensors = [];
     this.backTemSensors = [];
     this.frontHumSensors = [];
-    this.bsckHumSensors = [];
+    this.backHumSensors = [];
     this.metricsDatas = [];
   }
 
@@ -463,7 +463,7 @@ export class ServermappingComponent implements OnInit {
     }else if(metricName == "Front Humidity"){
       this.mappedSensors = this.frontHumSensors;
     }else if(metricName == "Back Humidity"){
-      this.mappedSensors =  this.bsckHumSensors;
+      this.mappedSensors =  this.backHumSensors;
     }
   }
   closeSelectSelectSensor(){
@@ -474,7 +474,7 @@ export class ServermappingComponent implements OnInit {
     this.frontTemSensors = [];
     this.backTemSensors = [];
     this.frontHumSensors = [];
-    this.bsckHumSensors = [];
+    this.backHumSensors = [];
     this.showSensors(this.mappingId,this.category,this.fillData);
     this.mappedSensors.forEach(element => {
       element.enable = true;
