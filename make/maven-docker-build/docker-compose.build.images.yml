@@ -7,12 +7,6 @@ services:
       dockerfile: $PWD/baseimage/Dockerfile
     image: baseimage:1.0
     
-  database:
-    build:
-      context: $PWD/database
-      dockerfile: $PWD/database/Dockerfile
-    image: flowgate/database:FLOWGATE_VERSION
-    
   redis:
     build:
       context: $PWD/redis

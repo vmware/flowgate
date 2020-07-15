@@ -106,11 +106,6 @@ buildDockerImages(){
 		cp $OUTPUTJARPATH/$j-*.jar $CURRENTPATH/$j
 	done
 
-	cd $CURRENTPATH
-	chmod a+x $CURRENTPATH/database/entrypoint.sh
-	chmod a+x $CURRENTPATH/database/init.sh
-	chmod a+x $CURRENTPATH/database/initData.sh
-	
 	docker-compose -f $DOCKERCOMPOSEBUILDIMAGESFILE build --force-rm --no-cache
 }
 
@@ -121,7 +116,9 @@ saveDockerImages(){
 	if [ -f "$FLOWGATEIMAGESTAR" ];then
 		rm -f $FLOWGATEIMAGESTAR
 	fi
-
+	
+	docker pull alberthaoyu/database:v1.0
+	docker tag alberthaoyu/database:v1.0 flowgate/database:$FLOWGATE_VERSION
 	docker save flowgate/vro-worker:$FLOWGATE_VERSION flowgate/vc-worker:$FLOWGATE_VERSION flowgate/nlyte-worker:$FLOWGATE_VERSION \
 	flowgate/management:$FLOWGATE_VERSION flowgate/infoblox-worker:$FLOWGATE_VERSION flowgate/labsdb-worker:$FLOWGATE_VERSION \
 	flowgate/poweriq-worker:$FLOWGATE_VERSION flowgate/aggregator:$FLOWGATE_VERSION flowgate/api:$FLOWGATE_VERSION \
