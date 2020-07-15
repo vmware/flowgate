@@ -1,9 +1,6 @@
 name: test nlyte-worker
 
-on:
-  pull_request:
-    paths:
-      - 'nlyte-worker/**'
+on: [pull_request]
 
 jobs:
   build:

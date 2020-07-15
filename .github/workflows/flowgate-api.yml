@@ -1,9 +1,6 @@
 name: test flowgate-api
 
-on:
-  pull_request:
-    paths:
-      - 'flowgate-api/**'
+on: [pull_request]
 
 jobs:
   build:

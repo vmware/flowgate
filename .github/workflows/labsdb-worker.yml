@@ -1,9 +1,6 @@
 name: test labsdb-worker
 
-on:
-  pull_request:
-    paths:
-      - 'labsdb-worker/**'
+on: [pull_request]
 
 jobs:
   build:

@@ -1,9 +1,6 @@
 name: test poweriq-worker
 
-on:
-  pull_request:
-    paths:
-      - 'poweriq-worker/**'
+on: [pull_request]
 
 jobs:
   build:

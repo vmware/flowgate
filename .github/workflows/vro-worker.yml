@@ -1,9 +1,6 @@
 name: test vro-worker
 
-on:
-  pull_request:
-    paths:
-      - 'vro-worker/**'
+on: [pull_request]
 
 jobs:
   build:
