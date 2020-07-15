@@ -76,10 +76,10 @@
 							<goal>install-file</goal>
 						</goals>
 						<configuration>
-							<file>./libs/bcprov-ext-jdk15on-150.jar</file>
+							<file>./libs/bcprov-ext-jdk15on-1.65.jar</file>
 							<groupId>org.bouncycastle</groupId>
 							<artifactId>bcprov-ext-jdk15on</artifactId>
-							<version>1.50</version>
+							<version>1.65</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -91,10 +91,10 @@
 							<goal>install-file</goal>
 						</goals>
 						<configuration>
-							<file>./libs/bcprov-jdk15on-150.jar</file>
+							<file>./libs/bcprov-jdk15on-1.65.01.jar</file>
 							<groupId>org.bouncycastle</groupId>
 							<artifactId>bcprov-jdk15on</artifactId>
-							<version>1.50</version>
+							<version>1.65.01</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -438,6 +438,10 @@
 				<exclusion>
 					<groupId>com.fasterxml.jackson.core</groupId>
 					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.tomcat.embed</groupId>
+					<artifactId>tomcat-embed-core</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
