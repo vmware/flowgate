@@ -1,9 +1,6 @@
 name: test management
 
-on:
-  pull_request:
-    paths:
-      - 'management/**'
+on: [pull_request]
 
 jobs:
   build:

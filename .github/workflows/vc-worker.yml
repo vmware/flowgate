@@ -1,9 +1,6 @@
 name: test vc-worker
 
-on:
-  pull_request:
-    paths:
-      - 'vc-worker/**'
+on: [pull_request]
 
 jobs:
   build:
