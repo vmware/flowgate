@@ -133,6 +133,17 @@ saveDockerImages(){
 	rm flowgate -rf
 }
 
+buildDatabaseImage(){
+	
+	echo "build database image..."
+	
+	cd $CURRENTPATH/database
+	chmod a+x entrypoint.sh
+	chmod a+x init.sh
+	chmod a+x initData.sh
+	
+	docker build -t flowgate/database:$FLOWGATE_VERSION .
+}
 
 case $1 in
 	"ui")
@@ -147,6 +158,9 @@ case $1 in
 	"save")
 		saveDockerImages
 	;;
+	"database")
+		buildDatabaseImage
+	;;
 	"all")
 		buildUi
 		buildAllJars
@@ -155,6 +169,6 @@ case $1 in
 		echo "build success."
 	;;
 	*)
-		echo "bash build.sh ( ui | jar | image | save | all ) -version v1.0"
+		echo "bash build.sh ( ui | jar | image | save | database | all ) -version v1.0"
 	;;
 esac
