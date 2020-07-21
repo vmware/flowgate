@@ -1,6 +1,6 @@
 FROM photon:2.0
 
-ENV GOSU_VERSION 1.10
+ENV GOSU_VERSION 1.12
 
 COPY docker-entrypoint.sh /usr/local/bin/
 
