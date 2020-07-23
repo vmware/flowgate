@@ -21,6 +21,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
 import com.vmware.flowgate.auth.AuthVcUser;
+import com.vmware.flowgate.auth.InfobloxAuth;
 import com.vmware.flowgate.auth.NlyteAuth;
 import com.vmware.flowgate.auth.PowerIQAuth;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
@@ -100,6 +101,11 @@ public class ServerValidationService {
             }
             break;
          case InfoBlox:
+        	 InfobloxAuth infobloxAuth = createInfobloxAuth();
+        	 if(!infobloxAuth.auth(config)) {
+                 throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
+                       "Invalid user name or password", null);
+              }
             break;
          case Device42:
             break;
@@ -146,5 +152,9 @@ public class ServerValidationService {
 
    public PowerIQAuth createPowerIQAuth() {
       return new PowerIQAuth();
+   }
+   
+   public InfobloxAuth createInfobloxAuth() {
+      return new InfobloxAuth();
    }
 }

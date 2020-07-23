@@ -16,7 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.vmware.flowgate.client.RestClientBase;
 import com.vmware.flowgate.client.RestTemplateBuilder;
@@ -65,9 +67,14 @@ public class InfobloxClient extends RestClientBase {
 
    public JsonResultForQueryHostNames getHostNameList(String ip) {
       try {
-       JsonResultForQueryHostNames hostName = this.restTemplate.exchange(
+    	 JsonResultForQueryHostNames hostName = this.restTemplate.exchange(
                String.format(queryHostURL, this.hostName, ip), HttpMethod.GET, RestTemplateBuilder.getDefaultEntity(), JsonResultForQueryHostNames.class).getBody();
-       return hostName;
+    	 return hostName;
+      }catch(HttpClientErrorException e) {
+    	  if(HttpStatus.UNAUTHORIZED.equals(e.getStatusCode())) {
+    		  throw e;
+    	  }
+    	  logger.info("Failed to query data from Infoblox : "+e.getMessage() );
       }catch(Exception e) {
          logger.info("Failed to query the ipaddress."+e.getMessage() );
       }

@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,7 @@ public class InfoBloxService implements AsyncService {
          }
          InfobloxClient client = new InfobloxClient(infoblox);
          List<String> hostNames = null;
+         IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
          try {
             hostNames = client.queryHostNamesByIP(message);
          }catch(ResourceAccessException e) {
@@ -72,7 +74,6 @@ public class InfoBloxService implements AsyncService {
             }
           }catch(HttpClientErrorException e1) {
              logger.error("Failed to query data from Infoblox", e1);
-             IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
              if(integrationStatus == null) {
                 integrationStatus = new IntegrationStatus();
              }
@@ -82,6 +83,11 @@ public class InfoBloxService implements AsyncService {
              updateIntegrationStatus(infoblox);
              return;
           }
+
+         if(integrationStatus.getRetryCounter() > 0) {
+        	 integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+        	 updateIntegrationStatus(infoblox);
+         }
          
          if (hostNames != null && !hostNames.isEmpty()) {
             for (String hostname : hostNames) {
