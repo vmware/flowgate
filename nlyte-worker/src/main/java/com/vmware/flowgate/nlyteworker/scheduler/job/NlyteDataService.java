@@ -94,15 +94,13 @@ public class NlyteDataService implements AsyncService {
          logger.warn("Drop none Nlyte message " + message.getType());
          return;
       }
-      //TO, this should be comment out since it may contain vc password.
       logger.info("message received");
       Set<EventUser> users = message.getTarget().getUsers();
-      //IntegrationStatus integrationStatus = null;
       for (EventUser command : users) {
          logger.info(command.getId());
          switch (command.getId()) {
          case EventMessageUtil.NLYTE_SyncData:
-            //it will sync all the data depend on the type in the vcjoblist.
+            //it will sync all the data depend on the type in the nlyteJobList.
             String messageString = null;
             while ((messageString =
                   template.opsForList().rightPop(EventMessageUtil.nlyteJobList)) != null) {
