@@ -164,7 +164,6 @@ public class PowerIQService implements AsyncService {
          logger.warn("Drop none PowerIQ message " + message.getType());
          return;
       }
-      //TO, this should be comment out since it may contain vc password.
       logger.info("message received");
       Set<EventUser> users = message.getTarget().getUsers();
 
@@ -172,7 +171,7 @@ public class PowerIQService implements AsyncService {
          logger.info(command.getId());
          switch (command.getId()) {
          case EventMessageUtil.POWERIQ_SyncData:
-            //it will sync all the data depend on the type in the vcjoblist.
+            //it will sync all the data depend on the type in the powerIQJobList.
             String messageString = null;
             while ((messageString =
                   template.opsForList().rightPop(EventMessageUtil.powerIQJobList)) != null) {
