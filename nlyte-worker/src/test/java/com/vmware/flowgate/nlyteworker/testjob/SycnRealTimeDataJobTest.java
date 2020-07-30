@@ -4,8 +4,8 @@
 */
 package com.vmware.flowgate.nlyteworker.testjob;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -338,8 +338,6 @@ public class SycnRealTimeDataJobTest {
       nlyteAsset.setChassisSlots(chassisSolts);
       HandleAssetUtil util = new HandleAssetUtil();
       util.handleChassisSolts(asset, nlyteAsset);
-      TestCase.assertEquals(2, asset.getCapacity());
-      TestCase.assertEquals(2, asset.getFreeCapacity());
       String chassisInfo = asset.getJustificationfields().get(FlowgateConstant.CHASSIS);
       ObjectMapper mapper = new ObjectMapper();
       try {
@@ -395,8 +393,6 @@ public class SycnRealTimeDataJobTest {
       nlyteAsset.setChassisMountedAssetMaps(cmAssets);
       HandleAssetUtil util = new HandleAssetUtil();
       util.handleChassisSolts(asset, nlyteAsset);
-      TestCase.assertEquals(2, asset.getCapacity());
-      TestCase.assertEquals(0, asset.getFreeCapacity());
       String chassisInfo = asset.getJustificationfields().get(FlowgateConstant.CHASSIS);
       ObjectMapper mapper = new ObjectMapper();
       try {
@@ -406,6 +402,49 @@ public class SycnRealTimeDataJobTest {
             if(chassisslot.getSlotName().equals("1")) {
                TestCase.assertEquals("Front", chassisslot.getMountingSide());
                TestCase.assertEquals(Integer.valueOf(197), chassisslot.getMountedAssetNumber());
+            }else if(chassisslot.getSlotName().equals("2")) {
+               TestCase.assertEquals("Back", chassisslot.getMountingSide());
+               TestCase.assertEquals(Integer.valueOf(198), chassisslot.getMountedAssetNumber());
+            }else {
+               TestCase.fail();
+            }
+         }
+      } catch (JsonProcessingException e) {
+        TestCase.fail(e.getMessage());
+      }
+   }
+
+   @Test
+   public void testHandleChassisSolts3() {
+      Asset asset = createAsset();
+      List<ChassisMountedAssetMap> chassisMaps = new ArrayList<ChassisMountedAssetMap>();
+      ChassisMountedAssetMap cMap1 = new ChassisMountedAssetMap();
+      cMap1.setMountedAssetID(105);
+      cMap1.setColumnPosition(1);
+      cMap1.setRowPosition(1);
+      cMap1.setMountingSide("Front");
+      cMap1.setSlotName("1");
+      chassisMaps.add(cMap1);
+      ChassisMountedAssetMap cMap2 = new ChassisMountedAssetMap();
+      cMap2.setMountedAssetID(198);
+      cMap2.setColumnPosition(1);
+      cMap2.setRowPosition(2);
+      cMap2.setMountingSide("Back");
+      cMap2.setSlotName("2");
+      chassisMaps.add(cMap2);
+      NlyteAsset nlyteAsset = getNlyteAsset().get(0);
+      nlyteAsset.setChassisMountedAssetMaps(chassisMaps);
+      HandleAssetUtil util = new HandleAssetUtil();
+      util.handleChassisSolts(asset, nlyteAsset);
+      String chassisInfo = asset.getJustificationfields().get(FlowgateConstant.CHASSIS);
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         Map<String, String> chassisInfoMap = mapper.readValue(chassisInfo, new TypeReference<Map<String,String>>() {});
+         List<FlowgateChassisSlot> slots = mapper.readValue(chassisInfoMap.get(FlowgateConstant.CHASSISSLOTS), new TypeReference<List<FlowgateChassisSlot>>() {});
+         for(FlowgateChassisSlot chassisslot : slots) {
+            if(chassisslot.getSlotName().equals("1")) {
+               TestCase.assertEquals("Front", chassisslot.getMountingSide());
+               TestCase.assertEquals(Integer.valueOf(105), chassisslot.getMountedAssetNumber());
             }else if(chassisslot.getSlotName().equals("2")) {
                TestCase.assertEquals("Back", chassisslot.getMountingSide());
                TestCase.assertEquals(Integer.valueOf(198), chassisslot.getMountedAssetNumber());
