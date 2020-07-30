@@ -287,31 +287,42 @@ public class HandleAssetUtil {
 
    public void handleChassisSolts(Asset asset, NlyteAsset nlyteAsset) {
       List<ChassisSlot> chassisSolts = nlyteAsset.getChassisSlots();
-      if(chassisSolts == null || chassisSolts.isEmpty()) {
-         return;
-      }
-      int toltalSolts = nlyteAsset.getChassisSlots().size();
-      asset.setCapacity(toltalSolts);
       List<ChassisMountedAssetMap> chassisMountedAssets = nlyteAsset.getChassisMountedAssetMaps();
+      List<FlowgateChassisSlot> flowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
       int usedSolts = 0;
-      HashMap<String, Integer> soltsAndmountedAssetNumberMap = new HashMap<String, Integer>();
-      if(chassisMountedAssets != null && !chassisMountedAssets.isEmpty()) {
+      if(chassisSolts == null || chassisSolts.isEmpty()) {
+         if(chassisMountedAssets == null || chassisMountedAssets.isEmpty()) {
+            return;
+         }
          usedSolts = chassisMountedAssets.size();
          for(ChassisMountedAssetMap caMap : chassisMountedAssets) {
-            soltsAndmountedAssetNumberMap.put(caMap.getMountingSide()+caMap.getSlotName(), caMap.getMountedAssetID());
+            FlowgateChassisSlot solt = new FlowgateChassisSlot();
+            solt.setColumnPosition(caMap.getColumnPosition());
+            solt.setMountingSide(caMap.getMountingSide());
+            solt.setRowPosition(caMap.getRowPosition());
+            solt.setSlotName(caMap.getSlotName());
+            solt.setMountedAssetNumber(caMap.getMountedAssetID());
+            flowgateChassisSlots.add(solt);
+         }
+      }else {
+         HashMap<String, Integer> soltsAndmountedAssetNumberMap = new HashMap<String, Integer>();
+         if(chassisMountedAssets != null && !chassisMountedAssets.isEmpty()) {
+            usedSolts = chassisMountedAssets.size();
+            for(ChassisMountedAssetMap caMap : chassisMountedAssets) {
+               soltsAndmountedAssetNumberMap.put(caMap.getMountingSide()+caMap.getSlotName(), caMap.getMountedAssetID());
+            }
+         }
+         for(ChassisSlot chassisSolt : chassisSolts) {
+            FlowgateChassisSlot solt = new FlowgateChassisSlot();
+            solt.setColumnPosition(chassisSolt.getColumnPosition());
+            solt.setMountingSide(chassisSolt.getMountingSide());
+            solt.setRowPosition(chassisSolt.getRowPosition());
+            solt.setSlotName(chassisSolt.getSlotName());
+            solt.setMountedAssetNumber(soltsAndmountedAssetNumberMap.get(solt.getMountingSide()+solt.getSlotName()));
+            flowgateChassisSlots.add(solt);
          }
       }
-      asset.setFreeCapacity(toltalSolts - usedSolts);
-      List<FlowgateChassisSlot> flowgateChassisSlots = new ArrayList<FlowgateChassisSlot>();
-      for(ChassisSlot chassisSolt : chassisSolts) {
-         FlowgateChassisSlot solt = new FlowgateChassisSlot();
-         solt.setColumnPosition(chassisSolt.getColumnPosition());
-         solt.setMountingSide(chassisSolt.getMountingSide());
-         solt.setRowPosition(chassisSolt.getRowPosition());
-         solt.setSlotName(chassisSolt.getSlotName());
-         solt.setMountedAssetNumber(soltsAndmountedAssetNumberMap.get(solt.getMountingSide()+solt.getSlotName()));
-         flowgateChassisSlots.add(solt);
-      }
+      asset.setFreeCapacity(asset.getCapacity() - usedSolts);
       try {
          String chassisSoltsInfo = mapper.writeValueAsString(flowgateChassisSlots);
          supplementChassisInfo(asset, FlowgateConstant.CHASSISSLOTS, chassisSoltsInfo);
@@ -387,6 +398,11 @@ public class HandleAssetUtil {
          asset.setCapacity(totalSize);
          break;
       case Chassis:
+         int columnsBack = material.getNumberOfColumnsBack();
+         int rowsBack = material.getNumberOfRowsBack();
+         int columnsFront = material.getNumberOfColumnsFront();
+         int rowsFront = material.getNumberOfRowsFront();
+         asset.setCapacity(columnsBack*rowsBack + columnsFront*rowsFront);
          supplementChassisInfo(asset, FlowgateConstant.CHASSIS_AIR_FLOW_TYPE, material.getAirflowTypeID());
          break;
       default:
