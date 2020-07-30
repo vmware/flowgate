@@ -27,6 +27,8 @@ export class NavComponent implements OnInit {
   setting:string[] = ["createSensorSetting","readSensorSettingsByPage","updateSensorSetting","deleteSensorSetting","startFullMappingAggregation","generateServerPDUMapping","readUnMappedServers"];
   sensorsetting:string[] = ["createSensorSetting","readSensorSettingsByPage","updateSensorSetting","deleteSensorSetting"];
   systemSetting:string[] = ["startFullMappingAggregation","generateServerPDUMapping","readUnMappedServers"];
+  assetmanagement:string [] = ["createAnAsset", "updateAsset", "deleteAsset", "readAsset", "readAssetBySource"];
+
   constructor(private activedRoute:ActivatedRoute,private router: Router,private auth:AuthenticationService) { }
   logout(){
     this.auth.logout();

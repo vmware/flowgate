@@ -118,7 +118,11 @@ SPDX-License-Identifier: BSD-2-Clause -->
                routerLinkActive="active">
                System Setting
             </a>
-                
+            <a clrVerticalNavLink
+                routerLink="/ui/nav/setting/asset-list" *appHasPrivilege=assetmanagement
+                routerLinkActive="active">
+                Asset Management
+            </a>
               </clr-vertical-nav-group-children>
           </clr-vertical-nav-group>
           

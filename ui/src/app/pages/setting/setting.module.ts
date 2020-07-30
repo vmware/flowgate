@@ -16,6 +16,9 @@ import { PagesModule } from '../../pages/pages.module';
 import { TriggerJobComponent } from '../setting/component/trigger-job/trigger-job.component';
 import { AssetChart } from './component/trigger-job/sankey.chart';
 import { FileUploadModule } from 'ng2-file-upload';
+import { AssetAddComponent } from './component/asset-add/asset-add.component';
+import { AssetListComponent } from './component/asset-list/asset-list.component';
+import { AssetEditComponent } from './component/asset-edit/asset-edit.component';
 
 @NgModule({
   imports: [
@@ -28,7 +31,7 @@ import { FileUploadModule } from 'ng2-file-upload';
     FileUploadModule
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
-  declarations: [SettingComponent,SensorsettingListComponent,SensorsettingEditComponent,SensorsettingAddComponent,TriggerJobComponent,AssetChart],
+  declarations: [SettingComponent,SensorsettingListComponent,SensorsettingEditComponent,SensorsettingAddComponent,TriggerJobComponent,AssetChart,AssetAddComponent,AssetListComponent,AssetEditComponent],
   providers:[ SettingService ]
 })
 export class SettingModule { }

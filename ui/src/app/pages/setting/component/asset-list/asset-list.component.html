@@ -1,0 +1,173 @@
+  <!-- Copyright 2019 VMware, Inc.
+  SPDX-License-Identifier: BSD-2-Clause -->
+<button class="btn btn-primary btn-icon" style="margin-right: 12px" (click)="addAsset()">
+    <clr-icon shape="plus">
+      </clr-icon>
+      <font style="vertical-align: inherit;">
+        <font style="vertical-align: inherit;"  >Add New Asset</font>
+       </font>
+  </button>
+
+  <clr-datagrid>
+        
+        <clr-dg-column>Name</clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                assetNumber
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                Source
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column>Category</clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                subCategory
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column>manufacturer</clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                serialnumber
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column>model</clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                tag
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                region
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                country
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                city
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                building
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                floor
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                room
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                row
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                col
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                mountingSide
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                capacity
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                freeCapacity
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column>cabinetName</clr-dg-column>
+        <clr-dg-column >
+            <ng-container *clrDgHideableColumn="{hidden: true}">
+                cabinetUnitPosition
+            </ng-container>
+        </clr-dg-column>
+        <clr-dg-column>status</clr-dg-column>
+        <clr-dg-column>created</clr-dg-column>
+
+        <clr-dg-placeholder>We couldn't find any asset!</clr-dg-placeholder>
+
+
+        <clr-dg-row *ngFor="let asset of assets">
+            <clr-dg-action-overflow>
+                <button class="action-item" (click)="onEdit(asset.id)">Edit</button>
+                <button class="action-item" (click)="onDelete(asset.id)">Delete</button>
+            </clr-dg-action-overflow>
+
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.assetName}}">{{asset.assetName}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.assetNumber}}">{{asset.assetNumber}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.assetSource}}">{{asset.assetSource}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.category}}">{{asset.category}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.subCategory}}">{{asset.subCategory}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.manufacturer}}">{{asset.manufacturer}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.serialnumber}}">{{asset.serialnumber}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.model}}">{{asset.model}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.tag}}">{{asset.tag}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.region}}">{{asset.region}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.country}}">{{asset.country}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.city}}">{{asset.city}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.building}}">{{asset.building}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.floor}}">{{asset.floor}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.room}}">{{asset.room}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.row}}">{{asset.row}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.col}}">{{asset.col}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.mountingSide}}">{{asset.mountingSide}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.capacity}}">{{asset.capacity}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.freeCapacity}}">{{asset.freeCapacity}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.cabinetName}}">{{asset.cabinetName}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.cabinetUnitPosition}}">{{asset.cabinetUnitPosition}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.status.status}}">{{asset.status.status}}</clr-dg-cell>
+            <clr-dg-cell class = "flowgate-overflow" title="{{asset.created | date:'yyyy-MM-dd HH:mm:ss'}}">{{asset.created | date:"yyyy-MM-dd HH:mm:ss"}}</clr-dg-cell>
+        </clr-dg-row>
+
+
+        <clr-dg-footer *ngIf="assets.length>0">
+        <ul class="pagination">
+            <li style="padding-top: 5px;"><div class="select">
+                <select id="selects_1" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;setInfo()">
+                <option>20</option>
+                <option>30</option>
+                <option>50</option>
+            </select></div>
+            </li>
+            <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
+            <li class="pagination-current">{{currentPage}}/{{totalPage}}</li>
+            <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button></li>
+        </ul>
+        </clr-dg-footer>
+  </clr-datagrid>
+  <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
+     <h3 class="modal-title">Operation Tips</h3>
+     <div class="modal-body">
+         <clr-alert [(clrAlertClosed)] = "clrAlertClosed"  [clrAlertType]="'alert-danger'" (clrAlertClosedChange)="onClose()">
+             <div class="alert-item">
+                 <span class="alert-text">
+                     Operation Error
+                 </span>
+             </div>
+         </clr-alert>
+         <p>Are you sure you want to delete this data? This action is permenant and cannot be recovered.</p>
+     </div>
+     <div class="modal-footer">
+         <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+         <button type="button" class="btn btn-primary" (click)="confirm()">Ok</button>
+     </div>
+  </clr-modal>

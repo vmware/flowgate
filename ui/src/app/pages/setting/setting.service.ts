@@ -9,6 +9,7 @@ import 'rxjs/add/operator/map';
 import { AuthenticationService } from '../auth/authenticationService';
 import {environment} from 'environments/environment.prod';
 import { HostNameAndIpmappingModule } from './host-name-and-ipmapping/host-name-and-ipmapping.module';
+import { AssetModule } from './component/asset-modules/asset.module';
 @Injectable()
 export class SettingService {
 
@@ -42,6 +43,50 @@ export class SettingService {
       this.options = new RequestOptions({ headers: header });
       return this.http.get(""+this.API_URL+"/v1/sensors/setting/"+id+"",this.options)
         .map((res)=>res)
+    }
+    
+    createAnAsset(asset:AssetModule){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      
+      let body = JSON.stringify(asset);
+      return this.http.post(""+this.API_URL+"/v1/assets", body,this.options).map((res)=>res)
+      
+    }
+
+    getAssetsBySource(source, currentPage, pageSize){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      
+      return this.http.get(""+this.API_URL+"/v1/assets/source/"+source+"?currentPage="+currentPage+"&pageSize="+pageSize, this.options)
+        .map((res)=>res)
+    }
+
+    getAssetsByID(id){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      
+      return this.http.get(""+this.API_URL+"/v1/assets/"+id, this.options)
+        .map((res)=>res)
+    }
+
+    updateAssetsByID(asset:AssetModule){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      let body = JSON.stringify(asset);
+      return this.http.put(""+this.API_URL+"/v1/assets", body, this.options).map((res)=>res)
+    }
+
+    deleteAssetById(id){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+
+      return this.http.delete(""+this.API_URL+"/v1/assets/"+id,this.options).map((res)=>res);
     }
 
     getsensorsettingData(Page,Size){
