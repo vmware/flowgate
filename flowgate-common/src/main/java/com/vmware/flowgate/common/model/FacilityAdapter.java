@@ -7,8 +7,9 @@ package com.vmware.flowgate.common.model;
 import java.util.List;
 
 import com.couchbase.client.java.repository.annotation.Id;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 
-public class AdapterType implements BaseDocument {
+public class FacilityAdapter implements BaseDocument {
 
    @Id
    private String id;
@@ -16,7 +17,8 @@ public class AdapterType implements BaseDocument {
    private String description;
    private String topic;
    private String queueName;
-   private String name;
+   private SoftwareType type;
+   private String subCategory;
    private List<AdapterJobCommand> commands;
    private long createTime;
 
@@ -28,14 +30,6 @@ public class AdapterType implements BaseDocument {
    @Override
    public void setId(String id) {
       this.id = id;
-   }
-
-   public String getName() {
-      return name;
-   }
-
-   public void setName(String name) {
-      this.name = name;
    }
 
    public String getDescription() {
@@ -84,6 +78,22 @@ public class AdapterType implements BaseDocument {
 
    public void setCreateTime(long createTime) {
       this.createTime = createTime;
+   }
+
+   public SoftwareType getType() {
+      return type;
+   }
+
+   public void setType(SoftwareType type) {
+      this.type = type;
+   }
+
+   public String getSubCategory() {
+      return subCategory;
+   }
+
+   public void setSubCategory(String subCategory) {
+      this.subCategory = subCategory;
    }
 
 }

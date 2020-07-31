@@ -22,6 +22,7 @@ public class SDDCSoftwareConfig implements Serializable, BaseDocument {
    private String userId;
    private boolean verifyCert;
    private IntegrationStatus integrationStatus;
+   private String subCategory;
 
    public enum SoftwareType {
       VRO, VCENTER, OTHERS, VROPSMP
@@ -59,10 +60,12 @@ public class SDDCSoftwareConfig implements Serializable, BaseDocument {
       this.serverURL = serverURL;
    }
 
+   @Override
    public String getId() {
       return id;
    }
 
+   @Override
    public void setId(String id) {
       this.id = id;
    }
@@ -113,6 +116,14 @@ public class SDDCSoftwareConfig implements Serializable, BaseDocument {
 
    public void setIntegrationStatus(IntegrationStatus integrationStatus) {
       this.integrationStatus = integrationStatus;
+   }
+
+   public String getSubCategory() {
+      return subCategory;
+   }
+
+   public void setSubCategory(String subCategory) {
+      this.subCategory = subCategory;
    }
 
 }
