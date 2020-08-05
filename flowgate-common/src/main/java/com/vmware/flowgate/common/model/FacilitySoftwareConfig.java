@@ -25,6 +25,7 @@ public class FacilitySoftwareConfig implements Serializable, BaseDocument {
    private SoftwareType type;
    private String userId;
    private boolean verifyCert;
+   private String subCategory;
    private IntegrationStatus integrationStatus;
    private HashMap<AdvanceSettingType, String> advanceSetting;
 
@@ -69,10 +70,12 @@ public class FacilitySoftwareConfig implements Serializable, BaseDocument {
       this.serverURL = serverURL;
    }
 
+   @Override
    public String getId() {
       return id;
    }
 
+   @Override
    public void setId(String id) {
       this.id = id;
    }
@@ -133,5 +136,12 @@ public class FacilitySoftwareConfig implements Serializable, BaseDocument {
       this.advanceSetting = advanceSetting;
    }
 
+   public String getSubCategory() {
+      return subCategory;
+   }
+
+   public void setSubCategory(String subCategory) {
+      this.subCategory = subCategory;
+   }
 
 }

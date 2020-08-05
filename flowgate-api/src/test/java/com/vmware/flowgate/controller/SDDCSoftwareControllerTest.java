@@ -134,6 +134,8 @@ public class SDDCSoftwareControllerTest {
                                  "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS")
                            .type(SoftwareType.class).optional(),
                      fieldWithPath("userId").description("userId"),
+                     fieldWithPath("subCategory").description(
+                           "subCategory"),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
                      subsectionWithPath("integrationStatus").description("The status of integration."))))
@@ -207,6 +209,8 @@ public class SDDCSoftwareControllerTest {
                                  "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS")
                            .type(SoftwareType.class).optional(),
                      fieldWithPath("userId").description("userId"),
+                     fieldWithPath("subCategory").description(
+                           "subCategory"),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
                      subsectionWithPath("integrationStatus").description("The status of integration."))))
@@ -328,6 +332,8 @@ public class SDDCSoftwareControllerTest {
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
                       "userId"),
+              fieldWithPath("subCategory").description(
+                    "subCategory"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
               subsectionWithPath("integrationStatus").description("The status of integration.").optional(),
@@ -376,6 +382,8 @@ public class SDDCSoftwareControllerTest {
                       "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS, VROPSMP").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
                       "userId"),
+              fieldWithPath("subCategory").description(
+                    "subCategory"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
               subsectionWithPath("integrationStatus").description("The status of integration.").optional()
@@ -425,6 +433,8 @@ public class SDDCSoftwareControllerTest {
                       "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS, VROPSMP").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
                       "userId"),
+              fieldWithPath("subCategory").description(
+                    "subCategory"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
               subsectionWithPath("integrationStatus").description("The status of integration.").optional()
@@ -472,6 +482,8 @@ public class SDDCSoftwareControllerTest {
                       "A type for SDDCSoftwareConfig,forExample VRO, VCENTER, OTHERS, VROPSMP").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
                       "userId"),
+              fieldWithPath("subCategory").description(
+                    "subCategory"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
               subsectionWithPath("integrationStatus").description("The status of integration.").optional()

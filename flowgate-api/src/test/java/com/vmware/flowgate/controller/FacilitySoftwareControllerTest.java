@@ -140,6 +140,8 @@ public class FacilitySoftwareControllerTest {
                         "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB")
                         .type(AssetSubCategory.class).optional(),
                   fieldWithPath("userId").description("userid"),
+                  fieldWithPath("subCategory").description(
+                        "subCategory"),
                   fieldWithPath("verifyCert").description(
                         "Whether to verify the certificate when accessing the serverURL."),
                   fieldWithPath("advanceSetting").description("advanceSetting"),
@@ -245,6 +247,8 @@ public class FacilitySoftwareControllerTest {
                            "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB")
                            .type(AssetSubCategory.class).optional(),
                      fieldWithPath("userId").description("userId"),
+                     fieldWithPath("subCategory").description(
+                           "subCategory"),
                      fieldWithPath("verifyCert").description("Whether to verify the certificate when accessing the serverURL."),
                      fieldWithPath("advanceSetting").description("advanceSetting"),
                      subsectionWithPath("integrationStatus").description("The status of integration."))));
@@ -285,6 +289,8 @@ public class FacilitySoftwareControllerTest {
                            "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB")
                            .type(AssetSubCategory.class).optional(),
                      fieldWithPath("userId").description("userId"),
+                     fieldWithPath("subCategory").description(
+                           "subCategory"),
                      fieldWithPath("verifyCert").description(
                            "Whether to verify the certificate when accessing the serverURL."),
                      fieldWithPath("advanceSetting").description("advanceSetting"),
@@ -440,6 +446,8 @@ public class FacilitySoftwareControllerTest {
                       "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
               fieldWithPath("userId").description(
                       "userId"),
+              fieldWithPath("subCategory").description(
+                    "subCategory"),
               fieldWithPath("verifyCert").description(
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
               subsectionWithPath("integrationStatus").description("The status of integration."),
