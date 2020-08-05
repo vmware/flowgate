@@ -595,6 +595,8 @@ public class SycnRealTimeDataJobTest {
       Asset asset = createAsset();
       asset.setAssetNumber(127);
       asset.setTag("tag1");
+      asset.setCapacity(8);
+      asset.setFreeCapacity(2);
       toUpdateAssets.add(asset);
       Asset asset2 = createAsset();
       asset2.setAssetNumber(128);
@@ -667,6 +669,8 @@ public class SycnRealTimeDataJobTest {
             }
          }else if(assetTosave.getAssetNumber() == 127) {
             TestCase.assertEquals(asset.getTag(), assetTosave.getTag());
+            TestCase.assertEquals(asset.getCapacity(), assetTosave.getCapacity());
+            TestCase.assertEquals(asset.getFreeCapacity(), assetTosave.getFreeCapacity());
          }else {
             TestCase.fail("Invalid assetNumber");
          }

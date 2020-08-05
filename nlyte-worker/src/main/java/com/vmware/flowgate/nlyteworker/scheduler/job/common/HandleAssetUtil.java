@@ -452,6 +452,13 @@ public class HandleAssetUtil {
                exsitingAsset.setTag(asset.getTag());
                isUpdated = true;
             }
+            if(valueIsChanged(exsitingAsset.getCapacity(),asset.getCapacity())) {
+               exsitingAsset.setCapacity(asset.getCapacity());
+               isUpdated = true;
+            }
+            if(valueIsChanged(exsitingAsset.getFreeCapacity(),asset.getFreeCapacity())) {
+               exsitingAsset.setFreeCapacity(asset.getFreeCapacity());
+            }
             exsitingAsset.setSerialnumber(asset.getSerialnumber());
             exsitingAsset.setAssetName(asset.getAssetName());
             exsitingAsset.setRegion(asset.getRegion());
