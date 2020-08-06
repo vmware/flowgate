@@ -10,6 +10,9 @@ import { SensorsettingEditComponent } from '../setting/component/sensorsetting-e
 import { SensorsettingAddComponent } from '../setting/component/sensorsetting-add/sensorsetting-add.component';
 import { ModuleWithProviders } from '@angular/core';
 import { TriggerJobComponent } from '../setting/component/trigger-job/trigger-job.component';
+import { AssetAddComponent } from './component/asset-add/asset-add.component';
+import { AssetListComponent } from './component/asset-list/asset-list.component';
+import { AssetEditComponent } from './component/asset-edit/asset-edit.component';
 
 // noinspection TypeScriptValidateTypes
 export const routes: Routes = [
@@ -30,6 +33,15 @@ export const routes: Routes = [
           },{
             path:'system-setting',
             component:TriggerJobComponent
+          },{
+            path: 'asset-list',
+            component: AssetListComponent
+          },{
+            path: 'asset-add',
+            component: AssetAddComponent
+          },{
+            path: 'asset-edit/:id',
+            component: AssetEditComponent
           }
         ]
       }
