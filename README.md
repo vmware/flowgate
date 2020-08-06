@@ -38,6 +38,9 @@ FlowGate is an open source vendor-neutral project to enable facility awareness i
 
 **System architecture**
 [Architecture document](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate_public_technical.pdf)
+
+**Usage Document**
+[Document](docs/user_guide.md)
 ## Contributing
 
 The Flowgate project team welcomes contributions from the community. Before you start working with Flowgate, please read our [Developer Certificate of Origin](https://cla.vmware.com/dco). All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch. For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
