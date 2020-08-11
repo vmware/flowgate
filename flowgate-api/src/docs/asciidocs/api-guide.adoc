@@ -1663,3 +1663,114 @@ include::{snippets}/SystemSetting-updateExpiredTimeRange-example/http-response.a
 ==== CURL request
 
 include::{snippets}/SystemSetting-updateExpiredTimeRange-example/curl-request.adoc[]
+
+[[resources-FacilityAdapter]]
+== /v1/facilityadapter
+
+The facilityadapter provides the entry point into the service.
+
+[[resources-facilityadapter-post]]
+=== createFacilityadapter
+
+A `POST` request is used to access the FacilityAdapter create.
+
+==== Request structure
+
+include::{snippets}/facilityadapter-create-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilityadapter-create-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilityadapter-create-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/facilityadapter-create-example/request-fields.adoc[]
+
+[[resources-facilityadapter-put]]
+=== updateFacilityadapter
+
+A `PUT` request is used to access the FacilityAdapter update.
+
+==== Request structure
+
+include::{snippets}/facilityadapter-update-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilityadapter-update-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilityadapter-update-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/facilityadapter-update-example/request-fields.adoc[]
+
+
+[[resources-facilityadapter-delete]]
+=== deleteFacilityadapterByID
+
+A `DELETE` request is used to access the FacilityAdapter delete.
+
+==== Request structure
+
+include::{snippets}/facilityadapter-deleteById-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilityadapter-deleteById-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilityadapter-deleteById-example/curl-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/facilityadapter-deleteById-example/request-fields.adoc[]
+
+[[resources-facilityadapter-queryByPage]]
+=== getFacilityadapterWithPagenation
+
+A `GET` request is used to access the facilityadapter read by Page.
+
+==== Request structure
+
+include::{snippets}/facilityadapter-findByPage-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilityadapter-findByPage-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilityadapter-findByPage-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/facilityadapter-findByPage-example/request-fields.adoc[]
+
+[[resources-facilityadapter-queryById]]
+=== getFacilityadapterById
+
+A `GET` request is used to access the facilityadapter by ID.
+
+==== Request structure
+
+include::{snippets}/facilityadapter-findOneById-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilityadapter-findOneById-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilityadapter-findOneById-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/facilityadapter-findOneById-example/response-fields.adoc[]
