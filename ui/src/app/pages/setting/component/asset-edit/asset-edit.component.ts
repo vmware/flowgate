@@ -7,6 +7,7 @@ import { AssetModule } from '../asset-modules/asset.module';
 import {Router,ActivatedRoute} from '@angular/router';
 import { SettingService } from '../../setting.service';
 import { error } from 'util';
+import { stringify } from 'querystring';
 @Component({
   selector: 'app-asset-edit',
   templateUrl: './asset-edit.component.html',
@@ -21,6 +22,12 @@ export class AssetEditComponent implements OnInit {
   allcategory=[ "Server", "PDU","Cabinet","Networks","Sensors","UPS","Chassis"];
   suballcategory = {"Server":["Blade","Standard"], 
   "Sensors":["Humidity","Temperature","AirPressure","AirFlow","ContactClosure","Smoke","Water","Vibration"]};
+  assetjsondata:string = " ";
+  baseconfig:boolean = true;
+  advance:boolean = false;
+  jsonerror:boolean = false;
+  checkjsonformat:boolean = false;
+  jsonerrormsg:string = " ";
 
   constructor(private service:SettingService,private router:Router,private activedRoute:ActivatedRoute) { }
   ngOnInit() {
@@ -41,7 +48,39 @@ export class AssetEditComponent implements OnInit {
     this.addfail=false;
   }
   cancel(){ this.router.navigate(["/ui/nav/setting/asset-list"]);}
+  jsonFormater(json:any) {
+    var obj = JSON.parse(json);
+    var formated = JSON.stringify(obj, undefined, 4);
+    return formated;
+  }
+  advanceCheckbox(){
+    this.advance = !this.advance;
+    this.baseconfig = !this.baseconfig;
+    this.assetjsondata = this.jsonFormater(JSON.stringify(this.asset));
+  }
+  checkJsonFormat(){
+    try {
+      JSON.parse(this.assetjsondata);
+      this.checkjsonformat = false;
+      this.jsonerror = false;
+    } catch(e) {
+        this.jsonerrormsg = String(e);
+        this.jsonerror = true;
+        this.checkjsonformat = true;
+    }
+  }
   save(){
+
+    if(this.advance == true){
+      let assetobj = JSON.parse(this.assetjsondata);
+      if(assetobj.id != this.asset.id){
+        this.addfail = true;
+        this.tip = "Don't change asset ID.";
+        return;
+      }
+      this.asset = JSON.parse(this.assetjsondata);
+    }
+    
     this.editassetloading = true;
     this.service.updateAssetsByID(this.asset).subscribe(
       (data)=>{

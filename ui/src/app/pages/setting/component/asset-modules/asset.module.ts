@@ -35,7 +35,7 @@ export class AssetModule {
   col:string;
   extraLocation:string;
   cabinetName:string;
-  cabinetUnitPosition:string;
+  cabinetUnitPosition:number;
   mountingSide:{};
   capacity:number;
   freeCapacity:number;
