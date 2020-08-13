@@ -3,6 +3,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 <form #DcimForm="ngForm">
     <section class="form-block">
           <label style="border-bottom-width: 1px;border-bottom-style: double;"> EDIT ASSET</label>
+          <div *ngIf="baseconfig">
           <!--  assetName : String -->
           <div class="form-group">
             <label class="required" for="AssetName">AssetName</label>       
@@ -187,15 +188,29 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </clr-tree-node>
             </ng-template>
           </clr-tree-node>
-  
-  
-          <button type="submit" class="btn btn-primary"  (click)="save()" [clrLoading]="editassetloading" [disabled]="DcimForm.form.invalid || editassetloading">Submit</button>
+          </div>
+          
+          <div style="margin-bottom: 15px;">
+            <label style="border-bottom-width: 1px;border-bottom-style: double;width: 100%;font-size: 16px;">Advance 
+              <span style="font-size: 12px;color: darkgray;">(Use raw data to update the asset, please use this as the last option to update an asset.)</span>
+            </label>
+            <clr-checkbox style="margin-right: 5px; margin-top: 15px;" (change)="advanceCheckbox()">
+              Raw Data
+            </clr-checkbox>
+
+            <form clrForm *ngIf="advance">
+              <textarea clrTextarea [(ngModel)]="assetjsondata" [class.invalid]="true" name="assetjson" style="height: 50em;" (keyup)="checkJsonFormat()" 
+              [ngStyle]="{'border-color':jsonerror === true ? 'red' : 'white', 'border-width':jsonerror === true ? '2px' : '1px'}" required></textarea>
+              <span style="color: red;" *ngIf="jsonerror">{{jsonerrormsg}}</span>
+            </form>
+          </div>
+
+          <button type="submit" class="btn btn-primary"  (click)="save()" [clrLoading]="editassetloading" [disabled]="DcimForm.form.invalid || editassetloading || checkjsonformat">Submit</button>
           <button type="button" class="btn btn-primary" (click)="cancel()">Cancel</button>
   
         <clr-modal [(clrModalOpen)]="addfail" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
           <h3 class="modal-title">Operation tips</h3>
           <div class="modal-body">
-              <p>Edit Asset Fail:</p>
               <p>{{tip}}</p>
           </div>
           <div class="modal-footer">
