@@ -19,6 +19,8 @@ import { FileUploadModule } from 'ng2-file-upload';
 import { AssetAddComponent } from './component/asset-add/asset-add.component';
 import { AssetListComponent } from './component/asset-list/asset-list.component';
 import { AssetEditComponent } from './component/asset-edit/asset-edit.component';
+import { FacilityAdapterListComponent } from './component/adaptertype/adaptertype-list/facility-adapter-list.component';
+import { FacilityAdapterService } from './component/adaptertype/facility-adapter.service';
 
 @NgModule({
   imports: [
@@ -31,7 +33,7 @@ import { AssetEditComponent } from './component/asset-edit/asset-edit.component'
     FileUploadModule
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
-  declarations: [SettingComponent,SensorsettingListComponent,SensorsettingEditComponent,SensorsettingAddComponent,TriggerJobComponent,AssetChart,AssetAddComponent,AssetListComponent,AssetEditComponent],
-  providers:[ SettingService ]
+  declarations: [SettingComponent,SensorsettingListComponent,SensorsettingEditComponent,SensorsettingAddComponent,TriggerJobComponent,AssetChart,AssetAddComponent,AssetListComponent,AssetEditComponent,FacilityAdapterListComponent],
+  providers:[ SettingService,FacilityAdapterService ]
 })
 export class SettingModule { }
