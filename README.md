@@ -42,7 +42,7 @@ With Project Flowgate, we can fetch metadata and runtime metrics from various fa
 **System architecture**
 [Architecture document](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate_public_technical.pdf)
 
-**Usage Document**
+**User Document**
 [Document](docs/user_guide.md)
 ## Contributing
 
