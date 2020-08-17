@@ -40,6 +40,7 @@ public class FacilityAdapterController {
    @Autowired
    private FacilityAdapterRepository facilityAdapterRepo;
    private static final String QUEUE_NAME_SUFFIX = ":joblist";
+   private static final String JOIN_FLAG = "_";
    private static Set<String> predefineName = new HashSet<String>();
    static {
       predefineName.add("Nlyte");
@@ -66,7 +67,7 @@ public class FacilityAdapterController {
       }
       HttpHeaders httpHeaders = new HttpHeaders();
       BaseDocumentUtil.generateID(adapter);
-      String unique_value = adapter.getType().name() + UUID.randomUUID().toString().replaceAll("-", "");
+      String unique_value = adapter.getType().name()+ JOIN_FLAG + UUID.randomUUID().toString().replaceAll("-", "");
       adapter.setTopic(unique_value);
       adapter.setSubCategory(unique_value);
       adapter.setQueueName(adapter.getSubCategory() + QUEUE_NAME_SUFFIX);

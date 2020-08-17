@@ -303,9 +303,9 @@ public class FacilityAdapterControllerTest {
       adapter.setDescription("Default adapter for test");
       List<AdapterJobCommand> commands = new ArrayList<AdapterJobCommand>();
       AdapterJobCommand command = new AdapterJobCommand();
-      command.setCommand("syncmetedata");
+      command.setCommand("syncmetadata");
       command.setTriggerCycle(1440);
-      command.setDescription("sync metedata job");
+      command.setDescription("sync metadata job");
       commands.add(command);
       AdapterJobCommand metricsCommand = new AdapterJobCommand();
       metricsCommand.setCommand("syncmetricsdata");
