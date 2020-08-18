@@ -71,6 +71,7 @@ export class TriggerJobComponent implements OnInit {
     "cabinetNum": 0,
     "switchNum": 0,
     "sensorNum": 0,
+    "chassisNum":0,
     "categoryIsUpsNum": 0,
     "userNum": 0,
     "sddcServerNum": 0,
