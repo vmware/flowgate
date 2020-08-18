@@ -13,8 +13,9 @@ import { TriggerJobComponent } from '../setting/component/trigger-job/trigger-jo
 import { AssetAddComponent } from './component/asset-add/asset-add.component';
 import { AssetListComponent } from './component/asset-list/asset-list.component';
 import { AssetEditComponent } from './component/asset-edit/asset-edit.component';
+import { FacilityAdapterListComponent } from './component/adaptertype/adaptertype-list/facility-adapter-list.component';
 
-// noinspection TypeScriptValidateTypes
+
 export const routes: Routes = [
     {
         path: '',
@@ -42,6 +43,9 @@ export const routes: Routes = [
           },{
             path: 'asset-edit/:id',
             component: AssetEditComponent
+          },{
+            path:'facilityadapter-list',
+            component:FacilityAdapterListComponent
           }
         ]
       }
