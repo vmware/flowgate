@@ -22,4 +22,5 @@ export class FacilityAdapterModule {
   subCategory:string;
   commands:AdapterJobCommandModule[];
   createTime:number;
+  serviceKey:string;
 }
