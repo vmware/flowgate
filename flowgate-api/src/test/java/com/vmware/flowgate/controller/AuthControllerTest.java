@@ -167,7 +167,6 @@ public class AuthControllerTest {
          }
       }
       DecodedJWT jwtcre = jwtUtil.getDecodedJwt(access_token);
-      System.out.println("test issure at :"+jwtcre.getIssuedAt().getTime());
       ObjectMapper mapper = new ObjectMapper();
       WormholeUserDetails userdetail = new WormholeUserDetails();
       userdetail.setUserId(userId);

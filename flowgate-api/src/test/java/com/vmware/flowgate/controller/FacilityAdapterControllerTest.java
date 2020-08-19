@@ -5,6 +5,8 @@
 package com.vmware.flowgate.controller;
 
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -28,9 +30,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.redis.core.SetOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -43,9 +49,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.model.AdapterJobCommand;
 import com.vmware.flowgate.common.model.FacilityAdapter;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.FacilityAdapterRepository;
+import com.vmware.flowgate.repository.FacilitySoftwareConfigRepository;
 
 import junit.framework.TestCase;
 
@@ -68,6 +76,12 @@ public class FacilityAdapterControllerTest {
    @Autowired
    private FacilityAdapterRepository facilityAdapterRepo;
 
+   @Autowired
+   private FacilitySoftwareConfigRepository facilitySoftwareRepo;
+
+   @MockBean
+   private StringRedisTemplate redis;
+
    @Rule
    public ExpectedException expectedEx = ExpectedException.none();
 
@@ -79,6 +93,9 @@ public class FacilityAdapterControllerTest {
 
    @Test
    public void createFacilityAdapterExample() throws JsonProcessingException, Exception {
+      SetOperations<String, String> setop = Mockito.mock(SetOperations.class);
+      when(redis.opsForSet()).thenReturn(setop);
+      when(setop.add(anyString(), anyString())).thenReturn(1l);
       FacilityAdapter adapter = createAdapter();
       this.mockMvc
             .perform(post("/v1/facilityadapter").contentType(MediaType.APPLICATION_JSON)
@@ -92,6 +109,7 @@ public class FacilityAdapterControllerTest {
                   fieldWithPath("topic").description("Topic of the facility adapter,created by flowgate"),
                   fieldWithPath("subCategory").description("Subcategory of the facility adapter,created by flowgate"),
                   fieldWithPath("queueName").description("Queue name of the facility adapter,created by flowgate"),
+                  fieldWithPath("serviceKey").description("Value for auth,created by flowgate"),
                   fieldWithPath("createTime").description("Create time of the facility adapter,created by flowgate"),
                   subsectionWithPath("commands").description("Job commands of the facility adapter,it should be not null"))))
             .andReturn().getResponse().getHeader("Location");
@@ -173,6 +191,7 @@ public class FacilityAdapterControllerTest {
                   fieldWithPath("topic").description("Topic of the facility adapter,created by flowgate"),
                   fieldWithPath("subCategory").description("Subcategory of the facility adapter,created by flowgate"),
                   fieldWithPath("queueName").description("Queue name of the facility adapter,created by flowgate"),
+                  fieldWithPath("serviceKey").description("Value for auth,created by flowgate"),
                   fieldWithPath("createTime").description("Create time of the facility adapter,created by flowgate"),
                   subsectionWithPath("commands").description("Job commands of the facility adapter,it should be not null"))))
             .andReturn();
@@ -257,6 +276,10 @@ public class FacilityAdapterControllerTest {
 
    @Test
    public void deleteFacilityAdapterExample() throws Exception {
+      SetOperations<String, String> setop = Mockito.mock(SetOperations.class);
+      when(redis.opsForSet()).thenReturn(setop);
+      when(setop.isMember(anyString(), anyString())).thenReturn(true);
+      when(setop.remove(anyString(), anyString())).thenReturn(1l);
       FacilityAdapter adapter = createAdapter();
       facilityAdapterRepo.save(adapter);
       this.mockMvc
@@ -267,6 +290,39 @@ public class FacilityAdapterControllerTest {
                   requestFields(fieldWithPath("id")
                         .description("ID of the facility adapter, created by flowgate"))))
             .andReturn();
+   }
+
+   @Test
+   public void deleteFacilityAdapterThrowExceptionExample() throws Exception {
+      FacilityAdapter adapter = createAdapter();
+      String subcategory = "OtherDCIM_"+ UUID.randomUUID().toString();
+      adapter.setSubCategory(subcategory);
+      facilityAdapterRepo.save(adapter);
+      FacilitySoftwareConfig example = new FacilitySoftwareConfig();
+      example.setId(UUID.randomUUID().toString());
+      example.setName("Nlyte");
+      example.setUserName("administrator@vsphere.local");
+      example.setPassword("Admin!23");
+      example.setServerURL("https://10.160.30.134");
+      example.setType(FacilitySoftwareConfig.SoftwareType.Nlyte);
+      example.setUserId("1");
+      example.setVerifyCert(false);
+      example.setDescription("description");
+      example.setSubCategory(subcategory);
+      facilitySoftwareRepo.save(example);
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("Adapter deletion failed, there are some integration instances are using it");
+      MvcResult result = this.mockMvc
+            .perform(delete("/v1/facilityadapter/" + adapter.getId() + "")
+                  .content("{\"id\":\"" + adapter.getId() + "\"}"))
+            .andReturn();
+      if (result.getResolvedException() != null) {
+         facilityAdapterRepo.deleteById(adapter.getId());
+         facilitySoftwareRepo.deleteById(example.getId());
+         throw result.getResolvedException();
+      } else {
+         TestCase.fail();
+      }
    }
 
    @Test
