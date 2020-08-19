@@ -25,35 +25,35 @@ SPDX-License-Identifier: BSD-2-Clause -->
 
 <clr-datagrid>
 
-        <clr-dg-column >
+        <clr-dg-column [clrDgField]="'vroResourceName'">
                 <ng-container *clrDgHideableColumn="{hidden: vrohid}">
                         vRealize Operations Manager Host Name
                 </ng-container>
         </clr-dg-column>
        
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'vroVMEntityObjectID'">
                 <ng-container *clrDgHideableColumn="{hidden: vrohid}">
                         vRealize Operations Manager VM Entity Object ID
                 </ng-container>
         </clr-dg-column>
         
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'vcHostName'">
                 <ng-container *clrDgHideableColumn="{hidden: hid}">
                         vCenter Host Name
                 </ng-container>
         </clr-dg-column>
-        <clr-dg-column>
+        <clr-dg-column [clrDgField]="'vcMobID'">
                 <ng-container *clrDgHideableColumn="{hidden: hid}">
                         vCenter Mob ID
                 </ng-container>
         </clr-dg-column>
        
-        <clr-dg-column>Asset</clr-dg-column>
+        <clr-dg-column [clrDgField]="'asset'">Asset</clr-dg-column>
         <clr-dg-column>Operation</clr-dg-column>
         <clr-dg-placeholder>{{nulltips}}</clr-dg-placeholder>
 
        
-        <clr-dg-row *ngFor="let serverMapping of serverMappings">
+        <clr-dg-row *clrDgItems="let serverMapping of serverMappings">
                 <clr-dg-cell>{{serverMapping.vroResourceName}}</clr-dg-cell>
                 <clr-dg-cell>{{serverMapping.vroVMEntityObjectID}}</clr-dg-cell>
                 <clr-dg-cell>{{serverMapping.vcHostName}}</clr-dg-cell>
