@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,12 +32,14 @@ import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
+import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.SDDCSoftwareRepository;
+import com.vmware.flowgate.repository.ServerMappingRepository;
 import com.vmware.flowgate.security.service.AccessTokenService;
 import com.vmware.flowgate.service.ServerValidationService;
 import com.vmware.flowgate.util.BaseDocumentUtil;
@@ -61,6 +64,9 @@ public class SDDCSoftwareController {
 
    @Autowired
    private StringRedisTemplate template;
+   
+   @Autowired
+   ServerMappingRepository serverMappingRepository;
 
    private static final Logger logger = LoggerFactory.getLogger(SDDCSoftwareController.class);
 
@@ -105,7 +111,42 @@ public class SDDCSoftwareController {
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
    public void delete(@PathVariable String id) {
-      sddcRepository.deleteById(id);
+
+	  Optional<SDDCSoftwareConfig> sddcOptional = sddcRepository.findById(id);
+	  SDDCSoftwareConfig server = new SDDCSoftwareConfig();
+	  try {
+		  server = sddcOptional.get();
+	  }catch(NoSuchElementException e) {
+		  throw WormholeRequestException.NotFound("sddc", "id", id);
+	  }
+      
+	  SoftwareType type = server.getType();
+	  switch(type) {
+	  case VCENTER:
+		  List<ServerMapping> vcenterMappings = serverMappingRepository.findAllByVCID(id);
+		  if(vcenterMappings != null && !vcenterMappings.isEmpty()) {
+			  for(ServerMapping mapping : vcenterMappings) {
+				  serverMappingRepository.deleteById(mapping.getId());
+			  }
+		  }
+		  break;
+	  case VRO:
+	  case VROPSMP:
+		  List<ServerMapping> mappings = serverMappingRepository.findAllByVroID(id);
+		  if(mappings != null && !mappings.isEmpty()) {
+			  for(ServerMapping mapping : mappings) {
+				  serverMappingRepository.deleteById(mapping.getId());
+			  }
+		  }
+		  break;
+	  default:
+		  logger.info(String.format("Integration Type: %s No Found.",
+                  server.getType()));
+		  break;
+	  }
+	  
+	  sddcRepository.deleteById(id);
+ 
    }
 
    //only modify the status of integration,and not verify information of server.
