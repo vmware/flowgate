@@ -141,6 +141,20 @@ public class AuthControllerTest {
    }
 
    @Test
+   public void testCreateTokenUseAdapterServiceKey() throws Exception {
+      WormholeUser user = null;
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("Invalid username or password");
+      MvcResult result =  this.mockMvc
+      .perform(post("/v1/auth/token").contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(user)))
+      .andReturn();
+      if (result.getResolvedException() != null) {
+         throw result.getResolvedException();
+      }
+   }
+
+   @Test
    public void testRefreshToken() throws Exception {
       ValueOperations<String, String> valueOperations = Mockito.mock(ValueOperations.class);
       Mockito.doReturn(valueOperations).when(template).opsForValue();

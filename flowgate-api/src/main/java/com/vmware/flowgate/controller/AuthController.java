@@ -66,20 +66,25 @@ public class AuthController {
          @RequestHeader(name = "serviceKey", required = false) String serviceKey,
          HttpServletRequest request, HttpServletResponse response) {
       AuthToken access_token = null;
-      if (user == null && !InitializeConfigureData.checkServiceKey(serviceKey)) {
+      if (user == null && serviceKey == null) {
          throw new WormholeRequestException(HttpStatus.UNAUTHORIZED, "Invalid username or password",
                null);
       }
       if (user != null) {
          access_token = accessTokenService.createToken(user);
-      } else if (InitializeConfigureData.checkServiceKey(serviceKey)) {
-         List<String> roleNames = new ArrayList<String>();
-         roleNames.add(FlowgateConstant.Role_admin);
-         AuthorityUtil util = new AuthorityUtil();
-         WormholeUserDetails userDetails =
-               new WormholeUserDetails(FlowgateConstant.systemUser, FlowgateConstant.systemUser,
-                     FlowgateConstant.systemUser, util.createGrantedAuthorities(roleNames));
-         access_token = jwtTokenUtil.generate(userDetails);
+      } else {
+         if(InitializeConfigureData.checkServiceKey(serviceKey) || accessTokenService.validateServiceKey(serviceKey)) {
+            List<String> roleNames = new ArrayList<String>();
+            roleNames.add(FlowgateConstant.Role_admin);
+            AuthorityUtil util = new AuthorityUtil();
+            WormholeUserDetails userDetails =
+                  new WormholeUserDetails(FlowgateConstant.systemUser, FlowgateConstant.systemUser,
+                        FlowgateConstant.systemUser, util.createGrantedAuthorities(roleNames));
+            access_token = jwtTokenUtil.generate(userDetails);
+         }else {
+            throw new WormholeRequestException(HttpStatus.UNAUTHORIZED, "Invalid username or password",
+                  null);
+         }
       }
       Cookie cookie = new Cookie(JwtTokenUtil.Token_Name, access_token.getAccess_token());
       cookie.setHttpOnly(true);

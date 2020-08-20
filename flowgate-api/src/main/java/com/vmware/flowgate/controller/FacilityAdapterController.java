@@ -84,4 +84,9 @@ public class FacilityAdapterController {
       return facilityAdapterRepo.findAll(pageRequest);
    }
 
+   @RequestMapping(method = RequestMethod.GET)
+   public List<FacilityAdapter> findAll(){
+      return facilityAdapterRepo.findAllFacilityAdapters();
+   }
+
 }

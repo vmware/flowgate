@@ -20,12 +20,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vmware.flowgate.common.exception.WormholeException;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.AuthToken;
 import com.vmware.flowgate.common.model.WormholeUser;
 import com.vmware.flowgate.config.InitializeConfigureData;
@@ -35,9 +34,9 @@ import com.vmware.flowgate.util.WormholeUserDetails;
 
 @Service
 public class AccessTokenService {
-   
+
    private static final Logger logger = LoggerFactory.getLogger(AccessTokenService.class);
-   
+
    @Autowired
    private UserDetailsServiceImpl userDetailsService;
    @Autowired
@@ -48,7 +47,7 @@ public class AccessTokenService {
    private UserDetailsServiceImpl userservice;
    @Autowired
    private StringRedisTemplate redisTemplate;
-   
+
    public AuthToken createToken(WormholeUser user) {
       // Perform the security
       AuthToken access_token = null;
@@ -65,7 +64,7 @@ public class AccessTokenService {
       }
       return access_token;
    }
-   
+
    public AuthToken refreshToken(String token) {
       DecodedJWT jwt = jwtTokenUtil.getDecodedJwt(token);
       WormholeUser user =  userservice.getUserByName(jwt.getSubject());
@@ -85,7 +84,7 @@ public class AccessTokenService {
       }
       return null;
    }
-   
+
    public String getUserJsonString(String token) {
       String userJson = redisTemplate.opsForValue().get(JwtTokenUtil.Prefix_token + token);
       if(userJson == null) {
@@ -93,11 +92,11 @@ public class AccessTokenService {
       }
       return userJson;
    }
-   
+
    public void removeToken(String token) {
       redisTemplate.delete(JwtTokenUtil.Prefix_token + token);
    }
-   
+
    public String getToken(HttpServletRequest request) {
       String authToken = request.getHeader(InitializeConfigureData.Authentication_Header);
       if (authToken != null && authToken.startsWith(JwtTokenUtil.Token_type+" ")) {
@@ -116,7 +115,7 @@ public class AccessTokenService {
       }
       return authToken;
    }
-   
+
    public WormholeUserDetails getCurrentUser(HttpServletRequest request) {
       String token = getToken(request);
       if(token == null && !InitializeConfigureData.unauthirzedURLs.containsKey(request.getRequestURI())) {
@@ -136,7 +135,14 @@ public class AccessTokenService {
          user = mapper.readValue(userJson,WormholeUserDetails.class);
       } catch (IOException e) {
          logger.error("Get current user failed,"+e.getMessage());
-      } 
+      }
       return user;
+   }
+
+   public boolean validateServiceKey(String value) {
+      if(redisTemplate.hasKey(FlowgateConstant.SERVICE_KEY_SET)) {
+         return redisTemplate.opsForSet().isMember(FlowgateConstant.SERVICE_KEY_SET, value);
+      }
+      return false;
    }
 }
