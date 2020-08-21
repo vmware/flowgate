@@ -26,4 +26,7 @@ public interface FacilitySoftwareConfigRepository extends CouchbasePagingAndSort
    Page<FacilitySoftwareConfig> findAllByUserIdAndTypeIn(String userId, List<String> types, Pageable page);
 
    Page<FacilitySoftwareConfig> findAllByTypeIn(List<String> types, Pageable page);
+
+   @Query("SELECT COUNT(*) AS count FROM #{#n1ql.bucket} WHERE _class = 'com.vmware.flowgate.common.model.FacilitySoftwareConfig' and subCategory = $1")
+   int countFacilityBySubcategory(String subcategory);
 }

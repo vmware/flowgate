@@ -103,4 +103,6 @@ public class FlowgateConstant {
    public static long DEFAULTEXPIREDTIMERANGE = 90*24*3600*1000l;//three months
 
    public static String Role_admin = "admin";
+
+   public static String SERVICE_KEY_SET = "adapter:servicekeylist";
 }

@@ -21,6 +21,7 @@ public class FacilityAdapter implements BaseDocument {
    private String subCategory;
    private List<AdapterJobCommand> commands;
    private long createTime;
+   private String serviceKey;
 
    @Override
    public String getId() {
@@ -94,6 +95,14 @@ public class FacilityAdapter implements BaseDocument {
 
    public void setSubCategory(String subCategory) {
       this.subCategory = subCategory;
+   }
+
+   public String getServiceKey() {
+      return serviceKey;
+   }
+
+   public void setServiceKey(String serviceKey) {
+      this.serviceKey = serviceKey;
    }
 
 }
