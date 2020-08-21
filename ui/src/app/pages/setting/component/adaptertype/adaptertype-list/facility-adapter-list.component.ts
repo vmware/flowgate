@@ -398,6 +398,7 @@ comfirmDelete(){
       }
     },(error)=>{
       this.confirmDeleteShow = false;
+      this.deleteErrorMsg = error.json().message;
       this.deleteErrorClosed = false;
       }
     )
