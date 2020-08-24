@@ -1,0 +1,12 @@
+[Unit]
+Description=publish sensor
+Requires=edgexfoundry.service
+After=edgexfoundry.service
+
+[Service]
+Restart=always
+WorkingDirectory=/home/python_sensor
+ExecStart=/usr/bin/python DTH11.py
+
+[Install]
+WantedBy=multi-user.target
