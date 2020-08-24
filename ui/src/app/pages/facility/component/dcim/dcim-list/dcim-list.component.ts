@@ -9,6 +9,7 @@ import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import { DcimService } from '../dcim.service';
 import { FacilityModule } from '../../../facility.module';
+import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
 @Component({
   selector: 'app-dcim-list',
   templateUrl: './dcim-list.component.html',
@@ -145,6 +146,9 @@ export class DcimListComponent implements OnInit {
             this.dcimConfigs = data.json().content;
             this.dcimConfigs.forEach(element=>{   
                 this.checkStatus(element);
+                if(element.type == 'OtherDCIM'){
+                  element.type = this.adapterMap.get(element.subCategory).displayName;
+                }
             })
             this.currentPage = data.json().number+1;
             this.totalPage = data.json().totalPages
@@ -220,9 +224,27 @@ export class DcimListComponent implements OnInit {
       }
     )
   }
+  dcimAdapters:FacilityAdapterModule[] = [];
+  adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
+  findAllAdapters(){
+    this.service.findAllFacilityAdapters().subscribe(
+      (data)=>{
+        let allFacilityAdapters:FacilityAdapterModule[] = [];
+        allFacilityAdapters = data.json();
+        allFacilityAdapters.forEach(element => {
+          if(element.type == "OtherDCIM"){
+            this.dcimAdapters.push(element);
+          }
+        });
+        this.dcimAdapters.forEach(element => {
+          this.adapterMap.set(element.subCategory,element);
+        });
+        this.getDcimConfigdatas(this.currentPage,this.pageSize); 
+      }
+    )
+  }
   ngOnInit() {
-     this.getDcimConfigdatas(this.currentPage,this.pageSize); 
-  
+    this.findAllAdapters();
   }
 
 }

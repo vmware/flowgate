@@ -10,6 +10,7 @@ import {Router,ActivatedRoute} from '@angular/router';
 import { DcimService } from '../../dcim/dcim.service';
 import {FormGroup, FormControl, Validators} from "@angular/forms";
 import { FacilityModule } from '../../../facility.module';
+import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
 @Component({
   selector: 'app-cmdb-edit',
   templateUrl: './cmdb-edit.component.html',
@@ -116,15 +117,45 @@ export class CmdbEditComponent implements OnInit {
   back(){
     this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
   }
+  seclectAdapter:FacilityAdapterModule = new FacilityAdapterModule();
+  cmdbAdapters:FacilityAdapterModule[] = [];
+  adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
+  findAllAdapters(){
+    this.service.findAllFacilityAdapters().subscribe(
+      (data)=>{
+        let allFacilityAdapters:FacilityAdapterModule[] = [];
+        allFacilityAdapters = data.json();
+        allFacilityAdapters.forEach(element => {
+          if(element.type == "OtherCMDB"){
+            this.cmdbAdapters.push(element);
+          }
+        });
+        let infoblox:FacilityAdapterModule = new FacilityAdapterModule();
+        infoblox.displayName = "InfoBlox";
+        infoblox.subCategory = "InfoBlox";
+        infoblox.type = "InfoBlox";
+        this.cmdbAdapters.push(infoblox);
+        let labsdb:FacilityAdapterModule = new FacilityAdapterModule();
+        labsdb.displayName = "Labsdb";
+        labsdb.subCategory = "Labsdb";
+        labsdb.type = "Labsdb";
+        this.cmdbAdapters.push(labsdb);
+        this.cmdbAdapters.forEach(element => {
+          this.adapterMap.set(element.subCategory,element);
+        });
+      }
+    )
+  }
   ngOnInit() {
     this.cmdbConfig.id = this.activedRoute.snapshot.params['id'];
-
     if(this.cmdbConfig.id != null && this.cmdbConfig.id != ""){
+      this.findAllAdapters();
       this.service.getDcimConfig(this.cmdbConfig.id).subscribe(
         (data)=>{
           if(data.status == 200){
             if(data.json != null){
               this.cmdbConfig = data.json();
+              this.seclectAdapter.subCategory = this.cmdbConfig.subCategory;
               this.checked =  data.json().verifyCert;
               if(this.checked == false){
                 this.cmdbConfig.verifyCert = "false";

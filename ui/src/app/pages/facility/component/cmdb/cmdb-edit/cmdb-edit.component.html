@@ -10,10 +10,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 <div class="form-group">
                                     <label class="required" for="gForm_3">Type</label>
                                         <div class="select" style="width:184px; ">
-                                            <select id="gForm_5"  formControlName="cmdbtype"  [(ngModel)]="cmdbConfig.type">                          
-                                                    <option value="InfoBlox">InfoBlox</option>
-                                                    <option value="Labsdb">Labsdb</option>
-                                                    <option value="OtherCMDB">Other CMDB</option>
+                                            <select id="gForm_5"  formControlName="cmdbtype"  [(ngModel)]="seclectAdapter.subCategory">                          
+                                                <option *ngFor="let adapter of cmdbAdapters" value="{{adapter.subCategory}}" >{{adapter.displayName}}</option>    
                                             </select>
                                         </div>
                                 </div>

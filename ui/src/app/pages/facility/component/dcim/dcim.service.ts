@@ -79,4 +79,12 @@ export class DcimService {
       this.options = new RequestOptions({ headers: header });
       return this.http.post(""+this.API_URL+"/v1/facilitysoftware/syncdatabyserverid/"+id+"",null,this.options).map((res)=>res)
     }
+
+    findAllFacilityAdapters(){
+      let header = new Headers({ 'Content-Type': 'application/json' });
+      header.append("Authorization",'Bearer ' + this.auth.getToken());
+      this.options = new RequestOptions({ headers: header });
+      return this.http.get(""+this.API_URL+"/v1/facilityadapter",this.options)
+      .map((res)=>res)
+    }
 }
