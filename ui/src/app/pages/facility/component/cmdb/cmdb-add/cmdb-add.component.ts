@@ -51,7 +51,7 @@ export class CmdbAddComponent implements OnInit {
     if(this.cmdbConfig.type != adapter.displayName){
       this.cmdbConfig.subCategory = adapter.subCategory;
     }
-    if(this.cmdbConfig.type != "InfoBlox"){
+    if(this.cmdbConfig.type == "Labsdb"){
       this.cmdbForm.setControl("userName",new FormControl('',Validators.nullValidator));
       this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.nullValidator));
     }else {
