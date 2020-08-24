@@ -39,6 +39,7 @@ import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -326,14 +327,14 @@ public class FacilityAdapterControllerTest {
    }
 
    @Test
-   public void findAllFacilityAdapterExample() throws JsonProcessingException, Exception {
+   public void findAllFacilityAdapterByPageExample() throws JsonProcessingException, Exception {
       FacilityAdapter adapter = createAdapter();
-      adapter.setDisplayName("displayNameForTestfindall");
+      adapter.setDisplayName("displayNameForTestfindallByPage");
       facilityAdapterRepo.save(adapter);
       this.mockMvc
             .perform(get("/v1/facilityadapter/pagenumber/1/pagesize/5"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$..content[0].displayName").value("displayNameForTestfindall"))
+            .andExpect(jsonPath("$..content[0].displayName").value("displayNameForTestfindallByPage"))
             .andDo(document("facilityadapter-findByPage-example", responseFields(
                   subsectionWithPath("content").description("FacilityAdapter's array."),
                   fieldWithPath("totalPages").description("content's total pages."),
@@ -347,6 +348,31 @@ public class FacilityAdapterControllerTest {
                   subsectionWithPath("pageable").description("pageable.").ignored(),
                   subsectionWithPath("sort").description("sorted.").ignored(),
                   fieldWithPath("empty").description("Is empty.").ignored())));
+      facilityAdapterRepo.deleteById(adapter.getId());
+   }
+
+   @Test
+   public void findAllFacilityAdapterExample() throws JsonProcessingException, Exception {
+      FacilityAdapter adapter = createAdapter();
+      adapter.setDisplayName("displayNameForTestfindall");
+      facilityAdapterRepo.save(adapter);
+      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
+            fieldWithPath("id").description("ID of the facility adapter, created by flowgate"),
+            fieldWithPath("displayName").description("Display name of the facility adapter, created by user"),
+            fieldWithPath("type").description("Type of the facility adapter"),
+            fieldWithPath("description").description("Description of the facility adapter"),
+            fieldWithPath("topic").description("Topic of the facility adapter,created by flowgate"),
+            fieldWithPath("subCategory").description("Subcategory of the facility adapter,created by flowgate"),
+            fieldWithPath("queueName").description("Queue name of the facility adapter,created by flowgate"),
+            fieldWithPath("serviceKey").description("Value for auth,created by flowgate"),
+            fieldWithPath("createTime").description("Create time of the facility adapter,created by flowgate"),
+            subsectionWithPath("commands").description("Job commands of the facility adapter,it should be not null") };
+      this.mockMvc
+            .perform(get("/v1/facilityadapter"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].displayName").value("displayNameForTestfindall"))
+            .andDo(document("facilityadapter-findAll-example", responseFields(fieldWithPath("[]").description("An array of facility adapters"))
+                  .andWithPrefix("[].", fieldpath)));
       facilityAdapterRepo.deleteById(adapter.getId());
    }
 
