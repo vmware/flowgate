@@ -27,7 +27,7 @@ With Project Flowgate, we can fetch metadata and runtime metrics from various fa
 ## Get Start
 **DEMO**
 
-[Demo Flowgate v1.1.2](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate1.1.2Update.mp4)
+[Demo Flowgate v1.1.2](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate1.1.2Update.mp4) or [https://youtu.be/REbDV4Pu_-c](https://youtu.be/REbDV4Pu_-c)
 
 [Demo Flowgate v1.0](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate_V1.0.mp4)
 
