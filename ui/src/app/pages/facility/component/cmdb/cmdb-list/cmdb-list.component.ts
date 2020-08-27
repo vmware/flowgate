@@ -9,6 +9,7 @@ import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import { DcimService } from '../../dcim/dcim.service';
 import { FacilityModule } from '../../../facility.module';
+import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
 
 @Component({
   selector: 'app-cmdb-list',
@@ -147,6 +148,9 @@ export class CmdbListComponent implements OnInit {
             this.cmdbConfigs =  data.json().content;
             this.cmdbConfigs.forEach(element=>{
                 this.checkStatus(element);
+                if(element.type == "OtherCMDB"){
+                  element.type = this.adapterMap.get(element.subCategory).displayName;
+                }
             })
             this.currentPage = data.json().number+1;
             this.totalPage = data.json().totalPages
@@ -221,9 +225,27 @@ export class CmdbListComponent implements OnInit {
       }
     )
   }
+  cmdbAdapters:FacilityAdapterModule[] = [];
+  adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
+  findAllAdapters(){
+    this.service.findAllFacilityAdapters().subscribe(
+      (data)=>{
+        let allFacilityAdapters:FacilityAdapterModule[] = [];
+        allFacilityAdapters = data.json();
+        allFacilityAdapters.forEach(element => {
+          if(element.type == "OtherCMDB"){
+            this.cmdbAdapters.push(element);
+          }
+        });
+        this.cmdbAdapters.forEach(element => {
+          this.adapterMap.set(element.subCategory,element);
+        });
+        this.getCMDBConfigdatas(this.currentPage,this.pageSize); 
+      }
+    )
+  }
   ngOnInit() {
-     this.getCMDBConfigdatas(this.currentPage,this.pageSize); 
-  
+    this.findAllAdapters();
   }
 
 }

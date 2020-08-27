@@ -9,6 +9,7 @@ import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { FacilityModule } from '../../../facility.module';
+import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
 @Component({
   selector: 'app-dcim-edit',
   templateUrl: './dcim-edit.component.html',
@@ -32,6 +33,8 @@ export class DcimEditComponent implements OnInit {
 
 
   changetype(){
+    this.dcimConfig.type = this.adapterMap.get(this.seclectAdapter.subCategory).type;
+    this.dcimConfig.subCategory = this.seclectAdapter.subCategory;
     if(this.dcimConfig.type == "Nlyte"){
       this.nlyteAdvanceSettingShow = true;
       this.powerIQAdvanceSettingShow = false;
@@ -96,7 +99,38 @@ export class DcimEditComponent implements OnInit {
   back(){
     this.router.navigate(["/ui/nav/facility/dcim/dcim-list"]);
   }
+  seclectAdapter:FacilityAdapterModule = new FacilityAdapterModule();
+  dcimAdapters:FacilityAdapterModule[] = [];
+  adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
+  findAllAdapters(){
+    this.service.findAllFacilityAdapters().subscribe(
+      (data)=>{
+        let allFacilityAdapters:FacilityAdapterModule[] = [];
+        allFacilityAdapters = data.json();
+        allFacilityAdapters.forEach(element => {
+          if(element.type == "OtherDCIM"){
+            this.dcimAdapters.push(element);
+          }
+        });
+        let nlyte:FacilityAdapterModule = new FacilityAdapterModule();
+        nlyte.displayName = "Nlyte";
+        nlyte.subCategory = "Nlyte";
+        nlyte.type = "Nlyte";
+        this.dcimAdapters.push(nlyte);
+        let powerIQ:FacilityAdapterModule = new FacilityAdapterModule();
+        powerIQ.displayName = "PowerIQ";
+        powerIQ.subCategory = "PowerIQ";
+        powerIQ.type = "PowerIQ";
+        this.dcimAdapters.push(powerIQ);
+        this.dcimAdapters.forEach(element => {
+          this.adapterMap.set(element.subCategory,element);
+        });
+      }
+    )
+  }
+
   ngOnInit() {
+    this.findAllAdapters();
     this.dcimConfig.advanceSetting ={
       DateFormat:"",
       TimeZone:"",
@@ -114,6 +148,7 @@ export class DcimEditComponent implements OnInit {
           if(data.status == 200){
             if(data.json != null){
               this.dcimConfig = data.json();
+              this.seclectAdapter.subCategory = this.dcimConfig.subCategory;
               if(data.json().advanceSetting == null){
                 this.dcimConfig.advanceSetting = {
                   DateFormat:"",

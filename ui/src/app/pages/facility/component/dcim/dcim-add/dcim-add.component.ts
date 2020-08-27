@@ -9,6 +9,7 @@ import {Http,RequestOptions } from '@angular/http'
 import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { FacilityModule } from '../../../facility.module';
+import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
 @Component({
   selector: 'app-dcim-add',
   templateUrl: './dcim-add.component.html',
@@ -31,10 +32,14 @@ export class DcimAddComponent implements OnInit {
 
   read = "";/** This property is to change the read-only attribute of the password input box*/
   advanceSetting:string = "";
- 
- 
+  seclectAdapter:FacilityAdapterModule = new FacilityAdapterModule();
+  
   changetype(){
-
+    let adapter:FacilityAdapterModule = this.adapterMap.get(this.seclectAdapter.displayName);
+    this.dcimConfig.type = adapter.type;
+    if(this.dcimConfig.type != adapter.displayName){
+      this.dcimConfig.subCategory = adapter.subCategory;
+    }
     if(this.dcimConfig.type == "Nlyte"){
       this.nlyteAdvanceSettingShow = true;
       this.powerIQAdvanceSettingShow = false;
@@ -102,7 +107,37 @@ export class DcimAddComponent implements OnInit {
   back(){
     this.router.navigate(["/ui/nav/facility/dcim/dcim-list"]);
   }
+
+  dcimAdapters:FacilityAdapterModule[] = [];
+  adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
+  findAllAdapters(){
+    this.service.findAllFacilityAdapters().subscribe(
+      (data)=>{
+        let allFacilityAdapters:FacilityAdapterModule[] = [];
+        allFacilityAdapters = data.json();
+        allFacilityAdapters.forEach(element => {
+          if(element.type == "OtherDCIM"){
+            this.dcimAdapters.push(element);
+          }
+        });
+        let nlyte:FacilityAdapterModule = new FacilityAdapterModule();
+        nlyte.displayName = "Nlyte";
+        nlyte.subCategory = "Nlyte";
+        nlyte.type = "Nlyte";
+        this.dcimAdapters.push(nlyte);
+        let powerIQ:FacilityAdapterModule = new FacilityAdapterModule();
+        powerIQ.displayName = "PowerIQ";
+        powerIQ.subCategory = "PowerIQ";
+        powerIQ.type = "PowerIQ";
+        this.dcimAdapters.push(powerIQ);
+        this.dcimAdapters.forEach(element => {
+          this.adapterMap.set(element.displayName,element);
+        });
+      }
+    )
+  }
   ngOnInit() {
+    this.findAllAdapters();
     this.dcimConfig.advanceSetting = {
       DateFormat:"",
       TimeZone:"",

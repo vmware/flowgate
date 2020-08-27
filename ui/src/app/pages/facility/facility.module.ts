@@ -6,10 +6,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FacilityComponent } from './facility.component';
 import { routing } from './facility.routing';
-import { CmdbComponent } from './component/cmdb/cmdb.component';
-import { CmdbAddComponent } from './component/cmdb/cmdb-add/cmdb-add.component';
-import { CmdbEditComponent } from './component/cmdb/cmdb-edit/cmdb-edit.component';
-import { CmdbListComponent } from './component/cmdb/cmdb-list/cmdb-list.component';
 @NgModule({
   imports: [
     CommonModule,
@@ -18,14 +14,15 @@ import { CmdbListComponent } from './component/cmdb/cmdb-list/cmdb-list.componen
   declarations: [FacilityComponent]
 })
 export class FacilityModule { 
-  public id;
-  public type;
-  public name;
-  public description;
-  public userName;
-  public password;
-  public serverURL;
-  public verifyCert;
-  public advanceSetting;
-  public integrationStatus;
+  id:string;
+  type:string;
+  name:string;
+  description:string;
+  userName:string;
+  password:string;
+  serverURL:string;
+  verifyCert:any;
+  advanceSetting:any;
+  integrationStatus:any;
+  subCategory:string;
 }

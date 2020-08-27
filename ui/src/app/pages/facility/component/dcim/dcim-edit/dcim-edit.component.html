@@ -10,10 +10,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     <div class="form-group ">
                         <label class="required" for="gForm_3">Type</label>
                             <div class="select" style="width:184px; ">
-                                <select id="gForm_5" [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.type" disabled> 
-                                        <option value="Nlyte" >Nlyte</option>
-                                        <option value="PowerIQ">PowerIQ</option>
-                                        <option value="OtherDCIM">Other DCIM</option>
+                                <select id="gForm_5" [ngModelOptions]="{standalone: true}"  [ngModel]="seclectAdapter.subCategory" disabled> 
+                                    <option *ngFor="let adapter of dcimAdapters" value="{{adapter.subCategory}}" >{{adapter.displayName}}</option>  
                                 </select>
                             </div>
                     </div>
