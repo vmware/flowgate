@@ -21,6 +21,7 @@ import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.AuthToken;
+import com.vmware.flowgate.common.model.FacilityAdapter;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.JobConfig;
@@ -75,6 +76,7 @@ public class WormholeAPIClient extends RestClientBase {
    private static final String GetServersWithPDUInfo = "/v1/assets/pdusisnotnull";
    private static final String GetAssetsByType = "/v1/assets/type/%s?currentPage=%s&pageSize=%s";
    private static final String GetAssetByName = "/v1/assets/name/%s";
+   private static final String GetAllCustomerFacilityAdapters = "/v1/facilityadapter";
 
    private static final String GetToken = "/v1/auth/token";
    private static final String GetRefreshToken = "/v1/auth/token/refresh";
@@ -418,5 +420,11 @@ public class WormholeAPIClient extends RestClientBase {
       return this.restTemplate.exchange(
             getAPIServiceEndpoint() + String.format(GetAssetByName, name), HttpMethod.GET,
             getDefaultEntity(), Asset.class);
+   }
+
+   public ResponseEntity<FacilityAdapter[]> getAllCustomerFacilityAdapters() {
+      return this.restTemplate.exchange(
+            getAPIServiceEndpoint() + GetAllCustomerFacilityAdapters, HttpMethod.GET,
+            getDefaultEntity(), FacilityAdapter[].class);
    }
 }

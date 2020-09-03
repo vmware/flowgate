@@ -4,6 +4,9 @@
 */
 package com.vmware.flowgate.aggregator;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,20 +14,39 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.quartz.JobExecutionException;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.aggregator.scheduler.job.AggregatorService;
+import com.vmware.flowgate.aggregator.scheduler.job.CustomerAdapterJobDispatcher;
+import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricName;
+import com.vmware.flowgate.common.model.AdapterJobCommand;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.FacilityAdapter;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
+import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.common.model.IntegrationStatus.Status;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
@@ -34,14 +56,22 @@ import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 
 import junit.framework.TestCase;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
 public class MessageProcessingTest {
 
-   @Autowired
+   @MockBean
    private StringRedisTemplate template;
 
    @Spy
    @InjectMocks
    private AggregatorService aggregatorService = new AggregatorService();
+
+   @SpyBean
+   private CustomerAdapterJobDispatcher customerAdapter;
+
+   @MockBean
+   private WormholeAPIClient restClient;
 
    @Test
    public void testMessage() {
@@ -198,5 +228,100 @@ public class MessageProcessingTest {
             needupdateServer.getMetricsformulars();
       TestCase.assertEquals(1, metricsFormulars.size());
       TestCase.assertEquals("asdasdw2213dsdfaewwqe", metricsFormulars.get(FlowgateConstant.PDU).keySet().iterator().next());
+   }
+
+   @Test
+   public void testExecuteCustomerSendMessageJob() throws JobExecutionException {
+      ListOperations<String, String> listOp = Mockito.mock(ListOperations.class);
+      ValueOperations<String, String> valueOp = Mockito.mock(ValueOperations.class);
+      when(template.opsForList()).thenReturn(listOp);
+      when(listOp.leftPushAll(anyString(), anyString())).thenReturn(1L);
+      when(template.hasKey(anyString())).thenReturn(true);
+      when(template.opsForValue()).thenReturn(valueOp);
+      when(valueOp.increment(anyString())).thenReturn(4l);
+
+      FacilitySoftwareConfig fac1 = createFacilitySoftware();
+      String unique_value1 = UUID.randomUUID().toString();
+      fac1.setSubCategory("OtherDCIM_"+unique_value1);
+      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
+      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(new ResponseEntity<FacilitySoftwareConfig[]>(new FacilitySoftwareConfig[0], HttpStatus.OK));
+
+      FacilityAdapter adapter = new FacilityAdapter();
+      adapter.setSubCategory("OtherDCIM_"+unique_value1);
+      AdapterJobCommand command1 = new AdapterJobCommand();
+      command1.setCommand("syncmetadata");
+      command1.setTriggerCycle(20);
+      List<AdapterJobCommand> commands = new ArrayList<AdapterJobCommand>();
+      commands.add(command1);
+      adapter.setCommands(commands);
+      adapter.setTopic(unique_value1);
+      adapter.setQueueName(unique_value1+":joblist");
+      FacilityAdapter[] adapters = new FacilityAdapter[1];
+      adapters[0] = adapter;
+      when(restClient.getAllCustomerFacilityAdapters()).thenReturn(new ResponseEntity<FacilityAdapter[]>(adapters, HttpStatus.OK));
+      customerAdapter.execute(null);
+      TestCase.assertEquals(true, CustomerAdapterJobDispatcher.facilityAdapterMap.containsKey(adapter.getSubCategory()));
+
+   }
+
+   @Test
+   public void testExecuteCustomerSendMessageJob1() throws JobExecutionException {
+      ListOperations<String, String> listOp = Mockito.mock(ListOperations.class);
+      ValueOperations<String, String> valueOp = Mockito.mock(ValueOperations.class);
+      when(template.opsForList()).thenReturn(listOp);
+      when(listOp.leftPushAll(anyString(), anyString())).thenReturn(1L);
+      when(template.hasKey(anyString())).thenReturn(true);
+      when(template.opsForValue()).thenReturn(valueOp);
+      when(valueOp.increment(anyString())).thenReturn(5l);
+
+      FacilitySoftwareConfig fac1 = createFacilitySoftware();
+      String unique_value1 = UUID.randomUUID().toString();
+      fac1.setSubCategory("OtherDCIM_"+unique_value1);
+      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
+      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(new ResponseEntity<FacilitySoftwareConfig[]>(new FacilitySoftwareConfig[0], HttpStatus.OK));
+
+      FacilityAdapter adapter = new FacilityAdapter();
+      adapter.setSubCategory(unique_value1);
+      AdapterJobCommand command1 = new AdapterJobCommand();
+      command1.setCommand("syncmetadata");
+      command1.setTriggerCycle(20);
+      List<AdapterJobCommand> commands = new ArrayList<AdapterJobCommand>();
+      commands.add(command1);
+      adapter.setCommands(commands);
+      adapter.setTopic(unique_value1);
+      adapter.setQueueName(unique_value1+":joblist");
+      FacilityAdapter[] adapters = new FacilityAdapter[1];
+      adapters[0] = adapter;
+      when(restClient.getAllCustomerFacilityAdapters()).thenReturn(new ResponseEntity<FacilityAdapter[]>(adapters, HttpStatus.OK));
+      customerAdapter.execute(null);
+      TestCase.assertEquals(null, CustomerAdapterJobDispatcher.facilityAdapterMap);
+
+   }
+
+   FacilitySoftwareConfig createFacilitySoftware() {
+      FacilitySoftwareConfig example = new FacilitySoftwareConfig();
+      example.setId(UUID.randomUUID().toString());
+      example.setName("OtherDcimSample");
+      example.setUserName("administrator@vsphere.local");
+      example.setPassword("Admin!23");
+      example.setServerURL("https://10.160.30.134");
+      example.setType(FacilitySoftwareConfig.SoftwareType.OtherDCIM);
+      example.setUserId("1");
+      example.setVerifyCert(false);
+      example.setDescription("description");
+      HashMap<AdvanceSettingType, String> advanceSetting = new HashMap<AdvanceSettingType, String>();
+      example.setAdvanceSetting(advanceSetting);
+      IntegrationStatus integrationStatus = new IntegrationStatus();
+      integrationStatus.setDetail("");
+      integrationStatus.setRetryCounter(0);
+      integrationStatus.setStatus(Status.ACTIVE);
+      example.setIntegrationStatus(integrationStatus);
+      return example;
+   }
+
+   public ResponseEntity<FacilitySoftwareConfig[]> getFacilitySoftwareByType(FacilitySoftwareConfig intergration) {
+      FacilitySoftwareConfig[] configs = new FacilitySoftwareConfig[1];
+      configs[0] = intergration;
+      return new ResponseEntity<FacilitySoftwareConfig[]>(configs, HttpStatus.OK);
    }
 }
