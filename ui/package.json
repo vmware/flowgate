@@ -70,7 +70,7 @@
     "macaddress": "0.2.9",
     "mem": "4.0.0",
     "mixin-deep": "2.0.1",
-    "node-sass": "^4.13.0",
+    "node-sass": "^4.13.1",
     "protractor": "~5.1.2",
     "querystringify": "2.0.0",
     "randomatic": "3.0.0",
