@@ -50,7 +50,7 @@
     "diff": "3.5.0",
     "enhanced-resolve": "~3.4.1",
     "extend": "3.0.2",
-    "handlebars": "4.3.5",
+    "handlebars": "4.5.3",
     "hoek": "4.2.1",
     "http-proxy-agent": "2.1.0",
     "https-proxy-agent": "2.2.3",
