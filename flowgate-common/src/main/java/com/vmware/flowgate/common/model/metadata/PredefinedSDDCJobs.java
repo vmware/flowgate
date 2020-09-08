@@ -35,5 +35,9 @@ public class PredefinedSDDCJobs {
          new JobConfig("AGGREGATOR-PREDEFINED-SYNC-LABSDB-DATA", "SyncLABSDBData", "AggregateJobs",
                "Everyday", "SyncLABSDBAll", "", "0 18 22 * * ?",
                "com.vmware.flowgate.aggregator.scheduler.job.LabsdbJobDispatcher",
+               JobType.AGGREGATOR),
+         new JobConfig("AGGREGATOR-PREDEFINED-SYNC-CUSTOMER-ADAPTER-DATA", "SyncCustomerAdapterData", "AggregateJobs",
+               "FiveMinutes", "SyncAdapterData", "", "10 0/5 * * * ?",
+               "com.vmware.flowgate.aggregator.scheduler.job.CustomerAdapterJobDispatcher",
                JobType.AGGREGATOR));
 }
