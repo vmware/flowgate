@@ -240,8 +240,100 @@ public class MessageProcessingTest {
       when(listOp.leftPushAll(anyString(), anyString())).thenReturn(1L);
       when(template.hasKey(anyString())).thenReturn(true);
       when(template.opsForValue()).thenReturn(valueOp);
-      when(valueOp.increment(anyString())).thenReturn(4l);
 
+      FacilitySoftwareConfig fac1 = createFacilitySoftware();
+      String unique_value1 = UUID.randomUUID().toString();
+      fac1.setSubCategory("OtherDCIM_"+unique_value1);
+      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
+
+      FacilitySoftwareConfig fac2 = createFacilitySoftware();
+      fac2.setType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB);
+      String unique_value2 = UUID.randomUUID().toString();
+      fac2.setSubCategory("OtherCMDB_"+unique_value2);
+
+      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(getFacilitySoftwareByType(fac2));
+
+      FacilityAdapter adapter = new FacilityAdapter();
+      adapter.setSubCategory("OtherDCIM_"+unique_value1);
+      AdapterJobCommand command1 = new AdapterJobCommand();
+      command1.setCommand("syncmetadata");
+      command1.setTriggerCycle(20);
+      List<AdapterJobCommand> commands = new ArrayList<AdapterJobCommand>();
+      commands.add(command1);
+      adapter.setCommands(commands);
+      adapter.setTopic(unique_value1);
+      adapter.setQueueName(unique_value1+":joblist");
+
+      FacilityAdapter adapter2 = new FacilityAdapter();
+      adapter2.setSubCategory("OtherCMDB_"+unique_value2);
+      AdapterJobCommand command2 = new AdapterJobCommand();
+      command2.setCommand("syncmetadata");
+      command2.setTriggerCycle(20);
+      List<AdapterJobCommand> commands2 = new ArrayList<AdapterJobCommand>();
+      commands2.add(command2);
+      adapter2.setCommands(commands2);
+      adapter2.setTopic(unique_value2);
+      adapter2.setQueueName(unique_value2+":joblist");
+
+      FacilityAdapter[] adapters = new FacilityAdapter[2];
+      adapters[0] = adapter;
+      adapters[1] = adapter2;
+      when(restClient.getAllCustomerFacilityAdapters()).thenReturn(new ResponseEntity<FacilityAdapter[]>(adapters, HttpStatus.OK));
+      customerAdapter.execute(null);
+   }
+
+   @Test
+   public void testExecuteCustomerSendMessageJob1() throws JobExecutionException {
+      ListOperations<String, String> listOp = Mockito.mock(ListOperations.class);
+      ValueOperations<String, String> valueOp = Mockito.mock(ValueOperations.class);
+      when(template.opsForList()).thenReturn(listOp);
+      when(listOp.leftPushAll(anyString(), anyString())).thenReturn(1L);
+      when(template.hasKey(anyString())).thenReturn(false);
+      when(template.opsForValue()).thenReturn(valueOp);
+      when(valueOp.get(anyString())).thenReturn("19");
+      FacilitySoftwareConfig fac1 = createFacilitySoftware();
+      String unique_value1 = UUID.randomUUID().toString();
+      fac1.setSubCategory("OtherDCIM_"+unique_value1);
+      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
+
+      FacilitySoftwareConfig fac2 = createFacilitySoftware();
+      fac2.setType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB);
+      String unique_value2 = UUID.randomUUID().toString();
+      fac2.setSubCategory("OtherCMDB_"+unique_value2);
+
+      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(getFacilitySoftwareByType(fac2));
+
+      FacilityAdapter adapter = new FacilityAdapter();
+      adapter.setSubCategory("OtherDCIM_"+unique_value1);
+      AdapterJobCommand command1 = new AdapterJobCommand();
+      command1.setCommand("syncmetadata");
+      command1.setTriggerCycle(20);
+      List<AdapterJobCommand> commands = new ArrayList<AdapterJobCommand>();
+      commands.add(command1);
+      adapter.setCommands(commands);
+      adapter.setTopic(unique_value1);
+      adapter.setQueueName(unique_value1+":joblist");
+
+      FacilityAdapter adapter2 = new FacilityAdapter();
+      adapter2.setSubCategory("OtherCMDB_"+unique_value2);
+      AdapterJobCommand command2 = new AdapterJobCommand();
+      command2.setCommand("syncmetadata");
+      command2.setTriggerCycle(20);
+      List<AdapterJobCommand> commands2 = new ArrayList<AdapterJobCommand>();
+      commands2.add(command2);
+      adapter2.setCommands(commands2);
+      adapter2.setTopic(unique_value2);
+      adapter2.setQueueName(unique_value2+":joblist");
+
+      FacilityAdapter[] adapters = new FacilityAdapter[2];
+      adapters[0] = adapter;
+      adapters[1] = adapter2;
+      when(restClient.getAllCustomerFacilityAdapters()).thenReturn(new ResponseEntity<FacilityAdapter[]>(adapters, HttpStatus.OK));
+      customerAdapter.execute(null);
+   }
+
+   @Test
+   public void testExecuteCustomerSendMessageJob2() throws JobExecutionException {
       FacilitySoftwareConfig fac1 = createFacilitySoftware();
       String unique_value1 = UUID.randomUUID().toString();
       fac1.setSubCategory("OtherDCIM_"+unique_value1);
@@ -260,30 +352,28 @@ public class MessageProcessingTest {
       adapter.setQueueName(unique_value1+":joblist");
       FacilityAdapter[] adapters = new FacilityAdapter[1];
       adapters[0] = adapter;
-      when(restClient.getAllCustomerFacilityAdapters()).thenReturn(new ResponseEntity<FacilityAdapter[]>(adapters, HttpStatus.OK));
+      when(restClient.getAllCustomerFacilityAdapters()).thenReturn(new ResponseEntity<FacilityAdapter[]>(new FacilityAdapter[0], HttpStatus.OK));
       customerAdapter.execute(null);
-      TestCase.assertEquals(true, CustomerAdapterJobDispatcher.facilityAdapterMap.containsKey(adapter.getSubCategory()));
-
    }
 
    @Test
-   public void testExecuteCustomerSendMessageJob1() throws JobExecutionException {
+   public void testExecuteCustomerSendMessageJob3() throws JobExecutionException {
       ListOperations<String, String> listOp = Mockito.mock(ListOperations.class);
       ValueOperations<String, String> valueOp = Mockito.mock(ValueOperations.class);
       when(template.opsForList()).thenReturn(listOp);
       when(listOp.leftPushAll(anyString(), anyString())).thenReturn(1L);
       when(template.hasKey(anyString())).thenReturn(true);
       when(template.opsForValue()).thenReturn(valueOp);
-      when(valueOp.increment(anyString())).thenReturn(5l);
+      when(valueOp.increment(anyString())).thenReturn(4l);
 
       FacilitySoftwareConfig fac1 = createFacilitySoftware();
       String unique_value1 = UUID.randomUUID().toString();
       fac1.setSubCategory("OtherDCIM_"+unique_value1);
-      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
+      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(new ResponseEntity<FacilitySoftwareConfig[]>(new FacilitySoftwareConfig[0], HttpStatus.OK));
       when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(new ResponseEntity<FacilitySoftwareConfig[]>(new FacilitySoftwareConfig[0], HttpStatus.OK));
 
       FacilityAdapter adapter = new FacilityAdapter();
-      adapter.setSubCategory(unique_value1);
+      adapter.setSubCategory("OtherDCIM_"+unique_value1);
       AdapterJobCommand command1 = new AdapterJobCommand();
       command1.setCommand("syncmetadata");
       command1.setTriggerCycle(20);
@@ -296,8 +386,6 @@ public class MessageProcessingTest {
       adapters[0] = adapter;
       when(restClient.getAllCustomerFacilityAdapters()).thenReturn(new ResponseEntity<FacilityAdapter[]>(adapters, HttpStatus.OK));
       customerAdapter.execute(null);
-      TestCase.assertEquals(null, CustomerAdapterJobDispatcher.facilityAdapterMap);
-
    }
 
    FacilitySoftwareConfig createFacilitySoftware() {
