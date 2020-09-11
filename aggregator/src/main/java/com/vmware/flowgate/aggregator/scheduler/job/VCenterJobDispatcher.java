@@ -43,16 +43,24 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
    @Override
    public void execute(JobExecutionContext context) throws JobExecutionException {
       // Read all the vcenter information, send to the redis topic
-      //this job will be triggered every 30 minutes.
-      //every 300 minutes we will trigger a sync CustomAttributes job.
+      //this job will be triggered every 5 minutes.
+      
+      //every 5 minutes we will trigger a sync host realtimedata job.
+      //every 12 hour we will trigger a sync host metadata job.
+      //every 1 day we will trigger a sync CustomerAttrsData job.
+      //every 10 days we will trigger a sync CustomAttributes job.
+      
       String execountString = template.opsForValue().get(EventMessageUtil.VCENTER_EXECOUNT);
       if (execountString == null || "".equals(execountString)) {
          execountString = "0";
       }
       long execount = Long.valueOf(execountString);
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      boolean syncCustomerMetric = execount++ % 10 == 0;
-      logger.info("Send Sync VC customer attributes data commands");
+      boolean syncHostMetadata = execount % 144 == 0;
+      boolean syncCustomerAttrsData = execount % 288 == 0;
+      boolean syncCustomAttributes = execount % 2880 == 0;
+      execount++;
+
       try {
          template.opsForValue().set(EventMessageUtil.VCENTER_EXECOUNT, String.valueOf(execount));
       }catch(Exception e) {
@@ -64,15 +72,29 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
          return;
       }
       try {
+         logger.info("Send query Host meta data commands");
          template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
                EventMessageUtil.generateSDDCMessageListByType(EventType.VCenter,
-                     EventMessageUtil.VCENTER_SyncCustomerAttrsData, vcServers));
-         if (syncCustomerMetric) {
+                     EventMessageUtil.VCENTER_QueryHostMetaData, vcServers));
+         if (syncHostMetadata) {
+            logger.info("Send query Host usage data commands");
+            template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
+                  EventMessageUtil.generateSDDCMessageListByType(EventType.VCenter,
+                        EventMessageUtil.VCENTER_QueryHostUsageData, vcServers));
+         }
+         if (syncCustomerAttrsData) {
+            logger.info("Send Sync VC customer attributes data commands");
+            template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
+                  EventMessageUtil.generateSDDCMessageListByType(EventType.VCenter,
+                        EventMessageUtil.VCENTER_SyncCustomerAttrsData, vcServers));
+         }
+         if (syncCustomAttributes) {
             logger.info("Send Sync VC customer attributes commands");
             template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
                   EventMessageUtil.generateSDDCMessageListByType(EventType.VCenter,
                         EventMessageUtil.VCENTER_SyncCustomerAttrs, vcServers));
          }
+
          publisher.publish(EventMessageUtil.VCTopic,
                EventMessageUtil.generateSDDCNotifyMessage(EventType.VCenter));
       } catch (IOException e) {

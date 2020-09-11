@@ -53,7 +53,10 @@ public class EventMessageUtil {
    public static final String VCENTER_SyncCustomerAttrsData = "vcenter.synccustomerattrsdata";
    public static final String VCENTER_SyncData = "vcenter.syncdata";
    public static final String VCENTER_EXECOUNT = "vcenter.execount";
-
+   
+   public static final String VCENTER_QueryHostMetaData = "vcenter.queryhostmetadata";
+   public static final String VCENTER_QueryHostUsageData = "vcenter.queryhostusagedata";
+   
    public static final String VRO_SyncData = "vro.syncdata";
    public static final String VRO_SyncMetricData = "vro.syncmetricdata";
    public static final String VRO_SyncMetricPropertyAndAlert = "vro.syncmetricpropertyalert";

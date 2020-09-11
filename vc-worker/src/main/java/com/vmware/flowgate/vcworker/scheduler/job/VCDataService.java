@@ -27,6 +27,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.cis.tagging.CategoryModel;
 import com.vmware.cis.tagging.CategoryModel.Cardinality;
@@ -49,10 +50,20 @@ import com.vmware.flowgate.common.utils.IPAddressUtil;
 import com.vmware.flowgate.vcworker.client.HostTagClient;
 import com.vmware.flowgate.vcworker.client.VsphereClient;
 import com.vmware.flowgate.vcworker.config.ServiceKeyConfig;
+import com.vmware.flowgate.vcworker.model.VCHostMetadata;
 import com.vmware.flowgate.vcworker.model.VCConstants;
+import com.vmware.vim.binding.vim.ClusterComputeResource;
+import com.vmware.vim.binding.vim.ComputeResource;
+import com.vmware.vim.binding.vim.Folder;
 import com.vmware.vim.binding.vim.HostSystem;
+import com.vmware.vim.binding.vim.ManagedEntity;
+import com.vmware.vim.binding.vim.cluster.ConfigInfoEx;
+import com.vmware.vim.binding.vim.cluster.DpmHostConfigInfo;
 import com.vmware.vim.binding.vim.fault.InvalidLogin;
+import com.vmware.vim.binding.vim.host.Summary.QuickStats;
+import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.vmomi.client.exception.ConnectionException;
+import com.vmware.vim25.ComputeResourceConfigInfo;
 
 @Service
 public class VCDataService implements AsyncService {
@@ -120,8 +131,16 @@ public class VCDataService implements AsyncService {
                      logger.info("Finish sync customer attributes for " + vcInfo.getName());
                      break;
                   case EventMessageUtil.VCENTER_SyncCustomerAttrsData:
-                     syncHostMetaData(vcInfo);
+                     syncCustomerAttrsData(vcInfo);
                      logger.info("Finish sync data for " + vcInfo.getName());
+                     break;
+                  case EventMessageUtil.VCENTER_QueryHostMetaData:
+                     queryHostMetaData(vcInfo);
+                     logger.info("Finish query host metadata for " + vcInfo.getName());
+                     break;
+                  case EventMessageUtil.VCENTER_QueryHostUsageData:
+                     queryHostMetaData(vcInfo);
+                     logger.info("Finish query host usage data for " + vcInfo.getName());
                      break;
                   default:
                      break;
@@ -166,6 +185,111 @@ public class VCDataService implements AsyncService {
       }
       vc.setIntegrationStatus(integrationStatus);
       updateIntegrationStatus(vc);
+   }
+
+   private void queryHostMetaData(SDDCSoftwareConfig vc) {
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      if (!vc.checkIsActive()) {
+         return;
+      }
+      try (VsphereClient vsphereClient =
+            VsphereClient.connect(String.format(VCConstants.SDKURL, vc.getServerURL()),
+                  vc.getUserName(), vc.getPassword(), !vc.isVerifyCert());) {
+         ServerMapping[] mappings = null;
+         try {
+            mappings = restClient.getServerMappingsByVC(vc.getId()).getBody();
+         } catch (HttpClientErrorException clientError) {
+            if (clientError.getRawStatusCode() != HttpStatus.NOT_FOUND.value()) {
+               throw clientError;
+            }
+            mappings = new ServerMapping[0];
+         }
+         HashMap<String, ServerMapping> mobIdDictionary = new HashMap<String, ServerMapping>();
+         for (ServerMapping mapping : mappings) {
+            mobIdDictionary.put(mapping.getVcMobID(), mapping);
+         }
+
+         //sync hosts metadata
+         Collection<HostSystem> hosts = vsphereClient.getAllHost();
+         if (hosts != null && !hosts.isEmpty()) {
+            for (HostSystem host : hosts) {
+               String mobId = host._getRef().getValue();
+               if (mobIdDictionary.containsKey(mobId)) {
+                  ServerMapping serverMapping = mobIdDictionary.get(mobId);
+                  if (serverMapping.getAsset() != null) {
+                     //TODO feed host meta data
+                     Asset hostMappingAsset =
+                           restClient.getAssetByID(serverMapping.getAsset()).getBody();
+                     if (hostMappingAsset != null) {
+                        feedHostMetaData(vsphereClient, hostMappingAsset, mobId);
+                     }
+                  }
+               }
+            }
+         }
+      } catch (ConnectionException e1) {
+         checkAndUpdateIntegrationStatus(vc, e1.getMessage());
+         return;
+      } catch (ExecutionException e2) {
+         if (e2.getCause() instanceof InvalidLogin) {
+            logger.error("Failed to push data to " + vc.getServerURL(), e2);
+            IntegrationStatus integrationStatus = vc.getIntegrationStatus();
+            if (integrationStatus == null) {
+               integrationStatus = new IntegrationStatus();
+            }
+            integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+            integrationStatus.setDetail("Invalid username or password.");
+            integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+            updateIntegrationStatus(vc);
+            return;
+         }
+      } catch (Exception e) {
+         logger.error("Failed to sync the host metadata to VC ", e);
+         return;
+      }
+   }
+
+   private void feedHostMetaData(VsphereClient vsphereClient, Asset hostMappingAsset,
+         String hostMobId) {
+
+      VCHostMetadata vcHostMetadata = new VCHostMetadata();
+
+      //get clusters from vcenter
+      Collection<ClusterComputeResource> clusters = vsphereClient.getAllClusterComputeResource();
+      if (clusters != null && !clusters.isEmpty()) {
+         for (ClusterComputeResource cluster : clusters) {
+            ConfigInfoEx ci = (ConfigInfoEx) cluster.getConfigurationEx();
+            ManagedObjectReference[] hostsMOR = cluster.getHost();
+            for (ManagedObjectReference hostMOR : hostsMOR) {
+               String mobId = hostMOR.getValue();
+               if (mobId.equals(hostMobId)) {
+                  DpmHostConfigInfo[] dpmHosts = ci.getDpmHostConfig();
+                  if (dpmHosts != null) {
+                     for (DpmHostConfigInfo dpmhost : dpmHosts) {
+                        dpmhost.getEnabled();
+                     }
+                  }
+               }
+            }
+            //TODO
+         }
+      }
+      HashMap<String, String> hostJustification = hostMappingAsset.getJustificationfields();
+      if (vcHostMetadata != null) {
+         try {
+            String vcHostObjStr = mapper.writeValueAsString(vcHostMetadata);
+            hostJustification.put(VCConstants.VCHOSTMETADATA, vcHostObjStr);
+
+         } catch (JsonProcessingException e) {
+            logger.error("Format sensor info map error", e);
+         }
+
+         restClient.saveAssets(hostMappingAsset);
+      }
+   }
+
+   private void queryHostUsageData(SDDCSoftwareConfig vc) {
+      //TODO
    }
 
    private void syncCustomAttributes(SDDCSoftwareConfig vc) {
@@ -224,7 +348,7 @@ public class VCDataService implements AsyncService {
       }
    }
 
-   private void syncHostMetaData(SDDCSoftwareConfig vcInfo) {
+   private void syncCustomerAttrsData(SDDCSoftwareConfig vcInfo) {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       if (!vcInfo.checkIsActive()) {
          return;

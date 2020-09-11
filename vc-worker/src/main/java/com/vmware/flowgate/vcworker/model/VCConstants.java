@@ -21,9 +21,11 @@ public class VCConstants {
    public static final String ASSET_SERIALNUMBER = "Asset.SerialNumber";
    public static final String ASSET_PDUs = "Asset.PDUs";
    public static final String ASSET_SWITCHs ="Asset.Switches";
-
+   
+   public static final String VCHOSTMETADATA ="HOST_METADATA";
    public static final String HOSTSYSTEM = "HostSystem";
-
+   public static final String CLUSTERCOMPUTERESOURCE = "ClusterComputeResource";
+   
    public static final String SDKURL = "https://%s/sdk";
 
    public static final Map<String, String> hostCustomAttrMapping;

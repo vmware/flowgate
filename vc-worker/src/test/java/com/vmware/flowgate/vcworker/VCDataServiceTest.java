@@ -3,17 +3,51 @@
  */
 package com.vmware.flowgate.vcworker;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vmware.flowgate.client.WormholeAPIClient;
+import com.vmware.flowgate.common.AssetCategory;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
+import com.vmware.flowgate.common.model.ServerMapping;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
+import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.vcworker.config.ServiceKeyConfig;
 import com.vmware.flowgate.vcworker.scheduler.job.VCDataService;
 
-public class VCDataServiceTest {
+import junit.framework.TestCase;
 
+public class VCDataServiceTest {
+   
+   @Spy
+   private VCDataService service = new VCDataService();
+    
+   @Spy
+   @InjectMocks
+   private WormholeAPIClient wormholeAPIClient;
+
+   @Before
+   public void before() {
+      MockitoAnnotations.initMocks(this);
+   }
+   
    @Test
    public void testGetPDUSwitchIDNamePortMapping() {
       Asset asset = new Asset();
@@ -28,4 +62,26 @@ public class VCDataServiceTest {
             nameMap.get("4b029b8337c64630b68d0f6c20a18e40").equals("cloud-fc02-sha1:05"));
       Assert.assertEquals(5, nameMap.size());
    }
+   
+   @Test
+   public void testCheckAndUpdateIntegrationStatus() {
+
+      SDDCSoftwareConfig vc = Mockito.spy(new SDDCSoftwareConfig());
+      IntegrationStatus integrationStatus = Mockito.spy(new IntegrationStatus());
+      String message = "message";
+      
+      vc.setIntegrationStatus(null);
+      Mockito.doNothing().when(service).updateIntegrationStatus(any(SDDCSoftwareConfig.class));
+      service.checkAndUpdateIntegrationStatus(vc, message);
+      TestCase.assertEquals(1, vc.getIntegrationStatus().getRetryCounter());
+      
+      Mockito.when(vc.getIntegrationStatus()).thenReturn(integrationStatus);
+      Mockito.when(integrationStatus.getRetryCounter()).thenReturn(FlowgateConstant.MAXNUMBEROFRETRIES);
+      
+      service.checkAndUpdateIntegrationStatus(vc, message);
+      TestCase.assertEquals(IntegrationStatus.Status.ERROR, integrationStatus.getStatus());
+      TestCase.assertEquals(message, integrationStatus.getDetail());
+
+   }
+
 }
