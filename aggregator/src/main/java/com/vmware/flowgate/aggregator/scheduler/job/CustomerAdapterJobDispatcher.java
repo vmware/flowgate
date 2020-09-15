@@ -46,7 +46,6 @@ public class CustomerAdapterJobDispatcher extends BaseJob implements Job {
    @Autowired
    private MessagePublisher publisher;
 
-   public static Map<String,FacilityAdapter> facilityAdapterMap = null;
    private static final int EVERY_CYCLE = 5;
    private static final String NODIFY_MESSAGE = "Nodify message";
    private static final Logger logger = LoggerFactory.getLogger(CustomerAdapterJobDispatcher.class);
@@ -54,41 +53,36 @@ public class CustomerAdapterJobDispatcher extends BaseJob implements Job {
    @Override
    public void execute(JobExecutionContext context) throws JobExecutionException {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      long execount = 0;
-      if (template.hasKey(EventMessageUtil.CUSTOMER_ADAPTER_EXECOUNT)) {
-         execount = template.opsForValue().increment(EventMessageUtil.CUSTOMER_ADAPTER_EXECOUNT);
-      }else {
-         template.opsForValue().set(EventMessageUtil.CUSTOMER_ADAPTER_EXECOUNT, String.valueOf(execount));
+      Map<String,FacilityAdapter> facilityAdapterMap = initFacilityAdapterMap();
+      if(facilityAdapterMap.isEmpty()) {
+         return;
       }
       List<FacilitySoftwareConfig> facilityIntegrations = getIntegrations();
-      initFacilityAdapterMap();
-      boolean reInitCustomerAdapter = false;
+      if(facilityIntegrations.isEmpty()) {
+         return;
+      }
+      String execountString = template.opsForValue().get(EventMessageUtil.CUSTOMER_ADAPTER_EXECOUNT);
+      if (execountString == null || "".equals(execountString)) {
+         execountString = "0";
+      }
+      long execount = Long.valueOf(execountString);
+      execount++;
+      template.opsForValue().set(EventMessageUtil.CUSTOMER_ADAPTER_EXECOUNT, String.valueOf(execount));
       for (FacilitySoftwareConfig integration : facilityIntegrations) {
          String subcategory = integration.getSubCategory();
-         if (!facilityAdapterMap.containsKey(subcategory)) {
-            //There is a new integration which is used a new adapter and the new adapter is not exist in cache data.
-            //We will update the cache data in next cycle
-            reInitCustomerAdapter = true;
-            continue;
-         }
          FacilityAdapter adapter = facilityAdapterMap.get(subcategory);
          sendMessage(execount,integration,adapter);
-      }
-      if(reInitCustomerAdapter) {
-         //next cycle reload the data from database
-         facilityAdapterMap = null;
       }
       logger.info("Send customer adapter job finished");
    }
 
-   private void initFacilityAdapterMap() {
-      if(facilityAdapterMap == null) {
-         facilityAdapterMap = new HashMap<String,FacilityAdapter>();
-         FacilityAdapter[] customerAdapters = restClient.getAllCustomerFacilityAdapters().getBody();
-         for(FacilityAdapter adapter : customerAdapters) {
-            facilityAdapterMap.put(adapter.getSubCategory(), adapter);
-         }
+   private Map<String,FacilityAdapter> initFacilityAdapterMap() {
+      Map<String,FacilityAdapter> facilityAdapterMap = new HashMap<String,FacilityAdapter>();
+      FacilityAdapter[] customerAdapters = restClient.getAllCustomerFacilityAdapters().getBody();
+      for(FacilityAdapter adapter : customerAdapters) {
+         facilityAdapterMap.put(adapter.getSubCategory(), adapter);
       }
+      return facilityAdapterMap;
    }
 
    private List<FacilitySoftwareConfig> getIntegrations(){
