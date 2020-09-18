@@ -4,8 +4,6 @@
 */
 package com.vmware.flowgate.adapter.client;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -58,11 +56,11 @@ public class AdapterClient {
       return serviceEndPoint;
    }
 
-   public ResponseEntity<String> getDataFromCustomerApi(){
-      return this.restTemplate.
-            exchange(getServiceEndPoint() + GET_DATA_API,
-                  HttpMethod.GET, RestTemplateBuilder.getDefaultEntity(), String.class);
-   }
+//   public ResponseEntity<MyDataModel1> getDataFromCustomerApi(){
+//      return this.restTemplate.
+//            exchange(getServiceEndPoint() + GET_DATA_API,
+//                  HttpMethod.GET, RestTemplateBuilder.getDefaultEntity(), MyDataModel1.class);
+//   }
 
    public boolean checkConnection() {
       //TODO
