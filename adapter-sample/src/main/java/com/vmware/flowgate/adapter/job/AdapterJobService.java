@@ -93,12 +93,18 @@ public class AdapterJobService implements AsyncService{
          logger.info("Finished sync metrics data." );
          break;
 //      case CUSTOMER_COMMAND1:
+//         myJob(integration);
 //         break;
       default:
          logger.warn("Unknown command");
          break;
       }
    }
+
+//   private void myJob(FacilitySoftwareConfig integration) {
+//      logger.info("The adapter is working, and the current integration is "+integration.getName());
+//      add your logic here.
+//   }
 
    private void syncMetadataJob(FacilitySoftwareConfig integration) {
       wormholeApiClient.setServiceKey(serviceKey);
@@ -150,6 +156,18 @@ public class AdapterJobService implements AsyncService{
          return;
       }
       //put your sync metrics data logic here
+      /**
+       *
+         1.Get data from your system
+            For example:
+            AdapterClient client = createClient(integration);
+            yourData = client.getDataFromCustomerApi();
+         2.Translate your data model to the flowgate data model
+         3.Save the data to flowgate, you need to check Flowgate API-Client in the common-restclient
+            For example
+            wormholeApiClient.saveAssets(asset);
+       */
+
    }
 
    private void updateIntegrationStatus(FacilitySoftwareConfig integration) {
