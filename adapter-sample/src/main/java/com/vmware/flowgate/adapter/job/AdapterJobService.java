@@ -110,51 +110,26 @@ public class AdapterJobService implements AsyncService{
       wormholeApiClient.setServiceKey(serviceKey);
       //check the status of integration
       AdapterClient client = createClient(integration);
-      try {
-         client.checkConnection();
-      } catch (ResourceAccessException e1) {
-         if (e1.getCause().getCause() instanceof ConnectException) {
-            checkAndUpdateIntegrationStatus(integration, e1.getMessage());
-            return;
-         }
-      } catch (HttpClientErrorException e) {
-         logger.error("Failed to query data from customer adapter", e);
-         IntegrationStatus integrationStatus = integration.getIntegrationStatus();
-         if (integrationStatus == null) {
-            integrationStatus = new IntegrationStatus();
-         }
-         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-         integrationStatus.setDetail(e.getMessage());
-         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-         updateIntegrationStatus(integration);
-         return;
-      }
+      checkConnection(client,integration);
       //put your sync metadata logic here
+      /**
+      *
+        1.Get data from your system
+           For example:
+           AdapterClient client = createClient(integration);
+           yourData = client.getDataFromCustomerApi();
+        2.Translate your data model to the flowgate data model
+        3.Save the data to flowgate, you need to check Flowgate API-Client in the common-restclient
+           For example
+           wormholeApiClient.saveAssets(asset);
+      */
    }
 
    private void syncMetricsDataJob(FacilitySoftwareConfig integration) {
       wormholeApiClient.setServiceKey(serviceKey);
       //check the status of integration
       AdapterClient client = createClient(integration);
-      try {
-         client.checkConnection();
-      } catch (ResourceAccessException e1) {
-         if (e1.getCause().getCause() instanceof ConnectException) {
-            checkAndUpdateIntegrationStatus(integration, e1.getMessage());
-            return;
-         }
-      } catch (HttpClientErrorException e) {
-         logger.error("Failed to query data from customer adapter", e);
-         IntegrationStatus integrationStatus = integration.getIntegrationStatus();
-         if (integrationStatus == null) {
-            integrationStatus = new IntegrationStatus();
-         }
-         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-         integrationStatus.setDetail(e.getMessage());
-         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-         updateIntegrationStatus(integration);
-         return;
-      }
+      checkConnection(client,integration);
       //put your sync metrics data logic here
       /**
        *
@@ -172,6 +147,28 @@ public class AdapterJobService implements AsyncService{
 
    private void updateIntegrationStatus(FacilitySoftwareConfig integration) {
       wormholeApiClient.updateFacility(integration);
+   }
+
+   private void checkConnection(AdapterClient client, FacilitySoftwareConfig integration) {
+      try {
+         client.checkConnection();
+      } catch (ResourceAccessException e1) {
+         if (e1.getCause().getCause() instanceof ConnectException) {
+            checkAndUpdateIntegrationStatus(integration, e1.getMessage());
+            return;
+         }
+      } catch (HttpClientErrorException e) {
+         logger.error("Failed to query data from customer adapter", e);
+         IntegrationStatus integrationStatus = integration.getIntegrationStatus();
+         if (integrationStatus == null) {
+            integrationStatus = new IntegrationStatus();
+         }
+         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+         integrationStatus.setDetail(e.getMessage());
+         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+         updateIntegrationStatus(integration);
+         return;
+      }
    }
 
    private void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig integration,String message) {
