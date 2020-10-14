@@ -1140,11 +1140,18 @@ public class AssetControllerTest {
 
    @Test
    public void getPageMappingsByVCIdExample() throws Exception {
+      String id = UUID.randomUUID().toString();
+      Asset server = createAsset();
+      server.setId(id);
+      server.setCategory(AssetCategory.Server);
+      server.setAssetName("cloud-sha1-esx2");
+      server = assetRepository.save(server);
       ServerMapping mapping1 = createServerMapping();
       mapping1.setVcClusterMobID("1");
       mapping1.setVcHostName("1");
       mapping1.setVroID("1");
       mapping1.setVcID("1");
+      mapping1.setAsset(id);
       serverMappingRepository.save(mapping1);
       ServerMapping mapping2 = createServerMapping();
       mapping2.setVcClusterMobID("2");
