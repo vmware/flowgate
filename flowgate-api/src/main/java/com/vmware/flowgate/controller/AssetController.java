@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -533,18 +532,23 @@ public class AssetController {
    }
 
    private Page<ServerMapping> replaceAssetIDwithAssetName(Page<ServerMapping> mappings) {
-      Map<String, ServerMapping> serverMappings = new HashMap<String, ServerMapping>();
+      HashMap<String,String> assetIdAndName = new HashMap<String,String>();
       for (ServerMapping mapping : mappings.getContent()) {
-         String asset = mapping.getAsset();
-         if (asset != null) {
-            serverMappings.put(mapping.getAsset(), mapping);
+         String assetID = mapping.getAsset();
+         if(assetID == null) {
+            continue;
          }
-      }
-      List<String> assetIds = new ArrayList<String>(serverMappings.keySet());
-      JsonArray array = JsonArray.from(assetIds);
-      Iterable<Asset> assets = assetRepository.findAll(array);
-      for (Asset asset : assets) {
-         serverMappings.get(asset.getId()).setAsset(asset.getAssetName());
+         if(assetIdAndName.containsKey(assetID)) {
+            String assetName = assetIdAndName.get(assetID);
+            mapping.setAsset(assetName);
+         }else {
+            Optional<Asset> assetOptional = assetRepository.findById(assetID);
+            if(assetOptional.isPresent()) {
+               String assetName = assetOptional.get().getAssetName();
+               mapping.setAsset(assetName);
+               assetIdAndName.put(assetID, assetName);
+            }
+         }
       }
       return mappings;
    }
