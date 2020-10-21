@@ -112,7 +112,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     <button class="action-item" [disabled]="checkIsPredefineData(command)" (click)="onDelete(command)" >Delete</button>
                 </clr-dg-action-overflow>
                 <clr-dg-cell>{{command.command}}</clr-dg-cell>
-                <clr-dg-cell title="{{command.description}}" style="max-width: 200px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
+                <clr-dg-cell title="{{command.description}}" style="max-width: 300px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
                 <clr-dg-cell>{{command.triggerCycle}} minutes</clr-dg-cell>
             </clr-dg-row>
         </clr-datagrid>
@@ -253,7 +253,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         
                             <clr-dg-row *ngFor="let command of predefineAdapterCommands">
                                 <clr-dg-cell>{{command.command}}</clr-dg-cell>
-                                <clr-dg-cell title="{{command.description}}" style="max-width: 200px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
+                                <clr-dg-cell title="{{command.description}}" style="max-width: 300px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
                                 <clr-dg-cell>{{command.triggerCycle}} minutes</clr-dg-cell>
                             </clr-dg-row>
                         </clr-datagrid>
@@ -331,7 +331,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     <button class="action-item" [disabled]="checkIsPredefineData(command)" (click)="onDeleteForEditAdapter(command)" >Delete</button>
                 </clr-dg-action-overflow>
                 <clr-dg-cell>{{command.command}}</clr-dg-cell>
-                <clr-dg-cell title="{{command.description}}" style="max-width: 200px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
+                <clr-dg-cell title="{{command.description}}" style="max-width: 300px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
                 <clr-dg-cell>{{command.triggerCycle}} minutes</clr-dg-cell>
             </clr-dg-row>
         </clr-datagrid>
@@ -471,7 +471,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         
                             <clr-dg-row *ngFor="let command of editAdapter.commands">
                                 <clr-dg-cell>{{command.command}}</clr-dg-cell>
-                                <clr-dg-cell title="{{command.description}}" style="max-width: 200px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
+                                <clr-dg-cell title="{{command.description}}" style="max-width: 300px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
                                 <clr-dg-cell>{{command.triggerCycle}} minutes</clr-dg-cell>
                             </clr-dg-row>
                         </clr-datagrid>
@@ -509,7 +509,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     
                         <clr-dg-row *ngFor="let command of showDetaileAdapter.commands">
                             <clr-dg-cell>{{command.command}}</clr-dg-cell>
-                            <clr-dg-cell title="{{command.description}}" style="max-width: 200px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
+                            <clr-dg-cell title="{{command.description}}" style="max-width: 300px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
                             <clr-dg-cell>{{command.triggerCycle}} minutes</clr-dg-cell>
                         </clr-dg-row>
                     </clr-datagrid>
