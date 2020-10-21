@@ -74,13 +74,13 @@ You need to install a flowgate service, and you have two ways to install it as b
 	
 5. Complete
 
-	Double check your configuretion
+	Double check your configurations
 	
 	<img alt="complete" src="images/adapter/complete.png">
 	
 ### Implement Your First Adapter
 
-Your adapter will become a part of Flowgate. The Flowgate service will periodically send requests to notify your Adapter start to work that reads datas from your system, performs data model conversion, and then calls Flowgate’s REST API to save these datas to Flowgate.
+Your adapter will become a part of Flowgate. The Flowgate service will periodically send requests to notify your adapter to work. When your adapter receive a notify message, your adapter will parse the message and execute the corresponding job according to the command in the message body. Depending on your needs, you may have multiple jobs. In these jobs, you may call your apis to read data from your system, and then process them, and finally store them in the flowgate system by calling the api of flowgate.
 
 To develop your adapter you can manually edit sample adapter code, and create some new data models and create some new apis to get data from your system and implement your custom command job.
 
@@ -213,7 +213,7 @@ The syncmetadata command is planed to sync the asset metadata information. The s
 <img alt="adapterjob" src="images/adapter/adapterjob.png">
 
 
-* In order to communicate with Flowgate api, you need a Flowgate api client. The commen-restclient project is that we have implemented a general flowgate api client. You only need to find the methods you may use in WormholeAPIClient.java. 
+* In order to communicate with Flowgate api, you need a Flowgate api client. The common-restclient project is that we have implemented a general flowgate api client. You only need to find the methods you may use in WormholeAPIClient.java. 
 
 * Open the WormholeAPIClient.java
 
@@ -350,7 +350,7 @@ Now we have adapter-sample.jar and docker image, we have two ways to deploy it, 
 
     3. Move jar file to the adapter-sample
 
-    4. Move you application.properties to the same directory,andmodify these configurations
+    4. Move you application.properties to the same directory,and modify these configurations
 
     5. Run the jar
 
