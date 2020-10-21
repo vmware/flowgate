@@ -1182,6 +1182,7 @@ public class AssetControllerTest {
       }finally {
          serverMappingRepository.deleteById(mapping1.getId());
          serverMappingRepository.deleteById(mapping2.getId());
+         assetRepository.deleteById(id);
       }
    }
 
