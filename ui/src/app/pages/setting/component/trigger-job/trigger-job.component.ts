@@ -481,7 +481,6 @@ export class TriggerJobComponent implements OnInit {
     this.saveMappingLoading = true;
     this.service.updateHostNameAndIPMapping(this.hostNameAndIPMapping).subscribe(
       (data)=>{
-        console.info(data)
         if(data.status == 200){
           this.selectedAssetName = "";
           this.saveMappingLoading = false;
