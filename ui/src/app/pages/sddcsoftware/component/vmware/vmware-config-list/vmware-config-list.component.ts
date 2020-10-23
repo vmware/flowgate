@@ -136,12 +136,14 @@ export class VmwareConfigListComponent implements OnInit {
       this.getVmareConfigdatas(this.currentPage,this.pageSize)
     }
   }
-
+  loading:boolean = true;
   getVmareConfigdatas(currentPage,pageSize){
+    this.loading = true;
     this.service.getVmwareConfigData(currentPage,pageSize).subscribe(
-      (data)=>{if(data.status == 200){
-        this.vmwareConfigs = data.json().content;
-        this.vmwareConfigs.forEach(element=>{  
+      (data)=>{
+        if(data.status == 200){
+          this.vmwareConfigs = data.json().content;
+          this.vmwareConfigs.forEach(element=>{  
           if(element.type == "VRO"){
             element.type = "vROps";
           }else if(element.type == "VCENTER"){
@@ -156,7 +158,17 @@ export class VmwareConfigListComponent implements OnInit {
         }else{
           this.disabled = "";
         }
+        this.loading = false;
       }
+    },
+    (error)=>{
+      this.loading = false;
+      this.alertType = "alert-danger";
+      this.alertcontent = "Internal error";
+      if(error._body != null && error.status != "0"){
+        this.alertcontent = error.json().message;
+      }
+      this.alertclose = false;
     })
   }
   addNewSddc(){
