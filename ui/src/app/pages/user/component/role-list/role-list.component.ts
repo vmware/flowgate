@@ -224,18 +224,38 @@ export class RoleListComponent implements OnInit {
       }
     })
   }
+  alertclose:boolean = true;
+  alertType:string = "";
+  alertcontent:string = "";
+  close(){
+    this.alertclose = true;
+  }
+  
+  loading:boolean = true;
+
   getroledatas(currentPage,pageSize){
+    this.loading = true;
     this.service.getRoleData(currentPage,pageSize).subscribe(
-      (data)=>{if(data.status == 200){
-            this.roles = data.json().content
-            this.currentPage = data.json().number+1;
-            this.totalPage = data.json().totalPages
-            if(this.totalPage == 1){
-              this.disabled = "disabled";
-            }else{
-              this.disabled = "";
-            }
+      (data)=>{
+        if(data.status == 200){
+          this.loading = false;
+          this.roles = data.json().content
+          this.currentPage = data.json().number+1;
+          this.totalPage = data.json().totalPages
+          if(this.totalPage == 1){
+            this.disabled = "disabled";
+          }else{
+            this.disabled = "";
+          }
       }
+    },(error)=>{
+      this.loading = false;
+      this.alertType = "alert-danger";
+      this.alertcontent = "Internal error";
+      if(error._body != null && error.status != "0"){
+        this.alertcontent = error.json().message;
+      }
+      this.alertclose = false;
     })
   }
   ngOnInit() {

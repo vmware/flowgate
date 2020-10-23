@@ -7,7 +7,14 @@ SPDX-License-Identifier: BSD-2-Clause -->
       <font style="vertical-align: inherit;"  >Create a role</font>
      </font>
 </button>
-<clr-datagrid>
+<clr-alert [clrAlertType]="alertType" (clrAlertClosedChange)="close()" [clrAlertClosed]= "alertclose">
+    <div class="alert-item">
+        <span class="alert-text">
+            {{alertcontent}}
+        </span>
+    </div>
+  </clr-alert>
+<clr-datagrid [clrDgLoading]="loading">
 
  <clr-dg-column>Role Name</clr-dg-column>
  <clr-dg-column>Privilege</clr-dg-column>

@@ -140,11 +140,15 @@ export class CmdbListComponent implements OnInit {
 	    var month = da.getMonth()+1+'-';
 	    var date = da.getDate();
 	    return year+month+date;
-	}
+  }
+  loading:boolean = true;
   getCMDBConfigdatas(currentPage,pageSize){
+    this.loading = true;
     this.cmdbConfigs = [];
     this.service.getDcimConfigData(currentPage,pageSize,this.types).subscribe(
-      (data)=>{if(data.status == 200){
+      (data)=>{
+        if(data.status == 200){
+            this.loading = false;
             this.cmdbConfigs =  data.json().content;
             this.cmdbConfigs.forEach(element=>{
                 this.checkStatus(element);
@@ -160,6 +164,15 @@ export class CmdbListComponent implements OnInit {
               this.disabled = "";
             }
       }
+    },
+    (error)=>{
+      this.loading = false;
+      this.alertType = "alert-danger";
+      this.alertcontent = "Internal error";
+      if(error._body != null && error.status != "0"){
+        this.alertcontent = error.json().message;
+      }
+      this.alertclose = false;
     })
   }
   addDcimConfig(){

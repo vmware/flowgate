@@ -138,11 +138,15 @@ export class DcimListComponent implements OnInit {
 	    var month = da.getMonth()+1+'-';
 	    var date = da.getDate();
 	    return year+month+date;
-	}
+  }
+  loading:boolean = true;
   getDcimConfigdatas(currentPage,pageSize){
+    this.loading = true;
     this.dcimConfigs = [];
     this.service.getDcimConfigData(currentPage,pageSize,this.types).subscribe(
-      (data)=>{if(data.status == 200){     
+      (data)=>{
+        if(data.status == 200){     
+            this.loading = false;
             this.dcimConfigs = data.json().content;
             this.dcimConfigs.forEach(element=>{   
                 this.checkStatus(element);
@@ -158,6 +162,14 @@ export class DcimListComponent implements OnInit {
               this.disabled = "";
             }
       }
+    },(error)=>{
+      this.loading = false;
+      this.alertType = "alert-danger";
+      this.alertcontent = "Internal error";
+      if(error._body != null && error.status != "0"){
+        this.alertcontent = error.json().message;
+      }
+      this.alertclose = false;
     })
   }
   addDcimConfig(){

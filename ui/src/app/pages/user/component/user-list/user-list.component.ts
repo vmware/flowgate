@@ -30,7 +30,7 @@ export class UserListComponent implements OnInit {
 
   deleteUser:string[] = ["deleteUser"];
   updateUser:string[] = ["updateUser","readUserByID"];
-
+ 
   checkadmin(username:string){
     if(username == "admin"){
       return true;
@@ -60,19 +60,38 @@ export class UserListComponent implements OnInit {
 	    var month = da.getMonth()+1+'-';
 	    var date = da.getDate();
 	    return year+month+date;
-	}
+  }
+
+  alertclose:boolean = true;
+  alertType:string = "";
+  alertcontent:string = "";
+  close(){
+    this.alertclose = true;
+  }
+  
+  loading:boolean = true;
   getUserdatas(currentPage,pageSize){
     this.data.getUserData(currentPage,pageSize).subscribe(
-      (data)=>{if(data.status == 200){
-            this.users = data.json().content;
-            this.currentPage = data.json().number+1;
-            this.totalPage = data.json().totalPages
-            if(this.totalPage == 1){
-              this.disabled = "disabled";
-            }else{
-              this.disabled = "";
-            }  
+      (data)=>{
+        if(data.status == 200){
+          this.loading = false;
+          this.users = data.json().content;
+          this.currentPage = data.json().number+1;
+          this.totalPage = data.json().totalPages
+          if(this.totalPage == 1){
+            this.disabled = "disabled";
+          }else{
+            this.disabled = "";
+          }  
       }
+    },(error)=>{
+      this.loading = false;
+      this.alertType = "alert-danger";
+      this.alertcontent = "Internal error";
+      if(error._body != null && error.status != "0"){
+        this.alertcontent = error.json().message;
+      }
+      this.alertclose = false;
     })
   }
   toEditUser(){
