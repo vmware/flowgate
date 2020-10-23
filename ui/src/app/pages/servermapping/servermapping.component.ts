@@ -475,6 +475,7 @@ export class ServermappingComponent implements OnInit {
     this.backTemSensors = [];
     this.frontHumSensors = [];
     this.backHumSensors = [];
+    this.assets = [];
     this.showSensors(this.mappingId,this.category,this.fillData);
     this.mappedSensors.forEach(element => {
       element.enable = true;
@@ -549,6 +550,7 @@ export class ServermappingComponent implements OnInit {
       
     }else if(this.category == "Sensors"){
       let sensorids:string[] = [];
+      this.assets = [];
       this.mappedSensors.forEach(element => {
         if(element.enable){
           sensorids.push(element.id);
@@ -646,9 +648,11 @@ export class ServermappingComponent implements OnInit {
     return jsonObject;
   }
   cancelAsset(){
+    this.assets = [];
     this.mappedServerModalOpen = false;
   }
   confirmAsset(asset:AssetModule){
+    this.assets = [];
     if(asset.enable){
       this.updateServerMapping(this.serverMapping.id,asset.id);
     }else{

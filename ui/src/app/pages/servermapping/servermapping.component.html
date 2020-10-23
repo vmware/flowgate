@@ -259,9 +259,21 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <clr-dg-row *ngFor="let metric of metricsDatas">
                             <clr-dg-cell>{{metric.metricName}}</clr-dg-cell>
                             <clr-dg-cell>
-                             
-                                <div >
-                                        <p *ngFor="let asset of metric.sensors" style="margin-top: 0px;"> {{asset.assetName}} </p>
+                                <div *ngIf="metric.sensors.length > 0">
+                                        <table class="table table-compact" style="margin:0px;">
+                                                <thead>
+                                                        <tr>
+                                                        <th class="left">Sensor Name</th>
+                                                        <th>Serial Number</th>
+                                                        </tr>
+                                                </thead>
+                                                <tbody>
+                                                        <tr *ngFor="let asset of metric.sensors">
+                                                        <td class="left">{{asset.assetName}}</td>
+                                                        <td>{{asset.serialnumber}}</td>
+                                                        </tr>
+                                                </tbody>
+                                        </table>
                                 </div>
                            </clr-dg-cell>
                             <clr-dg-cell><button class="btn btn-sm" (click)="selectSensor(metric.metricName)">Mapping Sensor</button></clr-dg-cell>

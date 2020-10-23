@@ -118,7 +118,6 @@ export class FacilityAdapterListComponent implements OnInit {
 
   addNewCommand(){
     this.addNewCommandSubmitLoading = true;
-    console.info(this.commandsNameList);
     if(this.checkCommandNameExisted(this.newCommand.command)){
       this.addCommandErrorClosed = false;
     }else{
