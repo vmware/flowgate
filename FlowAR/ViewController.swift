@@ -10,14 +10,19 @@ import UIKit
 import SceneKit
 import ARKit
 import Vision
+import CoreMotion
 
 class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
     var qrRequests = [VNRequest]()
-    var detectedDataAnchor: ARAnchor?
+    var detectedDataAnchor: [String: ARAnchor?] = [:]
+    var lastAddedAnchor: ARAnchor?
     var processing = false
+    // to know the angle
+    let manager = CMMotionManager()
+    var message: String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,25 +30,32 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate {
         // Set the view's delegate
         sceneView.delegate = self
         sceneView.session.delegate=self
+        sceneView.showsStatistics = true
+        sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin,
+                                  ARSCNDebugOptions.showFeaturePoints]
      
         startQrCodeDetection()
+        
     }
-    
+
     func startQrCodeDetection() {
         // Create a Barcode Detection Request
         let request = VNDetectBarcodesRequest(completionHandler: self.requestHandler)
         // Set it to recognize QR code only
-        request.symbologies = [.QR]
+        request.symbologies = [.Aztec, .Code39, .Code39Checksum, .Code39FullASCII, .Code39FullASCIIChecksum, .Code93, .Code93i, .Code128, .DataMatrix, .EAN8,
+                               .EAN13, .I2of5, .I2of5Checksum, .ITF14, .PDF417, .UPCE]
         self.qrRequests = [request]
     }
     
     func requestHandler(request: VNRequest, error: Error?) {
         // Get the first result out of the results, if there are any
         if let results = request.results, let result = results.first as? VNBarcodeObservation {
-            guard result.payloadStringValue != nil else {return}
+            guard let message=result.payloadStringValue else {return}
+            self.message = message
+            print(self.message ?? "No message.")
             // Get the bounding box for the bar code and find the center
             var rect = result.boundingBox
-            // Draw it
+            // TODO: Draw it
             // Flip coordinates
             rect = rect.applying(CGAffineTransform(scaleX: 1, y: -1))
             rect = rect.applying(CGAffineTransform(translationX: 0, y: 1))
@@ -51,7 +63,7 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate {
             let center = CGPoint(x: rect.midX, y: rect.midY)
             
             DispatchQueue.main.async {
-                self.hitTestQrCode(center: center)
+                self.hitTestQrCode(center: center, message: message)
                 self.processing = false
             }
         } else {
@@ -59,18 +71,18 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate {
         }
     }
     
-    func hitTestQrCode(center: CGPoint) {
+    func hitTestQrCode(center: CGPoint, message: String) {
         if let hitTestResults = sceneView?.hitTest(center, types: [.featurePoint] ),
             let hitTestResult = hitTestResults.first {
-            if let detectedDataAnchor = self.detectedDataAnchor,
-                let node = self.sceneView.node(for: detectedDataAnchor) {
+            if let detectedDataAnchor = self.detectedDataAnchor[message],
+               let node = self.sceneView.node(for: detectedDataAnchor!) {
                 _ = node.position
                 node.transform = SCNMatrix4(hitTestResult.worldTransform)
-                
             } else {
                 // Create an anchor. The node will be created in delegate methods
-                self.detectedDataAnchor = ARAnchor(transform: hitTestResult.worldTransform)
-                self.sceneView.session.add(anchor: self.detectedDataAnchor!)
+                self.detectedDataAnchor[message] = ARAnchor(transform: hitTestResult.worldTransform)
+                self.lastAddedAnchor = self.detectedDataAnchor[message] as? ARAnchor
+                self.sceneView.session.add(anchor: self.detectedDataAnchor[message]!!)
             }
         }
     }
@@ -111,23 +123,32 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate {
     }
 
     // MARK: - ARSCNViewDelegate
-    
 
     // Override to create and configure nodes for anchors added to the view's session.
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
 
         
-        if self.detectedDataAnchor?.identifier == anchor.identifier {
+        if self.lastAddedAnchor?.identifier == anchor.identifier {
             
             let node = SCNNode()
-            let plane = SCNPlane(width: 0.5, height: 0.5)
+            
+            let mesages = SCNText(string: self.message, extrusionDepth: 0)
+            let material = SCNMaterial()
+            material.diffuse.contents = UIColor.black
+            mesages.materials = [material]
+            
+            let messageNode = SCNNode(geometry: mesages)
+            messageNode.scale = SCNVector3Make( 0.001, 0.001, 0.001)
+            messageNode.position = messageNode.position + SCNVector3(-0.08, 0.08, 0.01)
+            node.addChildNode(messageNode)
+            
+            let plane = SCNPlane(width: 0.2, height: 0.2)
+            plane.cornerRadius = 0.02
             let planeNode = SCNNode(geometry: plane)
-            planeNode.eulerAngles.x = -.pi/2
-            
-            
-            
-            
+            planeNode.eulerAngles.x = 0
+            planeNode.opacity = 0.4
             node.addChildNode(planeNode)
+            
            
 //            node.addChildNode(addView())
             return node
@@ -140,8 +161,6 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate {
     }
     
     func addView() ->SCNNode{
-
-        
         
         let skScene = SKScene(size: CGSize(width: 200, height: 200))
         skScene.backgroundColor = UIColor.clear
@@ -167,5 +186,11 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate {
         let planeNode = SCNNode(geometry: plane)
 
         return planeNode
+    }
+}
+
+extension SCNVector3 {
+    static func + (left: SCNVector3, right: SCNVector3) -> SCNVector3 {
+        return SCNVector3Make(left.x + right.x, left.y + right.y, left.z + right.z)
     }
 }
