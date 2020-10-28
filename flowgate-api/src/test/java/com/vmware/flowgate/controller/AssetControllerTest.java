@@ -73,6 +73,7 @@ import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.Tenant;
 import com.vmware.flowgate.common.model.ValueUnit;
+import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
 import com.vmware.flowgate.repository.AssetRealtimeDataRepository;
@@ -391,24 +392,30 @@ public class AssetControllerTest {
    public void insertRealtimeDataExample() throws JsonProcessingException, Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
-      RealTimeData realtime = new RealTimeData();
-      realtime.setId(UUID.randomUUID().toString());
-      List<ValueUnit> values = new ArrayList<ValueUnit>();
-      ValueUnit valueunit = new ValueUnit();
-      valueunit.setValue("220");
-      valueunit.setUnit("volt");
-      valueunit.setKey(MetricName.PDU_VOLTAGE);
-      valueunit.setTime(System.currentTimeMillis());
-      values.add(valueunit);
-      realtime.setAssetID(asset.getId());
-      realtime.setTime(1234456);
-      realtime.setValues(values);
-      realtimeDataRepository.save(realtime);
+      long time = System.currentTimeMillis();
+      RealTimeData realtimedata = createServerPDURealTimeData(time);
+      List<ValueUnit> valueunits = realtimedata.getValues();
+      ValueUnit tempValue = new ValueUnit();
+      tempValue.setValueNum(32);
+      tempValue.setTime(time);
+      tempValue.setUnit(MetricUnit.C.toString());
+      tempValue.setKey(MetricName.TEMPERATURE);
+      valueunits.add(tempValue);
+
+      ValueUnit humidityValue = new ValueUnit();
+      humidityValue.setValueNum(20);
+      humidityValue.setTime(time);
+      humidityValue.setUnit("%");
+      humidityValue.setKey(MetricName.HUMIDITY);
+      valueunits.add(humidityValue);
+      realtimedata.setId(UUID.randomUUID().toString());
+      realtimedata.setAssetID(asset.getId());
+      realtimeDataRepository.save(realtimedata);
 
       this.mockMvc
             .perform(post("/v1/assets/" + asset.getId() + "/sensordata")
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(realtime)))
+                  .content(objectMapper.writeValueAsString(realtimedata)))
             .andExpect(status().isOk())
             .andDo(document("assets-insertRealtimeData-example", requestFields(
                   fieldWithPath("id").description("ID of the realtime, created by flowgate"),
@@ -418,7 +425,7 @@ public class AssetControllerTest {
                         .type(ValueUnit[].class),
                   fieldWithPath("time").description("The time of generate sensor data."))));
       assetRepository.deleteById(asset.getId());
-      realtimeDataRepository.deleteById(realtime.getId());
+      realtimeDataRepository.deleteById(realtimedata.getId());
    }
 
    @Test
@@ -517,7 +524,22 @@ public class AssetControllerTest {
       List<RealTimeData> realtimedatas = new ArrayList<RealTimeData>();
       long currentTime = System.currentTimeMillis();
       RealTimeData realtimedata1 = createServerPDURealTimeData(currentTime);
+      List<ValueUnit> valueunits = realtimedata1.getValues();
+      ValueUnit tempValue = new ValueUnit();
+      tempValue.setValueNum(32);
+      tempValue.setTime(currentTime);
+      tempValue.setUnit(MetricUnit.C.toString());
+      tempValue.setKey(MetricName.TEMPERATURE);
+      valueunits.add(tempValue);
+
+      ValueUnit humidityValue = new ValueUnit();
+      humidityValue.setValueNum(20);
+      humidityValue.setTime(currentTime);
+      humidityValue.setUnit("%");
+      humidityValue.setKey(MetricName.HUMIDITY);
+      valueunits.add(humidityValue);
       realtimedata1.setAssetID("assetid1");
+
       realtimedatas.add(realtimedata1);
       RealTimeData realtimedata2 = createServerPDURealTimeData(currentTime);
       realtimedata2.setAssetID("assetid2");
@@ -2238,12 +2260,14 @@ public class AssetControllerTest {
       ValueUnit tempValue = new ValueUnit();
       tempValue.setValueNum(32);
       tempValue.setTime(time);
+      tempValue.setUnit(MetricUnit.C.toString());
       tempValue.setKey(MetricName.TEMPERATURE);
       valueunits.add(tempValue);
 
       ValueUnit humidityValue = new ValueUnit();
       humidityValue.setValueNum(20);
       humidityValue.setTime(time);
+      humidityValue.setUnit("%");
       humidityValue.setKey(MetricName.HUMIDITY);
       valueunits.add(humidityValue);
 

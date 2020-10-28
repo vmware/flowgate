@@ -149,7 +149,7 @@ public class FacilityAdapterControllerTest {
                   .content(objectMapper.writeValueAsString(adapter1)))
             .andExpect(status().is4xxClientError())
             .andReturn();
-      facilityAdapterRepo.deleteById(adapter1.getId());
+      facilityAdapterRepo.deleteById(adapter.getId());
       if (result.getResolvedException() != null) {
          throw result.getResolvedException();
       } else {
