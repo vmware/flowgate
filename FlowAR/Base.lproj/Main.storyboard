@@ -11,7 +11,7 @@
         <!--View Controller-->
         <scene sceneID="Su8-9D-Fah">
             <objects>
-                <viewController id="flI-c1-I6V" customClass="ViewController" customModule="BarCode" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="flI-c1-I6V" customClass="ViewController" customModule="FlowAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="pRp-qK-Dxn">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
