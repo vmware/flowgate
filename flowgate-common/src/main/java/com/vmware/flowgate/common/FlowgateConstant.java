@@ -105,4 +105,6 @@ public class FlowgateConstant {
    public static String Role_admin = "admin";
 
    public static String SERVICE_KEY_SET = "adapter:servicekeylist";
+   
+   public static String HOST_METADATA ="HOST_METADATA";
 }
