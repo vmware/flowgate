@@ -4,21 +4,6 @@
 */
 package com.vmware.flowgate.infobloxworker.jobs;
 
-import java.net.ConnectException;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.ResourceAccessException;
-import com.vmware.flowgate.infobloxworker.config.ServiceKeyConfig;
-import com.vmware.flowgate.infobloxworker.service.InfobloxClient;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
@@ -29,6 +14,22 @@ import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
+import com.vmware.flowgate.infobloxworker.config.ServiceKeyConfig;
+import com.vmware.flowgate.infobloxworker.model.InfoBloxIPInfoResult;
+import com.vmware.flowgate.infobloxworker.service.InfobloxClient;
+import org.apache.commons.codec.binary.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
+
+import java.net.ConnectException;
+import java.util.List;
 
 @Service
 public class InfoBloxService implements AsyncService {
@@ -63,16 +64,16 @@ public class InfoBloxService implements AsyncService {
             continue;
          }
          InfobloxClient client = new InfobloxClient(infoblox);
-         List<String> hostNames = null;
+         List<InfoBloxIPInfoResult> infoBloxIPInfoResults = null;
          IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
          try {
-            hostNames = client.queryHostNamesByIP(message);
-         }catch(ResourceAccessException e) {
+            infoBloxIPInfoResults = client.queryHostNamesByIP(message);
+         } catch (ResourceAccessException e) {
             if(e.getCause().getCause() instanceof ConnectException) {
                checkAndUpdateIntegrationStatus(infoblox, e.getCause().getCause().getMessage());
                return;
             }
-          }catch(HttpClientErrorException e1) {
+         } catch (HttpClientErrorException e1) {
              logger.error("Failed to query data from Infoblox", e1);
              if(integrationStatus == null) {
                 integrationStatus = new IntegrationStatus();
@@ -85,24 +86,25 @@ public class InfoBloxService implements AsyncService {
           }
 
          if(integrationStatus.getRetryCounter() > 0) {
-        	 integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-        	 updateIntegrationStatus(infoblox);
+            integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+            updateIntegrationStatus(infoblox);
          }
-         
-         if (hostNames != null && !hostNames.isEmpty()) {
-            for (String hostname : hostNames) {
+
+         if (infoBloxIPInfoResults != null && !infoBloxIPInfoResults.isEmpty()) {
+            for (InfoBloxIPInfoResult infoBloxResult : infoBloxIPInfoResults) {
                try {
-                  ResponseEntity<Asset> asset = wormholeAPIClient.getAssetByName(hostname);
-                  if (asset == null) {
-                     logger.info(String.format("hostname (%s) no found!", hostname));
+                  ResponseEntity<Asset> asset = wormholeAPIClient.getAssetByName(infoBloxResult.getHostName());
+                  if (asset == null || asset.getBody() == null) {
+                     logger.info(String.format("hostname (%s) no found!", infoBloxResult.getHostName()));
                      continue;
                   }
                } catch (HttpClientErrorException e) {
-                  logger.error(String.format("Error when searching %s", hostname), e);
+                  logger.error(String.format("Error when searching %s", infoBloxResult.getHostName()), e);
                   continue;
                }
                AssetIPMapping tempMapping = new AssetIPMapping();
-               tempMapping.setAssetname(hostname);
+               tempMapping.setAssetname(infoBloxResult.getHostName());
+               tempMapping.setMacAddress(infoBloxResult.getMacAddress());
                tempMapping.setIp(message);
 
                AssetIPMapping[] mappings =
@@ -110,7 +112,11 @@ public class InfoBloxService implements AsyncService {
                boolean isNewMapping = true;
                if (null != mappings && mappings.length > 0) {
                   for (AssetIPMapping mapping : mappings) {
-                     if (hostname.equals(mapping.getAssetname())) {
+                     if (tempMapping.getAssetname().equals(mapping.getAssetname())) {
+                        if (!StringUtils.equals(mapping.getMacAddress(), tempMapping.getMacAddress())) {
+                           mapping.setMacAddress(tempMapping.getMacAddress());
+                           wormholeAPIClient.updateHostnameIPMapping(mapping);
+                        }
                         isNewMapping = false;
                         break;
                      }
@@ -119,15 +125,15 @@ public class InfoBloxService implements AsyncService {
                if (isNewMapping) {
                   wormholeAPIClient.createHostnameIPMapping(tempMapping);
                }
-               logger.info(String.format("Find hostname %s for ip %s", hostname, message));
+               logger.info(String.format("Find hostname %s for ip %s", infoBloxResult.getHostName(), message));
                return;
             }
          }
       }
       logger.info(String.format("Cannot find the hostname for IP: %s", message));
    }
-   
-   public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig infoblox,String message) {
+
+   private void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig infoblox,String message) {
       IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
       if(integrationStatus == null) {
          integrationStatus = new IntegrationStatus();
@@ -144,7 +150,7 @@ public class InfoBloxService implements AsyncService {
       }
       updateIntegrationStatus(infoblox);
    }
-   
+
    private void updateIntegrationStatus(FacilitySoftwareConfig infoblox) {
       wormholeAPIClient.setServiceKey(serviceKeyConfig.getServiceKey());
       wormholeAPIClient.updateFacility(infoblox);

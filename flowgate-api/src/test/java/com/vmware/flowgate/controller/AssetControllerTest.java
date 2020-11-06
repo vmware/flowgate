@@ -85,6 +85,8 @@ import com.vmware.flowgate.util.BaseDocumentUtil;
 
 import junit.framework.TestCase;
 
+import javax.crypto.Mac;
+
 class MappingIdForDoc {
    public String FirstId;
    public String SecondId;
@@ -633,7 +635,8 @@ public class AssetControllerTest {
          FieldDescriptor[] fieldpath = new FieldDescriptor[] {
                fieldWithPath("id").description("ID of the AssetIPMapping, created by flowgate"),
                fieldWithPath("ip").description("IP of AssetIPMapping."),
-               fieldWithPath("assetname").description("name of asset.") };
+               fieldWithPath("macAddress").description("macAddress of IP."),
+               fieldWithPath("assetname").description("name of asset."), };
          this.mockMvc.perform(get("/v1/assets/mapping/hostnameip/ip/" + mapping1.getIp()))
                .andExpect(status().isOk())
                .andDo(document("assets-getHostNameByIP-example",
@@ -1221,6 +1224,7 @@ public class AssetControllerTest {
       AssetIPMapping assetipmapping = createAssetIPMapping();
       assetipmapping.setAssetname(server.getAssetName());
       assetipmapping.setIp("192.168.0.1");
+      assetipmapping.setMacAddress("50:00:56:ge:64:62");
       this.mockMvc
             .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(assetipmapping)))
@@ -1228,6 +1232,7 @@ public class AssetControllerTest {
             .andDo(document("assets-createHostNameIPMapping-example", requestFields(
                   fieldWithPath("id").description("ID of the asset, created by flowgate"),
                   fieldWithPath("ip").description("ip of hostname"),
+                  fieldWithPath("macAddress").description("macAddress of IP"),
                   fieldWithPath("assetname").description(
                         "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"))));
       assetipmapping = assetIPMappingRepository.findById(assetipmapping.getId()).get();
@@ -1243,6 +1248,7 @@ public class AssetControllerTest {
       AssetIPMapping mapping = new AssetIPMapping();
       mapping.setAssetname("cloud-sha1-esx2");
       mapping.setIp("10.15");
+      mapping.setMacAddress("00:50:56:be:60:62");
       MvcResult result = this.mockMvc
       .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(mapping)))
@@ -1266,6 +1272,7 @@ public class AssetControllerTest {
       AssetIPMapping mapping = createAssetIPMapping();
       mapping.setAssetname("cloud-sha1-esx8");
       mapping.setIp("192.168.0.1");
+      mapping.setMacAddress("50:00:56:ge:64:62");
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("Can't find any asset with the name : " + mapping.getAssetname());
       MvcResult result = this.mockMvc
@@ -1282,6 +1289,7 @@ public class AssetControllerTest {
    public void deleteAssetIPAndNameMappingExample() throws Exception {
       AssetIPMapping assetipmapping = createAssetIPMapping();
       assetipmapping.setAssetname("cloud-server");
+      assetipmapping.setMacAddress("00:50:56:be:60:62");
       assetipmapping = assetIPMappingRepository.save(assetipmapping);
       this.mockMvc.perform(delete("/v1/assets/mapping/hostnameip/" + assetipmapping.getId()))
             .andExpect(status().isOk()).andDo(document("assets-deleteAssetIPAndNameMapping-example"));
@@ -1308,14 +1316,16 @@ public class AssetControllerTest {
       AssetIPMapping newAssetIPMapping = createAssetIPMapping();
       newAssetIPMapping.setAssetname(server1.getAssetName());
       newAssetIPMapping.setId(assetipmapping.getId());
+      newAssetIPMapping.setMacAddress("00:50:56:be:60:62");
       newAssetIPMapping.setIp("192.168.0.1");
       this.mockMvc
-            .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
+            .perform(put("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(newAssetIPMapping)))
-            .andExpect(status().isCreated())
+            .andExpect(status().isOk())
             .andDo(document("assets-updateHostNameIPMapping-example", requestFields(
                   fieldWithPath("id").description("ID of the asset, created by flowgate"),
                   fieldWithPath("ip").description("ip of hostname"),
+                  fieldWithPath("macAddress").description("macAddress of IP"),
                   fieldWithPath("assetname").description(
                         "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"))));
       assetipmapping = assetIPMappingRepository.findById(assetipmapping.getId()).get();
@@ -1323,6 +1333,47 @@ public class AssetControllerTest {
       assetRepository.deleteById(server1.getId());
       assetIPMappingRepository.deleteById(assetipmapping.getId());
       TestCase.assertEquals(server1.getAssetName(), assetipmapping.getAssetname());
+      TestCase.assertEquals("00:50:56:be:60:62", assetipmapping.getMacAddress());
+   }
+
+   @Test
+   public void updateHostNameIPMappingMacIsNullExample() throws Exception {
+      SetOperations<String,String> setOperations = Mockito.mock(SetOperations.class);
+      when(template.hasKey(anyString())).thenReturn(false);
+      when(template.opsForSet()).thenReturn(setOperations);
+      when(setOperations.add(anyString(), any())).thenReturn(1l);
+      Asset server = createAsset();
+      server.setCategory(AssetCategory.Server);
+      server.setAssetName("cloud-sha1-esx2");
+      server = assetRepository.save(server);
+      Asset server1 = createAsset();
+      server1.setCategory(AssetCategory.Server);
+      server1.setAssetName("cloud-sha1-esx8");
+      server1 = assetRepository.save(server1);
+      AssetIPMapping assetipmapping = createAssetIPMapping();
+      assetipmapping.setAssetname(server.getAssetName());
+      assetipmapping = assetIPMappingRepository.save(assetipmapping);
+
+      AssetIPMapping newAssetIPMapping = createAssetIPMapping();
+      newAssetIPMapping.setAssetname(server1.getAssetName());
+      newAssetIPMapping.setId(assetipmapping.getId());
+      newAssetIPMapping.setMacAddress(null);
+      this.mockMvc
+               .perform(put("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newAssetIPMapping)))
+               .andExpect(status().isOk())
+               .andDo(document("assets-updateHostNameIPMapping-example", requestFields(
+                        fieldWithPath("id").description("ID of the asset, created by flowgate"),
+                        fieldWithPath("ip").description("ip of hostname"),
+                        fieldWithPath("macAddress").description("macAddress of IP"),
+                        fieldWithPath("assetname").description(
+                                 "The name of the asset in the third part DCIM/CMDB systems. Usually it will be a unique identifier of an asset"))));
+      assetipmapping = assetIPMappingRepository.findById(assetipmapping.getId()).get();
+      assetRepository.deleteById(server.getId());
+      assetRepository.deleteById(server1.getId());
+      assetIPMappingRepository.deleteById(assetipmapping.getId());
+      TestCase.assertEquals(server1.getAssetName(), assetipmapping.getAssetname());
+      TestCase.assertNull(assetipmapping.getMacAddress());
    }
 
    @Test
@@ -1349,7 +1400,7 @@ public class AssetControllerTest {
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("Can't find any asset with the name : " + newAssetIPMapping.getAssetname());
       MvcResult result = this.mockMvc
-            .perform(post("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
+            .perform(put("/v1/assets/mapping/hostnameip").contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(newAssetIPMapping)))
             .andExpect(status().is5xxServerError())
             .andReturn();
@@ -1371,6 +1422,7 @@ public class AssetControllerTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$..totalPages").value(1))
       .andExpect(jsonPath("$..content[0].ip").value(assetipmapping.getIp()))
+      .andExpect(jsonPath("$..content[0].macAddress").value(assetipmapping.getMacAddress()))
       .andExpect(jsonPath("$..content[0].assetname").value(assetipmapping.getAssetname()))
       .andDo(document("assets-getHostNameIPMappingByPage-example",
             responseFields(subsectionWithPath("content").description("AssetIPMapping's array."),
@@ -2283,6 +2335,7 @@ public class AssetControllerTest {
       AssetIPMapping assetipmapping = new AssetIPMapping();
       assetipmapping.setId(UUID.randomUUID().toString());
       assetipmapping.setAssetname("assetname");
+      assetipmapping.setMacAddress("00:50:56:be:60:62");
       assetipmapping.setIp("127.0.0.1");
       return assetipmapping;
    }
