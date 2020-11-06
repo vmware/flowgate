@@ -1,99 +1,130 @@
 /**
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
-*/
+ */
 package com.vmware.flowgate.infobloxworker.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Infoblox {
-    @JsonProperty(value="_ref")
-    private String ref;
-    @JsonProperty(value="ip_address")
-    private String ipAddress;
-    @JsonProperty(value="is_conflict")
-    private boolean isConflict;
-    @JsonProperty(value="mac_address")
-    private String macAddress;
-    @JsonProperty(value="names")
-    private String[] hostNames;
-    @JsonProperty(value="network")
-    private String network;
-    @JsonProperty(value="network_view")
-    private String networkView;
-    @JsonProperty(value="objects")
-    private String[] objects;
-    @JsonProperty(value="status")
-    private String status;
-    @JsonProperty(value="types")
-    private String[] types;
-    @JsonProperty(value="usage")
-    private String[] usage;
 
-    public String get_ref(){
-        return ref;
-    }
-    public String getIpAddress() {
-        return ipAddress;
-    }
-    public boolean getIsConflict() {
-        return isConflict;
-    }
-    public String getMacAddress() {
-        return macAddress;
-    }
-    public String[] getHostNames() {
-        return hostNames;
-    }
-    public String getNetwork() {
-        return network;
-    }
-    public String getNetworkView() {
-        return networkView;
-    }
-    public String[] getObjects() {
-        return objects;
-    }
-    public String getStatus() {
-        return status;
-    }
-    public String[] getTypes() {
-        return types;
-    }
-    public String[] getUsage() {
-        return usage;
-    }
-    public void set_ref(String ref){
-        this.ref = ref;
-    }
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-    public void setIsConflict(boolean isConflict) {
-        this.isConflict = isConflict;
-    }
-    public void setMacAddress(String macAddress) {
-        this.macAddress = macAddress;
-    }
-    public void setHostNames(String[] hostNames) {
-        this.hostNames = hostNames;
-    }
-    public void setNetwork(String network) {
-        this.network = network;
-    }
-    public void setNetworkView(String networkView) {
-        this.networkView = networkView;
-    }
-    public void setObjects(String[] objects) {
-        this.objects = objects;
-    }
-    public void setStatus(String status) {
-        this.status = status;
-    }
-    public void setTypes(String[] types) {
-        this.types = types;
-    }
-    public void setUsage(String[] usage) {
-        this.usage = usage;
-    }
+   @JsonProperty(value = "_ref")
+   private String ref;
+   @JsonProperty(value = "ipv4addrs")
+   private ipv4addr[] ipv4addrs;
+   @JsonProperty(value = "name")
+   private String name;
+   @JsonProperty(value = "zone")
+   private String zone;
+
+   static class ipv4addr {
+
+      @JsonProperty(value = "_ref")
+      private String ref;
+      @JsonProperty(value = "discovered_data")
+      private DiscoveredData discoveredData;
+      @JsonProperty(value = "host")
+      private String host;
+      @JsonProperty(value = "ipv4addr")
+      private String ipv4addr;
+      @JsonProperty(value = "mac")
+      private String mac;
+
+      public String getRef() {
+         return ref;
+      }
+      public void setRef(String ref) {
+         this.ref = ref;
+      }
+      public DiscoveredData getDiscoveredData() {
+         return discoveredData;
+      }
+      public void setDiscoveredData(DiscoveredData discoveredData) {
+         this.discoveredData = discoveredData;
+      }
+      public String getHost() {
+         return host;
+      }
+
+      public void setHost(String host) {
+         this.host = host;
+      }
+      public String getIpv4addr() {
+         return ipv4addr;
+      }
+      public void setIpv4addr(String ipv4addr) {
+         this.ipv4addr = ipv4addr;
+      }
+      public String getMac() {
+         return mac;
+      }
+      public void setMac(String mac) {
+         this.mac = mac;
+      }
+
+      static class DiscoveredData {
+
+         @JsonProperty(value = "first_discovered")
+         private long firstDiscovered;
+         @JsonProperty(value = "last_discovered")
+         private long lastDiscovered;
+         @JsonProperty(value = "mac_address")
+         private String macAddress;
+         @JsonProperty(value = "os")
+         private String os;
+
+         public long getFirstDiscovered() {
+            return firstDiscovered;
+         }
+         public void setFirstDiscovered(long firstDiscovered) {
+            this.firstDiscovered = firstDiscovered;
+         }
+         public long getLastDiscovered() {
+            return lastDiscovered;
+         }
+         public void setLastDiscovered(long lastDiscovered) {
+            this.lastDiscovered = lastDiscovered;
+         }
+         public String getMacAddress() {
+            return macAddress;
+         }
+         public void setMacAddress(String macAddress) {
+            this.macAddress = macAddress;
+         }
+         public String getOs() {
+            return os;
+         }
+
+         public void setOs(String os) {
+            this.os = os;
+         }
+      }
+
+   }
+
+   public String getRef() {
+      return ref;
+   }
+   public void setRef(String ref) {
+      this.ref = ref;
+   }
+   public ipv4addr[] getIpv4addrs() {
+      return ipv4addrs;
+   }
+   public void setIpv4addrs(ipv4addr[] ipv4addrs) {
+      this.ipv4addrs = ipv4addrs;
+   }
+   public String getName() {
+      return name;
+   }
+   public void setName(String name) {
+      this.name = name;
+   }
+   public String getZone() {
+      return zone;
+   }
+   public void setZone(String zone) {
+      this.zone = zone;
+   }
+
 }

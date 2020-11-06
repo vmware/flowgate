@@ -583,13 +583,15 @@ public class AssetController {
       }
       AssetIPMapping oldMapping = oldMappingOptional.get();
       String assetName = mapping.getAssetname();
-      if(oldMapping.getAssetname().equals(assetName)) {
+      String macAddress = mapping.getMacAddress();
+      if(oldMapping.getAssetname().equals(assetName) && macAddress.equals(oldMapping.getMacAddress())) {
          return;
       }
       if(!assetService.isAssetNameValidate(assetName)) {
          throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't find any asset with the name : " + mapping.getAssetname(),null);
       }
       oldMapping.setAssetname(mapping.getAssetname());
+      oldMapping.setMacAddress(mapping.getMacAddress());
       assetIPMappingRepository.save(oldMapping);
    }
 
