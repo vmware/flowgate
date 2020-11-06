@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class InfobloxClient extends RestClientBase {
 
-   private static Logger logger = LoggerFactory.getLogger(InfobloxClient.class);
+   private static final Logger logger = LoggerFactory.getLogger(InfobloxClient.class);
 
    @Value("${infoblox.socket.timeout:60000}")
    private int socketTimeout;

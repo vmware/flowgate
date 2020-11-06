@@ -54,11 +54,11 @@ public class InfoBloxService implements AsyncService {
       //The data format of the message. should be an ip address.
       //Do the business here.
       String message = eventMessage.getContent();
-      logger.info(String.format("Try to find hostname for ip: %s", message));
+      logger.info("Try to find hostname for ip: {}", message);
       //check message , make sure it is an valid ip address;
       wormholeAPIClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      FacilitySoftwareConfig[] infoBloxes =
-            wormholeAPIClient.getFacilitySoftwareByType(SoftwareType.InfoBlox).getBody();
+      FacilitySoftwareConfig[] infoBloxes = wormholeAPIClient.getFacilitySoftwareByType(SoftwareType.InfoBlox).getBody();
+      AssetIPMapping[] mappings = wormholeAPIClient.getHostnameIPMappingByIP(message).getBody();
       for (FacilitySoftwareConfig infoblox : infoBloxes) {
          if(!infoblox.checkIsActive()) {
             continue;
@@ -107,8 +107,6 @@ public class InfoBloxService implements AsyncService {
                tempMapping.setMacAddress(infoBloxResult.getMacAddress());
                tempMapping.setIp(message);
 
-               AssetIPMapping[] mappings =
-                     wormholeAPIClient.getHostnameIPMappingByIP(message).getBody();
                boolean isNewMapping = true;
                if (null != mappings && mappings.length > 0) {
                   for (AssetIPMapping mapping : mappings) {
@@ -128,9 +126,10 @@ public class InfoBloxService implements AsyncService {
                logger.info(String.format("Find hostname %s for ip %s", infoBloxResult.getHostName(), message));
                return;
             }
+         } else {
+            logger.info("Cannot find the hostname for IP: {}", message);
          }
       }
-      logger.info(String.format("Cannot find the hostname for IP: %s", message));
    }
 
    private void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig infoblox,String message) {
