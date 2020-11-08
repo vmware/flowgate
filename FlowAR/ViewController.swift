@@ -10,23 +10,23 @@ import UIKit
 import SceneKit
 import ARKit
 import Vision
-import CoreMotion
+import ClassKit
 
-class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate {
+class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate, URLSessionDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
+    
+    var flow = FlowgateClient()
     
     var qrRequests = [VNRequest]()
     var detectedDataAnchor: [String: ARAnchor?] = [:]
     var lastAddedAnchor: ARAnchor?
     var processing = false
-    // to know the angle
-    let manager = CMMotionManager()
     var message: String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        Swift.print(flow.getFlowgateToken())
         // Set the view's delegate
         sceneView.delegate = self
         sceneView.session.delegate=self
@@ -52,7 +52,7 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate {
         if let results = request.results, let result = results.first as? VNBarcodeObservation {
             guard let message=result.payloadStringValue else {return}
             self.message = message
-            print(self.message ?? "No message.")
+            Swift.print(self.message ?? "No message.")
             // Get the bounding box for the bar code and find the center
             var rect = result.boundingBox
             // TODO: Draw it
