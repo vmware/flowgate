@@ -15,6 +15,7 @@
 		292F8B81253F2CE7004DEE4A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 292F8B7F253F2CE7004DEE4A /* LaunchScreen.storyboard */; };
 		292F8B8C253F2CE8004DEE4A /* FlowARTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292F8B8B253F2CE8004DEE4A /* FlowARTests.swift */; };
 		292F8B97253F2CE8004DEE4A /* FlowARUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292F8B96253F2CE8004DEE4A /* FlowARUITests.swift */; };
+		29E1906825581B16005D9D0C /* FlowgateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E1906725581B16005D9D0C /* FlowgateClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		292F8B92253F2CE8004DEE4A /* FlowARUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlowARUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		292F8B96253F2CE8004DEE4A /* FlowARUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowARUITests.swift; sourceTree = "<group>"; };
 		292F8B98253F2CE8004DEE4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		29E1906725581B16005D9D0C /* FlowgateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowgateClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 				292F8B7D253F2CE7004DEE4A /* Assets.xcassets */,
 				292F8B7F253F2CE7004DEE4A /* LaunchScreen.storyboard */,
 				292F8B82253F2CE7004DEE4A /* Info.plist */,
+				29E1906725581B16005D9D0C /* FlowgateClient.swift */,
 			);
 			path = FlowAR;
 			sourceTree = "<group>";
@@ -262,6 +265,7 @@
 				292F8B77253F2CE2004DEE4A /* ViewController.swift in Sources */,
 				292F8B75253F2CE2004DEE4A /* AppDelegate.swift in Sources */,
 				292F8B79253F2CE2004DEE4A /* Experience.rcproject in Sources */,
+				29E1906825581B16005D9D0C /* FlowgateClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
