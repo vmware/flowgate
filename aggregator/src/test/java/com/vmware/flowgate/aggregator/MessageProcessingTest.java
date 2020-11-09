@@ -4,7 +4,10 @@
 */
 package com.vmware.flowgate.aggregator;
 
+import static org.hamcrest.CoreMatchers.anything;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -22,6 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.Spy;
+import org.mockito.internal.matchers.Any;
 import org.quartz.JobExecutionException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -36,8 +40,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vmware.flowgate.aggregator.config.ServiceKeyConfig;
 import com.vmware.flowgate.aggregator.scheduler.job.AggregatorService;
 import com.vmware.flowgate.aggregator.scheduler.job.CustomerAdapterJobDispatcher;
+import com.vmware.flowgate.aggregator.scheduler.job.VCenterJobDispatcher;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricName;
@@ -71,9 +77,15 @@ public class MessageProcessingTest {
 
    @SpyBean
    private CustomerAdapterJobDispatcher customerAdapter;
+   
+   @SpyBean
+   private VCenterJobDispatcher vcenterJobDispatcher;
 
    @MockBean
    private WormholeAPIClient restClient;
+   
+   @MockBean
+   private ServiceKeyConfig serviceKeyConfig;
 
    @Test
    public void testMessage() {
@@ -386,6 +398,31 @@ public class MessageProcessingTest {
       adapters[0] = adapter;
       when(restClient.getAllCustomerFacilityAdapters()).thenReturn(new ResponseEntity<FacilityAdapter[]>(adapters, HttpStatus.OK));
       customerAdapter.execute(null);
+   }
+   
+   @Test
+   public void testVcJobExecute() throws JobExecutionException, JsonProcessingException {
+      
+      ListOperations<String, String> listOp = Mockito.mock(ListOperations.class);
+      ValueOperations<String, String> valueOp = Mockito.mock(ValueOperations.class);
+      SDDCSoftwareConfig[] sDDCSoftwareConfigs = {new SDDCSoftwareConfig(), new SDDCSoftwareConfig()};
+      ResponseEntity<SDDCSoftwareConfig[]> resp = Mockito.mock(ResponseEntity.class);
+      List<String> lists = new ArrayList<>();
+
+      when(template.opsForValue()).thenReturn(valueOp);
+      when(valueOp.get(anyString())).thenReturn("2880");
+      when(serviceKeyConfig.getServiceKey()).thenReturn("");
+
+      when(restClient.getVCServers()).thenReturn(resp);
+      when(resp.getBody()).thenReturn(sDDCSoftwareConfigs);
+      
+      when(template.opsForList()).thenReturn(listOp);
+      
+      doReturn(lists).when(vcenterJobDispatcher).generateSDDCMessageListByType("", sDDCSoftwareConfigs);
+      
+      when(listOp.leftPushAll("", lists)).thenReturn(1L);
+      
+      vcenterJobDispatcher.execute(null);
    }
 
    FacilitySoftwareConfig createFacilitySoftware() {
