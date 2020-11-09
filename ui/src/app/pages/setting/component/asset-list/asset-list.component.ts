@@ -4,9 +4,6 @@
 */
 import { Component, OnInit } from '@angular/core';
 import {Router,ActivatedRoute} from '@angular/router';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
 import { SettingService } from '../../setting.service';
 
 
@@ -17,7 +14,7 @@ import { SettingService } from '../../setting.service';
 })
 export class AssetListComponent implements OnInit {
 
-  constructor(private http:Http,private service:SettingService,private router: Router, private route: ActivatedRoute) { }
+  constructor(private service:SettingService,private router: Router, private route: ActivatedRoute) { }
  
   assets = [];
   currentPage:number = 1;
@@ -49,16 +46,15 @@ export class AssetListComponent implements OnInit {
   getAssetsDatas(currentPage,pageSize){
     this.assets = [];
     this.service.getAssetsBySource("flowgate", currentPage, pageSize).subscribe(
-      (data)=>{if(data.status == 200){
-            this.assets =  data.json().content;
-            this.currentPage = data.json().number+1;
-            this.totalPage = data.json().totalPages
-            if(this.totalPage == 1){
-              this.disabled = "disabled";
-            }else{
-              this.disabled = "";
-            }
-      }
+      (data)=>{
+        this.assets =  data['content'];
+        this.currentPage = data['number']+1;
+        this.totalPage = data['totalPages'];
+        if(this.totalPage == 1){
+          this.disabled = "disabled";
+        }else{
+          this.disabled = "";
+        }
     })
   }
   addAsset(){
@@ -69,10 +65,9 @@ export class AssetListComponent implements OnInit {
   }
   confirm(){
     this.service.deleteAssetById(this.assetId).subscribe(
-      (data)=>{if(data.status == 200){
+      (data)=>{
         this.basic = false;
         this.ngOnInit();
-      }
     })
   }
   onClose(){

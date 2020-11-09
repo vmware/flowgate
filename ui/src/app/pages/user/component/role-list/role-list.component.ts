@@ -3,12 +3,9 @@
  * SPDX-License-Identifier: BSD-2-Clause
 */
 import { Component, ViewChild,OnInit, SystemJsNgModuleLoader } from '@angular/core';
-import {Router,ActivatedRoute} from '@angular/router';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
+import {Router,ActivatedRoute} from '@angular/router';;
 import { RoleService } from '../../role.service';
-import {ClrWizard} from "@clr/angular";
+import {ClrDatagridStateInterface, ClrWizard} from "@clr/angular";
 
 @Component({
   selector: 'app-role-list',
@@ -17,7 +14,7 @@ import {ClrWizard} from "@clr/angular";
 })
 export class RoleListComponent implements OnInit {
 
-  constructor(private http:Http,private service:RoleService,private router: Router, private route: ActivatedRoute) { }
+  constructor(private service:RoleService) { }
   
   checkadmin(rolename:string){
     if(rolename == "admin"){
@@ -47,12 +44,10 @@ export class RoleListComponent implements OnInit {
       setTimeout(() => {
         this.service.AddRole(this.role.roleName,this.rolePrivilege).subscribe(
           (data)=>{
-            if(data.status == 201){
-              this.addwizard.close();
-              this.getroledatas(this.currentPage,this.pageSize);
-              this.role.roleName = "";
-              this.errorMessage = "";
-            }
+            this.addwizard.close();
+            this.refresh(this.currentState);
+            this.role.roleName = "";
+            this.errorMessage = "";
           },(error)=>{
             this.errorMessage = error.json().message;
             this.errorFlag = true;
@@ -121,24 +116,6 @@ export class RoleListComponent implements OnInit {
     this.roleprivilegeselected = [];
   }
 
-
-
-  setInfo(){
-    this.info=this.pageSize;
-    this.getroledatas(this.currentPage,this.pageSize)
-  }
-  previous(){
-    if(this.currentPage>1){
-      this.currentPage--;
-      this.getroledatas(this.currentPage,this.pageSize)
-    }
-  }
-  next(){
-    if(this.currentPage < this.totalPage){
-      this.currentPage++
-      this.getroledatas(this.currentPage,this.pageSize)
-    }
-  }
   createTime(time){
 		var da = time;
 	    da = new Date(da);
@@ -164,15 +141,13 @@ export class RoleListComponent implements OnInit {
     this.role.roleName = "";
     this.systemprivilegeselected = [];
     this.roleprivilegeselected = [];
-    this.getroledatas(this.currentPage,this.pageSize)
+    this.refresh(this.currentState);
   }
 
   save(){
     this.service.updateRole(this.role.id,this.role.roleName,this.rolePrivilege).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.getroledatas(this.currentPage,this.pageSize)
-        }
+        this.refresh(this.currentState);
       }
     )
     this.role.id = "";
@@ -194,16 +169,13 @@ export class RoleListComponent implements OnInit {
     
   }
   confirmdelete(){
-    this.service.deleteRole(this.roleId).subscribe(data=>{
-      
-      if(data.status == 200){
+    this.service.deleteRole(this.roleId).subscribe(
+      data=>{
         this.basic = false;
-        this.getroledatas(this.currentPage,this.pageSize);
+        this.refresh(this.currentState);
         this.deleteOptionTipClosed = true;
-      }
-    },
-    error=>{
-      this.deleteOptionTipClosed = false;
+    }, error=>{
+        this.deleteOptionTipClosed = false;
     })
   }
 
@@ -219,9 +191,8 @@ export class RoleListComponent implements OnInit {
 
   getprivileges(){
     this.service.getPrivileges().subscribe(
-      (data)=>{if(data.status == 200){
-            this.privilegeNames = data.json()
-      }
+      (data:string[])=>{
+        this.privilegeNames = data;
     })
   }
   alertclose:boolean = true;
@@ -232,34 +203,35 @@ export class RoleListComponent implements OnInit {
   }
   
   loading:boolean = true;
-
-  getroledatas(currentPage,pageSize){
+  currentState:ClrDatagridStateInterface;
+  totalItems:number = 0;
+  refresh(state: ClrDatagridStateInterface){
+    this.roles = [];
+    if (!state.page) {
+      return;
+    }
+    this.currentState = state;
+    let pagenumber = Math.round((state.page.from + 1) / state.page.size) + 1;
+    this.getRoles(pagenumber,state.page.size);
+  }
+  getRoles(currentPage:number,pageSize:number){
     this.loading = true;
     this.service.getRoleData(currentPage,pageSize).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.loading = false;
-          this.roles = data.json().content
-          this.currentPage = data.json().number+1;
-          this.totalPage = data.json().totalPages
-          if(this.totalPage == 1){
-            this.disabled = "disabled";
-          }else{
-            this.disabled = "";
-          }
-      }
+        this.loading = false;
+        this.roles = data['content'];
+        this.totalItems = data['totalElements'];
     },(error)=>{
-      this.loading = false;
-      this.alertType = "alert-danger";
-      this.alertcontent = "Internal error";
-      if(error._body != null && error.status != "0"){
-        this.alertcontent = error.json().message;
-      }
-      this.alertclose = false;
+        this.loading = false;
+        this.alertType = "alert-danger";
+        this.alertcontent = "Internal error";
+        if(error._body != null && error.status != "0"){
+          this.alertcontent = error.json().message;
+        }
+        this.alertclose = false;
     })
   }
   ngOnInit() {
-     this.getroledatas(this.currentPage,this.pageSize); 
      this.getprivileges();
   }
 

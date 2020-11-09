@@ -6,9 +6,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { SettingService } from '../../setting.service';
 import { NgForm } from '@angular/forms';
 import { HostNameAndIpmappingModule } from '../../host-name-and-ipmapping/host-name-and-ipmapping.module';
-import { fromEvent } from 'rxjs/observable/fromEvent';
+import { fromEvent ,  of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs/observable/of';
 import { FileUploader, ParsedResponseHeaders, FileItem } from 'ng2-file-upload';
 import {environment} from '../../../../../environments/environment.prod';
 import { AuthenticationService } from '../../../auth/authenticationService';
@@ -42,7 +41,7 @@ export class TriggerJobComponent implements OnInit {
       "description":"Manually Trigger the aggregate PDUs and Server mapping job. It will try to find out the possible PDUs that a server is connected to. The job will automatically executed by daily."
     }
   ]
-  servers=[];
+  servers:string[]=[];
   serverloading:boolean=false;
  
   serverMapping:boolean=false;
@@ -97,93 +96,67 @@ export class TriggerJobComponent implements OnInit {
       this.serverMapping = true;
       this.service.mergeserverMapping().subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.serverMapping = false;
-            this.alertType = "alert-success";
-            this.alertcontent = "Trigger Success";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },2000);
-          }else{
-            this.serverMapping = false;
-            this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
-          }
+          this.serverMapping = false;
+          this.alertType = "alert-success";
+          this.alertcontent = "Trigger Success";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },2000);
         },error=>{
           this.serverMapping = false;
           this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
+          this.alertcontent = "Trigger Failed";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },5000);
         }
       )
     }else if(jobname == "job2"){
       this.pduMapping = true;
       this.service.mergePduServerMapping().subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.pduMapping = false;
-            this.alertType = "alert-success";
-            this.alertcontent = "Trigger Success";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },2000);
-          }else{
-            this.pduMapping = false;
-            this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
-          }
+        
+          this.pduMapping = false;
+          this.alertType = "alert-success";
+          this.alertcontent = "Trigger Success";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },2000);
+
         },error=>{
           this.pduMapping = false;
           this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
+          this.alertcontent = "Trigger Failed";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },5000);
         }
       )
     }else if(jobname == "job3"){
       this.temphumidityMapping = true;
       this.service.fullSyncTempAndHumiditySensors(true).subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.temphumidityMapping = false;
-            this.alertType = "alert-success";
-            this.alertcontent = "Trigger Success";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },2000);
-          }else{
-            this.temphumidityMapping = false;
-            this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
-          }
+
+          this.temphumidityMapping = false;
+          this.alertType = "alert-success";
+          this.alertcontent = "Trigger Success";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },2000);
+      
         },error=>{
           this.temphumidityMapping = false;
           this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
+          this.alertcontent = "Trigger Failed";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },5000);
         }
       )
     }
@@ -206,12 +179,10 @@ export class TriggerJobComponent implements OnInit {
     let tosaveTime = this.toUpdateExpiredTimeRange*24*3600*1000;
     this.service.updatesTimeRange(tosaveTime).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.updateExpiredTime = false;
-          this.errorShow = false;
-          this.errorMsg = "";
-          this.getExpiredTimeRange();
-        }
+        this.updateExpiredTime = false;
+        this.errorShow = false;
+        this.errorMsg = "";
+        this.getExpiredTimeRange();
       },error=>{
         this.errorShow = true;
         this.errorMsg = error.json().message;
@@ -230,8 +201,8 @@ export class TriggerJobComponent implements OnInit {
 
   getExpiredTimeRange(){
     this.service.getExpiredTimeRange().subscribe(
-      (data)=>{
-        this.expiredTimeRange = data.text();
+      (data:Number)=>{
+        this.expiredTimeRange = data;
         this.expiredTimeRange = this.expiredTimeRange/(3600*1000*24)
         this.toUpdateExpiredTimeRange = this.expiredTimeRange;
       }
@@ -263,11 +234,9 @@ export class TriggerJobComponent implements OnInit {
     setTimeout(() => {
       this.unmappedservershow = true;
       this.service.getUnmappedserver().subscribe(
-        (data)=>{
-          if(data.status == 200){
-            this.servers = data.json();
-            this.serverloading = false;
-          }
+        (data:string[])=>{
+          this.servers = data;
+          this.serverloading = false;
         }
       )
     },2000);
@@ -276,9 +245,7 @@ export class TriggerJobComponent implements OnInit {
   getFirstPageData(){
     this.service.getSystemSummaryData().subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.flowgateSummery = data.json();
-        }
+        //this.flowgateSummery = data; //need to create a data model 
       }
     )
   }
@@ -338,20 +305,15 @@ export class TriggerJobComponent implements OnInit {
     this.loading = true;
     this.service.getHostNameAndIPMapping(pagenumber,pagesize,searchIP).subscribe(
       data=>{
-        if(data.status == 200){
-          this.loading = false;
-          if(data.text() != null){
-            this.hostNameAndIPMappings = data.json().content;
-            this.mappingsTotalPage = data.json()
-            this.pageNumber = data.json().number+1;
-            this.mappingsTotalPage = data.json().totalPages
-            if(this.mappingsTotalPage == 1){
-              this.disabled = "disabled";
-            }else{
-              this.disabled = "";
-            }
-          }
-        }
+        this.loading = false;
+        this.hostNameAndIPMappings = data['content'];
+        this.pageNumber = data['number']+1;
+        this.mappingsTotalPage = data['totalPages']
+        if(this.mappingsTotalPage == 1){
+          this.disabled = "disabled";
+        }else{
+          this.disabled = "";
+        } 
       },(error)=>{
         this.loading = false;
       }
@@ -371,9 +333,7 @@ export class TriggerJobComponent implements OnInit {
     this.deleteHostNameAndIPMapping = false;
     this.service.deleteHostNameAndIPMapping(this.selectedHostNameAndIPMappings[0].id).subscribe(
       data=>{
-        if(data.status == 200){
-          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
-        }
+        this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
       }
     )
   }
@@ -461,13 +421,12 @@ export class TriggerJobComponent implements OnInit {
     this.saveMappingLoading = true;
     this.service.saveHostNameAndIPMapping(this.hostNameAndIPMapping).subscribe(
       (data)=>{
-        if(data.status == 201){
-          this.selectedAssetName = "";
-          this.saveMappingLoading = false;
-          this.AddHostNameAndIPMapping = false;
-          this.assetNames = [];
-          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP) 
-        }
+        this.selectedAssetName = "";
+        this.saveMappingLoading = false;
+        this.AddHostNameAndIPMapping = false;
+        this.assetNames = [];
+        this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP) 
+        
       },error=>{
         this.saveMappingLoading = false;
         this.saveMappingErrorShow = true;
@@ -481,13 +440,11 @@ export class TriggerJobComponent implements OnInit {
     this.saveMappingLoading = true;
     this.service.updateHostNameAndIPMapping(this.hostNameAndIPMapping).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.selectedAssetName = "";
-          this.saveMappingLoading = false;
-          this.editHostNameAndIPMapping = false;
-          this.assetNames = [];
-          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
-        }
+        this.selectedAssetName = "";
+        this.saveMappingLoading = false;
+        this.editHostNameAndIPMapping = false;
+        this.assetNames = [];
+        this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
       },error=>{
         this.saveMappingLoading = false;
         this.saveMappingErrorShow = true;

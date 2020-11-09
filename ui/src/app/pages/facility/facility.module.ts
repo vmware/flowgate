@@ -5,11 +5,11 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FacilityComponent } from './facility.component';
-import { routing } from './facility.routing';
+import { ROUTING } from './facility.routing';
 @NgModule({
   imports: [
     CommonModule,
-    routing
+    ROUTING
   ],
   declarations: [FacilityComponent]
 })

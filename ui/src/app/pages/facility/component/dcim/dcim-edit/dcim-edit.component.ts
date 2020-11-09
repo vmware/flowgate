@@ -4,9 +4,6 @@
 */
 import { Component, OnInit } from '@angular/core';
 import { DcimService } from '../dcim.service';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { FacilityModule } from '../../../facility.module';
 import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
@@ -52,10 +49,8 @@ export class DcimEditComponent implements OnInit {
       this.loading = true;
       this.service.updateFacility(this.dcimConfig).subscribe(
         (data)=>{
-          if(data.status == 200){
-            this.loading = false;
-            this.router.navigate(["/ui/nav/facility/dcim/dcim-list"]);
-          }
+          this.loading = false;
+          this.router.navigate(["/ui/nav/facility/dcim/dcim-list"]);
         },
         error=>{
           if(error.status == 400 && error.json().errors[0] == "Invalid SSL Certificate"){
@@ -104,10 +99,8 @@ export class DcimEditComponent implements OnInit {
   adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
   findAllAdapters(){
     this.service.findAllFacilityAdapters().subscribe(
-      (data)=>{
-        let allFacilityAdapters:FacilityAdapterModule[] = [];
-        allFacilityAdapters = data.json();
-        allFacilityAdapters.forEach(element => {
+      (data:FacilityAdapterModule[])=>{
+        data.forEach(element => {
           if(element.type == "OtherDCIM"){
             this.dcimAdapters.push(element);
           }
@@ -144,28 +137,24 @@ export class DcimEditComponent implements OnInit {
    
     if(this.dcimConfig.id != null && this.dcimConfig.id != ""){
       this.service.getDcimConfig(this.dcimConfig.id).subscribe(
-        (data)=>{
-          if(data.status == 200){
-            if(data.json != null){
-              this.dcimConfig = data.json();
-              this.seclectAdapter.subCategory = this.dcimConfig.subCategory;
-              if(data.json().advanceSetting == null){
-                this.dcimConfig.advanceSetting = {
-                  DateFormat:"",
-                  TimeZone:"",
-                  PDU_POWER_UNIT:"KW",
-                  PDU_AMPS_UNIT:"A",
-                  PDU_VOLT_UNIT:"V",
-                  TEMPERATURE_UNIT:"C",
-                  HUMIDITY_UNIT:"%"
-                }
-              }
-              if(this.dcimConfig.verifyCert == false){
-                this.dcimConfig.verifyCert = "false";
-              }else{
-                this.dcimConfig.verifyCert = "true";
-              }
+        (data:FacilityModule)=>{
+          this.dcimConfig = data;
+          this.seclectAdapter.subCategory = this.dcimConfig.subCategory;
+          if(data.advanceSetting == null){
+            this.dcimConfig.advanceSetting = {
+              DateFormat:"",
+              TimeZone:"",
+              PDU_POWER_UNIT:"KW",
+              PDU_AMPS_UNIT:"A",
+              PDU_VOLT_UNIT:"V",
+              TEMPERATURE_UNIT:"C",
+              HUMIDITY_UNIT:"%"
             }
+          }
+          if(this.dcimConfig.verifyCert == false){
+            this.dcimConfig.verifyCert = "false";
+          }else{
+            this.dcimConfig.verifyCert = "true";
           }
         }
       )

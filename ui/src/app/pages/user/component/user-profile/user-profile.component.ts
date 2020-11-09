@@ -2,10 +2,10 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-import { Component, OnInit,Input,Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../user.service';
 import {ActivatedRoute,Router} from "@angular/router";
-import { error } from 'util';
+
 import { AuthenticationService } from '../../../auth/authenticationService';
 
 @Component({
@@ -62,9 +62,7 @@ export class UserProfileComponent implements OnInit {
   
     this.service.updateUser(this.user.id,this.user.username,this.user.password,this.user.email,null).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.router.navigate(["/ui/nav/"]);
-        }
+        this.router.navigate(["/ui/nav/"]);
       },
       error=>{
         this.basic = true;
@@ -84,16 +82,11 @@ export class UserProfileComponent implements OnInit {
   getusers(){
     this.service.getUserByName().subscribe(
       (data)=>{
-        if(data.status == 200){
-          if(data.json != null){
-            this.user.id = data.json().id;
-            this.user.username = data.json().userName;
-            this.user.email = data.json().emailAddress;   
-          }
-        }
+        this.user.id = data['id'];
+        this.user.username =  data['userName'];
+        this.user.email =  data['emailAddress'];   
       }
     )
-   
   }
  
   ngOnInit() { 

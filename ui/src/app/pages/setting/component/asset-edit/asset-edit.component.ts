@@ -4,10 +4,9 @@
 */
 import { Component, OnInit } from '@angular/core';
 import { AssetModule } from '../asset-modules/asset.module';
-import {Router,ActivatedRoute} from '@angular/router';
+import { Router,ActivatedRoute } from '@angular/router';
 import { SettingService } from '../../setting.service';
-import { error } from 'util';
-import { stringify } from 'querystring';
+
 @Component({
   selector: 'app-asset-edit',
   templateUrl: './asset-edit.component.html',
@@ -34,12 +33,8 @@ export class AssetEditComponent implements OnInit {
     this.asset.id = this.activedRoute.snapshot.params['id'];
     if(this.asset.id != null && this.asset.id != ""){
       this.service.getAssetsByID(this.asset.id).subscribe(
-        (data)=>{
-          if(data.status == 200){
-            if(data.json != null){
-              this.asset = data.json();
-            }
-          }
+        (data:AssetModule)=>{
+          this.asset = data;
         }
       )
     }
@@ -84,10 +79,8 @@ export class AssetEditComponent implements OnInit {
     this.editassetloading = true;
     this.service.updateAssetsByID(this.asset).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.editassetloading = false;
-          this.router.navigate(["/ui/nav/setting/asset-list"]);
-        }
+        this.editassetloading = false;
+        this.router.navigate(["/ui/nav/setting/asset-list"]);
       },
       error=>{
         this.editassetloading = false;

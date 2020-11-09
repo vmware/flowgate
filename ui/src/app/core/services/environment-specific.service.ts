@@ -1,13 +1,14 @@
+
+import {map} from 'rxjs/operators';
 /**
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
 import { Injectable, OnInit } from '@angular/core';
-import { Http, Response, Headers, RequestOptions } from '@angular/http';
-import { Observable, Subscription, BehaviorSubject } from 'rxjs/Rx';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/toPromise';
+import {  BehaviorSubject } from 'rxjs';
+
+
+
 import { EnvSpecific } from '../models/env-specific';
 
 
@@ -18,16 +19,16 @@ export class EnvironmentSpecificService {
   public envSpecificNull: EnvSpecific = null;
   private envSpecificSubject: BehaviorSubject<EnvSpecific> = new BehaviorSubject<EnvSpecific>(null);
 
-  constructor(private http: Http) {
+  constructor() {
   }
 
   public loadEnvironment() {
      
-      if (this.envSpecific === null || this.envSpecific === undefined) {
-        return this.http.get('./assets/url.json')
-            .map((data) => data.json())
-            .toPromise<EnvSpecific>();
-      }
+    //   if (this.envSpecific === null || this.envSpecific === undefined) {
+    //     return this.http.get('./assets/url.json').pipe(
+    //         map((data) => data)
+    //         .toPromise<EnvSpecific>();
+    //   }
 
       return Promise.resolve(this.envSpecificNull);
   }
