@@ -101,7 +101,7 @@ export class DcimListComponent implements OnInit {
         },2000);
         this.refresh(this.currentState);
       },error=>{
-        this.updateStatusAlertType = "alert-danger";
+        this.updateStatusAlertType = "danger";
         this.updateStatusAlertcontent = "Activation or suspension of the server failed.";
         this.updateStatusAlertclose = false;
         setTimeout(() => {
@@ -163,7 +163,7 @@ export class DcimListComponent implements OnInit {
         this.totalItems = data['totalElements'];
     },(error)=>{
       this.loading = false;
-      this.alertType = "alert-danger";
+      this.alertType = "danger";
       this.alertcontent = "Internal error";
       if(error._body != null && error.status != "0"){
         this.alertcontent = error.json().message;
@@ -214,7 +214,7 @@ export class DcimListComponent implements OnInit {
         },2000);
         
       },error=>{
-        this.alertType = "alert-danger";
+        this.alertType = "danger";
         this.alertcontent = "Failed to sync data for " +url;
         this.alertclose = false;
         setTimeout(() => {

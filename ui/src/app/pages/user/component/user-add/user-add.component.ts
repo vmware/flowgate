@@ -174,7 +174,7 @@ export class UserAddComponent implements OnInit {
           this.alertType = "";
           this.router.navigate(["/ui/nav/user/user-list"]);
         },error=>{
-          this.alertType = "alert-danger";
+          this.alertType = "danger";
           this.alertclose = false;
           this.alertcontent = error.json().message;
         }

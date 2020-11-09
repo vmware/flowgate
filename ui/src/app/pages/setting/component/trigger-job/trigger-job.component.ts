@@ -105,7 +105,7 @@ export class TriggerJobComponent implements OnInit {
           },2000);
         },error=>{
           this.serverMapping = false;
-          this.alertType = "alert-danger";
+          this.alertType = "danger";
           this.alertcontent = "Trigger Failed";
           this.alertclose = false;
           setTimeout(() => {
@@ -128,7 +128,7 @@ export class TriggerJobComponent implements OnInit {
 
         },error=>{
           this.pduMapping = false;
-          this.alertType = "alert-danger";
+          this.alertType = "danger";
           this.alertcontent = "Trigger Failed";
           this.alertclose = false;
           setTimeout(() => {
@@ -151,7 +151,7 @@ export class TriggerJobComponent implements OnInit {
       
         },error=>{
           this.temphumidityMapping = false;
-          this.alertType = "alert-danger";
+          this.alertType = "danger";
           this.alertcontent = "Trigger Failed";
           this.alertclose = false;
           setTimeout(() => {
