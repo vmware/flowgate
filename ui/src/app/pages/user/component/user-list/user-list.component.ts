@@ -71,7 +71,7 @@ export class UserListComponent implements OnInit {
         this.totalItems = data['totalElements'];  
     },(error)=>{
         this.loading = false;
-        this.alertType = "alert-danger";
+        this.alertType = "danger";
         this.alertcontent = "Internal error";
         if(error._body != null && error.status != "0"){
           this.alertcontent = error.json().message;
