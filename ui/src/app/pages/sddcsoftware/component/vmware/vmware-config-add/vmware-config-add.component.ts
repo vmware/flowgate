@@ -3,9 +3,6 @@
  * SPDX-License-Identifier: BSD-2-Clause
 */
 import { Component, OnInit } from '@angular/core';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { VmwareService } from '../../vmware/vmware.service';
 import { SddcsoftwareModule } from '../../../sddcsoftware.module';
@@ -34,10 +31,8 @@ export class VmwareConfigAddComponent implements OnInit {
       this.loading = true;
       this.service.AddVmwareConfig(this.vmwareConfig).subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.loading = false;
-            this.router.navigate(["/ui/nav/sddc/vmware/vmware-list"]);
-          }
+          this.loading = false;
+          this.router.navigate(["/ui/nav/sddc/vmware/vmware-list"]);
         },
         error=>{
           if(error.status == 400 && error.json().message == "Certificate verification error"){

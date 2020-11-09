@@ -5,13 +5,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SddcsoftwareComponent } from './sddcsoftware.component';
-import { routing } from './sddcsoftware.routing';
-import { VmwareComponent } from './component/vmware/vmware.component';
+import { ROUTING } from './sddcsoftware.routing';
 
 @NgModule({
   imports: [
     CommonModule,
-    routing,
+    ROUTING,
     
   ],
   declarations: [SddcsoftwareComponent]

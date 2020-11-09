@@ -2,10 +2,10 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-import { Component, OnInit,Input,Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../user.service';
 import {ActivatedRoute,Router} from "@angular/router";
-import { error } from 'util';
+
 @Component({
   selector: 'app-user-edit',
   templateUrl: './user-edit.component.html',
@@ -100,9 +100,7 @@ export class UserEditComponent implements OnInit {
     })
       this.service.updateUser(this.user.id,this.user.username,this.user.password,this.user.email,rolenames).subscribe(
         (data)=>{
-          if(data.status == 200){
-            this.router.navigate(["/ui/nav/user/user-list"]);
-          }
+          this.router.navigate(["/ui/nav/user/user-list"]);
         },
         error=>{
           this.basic = true;
@@ -122,16 +120,12 @@ export class UserEditComponent implements OnInit {
   getusers(){
     this.service.getUser(this.user.id).subscribe(
       (data)=>{
-        if(data.status == 200){
-          if(data.json != null){
-            this.user.username = data.json().userName;
-            this.user.password = data.json().password;
-            this.user.rpassword = data.json().password;
-            this.user.email = data.json().emailAddress;
-            this.user.roleNames = data.json().roleNames;
-            this.getRoles()
-          }
-        }
+        this.user.username = data['userName'];
+        this.user.password = data['password'];
+        this.user.rpassword = data['password'];
+        this.user.email = data['emailAddress'];
+        this.user.roleNames = data['roleNames'];
+        this.getRoles()
       }
     )
    
@@ -146,7 +140,7 @@ export class UserEditComponent implements OnInit {
           "privilegeNames":"",
           "enable":""
          });
-         data.json().content.forEach(element => {
+         data['content'].forEach(element => {
          var role={
          "id":"",
          "roleName":"",

@@ -4,9 +4,6 @@
 */
 import { Component, OnInit } from '@angular/core';
 import {Router,ActivatedRoute} from '@angular/router';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
 import { SettingService } from '../../setting.service';
 @Component({
   selector: 'app-sensorsetting-add',
@@ -15,7 +12,7 @@ import { SettingService } from '../../setting.service';
 })
 export class SensorsettingAddComponent implements OnInit {
 
-  constructor(private service:SettingService,private router:Router,private activedRoute:ActivatedRoute) { }
+  constructor(private service:SettingService,private router:Router) { }
 
   sensorsetting = {
     type:"",
@@ -37,9 +34,7 @@ export class SensorsettingAddComponent implements OnInit {
       this.operationTip = "";
       this.service.postsensorsetting(this.sensorsetting.type,this.sensorsetting.minNum,this.sensorsetting.maxNum,this.sensorsetting.minValue,this.sensorsetting.maxValue).subscribe(
         (data)=>{
-          if(data.status == 201){
             this.router.navigate(["/ui/nav/setting"]);
-          }
         }
       )
     }else{

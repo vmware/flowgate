@@ -4,7 +4,7 @@
 */
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FacilityAdapterModule } from '../facility-adapter.module';
-import { ClrWizard } from "@clr/angular";
+import { ClrDatagridStateInterface, ClrWizard } from "@clr/angular";
 import { AdapterJobCommandModule } from '../adapter-job-command.module';
 import { FacilityAdapterService } from '../facility-adapter.service';
 
@@ -61,34 +61,25 @@ export class FacilityAdapterListComponent implements OnInit {
     return "CMDB"
   }
 
-  setInfo(){
-    this.getFacilityAdapters(this.currentPage,this.pageSize)
-  }
-  previous(){
-    if(this.currentPage>1){
-      this.currentPage--;
-      this.getFacilityAdapters(this.currentPage,this.pageSize)
+  loading:boolean = true;
+  currentState:ClrDatagridStateInterface;
+  totalItems:number = 0;
+  refresh(state: ClrDatagridStateInterface){
+    this.adapters = [];
+    if (!state.page) {
+      return;
     }
+    this.currentState = state;
+    let pagenumber = Math.round((state.page.from + 1) / state.page.size) + 1;
+    this.getFacilityAdapters(pagenumber,state.page.size);
   }
-  next(){
-    if(this.currentPage < this.totalPage){
-      this.currentPage++
-      this.getFacilityAdapters(this.currentPage,this.pageSize)
-    }
-  }
-  getFacilityAdapters(currentPage,pageSize){
+  getFacilityAdapters(currentPage:number,pageSize:number){
+    this.loading = true;
     this.facilityAdapterService.getAdapterByPagee(currentPage,pageSize).subscribe(
       (data)=>{
-        if(data.status == 200){
-            this.adapters = data.json().content;
-            this.currentPage = data.json().number+1;
-            this.totalPage = data.json().totalPages
-            if(this.totalPage == 1){
-              this.nextbtnDisabled = "disabled";
-            }else{
-              this.nextbtnDisabled = "";
-            }  
-        }
+          this.adapters = data['content'];
+          this.totalItems = data['totalElements'];
+          this.loading = false;
     })
   }
 
@@ -144,14 +135,12 @@ export class FacilityAdapterListComponent implements OnInit {
     this.newFacilityAdapter.commands = this.predefineAdapterCommands;
     this.facilityAdapterService.createFacilityAdapter(this.newFacilityAdapter).subscribe(
       (data)=>{
-        if(data.status == 201){
-          this.addLoadingFlag = false;
-          this.wizard.forceFinish();
-          this.wizard.reset();
-          this.addErrorClosed = true;
-          this.addFacilityAdapterOpen = false;
-          this.getFacilityAdapters(this.currentPage,this.pageSize);
-      }
+        this.addLoadingFlag = false;
+        this.wizard.forceFinish();
+        this.wizard.reset();
+        this.addErrorClosed = true;
+        this.addFacilityAdapterOpen = false;
+        this.refresh(this.currentState);
     },(error) =>{
         this.addErrorClosed = false;
         this.addErrorMsg = error.json().message;
@@ -348,18 +337,16 @@ export class FacilityAdapterListComponent implements OnInit {
     this.loadingFlag = true;
     this.facilityAdapterService.updateFacilityAdapter(this.editAdapter).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.loadingFlag = false;
-          this.editwizard.forceFinish();
-          this.editwizard.reset();
-          this.editFacilityAdapterOpen = false;
-          this.editErrorClosed = true;
-          this.getFacilityAdapters(this.currentPage,this.pageSize);
-      }
+        this.loadingFlag = false;
+        this.editwizard.forceFinish();
+        this.editwizard.reset();
+        this.editFacilityAdapterOpen = false;
+        this.editErrorClosed = true;
+        this.refresh(this.currentState);
     },(error)=>{
-      this.editErrorClosed = false;  
-      this.editErrorMsg = error.json().message;
-      this.loadingFlag = false;
+        this.editErrorClosed = false;  
+        this.editErrorMsg = error.json().message;
+        this.loadingFlag = false;
       }
     )
   }
@@ -390,22 +377,19 @@ cancelDelete(){
 comfirmDelete(){
   this.facilityAdapterService.deleteAdapterById(this.removeAdapterId).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.confirmDeleteShow = false;
-          this.deleteErrorClosed = true;
-          this.getFacilityAdapters(this.currentPage,this.pageSize);
-      }
+        this.confirmDeleteShow = false;
+        this.deleteErrorClosed = true;
+        this.refresh(this.currentState);
+
     },(error)=>{
-      this.confirmDeleteShow = false;
-      this.deleteErrorMsg = error.json().message;
-      this.deleteErrorClosed = false;
+        this.confirmDeleteShow = false;
+        this.deleteErrorMsg = error.json().message;
+        this.deleteErrorClosed = false;
       }
     )
   }
 
-
 ngOnInit() {
-  this.getFacilityAdapters(this.currentPage,this.pageSize);
 }
 
 }

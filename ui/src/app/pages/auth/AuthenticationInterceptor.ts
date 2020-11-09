@@ -3,27 +3,39 @@
  * SPDX-License-Identifier: BSD-2-Clause
 */
 import {Injectable} from '@angular/core';
-import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpErrorResponse, HttpResponse} from '@angular/common/http';
+import {Observable, of, throwError} from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { AuthenticationService } from './authenticationService';
 
 @Injectable()
 export class AuthenticationInterceptor implements HttpInterceptor {
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const idToken = this.getToken();
-    if (idToken) {
-      const cloned = req.clone({
-        headers: req.headers.set('Authorization', 'Bearer ' + idToken)
-      });
+  constructor(private service:AuthenticationService){
 
-      return next.handle(cloned);
-    } else {
-      return next.handle(req);
+  }
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    if(this.service.isLoggedIn()){
+      req = req.clone({
+        setHeaders: {
+            'Authorization': 'Bearer ' +this.service.getToken()
+        }
+    });
     }
+    return next.handle(req).pipe(
+      catchError((err: HttpErrorResponse) => this.handleData(err))
+    ) ;
   }
 
-  getToken(): string {
-    const userStr = localStorage.getItem('currentUser');
-    return userStr ? JSON.parse(userStr).token.access_token : '';
+  private handleData(
+    event: HttpResponse<any> | HttpErrorResponse,
+  ): Observable<any> {
+    switch (event.status) {
+      case 401:
+        window.location.href = "/";
+        return of(event) ;
+      default:
+    }
+    return throwError(event) ;
   }
 }

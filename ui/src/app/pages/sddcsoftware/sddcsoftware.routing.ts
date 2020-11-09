@@ -7,7 +7,6 @@ import { Routes, RouterModule }  from '@angular/router';
 import { SddcsoftwareComponent } from './sddcsoftware.component';
 import { ModuleWithProviders } from '@angular/core';
 
-// noinspection TypeScriptValidateTypes
 export const routes: Routes = [
     {
         path: '',
@@ -16,10 +15,10 @@ export const routes: Routes = [
           {path: '', redirectTo: '', pathMatch: 'full'},
           {
             path: 'vmware',
-            loadChildren: 'app/pages/sddcsoftware/component/vmware/vmware.module#VmwareModule'
+            loadChildren: () => import('app/pages/sddcsoftware/component/vmware/vmware.module').then(m => m.VmwareModule)
           }
         ]
       }
 ];
 
-export const routing: ModuleWithProviders = RouterModule.forChild(routes);
+export const ROUTING: ModuleWithProviders<RouterModule> = RouterModule.forChild(routes);

@@ -35,9 +35,8 @@ export class SensorsettingEditComponent implements OnInit {
       this.operationTip = "";
       this.service.updatesensorsetting(this.sensorsetting.id,this.sensorsetting.type,this.sensorsetting.minNum,this.sensorsetting.maxNum,this.sensorsetting.minValue,this.sensorsetting.maxValue).subscribe(
         (data)=>{
-          if(data.status == 200){
-            this.router.navigate(["/ui/nav/setting"]);
-          }
+          this.router.navigate(["/ui/nav/setting"]);
+        
         }
       )
     }else{
@@ -59,11 +58,8 @@ export class SensorsettingEditComponent implements OnInit {
     if(this.sensorsetting.id != null && this.sensorsetting.id != ""){
       this.service.getsensorsetting(this.sensorsetting.id).subscribe(
         (data)=>{
-          if(data.status == 200){
-            if(data.json != null){
-             this.sensorsetting = data.json();
-            }
-          }
+          //TODO need a sensorsetting model
+          //this.sensorsetting = data;
         }
       )
     }

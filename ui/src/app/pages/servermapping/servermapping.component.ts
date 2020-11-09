@@ -1,3 +1,5 @@
+
+import {map} from 'rxjs/operators';
 /**
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
@@ -6,8 +8,7 @@ import { Component, OnInit } from '@angular/core';
 import { ServermappingService } from './servermapping.service';
 import {Router,ActivatedRoute} from '@angular/router';
 import { AssetModule } from './asset.module';
-import { forkJoin } from 'rxjs/observable/forkJoin';
-import { SubscribableOrPromise } from 'rxjs/Observable';
+import { forkJoin ,  SubscribableOrPromise } from 'rxjs';
 
 
 @Component({
@@ -86,30 +87,25 @@ export class ServermappingComponent implements OnInit {
   getServerConfigs(){
     this.service.getserverconfigs(this.serverconfig.type).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.serverconfigs = data.json();
-        }
+        //this.serverconfigs = data.json();// need datamodel
       }
     )
     this.serverMappings = [];
   }
   getServerMappings(){
     if(this.serverconfig.id !=""){
-      this.service.getServerMappings(this.pageSize,this.currentPage,this.serverconfig.type,this.serverconfig.id).subscribe((data)=>{
-        this.nulltips = "No mapping found!";
-        this.serverMappings = [];
-        if(data.status == 200){
-               this.serverMappings = data.json().content
-               this.currentPage = data.json().number+1;
-               this.totalPage = data.json().totalPages;
-              if(this.totalPage == 1){
-                this.disabled = "disabled";
-              }else{
-                this.disabled = "";
-              }
-        }else{
+      this.service.getServerMappings(this.pageSize,this.currentPage,this.serverconfig.type,this.serverconfig.id).subscribe(
+        (data)=>{
+          this.nulltips = "No mapping found!";
           this.serverMappings = [];
-        }
+          this.serverMappings = data['content'];
+          this.currentPage = data['number']+1;
+          this.totalPage = data['totalPages'];
+          if(this.totalPage == 1){
+            this.disabled = "disabled";
+          }else{
+            this.disabled = "";
+          }
       })
     }else{
       this.nulltips = "Please select a server first";
@@ -117,15 +113,13 @@ export class ServermappingComponent implements OnInit {
     }
   }
   updateServerMapping(id,assetID){
-    this.service.updateServerMapping(id,assetID).subscribe((data)=>{
-      if(data.status == 200){
+    this.service.updateServerMapping(id,assetID).subscribe(
+      (data)=>{
         this.mappedServerAsset.id = "";
         this.mappedServerModalOpen = false;
         this.getServerMappings();
-      }
-    },
-    (error)=>{
-      alert(error.json().errors[0]);
+    },(error)=>{
+        alert(error.json().errors[0]);
     })
   }
   previous(){
@@ -161,13 +155,11 @@ export class ServermappingComponent implements OnInit {
     this.currentPageAsset = 1;
     this.service.getMappingById(mappingId).subscribe(
       data=>{
-        if(data.status == 200){
-          this.serverMapping = data.json();
-          if(this.serverMapping.asset != null){
-            this.getAssetById(this.serverMapping.asset);
-          }else{
-            this.mappedServerAsset = new AssetModule();
-          }
+        //this.serverMapping = data.json(); //need datamodel
+        if(this.serverMapping.asset != null){
+          this.getAssetById(this.serverMapping.asset);
+        }else{
+          this.mappedServerAsset = new AssetModule();
         }
       }
     )
@@ -179,11 +171,9 @@ export class ServermappingComponent implements OnInit {
   getAssetById(id:string):AssetModule{
     let asset:AssetModule = new AssetModule();
     this.service.getAssetById(id).subscribe(
-      data=>{
-        if(data.status == 200){
-          this.mappedServerAsset= data.json();
-          this.mappedServerAsset.enable = true;
-        }
+      (data:AssetModule)=>{
+        this.mappedServerAsset= data;
+        this.mappedServerAsset.enable = true;
       }
     )
     return asset;
@@ -204,9 +194,8 @@ export class ServermappingComponent implements OnInit {
       this.showOtherCategory = "Switches";
     }
       this.service.getMappingById(id).subscribe(
-        data=>{
-          if(data.status == 200 && data.text() != ""){
-            this.serverMapping = data.json();
+        (data)=>{
+            //this.serverMapping = data.json(); //need datamodel
             let assetId = this.serverMapping.asset;
             this.service.getAssetById(assetId).subscribe(
               data=>{
@@ -226,7 +215,7 @@ export class ServermappingComponent implements OnInit {
                     }
                   }
                  
-                  forkJoin(reqList).map((data)=>data).subscribe((res)=>{
+                  forkJoin(reqList).pipe(map((data)=>data)).subscribe((res)=>{
                     res.forEach(element => {
                       if(element._body != null && element._body != ""){
                         let pduAsset:AssetModule = new AssetModule();
@@ -244,10 +233,7 @@ export class ServermappingComponent implements OnInit {
                 this.updateAssetModalErrorShow = true;
               }
             )   
-          }else{
-            this.updateAssetError = "Not found server mapping";
-            this.updateAssetModalErrorShow = true;
-          }
+          
         },error=>{
           this.updateAssetError = error.json().message();
           this.updateAssetModalErrorShow = true;
@@ -274,22 +260,21 @@ export class ServermappingComponent implements OnInit {
     this.searchBtnState = true;
     this.loading = true;
       this.service.getAssets(this.pageSizeAsset,this.currentPageAsset,this.keywords,this.category).subscribe(data=>{
-        if(data.status == 200){
-          this.searchBtnDisabled = false;
-          this.searchBtnState = false;
-          this.loading = false;
-          this.assets = data.json().content;
-          this.assets.forEach(element => {
-            element.enable = true;
-          });
-          if(data.json().content.length == this.pageSizeAsset){
-            this.emptyResult = false;
-            this.currentPageAsset = data.json().number+1;
-            this.disabledAsset = "";
-          }else{
-            this.emptyResult = true;
-            this.disabledAsset = "disabled";
-          }
+
+        this.searchBtnDisabled = false;
+        this.searchBtnState = false;
+        this.loading = false;
+        this.assets = data['content'];
+        this.assets.forEach(element => {
+          element.enable = true;
+        });
+        if(data['content'].length == this.pageSizeAsset){
+          this.emptyResult = false;
+          this.currentPageAsset = data['number']+1;
+          this.disabledAsset = "";
+        }else{
+          this.emptyResult = true;
+          this.disabledAsset = "disabled";
         }
       },
       (error)=>{
@@ -339,61 +324,55 @@ export class ServermappingComponent implements OnInit {
     this.category = category;
     this.mappingId = id;
     this.service.getMappingById(id).subscribe(
-      data=>{
-        if(data.status == 200 && data.text() != ""){
-          this.serverMapping = data.json();
-          let assetId = this.serverMapping.asset;
-          this.service.getAssetById(assetId).subscribe(
-            data=>{
-              if(data.status == 200){
-                this.mappedServerAsset= data.json();
-                let sensorformular = this.xah_obj_to_map(this.mappedServerAsset.metricsformulars).get('SENSOR');
-                if(sensorformular != null){
-                  let sensorMap = this.xah_obj_to_map(sensorformular);
-                  if(sensorMap.has("FrontTemperature")){
-                    let frontTemMap = this.xah_obj_to_map(sensorMap.get("FrontTemperature"));
-                    this.fronTemIds = [];
-                    frontTemMap.forEach((value: string, key: any)  => {
-                      this.fronTemIds.push(value);
-                    });
-                    this.getSensors("Front Temperature",this.fronTemIds);
-                  }
-                  if(sensorMap.has("BackTemperature")){
-                    let backTempMap = this.xah_obj_to_map(sensorMap.get("BackTemperature"));
-                    this.backTempIds = [];
-                    backTempMap.forEach((value: string, key: any)  => {
-                      this.backTempIds.push(value);
-                    });
-                    this.getSensors("Back Temperature",this.backTempIds);
-                  }
-                  if(sensorMap.has("FrontHumidity")){
-                    let frontHumMap = this.xah_obj_to_map(sensorMap.get("FrontHumidity"));
-                    this.frontHumIds = [];
-                    frontHumMap.forEach((value: string, key: any)  => {
-                      this.frontHumIds.push(value);
-                    });
-                    this.getSensors("Front Humidity",this.frontHumIds);
-                  }
-                  if(sensorMap.has("BackHumidity")){
-                    let backHumMap = this.xah_obj_to_map(sensorMap.get("BackHumidity"));
-                    this.backHumIds = [];
-                    backHumMap.forEach((value: string, key: any)  => {
-                      this.backHumIds.push(value);
-                    });
-                    this.getSensors("Back Humidity",this.backHumIds);
-                  }
+      (data)=>{
+
+        //this.serverMapping = data.json(); //need serverMapping model
+        let assetId = this.serverMapping.asset;
+        this.service.getAssetById(assetId).subscribe(
+          (data:AssetModule)=>{
+              this.mappedServerAsset= data;
+              let sensorformular = this.xah_obj_to_map(this.mappedServerAsset.metricsformulars).get('SENSOR');
+              if(sensorformular != null){
+                let sensorMap = this.xah_obj_to_map(sensorformular);
+                if(sensorMap.has("FrontTemperature")){
+                  let frontTemMap = this.xah_obj_to_map(sensorMap.get("FrontTemperature"));
+                  this.fronTemIds = [];
+                  frontTemMap.forEach((value: string, key: any)  => {
+                    this.fronTemIds.push(value);
+                  });
+                  this.getSensors("Front Temperature",this.fronTemIds);
                 }
-                this.fillData();
+                if(sensorMap.has("BackTemperature")){
+                  let backTempMap = this.xah_obj_to_map(sensorMap.get("BackTemperature"));
+                  this.backTempIds = [];
+                  backTempMap.forEach((value: string, key: any)  => {
+                    this.backTempIds.push(value);
+                  });
+                  this.getSensors("Back Temperature",this.backTempIds);
+                }
+                if(sensorMap.has("FrontHumidity")){
+                  let frontHumMap = this.xah_obj_to_map(sensorMap.get("FrontHumidity"));
+                  this.frontHumIds = [];
+                  frontHumMap.forEach((value: string, key: any)  => {
+                    this.frontHumIds.push(value);
+                  });
+                  this.getSensors("Front Humidity",this.frontHumIds);
+                }
+                if(sensorMap.has("BackHumidity")){
+                  let backHumMap = this.xah_obj_to_map(sensorMap.get("BackHumidity"));
+                  this.backHumIds = [];
+                  backHumMap.forEach((value: string, key: any)  => {
+                    this.backHumIds.push(value);
+                  });
+                  this.getSensors("Back Humidity",this.backHumIds);
+                }
               }
-            },error=>{
+              this.fillData();
+          },error=>{
               this.updateAssetError = error.json().message();
               this.updateAssetModalErrorShow = true;
             }
           )   
-        }else{
-          this.updateAssetError = "Not found server mapping";
-          this.updateAssetModalErrorShow = true;
-        }
       },error=>{
         this.updateAssetError = error.json().message();
         this.updateAssetModalErrorShow = true;
@@ -411,7 +390,7 @@ export class ServermappingComponent implements OnInit {
     for(let i=0;i<ids.length; i++){
       reqList.push(this.service.getAssetById(ids[i]));
     }
-     forkJoin(reqList).map((data)=>data).subscribe((res)=>{
+     forkJoin(reqList).pipe(map((data)=>data)).subscribe((res)=>{
       res.forEach(element => {
         if(element._body != null && element._body != ""){
           let sensorAsset:AssetModule = new AssetModule();
@@ -598,14 +577,12 @@ export class ServermappingComponent implements OnInit {
     }
     if(update){
       this.service.updateAsset(assetToUpdate).subscribe(data=>{
-        if(data.status == 200){
           this.loading = false;
           this.mappedOtherAssetModalOpen = false;
           if(this.category == "Sensors"){
             this.closeSelectSelectSensor();
             this.mappedOtherAssets = [];
           }
-        }
       },error=>{
         this.loading = false;
         this.updateAssetModalErrorShow = true;
@@ -669,16 +646,12 @@ export class ServermappingComponent implements OnInit {
     this.serverMappingId = "";
   }
   confirm(){
-    this.service.deleteServerMapping(this.serverMappingId).subscribe(data=>{
-      if(data.status == 200){
+    this.service.deleteServerMapping(this.serverMappingId).subscribe(
+      data=>{
         this.basic = false;
         this.getServerMappings();
-      }else{
+    },error=>{
         this.basic = false;
-      }
-    },
-    error=>{
-      this.basic = false;
     })
   }
 

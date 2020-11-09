@@ -4,7 +4,7 @@
 */
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { routing } from './setting.routing';
+import { ROUTING } from './setting.routing';
 import { ClarityModule } from '@clr/angular';
 import { FormsModule } from '@angular/forms';
 import { SensorsettingListComponent } from '../setting/component/sensorsetting-list/sensorsetting-list.component';
@@ -14,7 +14,7 @@ import { SettingComponent } from './setting.component';
 import { SettingService } from './setting.service';
 import { PagesModule } from '../../pages/pages.module';
 import { TriggerJobComponent } from '../setting/component/trigger-job/trigger-job.component';
-import { AssetChart } from './component/trigger-job/sankey.chart';
+//import { AssetChart } from './component/trigger-job/sankey.chart';
 import { FileUploadModule } from 'ng2-file-upload';
 import { AssetAddComponent } from './component/asset-add/asset-add.component';
 import { AssetListComponent } from './component/asset-list/asset-list.component';
@@ -28,12 +28,12 @@ import { FacilityAdapterService } from './component/adaptertype/facility-adapter
     ClarityModule,
     FormsModule,
     PagesModule,
-    routing,
-    AssetChart,
+    ROUTING,
+    //AssetChart,
     FileUploadModule
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
-  declarations: [SettingComponent,SensorsettingListComponent,SensorsettingEditComponent,SensorsettingAddComponent,TriggerJobComponent,AssetChart,AssetAddComponent,AssetListComponent,AssetEditComponent,FacilityAdapterListComponent],
+  declarations: [SettingComponent,SensorsettingListComponent,SensorsettingEditComponent,SensorsettingAddComponent,TriggerJobComponent,AssetAddComponent,AssetListComponent,AssetEditComponent,FacilityAdapterListComponent],
   providers:[ SettingService,FacilityAdapterService ]
 })
 export class SettingModule { }

@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
 */
 import { Component, OnInit } from '@angular/core';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
-import {Router,ActivatedRoute} from '@angular/router';
+import { Router,ActivatedRoute } from '@angular/router';
 import { VmwareService } from '../../vmware/vmware.service';
 import { SddcsoftwareModule } from '../../../sddcsoftware.module';
 @Component({
@@ -31,12 +28,9 @@ export class VmwareConfigEditComponent implements OnInit {
       this.loading = true;
       this.service.updateVmwareConfig(this.vmwareConfig).subscribe(
         (data)=>{
-          if(data.status == 200){
             this.loading = false;
             this.router.navigate(["/ui/nav/sddc/vmware/vmware-list"]);
-          }
-        },
-        error=>{
+        },error=>{
           if(error.status == 400 && error.json().message == "Certificate verification error"){
             this.loading = false;
             this.verify = true;
@@ -80,21 +74,15 @@ export class VmwareConfigEditComponent implements OnInit {
   }
   ngOnInit() {
     this.vmwareConfig.id = this.activedRoute.snapshot.params['id'];
-
     if(this.vmwareConfig.id != null && this.vmwareConfig.id != ""){
       this.service.getVmwareConfig(this.vmwareConfig.id).subscribe(
-        (data)=>{
-          if(data.status == 200){
-            if(data.json != null){
-              this.vmwareConfig = data.json();
-              this.checked =  data.json().verifyCert;
-              if(this.checked == false){
-                this.vmwareConfig.verifyCert = "false";
-              }else{
-                this.vmwareConfig.verifyCert = "true";
-              }
-           
-            }
+        (data:SddcsoftwareModule)=>{
+          this.vmwareConfig = data;
+          this.checked =  data.verifyCert;
+          if(this.checked == false){
+            this.vmwareConfig.verifyCert = "false";
+          }else{
+            this.vmwareConfig.verifyCert = "true";
           }
         }
       )
