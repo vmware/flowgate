@@ -4,10 +4,7 @@
 */
 import { Component, OnInit } from '@angular/core';
 import { DcimService } from '../dcim.service';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
-import {Router,ActivatedRoute} from '@angular/router';
+import { Router,ActivatedRoute } from '@angular/router';
 import { FacilityModule } from '../../../facility.module';
 import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
 @Component({
@@ -60,10 +57,8 @@ export class DcimAddComponent implements OnInit {
       this.loading = true;
       this.service.AddDcimConfig(this.dcimConfig).subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.loading = false;
-            this.router.navigate(["/ui/nav/facility/dcim/dcim-list"]);
-          }
+          this.loading = false;
+          this.router.navigate(["/ui/nav/facility/dcim/dcim-list"]);
         },
         error=>{
           if(error.status == 400 && error.json().errors[0] == "Invalid SSL Certificate"){
@@ -112,10 +107,8 @@ export class DcimAddComponent implements OnInit {
   adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
   findAllAdapters(){
     this.service.findAllFacilityAdapters().subscribe(
-      (data)=>{
-        let allFacilityAdapters:FacilityAdapterModule[] = [];
-        allFacilityAdapters = data.json();
-        allFacilityAdapters.forEach(element => {
+      (data:FacilityAdapterModule[])=>{
+        data.forEach(element => {
           if(element.type == "OtherDCIM"){
             this.dcimAdapters.push(element);
           }

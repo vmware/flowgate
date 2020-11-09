@@ -3,12 +3,9 @@
  * SPDX-License-Identifier: BSD-2-Clause
 */
 import { Component, OnInit } from '@angular/core';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
-import {Router,ActivatedRoute} from '@angular/router';
+import { Router } from '@angular/router';
 import { DcimService } from '../../dcim/dcim.service';
-import {FormGroup, FormControl, Validators} from "@angular/forms";
+import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { FacilityModule } from '../../../facility.module';
 import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
 @Component({
@@ -18,7 +15,7 @@ import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/f
 })
 export class CmdbAddComponent implements OnInit {
 
-  constructor(private service:DcimService,private router:Router,private activedRoute:ActivatedRoute) { }
+  constructor(private service:DcimService,private router:Router) { }
 
 
   cmdbForm = new FormGroup({
@@ -67,10 +64,8 @@ export class CmdbAddComponent implements OnInit {
       }
       this.service.AddDcimConfig(this.cmdbConfig).subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.loading = false;
-            this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
-          }
+          this.loading = false;
+          this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
         },
         error=>{
           if(error.status == 400 && error.json().errors[0] == "Invalid SSL Certificate"){
@@ -119,10 +114,8 @@ export class CmdbAddComponent implements OnInit {
   adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
   findAllAdapters(){
     this.service.findAllFacilityAdapters().subscribe(
-      (data)=>{
-        let allFacilityAdapters:FacilityAdapterModule[] = [];
-        allFacilityAdapters = data.json();
-        allFacilityAdapters.forEach(element => {
+      (data:FacilityAdapterModule[])=>{
+        data.forEach(element => {
           if(element.type == "OtherCMDB"){
             this.cmdbAdapters.push(element);
           }

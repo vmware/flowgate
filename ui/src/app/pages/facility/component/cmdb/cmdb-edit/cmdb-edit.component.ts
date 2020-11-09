@@ -3,9 +3,6 @@
  * SPDX-License-Identifier: BSD-2-Clause
 */
 import { Component, OnInit } from '@angular/core';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
 import {Router,ActivatedRoute} from '@angular/router';
 import { DcimService } from '../../dcim/dcim.service';
 import {FormGroup, FormControl, Validators} from "@angular/forms";
@@ -70,10 +67,8 @@ export class CmdbEditComponent implements OnInit {
       }
       this.service.updateFacility(this.cmdbConfig).subscribe(
         (data)=>{
-          if(data.status == 200){
-            this.loading = false;
-            this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
-          }
+          this.loading = false;
+          this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
         },
         error=>{
           if(error.status == 400 && error.json().errors[0] == "Invalid SSL Certificate"){
@@ -122,10 +117,8 @@ export class CmdbEditComponent implements OnInit {
   adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
   findAllAdapters(){
     this.service.findAllFacilityAdapters().subscribe(
-      (data)=>{
-        let allFacilityAdapters:FacilityAdapterModule[] = [];
-        allFacilityAdapters = data.json();
-        allFacilityAdapters.forEach(element => {
+      (data:FacilityAdapterModule[])=>{
+        data.forEach(element => {
           if(element.type == "OtherCMDB"){
             this.cmdbAdapters.push(element);
           }
@@ -151,20 +144,16 @@ export class CmdbEditComponent implements OnInit {
     if(this.cmdbConfig.id != null && this.cmdbConfig.id != ""){
       this.findAllAdapters();
       this.service.getDcimConfig(this.cmdbConfig.id).subscribe(
-        (data)=>{
-          if(data.status == 200){
-            if(data.json != null){
-              this.cmdbConfig = data.json();
+        (data:FacilityModule)=>{
+              this.cmdbConfig = data;
               this.seclectAdapter.subCategory = this.cmdbConfig.subCategory;
-              this.checked =  data.json().verifyCert;
+              this.checked =  data.verifyCert;
               if(this.checked == false){
                 this.cmdbConfig.verifyCert = "false";
               }else{
                 this.cmdbConfig.verifyCert = "true";
               }
               this.checkIsLabsDB();
-            }
-          }
         }
       )
     }

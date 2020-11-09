@@ -6,7 +6,6 @@ import { Component, OnInit } from '@angular/core';
 import { AssetModule } from '../asset-modules/asset.module';
 import {Router,ActivatedRoute} from '@angular/router';
 import { SettingService } from '../../setting.service';
-import { error } from 'util';
 @Component({
   selector: 'app-asset-add',
   templateUrl: './asset-add.component.html',
@@ -34,12 +33,9 @@ export class AssetAddComponent implements OnInit {
     this.asset.assetSource = "flowgate";
     this.service.createAnAsset(this.asset).subscribe(
       (data)=>{
-        if(data.status == 201){
-          this.addassetloading = false;
-          this.router.navigate(["/ui/nav/setting/asset-list"]);
-        }
-      },
-      error=>{
+        this.addassetloading = false;
+        this.router.navigate(["/ui/nav/setting/asset-list"]);
+      },error=>{
         this.addassetloading = false;
         if(error.status == 500)
         {

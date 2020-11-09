@@ -2,7 +2,8 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-import {Provider} from '@angular/core'; 
+import { Provider, Injectable } from '@angular/core'; 
+@Injectable()
 export class LocalStorage {
 
     public localStorage:any;

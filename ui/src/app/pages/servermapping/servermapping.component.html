@@ -2,24 +2,26 @@
 SPDX-License-Identifier: BSD-2-Clause -->
 <form>
 <section class="form-block">
-    <label> Content For Server Mapping</label>          
-    <div class="form-group">
-            <label for="selects_3" >Integration Type:</label>
-            <div class="select" style="margin-left: -110px;">
-                <select id="selects_2" [ngModelOptions]="{standalone: true}"  [(ngModel)]="serverconfig.type" on-change="changeType()" > 
-                    <option value="VRO" >vRealize Operations Manager</option>
-                    <option value="VCENTER">VMware vCenter</option>
-                    <option value="VROPSMP">vRealize Operations Management Pack</option>
+    <h2 style="margin-top: 0px"> Content For Server Mapping</h2>
+    <div>
+        <clr-select-container style="float: left;">
+                <label>Integration Type:</label>
+                <select clrSelect name="typeoptions" [ngModelOptions]="{standalone: true}" [(ngModel)]="serverconfig.type" on-change="changeType()">
+                        <option value="VRO" >vRealize Operations Manager</option>
+                        <option value="VCENTER">VMware vCenter</option>
+                        <option value="VROPSMP">vRealize Operations Management Pack</option>
                 </select>
-            </div>
-            <label for="selects_3">Server:</label>
-            <div class="select">
-                <select id="selects_3" [ngModelOptions]="{standalone: true}"  [(ngModel)]="serverconfig.id" on-change="change()" > 
-                    <option value="">Please Select</option>
-                    <option value="{{serverconfig.id}}" *ngFor="let serverconfig of serverconfigs">{{serverconfig.name}}</option>
+        </clr-select-container>
+    </div>      
+    <div>
+        <clr-select-container  style="margin-left: 320px;">
+                <label>Server:</label>
+                <select clrSelect name="nameoptions" [ngModelOptions]="{standalone: true}" [(ngModel)]="serverconfig.id" on-change="change()">
+                        <option value="">Please Select</option>
+                            <option value="{{serverconfig.id}}" *ngFor="let serverconfig of serverconfigs">{{serverconfig.name}}</option>
                 </select>
-            </div>
-        </div>
+        </clr-select-container>
+    </div>
 </section>
 </form>
 
@@ -123,7 +125,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 </tr>
                         </table>                
                 </div>
-                <clr-datagrid [(clrDgSingleSelected)]="mappedServerAsset" [clDgRowSelection]="true" [clrDgLoading]="loading">
+                <clr-datagrid [(clrDgSingleSelected)]="mappedServerAsset"  [clrDgLoading]="loading">
                         <clr-dg-column>Asset Name</clr-dg-column>
                         <clr-dg-column>Asset Source</clr-dg-column>
                         <clr-dg-column>Serial Number</clr-dg-column>
@@ -191,7 +193,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 </tr>
                         </table>                
                 </div>
-                <clr-datagrid [(clrDgSelected)]="selectedOtherAssets" [clDgRowSelection]="true" [clrDgLoading]="loading">
+                <clr-datagrid [(clrDgSelected)]="selectedOtherAssets"  [clrDgLoading]="loading">
                         <clr-dg-column>Asset Name</clr-dg-column>
                         <clr-dg-column>Asset Source</clr-dg-column>
                         <clr-dg-column>Serial Number</clr-dg-column>
@@ -313,7 +315,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 </tr>
                         </table>                
                 </div>
-                <clr-datagrid [(clrDgSelected)]="selectedSensors" [clDgRowSelection]="true" [clrDgLoading]="loading">
+                <clr-datagrid [(clrDgSelected)]="selectedSensors"  [clrDgLoading]="loading">
                         <clr-dg-column>Asset Name</clr-dg-column>
                         <clr-dg-column>Asset Source</clr-dg-column>
                         <clr-dg-column>Serial Number</clr-dg-column>

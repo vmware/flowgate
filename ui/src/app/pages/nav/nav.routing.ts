@@ -14,22 +14,22 @@ export const routes: Routes = [
           {path: '', redirectTo: 'server-mapping', pathMatch: 'full'},
           {
             path: 'user',
-            loadChildren: 'app/pages/user/user.module#UserModule'
+            loadChildren: () => import('app/pages/user/user.module').then(m => m.UserModule)
           },{
             path: 'sddc',
-            loadChildren: 'app/pages/sddcsoftware/sddcsoftware.module#SddcsoftwareModule'
+            loadChildren: () => import('app/pages/sddcsoftware/sddcsoftware.module').then(m => m.SddcsoftwareModule)
           },{
             path: 'server-mapping',
-            loadChildren: 'app/pages/servermapping/servermapping.module#ServermappingModule'
+            loadChildren: () => import('app/pages/servermapping/servermapping.module').then(m => m.ServermappingModule)
           },{
             path: 'facility',
-            loadChildren: 'app/pages/facility/facility.module#FacilityModule'
+            loadChildren: () => import('app/pages/facility/facility.module').then(m => m.FacilityModule)
           },{
             path: 'setting',
-            loadChildren: 'app/pages/setting/setting.module#SettingModule'
+            loadChildren: () => import('app/pages/setting/setting.module').then(m => m.SettingModule)
           }
         ]
       }
 ];
 
-export const routing: ModuleWithProviders = RouterModule.forChild(routes);
+export const ROUTING: ModuleWithProviders<RouterModule> = RouterModule.forChild(routes);

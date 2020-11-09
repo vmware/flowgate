@@ -6,13 +6,13 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClarityModule } from '@clr/angular';
 import { FormsModule } from '@angular/forms';
-import { routing } from './servermapping.routing'
+import { ROUTING } from './servermapping.routing'
 import { ServermappingComponent } from './servermapping.component';
 import { ServermappingService } from './servermapping.service';
 
 @NgModule({
   imports: [
-    CommonModule,routing ,ClarityModule,
+    CommonModule,ROUTING ,ClarityModule,
     FormsModule
   ],
   declarations: [ServermappingComponent],

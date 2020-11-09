@@ -15,7 +15,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </div>
 </clr-alert>
 
-<clr-datagrid>
+<clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)">
  
   <clr-dg-column>Name</clr-dg-column>
   <clr-dg-column>Description</clr-dg-column>
@@ -31,20 +31,13 @@ SPDX-License-Identifier: BSD-2-Clause -->
       <clr-dg-cell>{{adapter.displayName}}</clr-dg-cell>
       <clr-dg-cell>{{adapter.description}}</clr-dg-cell>
 </clr-dg-row>
+
 <clr-dg-footer>
-    <ul class="pagination">
-        <li style="padding-top: 5px;"><div class="select">
-          <select id="selects_1" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;setInfo()">
-            <option>5</option>
-            <option>10</option>
-            <option>20</option>
-            <option>50</option>
-        </select></div>
-      </li>
-         <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
-         <li class="pagination-current">{{currentPage}}/{{totalPage}}</li>
-         <li> <button class="pagination-next" type="button" disabled="{{nextbtnDisabled}}" on-click="next()"></button></li>
-     </ul>
+    <clr-dg-pagination #pagination [clrDgPageSize]="10" [clrDgTotalItems] = "totalItems">
+    <clr-dg-page-size [clrPageSizeOptions]="[10,20,50]">Facility Adapters per page</clr-dg-page-size>
+    {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+    of {{pagination.totalItems}} Facility Adapters 
+    </clr-dg-pagination>
 </clr-dg-footer>
 
 </clr-datagrid>

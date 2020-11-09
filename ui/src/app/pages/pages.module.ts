@@ -5,15 +5,14 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PagesComponent } from './pages.component';
-import { routing } from './pages.routing';
+import { ROUTING } from './pages.routing';
 import { HasPrivilegeDirective } from './auth/HasPrivilegeDirective';
 
 
 @NgModule({
   imports: [
     CommonModule,
-    routing
-
+    ROUTING
   ],
   declarations: [PagesComponent,HasPrivilegeDirective],
   exports:[HasPrivilegeDirective]
