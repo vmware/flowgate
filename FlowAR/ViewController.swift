@@ -16,17 +16,23 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate, URL
 
     @IBOutlet var sceneView: ARSCNView!
     
-    var flow = FlowgateClient()
-    
     var qrRequests = [VNRequest]()
     var detectedDataAnchor: [String: ARAnchor?] = [:]
+    var detectedDataResult: [String: [String: Any]] = [:]
     var lastAddedAnchor: ARAnchor?
     var processing = false
     var message: String!
     
+    var host = "https://202.121.180.32/"      // FLOWGATE_HOST
+    var password = "QWxv_3arJ70gl"         // FLOWGATE_PASSWORD
+    var username = "API"
+    var current_token: [String: Any] = [:]
+    var result: [String: Any] = [:]
+    var semaphore = DispatchSemaphore(value: 1)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        Swift.print(flow.getFlowgateToken())
+        Swift.print(getFlowgateToken())
         // Set the view's delegate
         sceneView.delegate = self
         sceneView.session.delegate=self
@@ -72,6 +78,7 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate, URL
     }
     
     func hitTestQrCode(center: CGPoint, message: String) {
+//        print(detectedDataResult)
         if let hitTestResults = sceneView?.hitTest(center, types: [.featurePoint] ),
             let hitTestResult = hitTestResults.first {
             if let detectedDataAnchor = self.detectedDataAnchor[message],
@@ -81,6 +88,8 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate, URL
             } else {
                 // Create an anchor. The node will be created in delegate methods
                 self.detectedDataAnchor[message] = ARAnchor(transform: hitTestResult.worldTransform)
+                _ = self.getAssetByID(ID: message)
+                print(detectedDataResult[message] ?? "no message")
                 self.lastAddedAnchor = self.detectedDataAnchor[message] as? ARAnchor
                 self.sceneView.session.add(anchor: self.detectedDataAnchor[message]!!)
             }
