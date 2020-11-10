@@ -2,8 +2,7 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-import { Component, ViewChild,OnInit, SystemJsNgModuleLoader } from '@angular/core';
-import {Router,ActivatedRoute} from '@angular/router';;
+import { Component, ViewChild,OnInit } from '@angular/core';
 import { RoleService } from '../../role.service';
 import {ClrDatagridStateInterface, ClrWizard} from "@clr/angular";
 
@@ -23,7 +22,7 @@ export class RoleListComponent implements OnInit {
     return false;
   }
   //wizard
-  @ViewChild("wizardxl") wizardExtraLarge: ClrWizard;
+  @ViewChild("eidtwizard") editWizard: ClrWizard;
    editwizardOpen: boolean = false;
    @ViewChild("addwizard") addwizard: ClrWizard;
    addwizardOpen: boolean = false;
@@ -37,13 +36,13 @@ export class RoleListComponent implements OnInit {
    }
 
   onCommit(): void {
-      let value: any = this.formData.value;
       this.loadingFlag = true;
       this.errorFlag = false;
 
       setTimeout(() => {
         this.service.AddRole(this.role.roleName,this.rolePrivilege).subscribe(
           (data)=>{
+            this.addwizard.reset();
             this.addwizard.close();
             this.refresh(this.currentState);
             this.role.roleName = "";
@@ -147,6 +146,7 @@ export class RoleListComponent implements OnInit {
   save(){
     this.service.updateRole(this.role.id,this.role.roleName,this.rolePrivilege).subscribe(
       (data)=>{
+        this.editWizard.reset();
         this.refresh(this.currentState);
       }
     )
@@ -223,7 +223,7 @@ export class RoleListComponent implements OnInit {
         this.totalItems = data['totalElements'];
     },(error)=>{
         this.loading = false;
-        this.alertType = "alert-danger";
+        this.alertType = "danger";
         this.alertcontent = "Internal error";
         if(error._body != null && error.status != "0"){
           this.alertcontent = error.json().message;

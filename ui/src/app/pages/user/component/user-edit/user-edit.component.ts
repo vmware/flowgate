@@ -5,14 +5,43 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../user.service';
 import {ActivatedRoute,Router} from "@angular/router";
+import { FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+
+function passwordMatchValidator(password: string): ValidatorFn {
+  return (control: FormControl) => {
+    if (!control || !control.parent) {
+      return null;
+    }
+    return control.parent.get(password).value === control.value ? null : { mismatch: true };
+  };
+}
 
 @Component({
   selector: 'app-user-edit',
   templateUrl: './user-edit.component.html',
   styleUrls: ['./user-edit.component.scss']
 })
+
 export class UserEditComponent implements OnInit {
-  constructor(private service:UserService,private router:Router,private activedRoute:ActivatedRoute) { }
+  editUserForm:FormGroup;
+  constructor(private service:UserService,private router:Router,private activedRoute:ActivatedRoute,private fb: FormBuilder) { 
+    this.editUserForm = this.fb.group({
+      username: [{value:'',disabled: true}, [
+        Validators.required
+      ]],
+      email:['', [
+        Validators.required,
+        Validators.email
+      ]],
+      password: ['', [
+        Validators.pattern(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,20}$/)
+      ]],
+      repassword: ['', [
+        passwordMatchValidator('password')
+      ]]
+    })
+  }
   modal="";
   basic=false;
   validconfirmPassword = false;
@@ -71,42 +100,25 @@ export class UserEditComponent implements OnInit {
       }
     } 
   }
-  getValidationState(){
-    return this.validconfirmPassword;
-  }
-  handleValidation(key: string, flag: boolean): void {
-    if(flag){
-      if(this.user.password === this.user.rpassword){
-        this.validconfirmPassword = false;
-        }else{
-          this.validconfirmPassword = true;
-        }
-    }
-  }
-  save(){
-    if(this.user.password != null && this.user.password != ""){
-      if(this.user.password != this.user.rpassword){
-        return;
-      }else if(!this.user.password.match("^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,20}$")){
-        return;
-      }
-    }
 
+  save(){
     var rolenames = [];
     this.roles.forEach(element=>{
       if(element.enable != "" && element.roleName != "all"){
         rolenames.push(element.roleName);
       }
     })
-      this.service.updateUser(this.user.id,this.user.username,this.user.password,this.user.email,rolenames).subscribe(
-        (data)=>{
-          this.router.navigate(["/ui/nav/user/user-list"]);
-        },
-        error=>{
-          this.basic = true;
-          this.modal = error.json().message;
-        }
-      )
+    this.user.email = this.editUserForm.get("email").value;
+    this.user.password = this.editUserForm.get("password").value;
+
+    this.service.updateUser(this.user.id,this.user.username,this.user.password,this.user.email,rolenames).subscribe(
+      (data)=>{
+        this.router.navigate(["/ui/nav/user/user-list"]);
+      },(error:HttpErrorResponse)=>{
+        this.basic = true;
+        this.modal = error.error.message;
+      }
+    )
     
   }
   close(){
@@ -120,15 +132,12 @@ export class UserEditComponent implements OnInit {
   getusers(){
     this.service.getUser(this.user.id).subscribe(
       (data)=>{
-        this.user.username = data['userName'];
-        this.user.password = data['password'];
-        this.user.rpassword = data['password'];
-        this.user.email = data['emailAddress'];
+        this.editUserForm.get('username').setValue(data['userName']) ;
+        this.editUserForm.get('email').setValue(data['emailAddress']) ;
         this.user.roleNames = data['roleNames'];
         this.getRoles()
       }
     )
-   
   }
   getRoles(){
     this.service.getRoles().subscribe(

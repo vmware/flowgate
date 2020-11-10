@@ -8,7 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </div>
 </clr-alert>
  <form clrForm [formGroup]="addUserForm">
-  
+ 
     <clr-control-container>
       <label>UserName</label>
       <input clrControl placeholder="Username" formControlName="username" />
@@ -57,102 +57,4 @@ SPDX-License-Identifier: BSD-2-Clause -->
       <button type="button" class="btn btn-primary" on-click="back()">Back</button>
     </div>
 
-  </form>
-
-
-  <!-- <form #userForm="ngForm" >
-  <section class="form-block">
-      <label> Content For User</label> 
-      <div class="form-group">
-        <label class="required" for="empuserName">Username</label>       
-        <label for="empuserName"
-            aria-haspopup="true"
-            role="tooltip"
-            class="tooltip tooltip-validation tooltip-md"
-            [class.invalid]="userNameInput.invalid && (userNameInput.dirty || userNameInput.touched)">
-            <input type="text" id="empuserName" placeholder="Username"
-                required
-                name="userName"
-                [(ngModel)]="user.username"
-                #userNameInput="ngModel">
-            <span class="tooltip-content">
-                Username is Required.
-            </span>
-        </label>
-      </div>
-      <div class="form-group">
-        <label class="required"  for="email">Email</label>
-        <label for="email"
-            aria-haspopup="true"
-            role="tooltip"
-            class="tooltip tooltip-validation tooltip-md"
-            [class.invalid]="emailInput.invalid && (emailInput.dirty || emailInput.touched)">
-            <input type="text" id="email" placeholder="Email Address"
-                required
-                email
-                name="email"
-                [(ngModel)]="user.email"
-                #emailInput="ngModel">
-            <span class="tooltip-content">
-                Email should be a valid email address like name@example.com.
-            </span>
-        </label>
-      </div>
-      <div class="form-group">
-        <label class="required"  for="password">Password</label>
-        <label for="password"
-            aria-haspopup="true"
-            role="tooltip"
-            class="tooltip tooltip-validation tooltip-md"
-            [class.invalid]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">
-            <input type="password" id="password" placeholder="Password"
-                required
-                pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,20}$"
-                name="password"
-                [(ngModel)]="user.password"
-                #passwordInput="ngModel"
-                >
-            <span class="tooltip-content">
-                Password should be 8-20 characters long with at least 1 uppercase, 1 lowercase and 1 number.
-            </span>
-        </label>
-      </div>
-      <div class="form-group">
-            <label class="required"  for="confirmPassword">Confirm Password</label>
-            <label for="confirmPassword"
-                aria-haspopup="true"
-                role="tooltip"
-                class="tooltip tooltip-validation tooltip-md"
-                [class.invalid]="getValidationState()">
-                <input type="password" id="confirmPassword" placeholder="Confirm Password"
-                    required
-                    pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,20}$"
-                    name="confirmPassword"
-                    [(ngModel)]="user.rpassword"
-                    #confirmPasswordInput="ngModel"
-                    (input)='handleValidation("confirmPassword", false)' 
-                (blur)='handleValidation("confirmPassword", true)'
-                >
-                <span class="tooltip-content">
-                   Password do not match.
-                </span>
-            </label>
-            
-        </div>
-         <div class="form-group" style="width: 420px;">
-            <label class="required" >Roles</label>
-            <div style="width: 180px;height: 150px;overflow: auto;">
-                    <clr-checkbox *ngFor="let role of roles"
-                    [ngModelOptions]="{standalone: true}"
-                    [(ngModel)]="role.enable" 
-                    [clrInline]="true"
-                    (change)="addrole(role.roleName,role.enable)" style="margin-right: 5px;">
-                        {{role.roleName}}
-                    </clr-checkbox>
-            </div>     
-        </div>          
-      <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="userForm.form.invalid">Submit</button>
-      <button type="button" class="btn btn-primary" on-click="reset()">Reset</button>
-      <button type="button" class="btn btn-primary" on-click="back()">Back</button>
-  </section>
-</form>  -->
+</form>

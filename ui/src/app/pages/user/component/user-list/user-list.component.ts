@@ -7,6 +7,7 @@ import { DataServiceService } from '../../../../data-service.service';
 import {Router,ActivatedRoute} from '@angular/router';
 import { UserService } from '../../user.service';
 import { ClrDatagridStateInterface } from '@clr/angular';
+import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
@@ -69,12 +70,12 @@ export class UserListComponent implements OnInit {
         this.loading = false;
         this.users = data['content'];
         this.totalItems = data['totalElements'];  
-    },(error)=>{
+    },(error:HttpErrorResponse)=>{
         this.loading = false;
         this.alertType = "danger";
         this.alertcontent = "Internal error";
-        if(error._body != null && error.status != "0"){
-          this.alertcontent = error.json().message;
+        if(error.status != 0){
+          this.alertcontent = error.error.message;
         }
         this.alertclose = false;
     })

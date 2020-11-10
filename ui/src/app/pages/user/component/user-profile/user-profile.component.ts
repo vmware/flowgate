@@ -5,8 +5,19 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../user.service';
 import {ActivatedRoute,Router} from "@angular/router";
-
 import { AuthenticationService } from '../../../auth/authenticationService';
+import { FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { disable } from 'core-js/fn/log';
+
+function passwordMatchValidator(password: string): ValidatorFn {
+  return (control: FormControl) => {
+    if (!control || !control.parent) {
+      return null;
+    }
+    return control.parent.get(password).value === control.value ? null : { mismatch: true };
+  };
+}
 
 @Component({
   selector: 'app-user-profile',
@@ -14,12 +25,24 @@ import { AuthenticationService } from '../../../auth/authenticationService';
   styleUrls: ['./user-profile.component.scss']
 })
 export class UserProfileComponent implements OnInit {
-
-  constructor(private service:UserService, 
-    private router:Router,
-    private activedRoute:ActivatedRoute,
-    private authservice:AuthenticationService
-    ) { }
+  editUserForm:FormGroup;
+  constructor(private service:UserService, private router:Router,private fb: FormBuilder) { 
+    this.editUserForm = this.fb.group({
+      username: [{value:'',disabled: true}, [
+        Validators.required
+      ]],
+      email:['', [
+        Validators.required,
+        Validators.email
+      ]],
+      password: ['', [
+        Validators.pattern(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,20}$/)
+      ]],
+      repassword: ['', [
+        passwordMatchValidator('password')
+      ]]
+    })
+  }
   modal="";
   basic=false;
   validconfirmPassword = false;
@@ -30,26 +53,7 @@ export class UserProfileComponent implements OnInit {
     rpassword:"",
     email:""
   }
-  
-  checkadmin(){
-    if(this.user.username == "admin"){
-      return true;
-    }
-    return false;
-  }
 
-  getValidationState(){
-    return this.validconfirmPassword;
-  }
-  handleValidation(key: string, flag: boolean): void {
-    if(flag){
-      if(this.user.password === this.user.rpassword){
-        this.validconfirmPassword = false;
-        }else{
-          this.validconfirmPassword = true;
-        }
-    }
-  }
   save(){
     let reg = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,20}$/;
     if(this.user.password != null && this.user.password != ""){
@@ -59,14 +63,16 @@ export class UserProfileComponent implements OnInit {
         return;
       }
     }
-  
+    this.user.username = this.editUserForm.get("username").value;
+    this.user.email = this.editUserForm.get("email").value;
+    this.user.password = this.editUserForm.get("password").value;
+
     this.service.updateUser(this.user.id,this.user.username,this.user.password,this.user.email,null).subscribe(
       (data)=>{
         this.router.navigate(["/ui/nav/"]);
-      },
-      error=>{
+      },(error:HttpErrorResponse)=>{
         this.basic = true;
-        this.modal = error.json().message;
+        this.modal = error.error.message;
       }
     )
     
@@ -83,8 +89,8 @@ export class UserProfileComponent implements OnInit {
     this.service.getUserByName().subscribe(
       (data)=>{
         this.user.id = data['id'];
-        this.user.username =  data['userName'];
-        this.user.email =  data['emailAddress'];   
+         this.editUserForm.get('username').setValue(data['userName']) ;
+        this.editUserForm.get('email').setValue(data['emailAddress']) ;
       }
     )
   }
