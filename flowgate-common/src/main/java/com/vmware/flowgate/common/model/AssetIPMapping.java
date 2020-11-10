@@ -12,6 +12,7 @@ public class AssetIPMapping implements BaseDocument {
    private String id;
    private String ip;
    private String assetname;
+   private String macAddress;
    public String getId() {
       return id;
    }
@@ -30,6 +31,10 @@ public class AssetIPMapping implements BaseDocument {
    public void setAssetname(String assetname) {
       this.assetname = assetname;
    }
-
-
+   public String getMacAddress() {
+      return macAddress;
+   }
+   public void setMacAddress(String macAddress) {
+      this.macAddress = macAddress;
+   }
 }

@@ -416,6 +416,13 @@ public class WormholeAPIClient extends RestClientBase {
             HttpMethod.POST, postEntity, Void.class);
    }
 
+   public ResponseEntity<Void> updateHostnameIPMapping(AssetIPMapping mapping) {
+      HttpEntity<Object> postEntity =
+               new HttpEntity<Object>(mapping, buildHeaders());
+      return this.restTemplate.exchange(getAPIServiceEndpoint() + HostNameIPMapping,
+               HttpMethod.PUT, postEntity, Void.class);
+   }
+
    public ResponseEntity<Asset> getAssetByName(String name){
       return this.restTemplate.exchange(
             getAPIServiceEndpoint() + String.format(GetAssetByName, name), HttpMethod.GET,
