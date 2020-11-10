@@ -18,6 +18,8 @@ package com.google.ar.sceneform.samples.gltf;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -28,16 +30,20 @@ import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
 import com.google.ar.core.HitResult;
+import com.google.ar.core.ImageFormat;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
+import com.google.ar.core.exceptions.NotYetAvailableException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 import com.google.ar.sceneform.samples.gltf.GetBitmap;
+
+import java.util.Arrays;
 
 /**
  * Display text using Sceneform
@@ -49,7 +55,6 @@ public class GltfActivity extends AppCompatActivity {
   private ArFragment arFragment;
   private ViewRenderable testRenderable;
   private AnchorNode anchorNode;
-  //private GetBitmap getBitmap;
 
   @Override
   @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
@@ -70,7 +75,7 @@ public class GltfActivity extends AppCompatActivity {
         .build()
         .thenAccept(renderable -> testRenderable = renderable);
 
-    // tap the anchor to place objects
+    // Tap the anchor to place objects
       /*
     arFragment.setOnTapArPlaneListener(
         (HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
@@ -87,7 +92,7 @@ public class GltfActivity extends AppCompatActivity {
         });
        */
 
-    arFragment
+      arFragment
         .getArSceneView()
         .getScene()
         .addOnUpdateListener(
@@ -96,33 +101,42 @@ public class GltfActivity extends AppCompatActivity {
                 arFragment.onUpdate(frameTime);
             }*/
             );
-
   }
 
-    private void onSceneUpdate(FrameTime frameTime) {
-        // Let the fragment update its state first.
-        arFragment.onUpdate(frameTime);
+  private void onSceneUpdate(FrameTime frameTime) {
+      // Let the fragment update its state first.
+      arFragment.onUpdate(frameTime);
 
-        // If there is no frame then don't process anything.
-        if (arFragment.getArSceneView().getArFrame() == null) {
-            return;
-        }
+      // If there is no frame then don't process anything.
+      if (arFragment.getArSceneView().getArFrame() == null) {
+          return;
+      }
 
-        // If ARCore is not tracking yet, then don't process anything.
-        if (arFragment.getArSceneView().getArFrame().getCamera().getTrackingState() != TrackingState.TRACKING) {
-            return;
-        }
+      // If ARCore is not tracking yet, then don't process anything.
+      if (arFragment.getArSceneView().getArFrame().getCamera().getTrackingState() != TrackingState.TRACKING) {
+          return;
+      }
 
-        // Place the anchor 1m in front of the camera if anchorNode is null.
-        if (this.anchorNode == null) {
-            Session session = arFragment.getArSceneView().getSession();
-            float[] pos = {0,0,-1};
-            float[] rotation = {0,0,0,1};
-            Anchor anchor = session.createAnchor(new Pose(pos, rotation));
-            anchorNode = new AnchorNode(anchor);
-            anchorNode.setRenderable(testRenderable);
-            anchorNode.setParent(arFragment.getArSceneView().getScene());
-        }
+      // Place the anchor 1m in front of the camera if anchorNode is null.
+      if (this.anchorNode == null) {
+          Session session = arFragment.getArSceneView().getSession();
+          float[] pos = {0,0,-1};
+          float[] rotation = {0,0,0,1};
+          Anchor anchor = session.createAnchor(new Pose(pos, rotation));
+          anchorNode = new AnchorNode(anchor);
+          anchorNode.setRenderable(testRenderable);
+          anchorNode.setParent(arFragment.getArSceneView().getScene());
+      }
+
+      // Send image
+      try (final Image image = arFragment.getArSceneView().getArFrame().acquireCameraImage()) {
+          if (image.getFormat() == ImageFormat.YUV_420_888) {
+              Bitmap bitmapImage = GetBitmap.imageToByte(image);
+              image.close();
+          }
+      } catch (NotYetAvailableException e) {
+          Log.e("TAG", e.getMessage());
+      }
     }
 
   /**
