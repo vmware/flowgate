@@ -83,7 +83,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
    </div>
 </clr-modal>
 
-<clr-wizard #wizardxl [(clrWizardOpen)]="editwizardOpen">
+<clr-wizard #eidtwizard [(clrWizardOpen)]="editwizardOpen">
     <clr-wizard-title>Update {{role.roleName}}</clr-wizard-title>
 
     <clr-wizard-button [type]="'cancel'" (click)="cancleUpdate()">Cancel</clr-wizard-button>
@@ -94,10 +94,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <clr-wizard-page>
         <ng-template clrPageTitle>Privileges</ng-template>
         
-        <div class="row">
+        <div class="clr-row">
         
-            <div class="col-md-5 col-sm-12 col-xs-12">
-                <clr-datagrid style="width: 102%;" [(clrDgSelected)]="systemprivilegeselected">
+            <div class="clr-col-md-5">
+                <clr-datagrid style="width: 110%;" [(clrDgSelected)]="systemprivilegeselected">
                     <clr-dg-column >Available privileges</clr-dg-column>
                     <clr-dg-placeholder>We couldn't find any privileges!</clr-dg-placeholder>
                     
@@ -106,12 +106,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     </clr-dg-row>
                 </clr-datagrid>
             </div>
-                <div class="col-lg-1 col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
+                <div class="clr-col-md-1" style="text-align: center;">
                 <clr-icon (click)="addprivilege()" style="position: fixed;top:47%;" class="is-highlight" shape="angle-double right" size="25"></clr-icon>
                 <clr-icon (click)="reduceprivilege()" style="position: fixed;top:53%;" class="is-highlight" shape="angle-double left" size="25"></clr-icon>
             </div> 
-            <div class="col-md-5 col-sm-12 col-xs-12">
-                <clr-datagrid  [(clrDgSelected)]="roleprivilegeselected">
+            <div class="clr-col-md-5">
+                <clr-datagrid style="width: 110%;" [(clrDgSelected)]="roleprivilegeselected">
                     <clr-dg-column >Owned Privileges</clr-dg-column>
                     <clr-dg-placeholder>We couldn't find any privileges!</clr-dg-placeholder>
                     
@@ -129,26 +129,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
     [clrWizardPageNextDisabled]="!formPageOne.valid">
         
         <ng-template clrPageTitle>Other Information</ng-template>
-        <form #formPageOne="ngForm">
-            <section class="form-block">
-                    <div class="form-group">
-                            <label class="required" for="roleName">Role Name</label>       
-                            <label for="roleName"
-                                aria-haspopup="true"
-                                role="tooltip"
-                                class="tooltip tooltip-validation tooltip-md"
-                                [class.invalid]="rolenameInput.invalid && (rolenameInput.dirty || rolenameInput.touched)">
-                                <input type="text" id="roleName" placeholder="RoleName"
-                                    required
-                                    name="rolename"
-                                    [(ngModel)]="role.roleName"
-                                    #rolenameInput="ngModel">
-                                <span class="tooltip-content tooltip-bottom-right">
-                                    Role Name is Required.
-                                </span>
-                            </label>
-                            </div>
-            </section>
+        <form clrForm #formPageOne="ngForm" [class.hide]="loadingFlag">
+            <clr-input-container>
+                <label>Role Name</label>
+                <input clrInput required [(ngModel)]="role.roleName" name="rolename" #rolename="ngModel" />
+                <clr-control-error>This field is required!</clr-control-error>
+            </clr-input-container>
         </form>
     </clr-wizard-page>
     
@@ -165,24 +151,24 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <clr-wizard-page [clrWizardPageNextDisabled]="rolePrivilege.length == 0">
         <ng-template clrPageTitle>Privileges</ng-template>
         
-        <div class="row">
+        <div class="clr-row">
         
-            <div class="col-md-5 col-sm-12 col-xs-12">
-                <clr-datagrid style="width: 102%;" [(clrDgSelected)]="systemprivilegeselected">
+            <div class="clr-col-md-5">
+                <clr-datagrid style="width: 110%;" [(clrDgSelected)]="systemprivilegeselected">
                     <clr-dg-column >Unowned Privileges</clr-dg-column>
                     <clr-dg-placeholder>We couldn't find any privileges!</clr-dg-placeholder>
                     
                     <clr-dg-row  *ngFor="let item of systemPrivileges" [clrDgItem]="item">               
-                        <clr-dg-cell style="padding-left: 0px;">{{item}}</clr-dg-cell>
+                        <clr-dg-cell>{{item}}</clr-dg-cell>
                     </clr-dg-row>
                 </clr-datagrid>
             </div>
-                <div class="col-lg-1 col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
+            <div class="clr-col-sm-1" style="text-align: center;">
                 <clr-icon (click)="addprivilege()" style="position: fixed;top:47%;" class="is-highlight" shape="angle-double right" size="25"></clr-icon>
                 <clr-icon (click)="reduceprivilege()" style="position: fixed;top:53%;" class="is-highlight" shape="angle-double left" size="25"></clr-icon>
             </div> 
-            <div class="col-md-5 col-sm-12 col-xs-12">
-                <clr-datagrid  [(clrDgSelected)]="roleprivilegeselected">
+            <div class="clr-col-md-5">
+                <clr-datagrid style="width: 110%;" [(clrDgSelected)]="roleprivilegeselected">
                     <clr-dg-column >Owned Privileges</clr-dg-column>
                     <clr-dg-placeholder>Please select at least one privilege!</clr-dg-placeholder>
                     
@@ -210,26 +196,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 {{errorMessage}}
             </div>
         </clr-alert>
-        <form #formPageOne="ngForm">
-            <section class="form-block">
-                    <div class="form-group">
-                            <label class="required" for="roleName">Role Name</label>       
-                            <label for="roleName"
-                                aria-haspopup="true"
-                                role="tooltip"
-                                class="tooltip tooltip-validation tooltip-md"
-                                [class.invalid]="rolenameInput.invalid && (rolenameInput.dirty || rolenameInput.touched)">
-                                <input type="text" id="roleName" placeholder="Role Name"
-                                    required
-                                    name="rolename"
-                                    [(ngModel)]="role.roleName"
-                                    #rolenameInput="ngModel">
-                                <span class="tooltip-content tooltip-bottom-right">
-                                    RoleName is Required.
-                                </span>
-                            </label>
-                            </div>
-            </section>
+        <form clrForm #formPageOne="ngForm" [class.hide]="loadingFlag">
+            <clr-input-container>
+                <label>Role Name</label>
+                <input clrInput required [(ngModel)]="role.roleName" name="rolename" #rolename="ngModel" />
+                <clr-control-error>This field is required!</clr-control-error>
+            </clr-input-container>
         </form>
     </clr-wizard-page>
     

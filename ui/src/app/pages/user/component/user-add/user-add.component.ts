@@ -6,6 +6,7 @@ import { Component, OnInit, AfterViewChecked, ChangeDetectorRef,ViewChild } from
 import { UserService } from '../../user.service';
 import { Router } from "@angular/router";
 import { NgForm,FormGroup,FormBuilder, FormControl, Validators, ValidatorFn } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 
 function passwordMatchValidator(password: string): ValidatorFn {
   return (control: FormControl) => {
@@ -173,10 +174,10 @@ export class UserAddComponent implements OnInit {
           this.alertcontent = "";
           this.alertType = "";
           this.router.navigate(["/ui/nav/user/user-list"]);
-        },error=>{
+        },(error:HttpErrorResponse)=>{
           this.alertType = "danger";
           this.alertclose = false;
-          this.alertcontent = error.json().message;
+          this.alertcontent = error.error.message;
         }
       )
   }
