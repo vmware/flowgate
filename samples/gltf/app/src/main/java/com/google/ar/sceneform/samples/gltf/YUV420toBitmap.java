@@ -13,10 +13,11 @@ import com.google.ar.core.exceptions.NotYetAvailableException;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 
-/** Convert the YUV420 image captured by acquireCameraImage() into bitmap
+/**
+ * Convert the YUV420 image captured by acquireCameraImage() into bitmap
  */
-public class GetBitmap {
-	public static Bitmap imageToByte(Image image) {
+public class YUV420toBitmap {
+	public static Bitmap getBitmap(Image image) {
 		byte[] byteArray;
 		byteArray = NV21toJPEG(YUV420toNV21(image), image.getWidth(), image.getHeight());
 		return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);

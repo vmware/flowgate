@@ -25,13 +25,10 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
-import com.google.ar.core.HitResult;
 import com.google.ar.core.ImageFormat;
-import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
@@ -40,10 +37,6 @@ import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
-import com.google.ar.sceneform.ux.TransformableNode;
-import com.google.ar.sceneform.samples.gltf.GetBitmap;
-
-import java.util.Arrays;
 
 /**
  * Display text using Sceneform
@@ -131,7 +124,8 @@ public class GltfActivity extends AppCompatActivity {
       // Send image
       try (final Image image = arFragment.getArSceneView().getArFrame().acquireCameraImage()) {
           if (image.getFormat() == ImageFormat.YUV_420_888) {
-              Bitmap bitmapImage = GetBitmap.imageToByte(image);
+              Bitmap bitmapImage = YUV420toBitmap.getBitmap(image);
+              // TODO: scan barcode
               image.close();
           }
       } catch (NotYetAvailableException e) {
