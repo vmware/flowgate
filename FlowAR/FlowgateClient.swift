@@ -8,7 +8,7 @@
 
 import Foundation
 import UIKit
-
+import ARKit
 extension ViewController{
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
@@ -65,6 +65,7 @@ extension ViewController{
         let session = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue.main)
         let token_url = URL(string: self.host + "/apiservice/v1/assets/name/" + name + "/")
         var request = URLRequest(url: token_url!)
+        semaphore.wait()
         // header
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         guard let acc_token = _token["access_token"] as? String else {
@@ -83,13 +84,13 @@ extension ViewController{
             if let httpResponse = response as? HTTPURLResponse{
                 if httpResponse.statusCode==200{
                     do{
-                        self.result = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
+                        self.fetch_result = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
                     }catch _{ print("JSONSerialization error:", error as Any)}
                 }
             }
     })
         task.resume()
-        return self.result
+        return self.fetch_result
     }
 
     func getAssetByID(ID: String){
@@ -116,12 +117,26 @@ extension ViewController{
             if let httpResponse = response as? HTTPURLResponse{
                 if httpResponse.statusCode==200{
                     do{
-                        self.result = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
-                        self.detectedDataResult[ID] = self.result
+                        self.detectedDataResult[ID] = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+//                        self.lastAddedAnchor = self.detectedDataAnchor[ID] as? ARAnchor
+                        self.sceneView.session.add(anchor: self.detectedDataAnchor[ID]!!)
+                        
                     }catch _{ print("JSONSerialization error:", error as Any)}
                 }
             }
         })
         task.resume()
-}
+    }
+    
+    func strFormat(ID: String) -> String{
+        let content = self.detectedDataResult[ID]! as [String: Any]
+        var result: String = "";
+        for item in items{
+            guard let temp = content[item] as? String else {
+                return "no this field"
+            }
+            result = result + item + ": " + temp + "\n"
+        }
+        return result
+    }
 }

@@ -18,17 +18,28 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate, URL
     
     var qrRequests = [VNRequest]()
     var detectedDataAnchor: [String: ARAnchor?] = [:]
+    var message: String!
     var detectedDataResult: [String: [String: Any]] = [:]
+//    {
+//        didSet{
+//            self.sceneView.session.add(anchor: self.detectedDataAnchor[message]!!)
+//        }
+//    }
     var lastAddedAnchor: ARAnchor?
     var processing = false
-    var message: String!
+
     
     var host = "https://202.121.180.32/"      // FLOWGATE_HOST
     var password = "QWxv_3arJ70gl"         // FLOWGATE_PASSWORD
     var username = "API"
     var current_token: [String: Any] = [:]
-    var result: [String: Any] = [:]
     var semaphore = DispatchSemaphore(value: 1)
+    let items = [
+        "assetName",
+//        "assetNumber",
+        "assetSource",
+        "category"]
+    var fetch_result: [String: Any] = [:]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,8 +48,8 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate, URL
         sceneView.delegate = self
         sceneView.session.delegate=self
         sceneView.showsStatistics = true
-        sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin,
-                                  ARSCNDebugOptions.showFeaturePoints]
+//        sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin,
+//                                  ARSCNDebugOptions.showFeaturePoints]
      
         startQrCodeDetection()
         
@@ -88,10 +99,10 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate, URL
             } else {
                 // Create an anchor. The node will be created in delegate methods
                 self.detectedDataAnchor[message] = ARAnchor(transform: hitTestResult.worldTransform)
-                _ = self.getAssetByID(ID: message)
+                self.getAssetByID(ID: message)
                 print(detectedDataResult[message] ?? "no message")
                 self.lastAddedAnchor = self.detectedDataAnchor[message] as? ARAnchor
-                self.sceneView.session.add(anchor: self.detectedDataAnchor[message]!!)
+//                self.sceneView.session.add(anchor: self.detectedDataAnchor[message]!!)
             }
         }
     }
@@ -133,6 +144,7 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate, URL
 
     // MARK: - ARSCNViewDelegate
 
+    
     // Override to create and configure nodes for anchors added to the view's session.
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
 
@@ -140,14 +152,26 @@ class ViewController: UIViewController, ARSCNViewDelegate,ARSessionDelegate, URL
         if self.lastAddedAnchor?.identifier == anchor.identifier {
             
             let node = SCNNode()
-            
-            let mesages = SCNText(string: self.message, extrusionDepth: 0)
+            guard let ID = self.message else { return node }
+//            while self.detectedDataResult[ID]==nil {
+//                print("wait")
+//            }
+            let mesages = SCNText(string: strFormat(ID: ID), extrusionDepth: 0)
             let material = SCNMaterial()
             material.diffuse.contents = UIColor.black
             mesages.materials = [material]
             
             let messageNode = SCNNode(geometry: mesages)
             messageNode.scale = SCNVector3Make( 0.001, 0.001, 0.001)
+            // set pivot of left top point
+            var minVec = SCNVector3Zero
+            var maxVec = SCNVector3Zero
+            (minVec, maxVec) =  messageNode.boundingBox
+            messageNode.pivot = SCNMatrix4MakeTranslation(
+                minVec.x,
+                maxVec.y,
+                minVec.z
+            )
             messageNode.position = messageNode.position + SCNVector3(-0.08, 0.08, 0.01)
             node.addChildNode(messageNode)
             
