@@ -128,14 +128,45 @@ extension ViewController{
         task.resume()
     }
     
-    func strFormat(ID: String) -> String{
+    func strFormat(ID: String) -> [String: String]{
         let content = self.detectedDataResult[ID]! as [String: Any]
-        var result: String = "";
+        var result: [String: String] = ["type":"", "content":"", "title":""]
         for item in items{
-            guard let temp = content[item] as? String else {
-                return "no this field"
+            if item == "assetName" {
+                result["title"] = content[item] as? String
+                continue
             }
-            result = result + item + ": " + temp + "\n"
+            if item.contains("."){
+                let item_l = item.split(separator: ".") // "xxx.aa/bb" get [xx, aa/bb]
+                let left = String(item_l[0]) // left = xx
+                guard let temp_o = content[left] as? [String: Any] else {return ["error":"no a list"]} // temp_o = content[xx]
+                let item_i = item_l[1].split(separator: "/") // [aa, bb]
+                result["type"]! += left + "\n"
+                result["content"]! += "\n"
+                for item_in in item_i{ // aa
+                    result["type"]! += "\t" + item_in + "\n"
+                    if let temp = temp_o[String(item_in)] as? String {
+                        result["content"]! += temp + "\n"
+                    } else if let temp = temp_o[String(item_in)] as? Int {
+                        result["content"]! += String(format: "%d", temp) + "\n"
+                    }
+                }
+            }
+            else {
+                result["type"]! += item + "\n"
+                if let temp = content[item] as? String {
+                    result["content"]! += temp + "\n"
+                } else if let temp = content[item] as? Int {
+                    result["content"]! += String(format: "%d", temp) + "\n"
+                }
+            }
+            
+//            guard let temp = content[item] as? String else {
+//                var temp = content[item] as? Double else{
+//
+//                }
+//            }
+//            result = result + item + ": " + temp + "\n"
         }
         return result
     }
