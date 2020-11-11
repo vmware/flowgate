@@ -17,6 +17,7 @@
 		292F8B97253F2CE8004DEE4A /* FlowARUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292F8B96253F2CE8004DEE4A /* FlowARUITests.swift */; };
 		2933C311255BA2E00040847E /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2933C310255BA2E00040847E /* StatusViewController.swift */; };
 		2933C316255BA4590040847E /* ViewController+ARSessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2933C315255BA4590040847E /* ViewController+ARSessionDelegate.swift */; };
+		2933C34F255BD8C40040847E /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 2933C34E255BD8C40040847E /* art.scnassets */; };
 		29E1906825581B16005D9D0C /* FlowgateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E1906725581B16005D9D0C /* FlowgateClient.swift */; };
 /* End PBXBuildFile section */
 
@@ -54,6 +55,7 @@
 		292F8B98253F2CE8004DEE4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2933C310255BA2E00040847E /* StatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewController.swift; sourceTree = "<group>"; };
 		2933C315255BA4590040847E /* ViewController+ARSessionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+ARSessionDelegate.swift"; sourceTree = "<group>"; };
+		2933C34E255BD8C40040847E /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
 		29E1906725581B16005D9D0C /* FlowgateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowgateClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -105,6 +107,7 @@
 		292F8B73253F2CE2004DEE4A /* FlowAR */ = {
 			isa = PBXGroup;
 			children = (
+				2933C34E255BD8C40040847E /* art.scnassets */,
 				2933C30F255BA2AC0040847E /* Additional View Controllers */,
 				292F8B74253F2CE2004DEE4A /* AppDelegate.swift */,
 				292F8B76253F2CE2004DEE4A /* ViewController.swift */,
@@ -250,6 +253,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				292F8B81253F2CE7004DEE4A /* LaunchScreen.storyboard in Resources */,
+				2933C34F255BD8C40040847E /* art.scnassets in Resources */,
 				292F8B7E253F2CE7004DEE4A /* Assets.xcassets in Resources */,
 				292F8B7C253F2CE2004DEE4A /* Main.storyboard in Resources */,
 			);
