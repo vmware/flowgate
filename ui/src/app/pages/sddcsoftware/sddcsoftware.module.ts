@@ -16,14 +16,14 @@ import { ROUTING } from './sddcsoftware.routing';
   declarations: [SddcsoftwareComponent]
 })
 export class SddcsoftwareModule {
-  public id;
-  public name;
-  public description;
-  public userName;
-  public password;
-  public serverURL;
-  public type;
-  public userId;
-  public verifyCert;
-  public integrationStatus;
+  id:string;
+  name:string;
+  description:string;
+  userName:string;
+  password:string;
+  serverURL:string;
+  type:string;
+  userId:string;
+  verifyCert:boolean;
+  integrationStatus:any;
  }

@@ -6,7 +6,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { routing } from './user.routing';
 import { ClarityModule } from '@clr/angular';
-import { ControlContainer, FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from './user.service';
 import { UserComponent } from './user.component';
 import { UserListComponent } from './component/user-list/user-list.component';

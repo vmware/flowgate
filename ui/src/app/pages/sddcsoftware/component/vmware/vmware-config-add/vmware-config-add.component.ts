@@ -3,17 +3,42 @@
  * SPDX-License-Identifier: BSD-2-Clause
 */
 import { Component, OnInit } from '@angular/core';
-import {Router,ActivatedRoute} from '@angular/router';
+import { Router } from '@angular/router';
 import { VmwareService } from '../../vmware/vmware.service';
 import { SddcsoftwareModule } from '../../../sddcsoftware.module';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-vmware-config-add',
   templateUrl: './vmware-config-add.component.html',
   styleUrls: ['./vmware-config-add.component.scss']
 })
 export class VmwareConfigAddComponent implements OnInit {
-
-  constructor(private service:VmwareService,private router:Router,private activedRoute:ActivatedRoute) { }
+  addSDDCForm:FormGroup;
+  constructor(private service:VmwareService,private router:Router,private fb: FormBuilder) { 
+    this.addSDDCForm = this.fb.group({
+      type: ['', [
+        Validators.required
+      ]],
+      serverURL: ['', [
+        Validators.required
+      ]],
+      name: ['', [
+        Validators.required
+      ]],
+      description: ['', [
+      ]],
+      userName: ['', [
+        Validators.required
+      ]],
+      password: ['', [
+        Validators.required
+      ]],
+      verifyCert: ['true', [
+        Validators.required
+      ]]
+    });
+  }
 
  
   loading:boolean = false;
@@ -27,31 +52,31 @@ export class VmwareConfigAddComponent implements OnInit {
 
   
   save(){
-      this.read = "readonly";
       this.loading = true;
+      this.vmwareConfig = this.addSDDCForm.value;
       this.service.AddVmwareConfig(this.vmwareConfig).subscribe(
         (data)=>{
           this.loading = false;
           this.router.navigate(["/ui/nav/sddc/vmware/vmware-list"]);
-        },
-        error=>{
-          if(error.status == 400 && error.json().message == "Certificate verification error"){
+        },(error:HttpErrorResponse)=>{
+
+          if(error.status == 400 && error.error.message == "Certificate verification error"){
             this.loading = false;
             this.verify = true;
             this.ignoreCertificatesModals = true;
-            this.tip = error.json().message+". Are you sure you ignore the certificate check?"
-          }else if(error.status == 400 && error.json().message == "UnknownHostException"){
+            this.tip = error.error.message+". Are you sure you ignore the certificate check?"
+          }else if(error.status == 400 && error.error.message == "UnknownHostException"){
             this.loading = false;
             this.operatingModals = true;
-            this.tip = error.json().message+". Please check your serverIp. ";
+            this.tip = error.error.message+". Please check your serverIp. ";
           }else if(error.status == 401){
             this.loading = false;
             this.operatingModals = true;
-            this.tip = error.json().message+". Please check your userName or password. ";
+            this.tip = error.error.message+". Please check your userName or password. ";
           }else{
             this.loading = false;
             this.operatingModals = true;
-            this.tip = error.json().message+". Please check your input. ";
+            this.tip = error.error.message+". Please check your input. ";
           }
         }
       )
@@ -59,14 +84,12 @@ export class VmwareConfigAddComponent implements OnInit {
   }
   Yes(){
     this.ignoreCertificatesModals = false;
-    this.read = "";
     if(this.verify){
-      this.vmwareConfig.verifyCert = "false";
+      this.addSDDCForm.get('verifyCert').setValue('false');
       this.save();
     }
   }
   No(){
-    this.read = "";
     this.ignoreCertificatesModals = false;
     this.operatingModals = false;
   }
@@ -77,7 +100,7 @@ export class VmwareConfigAddComponent implements OnInit {
     this.router.navigate(["/ui/nav/sddc/vmware/vmware-list"]);
   }
   ngOnInit() {
-    this.vmwareConfig.verifyCert = "true";
+    this.vmwareConfig.verifyCert = true;
   }
 
   
