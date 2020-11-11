@@ -1,0 +1,16 @@
+{
+  "images" : [
+    {
+      "filename" : "2801605067058_.pic_hd.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "width" : 3.93701,
+	"unit":"inches"
+  }
+}

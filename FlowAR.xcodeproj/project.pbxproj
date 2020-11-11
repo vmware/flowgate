@@ -15,6 +15,8 @@
 		292F8B81253F2CE7004DEE4A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 292F8B7F253F2CE7004DEE4A /* LaunchScreen.storyboard */; };
 		292F8B8C253F2CE8004DEE4A /* FlowARTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292F8B8B253F2CE8004DEE4A /* FlowARTests.swift */; };
 		292F8B97253F2CE8004DEE4A /* FlowARUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292F8B96253F2CE8004DEE4A /* FlowARUITests.swift */; };
+		2933C311255BA2E00040847E /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2933C310255BA2E00040847E /* StatusViewController.swift */; };
+		2933C316255BA4590040847E /* ViewController+ARSessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2933C315255BA4590040847E /* ViewController+ARSessionDelegate.swift */; };
 		29E1906825581B16005D9D0C /* FlowgateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E1906725581B16005D9D0C /* FlowgateClient.swift */; };
 /* End PBXBuildFile section */
 
@@ -50,6 +52,8 @@
 		292F8B92253F2CE8004DEE4A /* FlowARUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlowARUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		292F8B96253F2CE8004DEE4A /* FlowARUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowARUITests.swift; sourceTree = "<group>"; };
 		292F8B98253F2CE8004DEE4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2933C310255BA2E00040847E /* StatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewController.swift; sourceTree = "<group>"; };
+		2933C315255BA4590040847E /* ViewController+ARSessionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+ARSessionDelegate.swift"; sourceTree = "<group>"; };
 		29E1906725581B16005D9D0C /* FlowgateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowgateClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -101,6 +105,7 @@
 		292F8B73253F2CE2004DEE4A /* FlowAR */ = {
 			isa = PBXGroup;
 			children = (
+				2933C30F255BA2AC0040847E /* Additional View Controllers */,
 				292F8B74253F2CE2004DEE4A /* AppDelegate.swift */,
 				292F8B76253F2CE2004DEE4A /* ViewController.swift */,
 				292F8B78253F2CE2004DEE4A /* Experience.rcproject */,
@@ -109,6 +114,7 @@
 				292F8B7F253F2CE7004DEE4A /* LaunchScreen.storyboard */,
 				292F8B82253F2CE7004DEE4A /* Info.plist */,
 				29E1906725581B16005D9D0C /* FlowgateClient.swift */,
+				2933C315255BA4590040847E /* ViewController+ARSessionDelegate.swift */,
 			);
 			path = FlowAR;
 			sourceTree = "<group>";
@@ -129,6 +135,14 @@
 				292F8B98253F2CE8004DEE4A /* Info.plist */,
 			);
 			path = FlowARUITests;
+			sourceTree = "<group>";
+		};
+		2933C30F255BA2AC0040847E /* Additional View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				2933C310255BA2E00040847E /* StatusViewController.swift */,
+			);
+			path = "Additional View Controllers";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,7 +279,9 @@
 				292F8B77253F2CE2004DEE4A /* ViewController.swift in Sources */,
 				292F8B75253F2CE2004DEE4A /* AppDelegate.swift in Sources */,
 				292F8B79253F2CE2004DEE4A /* Experience.rcproject in Sources */,
+				2933C316255BA4590040847E /* ViewController+ARSessionDelegate.swift in Sources */,
 				29E1906825581B16005D9D0C /* FlowgateClient.swift in Sources */,
+				2933C311255BA2E00040847E /* StatusViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
