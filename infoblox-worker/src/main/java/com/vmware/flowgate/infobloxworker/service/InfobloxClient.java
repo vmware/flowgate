@@ -8,16 +8,17 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import com.vmware.flowgate.infobloxworker.model.InfoBloxIPInfoResult;
+import com.vmware.flowgate.infobloxworker.model.Infoblox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.client.support.BasicAuthorizationInterceptor;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.vmware.flowgate.client.RestClientBase;
@@ -35,7 +36,7 @@ public class InfobloxClient extends RestClientBase {
    private int socketTimeout;
 
    //we should make proxy_search=GM as optional
-   private String queryHostURL = "%s/wapi/v2.5/ipv4address?ip_address=%s&_return_as_object=1&_return_type=json";
+   private String queryHostAndMacURL = "%s/wapi/v2.5/ipv4address?ip_address=%s&_return_as_object=1&_return_type=json&_return_fields=ip_address,mac_address,names,discovered_data";
 
 
    private String hostName;
@@ -59,7 +60,7 @@ public class InfobloxClient extends RestClientBase {
       if(advanceSetting != null) {
          String proxy_search = advanceSetting.get(AdvanceSettingType.INFOBLOX_PROXY_SEARCH);
          if(proxy_search != null && !proxy_search.isEmpty()) {
-            this.queryHostURL = this.queryHostURL + "&_proxy_search=" + proxy_search;
+            this.queryHostAndMacURL = this.queryHostAndMacURL + "&_proxy_search=" + proxy_search;
          }
       }
    }
@@ -68,7 +69,7 @@ public class InfobloxClient extends RestClientBase {
    public JsonResultForQueryHostNames getHostNameList(String ip) {
       try {
     	 JsonResultForQueryHostNames hostName = this.restTemplate.exchange(
-               String.format(queryHostURL, this.hostName, ip), HttpMethod.GET, RestTemplateBuilder.getDefaultEntity(), JsonResultForQueryHostNames.class).getBody();
+               String.format(queryHostAndMacURL, this.hostName, ip), HttpMethod.GET, RestTemplateBuilder.getDefaultEntity(), JsonResultForQueryHostNames.class).getBody();
     	 return hostName;
       }catch(HttpClientErrorException e) {
     	  if(HttpStatus.UNAUTHORIZED.equals(e.getStatusCode())) {
@@ -81,30 +82,19 @@ public class InfobloxClient extends RestClientBase {
       return null;
    }
 
-   public List<String> queryHostNamesByIP(String ip) {
-
-      List<String> hostNameList = new ArrayList<String>();
-      List<String> retHostNameList = new ArrayList<String>();
-      this.restTemplate.getInterceptors().add(new BasicAuthorizationInterceptor(this.userName, this.password));
-
+   public List<InfoBloxIPInfoResult> queryHostNamesByIP(String ip) {
+      List<InfoBloxIPInfoResult> infoBloxIPInfoResults = new ArrayList<>();
+      this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(this.userName, this.password));
       JsonResultForQueryHostNames hostNames = this.getHostNameList(ip);
-      if(hostNames == null) {
-         return retHostNameList;
+      if(hostNames == null || hostNames.getResult().isEmpty() || hostNames.getResult().get(0).getHostNames().length == 0) {
+         return infoBloxIPInfoResults;
       }
-      Collections.addAll(hostNameList, hostNames.getResult().get(0).getHostNames());
+      Infoblox infoblox = hostNames.getResult().get(0);
       //TODO: we need real InfoBlox API to get HostName without zone from InfoBlox
-      String hostNameWithoutZone;
-      for(String hostName : hostNameList) {
-
-          int index = hostName.indexOf(".");
-          if(index > 0) {
-              hostNameWithoutZone = hostName.substring(0,index);
-          }else{
-              hostNameWithoutZone = hostName;
-          }
-          retHostNameList.add(hostNameWithoutZone);
+      for (String hostname : infoblox.getHostNames()) {
+         infoBloxIPInfoResults.add(InfoBloxIPInfoResult.build(hostname, infoblox));
       }
-      logger.debug(String.format("%s", retHostNameList));
-      return retHostNameList;
+      logger.debug(String.format("%s", infoBloxIPInfoResults));
+      return infoBloxIPInfoResults;
    }
 }

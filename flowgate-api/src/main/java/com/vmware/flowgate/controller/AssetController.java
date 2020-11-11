@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -583,13 +584,17 @@ public class AssetController {
       }
       AssetIPMapping oldMapping = oldMappingOptional.get();
       String assetName = mapping.getAssetname();
-      if(oldMapping.getAssetname().equals(assetName)) {
-         return;
+      String macAddress = mapping.getMacAddress();
+      if(StringUtils.equals(oldMapping.getAssetname(), assetName)) {
+         if (StringUtils.equals(macAddress, oldMapping.getMacAddress())) {
+            return;
+         }
       }
       if(!assetService.isAssetNameValidate(assetName)) {
          throw new WormholeRequestException(HttpStatus.INTERNAL_SERVER_ERROR,"Can't find any asset with the name : " + mapping.getAssetname(),null);
       }
       oldMapping.setAssetname(mapping.getAssetname());
+      oldMapping.setMacAddress(mapping.getMacAddress());
       assetIPMappingRepository.save(oldMapping);
    }
 
