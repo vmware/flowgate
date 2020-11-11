@@ -7,6 +7,7 @@ package com.vmware.flowgate.infobloxworker.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Infoblox {
+    
     @JsonProperty(value="_ref")
     private String ref;
     @JsonProperty(value="ip_address")
