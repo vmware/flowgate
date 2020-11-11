@@ -59,9 +59,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         // Set the view's delegate
         sceneView.delegate = self
         sceneView.session.delegate=self
-//        sceneView.showsStatistics = true
-//        sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin,
-//                                  ARSCNDebugOptions.showFeaturePoints]
      
         // Hook up status view controller callback(s).
         statusViewController.restartExperienceHandler = { [unowned self] in
@@ -104,7 +101,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         configuration.detectionImages = referenceImages
         session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
 
-        statusViewController.scheduleMessage("Look around to detect images", inSeconds: 7.5, messageType: .contentPlacement)
+        statusViewController.scheduleMessage("Look around to detect", inSeconds: 7.5, messageType: .contentPlacement)
     }
 
 
@@ -161,20 +158,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         }
     }
     
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        guard let referenceImages = ARReferenceImage.referenceImages(inGroupNamed: "AR Resources", bundle: nil) else {
-//            fatalError("Missing expected asset catalog resources.")
-//        }
-//
-//        // Create a session configuration
-//        let configuration = ARWorldTrackingConfiguration()
-//        configuration.detectionImages = referenceImages
-//
-//        // Run the view's session
-//        sceneView.session.run(configuration)
-//    }
-    
     public func session(_ session: ARSession, didUpdate frame: ARFrame) {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
@@ -220,48 +203,53 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
 
     
     // Override to create and configure nodes for anchors added to the view's session.
-//    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-//
-//        if self.lastAddedAnchor?.identifier == anchor.identifier {
-//
-//            let node = SCNNode()
-//            guard let ID = self.message else { return node }
-////            while self.detectedDataResult[ID]==nil {
-////                print("wait")
-////            }
-//            let result = strFormat(ID: ID)
-//            let left_message = generate_text(result["type"]!, -0.08, 0.05, 0.01, true)
-//            let right_message = generate_text(result["content"]!, 0.02, 0.05, 0.01)
-//            let title_message = generate_text(result["title"]!, -0.06, 0.08, 0.01, true, 2)
-//            node.addChildNode(left_message)
-//            node.addChildNode(right_message)
-//            node.addChildNode(title_message)
-//
-//
-//            let plane = SCNPlane(width: 0.2, height: 0.2)
-//            plane.cornerRadius = 0.02
-//            let planeNode = SCNNode(geometry: plane)
-//            planeNode.eulerAngles.x = 0
-//            planeNode.opacity = 0.4
-//            node.addChildNode(planeNode)
-//
-//
-////            node.addChildNode(addView())
-//            return node
-//
-//        }
-//        return nil
-//    }
-    
-    // MARK: - ARSCNViewDelegate (Image detection results)
-    /// - Tag: ARImageAnchor-Visualizing
-    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor){
-        print("detected")
-        if let imageAnchor = anchor  as? ARImageAnchor{
+    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
+
+        if self.lastAddedAnchor?.identifier == anchor.identifier {
+
+            DispatchQueue.main.async {
+                self.statusViewController.cancelAllScheduledMessages()
+                self.statusViewController.showMessage("Detected a bar code")
+            }
+            let node = SCNNode()
+            guard let ID = self.message else { return node }
+            let result = strFormat(ID: ID)
+            let left_message = generate_text(result["type"]!, -0.08, 0.05, 0.01, true)
+            let right_message = generate_text(result["content"]!, 0.02, 0.05, 0.01)
+            let title_message = generate_text(result["title"]!, -0.06, 0.08, 0.01, true, 2)
+            node.addChildNode(left_message)
+            node.addChildNode(right_message)
+            node.addChildNode(title_message)
+
+
+            let plane = SCNPlane(width: 0.2, height: 0.2)
+            plane.cornerRadius = 0.02
+            let planeNode = SCNNode(geometry: plane)
+            planeNode.eulerAngles.x = 0
+            planeNode.opacity = 0.4
+            node.addChildNode(planeNode)
+
+
+//            node.addChildNode(addView())
+            return node
+
+        } else   if let imageAnchor = anchor  as? ARImageAnchor{
             let referenceImage = imageAnchor.referenceImage
+            let node = SCNNode()
             updateQueue.async {
-                
+                guard let path = Bundle.main.path(forResource: "wireframe_shader", ofType: "metal", inDirectory: "art.scnassets"),
+                    let shader = try? String(contentsOfFile: path, encoding: .utf8) else {
+                    print(Bundle.main.path(forResource: "wireframe_shader", ofType: "metal", inDirectory: "Assets.xcassets") ?? "nothing")
+                        print("faile to open")
+                        return
+                }
                 // Create a plane to visualize the initial position of the detected image.
+                let wireFrame = SCNNode()
+                let box = SCNBox(width: referenceImage.physicalSize.width, height: 0, length: referenceImage.physicalSize.height, chamferRadius: 0)
+                box.firstMaterial?.diffuse.contents = UIColor.cyan
+                box.firstMaterial?.isDoubleSided = true
+                box.firstMaterial?.shaderModifiers = [.surface: shader]
+                wireFrame.geometry = box
                 let plane = SCNPlane(width: referenceImage.physicalSize.width,
                                      height: referenceImage.physicalSize.height)
                 let planeNode = SCNNode(geometry: plane)
@@ -278,68 +266,23 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                  Image anchors are not tracked after initial detection, so create an
                  animation that limits the duration for which the plane visualization appears.
                  */
-                planeNode.runAction(self.imageHighlightAction)
+//                planeNode.runAction(self.imageHighlightAction)
                 
                 // Add the plane visualization to the scene.
-                node.addChildNode(planeNode)
+                node.addChildNode(wireFrame)
             }
             DispatchQueue.main.async {
-                let imageName = referenceImage.name ?? ""
                 self.statusViewController.cancelAllScheduledMessages()
-                self.statusViewController.showMessage("Detected image “\(imageName)”")
+                self.statusViewController.showMessage("Detected a server")
             }
-        } else if self.lastAddedAnchor?.identifier == anchor.identifier {
-            
-            let node = SCNNode()
-            guard let ID = self.message else { return}
-//            while self.detectedDataResult[ID]==nil {
-//                print("wait")
-//            }
-            let result = strFormat(ID: ID)
-            let left_message = generate_text(result["type"]!, -0.08, 0.05, 0.01, true)
-            let right_message = generate_text(result["content"]!, 0.02, 0.05, 0.01)
-            let title_message = generate_text(result["title"]!, -0.06, 0.08, 0.01, true, 2)
-            node.addChildNode(left_message)
-            node.addChildNode(right_message)
-            node.addChildNode(title_message)
-
-
-            let plane = SCNPlane(width: 0.2, height: 0.2)
-            plane.cornerRadius = 0.02
-            let planeNode = SCNNode(geometry: plane)
-            planeNode.eulerAngles.x = 0
-            planeNode.opacity = 0.4
-            node.addChildNode(planeNode)
-//            node.addChildNode(addView())
+            return node
         }
+        return nil
     }
-    func addView() ->SCNNode{
-        
-        let skScene = SKScene(size: CGSize(width: 200, height: 200))
-        skScene.backgroundColor = UIColor.clear
-        
-        let rectangle = SKShapeNode(rect: CGRect(x: 0, y: 0, width: 200, height: 200), cornerRadius: 10)
-        rectangle.fillColor = #colorLiteral(red: 0.807843148708344, green: 0.0274509806185961, blue: 0.333333343267441, alpha: 1.0)
-        rectangle.strokeColor = #colorLiteral(red: 0.439215689897537, green: 0.0117647061124444, blue: 0.192156866192818, alpha: 1.0)
-        rectangle.lineWidth = 5
-        rectangle.alpha = 0.4
-        let labelNode = SKLabelNode(text: "Hello World")
-        labelNode.fontSize = 20
-        labelNode.fontName = "Arial"
-        labelNode.position = CGPoint(x:0,y:0)
-        skScene.addChild(rectangle)
-        skScene.addChild(labelNode)
-        
-        
-        let plane = SCNPlane(width: 0.20, height: 0.20)
-        let material = SCNMaterial()
-        material.isDoubleSided = true
-        material.diffuse.contents = skScene
-        plane.materials = [material]
-        let planeNode = SCNNode(geometry: plane)
+    
+    // MARK: - ARSCNViewDelegate (Image detection results)
+    /// - Tag: ARImageAnchor-Visualizing
 
-        return planeNode
-    }
     var imageHighlightAction: SCNAction {
         return .sequence([
             .wait(duration: 0.25),
