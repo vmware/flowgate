@@ -1,137 +1,92 @@
 <!-- Copyright 2019 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause -->
-<form #VMwareForm="ngForm">
-    <section class="form-block">
-        <label> Content For Integration</label>
-              <div class="form-group ">
-                  <label class="required" for="gForm_3">Type</label>
-                      <div class="select" style="width:184px; ">
-                          <select id="gForm_5" [ngModelOptions]="{standalone: true}"  [(ngModel)]="vmwareConfig.type" disabled > 
-                                  <option value="VRO" >vRealize Operations Manager</option>
-                                  <option value="VCENTER">vCenter Server</option>
-                          </select>
-                      </div>
-              </div>
+
+<form clrForm [formGroup]="editSDDCForm" >
+
+    <clr-select-container>
+        <label>Type</label>
+        <select clrSelect name="options" formControlName="type" style="width: 220px;">
+            <option value="VRO" >vRealize Operations Manager</option>
+            <option value="VCENTER">vCenter Server</option>
+        </select>
+        <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+    </clr-select-container>
+    <clr-control-container>
+        <label>Server</label>
+        <input clrControl placeholder="Server Ip Or Domain Name" formControlName="serverURL" style="width: 220px;"/>
+        <clr-control-helper>Please input Server Ip Or Domain Name.</clr-control-helper>
+        <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+    </clr-control-container>
+    <clr-control-container>
+        <label>Name</label>
+        <input clrControl placeholder="Name" formControlName="name" style="width: 220px;"/>
+        <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+    </clr-control-container>
+
+    <clr-control-container>
+        <label>Description</label>
+        <input clrControl placeholder="Description" formControlName="description" style="width: 220px;"/>
+    </clr-control-container>
+
+    <clr-control-container>
+        <label>UserName</label>
+        <input clrControl placeholder="Username" formControlName="userName"style="width: 220px;" />
+        <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+    </clr-control-container>
+
+    <clr-password-container>
+        <label>Password</label>
+        <input placeholder="Password" clrPassword formControlName="password" name="password" style="width: 185px;"/>
+        <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+    </clr-password-container>
+        
+    <clr-radio-container clrInline>
+        <label>VerifyCert</label>
+        <clr-radio-wrapper>
+            <input type="radio" clrRadio name="verifyCert" required value="true" formControlName="verifyCert"/>
+            <label>Yes</label>
+        </clr-radio-wrapper>
+        <clr-radio-wrapper>
+            <input type="radio" clrRadio name="verifyCert" required value="false" formControlName="verifyCert"/>
+            <label>No</label>
+        </clr-radio-wrapper>
+    </clr-radio-container>
+
+    <div style="margin-top: 50px;">
+        <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="editSDDCForm.invalid">Submit</button>
+        <button type="button" class="btn btn-primary" on-click="back()">Back</button>
+    </div>
+</form>
+   
+<clr-modal [(clrModalOpen)]="operatingModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
+    <h3 class="modal-title">Operation Tips</h3>
+    <div class="modal-body">
+        <p>{{tip}}</p>
+    </div>
+    <div class="modal-footer">
+        
+        <button type="button" class="btn btn-primary" (click)="No()">Yes</button>
+    </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="ignoreCertificatesModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
+    <h3 class="modal-title">Operation Tips</h3>
+    <div class="modal-body">
+        <p>{{tip}}</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="No()">No</button> 
+        <button type="button" class="btn btn-primary" (click)="Yes()">Yes</button>
+    </div>
+</clr-modal>
   
-              <div class="form-group">
-                  <label class="required" for="empserverIP">Server Ip</label>       
-                  <label for="empserverIP"
-                      aria-haspopup="true"
-                      role="tooltip"
-                      class="tooltip tooltip-validation tooltip-md"
-                      [class.invalid]="serverIPInput.invalid && (serverIPInput.dirty || serverIPInput.touched)">
-                      <input type="text" id="empserverIP" placeholder="Enter Server Ip" autocomplete="off" disabled
-                          required
-                          name="serverIP"
-                          [(ngModel)]="vmwareConfig.serverURL"
-                          #serverIPInput="ngModel">
-                      <span class="tooltip-content">
-                              Server Ip is Required.
-                      </span>
-                  </label>
-              </div>
-              
-              <div class="form-group">
-                  <label class="required" for="empserverName">Name</label>       
-                  <label for="empserverName"
-                      aria-haspopup="true"
-                      role="tooltip"
-                      class="tooltip tooltip-validation tooltip-md"
-                      [class.invalid]="serverNameInput.invalid && (serverNameInput.dirty || serverNameInput.touched)">
-                      <input type="text" id="empserverName" placeholder="Enter Name" autocomplete="off"
-                          required
-                          name="serverName"
-                          [(ngModel)]="vmwareConfig.name"
-                          #serverNameInput="ngModel">
-                      <span class="tooltip-content">
-                               Name is Required.
-                      </span>
-                  </label>
-              </div>
-              <div class="form-group" >
-                  <label for="gForm_1">Description</label>
-                  <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="vmwareConfig.description" id="gForm_6" placeholder="Description" size="45"/>
-              </div>  
-              <div class="form-group">
-                      <label class="required" for="empuserName">Username</label>       
-                      <label for="empuserName"
-                          aria-haspopup="true"
-                          role="tooltip"
-                          class="tooltip tooltip-validation tooltip-md"
-                          [class.invalid]="userNameInput.invalid && (userNameInput.dirty || userNameInput.touched)">
-                          <input type="text" id="empuserName" placeholder="Enter Username" autocomplete="off"
-                              required
-                              name="userName"
-                              [(ngModel)]="vmwareConfig.userName"
-                              #userNameInput="ngModel">
-                          <span class="tooltip-content">
-                              Username is Required.
-                          </span>
-                      </label>
-                  </div>
-              <div class="form-group">
-                  <label class="required"  for="emppassword">Password</label>
-                  <label for="emppassword"
-                      aria-haspopup="true"
-                      role="tooltip"
-                      class="tooltip tooltip-validation tooltip-md"
-                      [class.invalid]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">                    
-                      <input type="password" name="password" id="emppassword" placeholder="Enter Password" autocomplete="off" [readonly]="read"
-                          required
-                          [(ngModel)]="vmwareConfig.password"
-                          #passwordInput="ngModel">
-                      <span class="tooltip-content">
-                          Password is Required.
-                      </span>
-                  </label>
-              </div>
-            
-                  <div class="form-group">
-                          <label>Verify Cert</label>
-                          
-                          <div class="radio-inline">
-                              <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}" id="checkrads_11" value="true" [(ngModel)]="vmwareConfig.verifyCert">
-                              <label for="checkrads_11">Yes</label>
-                          </div>
-                          <div class="radio-inline">
-                              <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}"  id="checkrads_12" value="false" [(ngModel)]="vmwareConfig.verifyCert">
-                              <label for="checkrads_12">No</label>
-                          </div>
-                      </div>
-                  <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="VMwareForm.form.invalid">Submit</button>
-                  <button type="button" class="btn btn-primary" on-click ="cancel()">Cancel</button>
-        </section>
-      </form>
-      <clr-modal [(clrModalOpen)]="operatingModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
-        <h3 class="modal-title">Operation Tips</h3>
-        <div class="modal-body">
-            <p>{{tip}}</p>
+<div *ngIf="loading" >
+    <div id="mask" style="position:fixed;top:0;left:0;height:100%;width:100%;background:rgba(0, 0, 0, 0.4);z-index:198910170;">
+        <div style="position:relative;width:100%;height:100%;">
+            <div style="width:150px;height:150px;background:#ffffff;border-radius:5px;text-align:center;position:absolute;top:50%;left:50%;margin-left:-75px;margin-top:-75px;">
+                <span class="spinner" style="margin-top: 25%;">
+                    Loading...
+                </span>
+            </div>
         </div>
-        <div class="modal-footer">
-            
-            <button type="button" class="btn btn-primary" (click)="No()">Yes</button>
-        </div>
-    </clr-modal>
-    <clr-modal [(clrModalOpen)]="ignoreCertificatesModals" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
-        <h3 class="modal-title">Operation Tips</h3>
-        <div class="modal-body">
-            <p>{{tip}}</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline" (click)="No()">No</button> 
-            <button type="button" class="btn btn-primary" (click)="Yes()">Yes</button>
-        </div>
-    </clr-modal>
-  
-  <div *ngIf="loading" >
-          <div id="mask" style="position:fixed;top:0;left:0;height:100%;width:100%;background:rgba(0, 0, 0, 0.4);z-index:198910170;">
-              <div style="position:relative;width:100%;height:100%;">
-                  <div style="width:150px;height:150px;background:#ffffff;border-radius:5px;text-align:center;position:absolute;top:50%;left:50%;margin-left:-75px;margin-top:-75px;">
-                      <img src="/images/loading.gif" style="width:120px;height:120px;"/>
-                      <div id="mask-text" style="text-align:center;font-size:16px;height:30px;color:#0c0c0c;">
-                          Loading...
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
+    </div>
+</div>

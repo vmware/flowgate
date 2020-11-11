@@ -2,10 +2,10 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-import { Component, OnInit, AfterViewChecked, ChangeDetectorRef,ViewChild } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { UserService } from '../../user.service';
 import { Router } from "@angular/router";
-import { NgForm,FormGroup,FormBuilder, FormControl, Validators, ValidatorFn } from '@angular/forms';
+import { FormGroup,FormBuilder, FormControl, Validators, ValidatorFn } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
 function passwordMatchValidator(password: string): ValidatorFn {
