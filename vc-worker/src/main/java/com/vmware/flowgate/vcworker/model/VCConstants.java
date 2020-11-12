@@ -59,5 +59,22 @@ public class VCConstants {
       map.put(locationAntiAffinityTagName, locationAntiAffinityTagDescription);
       predefinedTags = Collections.unmodifiableMap(map);
    }
+   
+   public static final String TIMESTAMP = "timestamp";
+   public static final String VALUE = "value";
+   
+   public static final String HOST_CPU_GROUP = "cpu";
+   public static final String HOST_MEMORY_GROUP = "mem";
+   public static final String HOST_DISK_GROUP = "disk";
+   public static final String HOST_NETWORK_GROUP = "net";
+   
+   public static final String HOST_METRIC_USAGE= "usage";
+   public static final String HOST_METRIC_USAGEMHZ= "usagemhz";
+   public static final String HOST_METRIC_PERCENTAGE = "Percentage";
+   public static final String HOST_METRIC_MEM_ACTIVE = "active";
+   public static final String HOST_METRIC_MEM_SHARED = "sharedcommon";
+   public static final String HOST_METRIC_MEM_CONSUMED = "consumed";
+   public static final String HOST_METRIC_MEM_SWAP = "swapused";
+   public static final String HOST_METRIC_MEM_BALLON = "vmmemctl";
 
 }

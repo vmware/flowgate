@@ -33,5 +33,18 @@ public class MetricName {
    public static final String SERVER_CONNECTED_PDU_POWER = "PduPower";
    public static final String SERVER_USED_PDU_OUTLET_CURRENT = "ConnectedPDUOutletCurrent";
    public static final String SERVER_USED_PDU_OUTLET_POWER = "ConnectedPDUOutletPower";
+   
+   public static final String VC_HOST_CPUUSEDINMHZ = "CpuUsedInMhz";
+   public static final String VC_HOST_CPUUSAGE = "CpuUsage";
+   public static final String VC_HOST_ACTIVEMEMORY = "ActiveMemory";
+   public static final String VC_HOST_SWAPMEMORY = "SwapMemory";
+   public static final String VC_HOST_SHAREDMEMORY = "SharedMemory";
+   public static final String VC_HOST_BALLOONMEMORY = "BalloonMemory";
+   public static final String VC_HOST_CONSUMEDMEMORY = "ConsumedMemory";
+   public static final String VC_HOST_MEMORYUSAGE = "MemoryUsage";
+   public static final String VC_HOST_STORAGEUSED = "StorageUsed";
+   public static final String VC_HOST_STORAGEUSAGE = "StorageUsage";
+   public static final String VC_HOST_STORAGEIORATEUSAGE = "StorageIORateUsage";
+   public static final String VC_HOST_NETWORKUTILIZATION = "NetworkUtilization";
 
 }

@@ -35,11 +35,15 @@ import com.vmware.cis.tagging.CategoryModel.Cardinality;
 import com.vmware.cis.tagging.TagModel;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
+import com.vmware.flowgate.common.RealtimeDataUnit;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
+import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.common.model.redis.message.AsyncService;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
@@ -57,8 +61,17 @@ import com.vmware.flowgate.vcworker.model.HostNic;
 import com.vmware.flowgate.vcworker.model.VCConstants;
 import com.vmware.vim.binding.vim.AboutInfo;
 import com.vmware.vim.binding.vim.ClusterComputeResource;
-import com.vmware.vim.binding.vim.Datastore.HostMount;
 import com.vmware.vim.binding.vim.HostSystem;
+import com.vmware.vim.binding.vim.PerformanceManager;
+import com.vmware.vim.binding.vim.PerformanceManager.CounterInfo;
+import com.vmware.vim.binding.vim.PerformanceManager.EntityMetric;
+import com.vmware.vim.binding.vim.PerformanceManager.EntityMetricBase;
+import com.vmware.vim.binding.vim.PerformanceManager.IntSeries;
+import com.vmware.vim.binding.vim.PerformanceManager.MetricId;
+import com.vmware.vim.binding.vim.PerformanceManager.MetricSeries;
+import com.vmware.vim.binding.vim.PerformanceManager.ProviderSummary;
+import com.vmware.vim.binding.vim.PerformanceManager.QuerySpec;
+import com.vmware.vim.binding.vim.PerformanceManager.SampleInfo;
 import com.vmware.vim.binding.vim.cluster.ConfigInfoEx;
 import com.vmware.vim.binding.vim.cluster.DpmHostConfigInfo;
 import com.vmware.vim.binding.vim.fault.InvalidLogin;
@@ -71,21 +84,9 @@ import com.vmware.vim.binding.vim.host.Summary;
 import com.vmware.vim.binding.vim.host.Summary.HardwareSummary;
 import com.vmware.vim.binding.vim.host.Summary.QuickStats;
 import com.vmware.vim.binding.vim.host.ConnectInfo.DatastoreInfo;
-import com.vmware.vim.binding.vim.host.MountInfo;
-import com.vmware.vim.binding.vmodl.DynamicProperty;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
-import com.vmware.vim.binding.vmodl.query.InvalidProperty;
-import com.vmware.vim.binding.vmodl.query.PropertyCollector;
-import com.vmware.vim.binding.vmodl.query.PropertyCollector.FilterSpec;
-import com.vmware.vim.binding.vmodl.query.PropertyCollector.ObjectContent;
-import com.vmware.vim.binding.vmodl.query.PropertyCollector.ObjectSpec;
-import com.vmware.vim.binding.vmodl.query.PropertyCollector.PropertySpec;
-import com.vmware.vim.binding.vmodl.query.PropertyCollector.RetrieveOptions;
-import com.vmware.vim.binding.vmodl.query.PropertyCollector.RetrieveResult;
-import com.vmware.vim.binding.vmodl.query.PropertyCollector.SelectionSpec;
-import com.vmware.vim.binding.vmodl.query.PropertyCollector.TraversalSpec;
 import com.vmware.vim.vmomi.client.exception.ConnectionException;
-import com.vmware.vim.binding.impl.vmodl.TypeNameImpl;
+import com.vmware.vim.binding.impl.vim.PerformanceManager_Impl.QuerySpecImpl;
 
 
 @Service
@@ -131,8 +132,8 @@ public class VCDataService implements AsyncService {
                EventMessage payloadMessage = null;
                try {
                   payloadMessage = mapper.readValue(messageString, EventMessageImpl.class);
-               } catch (IOException e) {
-                  logger.error("Cannot process message", e);
+               } catch (IOException ioException) {
+                  logger.error("Cannot process message", ioException);
                }
                if (payloadMessage == null) {
                   continue;
@@ -140,8 +141,8 @@ public class VCDataService implements AsyncService {
                SDDCSoftwareConfig vcInfo = null;
                try {
                   vcInfo = mapper.readValue(payloadMessage.getContent(), SDDCSoftwareConfig.class);
-               } catch (IOException e) {
-                  logger.error("Cannot process message", e);
+               } catch (IOException ioException) {
+                  logger.error("Cannot process message", ioException);
                }
                if (null == vcInfo) {
                   continue;
@@ -160,6 +161,10 @@ public class VCDataService implements AsyncService {
                   case EventMessageUtil.VCENTER_QueryHostMetaData:
                      queryHostMetaData(vcInfo);
                      logger.info("Finish query host metadata for " + vcInfo.getName());
+                     break;
+                  case EventMessageUtil.VCENTER_QueryHostUsageData:
+                     queryHostMetrics(vcInfo);
+                     logger.info("Finish query host usage for " + vcInfo.getName());
                      break;
                   default:
                      break;
@@ -211,9 +216,9 @@ public class VCDataService implements AsyncService {
             vc.getUserName(), vc.getPassword(), !vc.isVerifyCert());
    }
 
-   public HashMap<String, ServerMapping> getVaildServerMapping(SDDCSoftwareConfig vc) {
+   public Map<String, ServerMapping> getVaildServerMapping(SDDCSoftwareConfig vc) {
 
-      HashMap<String, ServerMapping> mobIdDictionary = new HashMap<String, ServerMapping>();
+      Map<String, ServerMapping> mobIdDictionary = new HashMap<String, ServerMapping>();
       ServerMapping[] mappings = null;
       try {
          restClient.setServiceKey(serviceKeyConfig.getServiceKey());
@@ -223,7 +228,10 @@ public class VCDataService implements AsyncService {
             return null;
          }
       }
-
+      if(mappings == null) {
+         logger.error("vc: {} get serverMappings is null.", vc.getId());
+         return null;
+      }
       for (ServerMapping mapping : mappings) {
          if (mapping.getAsset() != null) {
             mobIdDictionary.put(mapping.getVcMobID(), mapping);
@@ -233,10 +241,11 @@ public class VCDataService implements AsyncService {
 
    }
 
+
    public void queryHostMetaData(SDDCSoftwareConfig vc) {
 
-      HashMap<String, ServerMapping> serverMappingMap = getVaildServerMapping(vc);
-      if (serverMappingMap == null) {
+      Map<String, ServerMapping> serverMappingMap = getVaildServerMapping(vc);
+      if (serverMappingMap == null || serverMappingMap.isEmpty()) {
          logger.info("serverMapping is invaild");
          return;
       }
@@ -250,8 +259,12 @@ public class VCDataService implements AsyncService {
             return;
          }
          Collection<ClusterComputeResource> clusters = vsphereClient.getAllClusterComputeResource();
-         HashMap<String, ClusterComputeResource> clusterMap =
+         Map<String, ClusterComputeResource> clusterMap =
                new HashMap<String, ClusterComputeResource>();
+         if(clusters == null) {
+            logger.error("vsphere: " + vsphereClient.getVCUUID() + " get clusters is null");
+            return;
+         }
          for (ClusterComputeResource cluster : clusters) {
             clusterMap.put(cluster._getRef().getValue(), cluster);
          }
@@ -277,8 +290,8 @@ public class VCDataService implements AsyncService {
                   if (oldHostInfoString != null) {
                      try {
                         hostInfo = mapper.readValue(oldHostInfoString, HostInfo.class);
-                     } catch (IOException e) {
-                        logger.error("Cannot process message", e);
+                     } catch (IOException ioException) {
+                        logger.error("Cannot process message", ioException);
                         continue;
                      }
                   }
@@ -299,8 +312,8 @@ public class VCDataService implements AsyncService {
                      String vcHostObjStr = mapper.writeValueAsString(hostInfo);
                      hostJustification.put(FlowgateConstant.HOST_METADATA, vcHostObjStr);
                      hostMappingAsset.setJustificationfields(hostJustification);
-                  } catch (JsonProcessingException e) {
-                     logger.error("Format host info map error", e);
+                  } catch (JsonProcessingException jsonProcessingException) {
+                     logger.error("Format host info map error", jsonProcessingException);
                      continue;
                   }
                   restClient.saveAssets(hostMappingAsset);
@@ -310,22 +323,361 @@ public class VCDataService implements AsyncService {
                }
             }
          }
-      } catch (ConnectionException e1) {
-         checkAndUpdateIntegrationStatus(vc, e1.getMessage());
+      } catch (ConnectionException connectionException) {
+         checkAndUpdateIntegrationStatus(vc, connectionException.getMessage());
          return;
-      } catch (ExecutionException e2) {
-         if (e2.getCause() instanceof InvalidLogin) {
-            logger.error("Failed to push data to " + vc.getServerURL(), e2);
+      } catch (ExecutionException executionException) {
+         if (executionException.getCause() instanceof InvalidLogin) {
+            logger.error("Failed to push data to " + vc.getServerURL(), executionException);
             checkAndUpdateIntegrationStatus(vc, "Invalid username or password.");
             return;
          }
-      } catch (Exception e) {
-         logger.error("Failed to sync the host metadata to VC ", e);
+      } catch (Exception exception) {
+         logger.error("Failed to sync the host metadata to VC ", exception);
          return;
       }
    }
 
-   public boolean feedClusterMetaData(HashMap<String, ClusterComputeResource> clusterMap,
+   public void queryHostMetrics(SDDCSoftwareConfig vc) {
+
+      Map<String, ServerMapping> serverMappingMap = getVaildServerMapping(vc);
+      if (serverMappingMap == null || serverMappingMap.isEmpty()) {
+         logger.info("No serverMapping found for vc {}", vc.getName());
+         return;
+      }
+      try (VsphereClient vsphereClient = connectVsphere(vc);) {
+
+         Collection<HostSystem> hosts = vsphereClient.getAllHost();
+         if (hosts == null || hosts.isEmpty()) {
+            logger.error("vsphere: {} get hosts is null", vc.getName());
+            return;
+         }
+         for (HostSystem host : hosts) {
+
+            String mobId = host._getRef().getValue();
+            if (serverMappingMap.containsKey(mobId)) {
+               ServerMapping serverMapping = serverMappingMap.get(mobId);
+               String assetId = serverMapping.getAsset();
+
+               Asset hostMappingAsset = restClient.getAssetByID(assetId).getBody();
+               if (hostMappingAsset == null) {
+                  logger.error("The asset {} doesn't exist in serverMapping {}.", assetId, serverMapping.getId());
+                  continue;
+               }
+               feedHostUsageData(vsphereClient, assetId, host._getRef());
+            }
+         }
+
+      } catch (ConnectionException connectionException) {
+         checkAndUpdateIntegrationStatus(vc, connectionException.getMessage());
+         return;
+      } catch (ExecutionException executionException) {
+         if (executionException.getCause() instanceof InvalidLogin) {
+            logger.error("Failed to login {}: {}" ,vc.getServerURL(), executionException);
+            checkAndUpdateIntegrationStatus(vc, "Invalid username or password.");
+            return;
+         }
+      } catch (Exception exception) {
+         logger.error("Failed to sync the host metrics to VC ", exception);
+         return;
+      }
+   }
+   
+   private void feedAssetMetricsFormulars(Asset asset) {
+      
+      String assetId = asset.getId();
+      Map<String, Map<String, Map<String, String>>> metricsFormulars =
+            asset.getMetricsformulars();
+      Map<String, Map<String, String>> metrics =
+            metricsFormulars.get(FlowgateConstant.HOST_METRICS);
+      if (metrics == null || metrics.isEmpty()) {
+         
+         metrics = new HashMap<>();
+         Map<String, String> cpuMap = new HashMap<>();
+         cpuMap.put(FlowgateConstant.HOST_CPU_USAGE, assetId);
+         cpuMap.put(FlowgateConstant.HOST_CPU_USED, assetId);
+         metrics.put(FlowgateConstant.HOST_CPU, cpuMap);
+         
+         Map<String, String> memoryMap = new HashMap<>();
+         memoryMap.put(FlowgateConstant.HOST_MEMORY_ACTIVE, assetId);
+         memoryMap.put(FlowgateConstant.HOST_MEMORY_BALLOON, assetId);
+         memoryMap.put(FlowgateConstant.HOST_MEMORY_CONSUMED, assetId);
+         memoryMap.put(FlowgateConstant.HOST_MEMORY_SHARED, assetId);
+         memoryMap.put(FlowgateConstant.HOST_MEMORY_SWAP, assetId);
+         memoryMap.put(FlowgateConstant.HOST_MEMORY_USAGE, assetId);
+         metrics.put(FlowgateConstant.HOST_MEMORY, memoryMap);
+         
+         Map<String, String> storageMap = new HashMap<>();
+         storageMap.put(FlowgateConstant.HOST_STORAGE_IORATEUSAGE, assetId);
+         storageMap.put(FlowgateConstant.HOST_STORAGE_USAGE, assetId);
+         storageMap.put(FlowgateConstant.HOST_STORAGE_USED, assetId);
+         metrics.put(FlowgateConstant.HOST_STORAGE, storageMap);
+         metricsFormulars.put(FlowgateConstant.HOST_METRICS, metrics);
+         
+         restClient.saveAssets(asset);
+      }
+   }
+
+   private Map<Integer, String> getMetricsCounters(PerformanceManager performanceManager) {
+
+      CounterInfo[] counterInfos = performanceManager.getPerfCounter();
+
+      Map<Integer, String> counters = new HashMap<Integer, String>();
+      for (int i = 0; i < counterInfos.length; i++) {
+         CounterInfo counterInfo = counterInfos[i];
+         int counterId = counterInfo.getKey();
+         String groupKey = counterInfo.getGroupInfo().getKey();
+         String nameKey = counterInfo.getNameInfo().getKey();
+         
+         switch(groupKey) {
+            case VCConstants.HOST_CPU_GROUP:
+               switch(nameKey) {
+                  case VCConstants.HOST_METRIC_USAGE:
+                  case VCConstants.HOST_METRIC_USAGEMHZ:
+                     counters.put(new Integer(counterId), groupKey.concat(nameKey));
+                     break;
+               }
+               break;
+            case VCConstants.HOST_MEMORY_GROUP:
+               switch(nameKey) {
+                  case VCConstants.HOST_METRIC_USAGE:
+                  case VCConstants.HOST_METRIC_MEM_ACTIVE:
+                  case VCConstants.HOST_METRIC_MEM_SHARED:
+                  case VCConstants.HOST_METRIC_MEM_CONSUMED:
+                  case VCConstants.HOST_METRIC_MEM_SWAP:
+                  case VCConstants.HOST_METRIC_MEM_BALLON:
+                     counters.put(new Integer(counterId), groupKey.concat(nameKey));
+                     break;
+               }
+               break;
+            case VCConstants.HOST_DISK_GROUP:
+               switch(nameKey) {
+                  case VCConstants.HOST_METRIC_USAGE:
+                     counters.put(new Integer(counterId), groupKey.concat(nameKey));
+                     break;
+               } 
+               break;
+            case VCConstants.HOST_NETWORK_GROUP:
+               switch(nameKey) {
+                  case VCConstants.HOST_METRIC_USAGE:
+                     counters.put(new Integer(counterId), groupKey.concat(nameKey));
+                     break;
+               }
+               break;
+            default:
+               break;   
+         }
+      }
+      
+      return counters;
+   }
+   
+   private List<MetricId> getPerformenceMetricsIds(PerformanceManager performanceManager, ManagedObjectReference hostRef, Map<Integer, String> counters) {
+      
+      MetricId[] queryAvailableMetric =
+            performanceManager.queryAvailableMetric(hostRef, null, null, new Integer(20));
+      
+      List<MetricId> metricIdList = new ArrayList<MetricId>();
+      if (queryAvailableMetric.length > 0) {
+         for (int i = 0; i < queryAvailableMetric.length; i++) {
+            MetricId metricId = queryAvailableMetric[i];
+            int counterId = metricId.getCounterId();
+            String instanceId = metricId.getInstance();
+            if (counters.containsKey(new Integer(counterId)) && (instanceId == null || instanceId.isEmpty())) {
+               metricIdList.add(metricId);
+            }
+         }
+      }
+
+      return metricIdList;
+   }
+   
+   public void feedHostUsageData(VsphereClient vsphereClient, String assetId,
+         ManagedObjectReference hostRef) {
+
+      List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
+      RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setAssetID(assetId);
+      List<ValueUnit> valueUnits = new ArrayList<ValueUnit>();
+ 
+      PerformanceManager performanceManager = vsphereClient.getPerformanceManager();
+
+      Map<Integer, String> counters = getMetricsCounters(performanceManager);
+      if(counters == null || counters.isEmpty()) {
+         logger.error("Asset: {} failed to get performance counters", assetId);
+         return;
+      }
+      List<MetricId> metricIdList = getPerformenceMetricsIds(performanceManager, hostRef, counters);
+      if(metricIdList == null || metricIdList.isEmpty()) {
+         logger.error("Asset: {} failed to get performance metricIds", assetId);
+         return;
+      }
+      //fill spec info
+      ProviderSummary summary = performanceManager.queryProviderSummary(hostRef);
+      int perfInterval = summary.getRefreshRate();
+      QuerySpec[] specs = new QuerySpecImpl[1];
+      specs[0] = new QuerySpecImpl();
+      specs[0].setEntity(hostRef);
+      specs[0].setMetricId(metricIdList.toArray(new MetricId[metricIdList.size()]));
+      specs[0].setIntervalId(perfInterval);
+      specs[0].setMaxSample(15);
+
+      //get metrics value
+      EntityMetricBase[] metricBase = performanceManager.queryStats(specs);
+      if(metricBase == null || metricBase.length <= 0) {
+         logger.error("Asset: {} failed to get performance metricBase", assetId);
+         return;
+      }
+      for(EntityMetricBase entityMetricBase : metricBase) {
+         /*
+         (vim.EntityMetric) {
+               dynamicType = null,
+               dynamicProperty = null,
+               entity = ManagedObjectReference: type = HostSystem, value = host-65, serverGuid = null,
+               sampleInfo = (vim.SampleInfo) [
+            (vim.SampleInfo) {
+               dynamicType = null,
+               dynamicProperty = null,
+               timestamp = java.util.GregorianCalendar[time=?,areFieldsSet=false,areAllFieldsSet=true,lenient=true,zone=sun.util.calendar.ZoneInfo[id="GMT+00:00",offset=0,dstSavings=0,useDaylight=false,transitions=0,lastRule=null],firstDayOfWeek=1,minimalDaysInFirstWeek=1,ERA=1,YEAR=2020,MONTH=11,WEEK_OF_YEAR=1,WEEK_OF_MONTH=1,DAY_OF_MONTH=10,DAY_OF_YEAR=1,DAY_OF_WEEK=5,DAY_OF_WEEK_IN_MONTH=1,AM_PM=0,HOUR=0,HOUR_OF_DAY=2,MINUTE=12,SECOND=20,MILLISECOND=0,ZONE_OFFSET=0,DST_OFFSET=0],
+               interval = 20
+            }...
+         ],
+         value = (vim.MetricSeries) [
+            (vim.IntSeries) {
+               dynamicType = null,
+               dynamicProperty = null,
+               id = (vim.MetricId) {
+                  dynamicType = null,
+                  dynamicProperty = null,
+                  counterId = 125,
+                  instance = 
+               },
+               value = (LONG) [
+                  667,
+                  251,
+                  96,
+                  298,
+                  99,
+                  119,
+                  492,
+                  318,
+                  98,
+                  218,
+                  128,
+                  141,
+                  1224,
+                  358,
+                  133
+               ]
+            }...
+         */
+         EntityMetric entityMetric = (EntityMetric) entityMetricBase;
+         /*
+         (vim.IntSeries) {
+               dynamicType = null,
+               dynamicProperty = null,
+               id = (vim.MetricId) {
+                  dynamicType = null,
+                  dynamicProperty = null,
+                  counterId = 125,
+                  instance = 
+               },
+               value = (LONG) [101,134,667,282,90,224,99,129,667,251,96,298,99,119,492]
+            }
+         */
+         MetricSeries[] metricSeries = entityMetric.getValue();
+         /*
+         (vim.SampleInfo) {
+            dynamicType = null,
+            dynamicProperty = null,
+            timestamp = java.util.GregorianCalendar[time=?,areFieldsSet=false,areAllFieldsSet=true,lenient=true,zone=sun.util.calendar.ZoneInfo[id="GMT+00:00",offset=0,dstSavings=0,useDaylight=false,transitions=0,lastRule=null],firstDayOfWeek=1,minimalDaysInFirstWeek=1,ERA=1,YEAR=2020,MONTH=11,WEEK_OF_YEAR=1,WEEK_OF_MONTH=1,DAY_OF_MONTH=10,DAY_OF_YEAR=1,DAY_OF_WEEK=5,DAY_OF_WEEK_IN_MONTH=1,AM_PM=0,HOUR=0,HOUR_OF_DAY=2,MINUTE=7,SECOND=40,MILLISECOND=0,ZONE_OFFSET=0,DST_OFFSET=0],
+            interval = 20
+          }
+         */
+         SampleInfo[] sampleInfos = entityMetric.getSampleInfo();
+         for (MetricSeries metricSerie : metricSeries) {
+            if (metricSerie instanceof IntSeries) {
+               IntSeries intSeries = (IntSeries) metricSerie;
+               long[] values = intSeries.getValue();
+               int counterId = metricSerie.getId().getCounterId();
+               for(int index = 0; index < values.length; index++) {
+                  long timeStamp = sampleInfos[index].getTimestamp().getTimeInMillis();
+                  
+                  ValueUnit valueUnit = new ValueUnit();
+                  long value = values[index];
+                  
+                  switch(counters.get(counterId)) {
+                     case VCConstants.HOST_CPU_GROUP + VCConstants.HOST_METRIC_USAGE:
+                        valueUnit.setKey(MetricName.VC_HOST_CPUUSAGE);
+                        valueUnit.setValueNum(value / 100.0);
+                        valueUnit.setUnit(RealtimeDataUnit.Percent.toString());
+                        break;
+                     case VCConstants.HOST_CPU_GROUP + VCConstants.HOST_METRIC_USAGEMHZ:
+                        valueUnit.setKey(MetricName.VC_HOST_CPUUSEDINMHZ);
+                        valueUnit.setValueNum(value);
+                        valueUnit.setUnit(RealtimeDataUnit.Mhz.toString());
+                        break;
+                     case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_USAGE:
+                        valueUnit.setKey(MetricName.VC_HOST_MEMORYUSAGE);
+                        valueUnit.setValueNum(value / 100.0);
+                        valueUnit.setUnit(RealtimeDataUnit.Percent.toString());
+                        break;
+                     case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_ACTIVE:
+                        valueUnit.setKey(MetricName.VC_HOST_ACTIVEMEMORY);
+                        valueUnit.setValueNum(value);
+                        valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+                     break;
+                     case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_SHARED:
+                        valueUnit.setKey(MetricName.VC_HOST_SHAREDMEMORY);
+                        valueUnit.setValueNum(value);
+                        valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+                     break;
+                     case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_CONSUMED:
+                        valueUnit.setKey(MetricName.VC_HOST_CONSUMEDMEMORY);
+                        valueUnit.setValueNum(value);
+                        valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+                     break;
+                     case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_SWAP:
+                        valueUnit.setKey(MetricName.VC_HOST_SWAPMEMORY);
+                        valueUnit.setValueNum(value);
+                        valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+                     break;
+                     case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_BALLON:
+                        valueUnit.setKey(MetricName.VC_HOST_BALLOONMEMORY);
+                        valueUnit.setValueNum(value);
+                        valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+                     break;
+                     case VCConstants.HOST_DISK_GROUP + VCConstants.HOST_METRIC_USAGE:
+                        valueUnit.setKey(MetricName.VC_HOST_STORAGEIORATEUSAGE);
+                        valueUnit.setValueNum(value);
+                        valueUnit.setUnit(RealtimeDataUnit.KBps.toString());
+                     break;
+                     case VCConstants.HOST_NETWORK_GROUP + VCConstants.HOST_METRIC_USAGE:
+                        valueUnit.setKey(MetricName.VC_HOST_NETWORKUTILIZATION);
+                        valueUnit.setValueNum(value);
+                        valueUnit.setUnit(RealtimeDataUnit.KBps.toString());
+                     break;  
+                  }
+                  valueUnit.setTime(timeStamp);
+                  valueUnits.add(valueUnit);
+               }
+            }
+         }
+         
+      }
+      if(valueUnits == null || valueUnits.isEmpty()) {
+         logger.error("ValueUnits of asset: {} is empty.", assetId);
+         return;
+      }
+      realTimeData.setValues(valueUnits);
+      realTimeData.setTime(valueUnits.get(0).getTime());
+      realTimeDatas.add(realTimeData);
+
+      restClient.saveRealTimeData(realTimeDatas);
+   }
+
+
+   public boolean feedClusterMetaData(Map<String, ClusterComputeResource> clusterMap,
          HostSystem host, HostInfo hostInfo, String vcInstanceUUID) {
 
       ManagedObjectReference hostParent = host.getParent();
@@ -696,12 +1048,12 @@ public class VCDataService implements AsyncService {
          vsphereClient.createCustomAttribute(VCConstants.ASSET_PDUs, VCConstants.HOSTSYSTEM);
          // Add host switch information;
          vsphereClient.createCustomAttribute(VCConstants.ASSET_SWITCHs, VCConstants.HOSTSYSTEM);
-      } catch (ConnectionException e1) {
-         checkAndUpdateIntegrationStatus(vc, e1.getMessage());
+      } catch (ConnectionException connectionException) {
+         checkAndUpdateIntegrationStatus(vc, connectionException.getMessage());
          return;
-      } catch (ExecutionException e2) {
-         if (e2.getCause() instanceof InvalidLogin) {
-            logger.error("Failed to push data to " + vc.getServerURL(), e2);
+      } catch (ExecutionException executionException) {
+         if (executionException.getCause() instanceof InvalidLogin) {
+            logger.error("Failed to push data to " + vc.getServerURL(), executionException);
             IntegrationStatus integrationStatus = vc.getIntegrationStatus();
             if (integrationStatus == null) {
                integrationStatus = new IntegrationStatus();
@@ -712,8 +1064,8 @@ public class VCDataService implements AsyncService {
             updateIntegrationStatus(vc);
             return;
          }
-      } catch (Exception e) {
-         logger.error("Failed to sync the host metadata to VC ", e);
+      } catch (Exception exception) {
+         logger.error("Failed to sync the host metadata to VC ", exception);
          return;
       }
       try (HostTagClient client = new HostTagClient(vc.getServerURL(), vc.getUserName(),
@@ -732,8 +1084,8 @@ public class VCDataService implements AsyncService {
             client.createTag(VCConstants.locationAntiAffinityTagName,
                   VCConstants.locationAntiAffinityTagDescription, categoryID);
          }
-      } catch (Exception e) {
-         logger.error("Faild to check the predefined tag information", e);
+      } catch (Exception exception) {
+         logger.error("Faild to check the predefined tag information", exception);
       }
    }
 
@@ -785,6 +1137,7 @@ public class VCDataService implements AsyncService {
                            serverMapping.setAsset(asset.getId());
                            restClient.saveServerMapping(serverMapping);
                            validMapping.add(serverMapping);
+                           feedAssetMetricsFormulars(asset);
                         }
                      } else {// seems we don't have the ip hostname mapping. Notify infoblox to check the ip
                         logger.info("Notify infoblox to check ip: " + ipaddress);
@@ -813,6 +1166,7 @@ public class VCDataService implements AsyncService {
                      Asset asset = restClient.getAssetByName(assetName).getBody();
                      if (asset != null) {
                         newMapping.setAsset(asset.getId());
+                        feedAssetMetricsFormulars(asset);
                      }
                   }
                }
@@ -828,12 +1182,12 @@ public class VCDataService implements AsyncService {
 
          feedData(assetDictionary, validMapping, hostDictionary);
          validClusterHostsLocationAntiaffinity(vcInfo, assetDictionary, validMapping);
-      } catch (ConnectionException e1) {
-         checkAndUpdateIntegrationStatus(vcInfo, e1.getMessage());
+      } catch (ConnectionException connectionException) {
+         checkAndUpdateIntegrationStatus(vcInfo, connectionException.getMessage());
          return;
-      } catch (ExecutionException e2) {
-         if (e2.getCause() instanceof InvalidLogin) {
-            logger.error("Failed to push data to " + vcInfo.getServerURL(), e2);
+      } catch (ExecutionException executionException) {
+         if (executionException.getCause() instanceof InvalidLogin) {
+            logger.error("Failed to push data to " + vcInfo.getServerURL(), executionException);
             IntegrationStatus integrationStatus = vcInfo.getIntegrationStatus();
             if (integrationStatus == null) {
                integrationStatus = new IntegrationStatus();
@@ -844,8 +1198,8 @@ public class VCDataService implements AsyncService {
             updateIntegrationStatus(vcInfo);
             return;
          }
-      } catch (Exception e) {
-         logger.error("Failed to push data to " + vcInfo.getServerURL(), e);
+      } catch (Exception exception) {
+         logger.error("Failed to push data to " + vcInfo.getServerURL(), exception);
       }
    }
 
@@ -971,8 +1325,8 @@ public class VCDataService implements AsyncService {
                client.attachTagToHost(locationTag.getId(),
                      assetIDMapping.get(a.getId()).getVcMobID());
             }
-         } catch (Exception e) {
-            logger.warn("Failed to tag the host, will try to tag it in next run.", e);
+         } catch (Exception exception) {
+            logger.warn("Failed to tag the host, will try to tag it in next run.", exception);
          }
       }
    }

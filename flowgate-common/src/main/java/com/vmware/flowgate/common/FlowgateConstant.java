@@ -107,4 +107,39 @@ public class FlowgateConstant {
    public static String SERVICE_KEY_SET = "adapter:servicekeylist";
    
    public static String HOST_METADATA ="HOST_METADATA";
+   
+   public static String HOST_METRICS = "HOSTMETRICS";
+   
+   public static String HOST_CPU = "CPU";
+   
+   public static String HOST_CPU_USED = "USED";
+   
+   public static String HOST_CPU_USAGE = "USAGE";
+   
+   public static String HOST_MEMORY = "MEMORY";
+   
+   public static String HOST_MEMORY_USAGE = "USAGE";
+   
+   public static String HOST_MEMORY_ACTIVE = "ACTIVE";
+   
+   public static String HOST_MEMORY_SHARED = "SHARED";
+   
+   public static String HOST_MEMORY_SWAP = "SWAP";
+   
+   public static String HOST_MEMORY_BALLOON = "BALLOON";
+   
+   public static String HOST_MEMORY_CONSUMED = "CONSUMED";
+   
+   public static String HOST_STORAGE = "STORAGE";
+    
+   public static String HOST_STORAGE_USED = "USED";
+   
+   public static String HOST_STORAGE_USAGE = "USAGE";
+   
+   public static String HOST_STORAGE_IORATEUSAGE = "IORATEUSAGE";
+   
+   public static String HOST_NETWORK = "NETWORK";
+   
+   public static String HOST_NETWORK_UTILIZATION = "UTILIZATION";
+   
 }
