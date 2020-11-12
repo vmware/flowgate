@@ -1,25 +1,37 @@
 package com.google.ar.sceneform.samples.gltf;
 
+import android.content.ContentValues;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.media.Image;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.ar.core.exceptions.NotYetAvailableException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
  * Convert the YUV420 image captured by acquireCameraImage() into bitmap
  */
-public class YUV420toBitmap {
-	public static Bitmap getBitmap(Image image) {
+public class YUV420toByteArray {
+	public static Bitmap getByteArray(Image image) {
 		byte[] byteArray;
 		byteArray = NV21toJPEG(YUV420toNV21(image), image.getWidth(), image.getHeight());
+		// return byteArray;
 		return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 	}
 

@@ -44,4 +44,5 @@ dependencies {
     api project(":sceneformux")
 
     implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'com.google.mlkit:barcode-scanning:16.0.3'
 }
