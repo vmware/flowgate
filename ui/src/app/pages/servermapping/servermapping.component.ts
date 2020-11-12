@@ -9,6 +9,9 @@ import { ServermappingService } from './servermapping.service';
 import {Router,ActivatedRoute} from '@angular/router';
 import { AssetModule } from './asset.module';
 import { forkJoin ,  SubscribableOrPromise } from 'rxjs';
+import { SddcsoftwareModule } from '../sddcsoftware/sddcsoftware.module';
+import { ServerMappingDataModule } from './mapping.module';
+import { ClrDatagridStateInterface } from '@clr/angular';
 
 
 @Component({
@@ -21,6 +24,8 @@ export class ServermappingComponent implements OnInit {
 
   constructor(private service:ServermappingService,private router: Router, private route: ActivatedRoute) {  
     this.selectedOtherAssets = [];
+    this.serverconfig.type = "";
+    this.serverconfig.id = ""; 
   }
  xah_obj_to_map = ( obj => {
     const mp = new Map;
@@ -40,36 +45,22 @@ export class ServermappingComponent implements OnInit {
   hid:boolean=true;
   disabled:String="";
   nulltips="Please select a server first.";
-  serverconfigs=[{
-    id:"id",
-    name:"name"
-  }];
-  serverconfig={
-    id:"",
-    name:"",
-    type:"VRO"
-  }
+
+  serverconfigs:SddcsoftwareModule[] = [];
+  serverconfig:SddcsoftwareModule= new SddcsoftwareModule();
  
-  serverMappings=[];
-  serverMapping={
-    id:"",
-    vroResourceName:"",
-    vroVMEntityName:"",
-    vroVMEntityObjectID:"",
-    vroVMEntityVCID:"",
-    vroResourceID:"",
-    asset:""
-  }
-  serverMappingVCs=[];
-  serverMappingVC={
-    vcHostName:"",
-    vcMobID:"",
-    asset:""
-  }
+  serverMappings:ServerMappingDataModule[] = [];
+  serverMapping:ServerMappingDataModule = new ServerMappingDataModule();
+  // serverMappingVCs=[];
+  // serverMappingVC={
+  //   vcHostName:"",
+  //   vcMobID:"",
+  //   asset:""
+  // }
   setInfo(){
     this.info=this.pageSize;
    
-    this.getServerMappings();
+    this.refresh(this.currentState);
   }
   changeType(){
     if(this.serverconfig.type == "VRO" || this.serverconfig.type == "VROPSMP"){
@@ -82,42 +73,47 @@ export class ServermappingComponent implements OnInit {
     this.getServerConfigs();
   }
   change(){
-      this.getServerMappings();
+      this.refresh(this.currentState);
   }
   getServerConfigs(){
     this.service.getserverconfigs(this.serverconfig.type).subscribe(
-      (data)=>{
-        //this.serverconfigs = data.json();// need datamodel
+      (data:SddcsoftwareModule[])=>{
+        this.serverconfigs = data;
       }
     )
     this.serverMappings = [];
   }
-  getServerMappings(){
+  currentState:ClrDatagridStateInterface;
+  totalItems:number = 0;
+  refresh(state: ClrDatagridStateInterface){
+    this.serverMappings = [];
+    if (!state.page) {
+      return;
+    }
+    this.currentState = state;
+    let pagenumber = Math.round((state.page.from + 1) / state.page.size) + 1;
+    this.getServerMappings(pagenumber,state.page.size);
+  }
+  getServerMappings(currentPage:number,pageSize:number){
     if(this.serverconfig.id !=""){
-      this.service.getServerMappings(this.pageSize,this.currentPage,this.serverconfig.type,this.serverconfig.id).subscribe(
+      this.service.getServerMappings(pageSize,currentPage,this.serverconfig.type,this.serverconfig.id).subscribe(
         (data)=>{
           this.nulltips = "No mapping found!";
           this.serverMappings = [];
           this.serverMappings = data['content'];
-          this.currentPage = data['number']+1;
-          this.totalPage = data['totalPages'];
-          if(this.totalPage == 1){
-            this.disabled = "disabled";
-          }else{
-            this.disabled = "";
-          }
+          this.totalItems = data['totalElements'];
       })
     }else{
       this.nulltips = "Please select a server first";
       this.serverMappings = [];
     }
   }
-  updateServerMapping(id,assetID){
+  updateServerMapping(id:string,assetID:string){
     this.service.updateServerMapping(id,assetID).subscribe(
       (data)=>{
         this.mappedServerAsset.id = "";
         this.mappedServerModalOpen = false;
-        this.getServerMappings();
+        this.refresh(this.currentState);
     },(error)=>{
         alert(error.json().errors[0]);
     })
@@ -125,13 +121,13 @@ export class ServermappingComponent implements OnInit {
   previous(){
     if(this.currentPage>1){
       this.currentPage--;
-      this.getServerMappings();
+      this.refresh(this.currentState);
     }
   }
   next(){
     if(this.currentPage < this.totalPage){
       this.currentPage++;
-      this.getServerMappings();
+      this.refresh(this.currentState);
     }
   }
 
@@ -154,8 +150,8 @@ export class ServermappingComponent implements OnInit {
   updateAssetID(mappingId:string){
     this.currentPageAsset = 1;
     this.service.getMappingById(mappingId).subscribe(
-      data=>{
-        //this.serverMapping = data.json(); //need datamodel
+      (data:ServerMappingDataModule)=>{
+        this.serverMapping = data;
         if(this.serverMapping.asset != null){
           this.getAssetById(this.serverMapping.asset);
         }else{
@@ -194,8 +190,8 @@ export class ServermappingComponent implements OnInit {
       this.showOtherCategory = "Switches";
     }
       this.service.getMappingById(id).subscribe(
-        (data)=>{
-            //this.serverMapping = data.json(); //need datamodel
+        (data:ServerMappingDataModule)=>{
+            this.serverMapping = data;
             let assetId = this.serverMapping.asset;
             this.service.getAssetById(assetId).subscribe(
               data=>{
@@ -324,9 +320,8 @@ export class ServermappingComponent implements OnInit {
     this.category = category;
     this.mappingId = id;
     this.service.getMappingById(id).subscribe(
-      (data)=>{
-
-        //this.serverMapping = data.json(); //need serverMapping model
+      (data:ServerMappingDataModule)=>{
+        this.serverMapping = data;
         let assetId = this.serverMapping.asset;
         this.service.getAssetById(assetId).subscribe(
           (data:AssetModule)=>{
@@ -638,7 +633,7 @@ export class ServermappingComponent implements OnInit {
   }
   
   ngOnInit() {
-    this.getServerConfigs();
+    //this.getServerConfigs();
   }
 
   cancel(){
@@ -649,7 +644,7 @@ export class ServermappingComponent implements OnInit {
     this.service.deleteServerMapping(this.serverMappingId).subscribe(
       data=>{
         this.basic = false;
-        this.getServerMappings();
+        this.refresh(this.currentState);
     },error=>{
         this.basic = false;
     })

@@ -1,28 +1,32 @@
 <!-- Copyright 2019 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause -->
-<form>
-<section class="form-block">
-    <h2 style="margin-top: 0px"> Content For Server Mapping</h2>
-    <div>
-        <clr-select-container style="float: left;">
-                <label>Integration Type:</label>
-                <select clrSelect name="typeoptions" [ngModelOptions]="{standalone: true}" [(ngModel)]="serverconfig.type" on-change="changeType()">
-                        <option value="VRO" >vRealize Operations Manager</option>
-                        <option value="VCENTER">VMware vCenter</option>
-                        <option value="VROPSMP">vRealize Operations Management Pack</option>
-                </select>
-        </clr-select-container>
-    </div>      
-    <div>
-        <clr-select-container  style="margin-left: 320px;">
-                <label>Server:</label>
-                <select clrSelect name="nameoptions" [ngModelOptions]="{standalone: true}" [(ngModel)]="serverconfig.id" on-change="change()">
-                        <option value="">Please Select</option>
-                            <option value="{{serverconfig.id}}" *ngFor="let serverconfig of serverconfigs">{{serverconfig.name}}</option>
-                </select>
-        </clr-select-container>
-    </div>
-</section>
+<form clrForm>
+        <section class="form-block">
+        <h2 style="margin-top: 0px"> Content For Server Mapping</h2>
+        <div class="clr-row">
+                <div class="clr-col-5">
+                        <clr-select-container>
+                                <label>Integration Type:</label>
+                                <select clrSelect name="typeoptions" [ngModelOptions]="{standalone: true}" [(ngModel)]="serverconfig.type" on-change="changeType()">
+                                        <option value="">Please Select</option>
+                                        <option value="VRO" >vRealize Operations Manager</option>
+                                        <option value="VCENTER">VMware vCenter</option>
+                                        <option value="VROPSMP">vRealize Operations Management Pack</option>
+                                </select>
+                        </clr-select-container>
+                </div>
+                <div class="clr-col-5">
+                        <clr-select-container>
+                                <label>Server:</label>
+                                <select clrSelect name="nameoptions" [ngModelOptions]="{standalone: true}" [(ngModel)]="serverconfig.id" on-change="change()">
+                                        <option value="">Please Select</option>
+                                        <option value="{{serverconfig.id}}" *ngFor="let serverconfig of serverconfigs">{{serverconfig.name}}</option>
+                                </select>
+                        </clr-select-container>
+                </div>
+        </div>
+        </section>
+    
 </form>
 
 <clr-datagrid>
@@ -82,20 +86,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </clr-dg-row>
        
       
-       <clr-dg-footer *ngIf="serverMappings.length>0">
-                <ul class="pagination">
-                    <li style="padding-top: 5px;"><div class="select">
-                      <select id="selects_1" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;setInfo()">
-                        <option>5</option>
-                        <option>10</option>
-                        <option>20</option>
-                        <option>50</option>
-                    </select></div>
-                  </li>
-                     <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
-                     <li class="pagination-current">{{currentPage}}/{{totalPage}}</li>
-                     <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button></li>
-                 </ul>
+       <clr-dg-footer>
+                <clr-dg-pagination #pagination [clrDgPageSize]="10" [clrDgTotalItems] = "totalItems">
+                        <clr-dg-page-size [clrPageSizeOptions]="[10,20,50]">ServerMappings per page</clr-dg-page-size>
+                        {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+                        of {{pagination.totalItems}} ServerMappings
+                </clr-dg-pagination>
        </clr-dg-footer>
 </clr-datagrid>
 

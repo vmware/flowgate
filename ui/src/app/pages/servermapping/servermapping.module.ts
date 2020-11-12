@@ -18,4 +18,5 @@ import { ServermappingService } from './servermapping.service';
   declarations: [ServermappingComponent],
   providers:[ServermappingService]
 })
-export class ServermappingModule { }
+export class ServermappingModule { 
+}

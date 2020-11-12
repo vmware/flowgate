@@ -7,6 +7,7 @@ import {Router,ActivatedRoute} from '@angular/router';
 import { VmwareService } from '../vmware.service';
 import { SddcsoftwareModule } from '../../../sddcsoftware.module';
 import { ClrDatagridStateInterface } from '@clr/angular';
+import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-vmware-config-list',
   templateUrl: './vmware-config-list.component.html',
@@ -143,13 +144,12 @@ export class VmwareConfigListComponent implements OnInit {
         })
         this.totalItems = data['totalElements'];
         this.loading = false;
-    },
-    (error)=>{
+    },(error:HttpErrorResponse)=>{
         this.loading = false;
         this.alertType = "danger";
         this.alertcontent = "Internal error";
-        if(error._body != null && error.status != "0"){
-          this.alertcontent = error.json().message;
+        if(error.status != 0){
+          this.alertcontent = error.error.message;
         }
         this.alertclose = false;
     })

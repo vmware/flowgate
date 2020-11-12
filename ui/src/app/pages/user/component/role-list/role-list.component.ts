@@ -5,6 +5,7 @@
 import { Component, ViewChild,OnInit } from '@angular/core';
 import { RoleService } from '../../role.service';
 import {ClrDatagridStateInterface, ClrWizard} from "@clr/angular";
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-role-list',
@@ -47,8 +48,8 @@ export class RoleListComponent implements OnInit {
             this.refresh(this.currentState);
             this.role.roleName = "";
             this.errorMessage = "";
-          },(error)=>{
-            this.errorMessage = error.json().message;
+          },(error:HttpErrorResponse)=>{
+            this.errorMessage = error.error.message;
             this.errorFlag = true;
           }
         )
@@ -221,12 +222,12 @@ export class RoleListComponent implements OnInit {
         this.loading = false;
         this.roles = data['content'];
         this.totalItems = data['totalElements'];
-    },(error)=>{
+    },(error:HttpErrorResponse)=>{
         this.loading = false;
         this.alertType = "danger";
         this.alertcontent = "Internal error";
-        if(error._body != null && error.status != "0"){
-          this.alertcontent = error.json().message;
+        if(error.status != 0){
+          this.alertcontent = error.error.message;
         }
         this.alertclose = false;
     })
