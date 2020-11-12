@@ -1,9 +1,11 @@
 package com.google.ar.sceneform.samples.gltf;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -18,9 +20,11 @@ import com.google.mlkit.vision.common.InputImage;
 
 import java.util.List;
 
+import com.google.ar.sceneform.samples.gltf.flowgate.flowgateClient;
+
 public class BarcodeScan {
 	private static final String TAG = "Barcode Detect";
-	public void scanBarcodes(InputImage image) {
+	public void scanBarcodes(InputImage image, flowgateClient fc, Context context, TextView textView) {
 		BarcodeScannerOptions options =
 			new BarcodeScannerOptions.Builder()
 				.setBarcodeFormats(Barcode.FORMAT_CODE_128)
@@ -36,42 +40,34 @@ public class BarcodeScan {
 			.addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
 				@Override
 				public void onSuccess(List<Barcode> barcodes) {
-					Log.d(TAG, "success");
 					// Task completed successfully
 					// [START_EXCLUDE]
 					// [START get_barcodes]
 					for (Barcode barcode: barcodes) {
-//                            Rect bounds = barcode.getBoundingBox();
-//                            Point[] corners = barcode.getCornerPoints();
 //
 						String rawValue = barcode.getRawValue();
 						Log.d(TAG, "The id is: " + rawValue);
 
-//                            int valueType = barcode.getValueType();
-//                            // See API reference for complete list of supported types
-//                            switch (valueType) {
-//                                case Barcode.TYPE_WIFI:
-//                                    String ssid = barcode.getWifi().getSsid();
-//                                    String password = barcode.getWifi().getPassword();
-//                                    int type = barcode.getWifi().getEncryptionType();
-//                                    break;
-//                                case Barcode.TYPE_URL:
-//                                    String title = barcode.getUrl().getTitle();
-//                                    String url = barcode.getUrl().getUrl();
-//                                    break;
-//                            }
+						Thread t = new Thread(){
+							@Override
+							public void run(){
+								fc.getAssetByIdOnScreen(context, rawValue, textView);
+							}
+						};
+						t.start();
+						try{
+							t.join();
+						}
+						catch (Exception e){
+							e.printStackTrace();
+						}
 					}
-					// [END get_barcodes]
-					// [END_EXCLUDE]
-
 				}
 			})
 			.addOnFailureListener(new OnFailureListener() {
 				@Override
 				public void onFailure(@NonNull Exception e) {
 					Log.d(TAG, "Failure");
-					// Task failed with an exception
-					// ...
 				}
 			});
 	}
