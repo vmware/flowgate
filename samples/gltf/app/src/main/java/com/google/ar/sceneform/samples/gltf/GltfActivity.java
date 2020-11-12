@@ -30,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
@@ -42,6 +43,7 @@ import com.google.ar.core.exceptions.NotYetAvailableException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.rendering.ViewRenderable;
+import com.google.ar.sceneform.samples.gltf.flowgate.flowgateClient;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.mlkit.vision.common.InputImage;
 
@@ -61,7 +63,8 @@ public class GltfActivity extends AppCompatActivity {
   private ArFragment arFragment;
   private ViewRenderable testRenderable;
   private AnchorNode anchorNode;
-  // int count = 1;
+
+  flowgateClient fc = new flowgateClient("202.121.180.32", "admin", "Ar_InDataCenter_450");
 
   @Override
   @SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
@@ -73,6 +76,7 @@ public class GltfActivity extends AppCompatActivity {
     if (!checkIsSupportedDeviceOrFinish(this)) {
       return;
     }
+
 
     setContentView(R.layout.activity_ux);
     arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
@@ -149,17 +153,13 @@ public class GltfActivity extends AppCompatActivity {
       try (final Image image = arFragment.getArSceneView().getArFrame().acquireCameraImage()) {
           if (image.getFormat() == ImageFormat.YUV_420_888) {
               Bitmap bitmapImage = YUV420toByteArray.getByteArray(image);
-              // byte[] byteArray = YUV420toByteArray.getByteArray(image);
               BarcodeScan barScanning = new BarcodeScan();
               InputImage inputImage = InputImage.fromBitmap(bitmapImage, 0);
-              /*if (count < 5){
-                  String filename = "file" + count + ".jpeg";
-                  count++;
-                  Log.d("TAG",filename);
-                  saveBitmap(bitmapImage, filename);
-              }*/
-              // InputImage inputImage = InputImage.fromByteArray(byteArray, image.getWidth(), image.getHeight(), 0, IMAGE_FORMAT_YUV_420_888);
-              barScanning.scanBarcodes(inputImage);
+
+              TextView textView = (TextView) testRenderable.getView();
+              Context context = this.getApplicationContext();
+
+              barScanning.scanBarcodes(inputImage, fc, context, textView);
               image.close();
           }
       } catch (NotYetAvailableException e) {
@@ -167,38 +167,6 @@ public class GltfActivity extends AppCompatActivity {
       }
   }
 
-    /*public void saveBitmap(Bitmap bitmap, String filename) throws IOException {
-        File appDir = new File(Environment.getExternalStorageDirectory(), "Boohee");
-        if (!appDir.exists()) {
-            appDir.mkdir();
-        }
-        File file = new File(appDir, filename);
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            MediaStore.Images.Media.insertImage(getContentResolver(),
-                file.getAbsolutePath(), filename, null);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        // 最后通知图库更新
-        //sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse(file.getAbsolutePath())));
-        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri uri = Uri.fromFile(file);
-        intent.setData(uri);
-        sendBroadcast(intent);
-        // 图片保存成功，图片路径：
-        Log.d("File saved", "path:" + file.getAbsolutePath());
-    }*/
 
   /**
    * Returns false and displays an error message if Sceneform can not run, true if Sceneform can run
