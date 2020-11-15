@@ -18,6 +18,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     
     @IBOutlet weak var blurView: UIVisualEffectView!
     
+    @IBOutlet weak var startview: UIView!
     var qrRequests = [VNRequest]()
     var detectedDataAnchor: [String: ARAnchor?] = [:]
     var message: String!
@@ -49,7 +50,12 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         "assetName",
         "assetNumber",
         "assetSource",
-        "category"]
+        "category",
+        "subCategory",
+        "manufacturer",
+        "model",
+        "tag",
+        "cabinetName"]
     var fetch_result: [String: Any] = [:]
     
     // MARK: - View Controller Life Cycle
@@ -176,7 +182,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         }
     }
     
-    func generate_text(_ text: String, _ x: Float, _ y: Float, _ z: Float, _ bold: Bool=false, _ size: Float=1) -> SCNNode {
+    func generate_text(_ text: String, _ x: Float, _ y: Float, _ z: Float,
+                       _ bold: Bool=false, _ size: Float=1, _ center: Bool=false) -> SCNNode {
         let mesages = SCNText(string: text, extrusionDepth: 0)
         if(bold) {mesages.font = UIFont(name:"HelveticaNeue-Bold", size: 12)}
         else {mesages.font = UIFont(name:"HelveticaNeue", size: 12)}
@@ -190,12 +197,22 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         var minVec = SCNVector3Zero
         var maxVec = SCNVector3Zero
         (minVec, maxVec) =  messageNode.boundingBox
-        messageNode.pivot = SCNMatrix4MakeTranslation(
+        if(center){
+            messageNode.pivot = SCNMatrix4MakeTranslation(
+                (minVec.x + maxVec.x)/2,
+                maxVec.y,
+                minVec.z
+            )
+            messageNode.position = messageNode.position + SCNVector3(0, y, z)
+        }
+        else {messageNode.pivot = SCNMatrix4MakeTranslation(
             minVec.x,
             maxVec.y,
             minVec.z
         )
         messageNode.position = messageNode.position + SCNVector3(x, y, z)
+        }
+        
         return messageNode
     }
 
@@ -214,15 +231,15 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             let node = SCNNode()
             guard let ID = self.message else { return node }
             let result = strFormat(ID: ID)
-            let left_message = generate_text(result["type"]!, -0.08, 0.05, 0.01, true)
-            let right_message = generate_text(result["content"]!, 0.02, 0.05, 0.01)
-            let title_message = generate_text(result["title"]!, -0.06, 0.08, 0.01, true, 2)
+            let left_message = generate_text(result["type"]!, -0.10, 0.05, 0.01)
+            let right_message = generate_text(result["content"]!, -0.02, 0.05, 0.01)
+            let title_message = generate_text(result["title"]!, -0.065, 0.08, 0.01, true, 2, true)
             node.addChildNode(left_message)
             node.addChildNode(right_message)
             node.addChildNode(title_message)
 
 
-            let plane = SCNPlane(width: 0.2, height: 0.2)
+            let plane = SCNPlane(width: 0.25, height: 0.2)
             plane.cornerRadius = 0.02
             let planeNode = SCNNode(geometry: plane)
             planeNode.eulerAngles.x = 0
@@ -246,7 +263,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 // Create a plane to visualize the initial position of the detected image.
                 let wireFrame = SCNNode()
                 let box = SCNBox(width: referenceImage.physicalSize.width, height: 0, length: referenceImage.physicalSize.height, chamferRadius: 0)
-                box.firstMaterial?.diffuse.contents = UIColor.cyan
+                box.firstMaterial?.diffuse.contents = UIColor.red
                 box.firstMaterial?.isDoubleSided = true
                 box.firstMaterial?.shaderModifiers = [.surface: shader]
                 wireFrame.geometry = box
