@@ -27,8 +27,8 @@ import java.nio.ByteBuffer;
 /**
  * Convert the YUV420 image captured by acquireCameraImage() into bitmap
  */
-public class YUV420toByteArray {
-	public static Bitmap getByteArray(Image image) {
+public class YUV420toBitmap {
+	public static Bitmap getBitmap(Image image) {
 		byte[] byteArray;
 		byteArray = NV21toJPEG(YUV420toNV21(image), image.getWidth(), image.getHeight());
 		// return byteArray;

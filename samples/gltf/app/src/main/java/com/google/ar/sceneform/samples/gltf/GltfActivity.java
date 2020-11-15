@@ -18,17 +18,13 @@ package com.google.ar.sceneform.samples.gltf;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.Image;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,11 +42,6 @@ import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.samples.gltf.flowgate.flowgateClient;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.mlkit.vision.common.InputImage;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  * Display text in AR scene using Sceneform
@@ -76,7 +67,6 @@ public class GltfActivity extends AppCompatActivity {
     if (!checkIsSupportedDeviceOrFinish(this)) {
       return;
     }
-
 
     setContentView(R.layout.activity_ux);
     arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
@@ -152,7 +142,7 @@ public class GltfActivity extends AppCompatActivity {
       // Send frame image and scan barcode
       try (final Image image = arFragment.getArSceneView().getArFrame().acquireCameraImage()) {
           if (image.getFormat() == ImageFormat.YUV_420_888) {
-              Bitmap bitmapImage = YUV420toByteArray.getByteArray(image);
+              Bitmap bitmapImage = YUV420toBitmap.getBitmap(image);
               BarcodeScan barScanning = new BarcodeScan();
               InputImage inputImage = InputImage.fromBitmap(bitmapImage, 0);
 
