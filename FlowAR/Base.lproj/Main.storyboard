@@ -11,7 +11,7 @@
         <!--View Controller-->
         <scene sceneID="Gc6-sg-zN3">
             <objects>
-                <viewController id="c6h-T4-VaG" customClass="ViewController" customModule="ARKitImageDetection" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="c6h-T4-VaG" customClass="ViewController" customModule="FlowAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ELN-Hy-SiV">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -53,6 +53,7 @@
                             <constraint firstItem="GWV-Ta-vSk" firstAttribute="leading" secondItem="a2U-sP-shK" secondAttribute="leading" id="ukb-71-aAy"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="wNO-U8-QO0"/>
                     <connections>
                         <outlet property="blurView" destination="aGR-hj-NkT" id="gJC-0T-gFt"/>
                         <outlet property="sceneView" destination="FZd-N3-nGX" id="V4b-yN-KGH"/>
@@ -60,12 +61,12 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="y5L-lq-w9w" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="56.799999999999997" y="98.50074962518741"/>
+            <point key="canvasLocation" x="56.521739130434788" y="98.4375"/>
         </scene>
         <!--Status View Controller-->
         <scene sceneID="1gk-qx-wyt">
             <objects>
-                <viewController id="nYX-8E-ouy" customClass="StatusViewController" customModule="ARKitImageDetection" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="nYX-8E-ouy" customClass="StatusViewController" customModule="FlowAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="pHH-Dc-DFj">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="85"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

@@ -28,7 +28,7 @@ _surface.transparent.a = clamp(normalizedDistance, 0.0, 1.0);
 ////////////////////////////////////////////////////////////////
 // Render only a wireframe
 ////////////////////////////////////////////////////////////////
-float lineThickness = 0.002;
+float lineThickness = 0.01;
 float u = _surface.diffuseTexcoord.x;
 float v = _surface.diffuseTexcoord.y;
 
