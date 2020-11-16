@@ -6,7 +6,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { routing } from './dcim.routing';
 import { ClarityModule } from '@clr/angular';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DcimComponent } from './dcim.component';
 import { DcimListComponent } from '../dcim/dcim-list/dcim-list.component';
 import { DcimAddComponent } from '../dcim/dcim-add/dcim-add.component';
@@ -19,7 +19,8 @@ import { PagesModule } from '../../../pages.module';
     routing,
     ClarityModule,
     FormsModule,
-    PagesModule
+    PagesModule,
+    ReactiveFormsModule,
   ],
   declarations: [DcimComponent,DcimListComponent,DcimAddComponent,DcimEditComponent],
   providers:[DcimService]
