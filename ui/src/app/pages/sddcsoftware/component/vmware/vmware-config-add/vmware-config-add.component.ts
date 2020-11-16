@@ -84,7 +84,8 @@ export class VmwareConfigAddComponent implements OnInit {
   }
   Yes(){
     this.ignoreCertificatesModals = false;
-    if(this.verify){
+    let verifyCert:boolean = this.addSDDCForm.get('verifyCert').value;
+    if(verifyCert){
       this.addSDDCForm.get('verifyCert').setValue('false');
       this.save();
     }
@@ -100,9 +101,7 @@ export class VmwareConfigAddComponent implements OnInit {
     this.router.navigate(["/ui/nav/sddc/vmware/vmware-list"]);
   }
   ngOnInit() {
-    this.vmwareConfig.verifyCert = true;
   }
 
-  
 
 }

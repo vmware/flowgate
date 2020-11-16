@@ -5,31 +5,46 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DcimService } from '../../dcim/dcim.service';
-import { FormGroup, FormControl, Validators } from "@angular/forms";
+import { FormGroup, FormControl, Validators, FormBuilder } from "@angular/forms";
 import { FacilityModule } from '../../../facility.module';
 import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
+import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-cmdb-add',
   templateUrl: './cmdb-add.component.html',
   styleUrls: ['./cmdb-add.component.scss']
 })
 export class CmdbAddComponent implements OnInit {
-
-  constructor(private service:DcimService,private router:Router) { }
-
-
-  cmdbForm = new FormGroup({
-    serverIPInput:new FormControl('',Validators.required),
-    serverName:new FormControl('',Validators.required),
-    userName:new FormControl('',Validators.required),
-    passwordInput:new FormControl('',Validators.required)
-  });
+  addCMDBForm:FormGroup;
+  constructor(private service:DcimService,private router:Router,private fb: FormBuilder) { 
+    this.addCMDBForm = this.fb.group({
+      type: ['', [
+        Validators.required
+      ]],
+      serverURL: ['', [
+        Validators.required
+      ]],
+      name: ['', [
+        Validators.required
+      ]],
+      description: ['', [
+      ]],
+      userName: ['', [
+        Validators.required
+      ]],
+      password: ['', [
+        Validators.required
+      ]],
+      verifyCert: ['true', [
+        Validators.required
+      ]]
+    });
+  }
 
   loading:boolean = false;
   operatingModals:boolean = false;
   ignoreCertificatesModals:boolean = false;
   tip:string = "";
-  verify:boolean = false;
   yes:boolean = false;
   no:boolean = true;
 
@@ -41,17 +56,15 @@ export class CmdbAddComponent implements OnInit {
     "INFOBLOX_PROXY_SEARCH":"LOCAL"
   }
   checkIsLabsDB(){
-    this.cmdbForm.setControl("userName",new FormControl('',Validators.required));
-    this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.required));
-    let adapter:FacilityAdapterModule = this.adapterMap.get(this.seclectAdapter.displayName);
+    this.addCMDBForm.setControl("userName",new FormControl('',Validators.required));
+    this.addCMDBForm.setControl("password",new FormControl('',Validators.required));
+    this.isInfoblox = false;
+    let adapter:FacilityAdapterModule = this.adapterMap.get(this.addCMDBForm.get('type').value);
     this.cmdbConfig.type = adapter.type;
-    if(this.cmdbConfig.type != adapter.displayName){
-      this.cmdbConfig.subCategory = adapter.subCategory;
-    }
     if(this.cmdbConfig.type == "Labsdb"){
-      this.cmdbForm.setControl("userName",new FormControl('',Validators.nullValidator));
-      this.cmdbForm.setControl("passwordInput",new FormControl('',Validators.nullValidator));
-    }else {
+      this.addCMDBForm.setControl("userName",new FormControl('',Validators.nullValidator));
+      this.addCMDBForm.setControl("password",new FormControl('',Validators.nullValidator));
+    }else if(this.cmdbConfig.type == "InfoBlox"){
       this.isInfoblox = true;
     }
   }
@@ -59,32 +72,31 @@ export class CmdbAddComponent implements OnInit {
   save(){
       this.read = "readonly";
       this.loading = true;
+      this.cmdbConfig = this.addCMDBForm.value;
       if(this.isInfoblox && this.enableProxySearch){
         this.cmdbConfig.advanceSetting = this.advanceSetting;
       }
+      let adapter:FacilityAdapterModule = this.adapterMap.get(this.addCMDBForm.get('type').value);
+      this.cmdbConfig.type = adapter.type;
+      this.cmdbConfig.subCategory = adapter.subCategory;
       this.service.AddDcimConfig(this.cmdbConfig).subscribe(
         (data)=>{
           this.loading = false;
           this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
-        },
-        error=>{
-          if(error.status == 400 && error.json().errors[0] == "Invalid SSL Certificate"){
-            this.loading = false;
-            this.verify = true;
+        },(error:HttpErrorResponse)=>{
+          this.loading = false;
+          if(error.status == 400 && error.error.message == "Invalid SSL Certificate"){
             this.ignoreCertificatesModals = true;
-            this.tip = error.json().message+". Are you sure you ignore the certificate check?"
-          }else if(error.status == 400 && error.json().errors[0] == "Unknown Host"){
-            this.loading = false;
+            this.tip = error.error.message+". Are you sure you ignore the certificate check?"
+          }else if(error.status == 400 && error.error.message == "Unknown Host"){
             this.operatingModals = true;
-            this.tip = error.json().message+". Please check your serverIp. ";
+            this.tip = error.error.message+". Please check your serverIp. ";
           }else if(error.status == 401){
-            this.loading = false;
             this.operatingModals = true;
-            this.tip = error.json().message+". Please check your userName or password. ";
+            this.tip = error.error.message+". Please check your userName or password. ";
           }else{
-            this.loading = false;
             this.operatingModals = true;
-            this.tip = error.json().message+". Please check your input. ";
+            this.tip = error.error.message+". Please check your input. ";
           }
         }
       )
@@ -93,8 +105,9 @@ export class CmdbAddComponent implements OnInit {
   Yes(){
     this.ignoreCertificatesModals = false;
     this.read = "";
-    if(this.verify){
-      this.cmdbConfig.verifyCert = "false";
+    let verifyCert:boolean = this.addCMDBForm.get('verifyCert').value;
+    if(verifyCert){
+      this.addCMDBForm.get('verifyCert').setValue('false');
       this.save();
     }
   }
@@ -138,7 +151,6 @@ export class CmdbAddComponent implements OnInit {
   }
   ngOnInit() {
     this.findAllAdapters();
-    this.cmdbConfig.verifyCert = "true";
   }
 
 }
