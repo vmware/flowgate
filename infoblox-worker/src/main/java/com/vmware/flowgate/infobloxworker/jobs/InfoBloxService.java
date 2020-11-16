@@ -7,12 +7,12 @@ package com.vmware.flowgate.infobloxworker.jobs;
 import java.net.ConnectException;
 import java.util.List;
 
+import com.vmware.flowgate.infobloxworker.model.InfoBloxIPInfoResult;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -63,10 +63,10 @@ public class InfoBloxService implements AsyncService {
             continue;
          }
          InfobloxClient client = new InfobloxClient(infoblox);
-         List<String> hostNames = null;
+         List<InfoBloxIPInfoResult> infoBloxIPInfoResults = null;
          IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
          try {
-            hostNames = client.queryHostNamesByIP(message);
+            infoBloxIPInfoResults = client.queryHostNamesByIP(message);
          }catch(ResourceAccessException e) {
             if(e.getCause().getCause() instanceof ConnectException) {
                checkAndUpdateIntegrationStatus(infoblox, e.getCause().getCause().getMessage());
@@ -89,20 +89,21 @@ public class InfoBloxService implements AsyncService {
         	 updateIntegrationStatus(infoblox);
          }
          
-         if (hostNames != null && !hostNames.isEmpty()) {
-            for (String hostname : hostNames) {
+         if (infoBloxIPInfoResults != null && !infoBloxIPInfoResults.isEmpty()) {
+            for (InfoBloxIPInfoResult infoBloxIPInfoResult : infoBloxIPInfoResults) {
                try {
-                  ResponseEntity<Asset> asset = wormholeAPIClient.getAssetByName(hostname);
+                  Asset asset = wormholeAPIClient.getAssetByName(infoBloxIPInfoResult.getHostName()).getBody();
                   if (asset == null) {
-                     logger.info(String.format("hostname (%s) no found!", hostname));
+                     logger.info(String.format("hostname (%s) no found!", infoBloxIPInfoResult.getHostName()));
                      continue;
                   }
                } catch (HttpClientErrorException e) {
-                  logger.error(String.format("Error when searching %s", hostname), e);
+                  logger.error(String.format("Error when searching %s", infoBloxIPInfoResult.getHostName()), e);
                   continue;
                }
                AssetIPMapping tempMapping = new AssetIPMapping();
-               tempMapping.setAssetname(hostname);
+               tempMapping.setAssetname(infoBloxIPInfoResult.getHostName());
+               tempMapping.setMacAddress(infoBloxIPInfoResult.getMacAddress());
                tempMapping.setIp(message);
 
                AssetIPMapping[] mappings =
@@ -110,7 +111,11 @@ public class InfoBloxService implements AsyncService {
                boolean isNewMapping = true;
                if (null != mappings && mappings.length > 0) {
                   for (AssetIPMapping mapping : mappings) {
-                     if (hostname.equals(mapping.getAssetname())) {
+                     if (tempMapping.getAssetname().equals(mapping.getAssetname())) {
+                        if (!StringUtils.equals(mapping.getMacAddress(), tempMapping.getMacAddress())) {
+                           mapping.setMacAddress(tempMapping.getMacAddress());
+                           wormholeAPIClient.updateHostnameIPMapping(mapping);
+                        }
                         isNewMapping = false;
                         break;
                      }
@@ -119,7 +124,7 @@ public class InfoBloxService implements AsyncService {
                if (isNewMapping) {
                   wormholeAPIClient.createHostnameIPMapping(tempMapping);
                }
-               logger.info(String.format("Find hostname %s for ip %s", hostname, message));
+               logger.info(String.format("Find hostname %s for ip %s", infoBloxIPInfoResult.getHostName(), message));
                return;
             }
          }
@@ -127,7 +132,7 @@ public class InfoBloxService implements AsyncService {
       logger.info(String.format("Cannot find the hostname for IP: %s", message));
    }
    
-   public void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig infoblox,String message) {
+   private void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig infoblox,String message) {
       IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
       if(integrationStatus == null) {
          integrationStatus = new IntegrationStatus();

@@ -4,78 +4,110 @@
 */
 package com.vmware.flowgate.infobloxworker.controller;
 
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.http.client.ClientProtocolException;
-
-import com.vmware.flowgate.infobloxworker.model.Infoblox;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.infobloxworker.model.InfoBloxIPInfoResult;
 import com.vmware.flowgate.infobloxworker.model.JsonResultForQueryHostNames;
 import com.vmware.flowgate.infobloxworker.service.InfobloxClient;
-import com.vmware.flowgate.client.WormholeAPIClient;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
-import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
-
-import ch.qos.logback.classic.Logger;
 import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class InfobloxClientTest {
 
-    @Mock
-    private JsonResultForQueryHostNames jsonHostNameResult = new JsonResultForQueryHostNames();
+   @Test
+   public void queryHostNamesByIPTestZoneIsNull() {
+      String ip = "10.161.71.154";
+      List<InfoBloxIPInfoResult> expectedResult = this.getExpectedResult();
+      InfobloxClient infobloxClient = new InfobloxClient(getInfobloxFacilitySoftware()[0]);
+      infobloxClient = Mockito.spy(infobloxClient);
+      Mockito.doReturn(this.getJsonResultForQueryHostNamesZoneIsNull()).when(infobloxClient).getHostNameList(ip);
+      List<InfoBloxIPInfoResult> actualResult = infobloxClient.queryHostNamesByIP(ip);
+      TestCase.assertEquals(expectedResult.size(), actualResult.size());
+      for (int i = 0; i < expectedResult.size(); i++) {
+         TestCase.assertEquals(expectedResult.get(i).getIpAddress(), actualResult.get(i).getIpAddress());
+         TestCase.assertEquals(expectedResult.get(i).getHostName(), actualResult.get(i).getHostName());
+         TestCase.assertEquals(expectedResult.get(i).getMacAddress(), actualResult.get(i).getMacAddress());
+      }
+   }
 
-    @Test
-    public void queryHostNamesByIPTest() {
-        String ip = "192.168.1.6";
-        List<String> successResult = new ArrayList<String>();
-        successResult.add("abc");
-        successResult.add("bcd");
-        successResult.add("def");
-        initJsonHostNameResult();
-        InfobloxClient client = new InfobloxClient(initInfobloxData());
-        client = Mockito.spy(client);
-        Mockito.doReturn(jsonHostNameResult).when(client).getHostNameList(ip);
-        List<String> ret = client.queryHostNamesByIP(ip);
-        TestCase.assertEquals(successResult, ret);
-    }
+   @Test
+   public void queryHostNamesByIPTestZoneNonNull() {
+      String ip = "10.161.71.154";
+      List<InfoBloxIPInfoResult> expectedResult = this.getExpectedResult();
+      InfobloxClient infobloxClient = new InfobloxClient(getInfobloxFacilitySoftware()[0]);
+      infobloxClient = Mockito.spy(infobloxClient);
+      Mockito.doReturn(this.getJsonResultForQueryHostNamesZoneNonNull()).when(infobloxClient).getHostNameList(ip);
+      List<InfoBloxIPInfoResult> actualResult = infobloxClient.queryHostNamesByIP(ip);
+      TestCase.assertEquals(expectedResult.size(), actualResult.size());
+      for (int i = 0; i < expectedResult.size(); i++) {
+         TestCase.assertEquals(expectedResult.get(i).getIpAddress(), actualResult.get(i).getIpAddress());
+         TestCase.assertEquals(expectedResult.get(i).getHostName(), actualResult.get(i).getHostName());
+         TestCase.assertEquals(expectedResult.get(i).getMacAddress(), actualResult.get(i).getMacAddress());
+      }
+   }
 
-    private FacilitySoftwareConfig initInfobloxData() {
-        FacilitySoftwareConfig infoBlox = new FacilitySoftwareConfig();
-        infoBlox.setName("Nlyte");
-        infoBlox.setUserName("admin");
-        infoBlox.setPassword("Admin!23");
-        infoBlox.setServerURL("10.160.46.136");
-        infoBlox.setUserId("1");
-        infoBlox.setVerifyCert(false);
-        infoBlox.setType(SoftwareType.InfoBlox);
-    return infoBlox;
-    }
-    private void initJsonHostNameResult() {
-        List<Infoblox> result = new ArrayList<Infoblox>();
-        Infoblox infoblox = new Infoblox();
-        String[] hostnames = {"abc", "bcd.com", "def.com"};
-        infoblox.set_ref("123");
-        infoblox.setHostNames(hostnames);
-        infoblox.setIpAddress("192.168.1.6");
-        infoblox.setIsConflict(true);
-        infoblox.setMacAddress("123");
-        infoblox.setNetwork("123");
-        infoblox.setNetworkView("123");
-        infoblox.setObjects(hostnames);
-        infoblox.setStatus("123");
-        infoblox.setTypes(hostnames);
-        infoblox.setUsage(hostnames);
-        result.add(infoblox);
-        jsonHostNameResult.setResult(result);
-    }
+   private JsonResultForQueryHostNames getJsonResultForQueryHostNamesZoneIsNull() {
+      String resultJSON = "{\"result\":[{\"_ref\":\"ipv4address/Li5pcHY0X2FkZHJlc3MkMTAuMTYxLjcxLjE1NC8w:10.161.71.154\",\"discovered_data\":{\"first_discovered\":1603864985,\"last_discovered\":1603869896,\"mac_address\":\"00:50:56:be:60:62\",\"os\":\"Linux 3.10 - 4.1\"},\"ip_address\":\"10.161.71.154\",\"mac_address\":\"\",\"names\":[\"ubuntu01\"]}]}";
+      JsonResultForQueryHostNames result = null;
+      try {
+         result = new ObjectMapper().readValue(resultJSON, JsonResultForQueryHostNames.class);
+      } catch (JsonProcessingException e) {
+         e.printStackTrace();
+      }
+      return result;
+   }
+
+   private JsonResultForQueryHostNames getJsonResultForQueryHostNamesZoneNonNull() {
+      String resultJSON = "{\"result\":[{\"_ref\":\"ipv4address/Li5pcHY0X2FkZHJlc3MkMTAuMTYxLjcxLjE1NC8w:10.161.71.154\",\"discovered_data\":{\"first_discovered\":1603864985,\"last_discovered\":1603869896,\"mac_address\":\"00:50:56:be:60:62\",\"os\":\"Linux 3.10 - 4.1\"},\"ip_address\":\"10.161.71.154\",\"mac_address\":\"\",\"names\":[\"ubuntu01.info.com\"]}]}";
+      JsonResultForQueryHostNames result = null;
+      try {
+         result = new ObjectMapper().readValue(resultJSON, JsonResultForQueryHostNames.class);
+      } catch (JsonProcessingException e) {
+         e.printStackTrace();
+      }
+      return result;
+   }
+
+   private List<InfoBloxIPInfoResult> getExpectedResult() {
+      List<InfoBloxIPInfoResult> expectedResult = new ArrayList<>();
+      InfoBloxIPInfoResult infoBloxIPInfoResult1 = new InfoBloxIPInfoResult();
+      infoBloxIPInfoResult1.setIpAddress("10.161.71.154");
+      infoBloxIPInfoResult1.setHostName("ubuntu01");
+      infoBloxIPInfoResult1.setMacAddress("00:50:56:be:60:62");
+      expectedResult.add(infoBloxIPInfoResult1);
+      return expectedResult;
+   }
+
+   private FacilitySoftwareConfig[] getInfobloxFacilitySoftware() {
+      FacilitySoftwareConfig[] facilitySoftwareConfigs = new FacilitySoftwareConfig[1];
+      FacilitySoftwareConfig facilitySoftwareConfig = new FacilitySoftwareConfig();
+      facilitySoftwareConfig.setPassword("O75xginpkAD748w=Lc20CrTzd1lEpvDTdJqH5IXBZTb5gYp7P8awDAs19F0=");
+      facilitySoftwareConfig.setServerURL("https://10.161.71.133");
+      facilitySoftwareConfig.setName("infoblox-1");
+      facilitySoftwareConfig.setVerifyCert(false);
+      IntegrationStatus integrationStatus = new IntegrationStatus();
+      integrationStatus.setRetryCounter(0);
+      integrationStatus.setDetail("");
+      integrationStatus.setStatus(IntegrationStatus.Status.ACTIVE);
+      facilitySoftwareConfig.setIntegrationStatus(integrationStatus);
+      facilitySoftwareConfig.setUserName("admin");
+      facilitySoftwareConfig.setType(FacilitySoftwareConfig.SoftwareType.InfoBlox);
+      facilitySoftwareConfig.setUserId("e1edfv8953002379827896a1aaiqoose");
+      facilitySoftwareConfigs[0] = facilitySoftwareConfig;
+      return facilitySoftwareConfigs;
+   }
+
 }
