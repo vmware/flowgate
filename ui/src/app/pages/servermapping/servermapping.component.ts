@@ -1,9 +1,8 @@
-
-import {map} from 'rxjs/operators';
 /**
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
+import {map} from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { ServermappingService } from './servermapping.service';
 import {Router,ActivatedRoute} from '@angular/router';
@@ -51,15 +50,9 @@ export class ServermappingComponent implements OnInit {
  
   serverMappings:ServerMappingDataModule[] = [];
   serverMapping:ServerMappingDataModule = new ServerMappingDataModule();
-  // serverMappingVCs=[];
-  // serverMappingVC={
-  //   vcHostName:"",
-  //   vcMobID:"",
-  //   asset:""
-  // }
+
   setInfo(){
     this.info=this.pageSize;
-   
     this.refresh(this.currentState);
   }
   changeType(){
@@ -85,6 +78,7 @@ export class ServermappingComponent implements OnInit {
   }
   currentState:ClrDatagridStateInterface;
   totalItems:number = 0;
+  serverMappingLoading:boolean = false;
   refresh(state: ClrDatagridStateInterface){
     this.serverMappings = [];
     if (!state.page) {
@@ -96,15 +90,19 @@ export class ServermappingComponent implements OnInit {
   }
   getServerMappings(currentPage:number,pageSize:number){
     if(this.serverconfig.id !=""){
+      this.serverMappingLoading = true;
       this.service.getServerMappings(pageSize,currentPage,this.serverconfig.type,this.serverconfig.id).subscribe(
         (data)=>{
           this.nulltips = "No mapping found!";
           this.serverMappings = [];
           this.serverMappings = data['content'];
           this.totalItems = data['totalElements'];
+          this.serverMappingLoading = false;
+      },(error)=>{
+        this.serverMappingLoading = false;
       })
     }else{
-      this.nulltips = "Please select a server first";
+      this.nulltips = "Please select a server first.";
       this.serverMappings = [];
     }
   }
@@ -136,7 +134,7 @@ export class ServermappingComponent implements OnInit {
   currentPageAsset:number=1;
   pageSizeAsset:number=5;
   serverMappingId:string="";
-  disabledAsset:string="";
+  disabledAsset:string="disabled";
   keywords:string="";
   mappedServerAsset:AssetModule = new AssetModule();
   assets :AssetModule[] = [];
@@ -147,7 +145,9 @@ export class ServermappingComponent implements OnInit {
   showOtherCategory:string="";
   searchBtnState:boolean = false;
   searchBtnDisabled:boolean = false;
-  updateAssetID(mappingId:string){
+  // assetListCurrentState:ClrDatagridStateInterface;
+  selectedServerAsset:AssetModule = new AssetModule();
+  showServerAsset(mappingId:string){
     this.currentPageAsset = 1;
     this.service.getMappingById(mappingId).subscribe(
       (data:ServerMappingDataModule)=>{
@@ -189,41 +189,37 @@ export class ServermappingComponent implements OnInit {
     }else if(category == "Networks"){
       this.showOtherCategory = "Switches";
     }
-      this.service.getMappingById(id).subscribe(
+    this.service.getMappingById(id).subscribe(
         (data:ServerMappingDataModule)=>{
             this.serverMapping = data;
             let assetId = this.serverMapping.asset;
             this.service.getAssetById(assetId).subscribe(
-              data=>{
-                if(data.status == 200){
-                  this.mappedServerAsset= data.json();
-                  let reqList:SubscribableOrPromise<any>[] = [];
-                  let assetIDs:string[] = [];
-                  if(category == "PDU"){
-                    assetIDs = this.mappedServerAsset.pdus;
-                  }else if(category == "Networks"){
-                    //switch
-                    assetIDs = this.mappedServerAsset.switches;
-                  }
-                  if(assetIDs != null){
-                    for(let i=0;i<assetIDs.length; i++){
-                      reqList.push(this.service.getAssetById(assetIDs[i]));
-                    }
-                  }
-                 
-                  forkJoin(reqList).pipe(map((data)=>data)).subscribe((res)=>{
-                    res.forEach(element => {
-                      if(element._body != null && element._body != ""){
-                        let pduAsset:AssetModule = new AssetModule();
-                        pduAsset = element.json();
-                        pduAsset.enable = true;
-                        this.mappedOtherAssets.push(pduAsset)
-                      }
-                    });
-                  })
-                  this.currentPage = 1;
-                  this.keywords="";
+              (data:AssetModule)=>{
+                this.mappedServerAsset= data;
+                let reqList:SubscribableOrPromise<any>[] = [];
+                let assetIDs:string[] = [];
+                if(category == "PDU"){
+                  assetIDs = this.mappedServerAsset.pdus;
+                }else if(category == "Networks"){
+                  //switch
+                  assetIDs = this.mappedServerAsset.switches;
                 }
+                if(assetIDs != null){
+                  for(let i=0;i<assetIDs.length; i++){
+                    reqList.push(this.service.getAssetById(assetIDs[i]));
+                  }
+                }
+                
+                forkJoin(reqList).pipe(map((data)=>data)).subscribe((res)=>{
+                  res.forEach((element:AssetModule) => {
+                    element.enable = true;
+                    this.mappedOtherAssets.push(element)
+                    
+                  });
+                })
+                this.currentPage = 1;
+                this.keywords="";
+             
               },error=>{
                 this.updateAssetError = error.json().message();
                 this.updateAssetModalErrorShow = true;
@@ -255,25 +251,24 @@ export class ServermappingComponent implements OnInit {
     this.searchBtnDisabled = true;
     this.searchBtnState = true;
     this.loading = true;
-      this.service.getAssets(this.pageSizeAsset,this.currentPageAsset,this.keywords,this.category).subscribe(data=>{
-
-        this.searchBtnDisabled = false;
-        this.searchBtnState = false;
-        this.loading = false;
-        this.assets = data['content'];
-        this.assets.forEach(element => {
-          element.enable = true;
-        });
-        if(data['content'].length == this.pageSizeAsset){
-          this.emptyResult = false;
-          this.currentPageAsset = data['number']+1;
-          this.disabledAsset = "";
-        }else{
-          this.emptyResult = true;
-          this.disabledAsset = "disabled";
-        }
-      },
-      (error)=>{
+      this.service.getAssets(this.pageSizeAsset,this.currentPageAsset,this.keywords,this.category).subscribe(
+        (data)=>{
+          this.searchBtnDisabled = false;
+          this.searchBtnState = false;
+          this.loading = false;
+          this.assets = data['content'];
+          this.assets.forEach(element => {
+            element.enable = true;
+          });
+          if(data['content'].length == this.pageSizeAsset){
+            this.emptyResult = false;
+            this.currentPageAsset = data['number']+1;
+            this.disabledAsset = "";
+          }else{
+            this.emptyResult = true;
+            this.disabledAsset = "disabled";
+          }
+      },(error)=>{
         this.updateAssetModalErrorShow = true;
         this.updateAssetError = error.json().message
         this.loading = false;
@@ -290,11 +285,13 @@ export class ServermappingComponent implements OnInit {
     }
   }
   nextAsset(){
-      if(!this.emptyResult){
-        this.currentPageAsset++;
-      }
-      this.getAssets();
+    if(!this.emptyResult){
+      this.currentPageAsset++;
+    }
+    this.getAssets();
   }
+    
+
   closeSelectOtherAsset(){
     this.mappedOtherAssets = [];
     this.mappedOtherAssetModalOpen = false;
@@ -386,21 +383,20 @@ export class ServermappingComponent implements OnInit {
       reqList.push(this.service.getAssetById(ids[i]));
     }
      forkJoin(reqList).pipe(map((data)=>data)).subscribe((res)=>{
-      res.forEach(element => {
-        if(element._body != null && element._body != ""){
-          let sensorAsset:AssetModule = new AssetModule();
-          sensorAsset = element.json();
-          sensorAsset.enable = true;
-          if(metricName == "Front Temperature"){
-            this.frontTemSensors.push(sensorAsset);
-          }else if(metricName == "Back Temperature"){
-            this.backTemSensors.push(sensorAsset);
-          }else if(metricName == "Front Humidity"){
-            this.frontHumSensors.push(sensorAsset);
-          }else if(metricName == "Back Humidity"){
-            this.backHumSensors.push(sensorAsset);
-          }
+      res.forEach((element:AssetModule) => {
+        let sensorAsset:AssetModule = new AssetModule();
+        sensorAsset = element;
+        sensorAsset.enable = true;
+        if(metricName == "Front Temperature"){
+          this.frontTemSensors.push(sensorAsset);
+        }else if(metricName == "Back Temperature"){
+          this.backTemSensors.push(sensorAsset);
+        }else if(metricName == "Front Humidity"){
+          this.frontHumSensors.push(sensorAsset);
+        }else if(metricName == "Back Humidity"){
+          this.backHumSensors.push(sensorAsset);
         }
+  
       });
     })
   }
@@ -633,7 +629,6 @@ export class ServermappingComponent implements OnInit {
   }
   
   ngOnInit() {
-    //this.getServerConfigs();
   }
 
   cancel(){
