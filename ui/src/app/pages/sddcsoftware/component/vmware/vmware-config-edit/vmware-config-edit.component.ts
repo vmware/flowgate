@@ -51,7 +51,6 @@ export class VmwareConfigEditComponent implements OnInit {
   operatingModals:boolean = false;
   ignoreCertificatesModals:boolean = false;
   tip:string = "";
-  verify:boolean = false;
  
   checked:boolean;
   read = "";
@@ -66,7 +65,6 @@ export class VmwareConfigEditComponent implements OnInit {
         },(error:HttpErrorResponse)=>{
           if(error.status == 400 && error.error.message == "Certificate verification error"){
             this.loading = false;
-            this.verify = true;
             this.ignoreCertificatesModals = true;
             this.tip = error.error.message+". Are you sure you ignore the certificate check?"
           }else if(error.status == 400 && error.error.message == "UnknownHostException"){
@@ -89,8 +87,9 @@ export class VmwareConfigEditComponent implements OnInit {
   Yes(){
     this.operatingModals = false;
     this.read = "";
-    if(this.verify){
-      this.vmwareConfig.verifyCert = false;
+    let verifyCert:boolean = this.editSDDCForm.get('verifyCert').value;
+    if(verifyCert){
+      this.editSDDCForm.get('verifyCert').setValue('false');
       this.save();
     }
   }
@@ -111,7 +110,8 @@ export class VmwareConfigEditComponent implements OnInit {
       this.service.getVmwareConfig(this.vmwareConfig.id).subscribe(
         (data:SddcsoftwareModule)=>{
           this.editSDDCForm.setValue(data);
-          if(this.vmwareConfig.verifyCert){
+          let verifyCert:boolean = this.editSDDCForm.get('verifyCert').value;
+          if(verifyCert){
             this.editSDDCForm.get('verifyCert').setValue('true');
           }else{
             this.editSDDCForm.get('verifyCert').setValue('false');
