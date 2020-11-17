@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
      </font>
 </button>
 
-<clr-alert [clrAlertType]="'alert-danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "deleteErrorClosed">
+<clr-alert [clrAlertType]="'danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "deleteErrorClosed">
     <div class="alert-item">
         <span>{{deleteErrorMsg}}</span>
     </div>
@@ -47,38 +47,32 @@ SPDX-License-Identifier: BSD-2-Clause -->
 
     <clr-wizard-button [type]="'cancel'">Close</clr-wizard-button>
     <clr-wizard-button [type]="'previous'">Previous</clr-wizard-button>
-    <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
+    <clr-wizard-button [type]="'next'" (click)="baseSetting()">Next</clr-wizard-button>
     <clr-wizard-button [type]="'finish'" >Done</clr-wizard-button>
 
     <clr-wizard-page [clrWizardPageNextDisabled]="!formPageOne.valid">
         <ng-template clrPageTitle>Create</ng-template> 
-        <form #formPageOne="ngForm">
-            <section class="form-block">
-                <div class="form-group ">
-                    <label class="required" for="gForm_5">Type</label>
-                        <div class="select" style="width:184px; ">
-                            <select id="gForm_5" [ngModelOptions]="{standalone: true}"  [ngModel]="newFacilityAdapter.type" (ngModelChange)="newFacilityAdapter.type=$event"> 
-                                    <option value="OtherCMDB">CMDB</option>
-                                    <option value="OtherDCIM">DCIM</option>
-                            </select>
-                        </div>
-                </div>
-                <div class="form-group">
-                    <label class="required">Display Name</label>
-                    <label for="nameInput" aria-haspopup="true" role="tooltip"
-                        [class.invalid]="name.touched && !name.valid"
-                        class="tooltip tooltip-validation tooltip-md tooltip-bottom-right">
-                        <input type="text" id="nameInput" required
-                        pattern="^[a-zA-Z][a-zA-Z0-9_]*$"
-                        [(ngModel)]="newFacilityAdapter.displayName" name="name" #name="ngModel">
-                        <span class="tooltip-content">{{Command_Name}}</span>
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="favInput">Description</label>
-                    <textarea clrTextarea [(ngModel)]="newFacilityAdapter.description" name="description" ></textarea>
-                </div>
-            </section>
+        <form clrForm [formGroup]="formPageOne" >
+
+            <clr-select-container>
+               <label>Type</label>
+               <select clrSelect name="options" formControlName="type" style="width: 220px;">
+                    <option value="OtherCMDB">CMDB</option>
+                    <option value="OtherDCIM">DCIM</option>
+               </select>
+               <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+           </clr-select-container>
+           <clr-control-container>
+               <label>Display Name</label>
+               <input clrControl placeholder="Display Name" formControlName="displayName" style="width: 220px;"/>
+               <clr-control-helper>{{Command_Name}}</clr-control-helper>
+               <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+               <clr-control-error *clrIfError="'pattern'">{{Command_Name}}</clr-control-error>
+           </clr-control-container>
+           <clr-textarea-container>
+            <label>Description</label>
+            <textarea clrTextarea  placeholder="description" formControlName="description"></textarea>
+          </clr-textarea-container>
         </form>
     </clr-wizard-page>
 
@@ -110,94 +104,83 @@ SPDX-License-Identifier: BSD-2-Clause -->
             </clr-dg-row>
         </clr-datagrid>
 
-         <form #commandForm="ngForm" *ngIf="onAdd">
-            <section class="form-block">
-                <label>{{Nem_Command_Form_Lable}}</label>
-                <clr-alert [clrAlertType]="'alert-danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "addCommandErrorClosed">
-                    <div class="alert-item">
-                        <span>{{Duplicate_Command_Name}}</span>
-                    </div>
-                </clr-alert>
-                <div class="form-group">
-                    <label>Name</label>
-                    <label for="commandname" aria-haspopup="true" role="tooltip"
-                        [class.invalid]="commandname.touched && !commandname.valid"
-                        class="tooltip tooltip-validation tooltip-md tooltip-bottom-right">
-                        <input type="text" id="commandname" required 
-                        pattern="^[a-zA-Z][a-zA-Z0-9_]*$" [(ngModel)]="newCommand.command" name="commandname" #commandname="ngModel">
-                        <span class="tooltip-content">{{Command_Name}}</span>
-                    </label>
+        <form clrForm [formGroup]="commandForm" *ngIf="onAdd">
+            <clr-alert [clrAlertType]="'danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "addCommandErrorClosed">
+                <div class="alert-item">
+                    <span>{{Duplicate_Command_Name}}</span>
                 </div>
-                <div class="form-group">
-                    <label>TriggerCycle</label>
-                    <label for="numberInput" aria-haspopup="true" role="tooltip"
-                        [class.invalid]="getValidationState()"
-                        class="tooltip tooltip-validation tooltip-md tooltip-bottom-right">
-                        <input type="number" id="numberInput" required [(ngModel)]="newCommand.triggerCycle" 
-                            name="number" #number="ngModel"
-                            required
-                            pattern="^[0-9]*[1-9][0-9]*$"
-                            (input)='handleValidation(newCommand.triggerCycle)' 
-                            (blur)='handleValidation(newCommand.triggerCycle)'>
-                        <span class="tooltip-content">
-                            {{Trigger_Cycle_Number}}
-                        </span>
-                    </label>
-                    <div class="select">
-                        <select id="exampleSelect1">
+            </clr-alert>
+            <clr-control-container>
+                <label>Name</label>
+                <input clrControl placeholder="Name" formControlName="command" style="width: 220px;"/>
+                <clr-control-helper>{{Command_Name}}</clr-control-helper>
+                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                <clr-control-error *clrIfError="'pattern'">{{Command_Name}}</clr-control-error>
+            </clr-control-container>
+            <div class="clr-row">
+                <div class="clr-col-12">
+                    <clr-control-container>
+                        <label>TriggerCycle</label>
+                        <input clrControl type="number" placeholder="Trigger Cycle" formControlName="triggerCycle" style="width: 220px;"/>
+                        <clr-control-helper>{{Trigger_Cycle_Number}}</clr-control-helper>
+                        <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                        <clr-control-error *clrIfError="'mismatch'">{{Trigger_Cycle_Number}}</clr-control-error>
+                    </clr-control-container>
+                </div>
+                <div class="clr-col-2" style=" margin-left: -52%; margin-top: -3px;">
+                    <clr-select-container>
+                        <select clrSelect name="options">
                             <option>Minute</option>
                         </select>
-                    </div>
+                    </clr-select-container>
                 </div>
-                <div class="form-group">
-                    <label for="favInput">Description</label>
-                    <textarea clrTextarea [(ngModel)]="newCommand.description" name="description" ></textarea>
-                </div>
-                <button type="submit" [clrLoading]="addNewCommandSubmitLoading" class="btn btn-primary" on-click="addNewCommand()" [disabled]="commandForm.form.invalid || getValidationState()">Add</button>
-                <button type="button" class="btn btn-primary" on-click="resetNewCommandForm()">Close</button>
-            </section>
-          
+            </div>
+           <clr-textarea-container>
+            <label>Description</label>
+            <textarea clrTextarea  placeholder="description" formControlName="description"></textarea>
+          </clr-textarea-container>
+          <div class="clr-row" style="margin-top: 20px;">
+            <button type="submit" [clrLoading]="addNewCommandSubmitLoading" class="btn btn-primary" on-click="addNewCommand()" [disabled]="commandForm.invalid">Add</button>
+            <button type="button" class="btn btn-primary" on-click="resetNewCommandForm()">Close</button>
+          </div>
+         
         </form> 
-        <form #commandEditForm="ngForm" *ngIf="onedit">
-            <section class="form-block">
-                <label>{{Edit_adapter_command}}</label>
-                <div class="form-group">
-                    <label>Name</label>
-                    <label for="commandname" aria-haspopup="true" role="tooltip"
-                        [class.invalid]="commandname.touched && !commandname.valid"
-                        class="tooltip tooltip-validation tooltip-md tooltip-bottom-right">
-                        <input type="text" id="commandname" disabled required [(ngModel)]="editCommand.command" name="commandname" #commandname="ngModel">
-                        <span class="tooltip-content">This field cannot be empty!</span>
-                    </label>
+
+        <form clrForm [formGroup]="commandEditForm" *ngIf="onedit">
+            <clr-control-container>
+                <label>Name</label>
+                <input clrControl placeholder="Name" readonly formControlName="command" style="width: 220px;"/>
+                <clr-control-helper>{{Command_Name}}</clr-control-helper>
+                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                <clr-control-error *clrIfError="'pattern'">{{Command_Name}}</clr-control-error>
+            </clr-control-container>
+            <div class="clr-row">
+                <div class="clr-col-12">
+                    <clr-control-container>
+                        <label>TriggerCycle</label>
+                        <input clrControl type="number" placeholder="Trigger Cycle" formControlName="triggerCycle" style="width: 220px;"/>
+                        <clr-control-helper>{{Trigger_Cycle_Number}}</clr-control-helper>
+                        <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                        <clr-control-error *clrIfError="'mismatch'">{{Trigger_Cycle_Number}}</clr-control-error>
+                    </clr-control-container>
                 </div>
-                <div class="form-group">
-                    <label>TriggerCycle</label>
-                    <label for="numberInput" aria-haspopup="true" role="tooltip"
-                        [class.invalid]="getValidationState()"
-                        class="tooltip tooltip-validation tooltip-md tooltip-bottom-right">
-                        <input type="number" id="editcommandnumberInput" required [(ngModel)]="editCommand.triggerCycle" 
-                            name="number" #number="ngModel"
-                            required
-                            pattern="^[0-9]*[1-9][0-9]*$"
-                            (input)='handleValidation(editCommand.triggerCycle)' 
-                            (blur)='handleValidation(editCommand.triggerCycle)'>
-                        <span class="tooltip-content">
-                            This field cannot be empty,and this value should be divisible by 5.
-                        </span>
-                    </label>
-                    <div class="select">
-                        <select id="exampleSelect1">
+                <div class="clr-col-2" style=" margin-left: -52%; margin-top: -3px;">
+                    <clr-select-container>
+                        <select clrSelect name="options">
                             <option>Minute</option>
                         </select>
-                    </div>
+                    </clr-select-container>
                 </div>
-                <div class="form-group">
-                    <label for="favInput">Description</label>
-                    <textarea clrTextarea [(ngModel)]="editCommand.description" name="description" ></textarea>
-                </div>
-                <button type="submit" [clrLoading]="editCommandSubmitLoading" class="btn btn-primary" on-click="saveEditCommand(editCommand)" [disabled]="commandEditForm.form.invalid || getValidationState()">Add</button>
-                <button type="button" class="btn btn-primary" on-click="resetEditCommandForm()">Close</button>
-            </section>    
+            </div>
+           <clr-textarea-container>
+            <label>Description</label>
+            <textarea clrTextarea  placeholder="description" formControlName="description"></textarea>
+          </clr-textarea-container>
+          <div class="clr-row" style="margin-top: 20px;">
+            <button type="submit" [clrLoading]="editCommandSubmitLoading" class="btn btn-primary" on-click="saveEditCommand()" [disabled]="commandEditForm.invalid">Add</button>
+            <button type="button" class="btn btn-primary" on-click="resetEditCommandForm()">Close</button>
+          </div>
+         
         </form> 
     </clr-wizard-page>
 
@@ -210,7 +193,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <ng-template clrPageNavTitle>
             Complete
         </ng-template> 
-        <clr-alert [clrAlertType]="'alert-danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "addErrorClosed">
+        <clr-alert [clrAlertType]="'danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "addErrorClosed">
             <div class="alert-item">
                 <span>{{addErrorMsg}}</span>
             </div>
@@ -220,26 +203,26 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </div>
         <div *ngIf="formPageOne.valid">
            
-            <form >
-                <label>Your information</label>
+            <form clrForm>
+                <h4 style="margin-top: 0px;">Your information</h4>
                 <section class="form-block">
-                   
-                    <div class="form-group">
+                    <clr-control-container>
                         <label>Type:</label>
                         <span>{{translateTypeName(newFacilityAdapter.type)}}</span>
-                    </div>
-
-                    <div class="form-group">
+                    </clr-control-container>
+                    <clr-control-container>
                         <label>Display name:</label>
                         <span>{{newFacilityAdapter.displayName }}</span>
-                    </div>
-                    <div class="form-group">
-                        <label>Description:</label>
-                        <textarea clrTextarea [(ngModel)]="newFacilityAdapter.description" name="description" readonly></textarea>
-                    </div>
-                    <div class="form-group">
+                    </clr-control-container>
+          
+                    <clr-textarea-container>
+                        <label>Description</label>
+                        <textarea clrTextarea  placeholder="description" [(ngModel)]="newFacilityAdapter.description" name="description" readonly></textarea>
+                    </clr-textarea-container>
+
+                   <clr-control-container>
                         <label>Commands:</label>
-                        <clr-datagrid style="width: -webkit-fill-available;">
+                        <clr-datagrid style="width: 200%;">
                             <clr-dg-column>Name</clr-dg-column>
                             <clr-dg-column>Description</clr-dg-column>
                             <clr-dg-column>Trigger Cycle</clr-dg-column>
@@ -250,15 +233,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 <clr-dg-cell>{{command.triggerCycle}} minutes</clr-dg-cell>
                             </clr-dg-row>
                         </clr-datagrid>
-                    </div>
+                    </clr-control-container>
                 </section>
             </form>
         </div>
-
-        <div *ngIf="!formPageOne.valid">
-            <p>Not quite there yet.</p>
-        </div>
-
     </clr-wizard-page>
 </clr-wizard>
 <clr-wizard #editFacilityAdapterwizard [(clrWizardOpen)]="editFacilityAdapterOpen">
@@ -266,42 +244,37 @@ SPDX-License-Identifier: BSD-2-Clause -->
 
     <clr-wizard-button [type]="'cancel'">Close</clr-wizard-button>
     <clr-wizard-button [type]="'previous'">Previous</clr-wizard-button>
-    <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
+    <clr-wizard-button [type]="'next'"  (click)="reinitadapterValue()">Next</clr-wizard-button>
     <clr-wizard-button [type]="'finish'" >Done</clr-wizard-button>
 
-    <clr-wizard-page [clrWizardPageNextDisabled]="!edieformPageOne.valid">
+    <clr-wizard-page [clrWizardPageNextDisabled]="!editformPageOne.valid">
         <ng-template clrPageTitle>Create</ng-template> 
-        <form #edieformPageOne="ngForm">
+        <form clrForm [formGroup]="editformPageOne">
             <section class="form-block">
-                <div class="form-group ">
-                    <label class="required" for="gForm_5">Type</label>
-                        <div class="select" style="width:184px; ">
-                            <select id="gForm_5" [ngModelOptions]="{standalone: true}"  [ngModel]="editAdapter.type" (ngModelChange)="editAdapter.type=$event"> 
-                                    <option value="OtherCMDB">CMDB</option>
-                                    <option value="OtherDCIM">DCIM</option>
-                            </select>
-                        </div>
-                </div>
-                <div class="form-group">
-                    <label class="required">Display Name</label>
-                    <label for="nameInput" aria-haspopup="true" role="tooltip"
-                        [class.invalid]="name.touched && !name.valid"
-                        class="tooltip tooltip-validation tooltip-md tooltip-bottom-right">
-                        <input type="text" id="nameInput" required
-                        pattern="^[a-zA-Z][a-zA-Z0-9_]*$"
-                        [(ngModel)]="editAdapter.displayName" name="name" #name="ngModel">
-                        <span class="tooltip-content">This field cannot be empty! Only letters and numbers can be entered and start with a letter</span>
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="favInput">Description</label>
-                    <textarea clrTextarea [(ngModel)]="editAdapter.description" name="description" ></textarea>
-                </div>
+                <clr-select-container>
+                    <label>Type</label>
+                    <select clrSelect name="options" formControlName="type" style="width: 220px;">
+                         <option value="OtherCMDB">CMDB</option>
+                         <option value="OtherDCIM">DCIM</option>
+                    </select>
+                    <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                </clr-select-container>
+                <clr-control-container>
+                    <label>Display Name</label>
+                    <input clrControl placeholder="Display Name" formControlName="displayName" style="width: 220px;"/>
+                    <clr-control-helper>{{Command_Name}}</clr-control-helper>
+                    <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                    <clr-control-error *clrIfError="'pattern'">{{Command_Name}}</clr-control-error>
+                </clr-control-container>
+                <clr-textarea-container>
+                 <label>Description</label>
+                 <textarea clrTextarea  placeholder="description" formControlName="description"></textarea>
+               </clr-textarea-container>
             </section>
         </form>
     </clr-wizard-page>
 
-    <clr-wizard-page [clrWizardPageNextDisabled]="!edieformPageOne.valid">
+    <clr-wizard-page [clrWizardPageNextDisabled]="!editformPageOne.valid">
         <ng-template clrPageTitle>Config adapter</ng-template> 
         <ng-template clrPageNavTitle>
             Config
@@ -318,7 +291,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <clr-dg-column>Description</clr-dg-column>
             <clr-dg-column>Trigger Cycle</clr-dg-column>
         
-            <clr-dg-row *ngFor="let command of editAdapter.commands">
+            <clr-dg-row *ngFor="let command of predefineAdapterCommandsForEditAdapter">
                 <clr-dg-action-overflow>
                     <button class="action-item"  (click)="onEditForEditAdapter(command)" >Edit</button>
                     <button class="action-item" [disabled]="checkIsPredefineData(command)" (click)="onDeleteForEditAdapter(command)" >Delete</button>
@@ -328,99 +301,87 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 <clr-dg-cell>{{command.triggerCycle}} minutes</clr-dg-cell>
             </clr-dg-row>
         </clr-datagrid>
-
-         <form #editAdapterCommandForm="ngForm" *ngIf="onAddForEditAdapter">
-            <section class="form-block">
-                <label>{{Nem_Command_Form_Lable}}</label>
-                <clr-alert [clrAlertType]="'alert-danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "addCommandErrorClosedForEditAdapter">
-                    <div class="alert-item">
-                        <span>{{Duplicate_Command_Name}}</span>
-                    </div>
-                </clr-alert>
-                <div class="form-group">
-                    <label>Name</label>
-                    <label for="commandname" aria-haspopup="true" role="tooltip"
-                        [class.invalid]="commandname.touched && !commandname.valid"
-                        class="tooltip tooltip-validation tooltip-md tooltip-bottom-right">
-                        <input type="text" id="commandname" required 
-                        pattern="^[a-zA-Z][a-zA-Z0-9_]*$" [(ngModel)]="newCommandForEditAdapter.command" name="commandname" #commandname="ngModel">
-                        <span class="tooltip-content">{{Command_Name}}</span>
-                    </label>
+        <form clrForm [formGroup]="editAdapterCommandForm" *ngIf="onAddForEditAdapter">
+            <clr-alert [clrAlertType]="'danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "addCommandErrorClosedForEditAdapter">
+                <div class="alert-item">
+                    <span>{{Duplicate_Command_Name}}</span>
                 </div>
-                <div class="form-group">
-                    <label>TriggerCycle</label>
-                    <label for="numberInputForEdit" aria-haspopup="true" role="tooltip"
-                        [class.invalid]="getValidationState()"
-                        class="tooltip tooltip-validation tooltip-md tooltip-bottom-right">
-                        <input type="number" id="numberInputForEdit" required [(ngModel)]="newCommandForEditAdapter.triggerCycle" 
-                            name="number" #number="ngModel"
-                            required
-                            pattern="^[0-9]*[1-9][0-9]*$"
-                            (input)='handleValidation(newCommandForEditAdapter.triggerCycle)' 
-                            (blur)='handleValidation(newCommandForEditAdapter.triggerCycle)'>
-                        <span class="tooltip-content">
-                            {{Trigger_Cycle_Number}}
-                        </span>
-                    </label>
-                    <div class="select">
-                        <select id="exampleSelect1">
+            </clr-alert>
+            <clr-control-container>
+                <label>Name</label>
+                <input clrControl placeholder="Name" formControlName="command" style="width: 220px;"/>
+                <clr-control-helper>{{Command_Name}}</clr-control-helper>
+                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                <clr-control-error *clrIfError="'pattern'">{{Command_Name}}</clr-control-error>
+            </clr-control-container>
+            <div class="clr-row">
+                <div class="clr-col-12">
+                    <clr-control-container>
+                        <label>TriggerCycle</label>
+                        <input clrControl type="number" placeholder="Trigger Cycle" formControlName="triggerCycle" style="width: 220px;"/>
+                        <clr-control-helper>{{Trigger_Cycle_Number}}</clr-control-helper>
+                        <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                        <clr-control-error *clrIfError="'mismatch'">{{Trigger_Cycle_Number}}</clr-control-error>
+                    </clr-control-container>
+                </div>
+                <div class="clr-col-2" style=" margin-left: -52%; margin-top: -3px;">
+                    <clr-select-container>
+                        <select clrSelect name="options">
                             <option>Minute</option>
                         </select>
-                    </div>
+                    </clr-select-container>
                 </div>
-                <div class="form-group">
-                    <label for="favInput">Description</label>
-                    <textarea clrTextarea [(ngModel)]="newCommandForEditAdapter.description" name="description" ></textarea>
-                </div>
-                <button type="submit" [clrLoading]="addNewCommandSubmitLoadingForEditAdapter" class="btn btn-primary" on-click="addNewCommandForEditAdapter()" [disabled]="editAdapterCommandForm.form.invalid || getValidationState()">Add</button>
-                <button type="button" class="btn btn-primary" on-click="resetNewCommandFormForEditAdapter()">Close</button>
-            </section>
-          
+            </div>
+           <clr-textarea-container>
+            <label>Description</label>
+            <textarea clrTextarea  placeholder="description" formControlName="description"></textarea>
+          </clr-textarea-container>
+          <div class="clr-row" style="margin-top: 20px;">
+            <button type="submit" [clrLoading]="addNewCommandSubmitLoadingForEditAdapter" class="btn btn-primary" on-click="addNewCommandForEditAdapter()" [disabled]="editAdapterCommandForm.invalid">Add</button>
+            <button type="button" class="btn btn-primary" on-click="resetNewCommandFormForEditAdapter()">Close</button>
+          </div>
+         
         </form> 
-        <form #editFormcommandEditForm="ngForm" *ngIf="oneditForEditAdapter">
-            <section class="form-block">
-                <label>{{Edit_adapter_command}}</label>
-                <div class="form-group">
-                    <label>Name</label>
-                    <label for="commandname" aria-haspopup="true" role="tooltip"
-                        [class.invalid]="commandname.touched && !commandname.valid"
-                        class="tooltip tooltip-validation tooltip-md tooltip-bottom-right">
-                        <input type="text" id="commandname" disabled required [(ngModel)]="editCommandForEditAdapter.command" name="commandname" #commandname="ngModel">
-                        <span class="tooltip-content">This field cannot be empty!</span>
-                    </label>
+        <form clrForm [formGroup]="editCommandFormForEditAdapter" *ngIf="oneditForEditAdapter">
+            <clr-control-container>
+                <label>Name</label>
+                <input clrControl placeholder="Name" readonly formControlName="command" style="width: 220px;"/>
+                <clr-control-helper>{{Command_Name}}</clr-control-helper>
+                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                <clr-control-error *clrIfError="'pattern'">{{Command_Name}}</clr-control-error>
+            </clr-control-container>
+            <div class="clr-row">
+                <div class="clr-col-12">
+                    <clr-control-container>
+                        <label>TriggerCycle</label>
+                        <input clrControl type="number" placeholder="Trigger Cycle" formControlName="triggerCycle" style="width: 220px;"/>
+                        <clr-control-helper>{{Trigger_Cycle_Number}}</clr-control-helper>
+                        <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                        <clr-control-error *clrIfError="'mismatch'">{{Trigger_Cycle_Number}}</clr-control-error>
+                    </clr-control-container>
                 </div>
-                <div class="form-group">
-                    <label>TriggerCycle</label>
-                    <label for="numberInput" aria-haspopup="true" role="tooltip"
-                        [class.invalid]="getValidationState()"
-                        class="tooltip tooltip-validation tooltip-md tooltip-bottom-right">
-                        <input type="number" id="editcommandnumberInput" required [(ngModel)]="editCommandForEditAdapter.triggerCycle" 
-                            name="number" #number="ngModel"
-                            required
-                            pattern="^[0-9]*[1-9][0-9]*$"
-                            (input)='handleValidation(editCommandForEditAdapter.triggerCycle)' 
-                            (blur)='handleValidation(editCommandForEditAdapter.triggerCycle)'>
-                        <span class="tooltip-content">
-                            {{Trigger_Cycle_Number}}
-                        </span>
-                    </label>
-                    <div class="select">
-                        <select id="exampleSelect1">
+                <div class="clr-col-2" style=" margin-left: -52%; margin-top: -3px;">
+                    <clr-select-container>
+                        <select clrSelect name="options">
                             <option>Minute</option>
                         </select>
-                    </div>
+                    </clr-select-container>
                 </div>
-                <div class="form-group">
-                    <label for="favInput">Description</label>
-                    <textarea clrTextarea [(ngModel)]="editCommandForEditAdapter.description" name="description" ></textarea>
-                </div>
-                <button type="submit" [clrLoading]="editCommandSubmitLoadingForEditAdapter" class="btn btn-primary" on-click="saveEditCommandForEditAdapter(editCommandForEditAdapter)" [disabled]="editFormcommandEditForm.form.invalid || getValidationState()">Add</button>
-                <button type="button" class="btn btn-primary" on-click="resetEditCommandFormForEditAdapter()">Close</button>
-            </section>    
+            </div>
+           <clr-textarea-container>
+            <label>Description</label>
+            <textarea clrTextarea  placeholder="description" formControlName="description"></textarea>
+          </clr-textarea-container>
+          <div class="clr-row" style="margin-top: 20px;">
+            <button type="submit" [clrLoading]="editCommandSubmitLoadingForEditAdapter" class="btn btn-primary" on-click="saveEditCommandForEditAdapter()" [disabled]="editCommandFormForEditAdapter.invalid">Add</button>
+            <button type="button" class="btn btn-primary" on-click="resetEditCommandFormForEditAdapter()">Close</button>
+          </div>
+         
         </form> 
+       
     </clr-wizard-page>
 
-    <clr-wizard-page [clrWizardPageNextDisabled]="!edieformPageOne.valid"  clrWizardPagePreventDefault="true"
+    <clr-wizard-page [clrWizardPageNextDisabled]="!editformPageOne.valid"  clrWizardPagePreventDefault="true"
     (clrWizardPageOnCancel)="doCancel()"
     (clrWizardPagePrevious)="goBack()"
     (clrWizardPageOnCommit)="updateAdapter()">
@@ -428,7 +389,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <ng-template clrPageNavTitle>
             Complete
         </ng-template> 
-        <clr-alert [clrAlertType]="'alert-danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "editErrorClosed">
+        <clr-alert [clrAlertType]="'danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "editErrorClosed">
             <div class="alert-item">
                 <span>{{editErrorMsg}}</span>
             </div>
@@ -436,39 +397,38 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <div class="spinner" *ngIf="loadingFlag">
             Loading...
         </div>
-        <div *ngIf="edieformPageOne.valid">
-           
-            <form >
-                <label>Your information</label>
+        <div *ngIf="editformPageOne.valid">
+            <form clrForm>
+                <h4 style="margin-top: 0px;">Your information</h4>
                 <section class="form-block">
-                   
-                    <div class="form-group">
+                    <clr-control-container>
                         <label>Type:</label>
                         <span>{{translateTypeName(editAdapter.type)}}</span>
-                    </div>
-
-                    <div class="form-group">
+                    </clr-control-container>
+                    <clr-control-container>
                         <label>Display name:</label>
                         <span>{{editAdapter.displayName }}</span>
-                    </div>
-                    <div class="form-group">
-                        <label>Description:</label>
-                        <textarea clrTextarea [(ngModel)]="editAdapter.description" name="description" readonly></textarea>
-                    </div>
-                    <div class="form-group">
+                    </clr-control-container>
+          
+                    <clr-textarea-container>
+                        <label>Description</label>
+                        <textarea clrTextarea  placeholder="description" [(ngModel)]="editAdapter.description" name="description" readonly></textarea>
+                    </clr-textarea-container>
+
+                   <clr-control-container>
                         <label>Commands:</label>
-                        <clr-datagrid style="width: -webkit-fill-available;">
+                        <clr-datagrid style="width: 200%;">
                             <clr-dg-column>Name</clr-dg-column>
                             <clr-dg-column>Description</clr-dg-column>
                             <clr-dg-column>Trigger Cycle</clr-dg-column>
                         
-                            <clr-dg-row *ngFor="let command of editAdapter.commands">
+                            <clr-dg-row *ngFor="let command of predefineAdapterCommandsForEditAdapter">
                                 <clr-dg-cell>{{command.command}}</clr-dg-cell>
                                 <clr-dg-cell title="{{command.description}}" style="max-width: 300px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
                                 <clr-dg-cell>{{command.triggerCycle}} minutes</clr-dg-cell>
                             </clr-dg-row>
                         </clr-datagrid>
-                    </div>
+                    </clr-control-container>
                 </section>
             </form>
         </div>
@@ -478,24 +438,37 @@ SPDX-License-Identifier: BSD-2-Clause -->
 <clr-modal [(clrModalOpen)]="showDetailPageShow" [clrModalSize]="'lg'">
     <h3 class="modal-title">Adapter config</h3>
     <div class="modal-body">
-        <form >
+        <form clrForm>
+            <h4 style="margin-top: 0px;">Your information</h4>
             <section class="form-block">
-                <div class="form-group">
+                <clr-control-container>
                     <label>Type:</label>
                     <span>{{translateTypeName(showDetaileAdapter.type)}}</span>
-                </div>
-
-                <div class="form-group">
-                    <label>Display name:</label>
+                </clr-control-container>
+                <clr-control-container>
+                    <label>Display Name:</label>
                     <span>{{showDetaileAdapter.displayName }}</span>
-                </div>
-                <div class="form-group">
-                    <label>Description:</label>
-                    <textarea clrTextarea [(ngModel)]="showDetaileAdapter.description" name="description" readonly></textarea>
-                </div>
-                <div class="form-group">
+                </clr-control-container>
+                <clr-control-container>
+                    <label>Topic:</label>
+                    <span>{{showDetaileAdapter.topic }}</span>
+                </clr-control-container>
+                <clr-control-container>
+                    <label>Queue Name:</label>
+                    <span>{{showDetaileAdapter.queueName }}</span>
+                </clr-control-container>
+                <clr-control-container>
+                    <label>Service Key:</label>
+                    <span>{{showDetaileAdapter.serviceKey }}</span>
+                </clr-control-container>
+      
+                <clr-textarea-container>
+                    <label>Description</label>
+                    <textarea clrTextarea  placeholder="description" [(ngModel)]="showDetaileAdapter.description" name="description" readonly></textarea>
+                </clr-textarea-container>
+               <clr-control-container>
                     <label>Commands:</label>
-                    <clr-datagrid style="width: -webkit-fill-available;">
+                    <clr-datagrid>
                         <clr-dg-column>Name</clr-dg-column>
                         <clr-dg-column>Description</clr-dg-column>
                         <clr-dg-column>Trigger Cycle</clr-dg-column>
@@ -506,19 +479,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             <clr-dg-cell>{{command.triggerCycle}} minutes</clr-dg-cell>
                         </clr-dg-row>
                     </clr-datagrid>
-                </div>
-                <div class="form-group">
-                    <label>Topic:</label>
-                    <span>{{showDetaileAdapter.topic }}</span>
-                </div>
-                <div class="form-group">
-                    <label>Queue name:</label>
-                    <span>{{showDetaileAdapter.queueName }}</span>
-                </div>
-                <div class="form-group">
-                    <label>Service Key:</label>
-                    <span>{{showDetaileAdapter.serviceKey }}</span>
-                </div>
+                </clr-control-container>
+              
             </section>
         </form>
     </div>

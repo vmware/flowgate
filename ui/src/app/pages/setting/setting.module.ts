@@ -6,7 +6,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ROUTING } from './setting.routing';
 import { ClarityModule } from '@clr/angular';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SensorsettingListComponent } from '../setting/component/sensorsetting-list/sensorsetting-list.component';
 import { SensorsettingEditComponent } from '../setting/component/sensorsetting-edit/sensorsetting-edit.component';
 import { SensorsettingAddComponent } from '../setting/component/sensorsetting-add/sensorsetting-add.component';
@@ -27,6 +27,7 @@ import { FacilityAdapterService } from './component/adaptertype/facility-adapter
     CommonModule,
     ClarityModule,
     FormsModule,
+    ReactiveFormsModule,
     PagesModule,
     ROUTING,
     //AssetChart,
