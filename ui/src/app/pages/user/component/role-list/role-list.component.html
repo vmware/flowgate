@@ -68,7 +68,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
    <h3 class="modal-title">Operation tips</h3>
    <div class="modal-body">
-       <clr-alert [(clrAlertClosed)] = "deleteOptionTipClosed"  [clrAlertType]="'alert-danger'" >
+       <clr-alert [(clrAlertClosed)] = "deleteOptionTipClosed"  [clrAlertType]="'danger'" >
            <div class="alert-item">
                <span class="alert-text">
                    Operation failed.
@@ -191,7 +191,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <div class="spinner" *ngIf="loadingFlag">
                 Loading...
         </div>
-        <clr-alert *ngIf="errorFlag" [clrAlertType]="'alert-danger'">
+        <clr-alert *ngIf="errorFlag" [clrAlertType]="'danger'">
             <div class="alert-item">
                 {{errorMessage}}
             </div>
