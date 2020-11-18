@@ -24,6 +24,9 @@ public class VCConstants {
    
    public static final String HOSTSYSTEM = "HostSystem";
    public static final String CLUSTERCOMPUTERESOURCE = "ClusterComputeResource";
+   public static final String READ_WRITE = "readWrite";
+   public static final String DATASTORE_TYPE = "Datastore";
+   public static final String DYNAMICPROPERTYNAME = "host";
    
    public static final String SDKURL = "https://%s/sdk";
 

@@ -3,16 +3,91 @@
  */
 package com.vmware.flowgate.vcworker;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vmware.flowgate.client.WormholeAPIClient;
+import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
+import com.vmware.flowgate.common.model.ServerMapping;
+import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.vcworker.client.VsphereClient;
+import com.vmware.flowgate.vcworker.config.ServiceKeyConfig;
+import com.vmware.flowgate.vcworker.model.EsxiMetadata;
+import com.vmware.flowgate.vcworker.model.HostInfo;
+import com.vmware.flowgate.vcworker.model.HostNic;
 import com.vmware.flowgate.vcworker.scheduler.job.VCDataService;
+import com.vmware.vim.binding.vim.AboutInfo;
+import com.vmware.vim.binding.vim.ClusterComputeResource;
+import com.vmware.vim.binding.vim.HostSystem;
+import com.vmware.vim.binding.vim.HostSystem.ConnectionState;
+import com.vmware.vim.binding.vim.HostSystem.PowerState;
+import com.vmware.vim.binding.vim.cluster.ConfigInfoEx;
+import com.vmware.vim.binding.vim.cluster.DpmConfigInfo;
+import com.vmware.vim.binding.vim.cluster.DpmHostConfigInfo;
+import com.vmware.vim.binding.vim.cluster.DrsConfigInfo;
+import com.vmware.vim.binding.vim.cluster.DrsConfigInfo.DrsBehavior;
+import com.vmware.vim.binding.vim.host.Capability;
+import com.vmware.vim.binding.vim.host.ConfigInfo;
+import com.vmware.vim.binding.vim.host.ConnectInfo;
+import com.vmware.vim.binding.vim.host.NetworkInfo;
+import com.vmware.vim.binding.vim.host.PhysicalNic;
+import com.vmware.vim.binding.vim.host.PhysicalNic.LinkSpeedDuplex;
+import com.vmware.vim.binding.vim.host.RuntimeInfo;
+import com.vmware.vim.binding.vim.host.Summary;
+import com.vmware.vim.binding.vim.host.ConnectInfo.DatastoreInfo;
+import com.vmware.vim.binding.vim.host.Summary.ConfigSummary;
+import com.vmware.vim.binding.vim.host.Summary.HardwareSummary;
+import com.vmware.vim.binding.vim.host.Summary.QuickStats;
+import com.vmware.vim.binding.vmodl.ManagedObjectReference;
+import com.vmware.vim.binding.vmodl.query.PropertyCollector.RetrieveResult;
+
+import junit.framework.TestCase;
 
 public class VCDataServiceTest {
+
+   @Spy
+   @InjectMocks
+   VCDataService service;
+
+   @Mock
+   private WormholeAPIClient restClient;
+
+   @Mock
+   private ServiceKeyConfig serviceKeyConfig;
+
+   @Mock
+   private VsphereClient vsphereClient;
+
+   private ObjectMapper mapper = new ObjectMapper();
+
+   @Before
+   public void before() {
+      MockitoAnnotations.initMocks(this);
+   }
 
    @Test
    public void testGetPDUSwitchIDNamePortMapping() {
@@ -27,5 +102,381 @@ public class VCDataServiceTest {
       Assert.assertTrue(
             nameMap.get("4b029b8337c64630b68d0f6c20a18e40").equals("cloud-fc02-sha1:05"));
       Assert.assertEquals(5, nameMap.size());
+   }
+
+   @Test
+   public void testCheckAndUpdateIntegrationStatus() {
+
+      SDDCSoftwareConfig vc = Mockito.spy(new SDDCSoftwareConfig());
+      IntegrationStatus integrationStatus = Mockito.spy(new IntegrationStatus());
+      String message = "message";
+
+      vc.setIntegrationStatus(null);
+      Mockito.doNothing().when(service).updateIntegrationStatus(any(SDDCSoftwareConfig.class));
+      service.checkAndUpdateIntegrationStatus(vc, message);
+      TestCase.assertEquals(1, vc.getIntegrationStatus().getRetryCounter());
+
+      Mockito.when(vc.getIntegrationStatus()).thenReturn(integrationStatus);
+      Mockito.when(integrationStatus.getRetryCounter())
+            .thenReturn(FlowgateConstant.MAXNUMBEROFRETRIES);
+
+      service.checkAndUpdateIntegrationStatus(vc, message);
+      TestCase.assertEquals(IntegrationStatus.Status.ERROR, integrationStatus.getStatus());
+      TestCase.assertEquals(message, integrationStatus.getDetail());
+
+   }
+
+   @Test
+   public void testGetVaildServerMapping() {
+
+      SDDCSoftwareConfig vc = Mockito.mock(SDDCSoftwareConfig.class);
+      String serviceKey = "serviceKey";
+      when(serviceKeyConfig.getServiceKey()).thenReturn(serviceKey);
+      doNothing().when(restClient).setServiceKey(serviceKey);
+      when(vc.getId()).thenReturn("id");
+      ServerMapping mapping1 = new ServerMapping();
+      mapping1.setVcMobID("vc1");
+      mapping1.setAsset("asset1");
+      ServerMapping mapping2 = new ServerMapping();
+      mapping2.setVcMobID("vc2");
+      mapping2.setAsset("asset2");
+      ServerMapping[] mappings = { mapping1, mapping2 };
+      ResponseEntity<ServerMapping[]> serverMappings =
+            new ResponseEntity<ServerMapping[]>(mappings, HttpStatus.OK);
+      when(restClient.getServerMappingsByVC(anyString())).thenReturn(serverMappings);
+
+      HashMap<String, ServerMapping> mobIdDictionary = service.getVaildServerMapping(vc);
+      TestCase.assertEquals(mapping1, mobIdDictionary.get(mapping1.getVcMobID()));
+      TestCase.assertEquals(mapping2, mobIdDictionary.get(mapping2.getVcMobID()));
+   }
+
+   @Test
+   public void testQueryHostMetaData() throws Exception {
+
+      SDDCSoftwareConfig vc = Mockito.mock(SDDCSoftwareConfig.class);
+      HashMap<String, ServerMapping> serverMappingMap = new HashMap<String, ServerMapping>();
+      ServerMapping mapping1 = new ServerMapping();
+      mapping1.setVcMobID("vc1");
+      mapping1.setAsset("asset1");
+      serverMappingMap.put(mapping1.getVcMobID(), mapping1);
+      ServerMapping mapping2 = new ServerMapping();
+      mapping2.setVcMobID("vc2");
+      mapping2.setAsset("asset2");
+      serverMappingMap.put(mapping2.getVcMobID(), mapping2);
+      doReturn(serverMappingMap).when(service).getVaildServerMapping(any());
+      doReturn(vsphereClient).when(service).connectVsphere(any());
+
+      HostSystem host1 = Mockito.mock(HostSystem.class);
+      HostSystem host2 = Mockito.mock(HostSystem.class);
+      Collection<HostSystem> hosts = new ArrayList<>();
+      hosts.add(host1);
+      hosts.add(host2);
+      when(vsphereClient.getAllHost()).thenReturn(hosts);
+
+      Collection<ClusterComputeResource> clusterComputeResources = new ArrayList<>();
+      ClusterComputeResource cluster = Mockito.mock(ClusterComputeResource.class);
+      clusterComputeResources.add(cluster);
+      clusterComputeResources.add(cluster);
+      when(vsphereClient.getAllClusterComputeResource()).thenReturn(clusterComputeResources);
+
+      ManagedObjectReference mor1 = Mockito.mock(ManagedObjectReference.class);
+      ManagedObjectReference mor2 = Mockito.mock(ManagedObjectReference.class);
+      when(host1._getRef()).thenReturn(mor1);
+      when(mor1.getValue()).thenReturn("vc1");
+      when(host2._getRef()).thenReturn(mor2);
+      when(mor2.getValue()).thenReturn("vc2");
+
+      Asset asset = new Asset();
+      asset.setId("asset1");
+      HashMap<String, String> hostJustification = new HashMap<String, String>();
+      HostInfo hostInfo = new HostInfo();
+      String vcHostObjStr = mapper.writeValueAsString(hostInfo);
+      hostJustification.put(FlowgateConstant.HOST_METADATA, vcHostObjStr);
+      asset.setJustificationfields(hostJustification);
+
+      ResponseEntity<Asset> assets = Mockito.mock(ResponseEntity.class);
+      when(restClient.getAssetByID(anyString())).thenReturn(assets);
+      when(assets.getBody()).thenReturn(asset);
+
+      doReturn(true).when(service).feedHostMetaData(any(), any());
+      doReturn(true).when(service).feedClusterMetaData(any(), any(), any(), anyString());
+
+      service.queryHostMetaData(vc);
+   }
+
+   @Test
+   public void testFeedHostMetaData() {
+
+      HostSystem host = Mockito.mock(HostSystem.class);
+
+      Capability capability = Mockito.mock(Capability.class);
+      when(host.getCapability()).thenReturn(capability);
+      when(capability.isMaintenanceModeSupported()).thenReturn(true);
+      when(capability.isRebootSupported()).thenReturn(true);
+      when(capability.getMaxRunningVMs()).thenReturn(10);
+      when(capability.getMaxSupportedVcpus()).thenReturn(10);
+      when(capability.getMaxRegisteredVMs()).thenReturn(10);
+
+      RuntimeInfo runtimeInfo = Mockito.mock(RuntimeInfo.class);
+      when(host.getRuntime()).thenReturn(runtimeInfo);
+      when(runtimeInfo.getConnectionState()).thenReturn(ConnectionState.connected);
+      when(runtimeInfo.getPowerState()).thenReturn(PowerState.poweredOff);
+      Calendar time = Mockito.mock(Calendar.class);
+      when(runtimeInfo.getBootTime()).thenReturn(time);
+
+      Summary summary = Mockito.mock(Summary.class);
+      when(host.getSummary()).thenReturn(summary);
+      when(summary.isRebootRequired()).thenReturn(true);
+
+      QuickStats quickStats = Mockito.mock(QuickStats.class);
+      when(summary.getQuickStats()).thenReturn(quickStats);
+      when(quickStats.getUptime()).thenReturn(10);
+
+      AboutInfo aboutInfo = Mockito.mock(AboutInfo.class);
+      ConfigSummary configSummary = Mockito.mock(ConfigSummary.class);
+      when(summary.getConfig()).thenReturn(configSummary);
+      when(configSummary.getProduct()).thenReturn(aboutInfo);
+      when(aboutInfo.getBuild()).thenReturn("build");
+      when(aboutInfo.getFullName()).thenReturn("fullname");
+      when(aboutInfo.getLicenseProductName()).thenReturn("productname");
+      when(aboutInfo.getVersion()).thenReturn("version");
+      when(aboutInfo.getLicenseProductVersion()).thenReturn("productversion");
+
+      HardwareSummary hardwareSummary = Mockito.mock(HardwareSummary.class);
+      when(summary.getHardware()).thenReturn(hardwareSummary);
+      when(hardwareSummary.getModel()).thenReturn("model");
+      when(hardwareSummary.getVendor()).thenReturn("model");
+      when(hardwareSummary.getNumCpuCores()).thenReturn((short) 2);
+      when(hardwareSummary.getNumCpuPkgs()).thenReturn((short) 2);
+      when(hardwareSummary.getNumCpuThreads()).thenReturn((short) 2);
+      when(hardwareSummary.getCpuMhz()).thenReturn(2);
+      when(hardwareSummary.getMemorySize()).thenReturn(2L);
+
+      NetworkInfo networkInfo = Mockito.mock(NetworkInfo.class);
+      ConfigInfo configInfo = Mockito.mock(ConfigInfo.class);
+      when(host.getConfig()).thenReturn(configInfo);
+      when(configInfo.getNetwork()).thenReturn(networkInfo);
+
+      LinkSpeedDuplex linkSpeedDuplex = Mockito.mock(LinkSpeedDuplex.class);
+      when(linkSpeedDuplex.isDuplex()).thenReturn(true);
+      when(linkSpeedDuplex.getSpeedMb()).thenReturn(2);
+
+
+      PhysicalNic[] physicalNics = new PhysicalNic[2];
+      physicalNics[0] = Mockito.mock(PhysicalNic.class);
+      when(physicalNics[0].getMac()).thenReturn("mac");
+      when(physicalNics[0].getDriver()).thenReturn("driver");
+      when(physicalNics[0].getLinkSpeed()).thenReturn(linkSpeedDuplex);
+      when(physicalNics[0].getDevice()).thenReturn("device");
+
+      physicalNics[1] = Mockito.mock(PhysicalNic.class);
+      when(physicalNics[1].getMac()).thenReturn("mac1");
+      when(physicalNics[1].getDriver()).thenReturn("driver1");
+      when(physicalNics[1].getLinkSpeed()).thenReturn(linkSpeedDuplex);
+      when(physicalNics[1].getDevice()).thenReturn("device1");
+      when(networkInfo.getPnic()).thenReturn(physicalNics);
+
+      ConnectInfo connectInfo = Mockito.mock(ConnectInfo.class);
+      DatastoreInfo[] datastores =
+            { Mockito.mock(DatastoreInfo.class), Mockito.mock(DatastoreInfo.class) };
+
+      com.vmware.vim.binding.vim.Datastore.Summary connectInfoSummary =
+            Mockito.mock(com.vmware.vim.binding.vim.Datastore.Summary.class);
+      when(connectInfoSummary.getCapacity()).thenReturn(2L);
+      when(datastores[0].getSummary()).thenReturn(connectInfoSummary);
+      ManagedObjectReference mor1 = Mockito.mock(ManagedObjectReference.class);
+      when(datastores[1].getSummary()).thenReturn(connectInfoSummary);
+      when(connectInfoSummary.getDatastore()).thenReturn(mor1);
+      when(mor1.getValue()).thenReturn("datastoreid");
+      
+      when(host.queryConnectionInfo()).thenReturn(connectInfo);
+      when(connectInfo.getDatastore()).thenReturn(datastores);
+
+      com.vmware.vim.binding.vim.vsan.host.ConfigInfo vsanConfigInfo =
+            Mockito.mock(com.vmware.vim.binding.vim.vsan.host.ConfigInfo.class);
+      when(configInfo.getVsanHostConfig()).thenReturn(vsanConfigInfo);
+      when(vsanConfigInfo.getEnabled()).thenReturn(true);
+
+      when(capability.getVsanSupported()).thenReturn(true);
+
+      Collection<ClusterComputeResource> clusterComputeResources = new ArrayList<>();
+      ClusterComputeResource cluster = Mockito.mock(ClusterComputeResource.class);
+      clusterComputeResources.add(cluster);
+      clusterComputeResources.add(cluster);
+      when(vsphereClient.getAllClusterComputeResource()).thenReturn(clusterComputeResources);
+
+      ManagedObjectReference[] mors = new ManagedObjectReference[2];
+      mors[0] = Mockito.mock(ManagedObjectReference.class);
+      mors[1] = Mockito.mock(ManagedObjectReference.class);
+      when(mors[0].getValue()).thenReturn("hostMobId");
+      when(mors[1].getValue()).thenReturn("hostMobId");
+
+      when(cluster.getHost()).thenReturn(mors);
+
+      ConfigInfoEx ci = Mockito.mock(ConfigInfoEx.class);
+      when(cluster.getConfigurationEx()).thenReturn(ci);
+      when(cluster.getName()).thenReturn("cluster");
+      DpmConfigInfo dpmConfigInfo = Mockito.mock(DpmConfigInfo.class);
+      when(dpmConfigInfo.getEnabled()).thenReturn(true);
+      when(ci.getDpmConfigInfo()).thenReturn(dpmConfigInfo);
+
+      DrsConfigInfo drsConfigInfo = Mockito.mock(DrsConfigInfo.class);
+      when(drsConfigInfo.getDefaultVmBehavior()).thenReturn(DrsBehavior.fullyAutomated);
+      when(ci.getDrsConfig()).thenReturn(drsConfigInfo);
+      com.vmware.vim.binding.vim.ComputeResource.Summary computeResourceSummary =
+            Mockito.mock(com.vmware.vim.binding.vim.ComputeResource.Summary.class);
+      when(computeResourceSummary.getNumEffectiveHosts()).thenReturn(2);
+      when(computeResourceSummary.getNumHosts()).thenReturn(2);
+      when(computeResourceSummary.getTotalCpu()).thenReturn(2);
+      when(computeResourceSummary.getNumCpuCores()).thenReturn((short) 2);
+      when(computeResourceSummary.getNumCpuThreads()).thenReturn((short) 2);
+      when(computeResourceSummary.getTotalMemory()).thenReturn(2L);
+      when(cluster.getSummary()).thenReturn(computeResourceSummary);
+      com.vmware.vim.binding.vim.vsan.cluster.ConfigInfo clusterConfigInfo =
+            Mockito.mock(com.vmware.vim.binding.vim.vsan.cluster.ConfigInfo.class);
+      when(ci.getVsanConfigInfo()).thenReturn(clusterConfigInfo);
+      when(clusterConfigInfo.getEnabled()).thenReturn(true);
+
+      DpmHostConfigInfo[] dpmHostConfigInfos = new DpmHostConfigInfo[2];
+      dpmHostConfigInfos[0] = Mockito.mock(DpmHostConfigInfo.class);
+      dpmHostConfigInfos[1] = Mockito.mock(DpmHostConfigInfo.class);
+      ManagedObjectReference mor2 = Mockito.mock(ManagedObjectReference.class);
+      when(dpmHostConfigInfos[0].getKey()).thenReturn(mor2);
+      when(mor2.getValue()).thenReturn("hostMobId");
+      when(dpmHostConfigInfos[1].getKey()).thenReturn(mor2);
+      when(mor2.getValue()).thenReturn("hostMobId");
+
+      when(ci.getDpmHostConfig()).thenReturn(dpmHostConfigInfos);
+      ManagedObjectReference mor3 = Mockito.mock(ManagedObjectReference.class);
+      when(cluster._getRef()).thenReturn(mor3);
+      when(mor3.getValue()).thenReturn("clusterMobid");
+      ManagedObjectReference mor4 = Mockito.mock(ManagedObjectReference.class);
+      when(cluster.getParent()).thenReturn(mor4);
+      when(mor4.getValue()).thenReturn("InstanceId");
+
+      when(host.getName()).thenReturn("hostname");
+
+      HostInfo hostInfo = new HostInfo();
+      List<HostNic> hostNics = new ArrayList<HostNic>();
+      HostNic hostNic1 = new HostNic();
+      hostNic1.setDriver("driver1");
+      hostNic1.setMacAddress("mac1");
+      hostNic1.setDuplex(true);
+      hostNic1.setLinkSpeedMb(2);
+      hostNic1.setName("nic1");
+      HostNic hostNic2 = new HostNic();
+      hostNic2.setDriver("driver2");
+      hostNic2.setMacAddress("mac2");
+      hostNic2.setDuplex(true);
+      hostNic2.setLinkSpeedMb(2);
+      hostNic2.setName("nic2");
+      hostNics.add(hostNic1);
+      hostNics.add(hostNic2);
+      hostInfo.setHostNics(hostNics);
+      
+      boolean needUpdate = service.feedHostMetaData(host, hostInfo);
+      TestCase.assertEquals(needUpdate, true);
+   }
+
+   @Test
+   public void testFeedClusterMetaData() {
+
+      HostSystem host = Mockito.mock(HostSystem.class);
+
+      HostInfo hostInfo = new HostInfo();
+      EsxiMetadata esxiMetadata = new EsxiMetadata();
+      esxiMetadata.setClusterDPMenabled(true);
+      esxiMetadata.setClusterDRSBehavior("clusterDRSBehavior");
+      esxiMetadata.setClusterEffectiveHostsNum(2);
+      esxiMetadata.setClusterHostsNum(2);
+      esxiMetadata.setClusterMobid("clusterMobid");
+      esxiMetadata.setClusterName("cluster");
+      esxiMetadata.setClusterTotalCpu(2);
+      esxiMetadata.setClusterTotalCpuCores(2);
+      esxiMetadata.setClusterTotalCpuThreads(2);
+      esxiMetadata.setClusterTotalMemory(2);
+      esxiMetadata.setClusterVSANenabled(true);
+      esxiMetadata.setHostDPMenabled(true);
+      esxiMetadata.setHostMobid("hostMobid");
+      esxiMetadata.setHostName("hostName");
+      esxiMetadata.setHostVSANenabled(true);
+      esxiMetadata.setHostVsanSupported(true);
+      esxiMetadata.setInstanceId("instanceId");
+      hostInfo.setEsxiMetadata(esxiMetadata);
+
+      ManagedObjectReference mor = Mockito.mock(ManagedObjectReference.class);
+      when(host.getParent()).thenReturn(mor);
+      when(mor.getValue()).thenReturn("cluster");
+      when(mor.getType()).thenReturn("ClusterComputeResource");
+
+      when(host._getRef()).thenReturn(mor);
+      when(mor.getValue()).thenReturn("hostMobId");
+
+      HashMap<String, ClusterComputeResource> clusterMap = Mockito.mock(HashMap.class);
+      ClusterComputeResource cluster = Mockito.mock(ClusterComputeResource.class);
+      when(clusterMap.get(anyString())).thenReturn(cluster);
+
+      clusterMap.put("cluster", cluster);
+      ConfigInfoEx ci = Mockito.mock(ConfigInfoEx.class);
+      when(cluster.getConfigurationEx()).thenReturn(ci);
+
+      when(cluster.getName()).thenReturn("cluster");
+      DpmConfigInfo dci = Mockito.mock(DpmConfigInfo.class);
+      when(ci.getDpmConfigInfo()).thenReturn(dci);
+      when(dci.getEnabled()).thenReturn(true);
+
+      DrsConfigInfo drsCI = Mockito.mock(DrsConfigInfo.class);
+      when(ci.getDrsConfig()).thenReturn(drsCI);
+      when(drsCI.getDefaultVmBehavior()).thenReturn(DrsBehavior.fullyAutomated);
+
+      com.vmware.vim.binding.vim.ComputeResource.Summary summary =
+            Mockito.mock(com.vmware.vim.binding.vim.ComputeResource.Summary.class);
+      when(cluster.getSummary()).thenReturn(summary);
+      when(summary.getNumEffectiveHosts()).thenReturn(2);
+      when(summary.getNumHosts()).thenReturn(2);
+      when(summary.getNumCpuCores()).thenReturn((short) 2);
+      when(summary.getTotalMemory()).thenReturn(2L);
+      when(summary.getNumCpuThreads()).thenReturn((short) 2);
+      when(summary.getTotalCpu()).thenReturn(2);
+
+      com.vmware.vim.binding.vim.vsan.cluster.ConfigInfo configInfo =
+            Mockito.mock(com.vmware.vim.binding.vim.vsan.cluster.ConfigInfo.class);
+      when(ci.getVsanConfigInfo()).thenReturn(configInfo);
+      when(configInfo.getEnabled()).thenReturn(true);
+
+      DpmHostConfigInfo[] dpmHostConfigInfos = new DpmHostConfigInfo[2];
+      dpmHostConfigInfos[0] = Mockito.mock(DpmHostConfigInfo.class);
+      dpmHostConfigInfos[1] = Mockito.mock(DpmHostConfigInfo.class);
+      ManagedObjectReference mor2 = Mockito.mock(ManagedObjectReference.class);
+      when(dpmHostConfigInfos[0].getKey()).thenReturn(mor2);
+      when(mor2.getValue()).thenReturn("hostMobId");
+      when(dpmHostConfigInfos[0].getEnabled()).thenReturn(true);
+      when(dpmHostConfigInfos[1].getKey()).thenReturn(mor2);
+      when(mor2.getValue()).thenReturn("hostMobId");
+      when(dpmHostConfigInfos[1].getEnabled()).thenReturn(true);
+
+      when(ci.getDpmHostConfig()).thenReturn(dpmHostConfigInfos);
+
+      ManagedObjectReference mor3 = Mockito.mock(ManagedObjectReference.class);
+      when(cluster._getRef()).thenReturn(mor3);
+      when(mor3.getValue()).thenReturn("cluster");
+      ManagedObjectReference mor4 = Mockito.mock(ManagedObjectReference.class);
+      when(cluster.getParent()).thenReturn(mor4);
+      when(mor4.getValue()).thenReturn("clusterInstance");
+      when(host.getName()).thenReturn("host");
+
+      ConfigInfo configInfo1 = Mockito.mock(ConfigInfo.class);
+      when(host.getConfig()).thenReturn(configInfo1);
+      com.vmware.vim.binding.vim.vsan.host.ConfigInfo hostConfig =
+            Mockito.mock(com.vmware.vim.binding.vim.vsan.host.ConfigInfo.class);
+      when(configInfo1.getVsanHostConfig()).thenReturn(hostConfig);
+      when(hostConfig.getEnabled()).thenReturn(true);
+      Capability hostCapability = Mockito.mock(Capability.class);
+      when(host.getCapability()).thenReturn(hostCapability);
+      when(hostCapability.getVsanSupported()).thenReturn(true);
+
+      boolean needUpdate =
+            service.feedClusterMetaData(clusterMap, host, hostInfo, "vcInstanceUUID");
+      TestCase.assertEquals(needUpdate, true);
    }
 }
