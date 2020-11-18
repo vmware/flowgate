@@ -15,7 +15,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </div>
   </clr-alert>
 
-  <clr-alert [clrAlertType]="'alert-danger'" [clrAlertAppLevel]="true" [clrAlertClosed]= "isStatusErrorMsgAlertClose" (clrAlertClosedChange)="statusMsgAlertClose()" >
+  <clr-alert [clrAlertType]="'danger'" [clrAlertAppLevel]="true" [clrAlertClosed]= "isStatusErrorMsgAlertClose" (clrAlertClosedChange)="statusMsgAlertClose()" >
         <clr-alert-item>
             <span class="alert-text">
                 {{statusErrorMsg}}You can reactive the integration by click.<clr-icon shape="ellipsis-vertical"></clr-icon> > Active , you can update the setting by click Edit Setting button if needed. 
@@ -77,7 +77,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 <clr-modal [(clrModalOpen)]="deleteOperationConfirm" [clrModalStaticBackdrop]="true">
    <h3 class="modal-title">Operation Tips</h3>
    <div class="modal-body">
-       <clr-alert [(clrAlertClosed)] = "deleteOperationAlertClosed"  [clrAlertType]="'alert-danger'">
+       <clr-alert [(clrAlertClosed)] = "deleteOperationAlertClosed"  [clrAlertType]="'danger'">
            <div class="alert-item">
                <span class="alert-text">
                    Operation Error
