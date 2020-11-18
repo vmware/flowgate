@@ -128,7 +128,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             </select>
           </div>
         </div>
-
+      <clr-tree>
         <clr-tree-node>
           Location
           <ng-template [clrIfExpanded]="false">
@@ -168,9 +168,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     </div>
                   </div>
               </clr-tree-node>
+            
           </ng-template>
         </clr-tree-node>
-
+      </clr-tree>
         <button type="submit" class="btn btn-primary"  (click)="save()" [clrLoading]="addassetloading" [disabled]="DcimForm.form.invalid || addassetloading">Submit</button>
         <button type="button" class="btn btn-primary" (click)="cancel()">Cancel</button>
       
