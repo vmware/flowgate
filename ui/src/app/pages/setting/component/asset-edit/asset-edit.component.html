@@ -138,13 +138,11 @@ SPDX-License-Identifier: BSD-2-Clause -->
           </div>
   
           <!--location group-->
+          <clr-tree>
           <clr-tree-node style="margin-left: -3px;">
             Location
             <ng-template [clrIfExpanded]="false">
                 <clr-tree-node>
-                  <!--region : String; 
-                  country : String;
-                  city : String -->
                     <div class="col-md-12" style="margin-left:-1.4rem; border-top-width: 1px; border-top-style: inset;">
                       <div class="form-group" style="margin-top: 12px;">
                         <label for="region">Region</label>
@@ -159,11 +157,6 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.city" id="city" placeholder="Enter City" size="45"/>
                       </div>
                         
-                      <!-- building : String;
-                            floor : String
-                            room : String
-                            row : String
-                            col : String -->
                       <div class="form-group" >
                         <label for="building">Building</label>
                         <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.building" id="building" placeholder="Enter Building" size="45"/>
@@ -186,8 +179,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
                       </div>
                     </div>
                 </clr-tree-node>
+              
             </ng-template>
           </clr-tree-node>
+        </clr-tree>
           </div>
           
           <div style="margin-bottom: 15px;">

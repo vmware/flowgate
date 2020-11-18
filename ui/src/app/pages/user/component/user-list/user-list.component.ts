@@ -61,8 +61,7 @@ export class UserListComponent implements OnInit {
       return;
     }
     this.currentState = state;
-    let pagenumber = Math.round((state.page.from + 1) / state.page.size) + 1;
-    this.getUsers(pagenumber,state.page.size);
+    this.getUsers(state.page.current,state.page.size);
   }
   getUsers(currentPage:number,pageSize:number){
     this.data.getUserData(currentPage,pageSize).subscribe(
