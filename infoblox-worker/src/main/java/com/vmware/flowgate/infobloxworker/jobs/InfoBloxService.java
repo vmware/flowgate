@@ -5,6 +5,7 @@
 package com.vmware.flowgate.infobloxworker.jobs;
 
 import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.vmware.flowgate.infobloxworker.model.InfoBloxIPInfoResult;
@@ -58,38 +59,59 @@ public class InfoBloxService implements AsyncService {
       wormholeAPIClient.setServiceKey(serviceKeyConfig.getServiceKey());
       FacilitySoftwareConfig[] infoBloxes =
             wormholeAPIClient.getFacilitySoftwareByType(SoftwareType.InfoBlox).getBody();
+      List<InfoBloxIPInfoResult> infoBloxIPInfoResults = new ArrayList<>();
+      List<InfoBloxIPInfoResult> hostRecordResults = null;
+      List<InfoBloxIPInfoResult> ipv4addressResults = null;
       for (FacilitySoftwareConfig infoblox : infoBloxes) {
          if(!infoblox.checkIsActive()) {
             continue;
          }
-         InfobloxClient client = new InfobloxClient(infoblox);
-         List<InfoBloxIPInfoResult> infoBloxIPInfoResults = null;
+         InfobloxClient client = buildInfobloxClient(infoblox);
+
          IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
+         IntegrationStatus.Status status = integrationStatus == null ? null : integrationStatus.getStatus();
          try {
-            infoBloxIPInfoResults = client.queryHostNamesByIP(message);
+            if (status == null || IntegrationStatus.Status.ACTIVE.equals(status)) {
+               hostRecordResults = client.queryHostRecordByIP(message);
+               logger.debug("queryHostRecordByIP: {}", hostRecordResults);
+               if (hostRecordResults != null && !hostRecordResults.isEmpty()) {
+                  infoBloxIPInfoResults.addAll(hostRecordResults);
+               }
+            }
+            if (hostRecordResults == null || hostRecordResults.isEmpty()) {
+               ipv4addressResults = client.queryIpv4addressByIP(message);
+               logger.debug("queryHostNamesByIP: {}", ipv4addressResults);
+               if (ipv4addressResults != null && !ipv4addressResults.isEmpty()) {
+                  infoBloxIPInfoResults.addAll(ipv4addressResults);
+               }
+               if (!IntegrationStatus.Status.WARNING.equals(status) && ipv4addressResults != null) {
+                  updateIntegrationStatusToWarning(infoblox, message);
+               }
+            }
          }catch(ResourceAccessException e) {
             if(e.getCause().getCause() instanceof ConnectException) {
                checkAndUpdateIntegrationStatus(infoblox, e.getCause().getCause().getMessage());
-               return;
+               continue;
             }
           }catch(HttpClientErrorException e1) {
              logger.error("Failed to query data from Infoblox", e1);
              if(integrationStatus == null) {
                 integrationStatus = new IntegrationStatus();
              }
-             integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-             integrationStatus.setDetail(e1.getMessage());
-             integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-             updateIntegrationStatus(infoblox);
-             return;
+            integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+            integrationStatus.setDetail(e1.getMessage());
+            integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+            infoblox.setIntegrationStatus(integrationStatus);
+            updateIntegrationStatus(infoblox);
+            continue;
           }
 
-         if(integrationStatus.getRetryCounter() > 0) {
+         if(integrationStatus != null && integrationStatus.getRetryCounter() > 0) {
         	 integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
         	 updateIntegrationStatus(infoblox);
          }
-         
-         if (infoBloxIPInfoResults != null && !infoBloxIPInfoResults.isEmpty()) {
+
+         if (!infoBloxIPInfoResults.isEmpty()) {
             for (InfoBloxIPInfoResult infoBloxIPInfoResult : infoBloxIPInfoResults) {
                try {
                   Asset asset = wormholeAPIClient.getAssetByName(infoBloxIPInfoResult.getHostName()).getBody();
@@ -131,7 +153,11 @@ public class InfoBloxService implements AsyncService {
       }
       logger.info(String.format("Cannot find the hostname for IP: %s", message));
    }
-   
+
+   public InfobloxClient buildInfobloxClient(FacilitySoftwareConfig infoblox) {
+      return new InfobloxClient(infoblox);
+   }
+
    private void checkAndUpdateIntegrationStatus(FacilitySoftwareConfig infoblox,String message) {
       IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
       if(integrationStatus == null) {
@@ -147,11 +173,24 @@ public class InfoBloxService implements AsyncService {
          integrationStatus.setDetail(message);
          integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
       }
+      infoblox.setIntegrationStatus(integrationStatus);
       updateIntegrationStatus(infoblox);
    }
    
    private void updateIntegrationStatus(FacilitySoftwareConfig infoblox) {
-      wormholeAPIClient.setServiceKey(serviceKeyConfig.getServiceKey());
       wormholeAPIClient.updateFacility(infoblox);
    }
+
+   private void updateIntegrationStatusToWarning (FacilitySoftwareConfig infoblox, String ip) {
+      IntegrationStatus integrationStatus = infoblox.getIntegrationStatus();
+      if (integrationStatus == null) {
+         integrationStatus = new IntegrationStatus();
+      }
+      integrationStatus.setStatus(IntegrationStatus.Status.WARNING);
+      integrationStatus.setDetail(String.format("Unauthorized or ip:%s unmanaged", ip));
+      infoblox.setIntegrationStatus(integrationStatus);
+      updateIntegrationStatus(infoblox);
+      logger.error("Update the infoblox status to warning because there is no permission or the ip unmanaged ip:{}", ip);
+   }
+
 }

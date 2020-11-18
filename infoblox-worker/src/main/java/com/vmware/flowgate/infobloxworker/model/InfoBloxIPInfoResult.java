@@ -13,15 +13,15 @@ public class InfoBloxIPInfoResult implements Serializable {
    public InfoBloxIPInfoResult() {
    }
 
-   public static InfoBloxIPInfoResult build(String hostName, Infoblox infoblox) {
+   public static InfoBloxIPInfoResult build(String hostName, InfobloxIpv4addressItem infobloxIpv4addressItem) {
       InfoBloxIPInfoResult infoBloxIPInfoResult = new InfoBloxIPInfoResult();
-      final String ipAddress = infoblox.getIpAddress();
+      final String ipAddress = infobloxIpv4addressItem.getIpAddress();
       final String macAddress;
       final String hostNameWithoutZone;
-      if (StringUtils.isNotBlank(infoblox.getMacAddress())) {
-         macAddress = infoblox.getMacAddress();
-      } else if (infoblox.getDiscoveredData() != null && StringUtils.isNotBlank(infoblox.getDiscoveredData().getMacAddress())) {
-         macAddress = infoblox.getDiscoveredData().getMacAddress();
+      if (StringUtils.isNotBlank(infobloxIpv4addressItem.getMacAddress())) {
+         macAddress = infobloxIpv4addressItem.getMacAddress();
+      } else if (infobloxIpv4addressItem.getDiscoveredData() != null && StringUtils.isNotBlank(infobloxIpv4addressItem.getDiscoveredData().getMacAddress())) {
+         macAddress = infobloxIpv4addressItem.getDiscoveredData().getMacAddress();
       } else {
          macAddress = null;
       }
@@ -33,6 +33,27 @@ public class InfoBloxIPInfoResult implements Serializable {
       }
 
       infoBloxIPInfoResult.setIpAddress(ipAddress);
+      infoBloxIPInfoResult.setMacAddress(macAddress);
+      infoBloxIPInfoResult.setHostName(hostNameWithoutZone);
+      return infoBloxIPInfoResult;
+   }
+
+   public static InfoBloxIPInfoResult build(InfobloxHostRecordItem infobloxHostRecordItem) {
+      InfoBloxIPInfoResult infoBloxIPInfoResult = new InfoBloxIPInfoResult();
+      ipv4addr ipv4addr  = infobloxHostRecordItem.getIpv4addrs()[0];
+      final String zone = infobloxHostRecordItem.getZone();
+      final String hostname = ipv4addr.getHost();
+      final String macAddress;
+      final String hostNameWithoutZone = StringUtils.isNotBlank(zone) && hostname.endsWith(zone) ? hostname.substring(0, hostname.length() - zone.length() - 1) : hostname;
+      if (StringUtils.isNotBlank(ipv4addr.getMac())) {
+         macAddress = ipv4addr.getMac();
+      } else if (ipv4addr.getDiscoveredData() != null && StringUtils.isNotBlank(ipv4addr.getDiscoveredData().getMacAddress())) {
+         macAddress = ipv4addr.getDiscoveredData().getMacAddress();
+      } else {
+         macAddress = null;
+      }
+
+      infoBloxIPInfoResult.setIpAddress(ipv4addr.getIpv4addr());
       infoBloxIPInfoResult.setMacAddress(macAddress);
       infoBloxIPInfoResult.setHostName(hostNameWithoutZone);
       return infoBloxIPInfoResult;

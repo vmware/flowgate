@@ -45,9 +45,8 @@ public class SDDCSoftwareConfig implements Serializable, BaseDocument {
    }
 
    public boolean checkIsActive() {
-      if (this.integrationStatus != null && this.integrationStatus.getStatus() != null
-            && !IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus())) {
-         return false;
+      if (this.integrationStatus != null && this.integrationStatus.getStatus() != null) {
+         return IntegrationStatus.Status.ACTIVE.equals(integrationStatus.getStatus()) || IntegrationStatus.Status.WARNING.equals(integrationStatus.getStatus());
       }
       return true;
    }

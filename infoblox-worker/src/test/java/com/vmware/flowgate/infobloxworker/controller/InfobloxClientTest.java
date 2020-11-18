@@ -10,6 +10,7 @@ import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.infobloxworker.model.InfoBloxIPInfoResult;
 import com.vmware.flowgate.infobloxworker.model.JsonResultForQueryHostNames;
+import com.vmware.flowgate.infobloxworker.model.JsonResultForQueryHostRecord;
 import com.vmware.flowgate.infobloxworker.service.InfobloxClient;
 import junit.framework.TestCase;
 import org.junit.Test;
@@ -33,8 +34,8 @@ public class InfobloxClientTest {
       List<InfoBloxIPInfoResult> expectedResult = this.getExpectedResult();
       InfobloxClient infobloxClient = new InfobloxClient(getInfobloxFacilitySoftware()[0]);
       infobloxClient = Mockito.spy(infobloxClient);
-      Mockito.doReturn(this.getJsonResultForQueryHostNamesZoneIsNull()).when(infobloxClient).getHostNameList(ip);
-      List<InfoBloxIPInfoResult> actualResult = infobloxClient.queryHostNamesByIP(ip);
+      Mockito.doReturn(this.getJsonResultForQueryHostNamesZoneIsNull()).when(infobloxClient).getIpv4address(ip);
+      List<InfoBloxIPInfoResult> actualResult = infobloxClient.queryIpv4addressByIP(ip);
       TestCase.assertEquals(expectedResult.size(), actualResult.size());
       for (int i = 0; i < expectedResult.size(); i++) {
          TestCase.assertEquals(expectedResult.get(i).getIpAddress(), actualResult.get(i).getIpAddress());
@@ -49,8 +50,40 @@ public class InfobloxClientTest {
       List<InfoBloxIPInfoResult> expectedResult = this.getExpectedResult();
       InfobloxClient infobloxClient = new InfobloxClient(getInfobloxFacilitySoftware()[0]);
       infobloxClient = Mockito.spy(infobloxClient);
-      Mockito.doReturn(this.getJsonResultForQueryHostNamesZoneNonNull()).when(infobloxClient).getHostNameList(ip);
-      List<InfoBloxIPInfoResult> actualResult = infobloxClient.queryHostNamesByIP(ip);
+      Mockito.doReturn(this.getJsonResultForQueryHostNamesZoneNonNull()).when(infobloxClient).getIpv4address(ip);
+      List<InfoBloxIPInfoResult> actualResult = infobloxClient.queryIpv4addressByIP(ip);
+      TestCase.assertEquals(expectedResult.size(), actualResult.size());
+      for (int i = 0; i < expectedResult.size(); i++) {
+         TestCase.assertEquals(expectedResult.get(i).getIpAddress(), actualResult.get(i).getIpAddress());
+         TestCase.assertEquals(expectedResult.get(i).getHostName(), actualResult.get(i).getHostName());
+         TestCase.assertEquals(expectedResult.get(i).getMacAddress(), actualResult.get(i).getMacAddress());
+      }
+   }
+
+   @Test
+   public void queryHostRecordByIPTestZoneIsNull() {
+      String ip = "10.161.71.154";
+      List<InfoBloxIPInfoResult> expectedResult = this.getExpectedResult();
+      InfobloxClient infobloxClient = new InfobloxClient(getInfobloxFacilitySoftware()[0]);
+      infobloxClient = Mockito.spy(infobloxClient);
+      Mockito.doReturn(this.getJsonResultForQueryHostRecordZoneIsNull()).when(infobloxClient).getHostRecord(ip);
+      List<InfoBloxIPInfoResult> actualResult = infobloxClient.queryHostRecordByIP(ip);
+      TestCase.assertEquals(expectedResult.size(), actualResult.size());
+      for (int i = 0; i < expectedResult.size(); i++) {
+         TestCase.assertEquals(expectedResult.get(i).getIpAddress(), actualResult.get(i).getIpAddress());
+         TestCase.assertEquals(expectedResult.get(i).getHostName(), actualResult.get(i).getHostName());
+         TestCase.assertEquals(expectedResult.get(i).getMacAddress(), actualResult.get(i).getMacAddress());
+      }
+   }
+
+   @Test
+   public void queryHostRecordByIPTestZoneNonNull() {
+      String ip = "10.161.71.154";
+      List<InfoBloxIPInfoResult> expectedResult = this.getExpectedResult();
+      InfobloxClient infobloxClient = new InfobloxClient(getInfobloxFacilitySoftware()[0]);
+      infobloxClient = Mockito.spy(infobloxClient);
+      Mockito.doReturn(this.getJsonResultForQueryHostRecordZoneNonNull()).when(infobloxClient).getHostRecord(ip);
+      List<InfoBloxIPInfoResult> actualResult = infobloxClient.queryHostRecordByIP(ip);
       TestCase.assertEquals(expectedResult.size(), actualResult.size());
       for (int i = 0; i < expectedResult.size(); i++) {
          TestCase.assertEquals(expectedResult.get(i).getIpAddress(), actualResult.get(i).getIpAddress());
@@ -70,11 +103,33 @@ public class InfobloxClientTest {
       return result;
    }
 
+   private JsonResultForQueryHostRecord getJsonResultForQueryHostRecordZoneIsNull() {
+      String resultJSON = "{\"result\":[{\"_ref\":\"record:host/ZG5zLmhvc3QkLm5vbl9ETlNfaG9zdF9yb290LjAuMTYwMzg2NTM3Mjg0NS51YnVudHUwMQ:ubuntu01/%20\",\"ipv4addrs\":[{\"_ref\":\"record:host_ipv4addr/ZG5zLmhvc3RfYWRkcmVzcyQubm9uX0ROU19ob3N0X3Jvb3QuMC4xNjAzODY1MzcyODQ1LnVidW50dTAxLjEwLjE2MS43MS4xNTQu:10.161.71.154/ubuntu01/%20\",\"discovered_data\":{\"first_discovered\":1603864985,\"last_discovered\":1603869896,\"mac_address\":\"00:50:56:be:60:62\",\"os\":\"Linux 3.10 - 4.1\"},\"host\":\"ubuntu01\",\"ipv4addr\":\"10.161.71.154\"}],\"name\":\"ubuntu01\",\"zone\":\"\"}]}";
+      JsonResultForQueryHostRecord result = null;
+      try {
+         result = new ObjectMapper().readValue(resultJSON, JsonResultForQueryHostRecord.class);
+      } catch (JsonProcessingException e) {
+         e.printStackTrace();
+      }
+      return result;
+   }
+
    private JsonResultForQueryHostNames getJsonResultForQueryHostNamesZoneNonNull() {
       String resultJSON = "{\"result\":[{\"_ref\":\"ipv4address/Li5pcHY0X2FkZHJlc3MkMTAuMTYxLjcxLjE1NC8w:10.161.71.154\",\"discovered_data\":{\"first_discovered\":1603864985,\"last_discovered\":1603869896,\"mac_address\":\"00:50:56:be:60:62\",\"os\":\"Linux 3.10 - 4.1\"},\"ip_address\":\"10.161.71.154\",\"mac_address\":\"\",\"names\":[\"ubuntu01.info.com\"]}]}";
       JsonResultForQueryHostNames result = null;
       try {
          result = new ObjectMapper().readValue(resultJSON, JsonResultForQueryHostNames.class);
+      } catch (JsonProcessingException e) {
+         e.printStackTrace();
+      }
+      return result;
+   }
+
+   private JsonResultForQueryHostRecord getJsonResultForQueryHostRecordZoneNonNull() {
+      String resultJSON = "{\"result\":[{\"_ref\":\"record:host/ZG5zLmhvc3QkLm5vbl9ETlNfaG9zdF9yb290LjAuMTYwMzg2NTM3Mjg0NS51YnVudHUwMQ:ubuntu01/%20\",\"ipv4addrs\":[{\"_ref\":\"record:host_ipv4addr/ZG5zLmhvc3RfYWRkcmVzcyQubm9uX0ROU19ob3N0X3Jvb3QuMC4xNjAzODY1MzcyODQ1LnVidW50dTAxLjEwLjE2MS43MS4xNTQu:10.161.71.154/ubuntu01/%20\",\"discovered_data\":{\"first_discovered\":1603864985,\"last_discovered\":1603869896,\"mac_address\":\"00:50:56:be:60:62\",\"os\":\"Linux 3.10 - 4.1\"},\"host\":\"ubuntu01.info.com\",\"ipv4addr\":\"10.161.71.154\"}],\"name\":\"ubuntu01\",\"zone\":\"info.com\"}]}";
+      JsonResultForQueryHostRecord result = null;
+      try {
+         result = new ObjectMapper().readValue(resultJSON, JsonResultForQueryHostRecord.class);
       } catch (JsonProcessingException e) {
          e.printStackTrace();
       }
