@@ -21,7 +21,6 @@ import { AssetListComponent } from './component/asset-list/asset-list.component'
 import { AssetEditComponent } from './component/asset-edit/asset-edit.component';
 import { FacilityAdapterListComponent } from './component/adaptertype/adaptertype-list/facility-adapter-list.component';
 import { FacilityAdapterService } from './component/adaptertype/facility-adapter.service';
-import { TreeFocusManagerService } from '@clr/angular/data/tree-view/tree-focus-manager.service';
 
 @NgModule({
   imports: [
