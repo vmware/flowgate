@@ -13,6 +13,7 @@ import {environment} from '../../../../../environments/environment.prod';
 import { AuthenticationService } from '../../../auth/authenticationService';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { HttpErrorResponse } from '@angular/common/http';
+import { SummaryModule } from '../../summary/summary.module';
 
 @Component({
   selector: 'app-trigger-job',
@@ -92,31 +93,8 @@ export class TriggerJobComponent implements OnInit {
   userFormRef:NgForm;
   errorShow:boolean = false;
   errorMsg:string = "";
-  flowgateSummery={
-    "assetsNum": 0,
-    "facilitySystemNum": 0,
-    "serverNum": 0,
-    "pduNum": 0,
-    "cabinetNum": 0,
-    "switchNum": 0,
-    "sensorNum": 0,
-    "categoryIsUpsNum": 0,
-    "userNum": 0,
-    "sddcServerNum": 0,
-    "sddcIntegrationNum": 0,
-    "vcNum": 0,
-    "vroNum": 0,
-    "humiditySensorNum": 0,
-    "temperatureSensorNum": 0,
-    "airFlowSensorNum": 0,
-    "smokeSensorNum": 0,
-    "waterSensorNum": 0,
-    "nlyteSummary": [],
-    "powerIqSummary": [],
-    "vcSummary": [],
-    "vroSummary": []
-  }
-
+  flowgateSummary:SummaryModule = new SummaryModule();
+  
   close(){
     this.alertclose = true
   }
@@ -274,8 +252,8 @@ export class TriggerJobComponent implements OnInit {
   }
   getFirstPageData(){
     this.service.getSystemSummaryData().subscribe(
-      (data)=>{
-        //this.flowgateSummery = data; //need to create a data model 
+      (data:SummaryModule)=>{
+        this.flowgateSummary = data;
       }
     )
   }
@@ -571,7 +549,6 @@ export class TriggerJobComponent implements OnInit {
       this.pageSize = 10;
       this.pageNumber = 1;
       this.searchIP = null;
-      // this.changePageSize();
       this.failureMappings = JSON.parse(response);
       if(this.failureMappings.length == 0){
         this.uploadMappingFile = false;
