@@ -193,12 +193,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </div>
             </clr-tab-content>
         </clr-tab>
-        <clr-tab *appHasPrivilege=assetTopology>
+        <!-- <clr-tab *appHasPrivilege=assetTopology>
             <button clrTabLink>Asset Topology</button>
             <clr-tab-content *clrIfActive>
                 <setting-asset></setting-asset>
             </clr-tab-content>
-        </clr-tab>
+        </clr-tab> -->
         <clr-tab *appHasPrivilege=syncData>
             <button (click)="getExpiredTimeRange()" clrTabLink>Sync Data</button>
             <clr-tab-content *clrIfActive>
@@ -286,29 +286,34 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <button [clrLoading]="serverloading" class="btn btn-info-outline "  (click)="getunmappedservers()" style="margin-top:10px;" >
                             Pull Unmapped Servers       
                         </button>
-                    
-                        <clr-datagrid *ngIf="unmappedservershow">
+                        <div class="clr-row">
+                            <div class="clr-col-4">
+                                <clr-datagrid *ngIf="unmappedservershow">
                             
-                            <clr-dg-column>server</clr-dg-column>
-                            
-                            <clr-dg-placeholder>We couldn't find any unmapped server!</clr-dg-placeholder>
-                            
-                            
-                            <clr-dg-row *ngFor="let item of servers">
-                            
-                                <clr-dg-cell >{{item}}</clr-dg-cell>
+                                    <clr-dg-column>server</clr-dg-column>
+                                    
+                                    <clr-dg-placeholder>We couldn't find any unmapped server!</clr-dg-placeholder>
+                                    
+                                    
+                                    <clr-dg-row *ngFor="let item of servers">
+                                    
+                                        <clr-dg-cell >{{item}}</clr-dg-cell>
+                                        
+                                        
+                                    </clr-dg-row>
                                 
-                                
-                            </clr-dg-row>
+                                </clr-datagrid>
+                            </div>
+
+                        </div>
                         
-                            </clr-datagrid>
                     </div>
                 </div>
             </clr-tab-content>
         </clr-tab>
 
         <clr-tab>
-            <button clrTabLink (click)="changePageSize()">AssetName and IP Mapping</button>
+            <button clrTabLink>AssetName and IP Mapping</button>
             <clr-tab-content *clrIfActive>
                 <div class="row">
                     <div class="col-md-12"> 
@@ -322,16 +327,16 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     </div>
 
                     <div class="col-md-8">
-                        <div class="form-group">
+                         <div class="form-group">
                             <table>
                                 <tr>
-                                    <td><input type="text" id="search" placeholder="IP" autocomplete="off" [(ngModel)]="searchIP" (keyup)="($event.which === 13) ? search() : 0" size="35"></td>
-                                    <td><button class="btn btn-sm" (click)="search();" [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled">Search</button></td>
+                                    <td><input clrControl type="text" id="search" placeholder="IP" autocomplete="off" [(ngModel)]="searchIP" (keyup)="($event.which === 13) ? search() : 0" size="35"></td>
+                                    <td><button style="margin-top: 30px;" class="btn btn-sm" (click)="search();" [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled">Search</button></td>
                                 </tr>
                             </table>                
                         </div>
-                      
-                        <clr-datagrid  [(clrDgSelected)]="selectedHostNameAndIPMappings"  [clrDgLoading]="loading">
+                  
+                        <clr-datagrid  [(clrDgSelected)]="selectedHostNameAndIPMappings" (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading"  >
                             <clr-dg-action-bar>
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-sm btn-secondary" (click)="onAdd()"><clr-icon shape="plus"></clr-icon> Add</button>
@@ -346,12 +351,20 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             
                             <clr-dg-placeholder>We couldn't find any mapping!</clr-dg-placeholder>
     
-                            <clr-dg-row *clrDgItems="let mapping of hostNameAndIPMappings" [clrDgItem]="mapping">
+                            <clr-dg-row *ngFor="let mapping of hostNameAndIPMappings" [clrDgItem]="mapping">
                                 <clr-dg-cell>{{mapping.ip}}</clr-dg-cell>
                                 <clr-dg-cell>{{mapping.assetname}}</clr-dg-cell>
                             </clr-dg-row>
-                            
+
                             <clr-dg-footer>
+                                <clr-dg-pagination #pagination [clrDgPageSize]="5" [clrDgTotalItems] = "totalItems">
+                                <clr-dg-page-size [clrPageSizeOptions]="[5,20,30,50]">Mappings per page</clr-dg-page-size>
+                                {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+                                of {{pagination.totalItems}} Mappings
+                                </clr-dg-pagination>
+                            </clr-dg-footer>
+                            
+                            <!-- <clr-dg-footer>
                                     
                                 <ul class="pagination">
                                     <li style="padding-top: 5px;">
@@ -369,7 +382,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                         <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button>
                                     </li>
                                 </ul>
-                            </clr-dg-footer>
+                            </clr-dg-footer> -->
                     </clr-datagrid>
                     </div>
                 </div>
@@ -382,6 +395,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <div class="modal-body" style="height: 600px;">
         <div class="row">
             <div class="col-md-12 trigger-job-text-center">
+                <clr-tree>
                 <clr-tree-node>
                     Nlyte
                     <ng-template [clrIfExpanded]="true">
@@ -466,6 +480,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <clr-tree-node>NO DATA.</clr-tree-node>
                     </ng-template>
                 </clr-tree-node>
+            </clr-tree>
             </div>
         </div>
         
@@ -479,6 +494,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <div class="modal-body" style="height: 600px;">
         <div class="row">
             <div class="col-md-12 trigger-job-text-center">
+            <clr-tree>
                 <clr-tree-node>
                     VMware vCenter
                     <ng-template [clrIfExpanded]="true">
@@ -531,6 +547,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         </clr-tree-node>
                     </ng-template>
                 </clr-tree-node>
+            </clr-tree>
             </div>
         </div>
     </div>
@@ -674,63 +691,36 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </span>
             </clr-alert-item>
         </clr-alert>
-        <form #mappingForm="ngForm">
-            <div class="form-group" style="margin-top: 30px;">
-                <label class="required" for="ip">IP</label>       
-                <label for="ip"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-sm tooltip-top-right"
-                    [class.invalid]="getIPValidationState()">
-                    <input type="text" id="ip" placeholder="Input a host ip" autocomplete="off"
-                        required style="width: 280px;"
-                        name="serverIP"
-                        [(ngModel)]="hostNameAndIPMapping.ip"
-                        #serverIPInput="ngModel" 
-                        (input)='handleIPValidation(true)' 
-                        (blur)='handleIPValidation(true)'
-                        (change)='handleIPValidation(true)'>
-                    <span class="tooltip-content">
-                        IP is Required.
-                    </span>
-                </label>
-            </div>
-            <div class="form-group" style="margin-top: 20px;">
-                <label class="required"  for="assetName">Asset Name</label>
-                <label for="assetName"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-md tooltip-top-right"
-                    [class.invalid]="assetNameInput.invalid && (assetNameInput.dirty || assetNameInput.touched)">
-                    <input type="text" id="hostname" placeholder="Input an asset name" style="width: 280px;"
-                        required
-                        name="assetName"
-                        [(ngModel)]="hostNameAndIPMapping.assetname"
-                        #assetNameInput="ngModel"
-                        (focus)="focus()"  (blur)="blur()"
-                        autocomplete="off">
-                    <span class="tooltip-content">
-                        Asset Name is Required.
-                    </span>
-                </label>
-              </div>
-            <div style="width: 280px; background-color: white;position: absolute; top: 8.5rem;left: 29.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px black; border-style: solid;" [hidden]="hidden">
+        <form clrForm [formGroup]="addAssetIPAndNameMappingForm" >
+           <clr-control-container>
+               <label>Server</label>
+               <input clrControl placeholder="Server Ip Or Domain Name" formControlName="ip" style="width: 220px;"/>
+               <clr-control-helper>Please enter a valid IP.</clr-control-helper>
+               <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+               <clr-control-error *clrIfError="'pattern'">Invalid IP!</clr-control-error>
+           </clr-control-container>
+            <clr-control-container>
+               <label>Name</label>
+               <input clrControl placeholder="Name" id="hostname" (focus)="focus()"  (blur)="blur()" formControlName="assetname" style="width: 220px;"/>
+               <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+           </clr-control-container>
+           <div style="width: 220px; background-color: white;position: absolute; top: 10rem;left: 19.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px #b2b3b3; border-style: solid;" [hidden]="hidden">
                 <span *ngIf="searchAssetNameloading" class="spinner spinner-md" style="margin-left: 43%; margin-bottom: -26%;">
                     Loading...
                 </span>
                 <ul class="list-unstyled">
-                  <li *ngFor="let ite of assetNames;let key=index" class="lihover" style="padding-left: 10px; font-size: 14px; cursor: pointer;">
-                      <div (click)="selectItem(ite)">
-                              {{ite}}
-                      </div>
-                  </li>
-              </ul>
-          </div>
-        </form>
+                    <li *ngFor="let ite of assetNames;let key=index" class="lihover" style="padding-left: 10px; font-size: 14px; cursor: pointer;">
+                        <div (click)="selectItem(ite)">
+                                {{ite}}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+       </form>
     </div>
     <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="cancelSave()">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="confirmSave()" [clrLoading]="saveMappingLoading" [disabled]="mappingForm.form.invalid || invalidIP">Save</button>
+            <button type="button" class="btn btn-primary" (click)="confirmSave()" [clrLoading]="saveMappingLoading" [disabled]="addAssetIPAndNameMappingForm.invalid">Save</button>
     </div>
 </clr-modal>
 
@@ -744,63 +734,35 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </span>
             </clr-alert-item>
         </clr-alert>
-        <form #updatemappingForm="ngForm">
-            <div class="form-group" style="margin-top: 30px;">
-                <label class="required" for="ip">IP</label>       
-                <label for="ip"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-sm tooltip-top-right"
-                    [class.invalid]="getIPValidationState()">
-                    <input type="text" id="ip" placeholder="Input a host ip" autocomplete="off"
-                        required style="width: 280px;"
-                        name="serverIP"
-                        [(ngModel)]="hostNameAndIPMapping.ip"
-                        #serverIPInput="ngModel" 
-                        (input)='handleIPValidation(true)' 
-                        (blur)='handleIPValidation(true)'
-                        (change)='handleIPValidation(true)'
-                        disabled>
-                    <span class="tooltip-content">
-                        IP is Required.
-                    </span>
-                </label>
-            </div>
-            <div class="form-group" style="margin-top: 20px;">
-                <label class="required"  for="assetName">Asset Name</label>
-                <label for="assetName"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-md tooltip-top-right"
-                    [class.invalid]="assetNameInput.invalid && (assetNameInput.dirty || assetNameInput.touched)">
-                    <input type="text" id="hostnameedit" placeholder="Input an asset name" style="width: 280px;"
-                        required
-                        name="assetName"
-                        [(ngModel)]="hostNameAndIPMapping.assetname"
-                        #assetNameInput="ngModel"
-                        (focus)="focus()"  (blur)="blur()"
-                        autocomplete="off">
-                    <span class="tooltip-content">
-                        Asset Name is Required.
-                    </span>
-                </label>
-              </div>
-            <div style="width: 280px; background-color: white;position: absolute; top: 8.5rem;left: 29.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px black; border-style: solid;" [hidden]="hidden">
-                <span *ngIf="searchAssetNameloading" class="spinner spinner-md" style="margin-left: 43%; margin-bottom: -26%;">
-                    Loading...
-                </span>
-                <ul class="list-unstyled">
-                  <li *ngFor="let ite of assetNames;let key=index" class="lihover" style="padding-left: 10px; font-size: 14px; cursor: pointer; ">
-                      <div (click)="selectItem(ite)">
-                              {{ite}}
-                      </div>
-                  </li>
-              </ul>
-          </div>
+        <form clrForm [formGroup]="editAssetIPAndNameMappingForm" >
+            <clr-control-container>
+                <label>Server</label>
+                <input clrControl placeholder="Server Ip Or Domain Name" formControlName="ip" readonly style="width: 220px;"/>
+                <clr-control-helper>Please enter an IP.</clr-control-helper>
+                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                <clr-control-error *clrIfError="'pattern'">Invalid IP!</clr-control-error>
+            </clr-control-container>
+             <clr-control-container>
+                <label>Name</label>
+                <input clrControl placeholder="Name" id="hostnameedit" (focus)="focus()"  (blur)="blur()" formControlName="assetname" style="width: 220px;"/>
+                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+            </clr-control-container>
+            <div style="width: 220px; background-color: white;position: absolute; top: 10rem;left: 19.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px #b2b3b3; border-style: solid;" [hidden]="hidden">
+                 <span *ngIf="searchAssetNameloading" class="spinner spinner-md" style="margin-left: 43%; margin-bottom: -26%;">
+                     Loading...
+                 </span>
+                 <ul class="list-unstyled">
+                     <li *ngFor="let ite of assetNames;let key=index" class="lihover" style="padding-left: 10px; font-size: 14px; cursor: pointer;">
+                         <div (click)="selectItemForEdit(ite)">
+                                 {{ite}}
+                         </div>
+                     </li>
+                 </ul>
+             </div>
         </form>
     </div>
     <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="cancelSave()">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="confirmUpdate()" [clrLoading]="saveMappingLoading" [disabled]="updatemappingForm.form.invalid || invalidIP || saveMappingLoading">Save</button>
+            <button type="button" class="btn btn-primary" (click)="confirmUpdate()" [clrLoading]="saveMappingLoading" [disabled]="editAssetIPAndNameMappingForm.invalid">Save</button>
     </div>
 </clr-modal>

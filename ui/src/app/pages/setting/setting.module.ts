@@ -21,6 +21,7 @@ import { AssetListComponent } from './component/asset-list/asset-list.component'
 import { AssetEditComponent } from './component/asset-edit/asset-edit.component';
 import { FacilityAdapterListComponent } from './component/adaptertype/adaptertype-list/facility-adapter-list.component';
 import { FacilityAdapterService } from './component/adaptertype/facility-adapter.service';
+import { TreeFocusManagerService } from '@clr/angular/data/tree-view/tree-focus-manager.service';
 
 @NgModule({
   imports: [
@@ -35,6 +36,6 @@ import { FacilityAdapterService } from './component/adaptertype/facility-adapter
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
   declarations: [SettingComponent,SensorsettingListComponent,SensorsettingEditComponent,SensorsettingAddComponent,TriggerJobComponent,AssetAddComponent,AssetListComponent,AssetEditComponent,FacilityAdapterListComponent],
-  providers:[ SettingService,FacilityAdapterService ]
+  providers:[ SettingService,FacilityAdapterService]
 })
 export class SettingModule { }
