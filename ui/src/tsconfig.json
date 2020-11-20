@@ -28,10 +28,10 @@
         ]
     },
   "files": [
-    "main.ts"
+    "main.ts",
+    "./polyfills.ts"
   ],
   "include": [
-    "src/**/*.d.ts",
-    "./polyfills.ts"
+    "src/**/*.d.ts"
   ]
 }
