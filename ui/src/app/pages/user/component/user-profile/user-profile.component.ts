@@ -4,11 +4,10 @@
 */
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../user.service';
-import {ActivatedRoute,Router} from "@angular/router";
-import { AuthenticationService } from '../../../auth/authenticationService';
+import { Router } from "@angular/router";
 import { FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { disable } from 'core-js/fn/log';
+
 
 function passwordMatchValidator(password: string): ValidatorFn {
   return (control: FormControl) => {
