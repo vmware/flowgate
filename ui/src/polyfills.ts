@@ -23,5 +23,3 @@
 
 
 import 'zone.js/dist/zone';
-import 'app/pages/setting/summary/summary.module'
-import 'app/pages/setting/component/trigger-job/sankey.chart'
