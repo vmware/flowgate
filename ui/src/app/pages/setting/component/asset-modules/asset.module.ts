@@ -41,7 +41,7 @@ export class AssetModule {
   freeCapacity:number;
   cabinetAssetNumber:string;
   assetRealtimeDataSpec:AssetRealtimeDataSpecModule = new AssetRealtimeDataSpecModule();
-  Justificationfields:any;
+  justificationfields:any;
   parent:any;
   status:AssetStatusModule = new AssetStatusModule();
   pdus:string[];

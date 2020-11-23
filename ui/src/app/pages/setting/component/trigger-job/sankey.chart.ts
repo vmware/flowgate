@@ -4,24 +4,24 @@
 */
 import { CommonModule } from '@angular/common';
 import {Component, ElementRef ,ViewChild, NgModule, CUSTOM_ELEMENTS_SCHEMA, AfterViewInit, OnInit} from '@angular/core'
+import { SddcsoftwareModule } from 'app/pages/sddcsoftware/sddcsoftware.module';
+import { AssetModule } from 'app/pages/setting/component/asset-modules/asset.module';
+import { ServerMappingDataModule } from 'app/pages/servermapping/mapping.module';
 import { SettingService } from '../../setting.service';
 import { MetricJsonData, Node, Link , LinkMap} from './sankey.data.service';
 
 declare var d3;
 
-// @NgModule({
-//     schemas: [ CUSTOM_ELEMENTS_SCHEMA  ]
-// })
 @Component({
     selector: 'setting-asset',
-    template: '<div class="row" style="margin-top: 22px;">\
+    template: '<div class="clr-row" style="margin-top: 22px;">\
                 <div class="col-lg-2 col-sm-2 col-2" style="text-align: center;">\
                     <label>Select VMware vCenter</label>\
                 </div>\
-                <div class="col-lg-4 col-sm-4 col-4">\
+                <div class="clr-col-4">\
                     <div class="form-group">\
-                        <div class="select">\
-                            <select id="select" on-change="change($event)" > \
+                        <div class="clr-select-wrapper">\
+                            <select class="clr-select" id="select" on-change="change($event)" > \
                                 <option value="">Please Select</option>\
                                 <option *ngFor="let vcenter of allVcenter" value="{{vcenter.id}}" >{{vcenter.name}}</option>\
                             </select>\
@@ -51,32 +51,22 @@ export class AssetChart implements AfterViewInit, OnInit{
        
     }
 
-    allVcenter = [{
-        id: "",
-        name: "",
-        description: "",
-        userName: "",
-        password: "",
-        integrationStatus: "",
-        serverURL:"",
-        type: "",
-        verifyCert: ""
-    }];
+    allVcenter:SddcsoftwareModule[] = [];
 
-    setPduSwitchData(data, num, hostIndex, type, nodes:Node [], links:Link []){
+    setPduSwitchData(data:AssetModule, num, hostIndex, type, nodes:Node [], links:Link []){
 
         let flag:Boolean = false;
         
         let index:number = 0;
 
         nodes.forEach((e) =>{
-            if(e.asset == data.json().id){//if same
+            if(e.asset == data.id){//if same
                 flag = true;
                 index = e.index;
             }
         })
         if(flag == false){
-            let node = new Node(data.json().assetName, type, data.json().id, num, []);
+            let node = new Node(data.assetName, type, data.id, num, []);
             nodes.push(node);
             index = num;
             num++;
@@ -88,145 +78,124 @@ export class AssetChart implements AfterViewInit, OnInit{
     }
 
     change(event:any){
-        // this.destroy();
-        // if(event.target.value == ""){
-        //     return;
-        // }
+        this.destroy();
+        if(event.target.value == ""){
+            return;
+        }
 
-        // let jsonString:MetricJsonData;
-        // let nodes = [];
-        // let links = [];
-        // let num = 0;
-        // let queryAssetTime = 0;
-        // let howManyAsset = 0;
-        // let vcId = event.target.value;
-        // let vcName = event.target[event.target.selectedIndex].innerHTML;
+        let jsonString:MetricJsonData;
+        let nodes = [];
+        let links = [];
+        let num = 0;
+        let queryAssetTime = 0;
+        let howManyAsset = 0;
+        let vcId = event.target.value;
+        let vcName = event.target[event.target.selectedIndex].innerHTML;
 
-        // let node = new Node(vcName, "vcenter", vcId, num, []);
-        // nodes.push(node);
-        // num++;
+        let node = new Node(vcName, "vcenter", vcId, num, []);
+        nodes.push(node);
+        num++;
 
-        // this.service.getVcenterById(vcId).subscribe(
-        //     (data)=>{
-        //         if(data.status == 200){
-        //             if(data['_body'] == ""){
-        //                 return;
-        //             }
+        this.service.getVcenterById(vcId).subscribe(
+            (data:ServerMappingDataModule[])=>{
+                    data.forEach(e => {
+                        if(e.asset != null){
+                            howManyAsset++;
+                        }
+                    })
 
-        //             data.json().forEach(e => {
-        //                 if(e.asset != null){
-        //                     howManyAsset++;
-        //                 }
-        //             })
+                    data.forEach(e => {
+                        if(e.asset == null){
+                            let node = new Node(e.vcHostName, "host", e.asset, num, []);
+                            nodes.push(node);
+                            let link = new Link(0, num, 1);
+                            links.push(link);
+                            num++;
+                        }else{
+                            this.service.getAssetById(e.asset).subscribe(// use vc's assetid search host
+                                (data:AssetModule)=>{
+                                    let linkMaps = [];
+                                    if(data.justificationfields['DEVICE_PORT_FOR_SERVER']){
+                                        let maps: string = data.justificationfields['DEVICE_PORT_FOR_SERVER'];
+                                        maps.split(",").forEach(e => {
+                                            let map = e.split("_FIELDSPLIT_");
+                                            let linkMap = new LinkMap(parseInt(map[0]), parseInt(map[2]), map[3]);
+                                            linkMaps.push(linkMap);
+                                        });
+                                    }
 
-        //             data.json().forEach(e => {
+                                    let node = new Node(e.vcHostName, "host", e.asset, num, linkMaps);
+                                    nodes.push(node);
+                                    let link = new Link(0, num, 1);
+                                    links.push(link);
+                                    
+                                    let hostIndex = num;
+                                    num++;
 
-        //                 if(e.asset == null){
-        //                     let node = new Node(e.vcHostName, "host", e.asset, num, []);
-        //                     nodes.push(node);
-        //                     let link = new Link(0, num, 1);
-        //                     links.push(link);
-        //                     num++;
-        //                 }else{
-        //                     this.service.getAssetById(e.asset).subscribe(// use vc's assetid search host
-        //                         (data)=>{
-        //                             if(data.status == 200){
-        //                                 if(data['_body'] == ""){
-        //                                     return;
-        //                                 }
-                                        
-        //                                 let linkMaps = [];
-        //                                 if(data.json().justificationfields['DEVICE_PORT_FOR_SERVER']){
-        //                                     let maps: string = data.json().justificationfields['DEVICE_PORT_FOR_SERVER'];
-        //                                     maps.split(",").forEach(e => {
-        //                                         let map = e.split("_FIELDSPLIT_");
-        //                                         let linkMap = new LinkMap(parseInt(map[0]), parseInt(map[2]), map[3]);
-        //                                         linkMaps.push(linkMap);
-        //                                     });
-        //                                 }
-
-        //                                 let node = new Node(e.vcHostName, "host", e.asset, num, linkMaps);
-        //                                 nodes.push(node);
-        //                                 let link = new Link(0, num, 1);
-        //                                 links.push(link);
-                                        
-        //                                 let hostIndex = num;
-        //                                 num++;
-
-        //                                 let pdus = [];
-        //                                 let switches = [];
-        //                                 let pduTime = 0;
-        //                                 let switchTime = 0;
-        //                                 pdus = data.json().pdus;
-        //                                 switches = data.json().switches;
-                                        
-        //                                 if(pdus != null){
-        //                                     pdus.forEach(e => {
-        //                                         this.service.getAssetById(e).subscribe(//use host's pdu search asset for get pdu info
-        //                                             (data)=>{
-        //                                                 if(data.status == 200){
-        //                                                     if(data['_body'] == ""){
-        //                                                         return;
-        //                                                     }
-        //                                                     num = this.setPduSwitchData(data, num, hostIndex, "pdu", nodes, links);
-        //                                                     pduTime++;
-        //                                                 }
-        //                                             }
-        //                                         )
-        //                                     })
-        //                                 }
-        //                                 if(switches != null){
-        //                                     switches.forEach(e => {
-        //                                         this.service.getAssetById(e).subscribe(
-        //                                             (data)=>{
-        //                                                 if(data.status == 200){
-        //                                                     if(data['_body'] == ""){
-        //                                                         return;
-        //                                                     }
-        //                                                     num = this.setPduSwitchData(data, num, hostIndex, "switch", nodes, links);
-        //                                                     switchTime++;
-        //                                                 }
-        //                                             }
-        //                                         )
-        //                                     })
-        //                                 }
-        //                                 let pduFinishFlag = false;
-        //                                 let switchFinishFlag = false;
-        //                                 let timeOut = 0;
-        //                                 let interval = setInterval(() => {
-        //                                     if((pdus != null && pdus.length == pduTime) || (pdus == null)){
-        //                                         pduFinishFlag = true;
-        //                                     }
-        //                                     if((switches != null && switches.length == switchTime) || (switches == null)){
-        //                                         switchFinishFlag = true;
-        //                                     }
-        //                                     if(pduFinishFlag && switchFinishFlag){
-        //                                         queryAssetTime++;
-        //                                         clearInterval(interval);
-        //                                     }
-        //                                     if(++timeOut == 60){
-        //                                         clearInterval(interval);
-        //                                     }
-        //                                 }, 500)
-        //                             }
-        //                         }
-        //                     )
-        //                 }
-        //             });
-        //             let timeOut = 0;
-        //             let interval = setInterval(() => {
-        //                 if(queryAssetTime == howManyAsset){
-        //                     jsonString = new MetricJsonData(nodes, links);
-        //                     this.render(jsonString);
-        //                     clearInterval(interval);
-        //                 }
-        //                 if(++timeOut == 60){
-        //                     clearInterval(interval);
-        //                 }
-        //             }, 500)
-        //         }
-        //     }
-        // )
+                                    let pdus = [];
+                                    let switches = [];
+                                    let pduTime = 0;
+                                    let switchTime = 0;
+                                    pdus = data.pdus;
+                                    switches = data.switches;
+                                    
+                                    if(pdus != null){
+                                        pdus.forEach(e => {
+                                            this.service.getAssetById(e).subscribe(//use host's pdu search asset for get pdu info
+                                                (data:AssetModule)=>{
+                                                    num = this.setPduSwitchData(data, num, hostIndex, "pdu", nodes, links);
+                                                    pduTime++;
+                                                }
+                                            )
+                                        })
+                                    }
+                                    if(switches != null){
+                                        switches.forEach(e => {
+                                            this.service.getAssetById(e).subscribe(
+                                                (data:AssetModule)=>{
+                                                    num = this.setPduSwitchData(data, num, hostIndex, "switch", nodes, links);
+                                                    switchTime++;
+                                                }
+                                            )
+                                        })
+                                    }
+                                    let pduFinishFlag = false;
+                                    let switchFinishFlag = false;
+                                    let timeOut = 0;
+                                    let interval = setInterval(() => {
+                                        if((pdus != null && pdus.length == pduTime) || (pdus == null)){
+                                            pduFinishFlag = true;
+                                        }
+                                        if((switches != null && switches.length == switchTime) || (switches == null)){
+                                            switchFinishFlag = true;
+                                        }
+                                        if(pduFinishFlag && switchFinishFlag){
+                                            queryAssetTime++;
+                                            clearInterval(interval);
+                                        }
+                                        if(++timeOut == 60){
+                                            clearInterval(interval);
+                                        }
+                                    }, 500)
+                                    
+                                }
+                            )
+                        }
+                    });
+                    let timeOut = 0;
+                    let interval = setInterval(() => {
+                        if(queryAssetTime == howManyAsset){
+                            jsonString = new MetricJsonData(nodes, links);
+                            this.render(jsonString);
+                            clearInterval(interval);
+                        }
+                        if(++timeOut == 60){
+                            clearInterval(interval);
+                        }
+                    }, 500)
+                
+            }
+        )
     }
 
     
@@ -333,13 +302,11 @@ export class AssetChart implements AfterViewInit, OnInit{
     }
 
     getVcenterSelect(){
-        // this.service.getAllVcenter().subscribe(
-        //     (data)=>{
-        //         if(data.status == 200){
-        //             this.allVcenter = data.json();
-        //         }
-        //     }
-        // )
+        this.service.getAllVcenter().subscribe(
+            (data:SddcsoftwareModule[])=>{
+                this.allVcenter = data;
+            }
+        )
     }
 
     ngOnInit(){
