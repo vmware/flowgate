@@ -59,17 +59,16 @@ extension ViewController{
         return current_token
     }
     
-    func getAssetByName(name: String) -> [String: Any]{
+    func getAssetByName(name: String) {
         let _token = self.getFlowgateToken()
         let config = URLSessionConfiguration.default
         let session = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue.main)
         let token_url = URL(string: self.host + "/apiservice/v1/assets/name/" + name + "/")
         var request = URLRequest(url: token_url!)
-        semaphore.wait()
         // header
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         guard let acc_token = _token["access_token"] as? String else {
-            return ["There is no token":0]
+            return
         }
         print(acc_token)
         request.addValue(("Bearer " + acc_token), forHTTPHeaderField: "Authorization")
@@ -90,7 +89,6 @@ extension ViewController{
             }
     })
         task.resume()
-        return self.fetch_result
     }
 
     func getAssetByID(ID: String){
@@ -117,8 +115,19 @@ extension ViewController{
             if let httpResponse = response as? HTTPURLResponse{
                 if httpResponse.statusCode==200{
                     do{
-                        self.detectedDataResult[ID] = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                        let info = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                        self.detectedDataResult[ID] = info
 //                        self.lastAddedAnchor = self.detectedDataAnchor[ID] as? ARAnchor
+                        if(!self.cabinet_b){
+                            self.cabinet_b = true
+                            self.cabinet = info?["cabinetName"] as? String
+                            DispatchQueue.main.async {
+                                self.statusViewController.cancelAllScheduledMessages()
+                                self.statusViewController.showMessage("Detected a bar code on " + self.cabinet + "Work around to detect the rack")
+                            }
+
+                            self.getAssetByName(name: self.cabinet)
+                        }
                         self.sceneView.session.add(anchor: self.detectedDataAnchor[ID]!!)
                         
                     }catch _{ print("JSONSerialization error:", error as Any)}
@@ -128,8 +137,8 @@ extension ViewController{
         task.resume()
     }
     
-    func strFormat(ID: String) -> [String: String]{
-        let content = self.detectedDataResult[ID]! as [String: Any]
+    func strFormat(content: [String: Any]) -> [String: String]{
+//        let content = self.detectedDataResult[ID]! as [String: Any]
         var result: [String: String] = ["type":"", "content":"", "title":""]
         for item in items{
             if item == "assetName" {
@@ -170,4 +179,6 @@ extension ViewController{
         }
         return result
     }
+    
+    
 }

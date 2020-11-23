@@ -18,11 +18,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     
     @IBOutlet weak var blurView: UIVisualEffectView!
     
-    @IBOutlet weak var startview: UIView!
     var qrRequests = [VNRequest]()
-    var detectedDataAnchor: [String: ARAnchor?] = [:]
-    var message: String!
-    var detectedDataResult: [String: [String: Any]] = [:]
+    var detectedDataAnchor: [String: ARAnchor?] = [:] // QR location
+    var message: String! // QR Message === ID
+    var detectedDataResult: [String: [String: Any]] = [:] // [ID: ["AssetId":"sfsdf", "AssetName": "sfdsfd"]]
+    var cabinet: String! // cabinet name -> getAssetByName
     
     /// The view controller that displays the status and "restart experience" UI.
     lazy var statusViewController: StatusViewController = {
@@ -37,15 +37,14 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         return sceneView.session
     }
     
-    var lastAddedAnchor: ARAnchor?
-    var processing = false
+    var lastAddedAnchor: ARAnchor? // 最近添加的QRcode的anchor
+    var processing = false // QR code image process
 
     
-    var host = "https://202.121.180.32/"      // FLOWGATE_HOST
+    let host = "https://202.121.180.32/"      // FLOWGATE_HOST
     var password = "QWxv_3arJ70gl"         // FLOWGATE_PASSWORD
     var username = "API"
     var current_token: [String: Any] = [:]
-    var semaphore = DispatchSemaphore(value: 1)
     let items = [
         "assetName",
         "assetNumber",
@@ -55,8 +54,14 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         "manufacturer",
         "model",
         "tag",
-        "cabinetName"]
-    var fetch_result: [String: Any] = [:]
+        "cabinetName"] // 看情况加
+    var fetch_result: [String: Any] = [:] // data for one cabinet
+    
+    lazy var cabinet_b = false {// is cabinet detected
+        didSet{
+            if(cabinet_b) {self.startFigure()}
+        }
+    }
     
     // MARK: - View Controller Life Cycle
     override func viewDidLoad() {
@@ -97,17 +102,26 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
 
     /// Creates a new AR configuration to run on the `session`.
     /// - Tag: ARReferenceImage-Loading
-    func resetTracking() {
-        
+    func startFigure(){
         guard let referenceImages = ARReferenceImage.referenceImages(inGroupNamed: "AR Resources", bundle: nil) else {
             fatalError("Missing expected asset catalog resources.")
         }
-        
         let configuration = ARWorldTrackingConfiguration()
         configuration.detectionImages = referenceImages
+        session.run(configuration)
+    }
+    func resetTracking() {
+        
+//        guard let referenceImages = ARReferenceImage.referenceImages(inGroupNamed: "AR Resources", bundle: nil) else {
+//            fatalError("Missing expected asset catalog resources.")
+//        }
+//
+        let configuration = ARWorldTrackingConfiguration()
+//        configuration.detectionImages = referenceImages
         session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
 
-        statusViewController.scheduleMessage("Look around to detect", inSeconds: 7.5, messageType: .contentPlacement)
+        statusViewController.scheduleMessage("Look around to detect server", inSeconds: 7.5, messageType: .contentPlacement)
+        cabinet_b = false;
     }
 
 
@@ -149,7 +163,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
 //        print(detectedDataResult)
         if let hitTestResults = sceneView?.hitTest(center, types: [.featurePoint] ),
             let hitTestResult = hitTestResults.first {
-            if let detectedDataAnchor = self.detectedDataAnchor[message],
+            if let detectedDataAnchor = self.detectedDataAnchor[message], // ID的anchor
                let node = self.sceneView.node(for: detectedDataAnchor!) {
                 _ = node.position
                 node.transform = SCNMatrix4(hitTestResult.worldTransform)
@@ -157,9 +171,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 // Create an anchor. The node will be created in delegate methods
                 self.detectedDataAnchor[message] = ARAnchor(transform: hitTestResult.worldTransform)
                 self.getAssetByID(ID: message)
-                print(detectedDataResult[message] ?? "no message")
                 self.lastAddedAnchor = self.detectedDataAnchor[message] as? ARAnchor
-//                self.sceneView.session.add(anchor: self.detectedDataAnchor[message]!!)
             }
         }
     }
@@ -184,7 +196,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     
     func generate_text(_ text: String, _ x: Float, _ y: Float, _ z: Float,
                        _ bold: Bool=false, _ size: Float=1, _ center: Bool=false) -> SCNNode {
-        let mesages = SCNText(string: text, extrusionDepth: 0)
+        let mesages = SCNText(string: text, extrusionDepth: 0) // SCN开头的geometry
         if(bold) {mesages.font = UIFont(name:"HelveticaNeue-Bold", size: 12)}
         else {mesages.font = UIFont(name:"HelveticaNeue", size: 12)}
         let material = SCNMaterial()
@@ -193,6 +205,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         
         let messageNode = SCNNode(geometry: mesages)
         messageNode.scale = SCNVector3Make( 0.001*size, 0.001*size, 0.001*size)
+        // 锚点
         // set pivot of left top point
         var minVec = SCNVector3Zero
         var maxVec = SCNVector3Zero
@@ -215,6 +228,9 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         
         return messageNode
     }
+    
+    // Anchor(定位) ->Node(Anchor) object -> node加进你要的返回的node
+    // Geometry     _^
 
     // MARK: - ARSCNViewDelegate
 
@@ -224,13 +240,13 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
 
         if self.lastAddedAnchor?.identifier == anchor.identifier {
 
-            DispatchQueue.main.async {
-                self.statusViewController.cancelAllScheduledMessages()
-                self.statusViewController.showMessage("Detected a bar code")
-            }
+//            DispatchQueue.main.async {
+////                self.statusViewController.cancelAllScheduledMessages()
+////                self.statusViewController.showMessage("Detected a bar code")
+//            }
             let node = SCNNode()
             guard let ID = self.message else { return node }
-            let result = strFormat(ID: ID)
+            let result = strFormat(content: detectedDataResult[ID]! as [String: Any])
             let left_message = generate_text(result["type"]!, -0.10, 0.05, 0.01)
             let right_message = generate_text(result["content"]!, -0.02, 0.05, 0.01)
             let title_message = generate_text(result["title"]!, -0.065, 0.08, 0.01, true, 2, true)
@@ -245,12 +261,9 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             planeNode.eulerAngles.x = 0
             planeNode.opacity = 0.4
             node.addChildNode(planeNode)
-
-
-//            node.addChildNode(addView())
             return node
 
-        } else   if let imageAnchor = anchor  as? ARImageAnchor{
+        } else if let imageAnchor = anchor  as? ARImageAnchor{
             let referenceImage = imageAnchor.referenceImage
             let node = SCNNode()
             updateQueue.async {
@@ -267,30 +280,39 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 box.firstMaterial?.isDoubleSided = true
                 box.firstMaterial?.shaderModifiers = [.surface: shader]
                 wireFrame.geometry = box
-                let plane = SCNPlane(width: referenceImage.physicalSize.width,
-                                     height: referenceImage.physicalSize.height)
+                
+                let result = self.strFormat(content: self.fetch_result as [String: Any])
+                let left_message = self.generate_text(result["type"]!, -0.10, 0.05, 0.01)
+                let right_message = self.generate_text(result["content"]!, -0.02, 0.05, 0.01)
+                let title_message = self.generate_text(result["title"]!, -0.065, 0.08, 0.01, true, 2, true)
+                node.addChildNode(left_message)
+                node.addChildNode(right_message)
+                node.addChildNode(title_message)
+
+
+                let plane = SCNPlane(width: 0.25, height: 0.2)
+                plane.cornerRadius = 0.02
                 let planeNode = SCNNode(geometry: plane)
-                planeNode.opacity = 0.25
+                planeNode.eulerAngles.x = 0
+                planeNode.opacity = 0.4
+                node.addChildNode(planeNode)
                 
                 /*
                  `SCNPlane` is vertically oriented in its local coordinate space, but
                  `ARImageAnchor` assumes the image is horizontal in its local space, so
                  rotate the plane to match.
-                 */
+//                 */
+                left_message.eulerAngles.x = -.pi / 2
+                right_message.eulerAngles.x = -.pi / 2
+                title_message.eulerAngles.x = -.pi / 2
                 planeNode.eulerAngles.x = -.pi / 2
-                
-                /*
-                 Image anchors are not tracked after initial detection, so create an
-                 animation that limits the duration for which the plane visualization appears.
-                 */
-//                planeNode.runAction(self.imageHighlightAction)
-                
-                // Add the plane visualization to the scene.
+//                planeNode.runAction(imageHighlightAction)
                 node.addChildNode(wireFrame)
+                
             }
             DispatchQueue.main.async {
                 self.statusViewController.cancelAllScheduledMessages()
-                self.statusViewController.showMessage("Detected a server")
+                self.statusViewController.showMessage("Detected a cabinet")
             }
             return node
         }
