@@ -72,6 +72,8 @@ public class AugmentedImageNode extends AnchorNode {
   public void setImage(AugmentedImage image, Context context) {
     this.image = image;
 
+    Log.d(TAG, "setImage begins");
+
     setAnchor(image.createAnchor(image.getCenterPose()));
 
     // width of frame bar
@@ -86,6 +88,8 @@ public class AugmentedImageNode extends AnchorNode {
     MaterialFactory.makeTransparentWithColor(context, c).thenAccept(
             // get the bars
             material -> {
+              Log.d(TAG, "materials set");
+
               RenderableDefinition.Submesh submesh =
                       RenderableDefinition.Submesh.builder().setTriangleIndices(triangleIndices).setMaterial(material).build();
 
@@ -100,7 +104,21 @@ public class AugmentedImageNode extends AnchorNode {
                               .setVertices(vertices[1])
                               .setSubmeshes(Arrays.asList(submesh))
                               .build();
+
+              CompletableFuture<ModelRenderable> future =
+                      ModelRenderable.builder().setSource(renderableDefinition[0]).build();
+
               try {
+                Log.d(TAG, "renderable");
+
+                if(future == null){
+                  Log.d(TAG, "null future");
+                }
+
+
+                assert future != null;
+                bar[0] = future.get();
+
                 bar[0] = ModelRenderable.builder().setSource(renderableDefinition[0]).build().get();
                 bar[1] = ModelRenderable.builder().setSource(renderableDefinition[1]).build().get();
               } catch (ExecutionException e) {
@@ -110,35 +128,37 @@ public class AugmentedImageNode extends AnchorNode {
                 Log.e(TAG, "InterruptedException when set image");
                 e.printStackTrace();
               }
+
+              // draw the frame
+              Vector3 localPosition = new Vector3();
+              Node cornerNode;
+
+              localPosition.set(0, 0.0f, 0.5f * image.getExtentZ());
+              cornerNode = new Node();
+              cornerNode.setParent(this);
+              cornerNode.setLocalPosition(localPosition);
+              cornerNode.setRenderable(bar[0]);
+
+              localPosition.set(0, 0.0f, -0.5f * image.getExtentZ());
+              cornerNode = new Node();
+              cornerNode.setParent(this);
+              cornerNode.setLocalPosition(localPosition);
+              cornerNode.setRenderable(bar[0]);
+
+              localPosition.set(0.5f * image.getExtentX(), 0.0f, 0);
+              cornerNode = new Node();
+              cornerNode.setParent(this);
+              cornerNode.setLocalPosition(localPosition);
+              cornerNode.setRenderable(bar[1]);
+
+              localPosition.set(-0.5f * image.getExtentX(), 0.0f, 0);
+              cornerNode = new Node();
+              cornerNode.setParent(this);
+              cornerNode.setLocalPosition(localPosition);
+              cornerNode.setRenderable(bar[1]);
+
+
             });
-
-    // draw the frame
-    Vector3 localPosition = new Vector3();
-    Node cornerNode;
-
-    localPosition.set(0, 0.0f, 0.5f * image.getExtentZ());
-    cornerNode = new Node();
-    cornerNode.setParent(this);
-    cornerNode.setLocalPosition(localPosition);
-    cornerNode.setRenderable(bar[0]);
-
-    localPosition.set(0, 0.0f, -0.5f * image.getExtentZ());
-    cornerNode = new Node();
-    cornerNode.setParent(this);
-    cornerNode.setLocalPosition(localPosition);
-    cornerNode.setRenderable(bar[0]);
-
-    localPosition.set(0.5f * image.getExtentX(), 0.0f, 0);
-    cornerNode = new Node();
-    cornerNode.setParent(this);
-    cornerNode.setLocalPosition(localPosition);
-    cornerNode.setRenderable(bar[1]);
-
-    localPosition.set(-0.5f * image.getExtentX(), 0.0f, 0);
-    cornerNode = new Node();
-    cornerNode.setParent(this);
-    cornerNode.setLocalPosition(localPosition);
-    cornerNode.setRenderable(bar[1]);
   }
 
   public AugmentedImage getImage() {
