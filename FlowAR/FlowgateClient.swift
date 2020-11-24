@@ -120,7 +120,8 @@ extension ViewController{
                         self.detectedDataResult[ID] = info
 //                        self.lastAddedAnchor = self.detectedDataAnchor[ID] as? ARAnchor
                         if(!self.cabinet_b){
-                            
+                            self.statusViewController.showPause()
+                            self.statusViewController.unhidePause()
                             self.cabinet = info?["cabinetName"] as? String
                             DispatchQueue.main.async {
                                 self.statusViewController.cancelAllScheduledMessages()

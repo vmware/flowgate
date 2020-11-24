@@ -27,8 +27,8 @@
                                 </view>
                                 <blurEffect style="light"/>
                             </visualEffectView>
-                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GWV-Ta-vSk">
-                                <rect key="frame" x="0.0" y="44" width="414" height="85"/>
+                            <containerView opaque="NO" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GWV-Ta-vSk">
+                                <rect key="frame" x="0.0" y="44" width="414" height="129"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="85" id="TSZ-xs-tGz"/>
                                 </constraints>
@@ -68,7 +68,7 @@
             <objects>
                 <viewController id="nYX-8E-ouy" customClass="StatusViewController" customModule="FlowAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="pHH-Dc-DFj">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="85"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="129"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <visualEffectView hidden="YES" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" verticalHuggingPriority="1000" verticalCompressionResistancePriority="100" translatesAutoresizingMaskIntoConstraints="NO" id="yqt-5e-tsJ" userLabel="Message Panel">
@@ -133,6 +133,44 @@
                                     <action selector="restartExperience:" destination="nYX-8E-ouy" eventType="touchUpInside" id="dVm-fh-JpT"/>
                                 </connections>
                             </button>
+                            <visualEffectView hidden="YES" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" verticalHuggingPriority="1000" verticalCompressionResistancePriority="100" translatesAutoresizingMaskIntoConstraints="NO" id="Q3r-ch-KgZ" userLabel="Pause Panel">
+                                <rect key="frame" x="269" y="97" width="125" height="32"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="kA0-HU-ogc">
+                                    <rect key="frame" x="0.0" y="0.0" width="125" height="32"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <visualEffectView opaque="NO" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="McW-Fb-gVB">
+                                            <rect key="frame" x="0.0" y="0.0" width="125" height="32"/>
+                                            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" id="coj-8j-1x8">
+                                                <rect key="frame" x="0.0" y="0.0" width="125" height="32"/>
+                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <gestureRecognizers/>
+                                            </view>
+                                            <vibrancyEffect>
+                                                <blurEffect style="extraLight"/>
+                                            </vibrancyEffect>
+                                        </visualEffectView>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="McW-Fb-gVB" firstAttribute="leading" secondItem="kA0-HU-ogc" secondAttribute="leading" id="H9n-gY-fco"/>
+                                        <constraint firstAttribute="trailing" secondItem="McW-Fb-gVB" secondAttribute="trailing" id="UhO-UZ-p1O"/>
+                                        <constraint firstItem="McW-Fb-gVB" firstAttribute="top" secondItem="kA0-HU-ogc" secondAttribute="top" id="ZMs-qB-X0Z"/>
+                                    </constraints>
+                                </view>
+                                <blurEffect style="light"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="3"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </visualEffectView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7dE-0L-Opb">
+                                <rect key="frame" x="269" y="97" width="125" height="30"/>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <action selector="pressPauseButton:" destination="nYX-8E-ouy" eventType="touchUpInside" id="I4j-xn-Zyo"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="FIW-KQ-pqD"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
@@ -142,17 +180,26 @@
                             <constraint firstItem="FIW-KQ-pqD" firstAttribute="trailing" secondItem="tzq-In-Wl8" secondAttribute="trailing" id="7bq-Jf-LmX"/>
                             <constraint firstItem="tzq-In-Wl8" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="yqt-5e-tsJ" secondAttribute="trailing" constant="8" id="KkT-aM-dF1"/>
                             <constraint firstItem="tzq-In-Wl8" firstAttribute="top" secondItem="FIW-KQ-pqD" secondAttribute="top" id="Ljf-67-3X0"/>
+                            <constraint firstItem="Q3r-ch-KgZ" firstAttribute="top" secondItem="7dE-0L-Opb" secondAttribute="top" id="Ob9-Rx-1pb"/>
+                            <constraint firstItem="Q3r-ch-KgZ" firstAttribute="bottom" secondItem="FIW-KQ-pqD" secondAttribute="bottom" id="b6k-UA-4mZ"/>
+                            <constraint firstItem="7dE-0L-Opb" firstAttribute="trailing" secondItem="pHH-Dc-DFj" secondAttribute="trailingMargin" id="hdf-XV-sqm"/>
+                            <constraint firstItem="7dE-0L-Opb" firstAttribute="trailing" secondItem="Q3r-ch-KgZ" secondAttribute="trailing" id="ioF-1y-t4D"/>
+                            <constraint firstItem="7dE-0L-Opb" firstAttribute="leading" secondItem="FIW-KQ-pqD" secondAttribute="leading" constant="269" id="vKz-m8-bnq"/>
+                            <constraint firstItem="Q3r-ch-KgZ" firstAttribute="top" secondItem="FIW-KQ-pqD" secondAttribute="top" constant="53" id="vhD-ig-wyx"/>
+                            <constraint firstItem="Q3r-ch-KgZ" firstAttribute="leading" secondItem="FIW-KQ-pqD" secondAttribute="leading" constant="269" id="vmx-X4-lQ0"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="PauseButton" destination="7dE-0L-Opb" id="inU-ql-f04"/>
                         <outlet property="messageLabel" destination="NCE-rG-VzY" id="LA1-4B-2BE"/>
                         <outlet property="messagePanel" destination="yqt-5e-tsJ" id="DPY-Mb-DdI"/>
+                        <outlet property="pausePanel" destination="Q3r-ch-KgZ" id="5dG-OX-lWm"/>
                         <outlet property="restartExperienceButton" destination="tzq-In-Wl8" id="Wbe-v6-6BF"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="IEG-Si-OIG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="58" y="-315"/>
+            <point key="canvasLocation" x="57.971014492753625" y="-315.06696428571428"/>
         </scene>
     </scenes>
     <resources>
