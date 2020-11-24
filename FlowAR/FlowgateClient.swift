@@ -126,7 +126,6 @@ extension ViewController{
                                 self.statusViewController.cancelAllScheduledMessages()
                                 self.statusViewController.showMessage("Detected a bar code on " + self.cabinet + "Work around to detect the rack")
                             }
-                            print(self.cabinet)
                             self.getAssetByName(name: self.cabinet)
                         }
                         self.sceneView.session.add(anchor: self.detectedDataAnchor[ID]!!)
