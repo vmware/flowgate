@@ -241,10 +241,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
 
         if self.lastAddedAnchor?.identifier == anchor.identifier {
 
-//            DispatchQueue.main.async {
-////                self.statusViewController.cancelAllScheduledMessages()
-////                self.statusViewController.showMessage("Detected a bar code")
-//            }
+            DispatchQueue.main.async {
+//                self.statusViewController.cancelAllScheduledMessages()
+//                self.statusViewController.showMessage("Detected a bar code")
+            }
             let node = SCNNode()
             guard let ID = self.message else { return node }
             let result = strFormat(content: detectedDataResult[ID]! as [String: Any])
