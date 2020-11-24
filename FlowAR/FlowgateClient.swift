@@ -84,6 +84,7 @@ extension ViewController{
                 if httpResponse.statusCode==200{
                     do{
                         self.fetch_result = try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
+                        self.cabinet_b = true
                     }catch _{ print("JSONSerialization error:", error as Any)}
                 }
             }
@@ -119,13 +120,13 @@ extension ViewController{
                         self.detectedDataResult[ID] = info
 //                        self.lastAddedAnchor = self.detectedDataAnchor[ID] as? ARAnchor
                         if(!self.cabinet_b){
-                            self.cabinet_b = true
+                            
                             self.cabinet = info?["cabinetName"] as? String
                             DispatchQueue.main.async {
                                 self.statusViewController.cancelAllScheduledMessages()
                                 self.statusViewController.showMessage("Detected a bar code on " + self.cabinet + "Work around to detect the rack")
                             }
-
+                            print(self.cabinet)
                             self.getAssetByName(name: self.cabinet)
                         }
                         self.sceneView.session.add(anchor: self.detectedDataAnchor[ID]!!)
