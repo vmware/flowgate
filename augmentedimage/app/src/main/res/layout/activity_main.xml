@@ -26,14 +26,19 @@
         android:layout_height="match_parent" />
 
 
-  <ImageView
+    <ImageView
       android:id="@+id/image_view_fit_to_scan"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:layout_gravity="center"
       android:scaleType="fitCenter"
       android:src="@drawable/fit_to_scan"
-      android:contentDescription="@string/fit_image_to_scan"
-      />
+      android:contentDescription="@string/fit_image_to_scan" />
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reset" />
 
 </FrameLayout>

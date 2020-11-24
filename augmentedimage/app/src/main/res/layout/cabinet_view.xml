@@ -6,6 +6,6 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="6dp"
-    android:text="Hello World"
+    android:text=""
     android:textColor="@android:color/black"
     android:textAlignment="center" />
