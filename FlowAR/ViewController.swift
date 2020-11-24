@@ -298,8 +298,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 wireFrame.geometry = box
                 
                 let result = self.strFormat(content: self.fetch_result as [String: Any])
-                let left_message = self.generate_text(result["type"]!, Float(2*referenceImage.physicalSize.width+0.11), 0.01, -0.05)// (x,y,z: length,depth,height)
-                let right_message = self.generate_text(result["content"]!, Float(2*referenceImage.physicalSize.width+0.03), 0.01, -0.05)
+                let left_message = self.generate_text(result["type"]!, Float(2*referenceImage.physicalSize.width+0.03), 0.01, -0.05)// (x,y,z: length,depth,height)
+                let right_message = self.generate_text(result["content"]!, Float(2*referenceImage.physicalSize.width+0.11), 0.01, -0.05)
                 let title_message = self.generate_text(result["title"]!, Float(2*referenceImage.physicalSize.width+0.07), 0.01, -0.08, true, 2)
                 node.addChildNode(left_message)
                 node.addChildNode(right_message)
