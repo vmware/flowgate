@@ -124,7 +124,7 @@ extension ViewController{
                             self.cabinet = info?["cabinetName"] as? String
                             DispatchQueue.main.async {
                                 self.statusViewController.cancelAllScheduledMessages()
-                                self.statusViewController.showMessage("Detected a bar code on " + self.cabinet + "Work around to detect the rack")
+                                self.statusViewController.showMessage("Work around to detect the rack" + self.cabinet)
                             }
                             self.getAssetByName(name: self.cabinet)
                         }
