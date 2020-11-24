@@ -34,10 +34,15 @@ class StatusViewController: UIViewController {
     
     @IBOutlet weak private var restartExperienceButton: UIButton!
 
+    @IBOutlet weak private var pausePanel: UIVisualEffectView!
+    
+    @IBOutlet weak var pauseButton: UIButton!
     // MARK: - Properties
     
     /// Trigerred when the "Restart Experience" button is tapped.
     var restartExperienceHandler: () -> Void = {}
+    
+    var pauseSessionHandler:() -> Void = {}
     
     /// Seconds before the timer message should fade out. Adjust if the app needs longer transient messages.
     private let displayDuration: TimeInterval = 6
@@ -63,6 +68,31 @@ class StatusViewController: UIViewController {
                 self?.setMessageHidden(true, animated: true)
             })
         }
+    }
+    
+    func showPause(){
+        pauseButton.setTitleColor(.black, for: .normal)
+        pauseButton.setTitleColor(.blue, for: .highlighted)
+        pauseButton.setTitle("Pause", for: .normal)
+    }
+    
+    func showContinue(){
+        pauseButton.setTitleColor(.black, for: .normal)
+        pauseButton.setTitleColor(.blue, for: .highlighted)
+        pauseButton.setTitle("Continue", for: .normal)
+    }
+    
+    func hidePause(){
+        pauseButton.isHidden = true
+        setPauseHidden(true, animated: true)
+    }
+    
+    func unhidePause(){
+        pauseButton.isHidden = false
+        setPauseHidden(false, animated: true)
+    }
+    @IBAction func pressPauseButton(_ sender: Any) {
+        pauseSessionHandler()
     }
     
     func scheduleMessage(_ text: String, inSeconds seconds: TimeInterval, messageType: MessageType) {
@@ -129,6 +159,20 @@ class StatusViewController: UIViewController {
 
         UIView.animate(withDuration: 0.2, delay: 0, options: [.beginFromCurrentState], animations: {
             self.messagePanel.alpha = hide ? 0 : 1
+        }, completion: nil)
+    }
+    
+    private func setPauseHidden(_ hide: Bool, animated: Bool) {
+        // The panel starts out hidden, so show it before animating opacity.
+        pausePanel.isHidden = false
+        
+        guard animated else {
+            pausePanel.alpha = hide ? 0 : 1
+            return
+        }
+
+        UIView.animate(withDuration: 0.2, delay: 0, options: [.beginFromCurrentState], animations: {
+            self.pausePanel.alpha = hide ? 0 : 1
         }, completion: nil)
     }
 }

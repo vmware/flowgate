@@ -24,6 +24,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     var detectedDataResult: [String: [String: Any]] = [:] // [ID: ["AssetId":"sfsdf", "AssetName": "sfdsfd"]]
     var cabinet: String! // cabinet name -> getAssetByName
     
+    var paused = false
+    
     /// The view controller that displays the status and "restart experience" UI.
     lazy var statusViewController: StatusViewController = {
         return children.lazy.compactMap({ $0 as? StatusViewController }).first!
@@ -77,6 +79,17 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             self.restartExperience()
         }
         startQrCodeDetection()
+        statusViewController.pauseSessionHandler = {[unowned self] in
+            if(paused){
+                self.paused = false
+                let configuration = ARWorldTrackingConfiguration()
+                session.run(configuration, options: [])
+                statusViewController.showPause()
+            }else{
+                self.paused = true
+                session.pause()
+                statusViewController.showContinue()
+            }}
     
     }
     
@@ -117,6 +130,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
 //            fatalError("Missing expected asset catalog resources.")
 //        }
 //
+        statusViewController.hidePause()
+        statusViewController.showPause()
         let configuration = ARWorldTrackingConfiguration()
 //        configuration.detectionImages = referenceImages
         session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
