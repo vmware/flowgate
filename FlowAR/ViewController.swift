@@ -70,6 +70,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         // Set the view's delegate
         sceneView.delegate = self
         sceneView.session.delegate=self
+//        sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin]
      
         // Hook up status view controller callback(s).
         statusViewController.restartExperienceHandler = { [unowned self] in
@@ -282,9 +283,9 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 wireFrame.geometry = box
                 
                 let result = self.strFormat(content: self.fetch_result as [String: Any])
-                let left_message = self.generate_text(result["type"]!, -0.10, 0.05, 0.01)
-                let right_message = self.generate_text(result["content"]!, -0.02, 0.05, 0.01)
-                let title_message = self.generate_text(result["title"]!, -0.065, 0.08, 0.01, true, 2, true)
+                let left_message = self.generate_text(result["type"]!, Float(2*referenceImage.physicalSize.width+0.11), 0.01, -0.05)// (x,y,z: length,depth,height)
+                let right_message = self.generate_text(result["content"]!, Float(2*referenceImage.physicalSize.width+0.03), 0.01, -0.05)
+                let title_message = self.generate_text(result["title"]!, Float(2*referenceImage.physicalSize.width+0.07), 0.01, -0.08, true, 2)
                 node.addChildNode(left_message)
                 node.addChildNode(right_message)
                 node.addChildNode(title_message)
@@ -295,6 +296,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 let planeNode = SCNNode(geometry: plane)
                 planeNode.eulerAngles.x = 0
                 planeNode.opacity = 0.4
+                planeNode.position = SCNVector3Make(Float(2*referenceImage.physicalSize.width+0.115), 0.009, -0.02)
                 node.addChildNode(planeNode)
                 
                 /*
