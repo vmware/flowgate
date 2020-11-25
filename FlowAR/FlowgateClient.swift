@@ -73,6 +73,7 @@ extension ViewController{
         print(acc_token)
         request.addValue(("Bearer " + acc_token), forHTTPHeaderField: "Authorization")
         request.httpMethod = "GET"
+        print("getAssetByName")
         let task = session.dataTask(with: request, completionHandler:  {(data, response, error) in
             if (error != nil){print(error.debugDescription)}
             print(2)
@@ -91,8 +92,52 @@ extension ViewController{
     })
         task.resume()
     }
+    
+    func getAssetByID(ID:String){
+//        DispatchQueue.main.async {
+//        self.statusViewController.cancelAllScheduledMessages()
+//        self.statusViewController.showMessage("getAssetByID")
+//        }
+        print("getAssetById")
+        let _token = self.getFlowgateToken()
+        let config = URLSessionConfiguration.default
+        let session = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue.main)
+        let token_url = URL(string: self.host + "/apiservice/v1/assets/" + ID + "/")
+        var request = URLRequest(url: token_url!)
+        // header
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard let acc_token = _token["access_token"] as? String else {
+            return
+        }
+        request.addValue(("Bearer " + acc_token), forHTTPHeaderField: "Authorization")
+        request.httpMethod = "GET"
+        let task = session.dataTask(with: request, completionHandler:  {(data, response, error) in
+            if (error != nil){print(error.debugDescription)}
+            print(2)
+            guard let data = data, error == nil else {
+                print(error?.localizedDescription ?? "get nothing")
+                return
+            }
+            if let httpResponse = response as? HTTPURLResponse{
+                if httpResponse.statusCode==200{
+                    do{
+//                    DispatchQueue.main.async {
+//                        self.statusViewController.cancelAllScheduledMessages()
+//                        self.statusViewController.showMessage("Internet")
+//                    }
+                        let info = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                        self.detectedDataResult[ID] = info
+                        print("getAssetByIdonline")
+                        self.sceneView.session.add(anchor: self.detectedDataAnchor[ID]!!)
+                        
+                    }catch _{ print("JSONSerialization error:", error as Any)}
+                }
+            }
+        })
+        task.resume()
+    }
 
-    func getAssetByID(ID: String){
+    func getAssetByIDNAnchor(ID: String){
 
         let _token = self.getFlowgateToken()
         let config = URLSessionConfiguration.default
@@ -119,17 +164,25 @@ extension ViewController{
                         let info = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
                         self.detectedDataResult[ID] = info
 //                        self.lastAddedAnchor = self.detectedDataAnchor[ID] as? ARAnchor
-                        if(!self.cabinet_b){
+                        
                             self.statusViewController.showPause()
                             self.statusViewController.unhidePause()
                             self.cabinet = info?["cabinetName"] as? String
                             DispatchQueue.main.async {
+                                guard let _ = self.cabinet else {
+                                    return
+                                }}
+                        DispatchQueue.main.async {
                                 self.statusViewController.cancelAllScheduledMessages()
                                 self.statusViewController.showMessage("Work around to detect the rack" + self.cabinet)
                             }
+                            guard let _ = self.cabinet else {
+                                self.statusViewController.cancelAllScheduledMessages()
+                                self.statusViewController.showMessage("Not in cabinet")
+                                return
+                            }
+                        print("getAssetByIDNAnchor")
                             self.getAssetByName(name: self.cabinet)
-                        }
-                        self.sceneView.session.add(anchor: self.detectedDataAnchor[ID]!!)
                         
                     }catch _{ print("JSONSerialization error:", error as Any)}
                 }
@@ -170,13 +223,6 @@ extension ViewController{
                     result["content"]! += String(format: "%d", temp) + "\n"
                 }
             }
-            
-//            guard let temp = content[item] as? String else {
-//                var temp = content[item] as? Double else{
-//
-//                }
-//            }
-//            result = result + item + ": " + temp + "\n"
         }
         return result
     }
