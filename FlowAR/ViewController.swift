@@ -296,6 +296,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 box.firstMaterial?.isDoubleSided = true
                 box.firstMaterial?.shaderModifiers = [.surface: shader]
                 wireFrame.geometry = box
+                node.addChildNode(wireFrame)
+                
                 
                 let result = self.strFormat(content: self.fetch_result as [String: Any])
                 let left_message = self.generate_text(result["type"]!, Float(2*referenceImage.physicalSize.width+0.03), 0.01, -0.05)// (x,y,z: length,depth,height)
@@ -324,7 +326,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 title_message.eulerAngles.x = -.pi / 2
                 planeNode.eulerAngles.x = -.pi / 2
 //                planeNode.runAction(imageHighlightAction)
-                node.addChildNode(wireFrame)
                 
             }
             DispatchQueue.main.async {
