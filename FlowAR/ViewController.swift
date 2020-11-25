@@ -23,6 +23,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     var message: String! // QR Message === ID
     var detectedDataResult: [String: [String: Any]] = [:] // [ID: ["AssetId":"sfsdf", "AssetName": "sfdsfd"]]
     var cabinet: String! // cabinet name -> getAssetByName
+    var cabitnetNode: SCNNode?
     
     var paused = false
     
@@ -64,7 +65,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             if(cabinet_b) {self.startFigure()}
         }
     }
-    
+    var cabinet_show = false;
     // MARK: - View Controller Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -124,6 +125,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         configuration.detectionImages = referenceImages
         session.run(configuration)
     }
+    
+    func stopFigure(){
+        let configuration = ARWorldTrackingConfiguration()
+        session.run(configuration)
+    }
     func resetTracking() {
         
 //        guard let referenceImages = ARReferenceImage.referenceImages(inGroupNamed: "AR Resources", bundle: nil) else {
@@ -133,11 +139,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         statusViewController.hidePause()
         statusViewController.showPause()
         let configuration = ARWorldTrackingConfiguration()
-//        configuration.detectionImages = referenceImages
         session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
 
         statusViewController.scheduleMessage("Look around to detect server", inSeconds: 7.5, messageType: .contentPlacement)
         cabinet_b = false;
+        cabinet_show = false;
     }
 
 
@@ -157,6 +163,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             guard let message=result.payloadStringValue else {return}
             self.message = message
             Swift.print(self.message ?? "No message.")
+            DispatchQueue.main.async {
+                self.statusViewController.cancelAllScheduledMessages()
+                self.statusViewController.showMessage("Detected a bar code")
+            }
             // Get the bounding box for the bar code and find the center
             var rect = result.boundingBox
             // TODO: Draw it
@@ -165,9 +175,18 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             rect = rect.applying(CGAffineTransform(translationX: 0, y: 1))
             // Get center
             let center = CGPoint(x: rect.midX, y: rect.midY)
-            
-            DispatchQueue.main.async {
+            if(cabinet_show)
+            {
+                DispatchQueue.main.async {
+                self.statusViewController.cancelAllScheduledMessages()
+                self.statusViewController.showMessage("Loading information")
+                }
+                DispatchQueue.main.async {
                 self.hitTestQrCode(center: center, message: message)
+                self.processing = false
+            }
+            }else{
+                getAssetByIDNAnchor(ID: message)
                 self.processing = false
             }
         } else {
@@ -178,16 +197,17 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     func hitTestQrCode(center: CGPoint, message: String) {
 //        print(detectedDataResult)
         if let hitTestResults = sceneView?.hitTest(center, types: [.featurePoint] ),
-            let hitTestResult = hitTestResults.first {
+           let hitTestResult = hitTestResults.first {
             if let detectedDataAnchor = self.detectedDataAnchor[message], // ID的anchor
                let node = self.sceneView.node(for: detectedDataAnchor!) {
-                _ = node.position
                 node.transform = SCNMatrix4(hitTestResult.worldTransform)
+                node.rotation = self.cabitnetNode?.rotation ?? node.rotation
             } else {
                 // Create an anchor. The node will be created in delegate methods
+//                self.detectedDataAnchor[message] = hitTestResult.anchor
                 self.detectedDataAnchor[message] = ARAnchor(transform: hitTestResult.worldTransform)
-                self.getAssetByID(ID: message)
                 self.lastAddedAnchor = self.detectedDataAnchor[message] as? ARAnchor
+                self.getAssetByID(ID: message)
             }
         }
     }
@@ -253,14 +273,14 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     
     // Override to create and configure nodes for anchors added to the view's session.
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-
         if self.lastAddedAnchor?.identifier == anchor.identifier {
-
-            DispatchQueue.main.async {
-                self.statusViewController.cancelAllScheduledMessages()
-                self.statusViewController.showMessage("Detected a bar code")
-            }
+            
+//            DispatchQueue.main.async {
+//            self.statusViewController.cancelAllScheduledMessages()
+//            self.statusViewController.showMessage("add this anchor")
+//            }
             let node = SCNNode()
+            node.orientation = (sceneView.pointOfView?.orientation)!
             guard let ID = self.message else { return node }
             let result = strFormat(content: detectedDataResult[ID]! as [String: Any])
             let left_message = generate_text(result["type"]!, -0.10, 0.05, 0.01)
@@ -297,6 +317,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 box.firstMaterial?.shaderModifiers = [.surface: shader]
                 wireFrame.geometry = box
                 node.addChildNode(wireFrame)
+                self.cabitnetNode = wireFrame
                 
                 // add lines
                 
@@ -333,7 +354,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 let planeNode = SCNNode(geometry: plane)
                 planeNode.eulerAngles.x = 0
                 planeNode.opacity = 0.4
-                planeNode.position = SCNVector3Make(Float(2*referenceImage.physicalSize.width+0.115), 0.009, -0.02)
+                planeNode.position = SCNVector3Make(Float(2*referenceImage.physicalSize.width+0.115), 0.009, 0.2)
                 node.addChildNode(planeNode)
                 
                 /*
@@ -346,6 +367,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 title_message.eulerAngles.x = -.pi / 2
                 planeNode.eulerAngles.x = -.pi / 2
 //                planeNode.runAction(imageHighlightAction)
+                self.cabinet_show = true;
+                self.stopFigure()
                 
             }
             DispatchQueue.main.async {

@@ -120,7 +120,25 @@ class StatusViewController: UIViewController {
     // MARK: - ARKit
     
     func showTrackingQualityInfo(for trackingState: ARCamera.TrackingState, autoHide: Bool) {
-        showMessage(trackingState.presentationString, autoHide: autoHide)
+        switch trackingState {
+        case .notAvailable:
+            showMessage("TRACKING UNAVAILABLE", autoHide: true)
+            return
+        case .limited(.excessiveMotion):
+            showMessage("TRACKING LIMITED\nExcessive motion", autoHide: true)
+            return
+        case .limited(.insufficientFeatures):
+            showMessage("TRACKING LIMITED\nLow detail", autoHide: true)
+            return
+        case .limited(.initializing):
+            showMessage("Initializing", autoHide: true)
+            return
+        case .limited(.relocalizing):
+            showMessage("Recovering from session interruption", autoHide: true)
+            return
+        default:
+            return
+        }
     }
     
     func escalateFeedback(for trackingState: ARCamera.TrackingState, inSeconds seconds: TimeInterval) {
