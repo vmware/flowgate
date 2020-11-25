@@ -58,6 +58,12 @@ public class AugmentedImageFragment extends ArFragment {
   // application.
   private static final double MIN_OPENGL_VERSION = 3.0;
 
+  private OnCompleteListener mListener;
+
+  public static interface OnCompleteListener {
+    public abstract void onComplete();
+  }
+
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
@@ -78,6 +84,13 @@ public class AugmentedImageFragment extends ArFragment {
       Log.e(TAG, "Sceneform requires OpenGL ES 3.0 or later");
       SnackbarHelper.getInstance()
           .showError(getActivity(), "Sceneform requires OpenGL ES 3.0 or later");
+    }
+
+    try {
+      this.mListener = (OnCompleteListener)context;
+    }
+    catch (final ClassCastException e) {
+      throw new ClassCastException(context.toString() + " must implement OnCompleteListener");
     }
   }
 
@@ -100,6 +113,9 @@ public class AugmentedImageFragment extends ArFragment {
       SnackbarHelper.getInstance()
           .showError(getActivity(), "Could not setup augmented image database");
     }
+    // Set Auto focus of the camera.
+    config.setFocusMode(Config.FocusMode.AUTO);
+    mListener.onComplete();
     return config;
   }
 
