@@ -283,19 +283,19 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             node.orientation = (sceneView.pointOfView?.orientation)!
             guard let ID = self.message else { return node }
             let result = strFormat(content: detectedDataResult[ID]! as [String: Any])
-            let left_message = generate_text(result["type"]!, -0.10, 0.05, 0.01)
-            let right_message = generate_text(result["content"]!, -0.02, 0.05, 0.01)
-            let title_message = generate_text(result["title"]!, -0.065, 0.08, 0.01, true, 2, true)
+            let left_message = generate_text(result["type"]!, -0.11, 0.05, 0.01)
+            let right_message = generate_text(result["content"]!, 0, 0.05, 0.01)
+            let title_message = generate_text(result["title"]!, -0.11, 0.08, 0.01, true, 2, true)
             node.addChildNode(left_message)
             node.addChildNode(right_message)
             node.addChildNode(title_message)
 
 
             let plane = SCNPlane(width: 0.25, height: 0.2)
-            plane.cornerRadius = 0.02
+//            plane.cornerRadius = 0.02
             let planeNode = SCNNode(geometry: plane)
             planeNode.eulerAngles.x = 0
-            planeNode.opacity = 0.4
+            planeNode.opacity = 0.8
             node.addChildNode(planeNode)
             return node
 
@@ -322,8 +322,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 // add lines
                 
                 var start_y = -referenceImage.physicalSize.height/2
-                let end_y = referenceImage.physicalSize.height/2
+                let end_y = referenceImage.physicalSize.height/2 - (referenceImage.physicalSize.height/42) * 3
                 let part = (referenceImage.physicalSize.height/42) * 3 // every 3 units
+                let text_pos = part/2
+                var iter = 40
+
                 
                 while(start_y<end_y){
                     let lineGeometry = SCNCylinder()
@@ -336,26 +339,87 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                     lineNode.eulerAngles.x = -.pi/2
                     lineNode.eulerAngles.y = -.pi/2
                     node.addChildNode(lineNode)
+                    
+                    // display row number
+                    let string = String(iter) + "-" + String(iter+2)
+                    let text = SCNText(string: string, extrusionDepth: 0.1)
+                    text.font = UIFont.systemFont(ofSize: 5)
+                    text.flatness = 0.005
+                    let textNode = SCNNode(geometry: text)
+                    let fontScale: Float = 0.01
+                    textNode.scale = SCNVector3(fontScale, fontScale, fontScale)
+                    
+                    let (min, max) = (text.boundingBox.min, text.boundingBox.max)
+                    let dx = min.x + 0.5 * (max.x - min.x)
+                    let dy = min.y + 0.5 * (max.y - min.y)
+                    let dz = min.z + 0.5 * (max.z - min.z)
+                    textNode.pivot = SCNMatrix4MakeTranslation(dx, dy, dz)
+                    textNode.position = SCNVector3Make(0, 0, Float(start_y + text_pos))
+                    textNode.opacity = 0.8
+                    textNode.eulerAngles.x = -.pi / 2
+                    node.addChildNode(textNode)
+                    
+                    let plane = SCNPlane(width: CGFloat(referenceImage.physicalSize.width), height: CGFloat(referenceImage.physicalSize.height/42) * 3)
+                    let planeNode = SCNNode(geometry: plane)
+                    planeNode.geometry?.firstMaterial?.diffuse.contents = UIColor.white.withAlphaComponent(0.5)
+                    planeNode.geometry?.firstMaterial?.isDoubleSided = true
+                    planeNode.position = SCNVector3Make(textNode.position.x, textNode.position.y, textNode.position.z + 0.001)
+                    
+//                    let width = (max.x - min.x) * fontScale
+//                    let height = (max.y - min.y) * fontScale
+//                    let plane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
+//                    let planeNode = SCNNode(geometry: plane)
+//                    planeNode.geometry?.firstMaterial?.diffuse.contents = UIColor.green.withAlphaComponent(0.5)
+//                    planeNode.geometry?.firstMaterial?.isDoubleSided = true
+//                    planeNode.position = textNode.position
+//                    planeNode.eulerAngles.x = .pi/2
+//                    planeNode.eulerAngles.y = 0
+//                    planeNode.eulerAngles.z = 0
+//                    textNode.eulerAngles.x = .pi/2
+//                    textNode.eulerAngles = planeNode.eulerAngles
+//                    planeNode.addChildNode(textNode)
+                    planeNode.eulerAngles.x = -.pi / 2
+                    node.addChildNode(planeNode)
+                    iter -= 3 // rack number +3
+
                     start_y+=part
                 }
                 
                 
                 let result = self.strFormat(content: self.fetch_result as [String: Any])
-                let left_message = self.generate_text(result["type"]!, Float(2*referenceImage.physicalSize.width+0.03), 0.01, -0.05)// (x,y,z: length,depth,height)
-                let right_message = self.generate_text(result["content"]!, Float(2*referenceImage.physicalSize.width+0.11), 0.01, -0.05)
-                let title_message = self.generate_text(result["title"]!, Float(2*referenceImage.physicalSize.width+0.07), 0.01, -0.08, true, 2)
+                let left_message = self.generate_text(result["type"]!, Float(referenceImage.physicalSize.width+0.01), 0.001, -0.05)// (x,y,z: length,depth,height)
+                let right_message = self.generate_text(result["content"]!, Float(referenceImage.physicalSize.width+0.12), 0.001, -0.05)
+                let title_message = self.generate_text(result["title"]!, Float(referenceImage.physicalSize.width+0.01), 0.001, -0.08, true, 2)
                 node.addChildNode(left_message)
                 node.addChildNode(right_message)
                 node.addChildNode(title_message)
 
 
                 let plane = SCNPlane(width: 0.25, height: 0.2)
-                plane.cornerRadius = 0.02
+//                plane.cornerRadius = 0.02
                 let planeNode = SCNNode(geometry: plane)
                 planeNode.eulerAngles.x = 0
-                planeNode.opacity = 0.4
-                planeNode.position = SCNVector3Make(Float(2*referenceImage.physicalSize.width+0.115), 0.009, 0.2)
+                planeNode.opacity = 0.8
+                planeNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, 0)
                 node.addChildNode(planeNode)
+                
+                
+                    
+                    
+                    // Add pointing line
+                    let lineConnect = SCNCylinder()
+                    lineConnect.radius = 0.002
+                    lineConnect.height  = CGFloat(referenceImage.physicalSize.width)
+                    lineConnect.radialSegmentCount = 5
+                    lineConnect.firstMaterial!.diffuse.contents = UIColor.red
+                    let frameNode = SCNNode(geometry: lineConnect)
+                    frameNode.position = SCNVector3(referenceImage.physicalSize.width/2.0, 0, 0)
+                    frameNode.eulerAngles.x = -.pi/2
+                    frameNode.eulerAngles.y = -.pi/2
+                    node.addChildNode(frameNode)
+                    
+                    
+
                 
                 /*
                  `SCNPlane` is vertically oriented in its local coordinate space, but
