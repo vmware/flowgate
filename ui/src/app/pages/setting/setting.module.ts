@@ -21,6 +21,7 @@ import { AssetListComponent } from './component/asset-list/asset-list.component'
 import { AssetEditComponent } from './component/asset-edit/asset-edit.component';
 import { FacilityAdapterListComponent } from './component/adaptertype/adaptertype-list/facility-adapter-list.component';
 import { FacilityAdapterService } from './component/adaptertype/facility-adapter.service';
+import { AssetChart } from './component/trigger-job/sankey.chart';
 
 @NgModule({
   imports: [
@@ -33,8 +34,8 @@ import { FacilityAdapterService } from './component/adaptertype/facility-adapter
     //AssetChart,
     FileUploadModule
   ],
-  schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
-  declarations: [SettingComponent,SensorsettingListComponent,SensorsettingEditComponent,SensorsettingAddComponent,TriggerJobComponent,AssetAddComponent,AssetListComponent,AssetEditComponent,FacilityAdapterListComponent],
+  schemas: [ CUSTOM_ELEMENTS_SCHEMA],
+  declarations: [AssetChart,SettingComponent,SensorsettingListComponent,SensorsettingEditComponent,SensorsettingAddComponent,TriggerJobComponent,AssetAddComponent,AssetListComponent,AssetEditComponent,FacilityAdapterListComponent],
   providers:[ SettingService,FacilityAdapterService]
 })
 export class SettingModule { }

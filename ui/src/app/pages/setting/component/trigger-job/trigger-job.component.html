@@ -193,12 +193,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </div>
             </clr-tab-content>
         </clr-tab>
-        <!-- <clr-tab *appHasPrivilege=assetTopology>
+        <clr-tab *appHasPrivilege=assetTopology>
             <button clrTabLink>Asset Topology</button>
             <clr-tab-content *clrIfActive>
                 <setting-asset></setting-asset>
             </clr-tab-content>
-        </clr-tab> -->
+        </clr-tab> 
         <clr-tab *appHasPrivilege=syncData>
             <button (click)="getExpiredTimeRange()" clrTabLink>Sync Data</button>
             <clr-tab-content *clrIfActive>
@@ -287,7 +287,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             Pull Unmapped Servers       
                         </button>
                         <div class="clr-row">
-                            <div class="clr-col-4">
+                            <div class="clr-col-12">
                                 <clr-datagrid *ngIf="unmappedservershow">
                             
                                     <clr-dg-column>server</clr-dg-column>

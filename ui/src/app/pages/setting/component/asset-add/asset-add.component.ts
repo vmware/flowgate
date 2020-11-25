@@ -21,7 +21,7 @@ export class AssetAddComponent implements OnInit {
   suballcategory = {"Server":["Blade","Standard"], 
   "Sensors":["Humidity","Temperature","AirPressure","AirFlow","ContactClosure","Smoke","Water","Vibration"]};
 
-  constructor(private service:SettingService,private router:Router,private activedRoute:ActivatedRoute) { }
+  constructor(private service:SettingService,private router:Router) { }
   ngOnInit() {
   }
   closefailTips(){
