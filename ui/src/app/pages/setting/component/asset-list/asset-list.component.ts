@@ -4,6 +4,7 @@
 */
 import { Component, OnInit } from '@angular/core';
 import {Router,ActivatedRoute} from '@angular/router';
+import { ClrDatagridStateInterface } from '@clr/angular';
 import { SettingService } from '../../setting.service';
 
 
@@ -26,36 +27,29 @@ export class AssetListComponent implements OnInit {
   assetId:string = '';
   clrAlertClosed:boolean = true;
 
-  setInfo(){
-    this.info=this.pageSize;
-    this.getAssetsDatas(this.currentPage,this.pageSize)
-  }
-  previous(){
-    if(this.currentPage>1){
-      this.currentPage--;
-      this.getAssetsDatas(this.currentPage,this.pageSize)
+  loading:boolean = true;
+  currentState:ClrDatagridStateInterface;
+  totalItems:number = 0;
+  refresh(state: ClrDatagridStateInterface){
+    this.assets = [];
+    this.loading = true;
+    if (!state.page) {
+      return;
     }
-  }
-  next(){
-    if(this.currentPage < this.totalPage){
-      this.currentPage++
-      this.getAssetsDatas(this.currentPage,this.pageSize)
-    }
+    this.currentState = state;
+    this.getAssetsDatas(state.page.current,state.page.size);
   }
 
-  getAssetsDatas(currentPage,pageSize){
+  getAssetsDatas(currentPage:number,pageSize:number){
     this.assets = [];
     this.service.getAssetsBySource("flowgate", currentPage, pageSize).subscribe(
       (data)=>{
         this.assets =  data['content'];
-        this.currentPage = data['number']+1;
-        this.totalPage = data['totalPages'];
-        if(this.totalPage == 1){
-          this.disabled = "disabled";
-        }else{
-          this.disabled = "";
-        }
-    })
+        this.totalItems = data['totalElements'];
+        this.loading = false;
+      },(error)=>{
+        this.loading = false;
+      })
   }
   addAsset(){
     this.router.navigate(["/ui/nav/setting/asset-add"]);
@@ -82,7 +76,6 @@ export class AssetListComponent implements OnInit {
     this.assetId = id;
   }
   ngOnInit() {
-     this.getAssetsDatas(this.currentPage,this.pageSize);
   }
 
 }

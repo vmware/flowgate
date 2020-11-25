@@ -19,7 +19,7 @@ export class SettingService {
 
   private API_URL = environment.API_URL;
 
-  constructor(private http:HttpClient,private auth:AuthenticationService) { 
+  constructor(private http:HttpClient) { 
   }
   postsensorsetting(type,minNum,maxNum,minValue,maxValue){
   let body = JSON.stringify({
