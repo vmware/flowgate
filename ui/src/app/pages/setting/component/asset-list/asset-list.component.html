@@ -8,7 +8,7 @@
        </font>
   </button>
 
-  <clr-datagrid>
+  <clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)">
         
         <clr-dg-column>Name</clr-dg-column>
         <clr-dg-column >
@@ -138,20 +138,12 @@
             <clr-dg-cell class = "flowgate-overflow" title="{{asset.created | date:'yyyy-MM-dd HH:mm:ss'}}">{{asset.created | date:"yyyy-MM-dd HH:mm:ss"}}</clr-dg-cell>
         </clr-dg-row>
 
-
-        <clr-dg-footer *ngIf="assets.length>0">
-        <ul class="pagination">
-            <li style="padding-top: 5px;"><div class="select">
-                <select id="selects_1" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;setInfo()">
-                <option>20</option>
-                <option>30</option>
-                <option>50</option>
-            </select></div>
-            </li>
-            <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
-            <li class="pagination-current">{{currentPage}}/{{totalPage}}</li>
-            <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button></li>
-        </ul>
+        <clr-dg-footer>
+            <clr-dg-pagination #pagination [clrDgPageSize]="10" [clrDgTotalItems] = "totalItems">
+            <clr-dg-page-size [clrPageSizeOptions]="[10,20,50]">Assets per page</clr-dg-page-size>
+            {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+            of {{pagination.totalItems}} Assets
+            </clr-dg-pagination>
         </clr-dg-footer>
   </clr-datagrid>
   <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
