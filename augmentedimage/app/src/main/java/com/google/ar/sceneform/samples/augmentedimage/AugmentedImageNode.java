@@ -57,6 +57,7 @@ public class AugmentedImageNode extends AnchorNode {
   // Two kinds of bars: one vertical, one horizontal;
   // two vertical bars & two horizontal bars form a frame
   private static ModelRenderable[] bar = new ModelRenderable[2];
+  private static ModelRenderable[] dividerBar = new ModelRenderable[1];
 
   public AugmentedImageNode() {
     // Do nothing upon construction
@@ -83,6 +84,7 @@ public class AugmentedImageNode extends AnchorNode {
     ArrayList<Vertex>[] vertices= new ArrayList[2];
     vertices[0] = getCubeVertices(new Vector3(image.getExtentX() + 2 * frameWidth, 0.0f, frameWidth), new Vector3(0.0f, 0.0f, 0.0f));
     vertices[1] = getCubeVertices(new Vector3(frameWidth, 0.0f, image.getExtentZ() + 2 * frameWidth), new Vector3(0.0f, 0.0f, 0.0f));
+    ArrayList<Vertex> dividerVertices = getCubeVertices(new Vector3(image.getExtentX(), 0.0f, frameWidth/5), new Vector3(0.0f, 0.0f, 0.0f));
     // color of frame
     Color c = new Color(android.graphics.Color.BLUE);
     MaterialFactory.makeTransparentWithColor(context, c).thenAccept(
@@ -104,23 +106,18 @@ public class AugmentedImageNode extends AnchorNode {
                               .setVertices(vertices[1])
                               .setSubmeshes(Arrays.asList(submesh))
                               .build();
-
-              CompletableFuture<ModelRenderable> future =
-                      ModelRenderable.builder().setSource(renderableDefinition[0]).build();
+              RenderableDefinition[] dividerRenderableDefinition = new RenderableDefinition[1];
+              dividerRenderableDefinition[0] =
+                      RenderableDefinition.builder()
+                              .setVertices(dividerVertices)
+                              .setSubmeshes(Arrays.asList(submesh))
+                              .build();
 
               try {
-                Log.d(TAG, "renderable");
-
-                if(future == null){
-                  Log.d(TAG, "null future");
-                }
-
-
-                assert future != null;
-                bar[0] = future.get();
 
                 bar[0] = ModelRenderable.builder().setSource(renderableDefinition[0]).build().get();
                 bar[1] = ModelRenderable.builder().setSource(renderableDefinition[1]).build().get();
+                dividerBar[0] = ModelRenderable.builder().setSource(dividerRenderableDefinition[0]).build().get();
               } catch (ExecutionException e) {
                 Log.e(TAG, "ExecutionException when set image");
                 e.printStackTrace();
@@ -157,6 +154,18 @@ public class AugmentedImageNode extends AnchorNode {
               cornerNode.setLocalPosition(localPosition);
               cornerNode.setRenderable(bar[1]);
 
+
+              float intervalNum = 14;
+              float interval = image.getExtentZ()/intervalNum;
+              float bottom = -0.5f * image.getExtentZ() + interval;
+
+              for(int i = 1; i < intervalNum; i++){
+                  localPosition.set(0, 0.0f, bottom + i * interval);
+                  cornerNode = new Node();
+                  cornerNode.setParent(this);
+                  cornerNode.setLocalPosition(localPosition);
+                  cornerNode.setRenderable(dividerBar[0]);
+              }
 
             });
   }
