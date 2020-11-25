@@ -19,10 +19,10 @@ package com.google.ar.sceneform.samples.augmentedimage;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
-import android.graphics.Rect;
 import android.media.Image;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.util.Log;
 import android.view.View;
@@ -37,6 +37,7 @@ import com.google.ar.core.Frame;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
+import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.core.exceptions.NotYetAvailableException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.FrameTime;
@@ -63,11 +64,10 @@ import java.util.Map;
  * href="https://developers.google.com/ar/develop/c/augmented-images/">Recognize and Augment
  * Images</a>.
  */
-public class AugmentedImageActivity extends AppCompatActivity {
+public class AugmentedImageActivity extends AppCompatActivity implements AugmentedImageFragment.OnCompleteListener {
   private ArFragment arFragment;
   private ImageView fitToScanView;
   private Button button;
-  private TextView dialogue;
 
   private TextView serverTextview;
   private ViewRenderable serverRenderable;
@@ -86,10 +86,19 @@ public class AugmentedImageActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
-    fitToScanView = findViewById(R.id.image_view_fit_to_scan);
+    // Create new fragment and transaction
+    arFragment = new AugmentedImageFragment();
+    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-    dialogue = (TextView) findViewById(R.id.disp1);
+    // Replace whatever is in the fragment_container view with this fragment,
+    // and add the transaction to the back stack
+    transaction.replace(R.id.ux_fragment, arFragment);
+    transaction.addToBackStack(null);
+    // Commit the transaction
+    transaction.commit();
+
+    // arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
+    fitToScanView = findViewById(R.id.image_view_fit_to_scan);
 
     button = findViewById(R.id.button1);
     // Reset the app status.
@@ -97,21 +106,26 @@ public class AugmentedImageActivity extends AppCompatActivity {
       @Override
       public void onClick(View v) {
         isScanSuccess = false;
+        serverNode = null;
         if (serverTextview != null){
           serverTextview.setText("");
         }
-        if (dialogue != null){
-          String status = "Detecting";
-          dialogue.setText(status);
-        }
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.detach(arFragment);
+        transaction.attach(arFragment);
+        transaction.commit();
       }
     });
+  }
 
+  @Override
+  public void onComplete() {
+    SnackbarHelper.getInstance().showMessage(this, "Detecting");
     // Build the 2D renderable for text views of server.
     ViewRenderable.builder()
-            .setView(this, R.layout.server_view)
-            .build()
-            .thenAccept(renderable -> serverRenderable = renderable);
+        .setView(this, R.layout.server_view)
+        .build()
+        .thenAccept(renderable -> serverRenderable = renderable);
 
     arFragment.getArSceneView().getScene().addOnUpdateListener(this::onUpdateFrame);
   }
@@ -138,11 +152,6 @@ public class AugmentedImageActivity extends AppCompatActivity {
       return;
     }
 
-    // Set Auto focus of the camera.
-    Config config = session.getConfig();
-    config.setFocusMode(Config.FocusMode.AUTO);
-    session.configure(config);
-
     // Let the fragment update its state first.
     arFragment.onUpdate(frameTime);
 
@@ -155,7 +164,7 @@ public class AugmentedImageActivity extends AppCompatActivity {
 
     // Scan once; and once the information is obtained, no scanning before reset.
     if (!isScanSuccess) {
-      if (this.serverNode != null) {
+      /*if (this.serverNode != null) {
         serverNode.getAnchor().detach();
         serverNode.setParent(null);
         serverNode.setRenderable(null);
@@ -165,7 +174,7 @@ public class AugmentedImageActivity extends AppCompatActivity {
           node = null;
         });
         augmentedImageMap.clear();
-      }
+      }*/
       // Send frame image and scan barcode.
       try (final Image image = arFragment.getArSceneView().getArFrame().acquireCameraImage()) {
         if (image.getFormat() == ImageFormat.YUV_420_888) {
@@ -175,11 +184,11 @@ public class AugmentedImageActivity extends AppCompatActivity {
 
           Context context = this.getApplicationContext();
 
-          barScanning.scanBarcodes(inputImage, fc, context, serverTextview, dialogue);
+          barScanning.scanBarcodes(inputImage, fc, context, serverTextview, this);
           image.close();
         }
       } catch (NotYetAvailableException e) {
-        Log.e("Barcode", e.getMessage());
+        Log.e("Barcode", "NotYetAvailableException sending frame image.", e);
       }
     }
 
@@ -208,8 +217,7 @@ public class AugmentedImageActivity extends AppCompatActivity {
               node.setImage(augmentedImage, this);
               augmentedImageMap.put(augmentedImage, node);
               arFragment.getArSceneView().getScene().addChild(node);
-              String status = "Device detected";
-              dialogue.setText(status);
+              SnackbarHelper.getInstance().showMessage(this, "Device detected and frame drawn");
 
               // Put the server's information near the cabinet.
               if (this.serverNode == null) {
