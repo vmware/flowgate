@@ -184,9 +184,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 DispatchQueue.main.async {
                 self.hitTestQrCode(center: center, message: message)
                 self.processing = false
-            }
+                }
             }else{
                 getAssetByIDNAnchor(ID: message)
+                self.hitTestQrCodeFirst(center: center, message: message)
                 self.processing = false
             }
         } else {
@@ -209,6 +210,17 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 self.lastAddedAnchor = self.detectedDataAnchor[message] as? ARAnchor
                 self.getAssetByID(ID: message)
             }
+        }
+    }
+    
+    func hitTestQrCodeFirst(center: CGPoint, message: String) {
+//        print(detectedDataResult)
+        if let hitTestResults = sceneView?.hitTest(center, types: [.featurePoint] ),
+           let hitTestResult = hitTestResults.first {
+                // Create an anchor. The node will be created in delegate methods
+//                self.detectedDataAnchor[message] = hitTestResult.anchor
+                self.detectedDataAnchor[message] = ARAnchor(transform: hitTestResult.worldTransform)
+                self.lastAddedAnchor = self.detectedDataAnchor[message] as? ARAnchor
         }
     }
     
@@ -285,7 +297,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             let result = strFormat(content: detectedDataResult[ID]! as [String: Any])
             let left_message = generate_text(result["type"]!, -0.11, 0.05, 0.01)
             let right_message = generate_text(result["content"]!, 0, 0.05, 0.01)
-            let title_message = generate_text(result["title"]!, -0.11, 0.08, 0.01, true, 2, true)
+            let title_message = generate_text(result["title"]!, -0.11, 0.08, 0.01, true, 2)
             node.addChildNode(left_message)
             node.addChildNode(right_message)
             node.addChildNode(title_message)
@@ -433,7 +445,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
 //                planeNode.runAction(imageHighlightAction)
                 self.cabinet_show = true;
                 self.stopFigure()
-                
+                self.sceneView.session.add(anchor: self.lastAddedAnchor!)
             }
             DispatchQueue.main.async {
                 self.statusViewController.cancelAllScheduledMessages()
