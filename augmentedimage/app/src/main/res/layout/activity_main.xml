@@ -38,7 +38,16 @@
     <Button
         android:id="@+id/button1"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
+        android:textSize="16sp"
         android:text="Reset" />
+
+    <TextView
+        android:id="@+id/disp1"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="right|center"
+        android:textSize="18sp"
+        android:text="Detecting" />
 
 </FrameLayout>
