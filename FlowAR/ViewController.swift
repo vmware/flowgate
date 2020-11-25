@@ -298,6 +298,29 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 wireFrame.geometry = box
                 node.addChildNode(wireFrame)
                 
+                // add lines
+                
+                let start_x = -referenceImage.physicalSize.width/2
+                let end_x = referenceImage.physicalSize.width/2
+                
+                var start_y = -referenceImage.physicalSize.height/2
+                let end_y = referenceImage.physicalSize.height/2
+                let part = referenceImage.physicalSize.height/42
+                
+                while(start_y<end_y){
+                    let lineGeometry = SCNCylinder()
+                    lineGeometry.radius = 0.002
+                    lineGeometry.height = CGFloat(referenceImage.physicalSize.width)
+                    lineGeometry.radialSegmentCount = 5
+                    lineGeometry.firstMaterial!.diffuse.contents = UIColor.green
+                    let lineNode = SCNNode(geometry: lineGeometry)
+                    lineNode.position = SCNVector3(0, 0, start_y)
+                    lineNode.position = SCNVector3Zero
+                    lineNode.eulerAngle.x = -.pi/2
+                    node.addChildNode(lineNode)
+                    start_y+=part
+                }
+                
                 
                 let result = self.strFormat(content: self.fetch_result as [String: Any])
                 let left_message = self.generate_text(result["type"]!, Float(2*referenceImage.physicalSize.width+0.03), 0.01, -0.05)// (x,y,z: length,depth,height)
@@ -339,6 +362,20 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     
     // MARK: - ARSCNViewDelegate (Image detection results)
     /// - Tag: ARImageAnchor-Visualizing
+    func lineBetweenNodes(positionA: SCNVector3, positionB: SCNVector3) -> SCNNode {
+            let vector = SCNVector3(positionA.x - positionB.x, positionA.y - positionB.y, positionA.z - positionB.z)
+            let distance = sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z)
+            let midPosition = SCNVector3 (x:(positionA.x + positionB.x) / 2, y:(positionA.y + positionB.y) / 2, z:(positionA.z + positionB.z) / 2)
+            let lineGeometry = SCNCylinder()
+            lineGeometry.radius = 0.002
+            lineGeometry.height = CGFloat(distance)
+            lineGeometry.radialSegmentCount = 5
+            lineGeometry.firstMaterial!.diffuse.contents = UIColor.green
+
+            let lineNode = SCNNode(geometry: lineGeometry)
+            lineNode.position = midPosition
+            return lineNode
+        }
 
     var imageHighlightAction: SCNAction {
         return .sequence([
@@ -355,5 +392,14 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
 extension SCNVector3 {
     static func + (left: SCNVector3, right: SCNVector3) -> SCNVector3 {
         return SCNVector3Make(left.x + right.x, left.y + right.y, left.z + right.z)
+    }
+}
+
+extension SCNGeometry {
+    class func line(from vector1: SCNVector3, to vector2: SCNVector3) -> SCNGeometry {
+        let indices: [Int32] = [0, 1]
+        let source = SCNGeometrySource(vertices: [vector1, vector2])
+        let element = SCNGeometryElement(indices: indices, primitiveType: .line)
+        return SCNGeometry(sources: [source], elements: [element])
     }
 }
