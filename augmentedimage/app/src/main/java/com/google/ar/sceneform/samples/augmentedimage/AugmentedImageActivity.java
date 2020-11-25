@@ -40,6 +40,7 @@ import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.NotYetAvailableException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.FrameTime;
+import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.samples.augmentedimage.flowgate.flowgateClient;
 import com.google.ar.sceneform.samples.common.helpers.SnackbarHelper;
@@ -66,11 +67,11 @@ public class AugmentedImageActivity extends AppCompatActivity {
   private ArFragment arFragment;
   private ImageView fitToScanView;
   private Button button;
+  private TextView dialogue;
 
-  private TextView serverTextview, cabinetTextview;
-  private ViewRenderable serverRenderable, cabinetRenderable;
-
-  private AnchorNode serverNode, cabinetNode;
+  private TextView serverTextview;
+  private ViewRenderable serverRenderable;
+  private AnchorNode serverNode;
 
   private Boolean isScanSuccess = false;
 
@@ -78,7 +79,7 @@ public class AugmentedImageActivity extends AppCompatActivity {
 
   // Augmented image and its associated center pose anchor, keyed by the augmented image in
   // the database.
-  private final Map<AugmentedImage, AugmentedImageNode> augmentedImageMap = new HashMap<>();
+  private Map<AugmentedImage, AugmentedImageNode> augmentedImageMap = new HashMap<>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -87,8 +88,10 @@ public class AugmentedImageActivity extends AppCompatActivity {
 
     arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
     fitToScanView = findViewById(R.id.image_view_fit_to_scan);
-    button = findViewById(R.id.button1);
 
+    dialogue = (TextView) findViewById(R.id.disp1);
+
+    button = findViewById(R.id.button1);
     // Reset the app status.
     button.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -97,21 +100,18 @@ public class AugmentedImageActivity extends AppCompatActivity {
         if (serverTextview != null){
           serverTextview.setText("");
         }
-        if (cabinetTextview != null){
-          cabinetTextview.setText("");
+        if (dialogue != null){
+          String status = "Detecting";
+          dialogue.setText(status);
         }
       }
     });
 
-    // Build the 2D renderable for text views of server & cabinet.
+    // Build the 2D renderable for text views of server.
     ViewRenderable.builder()
             .setView(this, R.layout.server_view)
             .build()
             .thenAccept(renderable -> serverRenderable = renderable);
-    ViewRenderable.builder()
-        .setView(this, R.layout.cabinet_view)
-        .build()
-        .thenAccept(renderable -> cabinetRenderable = renderable);
 
     arFragment.getArSceneView().getScene().addOnUpdateListener(this::onUpdateFrame);
   }
@@ -152,8 +152,7 @@ public class AugmentedImageActivity extends AppCompatActivity {
     }
 
     serverTextview = (TextView) serverRenderable.getView();
-    cabinetTextview = (TextView) cabinetRenderable.getView();
-    // Rect barcodePos = null;
+
     // Scan once; and once the information is obtained, no scanning before reset.
     if (!isScanSuccess) {
       if (this.serverNode != null) {
@@ -161,6 +160,11 @@ public class AugmentedImageActivity extends AppCompatActivity {
         serverNode.setParent(null);
         serverNode.setRenderable(null);
         serverNode = null;
+        augmentedImageMap.forEach((image, node) -> {
+          arFragment.getArSceneView().getScene().removeChild(node);
+          node = null;
+        });
+        augmentedImageMap.clear();
       }
       // Send frame image and scan barcode.
       try (final Image image = arFragment.getArSceneView().getArFrame().acquireCameraImage()) {
@@ -171,7 +175,7 @@ public class AugmentedImageActivity extends AppCompatActivity {
 
           Context context = this.getApplicationContext();
 
-          barScanning.scanBarcodes(inputImage, fc, context, serverTextview);
+          barScanning.scanBarcodes(inputImage, fc, context, serverTextview, dialogue);
           image.close();
         }
       } catch (NotYetAvailableException e) {
@@ -180,19 +184,9 @@ public class AugmentedImageActivity extends AppCompatActivity {
     }
 
     isScanSuccess = (serverTextview.getText().toString().length() != 0);
+
     // Image recognition after barcode scanning.
     if (isScanSuccess) {
-      // Put the server's information near the barcode.
-      if (this.serverNode == null) {
-        // float[] pos = {barcodePos.right, barcodePos.top, -1};
-        float[] pos = {0, 0, -1};
-        float[] rotation = {0, 0, 0, 1};
-        Anchor anchor = session.createAnchor(new Pose(pos, rotation));
-        serverNode = new AnchorNode(anchor);
-        serverNode.setRenderable(serverRenderable);
-        serverNode.setParent(arFragment.getArSceneView().getScene());
-      }
-
       Collection<AugmentedImage> updatedAugmentedImages =
           frame.getUpdatedTrackables(AugmentedImage.class);
       for (AugmentedImage augmentedImage : updatedAugmentedImages) {
@@ -214,17 +208,18 @@ public class AugmentedImageActivity extends AppCompatActivity {
               node.setImage(augmentedImage, this);
               augmentedImageMap.put(augmentedImage, node);
               arFragment.getArSceneView().getScene().addChild(node);
+              String status = "Device detected";
+              dialogue.setText(status);
 
-              /*// Create the anchor near the cabinet to show the text.
-              // 传fc, context, cabinetTextview
-              if (this.cabinetNode == null) {
-                float[] pos = {0, 0.0f, 0.5f * augmentedImage.getExtentZ()};
-                float[] rotation = {0, 0, 0, 1};
+              // Put the server's information near the cabinet.
+              if (this.serverNode == null) {
+                float[] pos = {augmentedImage.getCenterPose().tx() + augmentedImage.getExtentX(), augmentedImage.getCenterPose().ty(), augmentedImage.getCenterPose().tz()};
+                float[] rotation = {0, 0, 0, 90};
                 Anchor anchor = session.createAnchor(new Pose(pos, rotation));
-                cabinetNode = new AnchorNode(anchor);
-                cabinetNode.setRenderable(cabinetRenderable);
-                cabinetNode.setParent(arFragment.getArSceneView().getScene());
-              }*/
+                serverNode = new AnchorNode(anchor);
+                serverNode.setRenderable(serverRenderable);
+                serverNode.setParent(arFragment.getArSceneView().getScene());
+              }
             }
             break;
 

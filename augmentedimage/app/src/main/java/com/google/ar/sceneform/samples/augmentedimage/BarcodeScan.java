@@ -24,7 +24,7 @@ import com.google.ar.sceneform.samples.augmentedimage.flowgate.flowgateClient;
 
 public class BarcodeScan {
 	private static final String TAG = "Barcode Detect";
-	public void scanBarcodes(InputImage image, flowgateClient fc, Context context, TextView textView) {
+	public void scanBarcodes(InputImage image, flowgateClient fc, Context context, TextView textView, TextView dialogue) {
 		BarcodeScannerOptions options =
 			new BarcodeScannerOptions.Builder()
 				.setBarcodeFormats(Barcode.FORMAT_CODE_128)
@@ -44,9 +44,10 @@ public class BarcodeScan {
 					// [START_EXCLUDE]
 					// [START get_barcodes]
 					for (Barcode barcode: barcodes) {
-//
 						String rawValue = barcode.getRawValue();
 						Log.d(TAG, "The id is: " + rawValue);
+						String disp = "Bar code detected";
+						dialogue.setText(disp);
 
 						Thread t = new Thread(){
 							@Override
