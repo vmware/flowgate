@@ -566,6 +566,33 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void readAssetBySourceExample() throws Exception {
+      Asset asset = createAsset();
+      asset.setAssetName("testReadAssetBySource");
+      asset = assetRepository.save(asset);
+      try {
+         this.mockMvc.perform(get("/v1/assets/source/" + asset.getAssetSource()+"/?currentPage=1&pageSize=5"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$..content[0].assetName").value("testReadAssetBySource"))
+               .andDo(document("assets-getBySource-example",
+                       responseFields(subsectionWithPath("content").description("An assets array."),
+                             fieldWithPath("totalPages").description("content's total pages."),
+                               fieldWithPath("totalElements").description("content's total elements."),
+                               fieldWithPath("last").description("Is the last."),
+                               fieldWithPath("number").description("The page number."),
+                               fieldWithPath("size").description("The page size."),
+                               fieldWithPath("sort").description("The sort."),
+                               fieldWithPath("numberOfElements").description("The number of Elements."),
+                               fieldWithPath("first").description("Is the first."),
+                               subsectionWithPath("pageable").description("pageable.").ignored(),
+                               subsectionWithPath("sort").description("sorted.").ignored(),
+                               fieldWithPath("empty").description("Is empty.").ignored())));
+      }finally {
+         assetRepository.deleteById(asset.getId());
+      }
+   }
+
+   @Test
    public void readAssetBySourceAndTypeExample() throws Exception {
       Asset asset = createAsset();
       asset = assetRepository.save(asset);
