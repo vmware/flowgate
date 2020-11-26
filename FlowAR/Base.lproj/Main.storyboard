@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="c6h-T4-VaG">
-    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <device id="retina6_1" orientation="landscape" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
@@ -13,16 +13,16 @@
             <objects>
                 <viewController id="c6h-T4-VaG" customClass="ViewController" customModule="FlowAR" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ELN-Hy-SiV">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="896" height="414"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <sceneKitView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" wantsMultisampling="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FZd-N3-nGX" customClass="ARSCNView">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <rect key="frame" x="44" y="0.0" width="808" height="414"/>
                             </sceneKitView>
                             <visualEffectView hidden="YES" opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aGR-hj-NkT">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <rect key="frame" x="0.0" y="0.0" width="896" height="414"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="mbE-oU-z0Z">
-                                    <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="896" height="414"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 </view>
                                 <blurEffect style="light"/>
@@ -72,7 +72,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <visualEffectView hidden="YES" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" verticalHuggingPriority="1000" verticalCompressionResistancePriority="100" translatesAutoresizingMaskIntoConstraints="NO" id="yqt-5e-tsJ" userLabel="Message Panel">
-                                <rect key="frame" x="16" y="64" width="125" height="32"/>
+                                <rect key="frame" x="60" y="20" width="125" height="32"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="eea-j5-Rrv">
                                     <rect key="frame" x="0.0" y="0.0" width="125" height="32"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -120,7 +120,7 @@
                                 </userDefinedRuntimeAttributes>
                             </visualEffectView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="bottom" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tzq-In-Wl8" userLabel="Restart Experience Button Icon">
-                                <rect key="frame" x="370" y="44" width="44" height="59"/>
+                                <rect key="frame" x="370" y="0.0" width="44" height="59"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="59" id="LYs-2c-acL"/>
                                     <constraint firstAttribute="width" constant="44" id="gUr-iC-Qk9"/>
@@ -134,14 +134,14 @@
                                 </connections>
                             </button>
                             <visualEffectView hidden="YES" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" verticalHuggingPriority="1000" verticalCompressionResistancePriority="100" translatesAutoresizingMaskIntoConstraints="NO" id="Q3r-ch-KgZ" userLabel="Pause Panel">
-                                <rect key="frame" x="269" y="97" width="125" height="32"/>
+                                <rect key="frame" x="299" y="99" width="125" height="30"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="kA0-HU-ogc">
-                                    <rect key="frame" x="0.0" y="0.0" width="125" height="32"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="125" height="30"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <visualEffectView opaque="NO" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="McW-Fb-gVB">
+                                        <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="McW-Fb-gVB">
                                             <rect key="frame" x="0.0" y="0.0" width="125" height="32"/>
-                                            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" id="coj-8j-1x8">
+                                            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="coj-8j-1x8">
                                                 <rect key="frame" x="0.0" y="0.0" width="125" height="32"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <gestureRecognizers/>
@@ -155,8 +155,13 @@
                                         <constraint firstItem="McW-Fb-gVB" firstAttribute="leading" secondItem="kA0-HU-ogc" secondAttribute="leading" id="H9n-gY-fco"/>
                                         <constraint firstAttribute="trailing" secondItem="McW-Fb-gVB" secondAttribute="trailing" id="UhO-UZ-p1O"/>
                                         <constraint firstItem="McW-Fb-gVB" firstAttribute="top" secondItem="kA0-HU-ogc" secondAttribute="top" id="ZMs-qB-X0Z"/>
+                                        <constraint firstAttribute="bottom" secondItem="McW-Fb-gVB" secondAttribute="bottom" constant="-2" id="q9A-1e-HmP"/>
                                     </constraints>
                                 </view>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="125" id="JIS-qH-AWV"/>
+                                    <constraint firstAttribute="height" constant="30" id="T9N-E0-gFw"/>
+                                </constraints>
                                 <blurEffect style="light"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -165,7 +170,11 @@
                                 </userDefinedRuntimeAttributes>
                             </visualEffectView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7dE-0L-Opb">
-                                <rect key="frame" x="269" y="97" width="125" height="30"/>
+                                <rect key="frame" x="299" y="99" width="125" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="125" id="qOf-Fi-DHL"/>
+                                    <constraint firstAttribute="height" constant="30" id="rCD-xE-hlM"/>
+                                </constraints>
                                 <state key="normal" title="Button"/>
                                 <connections>
                                     <action selector="pressPauseButton:" destination="nYX-8E-ouy" eventType="touchUpInside" id="I4j-xn-Zyo"/>
@@ -178,15 +187,12 @@
                             <constraint firstItem="yqt-5e-tsJ" firstAttribute="top" secondItem="tzq-In-Wl8" secondAttribute="top" constant="20" id="1HX-Cb-kLW"/>
                             <constraint firstItem="yqt-5e-tsJ" firstAttribute="leading" secondItem="FIW-KQ-pqD" secondAttribute="leading" constant="16" id="3dS-ML-HvS"/>
                             <constraint firstItem="FIW-KQ-pqD" firstAttribute="trailing" secondItem="tzq-In-Wl8" secondAttribute="trailing" id="7bq-Jf-LmX"/>
+                            <constraint firstItem="7dE-0L-Opb" firstAttribute="bottom" secondItem="Q3r-ch-KgZ" secondAttribute="bottom" id="FyQ-h5-tzm"/>
                             <constraint firstItem="tzq-In-Wl8" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="yqt-5e-tsJ" secondAttribute="trailing" constant="8" id="KkT-aM-dF1"/>
                             <constraint firstItem="tzq-In-Wl8" firstAttribute="top" secondItem="FIW-KQ-pqD" secondAttribute="top" id="Ljf-67-3X0"/>
-                            <constraint firstItem="Q3r-ch-KgZ" firstAttribute="top" secondItem="7dE-0L-Opb" secondAttribute="top" id="Ob9-Rx-1pb"/>
-                            <constraint firstItem="Q3r-ch-KgZ" firstAttribute="bottom" secondItem="FIW-KQ-pqD" secondAttribute="bottom" id="b6k-UA-4mZ"/>
-                            <constraint firstItem="7dE-0L-Opb" firstAttribute="trailing" secondItem="pHH-Dc-DFj" secondAttribute="trailingMargin" id="hdf-XV-sqm"/>
-                            <constraint firstItem="7dE-0L-Opb" firstAttribute="trailing" secondItem="Q3r-ch-KgZ" secondAttribute="trailing" id="ioF-1y-t4D"/>
-                            <constraint firstItem="7dE-0L-Opb" firstAttribute="leading" secondItem="FIW-KQ-pqD" secondAttribute="leading" constant="269" id="vKz-m8-bnq"/>
-                            <constraint firstItem="Q3r-ch-KgZ" firstAttribute="top" secondItem="FIW-KQ-pqD" secondAttribute="top" constant="53" id="vhD-ig-wyx"/>
-                            <constraint firstItem="Q3r-ch-KgZ" firstAttribute="leading" secondItem="FIW-KQ-pqD" secondAttribute="leading" constant="269" id="vmx-X4-lQ0"/>
+                            <constraint firstItem="Q3r-ch-KgZ" firstAttribute="trailing" secondItem="FIW-KQ-pqD" secondAttribute="trailing" constant="10" id="Xe9-ef-eeI" userLabel="Pause Panel.trailing = Safe Area.trailing - 10"/>
+                            <constraint firstItem="7dE-0L-Opb" firstAttribute="centerX" secondItem="Q3r-ch-KgZ" secondAttribute="centerX" id="qNf-K4-9gD"/>
+                            <constraint firstItem="Q3r-ch-KgZ" firstAttribute="bottom" secondItem="FIW-KQ-pqD" secondAttribute="bottom" id="zu8-UN-ANY"/>
                         </constraints>
                     </view>
                     <connections>
