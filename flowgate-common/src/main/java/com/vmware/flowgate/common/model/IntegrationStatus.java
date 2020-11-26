@@ -11,7 +11,7 @@ public class IntegrationStatus {
    private int retryCounter;
    
    public enum Status {
-      ACTIVE, PENDING, ERROR;
+      ACTIVE, WARNING, PENDING, ERROR
    }
 
    public Status getStatus() {

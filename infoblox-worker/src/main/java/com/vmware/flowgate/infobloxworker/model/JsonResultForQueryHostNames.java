@@ -7,12 +7,12 @@ package com.vmware.flowgate.infobloxworker.model;
 import java.util.List;
 
 public class JsonResultForQueryHostNames {
-	private List<Infoblox> result;
+	private List<InfobloxIpv4addressItem> result;
 	
-	public List<Infoblox> getResult() {
+	public List<InfobloxIpv4addressItem> getResult() {
 		return result;
 	}
-	public void setResult(List<Infoblox> result) {
+	public void setResult(List<InfobloxIpv4addressItem> result) {
         this.result = result;
     }
 }
