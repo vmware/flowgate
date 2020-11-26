@@ -130,7 +130,7 @@ public class AssetController {
          pageSize = FlowgateConstant.maxPageSize;
       }
       PageRequest pageRequest = PageRequest.of(currentPage - 1, pageSize);
-      return assetRepository.findByAssetSourceContaining(assetSource,pageRequest);
+      return assetRepository.findByAssetSource(assetSource,pageRequest);
    }
 
    // Read Asset by source and type
