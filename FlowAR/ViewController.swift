@@ -18,6 +18,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     
     @IBOutlet weak var blurView: UIVisualEffectView!
     
+    var temperatures = [25.5, 25.8, 28, 26.9]
+    
     var qrRequests = [VNRequest]()
     var detectedDataAnchor: [String: ARAnchor?] = [:] // QR location
     var message: String! // QR Message === ID
@@ -246,41 +248,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         }
     }
     
-    func generate_text(_ text: String, _ x: Float, _ y: Float, _ z: Float,
-                       _ bold: Bool=false, _ size: Float=1, _ center: Bool=false) -> SCNNode {
-        let mesages = SCNText(string: text, extrusionDepth: 0) // SCN开头的geometry
-        if(bold) {mesages.font = UIFont(name:"HelveticaNeue-Bold", size: 12)}
-        else {mesages.font = UIFont(name:"HelveticaNeue", size: 12)}
-        let material = SCNMaterial()
-        material.diffuse.contents = UIColor.black
-        mesages.materials = [material]
-        
-        let messageNode = SCNNode(geometry: mesages)
-        messageNode.scale = SCNVector3Make( 0.001*size, 0.001*size, 0.001*size)
-        // 锚点
-        // set pivot of left top point
-        var minVec = SCNVector3Zero
-        var maxVec = SCNVector3Zero
-        (minVec, maxVec) =  messageNode.boundingBox
-        if(center){
-            messageNode.pivot = SCNMatrix4MakeTranslation(
-                (minVec.x + maxVec.x)/2,
-                maxVec.y,
-                minVec.z
-            )
-            messageNode.position = messageNode.position + SCNVector3(0, y, z)
-        }
-        else {messageNode.pivot = SCNMatrix4MakeTranslation(
-            minVec.x,
-            maxVec.y,
-            minVec.z
-        )
-        messageNode.position = messageNode.position + SCNVector3(x, y, z)
-        }
-        
-        return messageNode
-    }
-    
     // Anchor(定位) ->Node(Anchor) object -> node加进你要的返回的node
     // Geometry     _^
 
@@ -296,12 +263,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
 //            self.statusViewController.showMessage("add this anchor")
 //            }
             let node = SCNNode()
-            node.orientation = (sceneView.pointOfView?.orientation)!
             guard let ID = self.message else { return node }
             let result = strFormat(content: detectedDataResult[ID]! as [String: Any])
-            let left_message = generate_text(result["type"]!, -0.11, 0.05, 0.01)
-            let right_message = generate_text(result["content"]!, 0, 0.05, 0.01)
-            let title_message = generate_text(result["title"]!, -0.11, 0.09, 0.01, true, 2)
+            let left_message = textNode(text: result["type"]!,  position: SCNVector3(-0.11, 0.05, 0.01))
+            let right_message = textNode(text: result["content"]!, position: SCNVector3(0, 0.05, 0.01))
+            let title_message = textNode(text: result["title"]!, position: SCNVector3(-0.11, 0.09, 0.01), bold: true, size: 2)
             node.addChildNode(left_message)
             node.addChildNode(right_message)
             node.addChildNode(title_message)
@@ -314,7 +280,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             node.addChildNode(planeNode)
             
             let underLine = SCNPlane(width: 0.25, height: 0.002)
-            underLine.firstMaterial?.diffuse.contents = UIColor.blue
+            underLine.firstMaterial?.diffuse.contents = UIColor.cyan
             let underLineNode = SCNNode(geometry: underLine)
             underLineNode.eulerAngles.x = 0
             underLineNode.opacity = 0 // for fadein
@@ -412,12 +378,16 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 
                 
                 let result = self.strFormat(content: self.fetch_result as [String: Any])
-                let left_message = self.generate_text(result["type"]!, Float(referenceImage.physicalSize.width+0.01), 0.001, -0.05)// (x,y,z: length,depth,height)
-                let right_message = self.generate_text(result["content"]!, Float(referenceImage.physicalSize.width+0.12), 0.001, -0.05)
-                let title_message = self.generate_text(result["title"]!, Float(referenceImage.physicalSize.width+0.01), 0.001, -0.09, true, 2)
+                let left_message = self.textNode(text: result["type"]!,position: SCNVector3( Float(referenceImage.physicalSize.width+0.01), 0.001, -0.05))// (x,y,z: length,depth,height)
+                let right_message = self.textNode(text: result["content"]!, position: SCNVector3(Float(referenceImage.physicalSize.width+0.12), 0.001, -0.05))
+                let title_message = self.textNode(text: result["title"]!, position: SCNVector3(Float(referenceImage.physicalSize.width+0.01), 0.001, -0.09), bold: true, size: 2)
                 node.addChildNode(left_message)
                 node.addChildNode(right_message)
                 node.addChildNode(title_message)
+                
+                let text = self.see_chart_button()
+                text.position = SCNVector3(Float(referenceImage.physicalSize.width+0.01), 0.001, 0.1)
+                node.addChildNode(text)
 
 
                 let plane = SCNPlane(width: 0.25, height: 0.2)
@@ -428,6 +398,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 planeNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, 0)
                 node.addChildNode(planeNode)
                 
+                let chartNode = self.add_chart()
+                chartNode.position = SCNVector3(referenceImage.physicalSize.width, 0, 0.2)
+                node.addChildNode(chartNode)
+                
                 let underLine = SCNPlane(width: 0.25, height: 0.002)
                 underLine.firstMaterial?.diffuse.contents = UIColor.blue
                 let underLineNode = SCNNode(geometry: underLine)
@@ -436,31 +410,15 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 underLineNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0.001, -0.06)
                 node.addChildNode(underLineNode)
                 
-                    
-                    
                 // Add pointing line
-                let lineConnect = SCNCylinder()
-                lineConnect.radius = 0.002
-                lineConnect.height  = CGFloat(referenceImage.physicalSize.width)
-                lineConnect.radialSegmentCount = 5
-                lineConnect.firstMaterial!.diffuse.contents = UIColor.red
-                let frameNode = SCNNode(geometry: lineConnect)
-                frameNode.position = SCNVector3(referenceImage.physicalSize.width/2.0, 0, 0)
-                frameNode.eulerAngles.x = -.pi/2
-                frameNode.eulerAngles.y = -.pi/2
+                let frameNode = self.lineNode(color: .red, height: CGFloat(referenceImage.physicalSize.width), position: SCNVector3(referenceImage.physicalSize.width/2.0, 0, 0), angle: 0)
                 node.addChildNode(frameNode)
-                    
-                    
-
                 
                 /*
                  `SCNPlane` is vertically oriented in its local coordinate space, but
                  `ARImageAnchor` assumes the image is horizontal in its local space, so
                  rotate the plane to match.
 //                 */
-                left_message.eulerAngles.x = -.pi / 2
-                right_message.eulerAngles.x = -.pi / 2
-                title_message.eulerAngles.x = -.pi / 2
                 planeNode.eulerAngles.x = -.pi / 2
                 underLineNode.eulerAngles.x = -.pi / 2
                 
@@ -520,6 +478,108 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             .fadeIn(duration: 0.8),
         ])
     }
+    
+    func textNode(text: String, position: SCNVector3, bold: Bool=false,
+                       size: Float=1, center: Bool=false, color: UIColor = .black) -> SCNNode {
+        let mesages = SCNText(string: text, extrusionDepth: 0) // SCN开头的geometry
+        if(bold) {mesages.font = UIFont(name:"HelveticaNeue-Bold", size: 12)}
+        else {mesages.font = UIFont(name:"HelveticaNeue", size: 12)}
+        let material = SCNMaterial()
+        material.diffuse.contents = color
+        mesages.materials = [material]
+        
+        let messageNode = SCNNode(geometry: mesages)
+        messageNode.scale = SCNVector3Make( 0.001*size, 0.001*size, 0.001*size)
+        // 锚点
+        // set pivot of left top point
+        var minVec = SCNVector3Zero
+        var maxVec = SCNVector3Zero
+        (minVec, maxVec) =  messageNode.boundingBox
+        if(center){
+            messageNode.pivot = SCNMatrix4MakeTranslation(
+                (minVec.x + maxVec.x)/2,
+                maxVec.y,
+                minVec.z
+            )
+            messageNode.position = messageNode.position + position
+        }
+        else {messageNode.pivot = SCNMatrix4MakeTranslation(
+            minVec.x,
+            maxVec.y,
+            minVec.z
+        )
+        messageNode.eulerAngles.x = -.pi/2
+        messageNode.position = messageNode.position + position
+        }
+        
+        return messageNode
+    }
+    
+    func lineNode(color: UIColor, height: CGFloat, position: SCNVector3, angle: Float) -> SCNNode{
+        // Add vertical line
+        let LineConnect = SCNCylinder()
+        LineConnect.radius = 0.001
+        LineConnect.height  = height
+        LineConnect.radialSegmentCount = 5
+        LineConnect.firstMaterial!.diffuse.contents = color
+        let LineNode = SCNNode(geometry: LineConnect)
+        LineNode.pivot = SCNMatrix4MakeTranslation(
+            0,
+            -Float(height/2),
+            0
+        )
+        LineNode.position = position
+        LineNode.eulerAngles.x = -.pi/2
+        LineNode.eulerAngles.y = -.pi/2+angle
+        
+        return LineNode
+    }
+    
+    func ballNode(color: UIColor, position: SCNVector3, radius: CGFloat) -> SCNNode{
+        let ballGeo = SCNSphere()
+        ballGeo.radius = radius
+        ballGeo.firstMaterial!.diffuse.contents = color
+        let ballNode = SCNNode(geometry: ballGeo)
+        ballNode.position = position
+        return ballNode
+    }
+    
+    func see_chart_button() -> SCNNode{
+        let node = SCNNode()
+        node.addChildNode(textNode(text: "Temperature Plots", position: SCNVector3(0, 0, 0)))
+        node.addChildNode(lineNode(color: .cyan, height: 0.1/cos(.pi/2), position: SCNVector3(0, 0, 0), angle: -.pi/4))
+        node.addChildNode(lineNode(color: .cyan, height: 0.1/cos(.pi/2), position: SCNVector3(0, 0, 0), angle: .pi/4))
+        return node
+    }
+    
+    func add_chart() -> SCNNode{
+        let date = Date()
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: date)
+        let minutes = calendar.component(.minute, from: date)
+        let node = SCNNode()
+        node.name = "temperature"
+        node.addChildNode(lineNode(color: .darkGray, height: 0.1, position: SCNVector3(0, 0, 0), angle: .pi/2))
+        node.addChildNode(lineNode(color: .darkGray, height: 0.2, position: SCNVector3(0, 0, 0), angle: 0))
+        let height = temperatures.max()! - temperatures.min()!
+        let length = 0.18/Double(temperatures.count-1)
+        var now_height = 0.005
+        for i in 0...(temperatures.count-2){
+            let height = (temperatures[i+1] - temperatures[i])/height * 0.09
+            let angle = atan(height/length)
+            node.addChildNode(lineNode(color: .cyan, height: CGFloat(length/cos(angle)), position: SCNVector3(0.01 + length * Double(i), 0, -now_height), angle: Float(angle)))
+            node.addChildNode(ballNode(color: .cyan, position: SCNVector3(0.01 + length * Double(i), 0, -now_height), radius: 0.001))
+            node.addChildNode(textNode(text: String(temperatures[i]), position: SCNVector3Make(Float(0.01 + length * Double(i)), 0, -Float(now_height)), bold: false, size: 1, color: .darkGray))
+            node.addChildNode(textNode(text: String(hour) + ":" + String(minutes - temperatures.count + 1 + i), position: SCNVector3(Float(0.01 + length * Double(i)), 0, 0.01), bold: false, size: 1, color: .darkGray))
+            now_height += height
+        }
+        let i = temperatures.count - 1
+        node.addChildNode(textNode(text: String(temperatures[i]), position: SCNVector3(Float(0.01 + length * Double(i)), 0, -Float(now_height)), bold: false, size: 1, color: .darkGray))
+        node.addChildNode(textNode(text: String(hour) + ":" + String(minutes), position: SCNVector3(Float(0.01 + length * Double(i)), 0, 0.01), bold: false, size: 1, color: .darkGray))
+        node.addChildNode(textNode(text: "time: ", position: SCNVector3(-0.02, 0, 0.01), bold: false, size: 1, color: .darkGray))
+        return node
+    }
+    
 }
 
 extension SCNVector3 {
