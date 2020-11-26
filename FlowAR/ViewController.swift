@@ -93,7 +93,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             }}
     
     }
-    
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//        print("heihei")
+//
+//    }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -297,18 +301,40 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             let result = strFormat(content: detectedDataResult[ID]! as [String: Any])
             let left_message = generate_text(result["type"]!, -0.11, 0.05, 0.01)
             let right_message = generate_text(result["content"]!, 0, 0.05, 0.01)
-            let title_message = generate_text(result["title"]!, -0.11, 0.08, 0.01, true, 2)
+            let title_message = generate_text(result["title"]!, -0.11, 0.09, 0.01, true, 2)
             node.addChildNode(left_message)
             node.addChildNode(right_message)
             node.addChildNode(title_message)
 
 
             let plane = SCNPlane(width: 0.25, height: 0.2)
-//            plane.cornerRadius = 0.02
             let planeNode = SCNNode(geometry: plane)
             planeNode.eulerAngles.x = 0
-            planeNode.opacity = 0.8
+            planeNode.opacity = 0 // for fadein
             node.addChildNode(planeNode)
+            
+            let underLine = SCNPlane(width: 0.25, height: 0.002)
+            underLine.firstMaterial?.diffuse.contents = UIColor.blue
+            let underLineNode = SCNNode(geometry: underLine)
+            underLineNode.eulerAngles.x = 0
+            underLineNode.opacity = 0 // for fadein
+            underLineNode.position = SCNVector3Make(0, 0.06, 0.001)
+            node.addChildNode(underLineNode)
+            
+            planeNode.scale = SCNVector3Zero
+            planeNode.runAction(self.imageAppearAction)
+            underLineNode.scale = SCNVector3Zero
+            underLineNode.runAction(self.imageAppearAction)
+            
+            left_message.opacity = 0
+            right_message.opacity = 0
+            title_message.opacity = 0
+            
+            title_message.runAction(self.textAppearAction)
+            left_message.runAction(self.textAppearAction)
+            right_message.runAction(self.textAppearAction)
+            
+            
             return node
 
         } else if let imageAnchor = anchor  as? ARImageAnchor{
@@ -377,19 +403,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                     planeNode.geometry?.firstMaterial?.isDoubleSided = true
                     planeNode.position = SCNVector3Make(textNode.position.x, textNode.position.y, textNode.position.z + 0.001)
                     
-//                    let width = (max.x - min.x) * fontScale
-//                    let height = (max.y - min.y) * fontScale
-//                    let plane = SCNPlane(width: CGFloat(width), height: CGFloat(height))
-//                    let planeNode = SCNNode(geometry: plane)
-//                    planeNode.geometry?.firstMaterial?.diffuse.contents = UIColor.green.withAlphaComponent(0.5)
-//                    planeNode.geometry?.firstMaterial?.isDoubleSided = true
-//                    planeNode.position = textNode.position
-//                    planeNode.eulerAngles.x = .pi/2
-//                    planeNode.eulerAngles.y = 0
-//                    planeNode.eulerAngles.z = 0
-//                    textNode.eulerAngles.x = .pi/2
-//                    textNode.eulerAngles = planeNode.eulerAngles
-//                    planeNode.addChildNode(textNode)
                     planeNode.eulerAngles.x = -.pi / 2
                     node.addChildNode(planeNode)
                     iter -= 3 // rack number +3
@@ -401,7 +414,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 let result = self.strFormat(content: self.fetch_result as [String: Any])
                 let left_message = self.generate_text(result["type"]!, Float(referenceImage.physicalSize.width+0.01), 0.001, -0.05)// (x,y,z: length,depth,height)
                 let right_message = self.generate_text(result["content"]!, Float(referenceImage.physicalSize.width+0.12), 0.001, -0.05)
-                let title_message = self.generate_text(result["title"]!, Float(referenceImage.physicalSize.width+0.01), 0.001, -0.08, true, 2)
+                let title_message = self.generate_text(result["title"]!, Float(referenceImage.physicalSize.width+0.01), 0.001, -0.09, true, 2)
                 node.addChildNode(left_message)
                 node.addChildNode(right_message)
                 node.addChildNode(title_message)
@@ -411,24 +424,31 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
 //                plane.cornerRadius = 0.02
                 let planeNode = SCNNode(geometry: plane)
                 planeNode.eulerAngles.x = 0
-                planeNode.opacity = 0.8
+                planeNode.opacity = 0 // for fadein
                 planeNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, 0)
                 node.addChildNode(planeNode)
                 
+                let underLine = SCNPlane(width: 0.25, height: 0.002)
+                underLine.firstMaterial?.diffuse.contents = UIColor.blue
+                let underLineNode = SCNNode(geometry: underLine)
+                underLineNode.eulerAngles.x = 0
+                underLineNode.opacity = 0 // for fadein
+                underLineNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0.001, -0.06)
+                node.addChildNode(underLineNode)
                 
                     
                     
-                    // Add pointing line
-                    let lineConnect = SCNCylinder()
-                    lineConnect.radius = 0.002
-                    lineConnect.height  = CGFloat(referenceImage.physicalSize.width)
-                    lineConnect.radialSegmentCount = 5
-                    lineConnect.firstMaterial!.diffuse.contents = UIColor.red
-                    let frameNode = SCNNode(geometry: lineConnect)
-                    frameNode.position = SCNVector3(referenceImage.physicalSize.width/2.0, 0, 0)
-                    frameNode.eulerAngles.x = -.pi/2
-                    frameNode.eulerAngles.y = -.pi/2
-                    node.addChildNode(frameNode)
+                // Add pointing line
+                let lineConnect = SCNCylinder()
+                lineConnect.radius = 0.002
+                lineConnect.height  = CGFloat(referenceImage.physicalSize.width)
+                lineConnect.radialSegmentCount = 5
+                lineConnect.firstMaterial!.diffuse.contents = UIColor.red
+                let frameNode = SCNNode(geometry: lineConnect)
+                frameNode.position = SCNVector3(referenceImage.physicalSize.width/2.0, 0, 0)
+                frameNode.eulerAngles.x = -.pi/2
+                frameNode.eulerAngles.y = -.pi/2
+                node.addChildNode(frameNode)
                     
                     
 
@@ -442,7 +462,24 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 right_message.eulerAngles.x = -.pi / 2
                 title_message.eulerAngles.x = -.pi / 2
                 planeNode.eulerAngles.x = -.pi / 2
-//                planeNode.runAction(imageHighlightAction)
+                underLineNode.eulerAngles.x = -.pi / 2
+                
+                // animation
+                frameNode.scale = SCNVector3Zero
+                frameNode.runAction(self.imageAppearAction)
+                planeNode.scale = SCNVector3Zero
+                planeNode.runAction(self.imageAppearAction)
+                underLineNode.scale = SCNVector3Zero
+                underLineNode.runAction(self.imageAppearAction)
+                
+                left_message.opacity = 0
+                right_message.opacity = 0
+                title_message.opacity = 0
+                
+                title_message.runAction(self.textAppearAction)
+                left_message.runAction(self.textAppearAction)
+                right_message.runAction(self.textAppearAction)
+                
                 self.cabinet_show = true;
                 self.stopFigure()
                 self.sceneView.session.add(anchor: self.lastAddedAnchor!)
@@ -467,6 +504,20 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             .fadeOpacity(to: 0.85, duration: 0.25),
             .fadeOut(duration: 0.5),
             .removeFromParentNode()
+        ])
+    }
+    
+    var imageAppearAction: SCNAction {
+        return .group([
+            .fadeOpacity(to: 0.8, duration: 0.8),
+            .scale(to: 1.0, duration: 0.8),
+            
+        ])
+    }
+    var textAppearAction: SCNAction {
+        return .sequence([
+            .wait(duration: 0.25),
+            .fadeIn(duration: 0.8),
         ])
     }
 }
