@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vmware.flowgate.vcworker.model.VCConstants;
 import com.vmware.vim.binding.impl.vmodl.TypeNameImpl;
+import com.vmware.vim.binding.vim.ClusterComputeResource;
 import com.vmware.vim.binding.vim.CustomFieldsManager;
 import com.vmware.vim.binding.vim.HostSystem;
 import com.vmware.vim.binding.vim.ServiceInstance;
@@ -245,7 +246,11 @@ public class VsphereClient implements AutoCloseable, Closeable {
    public Collection<HostSystem> getAllHost() {
       return getResourcesByType(HostSystem.class, VCConstants.HOSTSYSTEM);
    }
-
+   
+   public Collection<ClusterComputeResource> getAllClusterComputeResource() {
+      return getResourcesByType(ClusterComputeResource.class, VCConstants.CLUSTERCOMPUTERESOURCE);
+   }
+   
    public void createCustomAttribute(String name, String type)
          throws InvalidPrivilege, DuplicateName {
 

@@ -5,6 +5,7 @@
 package com.vmware.flowgate.aggregator.scheduler.job;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.quartz.Job;
@@ -46,18 +47,35 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
    public void execute(JobExecutionContext context) throws JobExecutionException {
       // Read all the vcenter information, send to the redis topic
       //this job will be triggered every 5 minutes.
-      
+
       //every 5 minutes we will trigger a sync host realtimedata job.
       //every 12 hour we will trigger a sync host metadata job.
       //every 1 day we will trigger a sync CustomerAttrsData job.
       //every 10 days we will trigger a sync CustomAttributes job.
-      
+
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+      SDDCSoftwareConfig[] vcServers = restClient.getVCServers().getBody();
+      if (vcServers == null || vcServers.length == 0) {
+         logger.info("No vcenter server find");
+         return;
+      }
+      List<SDDCSoftwareConfig> serverActiveList = new ArrayList<SDDCSoftwareConfig>();
+      for (SDDCSoftwareConfig vc : vcServers) {
+         if (vc.checkIsActive()) {
+            serverActiveList.add(vc);
+         }
+      }
+      if (serverActiveList.size() == 0) {
+         return;
+      }
+      SDDCSoftwareConfig[] vcServersActiveArray = (SDDCSoftwareConfig[]) serverActiveList
+            .toArray(new SDDCSoftwareConfig[serverActiveList.size()]);
+
       String execountString = template.opsForValue().get(EventMessageUtil.VCENTER_EXECOUNT);
       if (execountString == null || "".equals(execountString)) {
          execountString = "0";
       }
       long execount = Long.valueOf(execountString);
-      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       boolean queryHostMetadata = execount % 144 == 0;
       boolean syncCustomerAttrsData = execount % 288 == 0;
       boolean syncCustomAttributes = execount % 2880 == 0;
@@ -65,32 +83,32 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
 
       try {
          template.opsForValue().set(EventMessageUtil.VCENTER_EXECOUNT, String.valueOf(execount));
-      }catch(Exception e) {
+      } catch (Exception e) {
          logger.error("Failed to set execount", e);
       }
-      SDDCSoftwareConfig[] vcServers = restClient.getVCServers().getBody();
-      if (vcServers == null || vcServers.length == 0) {
-         logger.info("No vcenter server find");
-         return;
-      }
+
       try {
          logger.info("Send query Host usage data commands");
          template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
-               generateSDDCMessageListByType(EventMessageUtil.VCENTER_QueryHostUsageData, vcServers));
+               generateSDDCMessageListByType(EventMessageUtil.VCENTER_QueryHostUsageData,
+                     vcServersActiveArray));
          if (queryHostMetadata) {
             logger.info("Send query Host meta data commands");
             template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
-               generateSDDCMessageListByType(EventMessageUtil.VCENTER_QueryHostMetaData, vcServers));
+                  generateSDDCMessageListByType(EventMessageUtil.VCENTER_QueryHostMetaData,
+                        vcServersActiveArray));
          }
          if (syncCustomerAttrsData) {
             logger.info("Send Sync VC customer attributes data commands");
             template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
-               generateSDDCMessageListByType(EventMessageUtil.VCENTER_SyncCustomerAttrsData, vcServers));
+                  generateSDDCMessageListByType(EventMessageUtil.VCENTER_SyncCustomerAttrsData,
+                        vcServersActiveArray));
          }
          if (syncCustomAttributes) {
             logger.info("Send Sync VC customer attributes commands");
             template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
-               generateSDDCMessageListByType(EventMessageUtil.VCENTER_SyncCustomerAttrs, vcServers));
+                  generateSDDCMessageListByType(EventMessageUtil.VCENTER_SyncCustomerAttrs,
+                        vcServersActiveArray));
          }
 
          publisher.publish(EventMessageUtil.VCTopic,
@@ -100,8 +118,9 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
       }
       logger.info("Sync VC findished");
    }
-   
-   public List<String> generateSDDCMessageListByType(String type, SDDCSoftwareConfig[] vcServers) throws JsonProcessingException {
+
+   public List<String> generateSDDCMessageListByType(String type, SDDCSoftwareConfig[] vcServers)
+         throws JsonProcessingException {
       return EventMessageUtil.generateSDDCMessageListByType(EventType.VCenter, type, vcServers);
    }
 }
