@@ -178,6 +178,7 @@ public class InfoBloxService implements AsyncService {
    }
    
    private void updateIntegrationStatus(FacilitySoftwareConfig infoblox) {
+      wormholeAPIClient.setServiceKey(serviceKeyConfig.getServiceKey());
       wormholeAPIClient.updateFacility(infoblox);
    }
 
