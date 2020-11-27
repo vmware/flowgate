@@ -396,11 +396,16 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 planeNode.eulerAngles.x = 0
                 planeNode.opacity = 0 // for fadein
                 planeNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, 0)
+                planeNode.name = "plane"
                 node.addChildNode(planeNode)
                 
                 let chartNode = self.add_chart()
                 chartNode.position = SCNVector3(referenceImage.physicalSize.width, 0, 0.2)
                 node.addChildNode(chartNode)
+                
+                let chartPlane = self.planeNode(width: 0.2, height: 0.01, opacity: 1, position: SCNVector3Make(Float(referenceImage.physicalSize.width) + 0.05, 0, 0.1))
+                chartPlane.name = "temp"
+                node.addChildNode(chartPlane)
                 
                 let underLine = SCNPlane(width: 0.25, height: 0.002)
                 underLine.firstMaterial?.diffuse.contents = UIColor.blue
@@ -414,11 +419,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 let frameNode = self.lineNode(color: .red, height: CGFloat(referenceImage.physicalSize.width), position: SCNVector3(referenceImage.physicalSize.width/2.0, 0, 0), angle: 0)
                 node.addChildNode(frameNode)
                 
-                /*
-                 `SCNPlane` is vertically oriented in its local coordinate space, but
-                 `ARImageAnchor` assumes the image is horizontal in its local space, so
-                 rotate the plane to match.
-//                 */
                 planeNode.eulerAngles.x = -.pi / 2
                 underLineNode.eulerAngles.x = -.pi / 2
                 
@@ -544,12 +544,41 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         return ballNode
     }
     
+    func planeNode(width: CGFloat, height: CGFloat, opacity: CGFloat, position: SCNVector3)->SCNNode{
+        let plane = SCNPlane(width: width, height: height)
+        let planeNode = SCNNode(geometry: plane)
+        planeNode.eulerAngles.x = -.pi/2
+        planeNode.opacity = opacity
+        planeNode.position = position
+        return planeNode
+    }
+    
     func see_chart_button() -> SCNNode{
         let node = SCNNode()
         node.addChildNode(textNode(text: "Temperature Plots", position: SCNVector3(0, 0, 0)))
         node.addChildNode(lineNode(color: .cyan, height: 0.1/cos(.pi/2), position: SCNVector3(0, 0, 0), angle: -.pi/4))
         node.addChildNode(lineNode(color: .cyan, height: 0.1/cos(.pi/2), position: SCNVector3(0, 0, 0), angle: .pi/4))
         return node
+    }
+
+    
+    @IBAction func tap_add_chart(_ sender: UITapGestureRecognizer) {
+        let currentTouchLocation = sender.location(in: sceneView)
+        print("?")
+        print(currentTouchLocation)
+        guard let hitTestResultNode = self.sceneView.hitTest(currentTouchLocation, options: nil).first?.node else {
+            print("no node")
+            return }
+        print(hitTestResultNode.name ?? "no name")
+        for node in hitTestResultNode.childNodes{
+
+            //4. If The Node Has A Name Then Print It Out
+            if let validName = node.name{
+                 print("Node\(validName) Is A Child Node Of \(hitTestResultNode)")
+            }
+
+        }
+        
     }
     
     func add_chart() -> SCNNode{
@@ -558,7 +587,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         let hour = calendar.component(.hour, from: date)
         let minutes = calendar.component(.minute, from: date)
         let node = SCNNode()
-        node.name = "temperature"
         node.addChildNode(lineNode(color: .darkGray, height: 0.1, position: SCNVector3(0, 0, 0), angle: .pi/2))
         node.addChildNode(lineNode(color: .darkGray, height: 0.2, position: SCNVector3(0, 0, 0), angle: 0))
         let height = temperatures.max()! - temperatures.min()!

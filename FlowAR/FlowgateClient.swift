@@ -216,10 +216,11 @@ extension ViewController{
                 }
             }
             else {
-                result["type"]! += item + "\n"
                 if let temp = content[item] as? String {
+                    result["type"]! += item + "\n"
                     result["content"]! += temp + "\n"
                 } else if let temp = content[item] as? Int {
+                    result["type"]! += item + "\n"
                     result["content"]! += String(format: "%d", temp) + "\n"
                 }
             }
