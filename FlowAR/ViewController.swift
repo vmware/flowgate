@@ -39,7 +39,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     let updateQueue = DispatchQueue(label: Bundle.main.bundleIdentifier! +
         ".serialSceneKitQueue")
     
-    /// Convenience accessor for the session owned by ARSCNView.
+    /// Convenience accessor for the session owneASd by ARSCNView.
     var session: ARSession {
         return sceneView.session
     }
@@ -273,6 +273,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             left_message.eulerAngles.x = 0
             right_message.eulerAngles.x = 0
             title_message.eulerAngles.x = 0
+            
+            left_message.opacity = 0
+            right_message.opacity = 0
+            title_message.opacity = 0
             node.addChildNode(left_message)
             node.addChildNode(right_message)
             node.addChildNode(title_message)
@@ -296,14 +300,12 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             planeNode.runAction(self.imageAppearAction)
             underLineNode.scale = SCNVector3Zero
             underLineNode.runAction(self.imageAppearAction)
-            
-            left_message.opacity = 0
-            right_message.opacity = 0
-            title_message.opacity = 0
+
             
             title_message.runAction(self.textAppearAction)
             left_message.runAction(self.textAppearAction)
             right_message.runAction(self.textAppearAction)
+            
             
             
             return node
@@ -386,6 +388,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 let left_message = self.textNode(text: result["type"]!,position: SCNVector3( Float(referenceImage.physicalSize.width+0.01), 0.001, -0.05))// (x,y,z: length,depth,height)
                 let right_message = self.textNode(text: result["content"]!, position: SCNVector3(Float(referenceImage.physicalSize.width+0.12), 0.001, -0.05))
                 let title_message = self.textNode(text: result["title"]!, position: SCNVector3(Float(referenceImage.physicalSize.width+0.01), 0.001, -0.09), bold: true, size: 2)
+                
+                left_message.opacity = 0
+                right_message.opacity = 0
+                title_message.opacity = 0
                 node.addChildNode(left_message)
                 node.addChildNode(right_message)
                 node.addChildNode(title_message)
@@ -398,16 +404,18 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 planeNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, 0)
                 node.addChildNode(planeNode)
                 
-                let text = self.see_chart_button()
-                text.position = SCNVector3(Float(referenceImage.physicalSize.width+0.01), 0.001, 0.05)
+                let text = self.textNode(text: "Show Temperature Plots", position: SCNVector3(Float(referenceImage.physicalSize.width+0.01), 0.001, 0.045), color: .brown)
+                text.opacity = 0
+                text.name = "temp"
                 node.addChildNode(text)
                 
-                let chartPlane = self.planeNode(width: 0.2, height: 0.01, opacity: 1, position: SCNVector3Make(Float(referenceImage.physicalSize.width) + 0.1, 0, 0.05))
+                let chartPlane = self.planeNode(width: 0.2, height: 0.015, opacity: 0.8, position: SCNVector3Make(Float(referenceImage.physicalSize.width) + 0.1, 0.0005, 0.05))
+                chartPlane.geometry?.firstMaterial?.diffuse.contents = UIColor.systemYellow
                 chartPlane.name = "temp"
                 node.addChildNode(chartPlane)
                 
                 self.chartNode = self.add_chart()
-                self.chartNode!.position = SCNVector3(referenceImage.physicalSize.width, 0, 0.18)
+                self.chartNode!.position = SCNVector3(referenceImage.physicalSize.width, 0.001, 0.18)
                 self.chartNode!.isHidden = true
                 node.addChildNode(self.chartNode!)
                 
@@ -434,14 +442,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 underLineNode.scale = SCNVector3Zero
                 underLineNode.runAction(self.imageAppearAction)
                 
-                left_message.opacity = 0
-                right_message.opacity = 0
-                title_message.opacity = 0
-                
                 title_message.runAction(self.textAppearAction)
                 left_message.runAction(self.textAppearAction)
                 right_message.runAction(self.textAppearAction)
-                
+                text.runAction(self.textAppearAction)
                 self.cabinet_show = true;
                 self.stopFigure()
                 self.sceneView.session.add(anchor: self.lastAddedAnchor!)
@@ -559,7 +563,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     
     func see_chart_button() -> SCNNode{
         let node = SCNNode()
-        node.addChildNode(textNode(text: "Temperature Plots", position: SCNVector3(0, 0, 0)))
+        node.addChildNode(textNode(text: "Show Temperature Plots", position: SCNVector3(0, 0, 0), color: .brown))
         node.addChildNode(lineNode(color: .cyan, height: 0.1/cos(.pi/2), position: SCNVector3(0, 0, 0), angle: -.pi/4))
         node.addChildNode(lineNode(color: .cyan, height: 0.1/cos(.pi/2), position: SCNVector3(0, 0, 0), angle: .pi/4))
         return node
