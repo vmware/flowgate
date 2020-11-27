@@ -29,6 +29,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     
     var paused = false
     
+    var chartNode: SCNNode?
+    
     /// The view controller that displays the status and "restart experience" UI.
     lazy var statusViewController: StatusViewController = {
         return children.lazy.compactMap({ $0 as? StatusViewController }).first!
@@ -268,6 +270,9 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             let left_message = textNode(text: result["type"]!,  position: SCNVector3(-0.11, 0.05, 0.01))
             let right_message = textNode(text: result["content"]!, position: SCNVector3(0, 0.05, 0.01))
             let title_message = textNode(text: result["title"]!, position: SCNVector3(-0.11, 0.09, 0.01), bold: true, size: 2)
+            left_message.eulerAngles.x = 0
+            right_message.eulerAngles.x = 0
+            title_message.eulerAngles.x = 0
             node.addChildNode(left_message)
             node.addChildNode(right_message)
             node.addChildNode(title_message)
@@ -384,11 +389,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 node.addChildNode(left_message)
                 node.addChildNode(right_message)
                 node.addChildNode(title_message)
-                
-                let text = self.see_chart_button()
-                text.position = SCNVector3(Float(referenceImage.physicalSize.width+0.01), 0.001, 0.1)
-                node.addChildNode(text)
-
 
                 let plane = SCNPlane(width: 0.25, height: 0.2)
 //                plane.cornerRadius = 0.02
@@ -396,16 +396,20 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 planeNode.eulerAngles.x = 0
                 planeNode.opacity = 0 // for fadein
                 planeNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, 0)
-                planeNode.name = "plane"
                 node.addChildNode(planeNode)
                 
-                let chartNode = self.add_chart()
-                chartNode.position = SCNVector3(referenceImage.physicalSize.width, 0, 0.2)
-                node.addChildNode(chartNode)
+                let text = self.see_chart_button()
+                text.position = SCNVector3(Float(referenceImage.physicalSize.width+0.01), 0.001, 0.05)
+                node.addChildNode(text)
                 
-                let chartPlane = self.planeNode(width: 0.2, height: 0.01, opacity: 1, position: SCNVector3Make(Float(referenceImage.physicalSize.width) + 0.05, 0, 0.1))
+                let chartPlane = self.planeNode(width: 0.2, height: 0.01, opacity: 1, position: SCNVector3Make(Float(referenceImage.physicalSize.width) + 0.1, 0, 0.05))
                 chartPlane.name = "temp"
                 node.addChildNode(chartPlane)
+                
+                self.chartNode = self.add_chart()
+                self.chartNode!.position = SCNVector3(referenceImage.physicalSize.width, 0, 0.18)
+                self.chartNode!.isHidden = true
+                node.addChildNode(self.chartNode!)
                 
                 let underLine = SCNPlane(width: 0.25, height: 0.002)
                 underLine.firstMaterial?.diffuse.contents = UIColor.blue
@@ -567,8 +571,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         print(currentTouchLocation)
         guard let hitTestResultNode = self.sceneView.hitTest(currentTouchLocation, options: nil).first?.node else { return }
         guard let name = hitTestResultNode.name else{ return }
+        print("name")
         if(name=="temp"){
             // TODO
+            print("here")
+            self.chartNode?.isHidden = false
         }
         
     }
