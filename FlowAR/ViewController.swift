@@ -396,12 +396,14 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 node.addChildNode(right_message)
                 node.addChildNode(title_message)
 
-                let plane = SCNPlane(width: 0.25, height: 0.2)
+                let plane = SCNPlane(width: 0.25, height: 0.18)
 //                plane.cornerRadius = 0.02
                 let planeNode = SCNNode(geometry: plane)
                 planeNode.eulerAngles.x = 0
                 planeNode.opacity = 0 // for fadein
-                planeNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, 0)
+                planeNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, -0.12)
+                planeNode.pivot = SCNMatrix4MakeTranslation(0, 0.1, 0)
+                
                 node.addChildNode(planeNode)
                 
                 let text = self.textNode(text: "Show Temperature Plots", position: SCNVector3(Float(referenceImage.physicalSize.width+0.01), 0.001, 0.045), color: .brown)
