@@ -30,6 +30,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     var paused = false
     
     var chartNode: SCNNode?
+    var addPlane: SCNNode?
     
     /// The view controller that displays the status and "restart experience" UI.
     lazy var statusViewController: StatusViewController = {
@@ -411,13 +412,17 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 text.name = "temp"
                 node.addChildNode(text)
                 
-                let chartPlane = self.planeNode(width: 0.2, height: 0.015, opacity: 0.8, position: SCNVector3Make(Float(referenceImage.physicalSize.width) + 0.1, 0.0005, 0.05))
+                let chartPlane = self.planeNode(width: 0.2, height: 0.015, opacity: 0.8, position: SCNVector3Make(Float(referenceImage.physicalSize.width) + 0.12, 0.0005, 0.05))
                 chartPlane.geometry?.firstMaterial?.diffuse.contents = UIColor.systemYellow
                 chartPlane.name = "temp"
                 node.addChildNode(chartPlane)
                 
+                self.addPlane = self.planeNode(width: 0.25, height: 0.16, opacity: 1, position: SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, 0.145))
+                planeNode.pivot = SCNMatrix4MakeTranslation(0, 0.08, 0)
+                node.addChildNode(self.addPlane!)
+                
                 self.chartNode = self.add_chart()
-                self.chartNode!.position = SCNVector3(referenceImage.physicalSize.width, 0.001, 0.18)
+                self.chartNode!.position = SCNVector3(Float(referenceImage.physicalSize.width) + 0.01, 0.001, 0.18)
                 self.chartNode!.isHidden = true
                 node.addChildNode(self.chartNode!)
                 
