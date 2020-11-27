@@ -564,19 +564,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
     
     @IBAction func tap_add_chart(_ sender: UITapGestureRecognizer) {
         let currentTouchLocation = sender.location(in: sceneView)
-        print("?")
         print(currentTouchLocation)
-        guard let hitTestResultNode = self.sceneView.hitTest(currentTouchLocation, options: nil).first?.node else {
-            print("no node")
-            return }
-        print(hitTestResultNode.name ?? "no name")
-        for node in hitTestResultNode.childNodes{
-
-            //4. If The Node Has A Name Then Print It Out
-            if let validName = node.name{
-                 print("Node\(validName) Is A Child Node Of \(hitTestResultNode)")
-            }
-
+        guard let hitTestResultNode = self.sceneView.hitTest(currentTouchLocation, options: nil).first?.node else { return }
+        guard let name = hitTestResultNode.name else{ return }
+        if(name=="temp"){
+            // TODO
         }
         
     }
