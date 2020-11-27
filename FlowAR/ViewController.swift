@@ -402,7 +402,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 let planeNode = SCNNode(geometry: plane)
                 planeNode.eulerAngles.x = 0
                 planeNode.opacity = 0 // for fadein
-                planeNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, -0.12)
+                planeNode.position = SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, -0.10)
                 planeNode.pivot = SCNMatrix4MakeTranslation(0, 0.1, 0)
                 
                 node.addChildNode(planeNode)
