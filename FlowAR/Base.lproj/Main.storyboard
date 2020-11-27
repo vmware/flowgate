@@ -24,6 +24,10 @@
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="mbE-oU-z0Z">
                                     <rect key="frame" x="0.0" y="0.0" width="896" height="414"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <gestureRecognizers/>
+                                    <connections>
+                                        <outletCollection property="gestureRecognizers" destination="E84-QR-lDg" appends="YES" id="bXU-uZ-bBE"/>
+                                    </connections>
                                 </view>
                                 <blurEffect style="light"/>
                             </visualEffectView>
@@ -39,6 +43,7 @@
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="a2U-sP-shK"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="GWV-Ta-vSk" firstAttribute="top" secondItem="a2U-sP-shK" secondAttribute="top" id="08s-8h-4NH"/>
                             <constraint firstItem="aGR-hj-NkT" firstAttribute="leading" secondItem="ELN-Hy-SiV" secondAttribute="leading" id="235-VJ-d7W"/>
@@ -52,6 +57,9 @@
                             <constraint firstAttribute="bottom" secondItem="FZd-N3-nGX" secondAttribute="bottom" id="isP-Hf-GdW"/>
                             <constraint firstItem="GWV-Ta-vSk" firstAttribute="leading" secondItem="a2U-sP-shK" secondAttribute="leading" id="ukb-71-aAy"/>
                         </constraints>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="E84-QR-lDg" appends="YES" id="uca-iu-OEL"/>
+                        </connections>
                     </view>
                     <navigationItem key="navigationItem" id="wNO-U8-QO0"/>
                     <connections>
@@ -60,6 +68,11 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="y5L-lq-w9w" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="E84-QR-lDg">
+                    <connections>
+                        <action selector="tap_add_chart:" destination="c6h-T4-VaG" id="fbQ-VC-v1k"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="56.521739130434788" y="98.4375"/>
         </scene>
