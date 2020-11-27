@@ -32,19 +32,15 @@ import android.widget.TextView;
 
 import com.google.ar.core.Anchor;
 import com.google.ar.core.AugmentedImage;
-import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
-import com.google.ar.core.exceptions.CameraNotAvailableException;
 import com.google.ar.core.exceptions.NotYetAvailableException;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.FrameTime;
-import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.samples.augmentedimage.flowgate.flowgateClient;
-import com.google.ar.sceneform.samples.common.helpers.SnackbarHelper;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.mlkit.vision.common.InputImage;
 
@@ -120,7 +116,9 @@ public class AugmentedImageActivity extends AppCompatActivity implements Augment
 
   @Override
   public void onComplete() {
-    SnackbarHelper.getInstance().showMessage(this, "Detecting");
+    TextView dialog = findViewById(R.id.disp1);
+    String text = "Detecting";
+    dialog.setText(text);
     // Build the 2D renderable for text views of server.
     ViewRenderable.builder()
         .setView(this, R.layout.server_view)
@@ -184,11 +182,12 @@ public class AugmentedImageActivity extends AppCompatActivity implements Augment
 
           Context context = this.getApplicationContext();
 
-          barScanning.scanBarcodes(inputImage, fc, context, serverTextview, this);
+          TextView dialog = findViewById(R.id.disp1);
+          barScanning.scanBarcodes(inputImage, fc, context, serverTextview, dialog);
           image.close();
         }
       } catch (NotYetAvailableException e) {
-        Log.e("Barcode", "NotYetAvailableException sending frame image.", e);
+        e.printStackTrace();
       }
     }
 
@@ -199,12 +198,14 @@ public class AugmentedImageActivity extends AppCompatActivity implements Augment
       Collection<AugmentedImage> updatedAugmentedImages =
           frame.getUpdatedTrackables(AugmentedImage.class);
       for (AugmentedImage augmentedImage : updatedAugmentedImages) {
+        TextView dialog = findViewById(R.id.disp1);
+        String text;
         switch (augmentedImage.getTrackingState()) {
           case PAUSED:
             // When an image is in PAUSED state, but the camera is not PAUSED, it has been detected,
             // but not yet tracked.
-            String text = "Detected Image " + augmentedImage.getIndex();
-            SnackbarHelper.getInstance().showMessage(this, text);
+            text = "Detected Image " + augmentedImage.getIndex();
+            dialog.setText(text);
             break;
 
           case TRACKING:
@@ -217,7 +218,8 @@ public class AugmentedImageActivity extends AppCompatActivity implements Augment
               node.setImage(augmentedImage, this);
               augmentedImageMap.put(augmentedImage, node);
               arFragment.getArSceneView().getScene().addChild(node);
-              SnackbarHelper.getInstance().showMessage(this, "Device detected and frame drawn");
+              text = "Device detected and frame drawn";
+              dialog.setText(text);
 
               // Put the server's information near the cabinet.
               if (this.serverNode == null) {

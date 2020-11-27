@@ -28,7 +28,9 @@
     <FrameLayout
         android:id="@+id/ux_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent" >
+
+    </FrameLayout>
 
     <ImageView
       android:id="@+id/image_view_fit_to_scan"
@@ -37,20 +39,57 @@
       android:layout_gravity="center"
       android:scaleType="fitCenter"
       android:src="@drawable/fit_to_scan"
-      android:contentDescription="@string/fit_image_to_scan" />
+      android:contentDescription="Fit image to scan" />
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Reset" />
-
-    <!--<TextView
-        android:id="@+id/disp1"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:gravity="right|center"
-        android:textSize="18sp"
-        android:text="Detecting" />-->
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1">
+                <Button
+                    android:id="@+id/button1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical"
+                    android:layout_marginLeft="3.0dip"
+                    android:text="Reset"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1">
+
+                <Button
+                    android:id="@+id/button2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center_vertical"
+                    android:layout_marginRight="3.0dip"
+                    android:text="Pause"/>
+        </LinearLayout>
+
+        </LinearLayout>
+        <TextView
+            android:id="@+id/disp1"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:background="#BF323232"
+            android:gravity="center"
+            android:layout_marginLeft="6.0dip"
+            android:padding="6dip"
+            android:textColor="@android:color/white"
+            android:text="Detecting" />
+    </LinearLayout>
 
 </FrameLayout>
