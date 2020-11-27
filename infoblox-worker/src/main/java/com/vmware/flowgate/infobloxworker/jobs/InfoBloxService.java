@@ -84,7 +84,8 @@ public class InfoBloxService implements AsyncService {
                if (ipv4addressResults != null && !ipv4addressResults.isEmpty()) {
                   infoBloxIPInfoResults.addAll(ipv4addressResults);
                }
-               if (!IntegrationStatus.Status.WARNING.equals(status) && ipv4addressResults != null) {
+               if ((status == null || IntegrationStatus.Status.ACTIVE.equals(status))
+                        && ipv4addressResults != null) {
                   updateIntegrationStatusToWarning(infoblox, message);
                }
             }
@@ -178,6 +179,7 @@ public class InfoBloxService implements AsyncService {
    }
    
    private void updateIntegrationStatus(FacilitySoftwareConfig infoblox) {
+      wormholeAPIClient.setServiceKey(serviceKeyConfig.getServiceKey());
       wormholeAPIClient.updateFacility(infoblox);
    }
 
