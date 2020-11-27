@@ -407,22 +407,23 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 
                 node.addChildNode(planeNode)
                 
-                let text = self.textNode(text: "Show Temperature Plots", position: SCNVector3(Float(referenceImage.physicalSize.width+0.01), 0.001, 0.045), color: .brown)
+                let text = self.textNode(text: "Show Temperature Plots", position: SCNVector3(Float(referenceImage.physicalSize.width+0.01), 0.002, 0.045), color: .white)
                 text.opacity = 0
                 text.name = "temp"
                 node.addChildNode(text)
                 
-                let chartPlane = self.planeNode(width: 0.2, height: 0.015, opacity: 0.8, position: SCNVector3Make(Float(referenceImage.physicalSize.width) + 0.12, 0.0005, 0.05))
-                chartPlane.geometry?.firstMaterial?.diffuse.contents = UIColor.systemYellow
+                let chartPlane = self.planeNode(width: 0.145, height: 0.015, opacity: 0, position: SCNVector3Make(Float(referenceImage.physicalSize.width) + 0.08, 0.001, 0.05), conor: 0.02)
+                chartPlane.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
                 chartPlane.name = "temp"
                 node.addChildNode(chartPlane)
                 
-                self.addPlane = self.planeNode(width: 0.25, height: 0.16, opacity: 1, position: SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), 0, 0.145))
+                self.addPlane = self.planeNode(width: 0.25, height: 0.16, opacity: 0, position: SCNVector3Make(Float(referenceImage.physicalSize.width+0.115), -0.001, 0.07))
                 planeNode.pivot = SCNMatrix4MakeTranslation(0, 0.08, 0)
+                self.addPlane!.pivot = SCNMatrix4MakeTranslation(0, 0.08, 0)
                 node.addChildNode(self.addPlane!)
                 
                 self.chartNode = self.add_chart()
-                self.chartNode!.position = SCNVector3(Float(referenceImage.physicalSize.width) + 0.01, 0.001, 0.18)
+                self.chartNode!.position = SCNVector3(Float(referenceImage.physicalSize.width) + 0.012, 0.001, 0.18)
                 self.chartNode!.isHidden = true
                 node.addChildNode(self.chartNode!)
                 
@@ -448,6 +449,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 planeNode.runAction(self.imageAppearAction)
                 underLineNode.scale = SCNVector3Zero
                 underLineNode.runAction(self.imageAppearAction)
+                
+                chartPlane.runAction(self.textAppearAction)
                 
                 title_message.runAction(self.textAppearAction)
                 left_message.runAction(self.textAppearAction)
@@ -559,8 +562,9 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
         return ballNode
     }
     
-    func planeNode(width: CGFloat, height: CGFloat, opacity: CGFloat, position: SCNVector3)->SCNNode{
+    func planeNode(width: CGFloat, height: CGFloat, opacity: CGFloat, position: SCNVector3, conor: CGFloat = 0)->SCNNode{
         let plane = SCNPlane(width: width, height: height)
+        plane.cornerRadius = conor
         let planeNode = SCNNode(geometry: plane)
         planeNode.eulerAngles.x = -.pi/2
         planeNode.opacity = opacity
@@ -587,6 +591,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
             // TODO
             print("here")
             self.chartNode?.isHidden = false
+            self.addPlane?.runAction(self.imageAppearAction)
         }
         
     }
