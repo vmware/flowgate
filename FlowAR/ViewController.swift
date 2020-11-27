@@ -436,7 +436,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, UR
                 node.addChildNode(underLineNode)
                 
                 // Add pointing line
-                let frameNode = self.lineNode(color: .red, height: CGFloat(referenceImage.physicalSize.width), position: SCNVector3(referenceImage.physicalSize.width/2.0, 0, 0), angle: 0)
+                let frameNode = self.lineNode(color: .red, height: CGFloat(referenceImage.physicalSize.width), position: SCNVector3(referenceImage.physicalSize.width/2.0 - 0.25, 0, 0), angle: 0)
                 node.addChildNode(frameNode)
                 
                 planeNode.eulerAngles.x = -.pi / 2
