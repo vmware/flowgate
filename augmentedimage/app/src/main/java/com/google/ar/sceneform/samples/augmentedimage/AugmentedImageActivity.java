@@ -62,14 +62,11 @@ import java.util.Map;
  */
 public class AugmentedImageActivity extends AppCompatActivity implements AugmentedImageFragment.OnCompleteListener {
   private ArFragment arFragment;
-  private ImageView fitToScanView;
-  private Button button;
-
   private TextView serverTextview;
   private ViewRenderable serverRenderable;
   private AnchorNode serverNode;
-
   private Boolean isScanSuccess = false;
+  private Boolean isPause = true;
 
   flowgateClient fc = new flowgateClient("202.121.180.32", "admin", "Ar_InDataCenter_450");
 
@@ -94,11 +91,10 @@ public class AugmentedImageActivity extends AppCompatActivity implements Augment
     transaction.commit();
 
     // arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
-    fitToScanView = findViewById(R.id.image_view_fit_to_scan);
 
-    button = findViewById(R.id.button1);
+    Button reset = findViewById(R.id.button1);
     // Reset the app status.
-    button.setOnClickListener(new View.OnClickListener() {
+    reset.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         isScanSuccess = false;
@@ -106,10 +102,31 @@ public class AugmentedImageActivity extends AppCompatActivity implements Augment
         if (serverTextview != null){
           serverTextview.setText("");
         }
+        TextView dialog = findViewById(R.id.disp1);
+        String text = "Resetting";
+        dialog.setText(text);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.detach(arFragment);
         transaction.attach(arFragment);
         transaction.commit();
+      }
+    });
+
+    Button pause = findViewById(R.id.button2);
+    // Pause/continue the current session.
+    pause.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        String text;
+        if (isPause){
+          onPause();
+          text = "Continue";
+        } else {
+          onResume();
+          text = "Pause";
+        }
+        isPause = !isPause;
+        pause.setText(text);
       }
     });
   }
@@ -126,15 +143,6 @@ public class AugmentedImageActivity extends AppCompatActivity implements Augment
         .thenAccept(renderable -> serverRenderable = renderable);
 
     arFragment.getArSceneView().getScene().addOnUpdateListener(this::onUpdateFrame);
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-    if (augmentedImageMap.isEmpty()) {
-      //fitToScanView.setVisibility(View.VISIBLE);
-      fitToScanView.setVisibility(View.GONE);
-    }
   }
 
   /**
@@ -187,6 +195,7 @@ public class AugmentedImageActivity extends AppCompatActivity implements Augment
           image.close();
         }
       } catch (NotYetAvailableException e) {
+        Log.e("NYA", "Not yet available");
         e.printStackTrace();
       }
     }
@@ -204,14 +213,11 @@ public class AugmentedImageActivity extends AppCompatActivity implements Augment
           case PAUSED:
             // When an image is in PAUSED state, but the camera is not PAUSED, it has been detected,
             // but not yet tracked.
-            text = "Detected Image " + augmentedImage.getIndex();
+            text = "Detected the paused Image " + augmentedImage.getIndex();
             dialog.setText(text);
             break;
 
           case TRACKING:
-            // Have to switch to UI Thread to update View.
-            fitToScanView.setVisibility(View.GONE);
-
             // Create a new anchor for newly found images.
             if (!augmentedImageMap.containsKey(augmentedImage)) {
               AugmentedImageNode node = new AugmentedImageNode();
