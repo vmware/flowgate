@@ -42,14 +42,7 @@ export class SensorsettingListComponent implements OnInit {
       this.getsensorsettingdatas(this.currentPage,this.pageSize)
     }
   }
-  createTime(time){
-		var da = time;
-	    da = new Date(da);
-	    var year = da.getFullYear()+'-';
-	    var month = da.getMonth()+1+'-';
-	    var date = da.getDate();
-	    return year+month+date;
-	}
+
   getsensorsettingdatas(currentPage,pageSize){
     this.data.getsensorsettingData(currentPage,pageSize).subscribe(
       (data)=>{

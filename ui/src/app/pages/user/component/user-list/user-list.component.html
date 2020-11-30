@@ -30,7 +30,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-dg-cell>{{user.userName}}</clr-dg-cell>
         <clr-dg-cell>{{user.roleNames}}</clr-dg-cell>
         <clr-dg-cell>{{user.emailAddress}}</clr-dg-cell>
-        <clr-dg-cell>{{createTime(user.createTime)}}</clr-dg-cell>
+        <clr-dg-cell>{{user.createTime | date:"yyyy-MM-dd HH:mm:ss"}}</clr-dg-cell>
         
   </clr-dg-row>
 
