@@ -102,7 +102,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     <clr-dg-placeholder>We couldn't find any privileges!</clr-dg-placeholder>
                     
                     <clr-dg-row  *ngFor="let item of systemPrivileges" [clrDgItem]="item">               
-                        <clr-dg-cell style="padding-left: 0px;">{{item}}</clr-dg-cell>
+                        <clr-dg-cell>{{item}}</clr-dg-cell>
                     </clr-dg-row>
                 </clr-datagrid>
             </div>
@@ -126,15 +126,16 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </clr-wizard-page>
 
     <clr-wizard-page
-    [clrWizardPageNextDisabled]="!formPageOne.valid">
+    [clrWizardPageNextDisabled]="!editRoleForm.valid">
         
         <ng-template clrPageTitle>Other Information</ng-template>
-        <form clrForm #formPageOne="ngForm" [class.hide]="loadingFlag">
-            <clr-input-container>
+        <form clrForm [formGroup]="editRoleForm" [class.hide]="loadingFlag">
+            <clr-control-container>
                 <label>Role Name</label>
-                <input clrInput required [(ngModel)]="role.roleName" name="rolename" #rolename="ngModel" />
-                <clr-control-error>This field is required!</clr-control-error>
-            </clr-input-container>
+                <input clrControl placeholder="Role Name" formControlName="roleName" style="width: 220px;"/>
+                <clr-control-helper></clr-control-helper>
+                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+            </clr-control-container>
         </form>
     </clr-wizard-page>
     
@@ -143,7 +144,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 <clr-wizard #addwizard [(clrWizardOpen)]="addwizardOpen">
     <clr-wizard-title>Create A Role</clr-wizard-title>
 
-    <clr-wizard-button [type]="'cancel'" (click)="cancleUpdate()">Close</clr-wizard-button>
+    <clr-wizard-button [type]="'cancel'" (click)="cancleAdd()">Close</clr-wizard-button>
     <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
     <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
     <clr-wizard-button [type]="'finish'" >Finish</clr-wizard-button>
@@ -186,7 +187,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     clrWizardPagePreventDefault="true"
     (clrWizardPageOnCommit)="onCommit()"
     (clrWizardPageOnCancel)="doCancel()"
-    [clrWizardPageNextDisabled]="!formPageOne.valid">
+    [clrWizardPageNextDisabled]="!addRoleForm.valid">
         <ng-template clrPageTitle>Role Name</ng-template>
         <div class="spinner" *ngIf="loadingFlag">
                 Loading...
@@ -196,12 +197,13 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 {{errorMessage}}
             </div>
         </clr-alert>
-        <form clrForm #formPageOne="ngForm" [class.hide]="loadingFlag">
-            <clr-input-container>
+        <form clrForm [formGroup]="addRoleForm" [class.hide]="loadingFlag">
+            <clr-control-container>
                 <label>Role Name</label>
-                <input clrInput required [(ngModel)]="role.roleName" name="rolename" #rolename="ngModel" />
-                <clr-control-error>This field is required!</clr-control-error>
-            </clr-input-container>
+                <input clrControl placeholder="Role Name" formControlName="roleName" style="width: 220px;"/>
+                <clr-control-helper></clr-control-helper>
+                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+            </clr-control-container>
         </form>
     </clr-wizard-page>
     

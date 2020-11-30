@@ -4,7 +4,7 @@
 */
 import { Component, OnInit,Input } from '@angular/core';
 import { DataServiceService } from '../../../../data-service.service';
-import {Router,ActivatedRoute} from '@angular/router';
+import {Router} from '@angular/router';
 import { UserService } from '../../user.service';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -36,15 +36,6 @@ export class UserListComponent implements OnInit {
     }
     return false;
   }
-  createTime(time){
-		var da = time;
-	    da = new Date(da);
-	    var year = da.getFullYear()+'-';
-	    var month = da.getMonth()+1+'-';
-	    var date = da.getDate();
-	    return year+month+date;
-  }
-
   alertclose:boolean = true;
   alertType:string = "";
   alertcontent:string = "";

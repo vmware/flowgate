@@ -6,6 +6,7 @@ import { Component, ViewChild,OnInit } from '@angular/core';
 import { RoleService } from '../../role.service';
 import {ClrDatagridStateInterface, ClrWizard} from "@clr/angular";
 import { HttpErrorResponse } from '@angular/common/http';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-role-list',
@@ -14,7 +15,18 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class RoleListComponent implements OnInit {
 
-  constructor(private service:RoleService) { }
+  constructor(private service:RoleService,private fb: FormBuilder) { 
+    this.addRoleForm = this.fb.group({
+      roleName: ['', [
+        Validators.required
+      ]]
+    });
+    this.editRoleForm = this.fb.group({
+      roleName: ['', [
+        Validators.required
+      ]]
+    });
+  }
   
   checkadmin(rolename:string){
     if(rolename == "admin"){
@@ -28,7 +40,8 @@ export class RoleListComponent implements OnInit {
    @ViewChild("addwizard") addwizard: ClrWizard;
    addwizardOpen: boolean = false;
 
-   @ViewChild("formPageOne") formData: any;
+   addRoleForm:FormGroup;
+   editRoleForm:FormGroup;
    loadingFlag: boolean = false;
    errorFlag: boolean = false;
    errorMessage:string = "";
@@ -41,12 +54,12 @@ export class RoleListComponent implements OnInit {
       this.errorFlag = false;
 
       setTimeout(() => {
-        this.service.AddRole(this.role.roleName,this.rolePrivilege).subscribe(
+        this.service.AddRole(this.addRoleForm.get('roleName').value,this.rolePrivilege).subscribe(
           (data)=>{
             this.addwizard.reset();
+            this.addRoleForm.reset();
             this.addwizard.close();
             this.refresh(this.currentState);
-            this.role.roleName = "";
             this.errorMessage = "";
           },(error:HttpErrorResponse)=>{
             this.errorMessage = error.error.message;
@@ -115,15 +128,6 @@ export class RoleListComponent implements OnInit {
     });
     this.roleprivilegeselected = [];
   }
-
-  createTime(time){
-		var da = time;
-	    da = new Date(da);
-	    var year = da.getFullYear()+'-';
-	    var month = da.getMonth()+1+'-';
-	    var date = da.getDate();
-	    return year+month+date;
-  }
   
   toAddrole(){
     this.addwizardOpen =true;
@@ -138,16 +142,23 @@ export class RoleListComponent implements OnInit {
 
   cancleUpdate(){
     this.role.id = "";
-    this.role.roleName = "";
     this.systemprivilegeselected = [];
     this.roleprivilegeselected = [];
+    this.editWizard.reset();
+    this.editRoleForm.reset();
     this.refresh(this.currentState);
+  }
+  cancleAdd(){
+    this.role.roleName = "";
+    this.addRoleForm.reset();
+    this.addwizard.reset();
   }
 
   save(){
-    this.service.updateRole(this.role.id,this.role.roleName,this.rolePrivilege).subscribe(
+    this.service.updateRole(this.role.id,this.editRoleForm.get('roleName').value,this.rolePrivilege).subscribe(
       (data)=>{
         this.editWizard.reset();
+        this.editRoleForm.reset();
         this.refresh(this.currentState);
       }
     )
@@ -158,7 +169,7 @@ export class RoleListComponent implements OnInit {
   }
   onEdit(roleId:string,roleName:string,privileges:string[]){
     this.role.id = roleId;
-    this.role.roleName = roleName;
+    this.editRoleForm.get('roleName').setValue(roleName);
     this.rolePrivilege = privileges;
     this.systemPrivileges = [];
     this.privilegeNames.forEach(element=>{
