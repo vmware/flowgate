@@ -10,5 +10,5 @@ fi
 cd $BUILDDIR/ui/
 npm install --unsafe-perm
 npm config set unsafe-perm true
-npm install -g @angular/cli@1.6.1
+npm install -g @angular/cli@10.2.0
 ng build --prod -e prod -aot=false >> $BUILDLOG
