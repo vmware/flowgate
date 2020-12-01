@@ -1,217 +1,187 @@
 <!-- Copyright 2019 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause -->
-<form #DcimForm="ngForm">
-    <section class="form-block">
-          <label style="border-bottom-width: 1px;border-bottom-style: double;"> EDIT ASSET</label>
-          <div *ngIf="baseconfig">
-          <!--  assetName : String -->
-          <div class="form-group">
-            <label class="required" for="AssetName">AssetName</label>       
-            <label for="AssetName"
-                aria-haspopup="true"
-                role="tooltip"
-                class="tooltip tooltip-validation tooltip-md"
-                [class.invalid]="AssetName.invalid && (AssetName.dirty || AssetName.touched)">
-                <input type="text" id="AssetName" placeholder="Enter AssetName" autocomplete="off"
-                    required
-                    name="AssetName"
-                    [(ngModel)]="asset.assetName"
-                    #AssetName="ngModel">
-                <span class="tooltip-content">
-                  AssetName is Required.
-                </span>
-            </label>
-          </div>
-          <!-- category : AssetCategory -->
-          <div class="form-group">
-            <label class="required" for="category">Category</label>
-            <div class="select" style="width:184px; " id="category"> 
-              <select clrSelect name="category" [(ngModel)]="asset.category" required>
-                <option *ngFor="let item of allcategory" [value]="item">{{item}}</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label  for="SubCategory" *ngIf="asset.category=='Server'||asset.category=='Sensors' "class="required">SubCategory</label>
-            <div class="select" style="width:184px; " id="SubCategory" *ngIf="asset.category=='Server'||asset.category=='Sensors' " > 
-              <select clrSelect name="SubCategory" [(ngModel)]="asset.subCategory" required >
-                <option  *ngFor="let item of suballcategory[asset.category]"  [value]="item">{{item}}</option>
-              </select>
-            </div>
-          </div>
-          <!-- assetNumber : long  -->
-          <div class="form-group" >
-            <label for="AssetNumber">AssetNumber</label>
-            <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.assetNumber" id="AssetNumber" placeholder="Enter AssetNumber" size="45"/>
-          </div>
-          <!-- manufacturer -->
-          <div class="form-group" >
-            <label for="Manufacturer">Manufacturer</label>
-            <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.manufacturer" id="Manufacturer" placeholder="Enter Manufacturer" size="45"/>
-          </div>
-          <!-- model : String -->
-          <div class="form-group" >
-            <label for="Model">Model</label>
-            <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.model" id="Model" placeholder="Enter Model" size="45"/>
-          </div>
-          <!--  serialnumber : String;  -->
-          <div class="form-group" >
-            <label for="serialnumber">Serialnumber</label>
-            <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.serialnumber" id="serialnumber" placeholder="Enter Serialnumber" size="45"/>
-          </div>
-          <!--  tag : String -->
-          <div class="form-group" >
-            <label for="tag">Tag</label>
-            <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.tag" id="tag" placeholder="Enter Tag" size="45"/>
-          </div> 
-  
-          <!-- cabinetName : String 
-               cabinetUnitPosition : int-->
-          <div class="form-group"  *ngIf="asset.category!='Cabinet' ">
-            <label for="cabinetName">CabinetName</label>
-            <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.cabinetName" id="cabinetName" placeholder="Enter CabinetName" size="45"/>
-          </div>
-          <div  class="form-group"  *ngIf="asset.category!='Cabinet' ">
-            <label for="cabinetUnitPosition">CabinetUnitPosition</label>
-            <input style="width:184px; " class="form-control" type="number" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.cabinetUnitPosition" id="cabinetUnitPosition" placeholder="Enter  CabinetUnitPosition" size="45"/>
-          </div>
-          <!--  mountingSide : MountingSide-->
-          <div class="form-group " *ngIf="asset.category!='Cabinet' ">
-            <label class="required" for="mountingSide">MountingSide</label>
-                <div class="select" style="width:184px; " id="mountingSide"> 
-                  <select clrSelect name="options2" [(ngModel)]="asset.mountingSide" required>
-                    <option value="Front">Front</option>
-                    <option value="Back">Back</option>
-                    <option value="Unmounted">Unmounted</option>
-                    <option value="External">External</option>
-                  </select>
-                </div>
-          </div>
-          <!-- cabinetsize : int 
-               cabinetAssetNumber : String -->
-          <div class="form-group"  *ngIf="asset.category=='Cabinet' ">
-            <label for="cabinetsize">Cabinetsize</label>
-            <input style="width:184px; " class="form-control" type="number" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.cabinetUnitPosition" id="cabinetsize" placeholder="Enter Cabinetsize" size="45"/>
-          </div>
-          <div class="form-group"  *ngIf="asset.category=='Cabinet' ">
-            <label for="cabinetAssetNumber">CabinetAssetNumber</label>
-            <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.cabinetAssetNumber" id="cabinetAssetNumber" placeholder="Enter CabinetAssetNumber" size="45"/>
-          </div> 
-  
-          <!-- RealtimeDataUnit : String 
-               validNumMin : string
-              validNumMax :string  -->
-          <div class="form-group"  *ngIf="asset.category=='Sensors' ">
-            <label class="required" for="assetRealtimeDataSpec">RealtimeDataUnit</label>
-            <div class="select" style="width:184px; " id="assetRealtimeDataSpec"> 
-              <select clrSelect name="assetRealtimeDataSpec" [(ngModel)]="asset.assetRealtimeDataSpec.unit" required>
-                <option value="Volts">Volts</option>
-                <option value="Amps">Amps</option>
-                <option value="KW">KW</option>
-                <option value="Celsius">Celsius</option>
-                <option value="Fahrenheit">Fahrenheit</option>
-                <option value="Percent">Percent</option>
-              </select>
-            </div>
-          </div> 
-          <div class="form-group"  *ngIf="asset.category=='Sensors' ">
-            <label for="validNumMin">validNumMin</label>
-            <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.assetRealtimeDataSpec.validNumMin" id="validNumMin" placeholder="Enter ValidNumMin" size="45"/>
-          </div>
-          <div class="form-group"  *ngIf="asset.category=='Sensors' ">
-            <label for="validNumMax">validNumMax</label>
-            <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.assetRealtimeDataSpec.validNumMax" id="validNumMax" placeholder="Enter ValidNumMax" size="45"/>
-          </div> 
-  
-          <!-- status  -->
-          <div class="form-group">
-            <label class="required" for="status">Status</label>
-            <div class="select" style="width:184px; " id="status">
-              <select clrSelect name="status" [(ngModel)]="asset.status.status" required>
-                <option value="Planned">Planned</option>
-                <option value="Active">Active</option>
-                <option value="Recycled">Recycled</option>
-                <option value="Decommissioned">Decommissioned</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-            </div>
-          </div>
-  
-          <!--location group-->
-          <clr-tree>
-          <clr-tree-node style="margin-left: -3px;">
-            Location
-            <ng-template [clrIfExpanded]="false">
-                <clr-tree-node>
-                    <div class="col-md-12" style="margin-left:-1.4rem; border-top-width: 1px; border-top-style: inset;">
-                      <div class="form-group" style="margin-top: 12px;">
-                        <label for="region">Region</label>
-                        <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.region" id="region" placeholder="Enter Region" size="45"/>
-                      </div>
-                      <div class="form-group">
-                        <label for="country">Country</label>
-                        <input   style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.country" id="country" placeholder="Enter Country" size="45"/>
-                      </div>
-                      <div class="form-group">
-                        <label for="city">City</label>
-                        <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.city" id="city" placeholder="Enter City" size="45"/>
-                      </div>
-                        
-                      <div class="form-group" >
-                        <label for="building">Building</label>
-                        <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.building" id="building" placeholder="Enter Building" size="45"/>
-                      </div>
-                      <div class="form-group" >
-                        <label for="floor">Floor</label>
-                        <input   style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.floor" id="floor" placeholder="Enter Floor " size="45"/>
-                      </div>
-                      <div class="form-group" >
-                        <label for="room">Room</label>
-                        <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.room" id="room" placeholder="Enter  Room  " size="45"/>
-                      </div>
-                      <div class="form-group" >
-                        <label for="row">Row</label>
-                        <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.row" id="row" placeholder="Enter Row" size="45"/>
-                      </div>
-                      <div class="form-group" >
-                        <label for="col">Col</label>
-                        <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="asset.col" id="col" placeholder="Enter Col" size="45"/>
-                      </div>
-                    </div>
-                </clr-tree-node>
-              
-            </ng-template>
-          </clr-tree-node>
-        </clr-tree>
-          </div>
-          
-          <div style="margin-bottom: 15px;">
-            <label style="border-bottom-width: 1px;border-bottom-style: double;width: 100%;font-size: 16px;">Advance 
-              <span style="font-size: 12px;color: darkgray;">(Use raw data to update the asset, please use this as the last option to update an asset.)</span>
-            </label>
-            <clr-checkbox style="margin-right: 5px; margin-top: 15px;" (change)="advanceCheckbox()">
-              Raw Data
-            </clr-checkbox>
+<!-- Copyright 2019 VMware, Inc.
+SPDX-License-Identifier: BSD-2-Clause -->
+<form clrForm [formGroup]="editAssetForm" >
+  <clr-control-container>
+    <label>AssetName</label>
+    <input clrControl placeholder="Asset Name" formControlName="assetName" style="width: 220px;"/>
+    <clr-control-helper>Please input asset Name.</clr-control-helper>
+    <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+  </clr-control-container>
 
-            <form clrForm *ngIf="advance">
-              <textarea clrTextarea [(ngModel)]="assetjsondata" [class.invalid]="true" name="assetjson" style="height: 50em;" (keyup)="checkJsonFormat()" 
-              [ngStyle]="{'border-color':jsonerror === true ? 'red' : 'white', 'border-width':jsonerror === true ? '2px' : '1px'}" required></textarea>
-              <span style="color: red;" *ngIf="jsonerror">{{jsonerrormsg}}</span>
-            </form>
-          </div>
+  <clr-select-container>
+    <label>Category</label>
+    <select clrSelect name="options" formControlName="category" style="width: 220px;" (change)="changeType()">
+      <option *ngFor="let item of allcategory" [value]="item">{{item}}</option>
+    </select>
+    <clr-control-helper>Please select a category.</clr-control-helper>
+    <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+  </clr-select-container>
 
-          <button type="submit" class="btn btn-primary"  (click)="save()" [clrLoading]="editassetloading" [disabled]="DcimForm.form.invalid || editassetloading || checkjsonformat">Submit</button>
-          <button type="button" class="btn btn-primary" (click)="cancel()">Cancel</button>
+  <clr-select-container>
+      <label>SubCategory</label>
+      <select clrSelect name="options" formControlName="subCategory" style="width: 220px;">
+      <option *ngFor="let item of suballcategory[editAssetForm.get('category').value]" [value]="item">{{item}}</option>
+      </select>
+      <clr-control-helper>Please select a subCategory.</clr-control-helper>
+      <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+  </clr-select-container>
+
+  <clr-select-container *ngIf="editAssetForm.get('category').value !='Cabinet' ">
+    <label>MountingSide</label>
+    <select clrSelect name="mountingSide" formControlName="mountingSide" style="width: 220px;">
+      <option value="Front">Front</option>
+      <option value="Back">Back</option>
+      <option value="Unmounted">Unmounted</option>
+      <option value="External">External</option>
+    </select>
+    <clr-control-helper>Please select a mounting side.</clr-control-helper>
+    <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+  </clr-select-container>
+
+  <clr-select-container>
+    <label>Status</label>
+    <select clrSelect name="statusDisplay" formControlName="statusDisplay" style="width: 220px;">
+      <option value="Planned">Planned</option>
+      <option value="Active">Active</option>
+      <option value="Recycled">Recycled</option>
+      <option value="Decommissioned">Decommissioned</option>
+      <option value="Cancelled">Cancelled</option>
+    </select>
+    <clr-control-helper>Please select a status.</clr-control-helper>
+    <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+  </clr-select-container>
+
+  <clr-control-container>
+    <label>AssetNumber</label>
+    <input clrControl placeholder="AssetNumber" formControlName="assetNumber" style="width: 220px;"/>
+  </clr-control-container>
+  <clr-control-container>
+    <label>Manufacturer</label>
+    <input clrControl placeholder="Manufacturer" formControlName="manufacturer" style="width: 220px;"/>
+  </clr-control-container>
+  <clr-control-container>
+    <label>Model</label>
+    <input clrControl placeholder="Model" formControlName="model" style="width: 220px;"/>
+  </clr-control-container>
+  <clr-control-container>
+    <label>Serialnumber</label>
+    <input clrControl placeholder="Serialnumber" formControlName="serialnumber" style="width: 220px;"/>
+  </clr-control-container>
+  <clr-control-container>
+    <label>Tag</label>
+    <input clrControl placeholder="Tag" formControlName="tag" style="width: 220px;"/>
+  </clr-control-container>
+  <clr-control-container *ngIf="editAssetForm.get('category').value !='Cabinet' ">
+    <label>CabinetName</label>
+    <input clrControl placeholder="CabinetName" formControlName="cabinetName" style="width: 220px;"/>
+  </clr-control-container>
+
+  <clr-control-container *ngIf="editAssetForm.get('category').value !='Cabinet' ">
+    <label>CabinetUnitPosition</label>
+    <input clrControl placeholder="CabinetUnitPosition" formControlName="cabinetUnitPosition" style="width: 220px;"/>
+  </clr-control-container>
+
+  <clr-control-container *ngIf="editAssetForm.get('category').value =='Cabinet' ">
+    <label>CabinetAssetNumber</label>
+    <input clrControl placeholder="CabinetAssetNumber" formControlName="cabinetAssetNumber" style="width: 220px;"/>
+  </clr-control-container>
+
+  <clr-control-container *ngIf="editAssetForm.get('category').value =='Cabinet' ">
+    <label>Cabinetsize</label>
+    <input clrControl placeholder="Capacity" formControlName="capacity" style="width: 220px;"/>
+  </clr-control-container>
+
+  <clr-select-container *ngIf="editAssetForm.get('category').value =='Sensors' ">
+    <label>RealtimeDataUnit</label>
+    <select clrSelect name="assetRealtimeDataSpecUnit" formControlName="unit" style="width: 220px;">
+      <option value="Volts">Volts</option>
+      <option value="Amps">Amps</option>
+      <option value="KW">KW</option>
+      <option value="Celsius">Celsius</option>
+      <option value="Fahrenheit">Fahrenheit</option>
+      <option value="Percent">Percent</option>
+    </select>
+    <clr-control-helper>Please select a unit.</clr-control-helper>
+    <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+  </clr-select-container>
+
+  <clr-control-container *ngIf="editAssetForm.get('category').value =='Sensors' ">
+    <label>ValidNumMin</label>
+    <input clrControl placeholder="ValidNumMin" formControlName="validNumMin" style="width: 220px;"/>
+  </clr-control-container>
+
+  <clr-control-container *ngIf="editAssetForm.get('category').value =='Sensors' "> 
+    <label>ValidNumMax</label>
+    <input clrControl placeholder="ValidNumMax" formControlName="validNumMax" style="width: 220px;"/>
+  </clr-control-container>
+
   
-        <clr-modal [(clrModalOpen)]="addfail" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
-          <h3 class="modal-title">Operation tips</h3>
-          <div class="modal-body">
-              <p>{{tip}}</p>
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-primary" (click)="closefailTips()">Close</button>
-          </div>
-        </clr-modal>
-  
-        </section>
-  </form>
+  <clr-stack-view style="margin-top: 10px;">
+    <clr-stack-block >
+        <clr-stack-label>Location</clr-stack-label>
+        <clr-stack-block>
+          <clr-control-container style="margin-left: -73%;">
+            <label>Region</label>
+            <input clrControl placeholder="Region" formControlName="region" style="width: 220px;"/>
+          </clr-control-container>
+          <clr-control-container style="margin-left: -73%;">
+            <label>Country</label>
+            <input clrControl placeholder="Country" formControlName="country" style="width: 220px;"/>
+          </clr-control-container>
+          <clr-control-container style="margin-left: -73%;">
+            <label>City</label>
+            <input clrControl placeholder="City" formControlName="city" style="width: 220px;"/>
+          </clr-control-container>
+          <clr-control-container style="margin-left: -73%;">
+            <label>Building</label>
+            <input clrControl placeholder="Building" formControlName="building" style="width: 220px;"/>
+          </clr-control-container>
+          <clr-control-container style="margin-left: -73%;">
+            <label>Floor</label>
+            <input clrControl placeholder="Floor" formControlName="floor" style="width: 220px;"/>
+          </clr-control-container>
+          <clr-control-container style="margin-left: -73%;">
+            <label>Room</label>
+            <input clrControl placeholder="Room" formControlName="room" style="width: 220px;"/>
+          </clr-control-container>
+          <clr-control-container style="margin-left: -73%;">
+            <label>Row</label>
+            <input clrControl placeholder="Row" formControlName="row" style="width: 220px;"/>
+          </clr-control-container>
+          <clr-control-container style="margin-left: -73%;">
+            <label>Col</label>
+            <input clrControl placeholder="Col" formControlName="col" style="width: 220px;"/>
+          </clr-control-container>
+        </clr-stack-block>
+    </clr-stack-block>
+  </clr-stack-view>
+
+  <clr-checkbox-container clrInline>
+    <label class="clr-control-label">Advance</label>
+    <clr-checkbox-wrapper>
+      <input type="checkbox" clrCheckbox value="option1" name="options" (change)="advanceCheckbox()"/>
+      <label>Raw Data</label>
+    </clr-checkbox-wrapper>
+    <clr-control-helper>Use raw data to update the asset, please use this as the last option to update an asset.</clr-control-helper>
+  </clr-checkbox-container>
+</form>
+
+<clr-textarea-container *ngIf="advance">
+  <textarea clrTextarea [(ngModel)]="assetjsondata" [class.invalid]="true" name="assetjson" style="height: 50em;min-width: 80em;" (keyup)="checkJsonFormat()" 
+  [ngStyle]="{'border-color':jsonerror === true ? 'red' : 'white', 'border-width':jsonerror === true ? '2px' : '1px'}" required></textarea>
+</clr-textarea-container>
+<div style="margin-top: 50px;">
+  <button type="submit" class="btn btn-primary"  (click)="save()" [clrLoading]="editassetloading"  [disabled]="editAssetForm.invalid || editassetloading || checkjsonformat" >Submit</button>
+  <button type="button" class="btn btn-primary" (click)="cancel()">Cancel</button>
+</div>
+<clr-modal [(clrModalOpen)]="editfail" [clrModalStaticBackdrop]="true" [clrModalClosable]="false">
+  <h3 class="modal-title">Operation tips</h3>
+  <div class="modal-body">
+      <p>{{tip}}</p>
+  </div>
+  <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="closefailTips()">Close</button>
+  </div>
+</clr-modal>
