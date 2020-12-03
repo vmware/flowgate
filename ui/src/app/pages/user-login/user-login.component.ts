@@ -2,6 +2,7 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component,OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LocalStorage } from '../../local.storage';
@@ -58,7 +59,7 @@ export class UserLoginComponent implements OnInit {
                         this.router.navigate(["ui/nav"]);
                     }
                 )
-          },error=>{
+          },(error:HttpErrorResponse)=>{
             if(error.status == 401){
                 this.tips = true;
                 this.textContent = "Invalid user name or password";

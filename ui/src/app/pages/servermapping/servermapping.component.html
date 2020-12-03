@@ -59,7 +59,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-dg-placeholder>{{nulltips}}</clr-dg-placeholder>
 
        
-        <clr-dg-row *clrDgItems="let serverMapping of serverMappings">
+        <clr-dg-row *ngFor="let serverMapping of serverMappings">
                 <clr-dg-cell>{{serverMapping.vroResourceName}}</clr-dg-cell>
                 <clr-dg-cell>{{serverMapping.vroVMEntityObjectID}}</clr-dg-cell>
                 <clr-dg-cell>{{serverMapping.vcHostName}}</clr-dg-cell>
@@ -86,7 +86,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
        
       
        <clr-dg-footer>
-                <clr-dg-pagination #pagination [clrDgPageSize]="20" [clrDgTotalItems] = "totalItems">
+                <clr-dg-pagination #pagination [clrDgPageSize]="10" [clrDgTotalItems] = "totalItems">
                         <clr-dg-page-size [clrPageSizeOptions]="[10,20,50]">ServerMappings per page</clr-dg-page-size>
                         {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
                         of {{pagination.totalItems}} ServerMappings
@@ -164,7 +164,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="cancelAsset()">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="confirmAsset(mappedServerAsset)">Ok</button>
+            <button type="button" class="btn btn-primary" (click)="confirmAsset(selectedServerAsset)">Ok</button>
         </div>
 </clr-modal>
  <clr-modal [(clrModalOpen)]="mappedOtherAssetModalOpen" [clrModalStaticBackdrop]="false" [clrModalSize]="'xl'" [clrModalClosable]="false">

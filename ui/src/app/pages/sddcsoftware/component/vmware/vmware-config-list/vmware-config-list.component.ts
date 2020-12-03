@@ -126,8 +126,7 @@ export class VmwareConfigListComponent implements OnInit {
       return;
     }
     this.currentState = state;
-    let pagenumber = Math.round((state.page.from + 1) / state.page.size) + 1;
-    this.getVmareConfigdatas(pagenumber,state.page.size);
+    this.getVmareConfigdatas(state.page.current,state.page.size);
   }
   getVmareConfigdatas(currentPage:number,pageSize:number){
     this.loading = true;
