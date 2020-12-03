@@ -18,7 +18,7 @@
     <clr-alert [clrAlertType]="'danger'" [clrAlertAppLevel]="true" [clrAlertClosed]= "isStatusErrorMsgAlertClose" (clrAlertClosedChange)="statusMsgAlertClose()" >
         <clr-alert-item>
             <span class="alert-text">
-                {{statusErrorMsg}}you can reactive the integration by click <clr-icon shape="ellipsis-vertical"></clr-icon> > Active , you can update the setting by click Edit Setting button if needed. 
+                {{statusErrorMsg}}you can reactive the integration by click <clr-icon shape="ellipsis-vertical"></clr-icon> > Active , you can update the setting by click Edit Setting button if needed.
             </span>
             <div class="alert-actions">
                 <button class="btn alert-action" (click)="fixError()">Update Setting</button>
@@ -33,7 +33,7 @@
         </div>
     </clr-alert>
   <clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)">
-  
+
     <clr-dg-column >Type</clr-dg-column>
     <clr-dg-column>ServerUrl</clr-dg-column>
     <clr-dg-column>Name</clr-dg-column>
@@ -43,7 +43,7 @@
     <clr-dg-column>Status</clr-dg-column>
 
     <clr-dg-placeholder>We couldn't find any integration!</clr-dg-placeholder>
-  
+
     <clr-dg-row *ngFor="let cmdbConfig of cmdbConfigs">
         <clr-dg-action-overflow>
             <button class="action-item" (click)="onEdit(cmdbConfig.id)" *appHasPrivilege=updatefacility>Edit</button>
@@ -55,16 +55,16 @@
         <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.type}}">{{cmdbConfig.type}}</clr-dg-cell>
         <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.serverURL}}">{{cmdbConfig.serverURL}}</clr-dg-cell>
         <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.name}}">{{cmdbConfig.name}}</clr-dg-cell>
-        <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.description}}">{{cmdbConfig.description}}</clr-dg-cell>    
+        <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.description}}">{{cmdbConfig.description}}</clr-dg-cell>
         <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.userName}}">{{cmdbConfig.userName}}</clr-dg-cell>
         <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.verifyCert}}">{{cmdbConfig.verifyCert}}</clr-dg-cell>
         <clr-dg-cell class = "flowgate-overflow" title="{{cmdbConfig.integrationStatus.status}}">{{cmdbConfig.integrationStatus.status}}
-            <clr-icon *ngIf="cmdbConfig.integrationStatus.status == 'ERROR'" class="alert-icon" style="color: #c92100;cursor: pointer;" shape="exclamation-circle" (click)="showErrorMsg(cmdbConfig)"></clr-icon>       
+            <clr-icon *ngIf="cmdbConfig.integrationStatus.status == 'ERROR'" class="alert-icon" style="color: #c92100;cursor: pointer;" shape="exclamation-circle" (click)="showErrorMsg(cmdbConfig)"></clr-icon>
             <clr-icon *ngIf="cmdbConfig.integrationStatus.status == 'ACTIVE'" class="alert-icon" shape="check-circle" style="color: #318700;"></clr-icon>
             <clr-icon *ngIf="cmdbConfig.integrationStatus.status == 'PENDING'" class="alert-icon" shape="exclamation-triangle" style="color: #ffdc0b;"></clr-icon>
         </clr-dg-cell>
     </clr-dg-row>
-  
+
     <clr-dg-footer>
         <clr-dg-pagination #pagination [clrDgPageSize]="10" [clrDgTotalItems] = "totalItems">
         <clr-dg-page-size [clrPageSizeOptions]="[10,20,50]">Integrations of CMDB per page</clr-dg-page-size>
@@ -91,4 +91,3 @@
          <button type="button" class="btn btn-primary" (click)="confirm()">Ok</button>
      </div>
   </clr-modal>
-  

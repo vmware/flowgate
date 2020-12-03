@@ -5,7 +5,7 @@
 import { Component, OnInit } from '@angular/core';
 import {Router,ActivatedRoute} from '@angular/router';
 import { DcimService } from '../../dcim/dcim.service';
-import {FormGroup, Validators, FormBuilder} from "@angular/forms";
+import {FormGroup, Validators, FormBuilder, FormControl} from "@angular/forms";
 import { FacilityModule } from '../../../facility.module';
 import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -19,7 +19,7 @@ import { map } from 'rxjs/operators';
 export class CmdbEditComponent implements OnInit {
 
   editCMDBForm:FormGroup;
-  constructor(private service:DcimService,private router:Router,private activedRoute:ActivatedRoute,private fb: FormBuilder) { 
+  constructor(private service:DcimService,private router:Router,private activedRoute:ActivatedRoute,private fb: FormBuilder) {
     this.editCMDBForm = this.fb.group({
       type: [{value:'',disabled: true}, [
         Validators.required
@@ -72,14 +72,16 @@ export class CmdbEditComponent implements OnInit {
   isInfoblox:boolean = false;
   enableProxySearch:boolean = false;
   checkIsLabsDB(){
-    this.editCMDBForm.get('userName').setValidators(Validators.required);
-    this.editCMDBForm.get('password').setValidators(Validators.required);
+    this.editCMDBForm.controls["userName"].setValidators([Validators.required]);
+    this.editCMDBForm.controls["password"].setValidators([Validators.required]);
     this.isInfoblox = false;
     let subcategory:string =  this.editCMDBForm.get('type').value;
     let adapter:FacilityAdapterModule = this.adapterMap.get(subcategory);
     if(adapter.type == "Labsdb"){
-      this.editCMDBForm.get('userName').setValidators(Validators.nullValidator);
-      this.editCMDBForm.get('password').setValidators(Validators.nullValidator);
+      this.editCMDBForm.controls["userName"].clearValidators();
+      this.editCMDBForm.controls["userName"].setValidators([Validators.nullValidator]);
+      this.editCMDBForm.controls["password"].clearValidators();
+      this.editCMDBForm.controls["password"].setValidators([Validators.nullValidator]);
     }else if(adapter.type == "InfoBlox"){
       this.isInfoblox = true;
       if(this.editCMDBForm.get('advanceSetting').value != null && this.editCMDBForm.get('advanceSetting').value.INFOBLOX_PROXY_SEARCH != ""){
@@ -87,11 +89,13 @@ export class CmdbEditComponent implements OnInit {
         this.advanceSetting = this.editCMDBForm.get('advanceSetting').value;
       }
     }
+    this.editCMDBForm.controls['userName'].updateValueAndValidity();
+    this.editCMDBForm.controls['password'].updateValueAndValidity();
   }
 
   save(){
       this.read = "readonly";
-      this.loading = true;      
+      this.loading = true;
       this.cmdbConfig = this.editCMDBForm.value;
       if(this.isInfoblox && this.editCMDBForm.get('advanceSetting').value != null){
         if(this.enableProxySearch){
@@ -103,7 +107,7 @@ export class CmdbEditComponent implements OnInit {
       }
       let adapter:FacilityAdapterModule = this.adapterMap.get(this.editCMDBForm.get('type').value);
       this.cmdbConfig.type = adapter.type;
-    
+
       this.service.updateFacility(this.cmdbConfig).subscribe(
         (data)=>{
           this.loading = false;
@@ -126,7 +130,7 @@ export class CmdbEditComponent implements OnInit {
           }
         }
       )
-  
+
   }
   Yes(){
     this.ignoreCertificatesModals = false;

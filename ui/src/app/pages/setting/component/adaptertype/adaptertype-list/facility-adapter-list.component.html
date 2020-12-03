@@ -15,8 +15,17 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </div>
 </clr-alert>
 
+<clr-alert [clrAlertType]="alertType" (clrAlertClosedChange)="close()" [clrAlertClosed]= "alertclose">
+    <div class="alert-item">
+          <span class="alert-text">
+              {{alertcontent}}
+          </span>
+    </div>
+</clr-alert>
+
+
 <clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)">
- 
+
   <clr-dg-column>Name</clr-dg-column>
   <clr-dg-column>Description</clr-dg-column>
   <clr-dg-placeholder>We couldn't find any facility adapter!</clr-dg-placeholder>
@@ -36,7 +45,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <clr-dg-pagination #pagination [clrDgPageSize]="10" [clrDgTotalItems] = "totalItems">
     <clr-dg-page-size [clrPageSizeOptions]="[10,20,50]">Facility Adapters per page</clr-dg-page-size>
     {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
-    of {{pagination.totalItems}} Facility Adapters 
+    of {{pagination.totalItems}} Facility Adapters
     </clr-dg-pagination>
 </clr-dg-footer>
 
@@ -51,7 +60,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <clr-wizard-button [type]="'finish'" >Done</clr-wizard-button>
 
     <clr-wizard-page [clrWizardPageNextDisabled]="!formPageOne.valid">
-        <ng-template clrPageTitle>Create</ng-template> 
+        <ng-template clrPageTitle>Create</ng-template>
         <form clrForm [formGroup]="formPageOne" >
 
             <clr-select-container>
@@ -77,10 +86,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </clr-wizard-page>
 
     <clr-wizard-page [clrWizardPageNextDisabled]="!formPageOne.valid">
-        <ng-template clrPageTitle>Config adapter</ng-template> 
+        <ng-template clrPageTitle>Config adapter</ng-template>
         <ng-template clrPageNavTitle>
             Config
-        </ng-template> 
+        </ng-template>
         <clr-alert [clrAlertType]="'alert-info'" [clrAlertClosable]="false">
             <div class="alert-item">
                <span>{{Command_Description}}</span>
@@ -92,7 +101,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <clr-dg-column>Name</clr-dg-column>
             <clr-dg-column>Description</clr-dg-column>
             <clr-dg-column>Trigger Cycle</clr-dg-column>
-        
+
             <clr-dg-row *ngFor="let command of predefineAdapterCommands">
                 <clr-dg-action-overflow>
                     <button class="action-item"  (click)="onEdit(command)" >Edit</button>
@@ -143,8 +152,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <button type="submit" [clrLoading]="addNewCommandSubmitLoading" class="btn btn-primary" on-click="addNewCommand()" [disabled]="commandForm.invalid">Add</button>
             <button type="button" class="btn btn-primary" on-click="resetNewCommandForm()">Close</button>
           </div>
-         
-        </form> 
+
+        </form>
 
         <form clrForm [formGroup]="commandEditForm" *ngIf="onedit">
             <clr-control-container>
@@ -180,8 +189,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <button type="submit" [clrLoading]="editCommandSubmitLoading" class="btn btn-primary" on-click="saveEditCommand()" [disabled]="commandEditForm.invalid">Add</button>
             <button type="button" class="btn btn-primary" on-click="resetEditCommandForm()">Close</button>
           </div>
-         
-        </form> 
+
+        </form>
     </clr-wizard-page>
 
     <clr-wizard-page [clrWizardPageNextDisabled]="!formPageOne.valid"
@@ -189,10 +198,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
     (clrWizardPageOnCancel)="addAdapterDoCancel()"
     (clrWizardPagePrevious)="addAdapterGoBack()"
     (clrWizardPageOnCommit)="saveNewAdapter()">
-        <ng-template clrPageTitle>Go to complete!</ng-template> 
+        <ng-template clrPageTitle>Go to complete!</ng-template>
         <ng-template clrPageNavTitle>
             Complete
-        </ng-template> 
+        </ng-template>
         <clr-alert [clrAlertType]="'danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "addErrorClosed">
             <div class="alert-item">
                 <span>{{addErrorMsg}}</span>
@@ -202,7 +211,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             Loading...
         </div>
         <div *ngIf="formPageOne.valid">
-           
+
             <form clrForm>
                 <h4 style="margin-top: 0px;">Your information</h4>
                 <section class="form-block">
@@ -214,7 +223,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <label>Display name:</label>
                         <span>{{newFacilityAdapter.displayName }}</span>
                     </clr-control-container>
-          
+
                     <clr-textarea-container>
                         <label>Description</label>
                         <textarea clrTextarea  placeholder="description" [(ngModel)]="newFacilityAdapter.description" name="description" readonly></textarea>
@@ -226,7 +235,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             <clr-dg-column>Name</clr-dg-column>
                             <clr-dg-column>Description</clr-dg-column>
                             <clr-dg-column>Trigger Cycle</clr-dg-column>
-                        
+
                             <clr-dg-row *ngFor="let command of predefineAdapterCommands">
                                 <clr-dg-cell>{{command.command}}</clr-dg-cell>
                                 <clr-dg-cell title="{{command.description}}" style="max-width: 300px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
@@ -248,7 +257,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <clr-wizard-button [type]="'finish'" >Done</clr-wizard-button>
 
     <clr-wizard-page [clrWizardPageNextDisabled]="!editformPageOne.valid">
-        <ng-template clrPageTitle>Create</ng-template> 
+        <ng-template clrPageTitle>Create</ng-template>
         <form clrForm [formGroup]="editformPageOne">
             <section class="form-block">
                 <clr-select-container>
@@ -275,10 +284,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </clr-wizard-page>
 
     <clr-wizard-page [clrWizardPageNextDisabled]="!editformPageOne.valid">
-        <ng-template clrPageTitle>Config adapter</ng-template> 
+        <ng-template clrPageTitle>Config adapter</ng-template>
         <ng-template clrPageNavTitle>
             Config
-        </ng-template> 
+        </ng-template>
         <clr-alert [clrAlertType]="'alert-info'" [clrAlertClosable]="false">
             <div class="alert-item">
                <span>{{Command_Description}}</span>
@@ -290,7 +299,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <clr-dg-column>Name</clr-dg-column>
             <clr-dg-column>Description</clr-dg-column>
             <clr-dg-column>Trigger Cycle</clr-dg-column>
-        
+
             <clr-dg-row *ngFor="let command of predefineAdapterCommandsForEditAdapter">
                 <clr-dg-action-overflow>
                     <button class="action-item"  (click)="onEditForEditAdapter(command)" >Edit</button>
@@ -340,8 +349,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <button type="submit" [clrLoading]="addNewCommandSubmitLoadingForEditAdapter" class="btn btn-primary" on-click="addNewCommandForEditAdapter()" [disabled]="editAdapterCommandForm.invalid">Add</button>
             <button type="button" class="btn btn-primary" on-click="resetNewCommandFormForEditAdapter()">Close</button>
           </div>
-         
-        </form> 
+
+        </form>
         <form clrForm [formGroup]="editCommandFormForEditAdapter" *ngIf="oneditForEditAdapter">
             <clr-control-container>
                 <label>Name</label>
@@ -376,19 +385,19 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <button type="submit" [clrLoading]="editCommandSubmitLoadingForEditAdapter" class="btn btn-primary" on-click="saveEditCommandForEditAdapter()" [disabled]="editCommandFormForEditAdapter.invalid">Add</button>
             <button type="button" class="btn btn-primary" on-click="resetEditCommandFormForEditAdapter()">Close</button>
           </div>
-         
-        </form> 
-       
+
+        </form>
+
     </clr-wizard-page>
 
     <clr-wizard-page [clrWizardPageNextDisabled]="!editformPageOne.valid"  clrWizardPagePreventDefault="true"
     (clrWizardPageOnCancel)="doCancel()"
     (clrWizardPagePrevious)="goBack()"
     (clrWizardPageOnCommit)="updateAdapter()">
-        <ng-template clrPageTitle>Go to complete</ng-template> 
+        <ng-template clrPageTitle>Go to complete</ng-template>
         <ng-template clrPageNavTitle>
             Complete
-        </ng-template> 
+        </ng-template>
         <clr-alert [clrAlertType]="'danger'" [clrAlertClosable]="true" [(clrAlertClosed)] = "editErrorClosed">
             <div class="alert-item">
                 <span>{{editErrorMsg}}</span>
@@ -409,7 +418,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <label>Display name:</label>
                         <span>{{editAdapter.displayName }}</span>
                     </clr-control-container>
-          
+
                     <clr-textarea-container>
                         <label>Description</label>
                         <textarea clrTextarea  placeholder="description" [(ngModel)]="editAdapter.description" name="description" readonly></textarea>
@@ -421,7 +430,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             <clr-dg-column>Name</clr-dg-column>
                             <clr-dg-column>Description</clr-dg-column>
                             <clr-dg-column>Trigger Cycle</clr-dg-column>
-                        
+
                             <clr-dg-row *ngFor="let command of predefineAdapterCommandsForEditAdapter">
                                 <clr-dg-cell>{{command.command}}</clr-dg-cell>
                                 <clr-dg-cell title="{{command.description}}" style="max-width: 300px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
@@ -461,7 +470,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     <label>Service Key:</label>
                     <span>{{showDetaileAdapter.serviceKey }}</span>
                 </clr-control-container>
-      
+
                 <clr-textarea-container>
                     <label>Description</label>
                     <textarea clrTextarea  placeholder="description" [(ngModel)]="showDetaileAdapter.description" name="description" readonly></textarea>
@@ -472,7 +481,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <clr-dg-column>Name</clr-dg-column>
                         <clr-dg-column>Description</clr-dg-column>
                         <clr-dg-column>Trigger Cycle</clr-dg-column>
-                    
+
                         <clr-dg-row *ngFor="let command of showDetaileAdapter.commands">
                             <clr-dg-cell>{{command.command}}</clr-dg-cell>
                             <clr-dg-cell title="{{command.description}}" style="max-width: 300px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;">{{command.description}}</clr-dg-cell>
@@ -480,7 +489,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         </clr-dg-row>
                     </clr-datagrid>
                 </clr-control-container>
-              
+
             </section>
         </form>
     </div>
