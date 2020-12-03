@@ -22,6 +22,17 @@ export class AuthenticationInterceptor implements HttpInterceptor {
         }
     });
     }
+    if(req.url.lastIndexOf('/auth/token')){
+      return next.handle(req).pipe(
+        catchError((err: HttpErrorResponse) => this.handleDataNoJump(err))
+      ) ;
+    }
+    if(req.url.lastIndexOf('/v1/facilitysoftware')){
+      return next.handle(req).pipe(
+        catchError((err: HttpErrorResponse) => this.handleDataNoJump(err))
+      ) ;
+    }
+
     return next.handle(req).pipe(
       catchError((err: HttpErrorResponse) => this.handleData(err))
     ) ;
@@ -30,12 +41,19 @@ export class AuthenticationInterceptor implements HttpInterceptor {
   private handleData(
     event: HttpResponse<any> | HttpErrorResponse,
   ): Observable<any> {
+    
     switch (event.status) {
       case 401:
         window.location.href = "/";
         return of(event) ;
       default:
     }
+    return throwError(event) ;
+  }
+
+  private handleDataNoJump(
+    event: HttpResponse<any> | HttpErrorResponse,
+  ): Observable<any> {
     return throwError(event) ;
   }
 }

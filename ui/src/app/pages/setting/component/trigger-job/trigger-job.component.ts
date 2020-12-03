@@ -271,10 +271,7 @@ export class TriggerJobComponent implements OnInit {
   loading:boolean = true;
   disabled:string="";
   selectedAssetName:string="";
-  changePageSize(){
-    
-    this.refresh(this.currentState);
-  }
+
   searchIP:string = null;
   searchBtnState:boolean = false;
   searchBtnDisabled:boolean = false;

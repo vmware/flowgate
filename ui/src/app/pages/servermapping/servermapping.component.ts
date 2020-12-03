@@ -85,8 +85,7 @@ export class ServermappingComponent implements OnInit {
       return;
     }
     this.currentState = state;
-    let pagenumber = Math.round((state.page.from + 1) / state.page.size) + 1;
-    this.getServerMappings(pagenumber,state.page.size);
+    this.getServerMappings(state.page.current,state.page.size);
   }
   getServerMappings(currentPage:number,pageSize:number){
     if(this.serverconfig.id !=""){
