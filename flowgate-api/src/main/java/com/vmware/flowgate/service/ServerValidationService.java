@@ -39,9 +39,9 @@ public class ServerValidationService {
    public void validVCServer(SDDCSoftwareConfig server) {
       AuthVcUser authVcUser = getVcAuth(server);
       try {
-         
+
          authVcUser.authenticateUser(server.getUserName(), server.getPassword());
-         
+
       }catch(SslException | SSLException e) {
          throw new WormholeRequestException(HttpStatus.BAD_REQUEST,"Certificate verification error",e.getCause());
       }catch(AuthException | InvalidLogin e) {
@@ -62,19 +62,22 @@ public class ServerValidationService {
       } catch (AuthException e) {
          throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
                "Invalid user name or password", e.getCause());
-      } catch (SslException e1) {
-         throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-               "Certificate verification error", e1.getCause());
-      } catch (UndeclaredThrowableException e2) {
-         if (e2.getUndeclaredThrowable().getCause() instanceof ConnectException) {
-            throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                  "Failed to connect to server", e2.getCause());
-         }else if(e2.getUndeclaredThrowable() instanceof SSLException) {
-            throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                  "Certificate verification error", e2.getCause());
+      } catch (Exception e3) {
+         if(e3.getCause() instanceof UndeclaredThrowableException) {
+            UndeclaredThrowableException e = (UndeclaredThrowableException)e3.getCause();
+            if (e.getUndeclaredThrowable().getCause() instanceof ConnectException) {
+               throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                     "Failed to connect to server", e.getCause());
+            }else if(e.getUndeclaredThrowable() instanceof SSLException) {
+               throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                     "Certificate verification error", e.getCause());
+            }else {
+               throw new WormholeRequestException("This is a Exception Message :" + e.getMessage(),
+                     e.getCause());
+            }
          }else {
-            throw new WormholeRequestException("This is a Exception Message :" + e2.getMessage(),
-                  e2.getCause());
+            throw new WormholeRequestException("This is a Exception Message :" + e3.getMessage(),
+                  e3.getCause());
          }
       }
    }
@@ -83,29 +86,30 @@ public class ServerValidationService {
       return new VRopsAuth(server);
    }
 
-   public void validateFacilityServer(FacilitySoftwareConfig config) throws WormholeRequestException{
+   public void validateFacilityServer(FacilitySoftwareConfig config)
+         throws WormholeRequestException {
       try {
          switch (config.getType()) {
          case Nlyte:
             NlyteAuth nlyteAuth = createNlyteAuth();
-            if(!nlyteAuth.auth(config)) {
+            if (!nlyteAuth.auth(config)) {
                throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
                      "Invalid user name or password", null);
             }
             break;
          case PowerIQ:
             PowerIQAuth powerIQAuth = createPowerIQAuth();
-            if(!powerIQAuth.auth(config)) {
+            if (!powerIQAuth.auth(config)) {
                throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
                      "Invalid user name or password", null);
             }
             break;
          case InfoBlox:
-        	 InfobloxAuth infobloxAuth = createInfobloxAuth();
-        	 if(!infobloxAuth.auth(config)) {
-                 throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
-                       "Invalid user name or password", null);
-              }
+            InfobloxAuth infobloxAuth = createInfobloxAuth();
+            if (!infobloxAuth.auth(config)) {
+               throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
+                     "Invalid user name or password", null);
+            }
             break;
          case Device42:
             break;
@@ -118,31 +122,30 @@ public class ServerValidationService {
          default:
             throw WormholeRequestException.InvalidFiled("type", config.getType().toString());
          }
-      }catch (ResourceAccessException e) {
-         if(e.getCause() instanceof  SSLException) {
+      } catch (ResourceAccessException e) {
+         if (e.getCause() instanceof SSLException) {
             throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                  "Certificate verification error", e.getCause(),WormholeRequestException.InvalidSSLCertificateCode);
-         }else if(e.getCause() instanceof  UnknownHostException) {
-            throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host",
-                  e.getCause(),WormholeRequestException.UnknownHostCode);
+                  "Certificate verification error", e.getCause(),
+                  WormholeRequestException.InvalidSSLCertificateCode);
+         } else if (e.getCause() instanceof UnknownHostException) {
+            throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host", e.getCause(),
+                  WormholeRequestException.UnknownHostCode);
          }
-         throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-               e.getMessage(), e.getCause());
+         throw new WormholeRequestException(HttpStatus.BAD_REQUEST, e.getMessage(), e.getCause());
       } catch (UnknownHostException e) {
-         throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host",
-               e.getCause(),WormholeRequestException.UnknownHostCode);
-      } catch (SSLException | KeyManagementException
-            | CertificateException | NoSuchAlgorithmException | KeyStoreException e) {
+         throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host", e.getCause(),
+               WormholeRequestException.UnknownHostCode);
+      } catch (SSLException | KeyManagementException | CertificateException
+            | NoSuchAlgorithmException | KeyStoreException e) {
          throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
                "Certificate verification error", e.getCause(),
                WormholeRequestException.InvalidSSLCertificateCode);
-      }  catch (HttpClientErrorException e) {
-         if(HttpStatus.UNAUTHORIZED.equals(e.getStatusCode())) {
+      } catch (HttpClientErrorException e) {
+         if (HttpStatus.UNAUTHORIZED.equals(e.getStatusCode())) {
             throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
                   "Invalid user name or password", e.getCause());
-         }else if(HttpStatus.FORBIDDEN.equals(e.getStatusCode())) {
-            throw new WormholeRequestException(HttpStatus.FORBIDDEN,
-                  "403 Forbidden", e.getCause());
+         } else if (HttpStatus.FORBIDDEN.equals(e.getStatusCode())) {
+            throw new WormholeRequestException(HttpStatus.FORBIDDEN, "403 Forbidden", e.getCause());
          }
       }
    }
@@ -153,7 +156,7 @@ public class ServerValidationService {
    public PowerIQAuth createPowerIQAuth() {
       return new PowerIQAuth();
    }
-   
+
    public InfobloxAuth createInfobloxAuth() {
       return new InfobloxAuth();
    }
