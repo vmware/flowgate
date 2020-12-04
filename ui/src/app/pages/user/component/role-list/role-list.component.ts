@@ -144,9 +144,11 @@ export class RoleListComponent implements OnInit {
     this.role.id = "";
     this.systemprivilegeselected = [];
     this.roleprivilegeselected = [];
+    this.editWizard.close();
     this.editWizard.reset();
     this.editRoleForm.reset();
-    this.refresh(this.currentState);
+    this.errorFlag = false;
+    this.errorMessage = "";
   }
   cancleAdd(){
     this.role.roleName = "";
@@ -155,17 +157,27 @@ export class RoleListComponent implements OnInit {
   }
 
   save(){
+    this.loadingFlag = true;
+    this.errorFlag = false;
     this.service.updateRole(this.role.id,this.editRoleForm.get('roleName').value,this.rolePrivilege).subscribe(
       (data)=>{
+        this.editWizard.close();
         this.editWizard.reset();
         this.editRoleForm.reset();
         this.refresh(this.currentState);
+        this.errorMessage = "";
+        this.systemprivilegeselected = [];
+        this.roleprivilegeselected = [];
+        this.loadingFlag = false;
+      },(error:HttpErrorResponse)=>{
+        this.errorMessage = error.error.message;
+        this.errorFlag = true;
+        this.systemprivilegeselected = [];
+        this.roleprivilegeselected = [];
+        this.loadingFlag = false;
       }
-    )
-    this.role.id = "";
-    this.role.roleName = "";
-    this.systemprivilegeselected = [];
-    this.roleprivilegeselected = [];
+    ) 
+
   }
   onEdit(roleId:string,roleName:string,privileges:string[]){
     this.role.id = roleId;
