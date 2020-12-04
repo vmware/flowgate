@@ -183,15 +183,12 @@ export class UserAddComponent implements OnInit {
   }
 
   reset(){
-    this.user = {
-      id:"",
-      username:"",
-      password:"",
-      rpassword:"",
-      roleName:[],
-      roleId:"",
-      email:""
-    }
+    this.addUserForm.reset();
+    this.roles.forEach(element=>{
+      if(element.enable != ""){
+        element.enable = "";
+      }
+    })
     this.alertclose = true;
     this.alertcontent = "";
     this.alertType = "";

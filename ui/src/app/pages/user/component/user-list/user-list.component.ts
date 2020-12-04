@@ -55,6 +55,7 @@ export class UserListComponent implements OnInit {
     this.getUsers(state.page.current,state.page.size);
   }
   getUsers(currentPage:number,pageSize:number){
+    this.loading = true;
     this.data.getUserData(currentPage,pageSize).subscribe(
       (data)=>{
         this.loading = false;

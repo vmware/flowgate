@@ -89,7 +89,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <clr-wizard-button [type]="'cancel'" (click)="cancleUpdate()">Cancel</clr-wizard-button>
     <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
     <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
-    <clr-wizard-button [type]="'finish'" (click)="save()" disabled >Finish</clr-wizard-button>
+    <clr-wizard-button [type]="'finish'" >Finish</clr-wizard-button>
 
     <clr-wizard-page>
         <ng-template clrPageTitle>Privileges</ng-template>
@@ -126,10 +126,20 @@ SPDX-License-Identifier: BSD-2-Clause -->
     </clr-wizard-page>
 
     <clr-wizard-page
+    clrWizardPagePreventDefault="true"
+    (clrWizardPageOnCommit)="save()"
     [clrWizardPageNextDisabled]="!editRoleForm.valid">
         
         <ng-template clrPageTitle>Other Information</ng-template>
-        <form clrForm [formGroup]="editRoleForm" [class.hide]="loadingFlag">
+        <div class="spinner" *ngIf="loadingFlag">
+            Loading...
+        </div>
+        <clr-alert *ngIf="errorFlag" [clrAlertType]="'danger'">
+            <div class="alert-item">
+                {{errorMessage}}
+            </div>
+        </clr-alert>
+        <form clrForm [formGroup]="editRoleForm">
             <clr-control-container>
                 <label>Role Name</label>
                 <input clrControl placeholder="Role Name" formControlName="roleName" style="width: 220px;"/>
