@@ -299,6 +299,11 @@ public class AuthController {
       if(!oldRoleOptional.isPresent()) {
          throw WormholeRequestException.NotFound("Role", "id", role.getId());
       }
+      WormholeRole  existingRole = roleRepository.findOneByRoleName(role.getRoleName());
+      if (existingRole != null && !existingRole.getId().equals(role.getId())) {
+         String message = "The role name: " + role.getRoleName() + " is already exsit.";
+         throw new WormholeRequestException(message);
+      }
       WormholeRole old = oldRoleOptional.get();
       if (role.getRoleName() != null && !"".equals(role.getRoleName().trim())) {
          old.setRoleName(role.getRoleName());
