@@ -181,23 +181,27 @@ public class VROAsyncJob implements AsyncService {
       try {
          metricClient = new MetricClient(vro, publisher);
          hosts = metricClient.getHostSystemsResources();
-      } catch (AuthException e) {
-         logger.error("Failed to connect to VROps manager ", e);
+      } catch (AuthException authException) {
+         logger.error("Failed to connect to VROps manager ", authException);
          IntegrationStatus integrationStatus = config.getIntegrationStatus();
          if (integrationStatus == null) {
             integrationStatus = new IntegrationStatus();
          }
          integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-         integrationStatus.setDetail(e.getMessage());
+         integrationStatus.setDetail(authException.getMessage());
          integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
          updateIntegrationStatus(config);
          return;
-      } catch (UndeclaredThrowableException e1) {
-         if (e1.getUndeclaredThrowable().getCause() instanceof ConnectException) {
-            checkAndUpdateIntegrationStatus(config,
-                  e1.getUndeclaredThrowable().getCause().getMessage());
-            return;
+      } catch (Exception e) {
+         if(e.getCause() instanceof UndeclaredThrowableException) {
+            UndeclaredThrowableException undeclaredThrowableException = (UndeclaredThrowableException)e.getCause();
+            if (undeclaredThrowableException.getUndeclaredThrowable().getCause() instanceof ConnectException) {
+               checkAndUpdateIntegrationStatus(config,
+                     undeclaredThrowableException.getUndeclaredThrowable().getCause().getMessage());
+               return;
+            }
          }
+         throw e;
       }
       //read all host/asset maaping from apiserver
       Map<String, Asset> assetDictionary = new HashMap<String, Asset>();
@@ -601,12 +605,16 @@ public class VROAsyncJob implements AsyncService {
          integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
          updateIntegrationStatus(config);
          return;
-      } catch (UndeclaredThrowableException e1) {
-         if (e1.getUndeclaredThrowable().getCause() instanceof ConnectException) {
-            checkAndUpdateIntegrationStatus(config,
-                  e1.getUndeclaredThrowable().getCause().getMessage());
-            return;
+      } catch (Exception e) {
+         if(e.getCause() instanceof UndeclaredThrowableException) {
+            UndeclaredThrowableException undeclaredThrowableException = (UndeclaredThrowableException)e.getCause();
+            if (undeclaredThrowableException.getUndeclaredThrowable().getCause() instanceof ConnectException) {
+               checkAndUpdateIntegrationStatus(config,
+                     undeclaredThrowableException.getUndeclaredThrowable().getCause().getMessage());
+               return;
+            }
          }
+         throw e;
       }
       AlertClient alertClient = new AlertClient(vroConf);
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());

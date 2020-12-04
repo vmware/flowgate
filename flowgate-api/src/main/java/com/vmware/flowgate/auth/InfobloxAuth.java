@@ -8,7 +8,6 @@ import java.security.cert.CertificateException;
 
 import javax.net.ssl.SSLException;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
@@ -24,14 +23,17 @@ public class InfobloxAuth extends ServerAuth {
 	   public boolean auth(FacilitySoftwareConfig softwareConfig)
 	         throws  KeyManagementException, SSLException, UnknownHostException,
 	         CertificateException, NoSuchAlgorithmException, KeyStoreException {
-		   
-		   RestTemplate restTemplate = getConnection(softwareConfig);
-		   restTemplate.getInterceptors().add(new BasicAuthorizationInterceptor(
-		            softwareConfig.getUserName(), softwareConfig.getPassword()));
-	      ResponseEntity<String> response = restTemplate
-	            .getForEntity(String.format(authUrl,softwareConfig.getServerURL()), String.class);
-	      if (HttpStatus.OK.equals(response.getStatusCode())) {
-	         return true;
+	      try {
+	         RestTemplate restTemplate = getConnection(softwareConfig);
+	         restTemplate.getInterceptors().add(new BasicAuthorizationInterceptor(
+	                  softwareConfig.getUserName(), softwareConfig.getPassword()));
+	         ResponseEntity<String> response = restTemplate
+	               .getForEntity(String.format(authUrl,softwareConfig.getServerURL()), String.class);
+	         if (HttpStatus.OK.equals(response.getStatusCode())) {
+	            return true;
+	         }
+	      }catch(Exception e) {
+	         return false;
 	      }
 	      return false;
 	   }
