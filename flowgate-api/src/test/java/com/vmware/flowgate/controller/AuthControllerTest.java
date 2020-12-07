@@ -580,6 +580,26 @@ public class AuthControllerTest {
        roleRepository.deleteById(role.getId());
    }
 
+   @Test
+   public void updateRoleExampleException() throws Exception {
+       WormholeRole role = createRole();
+       role.setRoleName("sddcuser");
+       roleRepository.save(role);
+       WormholeRole role1 = createRole();
+       roleRepository.save(role1);
+       role1.setRoleName("sddcuser");
+       expectedEx.expect(WormholeRequestException.class);
+       expectedEx.expectMessage("The role name: "+role1.getRoleName()+" is already exsit.");
+       MvcResult result = this.mockMvc.perform(put("/v1/auth/role").contentType(MediaType.APPLICATION_JSON_VALUE)
+              .content(objectMapper.writeValueAsString(role1))).andReturn();
+       if (result.getResolvedException() != null) {
+          roleRepository.deleteById(role.getId());
+          roleRepository.deleteById(role1.getId());
+          throw result.getResolvedException();
+       }
+   }
+
+
    AuthToken createToken(){
       AuthToken token = new AuthToken();
       token.setAccess_token("R$TYUIMJ");
