@@ -24,7 +24,7 @@ export class CmdbEditComponent implements OnInit {
       type: [{value:'',disabled: true}, [
         Validators.required
       ]],
-      serverURL: ['', [
+      serverURL: [{value:'',disabled: true}, [
         Validators.required
       ]],
       name: ['', [

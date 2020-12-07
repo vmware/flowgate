@@ -7,8 +7,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <form clrForm [formGroup]="editDCIMForm" >
                 <clr-select-container>
                    <label>Type</label>
-                   <select clrSelect style="width: 220px;" formControlName="type" (change)="changetype()">                          
-                    <option *ngFor="let adapter of dcimAdapters" value="{{adapter.subCategory}}" >{{adapter.displayName}}</option>      
+                   <select clrSelect style="width: 220px;" formControlName="type" (change)="changetype()">
+                    <option *ngFor="let adapter of dcimAdapters" value="{{adapter.subCategory}}" >{{adapter.displayName}}</option>
                   </select>
                    <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
                </clr-select-container>
@@ -23,24 +23,24 @@ SPDX-License-Identifier: BSD-2-Clause -->
                    <input clrControl placeholder="Name" formControlName="name" style="width: 220px;"/>
                    <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
                </clr-control-container>
-           
+
                <clr-control-container>
                    <label>Description</label>
                    <input clrControl placeholder="Description" formControlName="description" style="width: 220px;"/>
                </clr-control-container>
-           
+
                 <clr-control-container>
                    <label>UserName</label>
                    <input clrControl placeholder="Username" formControlName="userName"style="width: 220px;" />
                    <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
                </clr-control-container>
-           
+
                <clr-password-container>
                  <label>Password</label>
                  <input placeholder="Password" clrPassword formControlName="password" name="password" style="width: 185px;"/>
                  <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
                </clr-password-container>
-                 
+
                <clr-radio-container clrInline>
                    <label>VerifyCert</label>
                    <clr-radio-wrapper>
@@ -52,112 +52,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
                      <label>No</label>
                    </clr-radio-wrapper>
                </clr-radio-container>
-           
+
                <div style="margin-top: 50px;">
                  <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="editDCIMForm.invalid">Submit</button>
                  <button type="button" class="btn btn-primary" on-click ="cancel()">Cancel</button>
                </div>
            </form>
-            <!-- <form #DcimForm="ngForm">
-                <section class="form-block">
-                    <label> Content for Integration</label>
-                    <div class="form-group ">
-                        <label class="required" for="gForm_3">Type</label>
-                            <div class="select" style="width:184px; ">
-                                <select id="gForm_5" [ngModelOptions]="{standalone: true}"  [ngModel]="seclectAdapter.subCategory" disabled> 
-                                    <option *ngFor="let adapter of dcimAdapters" value="{{adapter.subCategory}}" >{{adapter.displayName}}</option>  
-                                </select>
-                            </div>
-                    </div>
-        
-                    <div class="form-group">
-                        <label class="required" for="empserverIP">Server Ip</label>       
-                        <label for="empserverIP"
-                            aria-haspopup="true"
-                            role="tooltip"
-                            class="tooltip tooltip-validation tooltip-md"
-                            [class.invalid]="serverIPInput.invalid && (serverIPInput.dirty || serverIPInput.touched)">
-                            <input type="text" id="empserverIP" placeholder="Enter Server Ip" autocomplete="off" disabled 
-                                required
-                                name="serverIP"
-                                [(ngModel)]="dcimConfig.serverURL"
-                                #serverIPInput="ngModel">
-                            <span class="tooltip-content">
-                                    Server Ip is Required.
-                            </span>
-                        </label>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="required" for="empserverName">Name</label>       
-                        <label for="empserverName"
-                            aria-haspopup="true"
-                            role="tooltip"
-                            class="tooltip tooltip-validation tooltip-md"
-                            [class.invalid]="serverNameInput.invalid && (serverNameInput.dirty || serverNameInput.touched)">
-                            <input type="text" id="empserverName" placeholder="Enter Name" autocomplete="off"
-                                required
-                                name="serverName"
-                                [(ngModel)]="dcimConfig.name"
-                                #serverNameInput="ngModel">
-                            <span class="tooltip-content">
-                                    Name is Required.
-                            </span>
-                        </label>
-                    </div>
-                    <div class="form-group" >
-                        <label for="gForm_1">Description</label>
-                        <input style="width:184px; " class="form-control" type="text" [ngModelOptions]="{standalone: true}"  [(ngModel)]="dcimConfig.description" id="gForm_6" placeholder="Description" size="45"/>
-                    </div>  
-                    <div class="form-group">
-                            <label class="required" for="empuserName">Username</label>       
-                            <label for="empuserName"
-                                aria-haspopup="true"
-                                role="tooltip"
-                                class="tooltip tooltip-validation tooltip-md"
-                                [class.invalid]="userNameInput.invalid && (userNameInput.dirty || userNameInput.touched)">                         
-                                <input type="text" id="empuserName" placeholder="Enter UserName" autocomplete="off"
-                                    required
-                                    name="userName"
-                                    [(ngModel)]="dcimConfig.userName"
-                                    #userNameInput="ngModel">
-                                <span class="tooltip-content">
-                                    Username is Required.
-                                </span>
-                            </label>
-                        </div>
-                    <div class="form-group">
-                        <label class="required"  for="emppassword">Password</label>
-                        <label for="emppassword"
-                            aria-haspopup="true"
-                            role="tooltip"
-                            class="tooltip tooltip-validation tooltip-md"
-                            [class.invalid]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">         
-                            <input type="password" name="password" id="emppassword" placeholder="Enter Password" autocomplete="off" [readonly]="read"
-                                required
-                                [(ngModel)]="dcimConfig.password"
-                                #passwordInput="ngModel">
-                            <span class="tooltip-content">
-                                Password is Required.
-                            </span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>Verify Cert</label>
-                        
-                        <div class="radio-inline">
-                            <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}" id="checkrads_11" value="true" [(ngModel)]="dcimConfig.verifyCert">
-                            <label for="checkrads_11">Yes</label>
-                        </div>
-                        <div class="radio-inline">
-                            <input type="radio" name="gridRadios1" [ngModelOptions]="{standalone: true}"  id="checkrads_12" value="false" [(ngModel)]="dcimConfig.verifyCert">
-                            <label for="checkrads_12">No</label>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="editDCIMForm.invalid">Submit</button>
-                    <button type="button" class="btn btn-primary" on-click ="cancel()">Cancel</button>
-                </section>
-            </form> -->
         </clr-tab-content>
     </clr-tab>
     <clr-tab>
@@ -171,7 +71,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </clr-input-container>
 
                 <clr-select-container>
-                        <label>Timezone </label>     
+                        <label>Timezone </label>
                         <select clrSelect name="timezone" style="width: 200px;" [(ngModel)]="dcimConfig.advanceSetting.TimeZone">
                             <option value="" >Please Select </option>
                                     <option value="GMT" >GMT</option>
@@ -205,7 +105,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <clr-control-helper>This will set the data timezone to a specific timezone. Leave it as blank unless you understanding the affect of the changes.</clr-control-helper>
                 </clr-select-container>
                 <clr-select-container>
-                    <label>Power Unit</label>     
+                    <label>Power Unit</label>
                     <select clrSelect name="powerUnit" style="width: 200px;" [(ngModel)]="dcimConfig.advanceSetting.PDU_POWER_UNIT">
                         <option value="" >Please Select </option>
                         <option value="MW" >MW</option>
@@ -213,10 +113,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <option value='KW'>KW</option>
                     </select>
                     <clr-control-helper>This will set the unit of power. Leave it as default value unless you understanding the affect of the changes.</clr-control-helper>
-                </clr-select-container>        
-                     
+                </clr-select-container>
+
                 <clr-select-container>
-                    <label>Current Unit</label>     
+                    <label>Current Unit</label>
                     <select clrSelect name="ampsUnit" style="width: 200px;" [(ngModel)]="dcimConfig.advanceSetting.PDU_AMPS_UNIT">
                         <option value="" >Please Select </option>
                         <option value="MA" >MA</option>
@@ -224,9 +124,9 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <option value='KA' >KA</option>
                     </select>
                     <clr-control-helper>This will set the unit of current. Leave it as default value unless you understanding the affect of the changes.</clr-control-helper>
-                </clr-select-container>  
+                </clr-select-container>
                 <clr-select-container>
-                    <label>Voltage Unit</label>     
+                    <label>Voltage Unit</label>
                     <select clrSelect name="voltUnit" style="width: 200px;" [(ngModel)]="dcimConfig.advanceSetting.PDU_VOLT_UNIT">
                         <option value="" >Please Select </option>
                         <option value="MV" >MV</option>
@@ -234,26 +134,26 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <option value='KV' >KV</option>
                     </select>
                     <clr-control-helper>This will set the unit of voltage. Leave it as default value unless you understanding the affect of the changes.</clr-control-helper>
-                </clr-select-container>  
+                </clr-select-container>
                 <clr-select-container>
-                    <label>Temperature Unit</label>     
+                    <label>Temperature Unit</label>
                     <select clrSelect name="temUnit" style="width: 200px;" [(ngModel)]="dcimConfig.advanceSetting.TEMPERATURE_UNIT">
                         <option value="" >Please Select </option>
                         <option value="C" >C</option>
                         <option value='F' >F</option>
                     </select>
                     <clr-control-helper>This will set the unit of temperature. Leave it as default value unless you understanding the affect of the changes.</clr-control-helper>
-                </clr-select-container>  
+                </clr-select-container>
                 <clr-select-container>
-                    <label>Humidity Unit</label>     
+                    <label>Humidity Unit</label>
                     <select clrSelect name="HUMIDITY_UNIT" style="width: 200px;" [(ngModel)]="dcimConfig.advanceSetting.HUMIDITY_UNIT">
                         <option value="" >Please Select </option>
                         <option value="%" >%</option>
                     </select>
                     <clr-control-helper>This will set the unit of humidity. Leave it as default value unless you understanding the affect of the changes.</clr-control-helper>
-                </clr-select-container>  
+                </clr-select-container>
                 <button type="submit" class="btn btn-primary" on-click="save()" [disabled]="editDCIMForm.invalid">Submit</button>
-                <button type="button" class="btn btn-primary" on-click ="cancel()">Cancel</button>  
+                <button type="button" class="btn btn-primary" on-click ="cancel()">Cancel</button>
             </form>
         </clr-tab-content>
     </clr-tab>
@@ -265,7 +165,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <p>{{tip}}</p>
         </div>
         <div class="modal-footer">
-            
+
             <button type="button" class="btn btn-primary" (click)="closeOperationTips()">Close</button>
         </div>
 </clr-modal>
@@ -275,7 +175,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <p>{{tip}}</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-outline" (click)="closeVerifyCertModal()">No</button> 
+            <button type="button" class="btn btn-outline" (click)="closeVerifyCertModal()">No</button>
             <button type="button" class="btn btn-primary" (click)="confirmNoVerifyCertModal()">Yes</button>
         </div>
 </clr-modal>

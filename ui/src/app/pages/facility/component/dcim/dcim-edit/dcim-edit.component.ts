@@ -19,12 +19,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class DcimEditComponent implements OnInit {
 
   editDCIMForm:FormGroup;
-  constructor(private service:DcimService,private router:Router,private activedRoute:ActivatedRoute,private fb: FormBuilder) { 
+  constructor(private service:DcimService,private router:Router,private activedRoute:ActivatedRoute,private fb: FormBuilder) {
     this.editDCIMForm = this.fb.group({
       type: [{value:'',disabled: true}, [
         Validators.required
       ]],
-      serverURL: ['', [
+      serverURL: [{value:'',disabled: true}, [
         Validators.required
       ]],
       name: ['', [
@@ -63,7 +63,7 @@ export class DcimEditComponent implements OnInit {
   powerIQAdvanceSettingShow:boolean = false;
   commonAdvanceSettingShow:boolean = true;
   dcimConfig:FacilityModule = new FacilityModule();
-  
+
   read = "";/** This property is to change the read-only attribute of the password input box*/
 
 
@@ -81,7 +81,7 @@ export class DcimEditComponent implements OnInit {
       this.nlyteAdvanceSettingShow = false;
     }
   }
-  
+
   save(){
       this.read = "readonly";
       this.loading = true;
@@ -115,7 +115,7 @@ export class DcimEditComponent implements OnInit {
           }
         }
       )
-  
+
   }
   confirmNoVerifyCertModal(){
     this.ignoreCertificatesModals = false;
