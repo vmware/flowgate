@@ -35,7 +35,12 @@ export class FacilityAdapterListComponent implements OnInit {
   commandEditForm:FormGroup;
   editAdapterCommandForm:FormGroup;
   editCommandFormForEditAdapter:FormGroup;
-  constructor(private facilityAdapterService:FacilityAdapterService ,private fb: FormBuilder) { 
+
+  alertclose:boolean = true;
+  alertType:string = "";
+  alertcontent:string = "";
+
+  constructor(private facilityAdapterService:FacilityAdapterService ,private fb: FormBuilder) {
     this.formPageOne = this.fb.group({
       type: ['', [
         Validators.required
@@ -115,7 +120,7 @@ export class FacilityAdapterListComponent implements OnInit {
   }
 
   //alert
-  Duplicate_Command_Name:string = "Duplicate command name."; 
+  Duplicate_Command_Name:string = "Duplicate command name.";
   Trigger_Cycle_Number:string = "The number should be multiples of 5.";
   Command_Name:string = "Please use letter and number combination for the adapter name, it must start with a letter.";
   Nem_Command_Form_Lable:string = "New Command";
@@ -158,6 +163,10 @@ export class FacilityAdapterListComponent implements OnInit {
     return "CMDB"
   }
 
+  close(){
+    this.alertclose = true;
+  }
+
   loading:boolean = true;
   currentState:ClrDatagridStateInterface;
   totalItems:number = 0;
@@ -167,8 +176,7 @@ export class FacilityAdapterListComponent implements OnInit {
       return;
     }
     this.currentState = state;
-    let pagenumber = Math.round((state.page.from + 1) / state.page.size) + 1;
-    this.getFacilityAdapters(pagenumber,state.page.size);
+    this.getFacilityAdapters(state.page.current,state.page.size);
   }
   getFacilityAdapters(currentPage:number,pageSize:number){
     this.loading = true;
@@ -177,7 +185,15 @@ export class FacilityAdapterListComponent implements OnInit {
           this.adapters = data['content'];
           this.totalItems = data['totalElements'];
           this.loading = false;
-    })
+    },(error)=>{
+            this.loading = false;
+            this.alertType = "danger";
+            this.alertcontent = "Internal error";
+            if(error._body != null && error.status != "0"){
+                this.alertcontent = error.json().message;
+            }
+            this.alertclose = false;
+        })
   }
   baseSetting(){
     this.newFacilityAdapter = this.formPageOne.value;
@@ -239,6 +255,7 @@ export class FacilityAdapterListComponent implements OnInit {
         this.addLoadingFlag = false;
         this.wizard.forceFinish();
         this.wizard.reset();
+        this.formPageOne.reset();
         this.addErrorClosed = true;
         this.addFacilityAdapterOpen = false;
         this.refresh(this.currentState);
@@ -311,7 +328,7 @@ export class FacilityAdapterListComponent implements OnInit {
   getValidationState(){
     return this.validTriggerCyle;
   }
- 
+
   handleValidation(value:number): void {
    if(value != 0 && value % 5 == 0){
      this.validTriggerCyle = false;
@@ -454,7 +471,7 @@ export class FacilityAdapterListComponent implements OnInit {
         this.editErrorClosed = true;
         this.refresh(this.currentState);
     },(error:HttpErrorResponse)=>{
-        this.editErrorClosed = false;  
+        this.editErrorClosed = false;
         this.editErrorMsg = error.error.message;
         this.loadingFlag = false;
       }

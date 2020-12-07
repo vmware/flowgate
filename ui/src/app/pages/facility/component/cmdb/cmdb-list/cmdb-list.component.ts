@@ -17,7 +17,7 @@ import { ClrDatagridStateInterface } from '@clr/angular';
 export class CmdbListComponent implements OnInit {
 
   constructor(private service:DcimService,private router: Router) { }
- 
+
   cmdbConfigs = [];
   currentPage:number = 1;
   totalPage:number = 1;
@@ -40,13 +40,13 @@ export class CmdbListComponent implements OnInit {
   updateStatusAlertclose:boolean = true;
   updateStatusAlertType:string = "";
   updateStatusAlertcontent:string = "";
-  
+
   //for integrationStatus alert message
   isStatusErrorMsgAlertClose:boolean=true;
   editStatusDcimId:string = "";
   statusErrorMsg = "";
   dcimModule:FacilityModule = new FacilityModule();
-  types:string = "InfoBlox,OtherCMDB,Labsdb"; 
+  types:string = "InfoBlox,OtherCMDB,Labsdb";
   checkStatus(element:any):any{
     var status = {
       "status":"ACTIVE",
@@ -67,8 +67,7 @@ export class CmdbListComponent implements OnInit {
     this.editStatusDcimId = "";
   }
   fixError(){
-    window.sessionStorage.setItem("editdcimconfigid",this.editStatusDcimId);
-    this.router.navigateByUrl("/ui/nav/facility/cmdb/cmdb-edit");
+    this.router.navigate(['/ui/nav/facility/cmdb/cmdb-edit',this.editStatusDcimId]);
   }
   updateStatusResultClose(){
     this.updateStatusAlertclose = true;
@@ -98,17 +97,17 @@ export class CmdbListComponent implements OnInit {
           }
           this.updateStatusAlertclose = false;
           setTimeout(() => {
-            this.updateStatusAlertclose = true  
+            this.updateStatusAlertclose = true
           },2000);
-          this.refresh(this.currentState); 
+          this.refresh(this.currentState);
       },error=>{
         this.updateStatusAlertType = "danger";
         this.updateStatusAlertcontent = "Activation or suspension of the server failed.";
         this.updateStatusAlertclose = false;
         setTimeout(() => {
-          this.updateStatusAlertclose = true  
+          this.updateStatusAlertclose = true
         },2000);
-        this.refresh(this.currentState); 
+        this.refresh(this.currentState);
       }
     )
   }
@@ -122,8 +121,7 @@ export class CmdbListComponent implements OnInit {
       return;
     }
     this.currentState = state;
-    let pagenumber = Math.round((state.page.from + 1) / state.page.size) + 1;
-    this.getCMDBConfigdatas(pagenumber,state.page.size);
+    this.getCMDBConfigdatas(state.page.current,state.page.size);
   }
   getCMDBConfigdatas(currentPage,pageSize){
     this.loading = true;
@@ -159,7 +157,7 @@ export class CmdbListComponent implements OnInit {
     this.service.deleteDcimConfig(this.cmdbConfigId).subscribe(
       data=>{
         this.basic = false;
-        this.refresh(this.currentState); 
+        this.refresh(this.currentState);
       },error=>{
         this.clrAlertClosed = false;
     })
@@ -174,7 +172,7 @@ export class CmdbListComponent implements OnInit {
   onDelete(id){
     this.basic = true;
     this.cmdbConfigId = id;
-  
+
   }
   close(){
     this.alertclose = true;
@@ -186,14 +184,14 @@ export class CmdbListComponent implements OnInit {
         this.alertcontent = "The sync job has been scheduled.";
         this.alertclose = false;
         setTimeout(() => {
-          this.alertclose = true  
+          this.alertclose = true
         },2000);
       },error=>{
         this.alertType = "danger";
         this.alertcontent = "Failed to sync data for " +url;
         this.alertclose = false;
         setTimeout(() => {
-          this.alertclose = true  
+          this.alertclose = true
         },2000);
       }
     )
@@ -211,7 +209,7 @@ export class CmdbListComponent implements OnInit {
         this.cmdbAdapters.forEach(element => {
           this.adapterMap.set(element.subCategory,element);
         });
-        this.refresh(this.currentState); 
+        this.refresh(this.currentState);
       }
     )
   }

@@ -15,7 +15,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
   </div>
 </clr-alert>
 <clr-datagrid (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">
- 
+
   <clr-dg-column>Username</clr-dg-column>
   <clr-dg-column>Role Name</clr-dg-column>
   <clr-dg-column>Email</clr-dg-column>
@@ -31,7 +31,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-dg-cell>{{user.roleNames}}</clr-dg-cell>
         <clr-dg-cell>{{user.emailAddress}}</clr-dg-cell>
         <clr-dg-cell>{{user.createTime | date:"yyyy-MM-dd HH:mm:ss"}}</clr-dg-cell>
-        
+
   </clr-dg-row>
 
   <clr-dg-footer>

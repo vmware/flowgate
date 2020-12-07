@@ -16,7 +16,7 @@ import { ClrDatagridStateInterface } from '@clr/angular';
 export class DcimListComponent implements OnInit {
 
   constructor(private service:DcimService,private router: Router) { }
- 
+
   dcimConfigs = [];
   currentPage:number = 1;
   totalPage:number = 1;
@@ -39,7 +39,7 @@ export class DcimListComponent implements OnInit {
   updateStatusAlertclose:boolean = true;
   updateStatusAlertType:string = "";
   updateStatusAlertcontent:string = "";
-  
+
   //for integrationStatus alert message
   isStatusErrorMsgAlertClose:boolean=true;
   editStatusDcimId:string = "";
@@ -97,7 +97,7 @@ export class DcimListComponent implements OnInit {
         }
         this.updateStatusAlertclose = false;
         setTimeout(() => {
-          this.updateStatusAlertclose = true  
+          this.updateStatusAlertclose = true
         },2000);
         this.refresh(this.currentState);
       },error=>{
@@ -105,7 +105,7 @@ export class DcimListComponent implements OnInit {
         this.updateStatusAlertcontent = "Activation or suspension of the server failed.";
         this.updateStatusAlertclose = false;
         setTimeout(() => {
-          this.updateStatusAlertclose = true  
+          this.updateStatusAlertclose = true
         },2000);
         this.refresh(this.currentState);
       }
@@ -136,8 +136,7 @@ export class DcimListComponent implements OnInit {
       return;
     }
     this.currentState = state;
-    let pagenumber = Math.round((state.page.from + 1) / state.page.size) + 1;
-    this.getDcimConfigdatas(pagenumber,state.page.size);
+    this.getDcimConfigdatas(state.page.current,state.page.size);
   }
   getDcimConfigdatas(currentPage:number,pageSize:number){
     this.loading = true;
@@ -146,7 +145,7 @@ export class DcimListComponent implements OnInit {
       (data)=>{
         this.loading = false;
         this.dcimConfigs = data['content'];
-        this.dcimConfigs.forEach(element=>{   
+        this.dcimConfigs.forEach(element=>{
             this.checkStatus(element);
             if(element.type == 'OtherDCIM'){
               element.type = this.adapterMap.get(element.subCategory).displayName;
@@ -189,12 +188,12 @@ export class DcimListComponent implements OnInit {
   onDelete(id){
     this.basic = true;
     this.dcimConfigId = id;
-  
+
   }
   close(){
     this.alertclose = true;
   }
- 
+
   syncData(id:string,url:string){
     this.service.syncData(id).subscribe(
       (data)=>{
@@ -202,15 +201,15 @@ export class DcimListComponent implements OnInit {
         this.alertcontent = "The sync job has been scheduled.";
         this.alertclose = false;
         setTimeout(() => {
-          this.alertclose = true  
+          this.alertclose = true
         },2000);
-        
+
       },error=>{
         this.alertType = "danger";
         this.alertcontent = "Failed to sync data for " +url;
         this.alertclose = false;
         setTimeout(() => {
-          this.alertclose = true  
+          this.alertclose = true
         },2000);
       }
     )
@@ -228,7 +227,7 @@ export class DcimListComponent implements OnInit {
         this.dcimAdapters.forEach(element => {
           this.adapterMap.set(element.subCategory,element);
         });
-        this.refresh(this.currentState); 
+        this.refresh(this.currentState);
       }
     )
   }
