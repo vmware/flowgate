@@ -55,5 +55,4 @@ export class AssetTempModule {
   unit:string;
   validNumMin:any;
   validNumMax:any;
-  statusDisplay:any;
  }

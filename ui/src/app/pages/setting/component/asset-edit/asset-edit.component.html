@@ -19,7 +19,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
   </clr-select-container>
 
-  <clr-select-container>
+  <clr-select-container *ngIf="editAssetForm.get('category').value =='Sensors' || editAssetForm.get('category').value =='Server'">
       <label>SubCategory</label>
       <select clrSelect name="options" formControlName="subCategory" style="width: 220px;">
       <option *ngFor="let item of suballcategory[editAssetForm.get('category').value]" [value]="item">{{item}}</option>
@@ -42,7 +42,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 
   <clr-select-container>
     <label>Status</label>
-    <select clrSelect name="statusDisplay" formControlName="statusDisplay" style="width: 220px;">
+    <select clrSelect name="status" formControlName="status" style="width: 220px;">
       <option value="Planned">Planned</option>
       <option value="Active">Active</option>
       <option value="Recycled">Recycled</option>
@@ -73,7 +73,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <label>Tag</label>
     <input clrControl placeholder="Tag" formControlName="tag" style="width: 220px;"/>
   </clr-control-container>
-  <clr-control-container *ngIf="editAssetForm.get('category').value !='Cabinet' ">
+  <clr-control-container>
     <label>CabinetName</label>
     <input clrControl placeholder="CabinetName" formControlName="cabinetName" style="width: 220px;"/>
   </clr-control-container>
@@ -123,35 +123,35 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-stack-label>Location</clr-stack-label>
         <clr-stack-block>
           <clr-control-container style="margin-left: -73%;">
-            <label>Region</label>
+            <label class="locationTitleSpacing">Region</label>
             <input clrControl placeholder="Region" formControlName="region" style="width: 220px;"/>
           </clr-control-container>
           <clr-control-container style="margin-left: -73%;">
-            <label>Country</label>
+            <label class="locationTitleSpacing">Country</label>
             <input clrControl placeholder="Country" formControlName="country" style="width: 220px;"/>
           </clr-control-container>
           <clr-control-container style="margin-left: -73%;">
-            <label>City</label>
+            <label class="locationTitleSpacing">City</label>
             <input clrControl placeholder="City" formControlName="city" style="width: 220px;"/>
           </clr-control-container>
           <clr-control-container style="margin-left: -73%;">
-            <label>Building</label>
+            <label class="locationTitleSpacing">Building</label>
             <input clrControl placeholder="Building" formControlName="building" style="width: 220px;"/>
           </clr-control-container>
           <clr-control-container style="margin-left: -73%;">
-            <label>Floor</label>
+            <label class="locationTitleSpacing">Floor</label>
             <input clrControl placeholder="Floor" formControlName="floor" style="width: 220px;"/>
           </clr-control-container>
           <clr-control-container style="margin-left: -73%;">
-            <label>Room</label>
+            <label class="locationTitleSpacing">Room</label>
             <input clrControl placeholder="Room" formControlName="room" style="width: 220px;"/>
           </clr-control-container>
           <clr-control-container style="margin-left: -73%;">
-            <label>Row</label>
+            <label class="locationTitleSpacing">Row</label>
             <input clrControl placeholder="Row" formControlName="row" style="width: 220px;"/>
           </clr-control-container>
           <clr-control-container style="margin-left: -73%;">
-            <label>Col</label>
+            <label class="locationTitleSpacing">Col</label>
             <input clrControl placeholder="Col" formControlName="col" style="width: 220px;"/>
           </clr-control-container>
         </clr-stack-block>

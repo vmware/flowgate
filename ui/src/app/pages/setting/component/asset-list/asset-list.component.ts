@@ -61,7 +61,7 @@ export class AssetListComponent implements OnInit {
     this.service.deleteAssetById(this.assetId).subscribe(
       (data)=>{
         this.basic = false;
-        this.ngOnInit();
+        this.refresh(this.currentState)
     })
   }
   onClose(){

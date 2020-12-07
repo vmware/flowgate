@@ -88,8 +88,6 @@ export class AssetEditComponent implements OnInit {
       validNumMax: ['', [
       ]],
       status:  ['', [
-      ]],
-      statusDisplay: ['', [
         Validators.required
       ]],
       assetRealtimeDataSpec: ['', [
@@ -125,8 +123,28 @@ export class AssetEditComponent implements OnInit {
   changeType(){
     let category:string = this.editAssetForm.get('category').value;
     if(category == 'Sensors'){
-      this.editAssetForm.setControl("unit",new FormControl('',Validators.required));
+      this.editAssetForm.controls["unit"].setValidators([Validators.required]);
+      this.editAssetForm.controls["mountingSide"].setValidators([Validators.required]);
+      this.editAssetForm.controls["subCategory"].setValidators([Validators.required]);
     }
+    if(category == 'Server'){
+      this.editAssetForm.controls["unit"].clearValidators();
+      this.editAssetForm.controls["mountingSide"].setValidators([Validators.required]);
+      this.editAssetForm.controls["subCategory"].setValidators([Validators.required]);
+    }
+    if(category == 'Cabinet'){
+      this.editAssetForm.controls["unit"].clearValidators();
+      this.editAssetForm.controls["mountingSide"].clearValidators();
+      this.editAssetForm.controls["subCategory"].clearValidators();
+    }
+    if(category == 'PDU' || category == 'Networks' || category == 'UPS' || category == 'Chassis'){
+      this.editAssetForm.controls["unit"].clearValidators();
+      this.editAssetForm.controls["mountingSide"].setValidators([Validators.required]);
+      this.editAssetForm.controls["subCategory"].clearValidators();
+    }
+    this.editAssetForm.controls['unit'].updateValueAndValidity();
+    this.editAssetForm.controls['mountingSide'].updateValueAndValidity();
+    this.editAssetForm.controls['subCategory'].updateValueAndValidity();
   }
   ngOnInit() {
     this.asset.id = this.activedRoute.snapshot.params['id'];
@@ -137,17 +155,14 @@ export class AssetEditComponent implements OnInit {
           assetTemp.unit = "";
           assetTemp.validNumMax = "";
           assetTemp.validNumMin = "";
-          assetTemp.statusDisplay = "";
           if(assetTemp.assetRealtimeDataSpec != null){
             assetTemp.unit = assetTemp.assetRealtimeDataSpec.unit == null ? "": assetTemp.assetRealtimeDataSpec.unit;
             assetTemp.validNumMax = assetTemp.assetRealtimeDataSpec.validNumMax == null ? "": assetTemp.assetRealtimeDataSpec.validNumMax;
             assetTemp.validNumMin = assetTemp.assetRealtimeDataSpec.validNumMin == null ? "": assetTemp.assetRealtimeDataSpec.validNumMin;
           }
-          if(assetTemp.status != null){
-            assetTemp.statusDisplay = assetTemp.status.status == null ? "": assetTemp.status.status;
-          }
-          this.assetjsondata = this.jsonFormater(JSON.stringify(this.asset, this.replacer));
           this.editAssetForm.setValue(assetTemp);
+          this.editAssetForm.get("status").setValue(assetTemp.status.status);
+          this.changeType();
         }
       )
     }
@@ -169,13 +184,24 @@ export class AssetEditComponent implements OnInit {
       if (key=="unit") return undefined;
       else if (key=="validNumMin") return undefined;
       else if (key=="validNumMax") return undefined;
-      else if (key=="statusDisplay") return undefined;
       else return value;
   }
 
   advanceCheckbox(){
     this.advance = !this.advance;
     this.baseconfig = !this.baseconfig;
+    let asset:AssetModule = this.editAssetForm.value;
+    if(asset.category == 'Sensors'){
+      let realtimespec:AssetRealtimeDataSpecModule = new AssetRealtimeDataSpecModule();
+      realtimespec.unit = this.editAssetForm.get('unit').value;
+      realtimespec.validNumMax = this.editAssetForm.get('validNumMax').value;
+      realtimespec.validNumMin = this.editAssetForm.get('validNumMin').value;
+      asset.assetRealtimeDataSpec = realtimespec;
+    }
+    let assetStatus:AssetStatusModule = new AssetStatusModule();
+    assetStatus.status = this.editAssetForm.get('status').value;
+    asset.status = assetStatus
+    this.assetjsondata = this.jsonFormater(JSON.stringify(asset, this.replacer));
   }
 
   checkJsonFormat(){
@@ -211,13 +237,40 @@ export class AssetEditComponent implements OnInit {
         realtimespec.validNumMin = this.editAssetForm.get('validNumMin').value;
         asset.assetRealtimeDataSpec = realtimespec;
       }
+
+      if(asset.category == 'Cabinet'){
+        asset.cabinetAssetNumber = this.editAssetForm.get('cabinetAssetNumber').value;
+        asset.capacity = this.editAssetForm.get('capacity').value;
+      }else{
+        asset.mountingSide = this.editAssetForm.get('mountingSide').value;
+        asset.cabinetUnitPosition = this.editAssetForm.get('cabinetUnitPosition').value;
+      }
+      if(asset.category == 'Server'){
+        asset.subCategory = this.editAssetForm.get('subCategory').value;
+      }
+      
+      asset.cabinetName = this.editAssetForm.get('cabinetName').value;
+      asset.assetName = this.editAssetForm.get('assetName').value;
+      asset.assetNumber = this.editAssetForm.get('assetNumber').value;
+      asset.manufacturer = this.editAssetForm.get('manufacturer').value;
+      asset.serialnumber = this.editAssetForm.get('serialnumber').value;
+      asset.model = this.editAssetForm.get('model').value;
+      asset.tag = this.editAssetForm.get('tag').value;
+      asset.region = this.editAssetForm.get('region').value;
+      asset.country = this.editAssetForm.get('country').value;
+      asset.city = this.editAssetForm.get('city').value;
+      asset.building = this.editAssetForm.get('building').value;
+      asset.floor = this.editAssetForm.get('floor').value;
+      asset.room = this.editAssetForm.get('room').value;
+      asset.row = this.editAssetForm.get('row').value;
+      asset.col = this.editAssetForm.get('col').value;
+
       this.editassetloading = true;
       asset.assetSource = "flowgate";
       let assetStatus:AssetStatusModule = new AssetStatusModule();
-      assetStatus.status = this.editAssetForm.get('statusDisplay').value;
+      assetStatus.status = this.editAssetForm.get('status').value;
       asset.status = assetStatus
     }
-
     this.service.updateAssetsByID(asset).subscribe(
       (data)=>{
         this.editassetloading = false;
