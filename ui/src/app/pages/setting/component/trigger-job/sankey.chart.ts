@@ -35,7 +35,7 @@ declare var d3;
                 <br\>\
                 <div class="row father_width" #target>\
                 </div>\
-                <div id="Legend" class="row">\
+                <div id="Legend">\
                     <span class="label label-info" style="border:0px; color:white;background:#006a91;width: 75px;">vCenter</span>\
                     <span class="label label-success" style="border:0px; color:white;background:#bbcdd6;width: 75px;">Host</span>\
                     <span class="label label-warning" style="border:0px; color:white;background:#ea924c;width: 75px;">PDU</span>\
