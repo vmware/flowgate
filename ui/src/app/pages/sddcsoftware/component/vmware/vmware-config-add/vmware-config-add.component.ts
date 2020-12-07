@@ -65,14 +65,10 @@ export class VmwareConfigAddComponent implements OnInit {
             this.verify = true;
             this.ignoreCertificatesModals = true;
             this.tip = error.error.message+". Are you sure you ignore the certificate check?"
-          }else if(error.status == 400 && error.error.message == "UnknownHostException"){
+          }else if(error.status == 400){
             this.loading = false;
             this.operatingModals = true;
-            this.tip = error.error.message+". Please check your serverIp. ";
-          }else if(error.status == 401){
-            this.loading = false;
-            this.operatingModals = true;
-            this.tip = error.error.message+". Please check your userName or password. ";
+            this.tip = error.error.message;
           }else{
             this.loading = false;
             this.operatingModals = true;
