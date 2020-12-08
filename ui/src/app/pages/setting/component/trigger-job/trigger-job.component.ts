@@ -309,12 +309,14 @@ export class TriggerJobComponent implements OnInit {
       return;
     }
     this.currentState = state;
+    this.loading = true;
     this.getHostNameAndIPMappings(state.page.size,state.page.current);
   }
 
   getHostNameAndIPMappings(pagesize:number,pagenumber:number){
     this.service.getHostNameAndIPMapping(pagenumber,pagesize,this.searchIP).subscribe(
       data=>{
+        this.selectedHostNameAndIPMappings = [];
         this.hostNameAndIPMappings = [];
         this.loading = false;
         this.hostNameAndIPMappings = data['content'];
@@ -345,6 +347,7 @@ export class TriggerJobComponent implements OnInit {
   }
   onAdd(){
     this.AddHostNameAndIPMapping = true;
+    this.saveMappingErrorShow = false;
     this.hostNameAndIPMapping = new HostNameAndIpmappingModule();
     setTimeout(() => {
       const input = document.querySelector('#hostname');
@@ -367,8 +370,11 @@ export class TriggerJobComponent implements OnInit {
   }
   onEdit(){
     this.editHostNameAndIPMapping = true;
-    this.editAssetIPAndNameMappingForm.setValue(this.selectedHostNameAndIPMappings[0])
-    this.selectedAssetName = this.hostNameAndIPMapping.assetname;
+    this.saveMappingErrorShow = false;
+    this.editAssetIPAndNameMappingForm.get("id").setValue(this.selectedHostNameAndIPMappings[0].id);
+    this.editAssetIPAndNameMappingForm.get("ip").setValue(this.selectedHostNameAndIPMappings[0].ip);
+    this.editAssetIPAndNameMappingForm.get("assetname").setValue(this.selectedHostNameAndIPMappings[0].assetname);
+    this.selectedAssetName = this.selectedHostNameAndIPMappings[0].assetname;
     setTimeout(() => {
       const input = document.querySelector('#hostnameedit');
       const input$ = fromEvent(input, 'input');
@@ -389,22 +395,28 @@ export class TriggerJobComponent implements OnInit {
       }, 100);
   }
   selectItem(item:any){
-    this.addAssetIPAndNameMappingForm.get('assetname').setValue(item);
     this.selectedAssetName = item;
   }
   selectItemForEdit(item:any){
-    this.editAssetIPAndNameMappingForm.get('assetname').setValue(item);
+    this.selectedAssetName = item;
   }
   hidden:boolean = true;
-  focus(){
+  focusAdd(){
     this.hidden = false;
-    this.hostNameAndIPMapping.assetname = this.selectedAssetName;
-    
   }
-  blur(){
+  focusEdit(){
+    this.hidden = false;
+  }
+  blurAdd(){
     setTimeout(() => {
     this.hidden = true;
-    this.hostNameAndIPMapping.assetname = this.selectedAssetName;
+    this.addAssetIPAndNameMappingForm.get("assetname").setValue(this.selectedAssetName);
+    }, 150);
+  }
+  blurEdit(){
+    setTimeout(() => {
+    this.hidden = true;
+    this.editAssetIPAndNameMappingForm.get("assetname").setValue(this.selectedAssetName);
     }, 150);
   }
   searchAssetNameloading:boolean = false;
@@ -549,8 +561,7 @@ export class TriggerJobComponent implements OnInit {
       this.uploadError = true;
       this.uploadErrorMsg = "Upload failure" + response;
     }else{
-      this.pageSize = 10;
-      this.pageNumber = 1;
+      this.refresh(this.currentState);
       this.searchIP = null;
       this.failureMappings = JSON.parse(response);
       if(this.failureMappings.length == 0){
