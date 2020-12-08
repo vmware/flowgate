@@ -191,9 +191,9 @@ export class TriggerJobComponent implements OnInit {
         this.errorShow = false;
         this.errorMsg = "";
         this.getExpiredTimeRange();
-      },error=>{
+      },(error:HttpErrorResponse)=>{
         this.errorShow = true;
-        this.errorMsg = error.json().message;
+        this.errorMsg = error.message;
       }
     )
   }
