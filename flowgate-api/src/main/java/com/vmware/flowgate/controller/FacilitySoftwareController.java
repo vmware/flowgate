@@ -7,12 +7,11 @@ package com.vmware.flowgate.controller;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -187,11 +186,13 @@ public class FacilitySoftwareController {
       old.setName(config.getName());
       old.setDescription(config.getDescription());
       old.setUserName(config.getUserName());
-      old.setPassword(config.getPassword());
+      if (StringUtils.isNotBlank(config.getPassword())) {
+         old.setPassword(config.getPassword());
+      }
       old.setVerifyCert(config.isVerifyCert());
       old.setAdvanceSetting(config.getAdvanceSetting());
       old.setIntegrationStatus(config.getIntegrationStatus());
-      serverValidationService.validateFacilityServer(config);
+      serverValidationService.validateFacilityServer(old);
       encryptServerPassword(old);
       repository.save(old);
    }
