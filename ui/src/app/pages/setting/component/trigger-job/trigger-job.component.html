@@ -286,6 +286,9 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <button [clrLoading]="serverloading" class="btn btn-info-outline "  (click)="getunmappedservers()" style="margin-top:10px;" >
                             Pull Unmapped Servers       
                         </button>
+                        <div *ngIf="unmappedservershow" style="color: crimson">
+                            {{unmappedServerErrorMsg}}
+                        </div>
                         <div class="clr-row">
                             <div class="clr-col-12">
                                 <clr-datagrid *ngIf="unmappedservershow">
