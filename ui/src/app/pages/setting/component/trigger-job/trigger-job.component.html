@@ -681,7 +681,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
            </clr-control-container>
             <clr-control-container>
                <label>Name</label>
-               <input clrControl placeholder="Name" id="hostname" (focus)="focus()"  (blur)="blur()" formControlName="assetname" style="width: 220px;"/>
+               <input clrControl placeholder="Name" id="hostname" (focus)="focusAdd()"  (blur)="blurAdd()" formControlName="assetname" style="width: 220px;"/>
                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
            </clr-control-container>
            <div style="width: 220px; background-color: white;position: absolute; top: 10rem;left: 19.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px #b2b3b3; border-style: solid;" [hidden]="hidden">
@@ -724,7 +724,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             </clr-control-container>
              <clr-control-container>
                 <label>Name</label>
-                <input clrControl placeholder="Name" id="hostnameedit" (focus)="focus()"  (blur)="blur()" formControlName="assetname" style="width: 220px;"/>
+                <input clrControl placeholder="Name" id="hostnameedit" (focus)="focusEdit()"  (blur)="blurEdit()" formControlName="assetname" style="width: 220px;"/>
                 <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
             </clr-control-container>
             <div style="width: 220px; background-color: white;position: absolute; top: 10rem;left: 19.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px #b2b3b3; border-style: solid;" [hidden]="hidden">
