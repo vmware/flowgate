@@ -93,6 +93,7 @@ export class TriggerJobComponent implements OnInit {
   userFormRef:NgForm;
   errorShow:boolean = false;
   errorMsg:string = "";
+  unmappedServerErrorMsg:string = "";
   flowgateSummary:SummaryModule = new SummaryModule();
   
   close(){
@@ -182,6 +183,7 @@ export class TriggerJobComponent implements OnInit {
     this.validExpiredTime = false;
     this.errorShow = false;
     this.errorMsg = "";
+    this.unmappedServerErrorMsg = "";
   }
   save(){
     let tosaveTime = this.toUpdateExpiredTimeRange*24*3600*1000;
@@ -245,6 +247,10 @@ export class TriggerJobComponent implements OnInit {
         (data:string[])=>{
           this.servers = data;
           this.serverloading = false;
+          this.unmappedServerErrorMsg = "";
+        },(error:HttpErrorResponse)=>{
+          this.unmappedservershow = true;
+          this.unmappedServerErrorMsg = error.message;
         }
       )
     },2000);
