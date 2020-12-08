@@ -28,11 +28,6 @@ export class AuthenticationInterceptor implements HttpInterceptor {
         catchError((err: HttpErrorResponse) => this.handleDataNoJump(err))
       );
     }
-    if(req.url.indexOf('/v1/facilitysoftware') != -1){
-      return next.handle(req).pipe(
-        catchError((err: HttpErrorResponse) => this.handleDataNoJump(err))
-      );
-    }
 
     return next.handle(req).pipe(
       catchError((err: HttpErrorResponse) => this.handleData(err))

@@ -60,8 +60,8 @@ public class ServerValidationService {
          VRopsAuth ss = createVRopsAuth(server);
          ss.getClient().apiVersionsClient().getCurrentVersion();
       } catch (AuthException e) {
-         throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
-               "Invalid user name or password", e.getCause());
+         throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+               "Invalid user name or password.Please check your userName or password.", e.getCause());
       } catch (Exception e3) {
          if(e3.getCause() instanceof UndeclaredThrowableException) {
             UndeclaredThrowableException e = (UndeclaredThrowableException)e3.getCause();
@@ -93,22 +93,22 @@ public class ServerValidationService {
          case Nlyte:
             NlyteAuth nlyteAuth = createNlyteAuth();
             if (!nlyteAuth.auth(config)) {
-               throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
-                     "Invalid user name or password", null);
+               throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                     "Invalid user name or password.Please check your userName or password.", null);
             }
             break;
          case PowerIQ:
             PowerIQAuth powerIQAuth = createPowerIQAuth();
             if (!powerIQAuth.auth(config)) {
-               throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
-                     "Invalid user name or password", null);
+               throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                     "Invalid user name or password.Please check your userName or password.", null);
             }
             break;
          case InfoBlox:
             InfobloxAuth infobloxAuth = createInfobloxAuth();
             if (!infobloxAuth.auth(config)) {
-               throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
-                     "Invalid user name or password", null);
+               throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                     "Invalid user name or password.Please check your userName or password.", null);
             }
             break;
          case Device42:
@@ -128,12 +128,12 @@ public class ServerValidationService {
                   "Certificate verification error", e.getCause(),
                   WormholeRequestException.InvalidSSLCertificateCode);
          } else if (e.getCause() instanceof UnknownHostException) {
-            throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host", e.getCause(),
+            throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host.Please check your serverIp.", e.getCause(),
                   WormholeRequestException.UnknownHostCode);
          }
          throw new WormholeRequestException(HttpStatus.BAD_REQUEST, e.getMessage(), e.getCause());
       } catch (UnknownHostException e) {
-         throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host", e.getCause(),
+         throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host.Please check your serverIp.", e.getCause(),
                WormholeRequestException.UnknownHostCode);
       } catch (SSLException | KeyManagementException | CertificateException
             | NoSuchAlgorithmException | KeyStoreException e) {
@@ -142,8 +142,8 @@ public class ServerValidationService {
                WormholeRequestException.InvalidSSLCertificateCode);
       } catch (HttpClientErrorException e) {
          if (HttpStatus.UNAUTHORIZED.equals(e.getStatusCode())) {
-            throw new WormholeRequestException(HttpStatus.UNAUTHORIZED,
-                  "Invalid user name or password", e.getCause());
+            throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                  "Invalid user name or password.Please check your userName or password.", e.getCause());
          } else if (HttpStatus.FORBIDDEN.equals(e.getStatusCode())) {
             throw new WormholeRequestException(HttpStatus.FORBIDDEN, "403 Forbidden", e.getCause());
          }
