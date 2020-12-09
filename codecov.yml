@@ -10,46 +10,55 @@ coverage:
     project:
       default: false
       aggregator:
+        threshold: 0%
         flags:
           - aggregator
         if_not_found: success
         if_ci_failed: error
       infoblox:
+        threshold: 0%
         flags:
           - infoblox
         if_not_found: success
         if_ci_failed: error
       api:
+        threshold: 0%
         flags:
           - api
         if_not_found: success
         if_ci_failed: error
       labsdb:
+        threshold: 0%
         flags:
           - labsdb
         if_not_found: success
         if_ci_failed: error
       management:
+        threshold: 0%
         flags:
           - management
         if_not_found: success
         if_ci_failed: error
       nlyte:
+        threshold: 0%
         flags:
           - nlyte
         if_not_found: success
         if_ci_failed: error
       poweriq:
+        threshold: 0%
         flags:
           - poweriq
         if_not_found: success
         if_ci_failed: error
       vc:
+        threshold: 0%
         flags:
           - vc
         if_not_found: success
         if_ci_failed: error
       vro:
+        threshold: 0%
         flags:
           - vro
         if_not_found: success
@@ -109,3 +118,4 @@ comment:
   layout: "reach, diff, flags, files"
   behavior: default
   require_changes: no
+  
