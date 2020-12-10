@@ -18,20 +18,14 @@ public class VRopsAuth {
 
    public VRopsAuth(SDDCSoftwareConfig config) {
       String url = String.format("https://%s/suite-api", config.getServerURL());
-
-      try {
-         this.client = ClientConfig.builder()
-               .useJson().serverUrl(url).verify(String.valueOf(config.isVerifyCert()))
-               .ignoreHostName(!config.isVerifyCert()).useInternalApis(false).build().newClient();
-         UsernamePassword up = new UsernamePassword(config.getUserName(), config.getPassword());
-         AuthToken token = client.userAndAuthManagementClient().acquireToken(up);
-         client = ClientConfig.builder().tokenAuth(token.getToken()).useJson().serverUrl(url)
-               .verify(String.valueOf(config.isVerifyCert())).ignoreHostName(!config.isVerifyCert())
-               .useInternalApis(false).build().newClient();
-      } catch (Exception e) {
-         e.printStackTrace();
-         throw new RuntimeException(e);
-      }
+      this.client = ClientConfig.builder()
+            .useJson().serverUrl(url).verify(String.valueOf(config.isVerifyCert()))
+            .ignoreHostName(!config.isVerifyCert()).useInternalApis(false).build().newClient();
+      UsernamePassword up = new UsernamePassword(config.getUserName(), config.getPassword());
+      AuthToken token = client.userAndAuthManagementClient().acquireToken(up);
+      client = ClientConfig.builder().tokenAuth(token.getToken()).useJson().serverUrl(url)
+            .verify(String.valueOf(config.isVerifyCert())).ignoreHostName(!config.isVerifyCert())
+            .useInternalApis(false).build().newClient();
    }
 
    public Client getClient() {

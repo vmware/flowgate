@@ -59,26 +59,21 @@ public class ServerValidationService {
       try {
          VRopsAuth ss = createVRopsAuth(server);
          ss.getClient().apiVersionsClient().getCurrentVersion();
-      } catch (AuthException e) {
+      } catch (AuthException authException) {
          throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-               "Invalid user name or password.Please check your userName or password.", e.getCause());
-      } catch (Exception e3) {
-         if(e3.getCause() instanceof UndeclaredThrowableException) {
-            UndeclaredThrowableException e = (UndeclaredThrowableException)e3.getCause();
-            if (e.getUndeclaredThrowable().getCause() instanceof ConnectException) {
+               "Invalid user name or password.", authException.getCause());
+      } catch (Exception exception) {
+         if(exception.getCause() instanceof UndeclaredThrowableException) {
+            UndeclaredThrowableException undeclaredThrowableException = (UndeclaredThrowableException)exception.getCause();
+            if (undeclaredThrowableException.getUndeclaredThrowable().getCause() instanceof ConnectException) {
                throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                     "Failed to connect to server", e.getCause());
-            }else if(e.getUndeclaredThrowable() instanceof SSLException) {
+                     "Failed to connect to server", undeclaredThrowableException.getCause());
+            }else if(undeclaredThrowableException.getUndeclaredThrowable() instanceof SSLException) {
                throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                     "Certificate verification error", e.getCause());
-            }else {
-               throw new WormholeRequestException("This is a Exception Message :" + e.getMessage(),
-                     e.getCause());
+                     "Certificate verification error", undeclaredThrowableException.getCause());
             }
-         }else {
-            throw new WormholeRequestException("This is a Exception Message :" + e3.getMessage(),
-                  e3.getCause());
          }
+         throw new WormholeRequestException("Internal error",exception.getCause());
       }
    }
 
@@ -94,21 +89,21 @@ public class ServerValidationService {
             NlyteAuth nlyteAuth = createNlyteAuth();
             if (!nlyteAuth.auth(config)) {
                throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                     "Invalid user name or password.Please check your userName or password.", null);
+                     "Invalid user name or password.", null);
             }
             break;
          case PowerIQ:
             PowerIQAuth powerIQAuth = createPowerIQAuth();
             if (!powerIQAuth.auth(config)) {
                throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                     "Invalid user name or password.Please check your userName or password.", null);
+                     "Invalid user name or password.", null);
             }
             break;
          case InfoBlox:
             InfobloxAuth infobloxAuth = createInfobloxAuth();
             if (!infobloxAuth.auth(config)) {
                throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                     "Invalid user name or password.Please check your userName or password.", null);
+                     "Invalid user name or password.", null);
             }
             break;
          case Device42:
@@ -143,7 +138,7 @@ public class ServerValidationService {
       } catch (HttpClientErrorException e) {
          if (HttpStatus.UNAUTHORIZED.equals(e.getStatusCode())) {
             throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                  "Invalid user name or password.Please check your userName or password.", e.getCause());
+                  "Invalid user name or password.", e.getCause());
          } else if (HttpStatus.FORBIDDEN.equals(e.getStatusCode())) {
             throw new WormholeRequestException(HttpStatus.FORBIDDEN, "403 Forbidden", e.getCause());
          }
