@@ -68,7 +68,7 @@ export class CmdbAddComponent implements OnInit {
       this.isInfoblox = true;
     }
   }
-
+  predefinedType:string[] = ['InfoBlox','Labsdb'];
   save(){
       this.read = "readonly";
       this.loading = true;
@@ -78,7 +78,9 @@ export class CmdbAddComponent implements OnInit {
       }
       let adapter:FacilityAdapterModule = this.adapterMap.get(this.addCMDBForm.get('type').value);
       this.cmdbConfig.type = adapter.type;
-      this.cmdbConfig.subCategory = adapter.subCategory;
+      if(this.predefinedType.indexOf(adapter.type) == -1){
+        this.cmdbConfig.subCategory = adapter.subCategory;
+      }
       this.service.AddDcimConfig(this.cmdbConfig).subscribe(
         (data)=>{
           this.loading = false;
