@@ -155,6 +155,7 @@ export class CmdbEditComponent implements OnInit {
   seclectAdapter:FacilityAdapterModule = new FacilityAdapterModule();
   cmdbAdapters:FacilityAdapterModule[] = [];
   adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
+  predefinedType:string[] = ['InfoBlox','Labsdb'];
   findAllAdapters(){
     this.service.findAllFacilityAdapters().subscribe(
       (data:FacilityAdapterModule[])=>{
@@ -181,7 +182,9 @@ export class CmdbEditComponent implements OnInit {
         forkJoin(reqList).pipe(map((data)=>data)).subscribe((res)=>{
           res.forEach((element:FacilityModule) => {
             this.editCMDBForm.setValue(element);
-            this.editCMDBForm.get('type').setValue(element.subCategory);
+            if(this.predefinedType.indexOf(element.type) == -1){
+              this.editCMDBForm.get('type').setValue(element.subCategory);
+            }
             let verifyCert:boolean = this.editCMDBForm.get('verifyCert').value;
             if(verifyCert){
               this.editCMDBForm.get('verifyCert').setValue('true');

@@ -136,6 +136,7 @@ export class DcimEditComponent implements OnInit {
   seclectAdapter:FacilityAdapterModule = new FacilityAdapterModule();
   dcimAdapters:FacilityAdapterModule[] = [];
   adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
+  predefinedType:string[] = ['Nlyte','PowerIQ'];
   findAllAdapters(){
     this.service.findAllFacilityAdapters().subscribe(
       (data:FacilityAdapterModule[])=>{
@@ -164,7 +165,9 @@ export class DcimEditComponent implements OnInit {
           res.forEach((element:FacilityModule) => {
             this.dcimConfig.advanceSetting = element.advanceSetting;
             this.editDCIMForm.setValue(element);
-            this.editDCIMForm.get('type').setValue(element.subCategory);
+            if(this.predefinedType.indexOf(element.type) == -1){
+              this.editDCIMForm.get('type').setValue(element.subCategory);
+            }
             let verifyCert:boolean = this.editDCIMForm.get('verifyCert').value;
             if(verifyCert){
               this.editDCIMForm.get('verifyCert').setValue('true');

@@ -53,7 +53,7 @@ export class DcimAddComponent implements OnInit {
   read = "";/** This property is to change the read-only attribute of the password input box*/
   advanceSetting:string = "";
   seclectAdapter:FacilityAdapterModule = new FacilityAdapterModule();
-  
+  predefinedType:string[] = ['Nlyte','PowerIQ'];
   changetype(){
     
     let adapter:FacilityAdapterModule = this.adapterMap.get(this.addDCIMForm.get('type').value);
@@ -74,8 +74,9 @@ export class DcimAddComponent implements OnInit {
       this.dcimConfig =this.addDCIMForm.value;
       let adapter:FacilityAdapterModule = this.adapterMap.get(this.addDCIMForm.get('type').value);
       this.dcimConfig.type = adapter.type;
-      this.dcimConfig.subCategory = adapter.subCategory;
-
+      if(this.predefinedType.indexOf(adapter.type) == -1){
+        this.dcimConfig.subCategory = adapter.subCategory;
+      }
       this.dcimConfig.advanceSetting = advanceSetting;
       this.service.AddDcimConfig(this.dcimConfig).subscribe(
         (data)=>{
