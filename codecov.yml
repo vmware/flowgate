@@ -1,4 +1,6 @@
 codecov:
+  branch: updateclarity4
+  strict_yaml_branch: updateclarity4
   require_ci_to_pass: yes
 
 coverage:
