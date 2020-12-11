@@ -5,5 +5,5 @@
 package com.vmware.flowgate.common;
 
 public enum RealtimeDataUnit {
-   Volts, Amps, KW, Celsius, Fahrenheit, Percent;
+   Volts, Amps, KW, Celsius, Fahrenheit, Percent, Mhz, KB, MB, KBps;
 }

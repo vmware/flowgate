@@ -23,6 +23,7 @@ import com.vmware.vim.binding.impl.vmodl.TypeNameImpl;
 import com.vmware.vim.binding.vim.ClusterComputeResource;
 import com.vmware.vim.binding.vim.CustomFieldsManager;
 import com.vmware.vim.binding.vim.HostSystem;
+import com.vmware.vim.binding.vim.PerformanceManager;
 import com.vmware.vim.binding.vim.ServiceInstance;
 import com.vmware.vim.binding.vim.ServiceInstanceContent;
 import com.vmware.vim.binding.vim.SessionManager;
@@ -69,6 +70,7 @@ public class VsphereClient implements AutoCloseable, Closeable {
    private String vcUUID;
    private PropertyCollector propertyCollector;
    private ViewManager viewManager;
+   private PerformanceManager performanceManager;
 
    private static final String https_sdk_tunnel_8089 = "https://sdkTunnel:8089";
 
@@ -205,6 +207,13 @@ public class VsphereClient implements AutoCloseable, Closeable {
       if (null == client)
          throw new NullPointerException(NO_CONNECTION_TO_V_SPHERE);
       return sic;
+   }
+
+   public PerformanceManager getPerformanceManager() {
+      if(performanceManager == null) {
+         performanceManager = client.createStub(PerformanceManager.class, sic.getPerfManager());
+      }
+      return performanceManager;
    }
 
    public PropertyCollector getPropertyCollector() {
