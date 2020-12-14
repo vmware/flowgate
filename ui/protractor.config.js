@@ -4,7 +4,7 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-const { SpecReporter } = require('jasmine-spec-reporter');
+const { SpecReporter, StacktraceOption } = require('jasmine-spec-reporter');
 
 exports.config = {
     allScriptsTimeout: 11000,
@@ -26,6 +26,6 @@ exports.config = {
         require('ts-node').register({
             project: 'e2e/tsconfig.json'
         });
-        jasmine.getEnv().addReporter(new SpecReporter({ spec: { displayStacktrace: true } }));
+        jasmine.getEnv().addReporter(new SpecReporter({ spec: { displayStacktrace: StacktraceOption.NONE } }));
     }
 };
