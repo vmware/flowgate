@@ -88,7 +88,6 @@ export class DcimEditComponent implements OnInit {
       let advanceSetting:any = this.dcimConfig.advanceSetting;
       this.dcimConfig =this.editDCIMForm.value;
       let adapter:FacilityAdapterModule = this.adapterMap.get(this.editDCIMForm.get('type').value);
-      this.dcimConfig.type = adapter.type;
       this.dcimConfig.subCategory = adapter.subCategory;
       this.dcimConfig.advanceSetting = advanceSetting;
       this.service.updateFacility(this.dcimConfig).subscribe(

@@ -96,17 +96,14 @@ export class CmdbEditComponent implements OnInit {
   save(){
       this.read = "readonly";
       this.loading = true;
-      if(this.isInfoblox && this.editCMDBForm.get('advanceSetting').value != null){
-        if(this.enableProxySearch){
+      if (this.isInfoblox) {
+        if (this.enableProxySearch) {
           this.editCMDBForm.get('advanceSetting').setValue(this.advanceSetting);
-        }else{
-          this.advanceSetting.INFOBLOX_PROXY_SEARCH = "";
-          this.editCMDBForm.get('advanceSetting').setValue(this.advanceSetting);
+        } else {
+          this.editCMDBForm.get('advanceSetting').setValue(null);
         }
       }
-      let adapter:FacilityAdapterModule = this.adapterMap.get(this.editCMDBForm.get('type').value);
       this.cmdbConfig = this.editCMDBForm.value;
-      this.cmdbConfig.type = adapter.type;
 
       this.service.updateFacility(this.cmdbConfig).subscribe(
         (data)=>{
