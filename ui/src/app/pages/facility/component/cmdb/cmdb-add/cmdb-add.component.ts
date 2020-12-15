@@ -90,12 +90,10 @@ export class CmdbAddComponent implements OnInit {
           if(error.status == 400 && error.error.message == "Invalid SSL Certificate"){
             this.ignoreCertificatesModals = true;
             this.tip = error.error.message+". Are you sure you ignore the certificate check?"
-          }else if(error.status == 400 && error.error.message == "Unknown Host"){
+          }else if(error.status == 400){
+            this.loading = false;
             this.operatingModals = true;
-            this.tip = error.error.message+". Please check your serverIp. ";
-          }else if(error.status == 401){
-            this.operatingModals = true;
-            this.tip = error.error.message+". Please check your userName or password. ";
+            this.tip = error.error.message;
           }else{
             this.operatingModals = true;
             this.tip = error.error.message+". Please check your input. ";

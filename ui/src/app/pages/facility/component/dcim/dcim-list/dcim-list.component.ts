@@ -89,7 +89,7 @@ export class DcimListComponent implements OnInit {
     }
     this.service.updateFacilityStatus(updateDcim).subscribe(
       (data)=>{
-        this.updateStatusAlertType = "alert-success";
+        this.updateStatusAlertType = "success";
         if(updateDcim.integrationStatus.status == "ACTIVE"){
           this.updateStatusAlertcontent = "The server "+dcim.name+" has been activated.";
         }else{
@@ -197,7 +197,7 @@ export class DcimListComponent implements OnInit {
   syncData(id:string,url:string){
     this.service.syncData(id).subscribe(
       (data)=>{
-        this.alertType = "alert-success";
+        this.alertType = "success";
         this.alertcontent = "The sync job has been scheduled.";
         this.alertclose = false;
         setTimeout(() => {
