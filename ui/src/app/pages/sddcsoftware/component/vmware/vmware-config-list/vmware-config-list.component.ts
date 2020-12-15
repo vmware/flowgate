@@ -94,7 +94,7 @@ export class VmwareConfigListComponent implements OnInit {
     }
     this.service.updateStatus(toUpdateSddc).subscribe(
       (data)=>{
-        this.updateStatusAlertType = "alert-success";
+        this.updateStatusAlertType = "success";
         if(toUpdateSddc.integrationStatus.status == "ACTIVE"){
           this.updateStatusAlertcontent = "The server "+sddc.name+" has been activated.";
         }else{
@@ -180,7 +180,7 @@ export class VmwareConfigListComponent implements OnInit {
   syncData(id:string,url:string){
     this.service.syncData(id).subscribe(
       (data)=>{
-        this.alertType = "alert-success";
+        this.alertType = "success";
         this.alertcontent = "The sync job has been scheduled.";
         this.alertclose = false;
         setTimeout(() => {

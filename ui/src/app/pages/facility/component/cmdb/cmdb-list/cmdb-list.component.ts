@@ -89,7 +89,7 @@ export class CmdbListComponent implements OnInit {
     }
     this.service.updateFacilityStatus(updateCmdb).subscribe(
       (data)=>{
-          this.updateStatusAlertType = "alert-success";
+          this.updateStatusAlertType = "success";
           if(updateCmdb.integrationStatus.status == "ACTIVE"){
             this.updateStatusAlertcontent = "The server "+cmdb.name+" has been activated.";
           }else{
@@ -180,7 +180,7 @@ export class CmdbListComponent implements OnInit {
   syncData(id:string,url:string){
     this.service.syncData(id).subscribe(
       (data)=>{
-        this.alertType = "alert-success";
+        this.alertType = "success";
         this.alertcontent = "The sync job has been scheduled.";
         this.alertclose = false;
         setTimeout(() => {

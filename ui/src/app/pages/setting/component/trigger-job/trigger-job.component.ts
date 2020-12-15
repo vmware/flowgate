@@ -106,7 +106,7 @@ export class TriggerJobComponent implements OnInit {
       this.service.mergeserverMapping().subscribe(
         (data)=>{
           this.serverMapping = false;
-          this.alertType = "alert-success";
+          this.alertType = "success";
           this.alertcontent = "Trigger Success";
           this.alertclose = false;
           setTimeout(() => {
@@ -128,7 +128,7 @@ export class TriggerJobComponent implements OnInit {
         (data)=>{
         
           this.pduMapping = false;
-          this.alertType = "alert-success";
+          this.alertType = "success";
           this.alertcontent = "Trigger Success";
           this.alertclose = false;
           setTimeout(() => {
@@ -151,7 +151,7 @@ export class TriggerJobComponent implements OnInit {
         (data)=>{
 
           this.temphumidityMapping = false;
-          this.alertType = "alert-success";
+          this.alertType = "success";
           this.alertcontent = "Trigger Success";
           this.alertclose = false;
           setTimeout(() => {

@@ -123,12 +123,12 @@ public class ServerValidationService {
                   "Certificate verification error", e.getCause(),
                   WormholeRequestException.InvalidSSLCertificateCode);
          } else if (e.getCause() instanceof UnknownHostException) {
-            throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host.Please check your serverIp.", e.getCause(),
+            throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host.Please check your server IP.", e.getCause(),
                   WormholeRequestException.UnknownHostCode);
          }
          throw new WormholeRequestException(HttpStatus.BAD_REQUEST, e.getMessage(), e.getCause());
       } catch (UnknownHostException e) {
-         throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host.Please check your serverIp.", e.getCause(),
+         throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host.Please check your server IP.", e.getCause(),
                WormholeRequestException.UnknownHostCode);
       } catch (SSLException | KeyManagementException | CertificateException
             | NoSuchAlgorithmException | KeyStoreException e) {
