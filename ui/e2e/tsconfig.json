@@ -1,26 +1,15 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
-    "compileOnSave": false,
+    "extends": "../tsconfig.json",
     "compilerOptions": {
-        "rootDir": "../",
-        "baseUrl": "",
-        "declaration": false,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "outDir": "dist/out-tsc-e2e",
-        "sourceMap": true,
-        "target": "es5",
-        "typeRoots": [
-            "node_modules/@types"
-        ],
-        "types": [
-          "jasmine",
-          "jasminewd2"
-        ]
-    },
-    "exclude": [
-        "node_modules",
-        "dist"
-    ]
-}
+      "outDir": "../out-tsc/e2e",
+      "module": "commonjs",
+      "target": "es2018",
+      "types": [
+        "jasmine",
+        "jasminewd2",
+        "node"
+      ]
+    }
+  }
+  

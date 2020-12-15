@@ -4,9 +4,23 @@
 */
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FacilityAdapterModule } from '../facility-adapter.module';
-import { ClrWizard } from "@clr/angular";
+import { ClrDatagridStateInterface, ClrWizard } from "@clr/angular";
 import { AdapterJobCommandModule } from '../adapter-job-command.module';
 import { FacilityAdapterService } from '../facility-adapter.service';
+import { FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+
+function triggerCycleMatchValidator(triggerCycle: string): ValidatorFn {
+  return (control: FormControl) => {
+    if (!control || !control.parent) {
+      return null;
+    }
+    if(control.parent.get(triggerCycle).value != 0 && control.parent.get(triggerCycle).value % 5 == 0){
+      return null;
+    }
+    return { mismatch: true };
+  };
+}
 
 @Component({
   selector: 'app-adaptertype-list',
@@ -15,10 +29,98 @@ import { FacilityAdapterService } from '../facility-adapter.service';
 })
 export class FacilityAdapterListComponent implements OnInit {
 
-  constructor(private facilityAdapterService:FacilityAdapterService ) { }
+  formPageOne:FormGroup;
+  editformPageOne:FormGroup;
+  commandForm:FormGroup;
+  commandEditForm:FormGroup;
+  editAdapterCommandForm:FormGroup;
+  editCommandFormForEditAdapter:FormGroup;
+
+  alertclose:boolean = true;
+  alertType:string = "";
+  alertcontent:string = "";
+
+  constructor(private facilityAdapterService:FacilityAdapterService ,private fb: FormBuilder) {
+    this.formPageOne = this.fb.group({
+      type: ['', [
+        Validators.required
+      ]],
+      displayName: ['', [
+        Validators.required,
+        Validators.pattern(/^[a-zA-Z][a-zA-Z0-9_]*$/)
+      ]],
+      description: ['', [
+      ]]
+    });
+    this.editformPageOne = this.fb.group({
+      type: ['', [
+        Validators.required
+      ]],
+      displayName: ['', [
+        Validators.required,
+        Validators.pattern(/^[a-zA-Z][a-zA-Z0-9_]*$/)
+      ]],
+      description: ['', [
+      ]],
+      id: ['', [
+      ]]
+    });
+    this.commandForm = this.fb.group({
+      command: ['', [
+        Validators.required,
+        Validators.pattern(/^[a-zA-Z][a-zA-Z0-9_]*$/)
+      ]],
+      triggerCycle: ['', [
+        Validators.required,
+        Validators.pattern(/^[0-9]*[1-9][0-9]*$/),
+        triggerCycleMatchValidator('triggerCycle')
+      ]],
+      description: ['', [
+      ]]
+    });
+    this.commandEditForm = this.fb.group({
+      command: ['', [
+        Validators.required,
+        Validators.pattern(/^[a-zA-Z][a-zA-Z0-9_]*$/)
+      ]],
+      triggerCycle: ['', [
+        Validators.required,
+        Validators.pattern(/^[0-9]*[1-9][0-9]*$/),
+        triggerCycleMatchValidator('triggerCycle')
+      ]],
+      description: ['', [
+      ]]
+    });
+    this.editAdapterCommandForm = this.fb.group({
+      command: ['', [
+        Validators.required,
+        Validators.pattern(/^[a-zA-Z][a-zA-Z0-9_]*$/)
+      ]],
+      triggerCycle: ['', [
+        Validators.required,
+        Validators.pattern(/^[0-9]*[1-9][0-9]*$/),
+        triggerCycleMatchValidator('triggerCycle')
+      ]],
+      description: ['', [
+      ]]
+    });
+    this.editCommandFormForEditAdapter = this.fb.group({
+      command: ['', [
+        Validators.required,
+        Validators.pattern(/^[a-zA-Z][a-zA-Z0-9_]*$/)
+      ]],
+      triggerCycle: ['', [
+        Validators.required,
+        Validators.pattern(/^[0-9]*[1-9][0-9]*$/),
+        triggerCycleMatchValidator('triggerCycle')
+      ]],
+      description: ['', [
+      ]]
+    });
+  }
 
   //alert
-  Duplicate_Command_Name:string = "Duplicate command name."; 
+  Duplicate_Command_Name:string = "Duplicate command name.";
   Trigger_Cycle_Number:string = "The number should be multiples of 5.";
   Command_Name:string = "Please use letter and number combination for the adapter name, it must start with a letter.";
   Nem_Command_Form_Lable:string = "New Command";
@@ -61,35 +163,40 @@ export class FacilityAdapterListComponent implements OnInit {
     return "CMDB"
   }
 
-  setInfo(){
-    this.getFacilityAdapters(this.currentPage,this.pageSize)
+  close(){
+    this.alertclose = true;
   }
-  previous(){
-    if(this.currentPage>1){
-      this.currentPage--;
-      this.getFacilityAdapters(this.currentPage,this.pageSize)
+
+  loading:boolean = true;
+  currentState:ClrDatagridStateInterface;
+  totalItems:number = 0;
+  refresh(state: ClrDatagridStateInterface){
+    this.adapters = [];
+    if (!state.page) {
+      return;
     }
+    this.currentState = state;
+    this.getFacilityAdapters(state.page.current,state.page.size);
   }
-  next(){
-    if(this.currentPage < this.totalPage){
-      this.currentPage++
-      this.getFacilityAdapters(this.currentPage,this.pageSize)
-    }
-  }
-  getFacilityAdapters(currentPage,pageSize){
+  getFacilityAdapters(currentPage:number,pageSize:number){
+    this.loading = true;
     this.facilityAdapterService.getAdapterByPagee(currentPage,pageSize).subscribe(
       (data)=>{
-        if(data.status == 200){
-            this.adapters = data.json().content;
-            this.currentPage = data.json().number+1;
-            this.totalPage = data.json().totalPages
-            if(this.totalPage == 1){
-              this.nextbtnDisabled = "disabled";
-            }else{
-              this.nextbtnDisabled = "";
-            }  
-        }
-    })
+          this.adapters = data['content'];
+          this.totalItems = data['totalElements'];
+          this.loading = false;
+    },(error)=>{
+            this.loading = false;
+            this.alertType = "danger";
+            this.alertcontent = "Internal error";
+            if(error._body != null && error.status != "0"){
+                this.alertcontent = error.json().message;
+            }
+            this.alertclose = false;
+        })
+  }
+  baseSetting(){
+    this.newFacilityAdapter = this.formPageOne.value;
   }
 
   addAdapterType(){
@@ -113,17 +220,18 @@ export class FacilityAdapterListComponent implements OnInit {
   openAddCommand(){
     this.onAdd = true;
     this.onedit = false;
-    this.newCommand = new AdapterJobCommandModule();
+    this.commandForm.reset();
   }
 
   addNewCommand(){
     this.addNewCommandSubmitLoading = true;
-    if(this.checkCommandNameExisted(this.newCommand.command)){
+    let newCommand:AdapterJobCommandModule = this.commandForm.value;
+    if(this.checkCommandNameExisted(newCommand.command)){
       this.addCommandErrorClosed = false;
     }else{
       this.addCommandErrorClosed = true;
-      this.predefineAdapterCommands.push(this.newCommand);
-      this.newCommand = new AdapterJobCommandModule();
+      this.predefineAdapterCommands.push(newCommand);
+      this.commandForm.reset();
       this.onAdd = false;
       this.refreshNameList();
     }
@@ -144,14 +252,13 @@ export class FacilityAdapterListComponent implements OnInit {
     this.newFacilityAdapter.commands = this.predefineAdapterCommands;
     this.facilityAdapterService.createFacilityAdapter(this.newFacilityAdapter).subscribe(
       (data)=>{
-        if(data.status == 201){
-          this.addLoadingFlag = false;
-          this.wizard.forceFinish();
-          this.wizard.reset();
-          this.addErrorClosed = true;
-          this.addFacilityAdapterOpen = false;
-          this.getFacilityAdapters(this.currentPage,this.pageSize);
-      }
+        this.addLoadingFlag = false;
+        this.wizard.forceFinish();
+        this.wizard.reset();
+        this.formPageOne.reset();
+        this.addErrorClosed = true;
+        this.addFacilityAdapterOpen = false;
+        this.refresh(this.currentState);
     },(error) =>{
         this.addErrorClosed = false;
         this.addErrorMsg = error.json().message;
@@ -172,14 +279,12 @@ export class FacilityAdapterListComponent implements OnInit {
   onEdit(command:AdapterJobCommandModule){
     this.onAdd = false;;
     this.onedit = true;
-    this.editCommand = new AdapterJobCommandModule();
-    this.editCommand.description = command.description;
-    this.editCommand.command = command.command;
-    this.editCommand.triggerCycle = command.triggerCycle;
+    this.commandEditForm.setValue(command);
   }
 
-  saveEditCommand(editcommand:AdapterJobCommandModule){
+  saveEditCommand(){
     this.editCommandSubmitLoading = true;
+    let editcommand:AdapterJobCommandModule = this.commandEditForm.value;
     this.predefineAdapterCommands.forEach(element => {
       if(element.command == editcommand.command){
         element.triggerCycle = editcommand.triggerCycle;
@@ -199,13 +304,13 @@ export class FacilityAdapterListComponent implements OnInit {
 
   resetEditCommandForm(){
     this.onedit = false;
-    this.editCommand = new AdapterJobCommandModule();
+    this.commandEditForm.reset();
   }
 
   resetNewCommandForm(){
     this.onAdd = false;
     this.addCommandErrorClosed = true;
-    this.newCommand = new AdapterJobCommandModule();
+    this.commandForm.reset();
   }
 
   onDelete(command:AdapterJobCommandModule){
@@ -223,7 +328,7 @@ export class FacilityAdapterListComponent implements OnInit {
   getValidationState(){
     return this.validTriggerCyle;
   }
- 
+
   handleValidation(value:number): void {
    if(value != 0 && value % 5 == 0){
      this.validTriggerCyle = false;
@@ -251,16 +356,21 @@ export class FacilityAdapterListComponent implements OnInit {
   onAddForEditAdapter:boolean = false;
   addCommandErrorClosedForEditAdapter:boolean = true;
   commandsNameListForEditAdapter:string[] = [];
+  predefineAdapterCommandsForEditAdapter:AdapterJobCommandModule[] = [];
 
   onEditAdapter(adapter:FacilityAdapterModule){
     this.editFacilityAdapterOpen = true;
-    this.editAdapter = adapter;
+    this.editformPageOne.get('type').setValue(adapter.type);
+    this.editformPageOne.get('displayName').setValue(adapter.displayName);
+    this.editformPageOne.get('description').setValue(adapter.description);
+    this.editformPageOne.get('id').setValue(adapter.id);
+    this.predefineAdapterCommandsForEditAdapter = adapter.commands;
     this.prepareAdapterName(adapter);
   }
 
   prepareAdapterName(adapter:FacilityAdapterModule){
     this.commandsNameListForEditAdapter = [];
-    adapter.commands.forEach(element => {
+    this.predefineAdapterCommandsForEditAdapter.forEach(element => {
       this.commandsNameListForEditAdapter.push(element.command);
     });
   }
@@ -268,16 +378,18 @@ export class FacilityAdapterListComponent implements OnInit {
   openAddCommandForEditAdapter(){
     this.onAddForEditAdapter = true;
     this.oneditForEditAdapter = false;
-    this.newCommandForEditAdapter = new AdapterJobCommandModule();
+    //this.newCommandForEditAdapter = new AdapterJobCommandModule();
+    this.editAdapterCommandForm.reset();
   }
 
   addNewCommandForEditAdapter(){
     this.addNewCommandSubmitLoadingForEditAdapter = true;
-    if(this.checkCommandNameExistedForEditAdapter(this.newCommandForEditAdapter.command)){
+    let newCommand:AdapterJobCommandModule = this.editAdapterCommandForm.value;
+    if(this.checkCommandNameExistedForEditAdapter(newCommand.command)){
       this.addCommandErrorClosedForEditAdapter = false;
     }else{
       this.addCommandErrorClosedForEditAdapter = true;
-      this.editAdapter.commands.push(this.newCommandForEditAdapter);
+      this.predefineAdapterCommandsForEditAdapter.push(newCommand);
       this.newCommandForEditAdapter = new AdapterJobCommandModule();
       this.onAddForEditAdapter = false;
       this.refreshNameListForEdit();
@@ -286,7 +398,7 @@ export class FacilityAdapterListComponent implements OnInit {
   }
   refreshNameListForEdit(){
     this.commandsNameListForEditAdapter = [];
-    this.editAdapter.commands.forEach(element => {
+    this.predefineAdapterCommandsForEditAdapter.forEach(element => {
       this.commandsNameListForEditAdapter.push(element.command);
     });
   }
@@ -300,12 +412,13 @@ export class FacilityAdapterListComponent implements OnInit {
 
   resetEditCommandFormForEditAdapter(){
     this.oneditForEditAdapter = false;
-    this.editCommandForEditAdapter = new AdapterJobCommandModule();
+    this.editCommandFormForEditAdapter.reset();
   }
 
-  saveEditCommandForEditAdapter(editcommand:AdapterJobCommandModule){
+  saveEditCommandForEditAdapter(){
     this.editCommandSubmitLoadingForEditAdapter = true;
-    this.editAdapter.commands.forEach(element => {
+    let editcommand:AdapterJobCommandModule = this.editCommandFormForEditAdapter.value;
+    this.predefineAdapterCommandsForEditAdapter.forEach(element => {
       if(element.command == editcommand.command){
         element.triggerCycle = editcommand.triggerCycle;
         element.description = editcommand.description;
@@ -318,27 +431,28 @@ export class FacilityAdapterListComponent implements OnInit {
   resetNewCommandFormForEditAdapter(){
     this.onAddForEditAdapter = false;
     this.addCommandErrorClosedForEditAdapter = true;
-    this.newCommandForEditAdapter = new AdapterJobCommandModule();
+    this.editAdapterCommandForm.reset();
   }
 
   onEditForEditAdapter(command:AdapterJobCommandModule){
     this.onAddForEditAdapter = false;;
     this.oneditForEditAdapter = true;
-    this.editCommandForEditAdapter = new AdapterJobCommandModule();
-    this.editCommandForEditAdapter.description = command.description;
-    this.editCommandForEditAdapter.command = command.command;
-    this.editCommandForEditAdapter.triggerCycle = command.triggerCycle;
+    this.editCommandFormForEditAdapter.setValue(command);
   }
 
   onDeleteForEditAdapter(command:AdapterJobCommandModule){
-    for (let index = 0; index < this.editAdapter.commands.length; index++) {
-      const element = this.editAdapter.commands[index];
+    for (let index = 0; index < this.predefineAdapterCommandsForEditAdapter.length; index++) {
+      const element = this.predefineAdapterCommandsForEditAdapter[index];
       if(element.command == command.command){
-        this.editAdapter.commands.splice(index,1);
+        this.predefineAdapterCommandsForEditAdapter.splice(index,1);
         this.onedit = false;
       }
     }
     this.refreshNameListForEdit();
+  }
+
+  reinitadapterValue(){
+    this.editAdapter = this.editformPageOne.value;
   }
 
   editErrorClosed:boolean = true;
@@ -346,20 +460,20 @@ export class FacilityAdapterListComponent implements OnInit {
   loadingFlag:boolean = false;
   updateAdapter(){
     this.loadingFlag = true;
+    this.editAdapter = this.editformPageOne.value;
+    this.editAdapter.commands = this.predefineAdapterCommandsForEditAdapter;
     this.facilityAdapterService.updateFacilityAdapter(this.editAdapter).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.loadingFlag = false;
-          this.editwizard.forceFinish();
-          this.editwizard.reset();
-          this.editFacilityAdapterOpen = false;
-          this.editErrorClosed = true;
-          this.getFacilityAdapters(this.currentPage,this.pageSize);
-      }
-    },(error)=>{
-      this.editErrorClosed = false;  
-      this.editErrorMsg = error.json().message;
-      this.loadingFlag = false;
+        this.loadingFlag = false;
+        this.editwizard.forceFinish();
+        this.editwizard.reset();
+        this.editFacilityAdapterOpen = false;
+        this.editErrorClosed = true;
+        this.refresh(this.currentState);
+    },(error:HttpErrorResponse)=>{
+        this.editErrorClosed = false;
+        this.editErrorMsg = error.error.message;
+        this.loadingFlag = false;
       }
     )
   }
@@ -390,22 +504,19 @@ cancelDelete(){
 comfirmDelete(){
   this.facilityAdapterService.deleteAdapterById(this.removeAdapterId).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.confirmDeleteShow = false;
-          this.deleteErrorClosed = true;
-          this.getFacilityAdapters(this.currentPage,this.pageSize);
-      }
-    },(error)=>{
-      this.confirmDeleteShow = false;
-      this.deleteErrorMsg = error.json().message;
-      this.deleteErrorClosed = false;
+        this.confirmDeleteShow = false;
+        this.deleteErrorClosed = true;
+        this.refresh(this.currentState);
+
+    },(error:HttpErrorResponse)=>{
+        this.confirmDeleteShow = false;
+        this.deleteErrorMsg = error.error.message;
+        this.deleteErrorClosed = false;
       }
     )
   }
 
-
 ngOnInit() {
-  this.getFacilityAdapters(this.currentPage,this.pageSize);
 }
 
 }

@@ -2,20 +2,48 @@
  * Copyright 2019 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
-import { Component, OnInit,Input,Output, AfterViewChecked,EventEmitter, ChangeDetectorRef,ViewChild } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { UserService } from '../../user.service';
-import {ActivatedRoute,Router} from "@angular/router";
-import { NgForm } from '@angular/forms';
+import { Router } from "@angular/router";
+import { FormGroup,FormBuilder, FormControl, Validators, ValidatorFn } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+
+function passwordMatchValidator(password: string): ValidatorFn {
+  return (control: FormControl) => {
+    if (!control || !control.parent) {
+      return null;
+    }
+    return control.parent.get(password).value === control.value ? null : { mismatch: true };
+  };
+}
+
 @Component({
   selector: 'app-user-add',
   templateUrl: './user-add.component.html',
   styleUrls: ['./user-add.component.scss']
 })
-export class UserAddComponent implements AfterViewChecked,OnInit {
-  constructor(private service:UserService,private router:Router,private activedRoute:ActivatedRoute, private ref: ChangeDetectorRef) { }
-
-  @ViewChild("userForm") userForm: NgForm;
-  userFormRef:NgForm;
+export class UserAddComponent implements OnInit {
+  addUserForm:FormGroup;
+  constructor(private service:UserService,private router:Router,private ref: ChangeDetectorRef,private fb: FormBuilder) { 
+    this.addUserForm = this.fb.group({
+      username: ['', [
+        Validators.required
+      ]],
+      email:['', [
+        Validators.required,
+        Validators.email
+      ]],
+      password: ['', [
+        Validators.required,
+        Validators.pattern(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,20}$/)
+      ]],
+      repassword: ['', [
+        Validators.required,
+        passwordMatchValidator('password')
+      ]]
+    });
+  }
+  rolesIsEmpty:boolean = true;
   formValueChanged = false;
   validationStateMap: any = {};
   validconfirmPassword = false;
@@ -32,6 +60,7 @@ export class UserAddComponent implements AfterViewChecked,OnInit {
     roleId:"",
     email:""
   }
+
   close(){
     this.alertclose = true;
     this.alertcontent = "";
@@ -92,6 +121,13 @@ export class UserAddComponent implements AfterViewChecked,OnInit {
      
       }
     } 
+    this.rolesIsEmpty = true;
+    this.roles.forEach(element=>{
+      if(element.enable.toString() ==  'true'){
+        this.rolesIsEmpty = false;
+      }
+    })
+
   }
   getRoles(){
     this.service.getRoles().subscribe(
@@ -103,7 +139,7 @@ export class UserAddComponent implements AfterViewChecked,OnInit {
           "privilegeNames":"",
           "enable":""
          })
-        data.json().content.forEach(element => {
+        data['content'].forEach(element => {
          var role={
          "id":"",
          "roleName":"",
@@ -129,32 +165,30 @@ export class UserAddComponent implements AfterViewChecked,OnInit {
         rolenames.push(element.roleName);
       }
     })
+    this.user.username = this.addUserForm.get("username").value;
+    this.user.password = this.addUserForm.get("password").value;
+    this.user.email = this.addUserForm.get("email").value;
       this.service.postuser(this.user.username,this.user.password,this.user.email,rolenames).subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.alertclose = true;
-            this.alertcontent = "";
-            this.alertType = "";
-            this.router.navigate(["/ui/nav/user/user-list"]);
-          }
-        },error=>{
-          this.alertType = "alert-danger";
+          this.alertclose = true;
+          this.alertcontent = "";
+          this.alertType = "";
+          this.router.navigate(["/ui/nav/user/user-list"]);
+        },(error:HttpErrorResponse)=>{
+          this.alertType = "danger";
           this.alertclose = false;
-          this.alertcontent = error.json().message;
+          this.alertcontent = error.error.message;
         }
       )
   }
 
   reset(){
-    this.user = {
-      id:"",
-      username:"",
-      password:"",
-      rpassword:"",
-      roleName:[],
-      roleId:"",
-      email:""
-    }
+    this.addUserForm.reset();
+    this.roles.forEach(element=>{
+      if(element.enable != ""){
+        element.enable = "";
+      }
+    })
     this.alertclose = true;
     this.alertcontent = "";
     this.alertType = "";
@@ -195,16 +229,16 @@ export class UserAddComponent implements AfterViewChecked,OnInit {
         }
     }
   }
-  ngAfterViewChecked(): void {
-    if (this.userFormRef !== this.userForm) {
-        this.userFormRef = this.userForm;
-        if (this.userFormRef) {
-            this.userFormRef.valueChanges.subscribe(data => {
-                this.formValueChanged = true;
-            });
-        }
-    }
-  }
+  // ngAfterViewChecked(): void {
+  //   if (this.userFormRef !== this.userForm) {
+  //       this.userFormRef = this.userForm;
+  //       if (this.userFormRef) {
+  //           this.userFormRef.valueChanges.subscribe(data => {
+  //               this.formValueChanged = true;
+  //           });
+  //       }
+  //   }
+  // }
 
 
 

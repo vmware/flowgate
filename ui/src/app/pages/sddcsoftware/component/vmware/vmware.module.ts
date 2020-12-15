@@ -6,7 +6,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { routing } from './vmware.routing';
 import { ClarityModule } from '@clr/angular';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { VmwareConfigAddComponent } from '../vmware/vmware-config-add/vmware-config-add.component';
 import { VmwareConfigEditComponent } from '../vmware/vmware-config-edit/vmware-config-edit.component';
 import { VmwareConfigListComponent } from '../vmware/vmware-config-list/vmware-config-list.component';
@@ -19,7 +19,8 @@ import { PagesModule } from '../../../pages.module';
     routing,
     ClarityModule,
     PagesModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
   ],
   declarations: [VmwareComponent,VmwareConfigAddComponent,VmwareConfigEditComponent,VmwareConfigListComponent],
   providers:[VmwareService]

@@ -1,29 +1,35 @@
 <!-- Copyright 2019 VMware, Inc.
 SPDX-License-Identifier: BSD-2-Clause -->
-<form>
-<section class="form-block">
-    <label> Content For Server Mapping</label>          
-    <div class="form-group">
-            <label for="selects_3" >Integration Type:</label>
-            <div class="select" style="margin-left: -110px;">
-                <select id="selects_2" [ngModelOptions]="{standalone: true}"  [(ngModel)]="serverconfig.type" on-change="changeType()" > 
-                    <option value="VRO" >vRealize Operations Manager</option>
-                    <option value="VCENTER">VMware vCenter</option>
-                    <option value="VROPSMP">vRealize Operations Management Pack</option>
-                </select>
-            </div>
-            <label for="selects_3">Server:</label>
-            <div class="select">
-                <select id="selects_3" [ngModelOptions]="{standalone: true}"  [(ngModel)]="serverconfig.id" on-change="change()" > 
-                    <option value="">Please Select</option>
-                    <option value="{{serverconfig.id}}" *ngFor="let serverconfig of serverconfigs">{{serverconfig.name}}</option>
-                </select>
-            </div>
+<form clrForm>
+        <section class="form-block">
+        <h2 style="margin-top: 0px"> Content For Server Mapping</h2>
+        <div class="clr-row">
+                <div class="clr-col-8">
+                        <clr-select-container>
+                                <label>Integration Type:</label>
+                                <select clrSelect name="typeoptions" [ngModelOptions]="{standalone: true}" [(ngModel)]="serverconfig.type" on-change="changeType()">
+                                        <option value="">Please Select</option>
+                                        <option value="VRO" >vRealize Operations Manager</option>
+                                        <option value="VCENTER">VMware vCenter</option>
+                                        <option value="VROPSMP">vRealize Operations Management Pack</option>
+                                </select>
+                        </clr-select-container>
+                </div>
+                <div class="clr-col-4" style="margin-left: -20%;">
+                        <clr-select-container>
+                                <label>Server:</label>
+                                <select clrSelect name="nameoptions" [ngModelOptions]="{standalone: true}" [(ngModel)]="serverconfig.id" on-change="change()">
+                                        <option value="">Please Select</option>
+                                        <option value="{{serverconfig.id}}" *ngFor="let serverconfig of serverconfigs">{{serverconfig.name}}</option>
+                                </select>
+                        </clr-select-container>
+                </div>
         </div>
-</section>
+        </section>
+    
 </form>
 
-<clr-datagrid>
+<clr-datagrid [clrDgLoading]="serverMappingLoading" (clrDgRefresh)="refresh($event)">
 
         <clr-dg-column [clrDgField]="'vroResourceName'">
                 <ng-container *clrDgHideableColumn="{hidden: vrohid}">
@@ -53,7 +59,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-dg-placeholder>{{nulltips}}</clr-dg-placeholder>
 
        
-        <clr-dg-row *clrDgItems="let serverMapping of serverMappings">
+        <clr-dg-row *ngFor="let serverMapping of serverMappings">
                 <clr-dg-cell>{{serverMapping.vroResourceName}}</clr-dg-cell>
                 <clr-dg-cell>{{serverMapping.vroVMEntityObjectID}}</clr-dg-cell>
                 <clr-dg-cell>{{serverMapping.vcHostName}}</clr-dg-cell>
@@ -68,11 +74,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         </button>
                         <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
                                 
-                                <button type="button" on-click="updateAssetID(serverMapping.id)" clrDropdownItem >Mapping Server asset</button>
+                                <button type="button" on-click="showServerAsset(serverMapping.id)" clrDropdownItem >Mapping Server asset</button>
                                 <button type="button" on-click="showOtherAssetMapping(serverMapping.id,'PDU')" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping PDU asset</button>
                                 <button type="button" on-click="showSensors(serverMapping.id,'Sensors')" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Sensor asset</button>
                                 <button type="button" on-click="showOtherAssetMapping(serverMapping.id,'Networks')" [disabled] = "validateMapped(serverMapping)" clrDropdownItem >Mapping Switch asset</button>
-                                
                                 <button type="button" clrDropdownItem on-click="deleteServerMapping(serverMapping.id)">Delete</button>
                         </clr-dropdown-menu>
                         </clr-dropdown>    
@@ -80,20 +85,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
         </clr-dg-row>
        
       
-       <clr-dg-footer *ngIf="serverMappings.length>0">
-                <ul class="pagination">
-                    <li style="padding-top: 5px;"><div class="select">
-                      <select id="selects_1" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;setInfo()">
-                        <option>5</option>
-                        <option>10</option>
-                        <option>20</option>
-                        <option>50</option>
-                    </select></div>
-                  </li>
-                     <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
-                     <li class="pagination-current">{{currentPage}}/{{totalPage}}</li>
-                     <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button></li>
-                 </ul>
+       <clr-dg-footer>
+                <clr-dg-pagination #pagination [clrDgPageSize]="10" [clrDgTotalItems] = "totalItems">
+                        <clr-dg-page-size [clrPageSizeOptions]="[10,20,50]">ServerMappings per page</clr-dg-page-size>
+                        {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+                        of {{pagination.totalItems}} ServerMappings
+                </clr-dg-pagination>
        </clr-dg-footer>
 </clr-datagrid>
 
@@ -103,27 +100,34 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <div class="modal-body">
                 <clr-alert [clrAlertClosable]="true" *ngIf="updateAssetModalErrorShow" [clrAlertType]="'danger'">
                         <clr-alert-item>
-                            <span class="alert-text">
+                                <span class="alert-text">
                                 {{updateAssetError}}
-                            </span>
+                                </span>
                         </clr-alert-item>
-                    </clr-alert>
-                <div class="form-group">
-                        <table>
-                                <tr>
-                                   <td><input type="text" id="formFields_9" placeholder="assetName" [(ngModel)]="keywords" (keyup)="($event.which === 13) ? search() : 0" size="35"></td>
-                                   <td><button [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled" class="btn btn-sm" (click)="search();" >Search</button></td>
-                                   <td>MappedAsset: </td>
-                                   <td>
-                                        <clr-checkbox *ngIf ="mappedServerAsset.assetName != null"[ngModelOptions]="{standalone: true}"
-                                        [(ngModel)]="mappedServerAsset.enable"  [clrInline]="true">
-                                          {{mappedServerAsset.assetName}}
-                                         </clr-checkbox>
-                                   </td>
-                                </tr>
-                        </table>                
-                </div>
-                <clr-datagrid [(clrDgSingleSelected)]="mappedServerAsset" [clDgRowSelection]="true" [clrDgLoading]="loading">
+                </clr-alert>
+                <form clrForm>
+                        <div class="clr-row">
+                                <div class="clr-col-3">
+                                        <clr-input-container>
+                                                <input clrInput placeholder="assetName" name="assetName" [(ngModel)]="keywords"  style="width: 220px; margin-left: -50px;" />
+                                        </clr-input-container>
+                                </div>
+                                <div class="clr-col-1" style="margin-left: -54px; margin-top: 7px;">
+                                        <button [clrLoading]="searchBtnState"  class="btn btn-md" (click)="search();" >Search</button>
+                                </div>
+                                <div class="clr-col-5">
+                                         <clr-checkbox-container clrInline *ngIf ="mappedServerAsset.assetName != null">
+                                                <label>MappedAsset:</label>
+                                                <clr-checkbox-wrapper style="padding-left: 20px">
+                                                  <input type="checkbox" clrCheckbox name="options"  [(ngModel)]="mappedServerAsset.enable" />
+                                                  <label>{{mappedServerAsset.assetName}}</label>
+                                                </clr-checkbox-wrapper>
+                                        </clr-checkbox-container>
+                                </div>
+                        </div>
+                </form>
+
+                <clr-datagrid [(clrDgSingleSelected)]="selectedServerAsset" [clrDgLoading]="loading">
                         <clr-dg-column>Asset Name</clr-dg-column>
                         <clr-dg-column>Asset Source</clr-dg-column>
                         <clr-dg-column>Serial Number</clr-dg-column>
@@ -148,22 +152,22 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             <clr-dg-cell>{{asset.cabinetUnitPosition}}</clr-dg-cell>
                             <clr-dg-cell>{{asset.pdus}}</clr-dg-cell>
                        </clr-dg-row>
-                      
-                       <clr-dg-footer>
-                                <ul class="pagination">
-                                     <li ><button class="pagination-previous" type="button" on-click="previousAsset()" ></button></li>
-                                     <li class="pagination-current">{{currentPageAsset}}</li>
-                                     <li> <button class="pagination-next" type="button" disabled="{{disabledAsset}}" on-click="nextAsset()"></button></li>
-                                 </ul>
-                       </clr-dg-footer>
+                        <clr-dg-footer>
+                                <div class="pagination-list ng-star-inserted" style="margin-left: 85%;">
+                                        <button type="button" class="pagination-previous" aria-label="Previous Page" (click)="previousAsset()"><clr-icon shape="angle left" role="none"></clr-icon></button>
+                                        <span aria-label="Total Pages">{{currentPageAsset}}</span> 
+                                        <button type="button" class="pagination-next" aria-label="Next Page" disabled="{{disabledAsset}}" (click)="nextAsset()"><clr-icon shape="angle right" role="none"></clr-icon></button>
+                                   </div>
+                        </clr-dg-footer>
+                        
                 </clr-datagrid>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="cancelAsset()">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="confirmAsset(mappedServerAsset)">Ok</button>
+            <button type="button" class="btn btn-primary" (click)="confirmAsset(selectedServerAsset)">Ok</button>
         </div>
 </clr-modal>
-<clr-modal [(clrModalOpen)]="mappedOtherAssetModalOpen" [clrModalStaticBackdrop]="false" [clrModalSize]="'xl'" [clrModalClosable]="false">
+ <clr-modal [(clrModalOpen)]="mappedOtherAssetModalOpen" [clrModalStaticBackdrop]="false" [clrModalSize]="'xl'" [clrModalClosable]="false">
         <h3 class="modal-title">Select {{showOtherCategory}}</h3>
        
         <div class="modal-body">
@@ -174,24 +178,28 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             </span>
                         </clr-alert-item>
                     </clr-alert>
-                <div class="form-group">
-                        <table>
-                                <tr>
-                                   <td><input type="text" id="formFields_8" placeholder="assetName" [(ngModel)]="keywords" (keyup)="($event.which === 13) ? search() : 0" size="35"></td>
-                                   <td><button [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled" class="btn btn-sm" (click)="search();" >Search</button></td>
-                                   <td>Mapped Asset: </td>
-                                   <td>
-                                       
-                                        <clr-checkbox *ngFor="let asset of mappedOtherAssets"  [ngModelOptions]="{standalone: true}"
-                                        [(ngModel)]="asset.enable" [clrInline]="true">
-                                                {{asset.assetName}}
-                                        </clr-checkbox>
-                                        
-                                   </td>
-                                </tr>
-                        </table>                
-                </div>
-                <clr-datagrid [(clrDgSelected)]="selectedOtherAssets" [clDgRowSelection]="true" [clrDgLoading]="loading">
+                <form clrForm>
+                        <div class="clr-row">
+                                <div class="clr-col-3">
+                                        <clr-input-container>
+                                                <input clrInput placeholder="assetName" name="assetName" [(ngModel)]="keywords" (keyup)="($event.which === 13) ? search() : 0"  style="width: 220px; margin-left: -50px;" />
+                                        </clr-input-container>
+                                </div>
+                                <div class="clr-col-1" style="margin-left: -54px; margin-top: 7px;">
+                                        <button [clrLoading]="searchBtnState"  class="btn btn-md" (click)="search();" >Search</button>
+                                </div>
+                                <div class="clr-col-5">
+                                         <clr-checkbox-container clrInline >
+                                                <label>MappedAsset:</label>
+                                                <clr-checkbox-wrapper *ngFor="let asset of mappedOtherAssets"   style="padding-left: 20px">
+                                                  <input type="checkbox" clrCheckbox  [ngModelOptions]="{standalone: true}" [(ngModel)]="asset.enable"/>
+                                                  <label>{{asset.assetName}}</label>
+                                                </clr-checkbox-wrapper>
+                                        </clr-checkbox-container>
+                                </div>
+                        </div>
+                </form>
+                <clr-datagrid [(clrDgSelected)]="selectedOtherAssets"  [clrDgLoading]="loading">
                         <clr-dg-column>Asset Name</clr-dg-column>
                         <clr-dg-column>Asset Source</clr-dg-column>
                         <clr-dg-column>Serial Number</clr-dg-column>
@@ -214,14 +222,13 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             <clr-dg-cell>{{asset.cabinetName}}</clr-dg-cell>
                             <clr-dg-cell>{{asset.cabinetUnitPosition}}</clr-dg-cell>
                        </clr-dg-row>
-                      
                        <clr-dg-footer>
-                                <ul class="pagination">
-                                     <li ><button class="pagination-previous" type="button" on-click="previousAsset()" ></button></li>
-                                     <li class="pagination-current">{{currentPageAsset}}</li>
-                                     <li> <button class="pagination-next" type="button" disabled="{{disabledAsset}}" on-click="nextAsset()"></button></li>
-                                 </ul>
-                       </clr-dg-footer>
+                                <div class="pagination-list ng-star-inserted" style="margin-left: 85%;">
+                                        <button type="button" class="pagination-previous" aria-label="Previous Page" (click)="previousAsset()"><clr-icon shape="angle left" role="none"></clr-icon></button>
+                                        <span aria-label="Total Pages">{{currentPageAsset}}</span> 
+                                        <button type="button" class="pagination-next" aria-label="Next Page" disabled="{{disabledAsset}}" (click)="nextAsset()"><clr-icon shape="angle right" role="none"></clr-icon></button>
+                                </div>
+                        </clr-dg-footer>
                 </clr-datagrid>
         </div>
         <div class="modal-footer">
@@ -296,24 +303,28 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             </span>
                         </clr-alert-item>
                     </clr-alert>
-                <div class="form-group">
-                        <table>
-                                <tr>
-                                   <td><input type="text" id="formFields_8" placeholder="assetName" [(ngModel)]="keywords" (keyup)="($event.which === 13) ? search() : 0" size="35"></td>
-                                   <td><button class="btn btn-sm" (click)="search();" [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled">Search</button></td>
-                                   <td>MappedAsset: </td>
-                                   <td>
-                                       
-                                        <clr-checkbox *ngFor="let asset of mappedSensors"  [ngModelOptions]="{standalone: true}"
-                                        [(ngModel)]="asset.enable" [clrInline]="true">
-                                                {{asset.assetName}}
-                                        </clr-checkbox>
-                                        
-                                   </td>
-                                </tr>
-                        </table>                
-                </div>
-                <clr-datagrid [(clrDgSelected)]="selectedSensors" [clDgRowSelection]="true" [clrDgLoading]="loading">
+                <form clrForm>
+                        <div class="clr-row">
+                                <div class="clr-col-3">
+                                        <clr-input-container>
+                                                <input clrInput placeholder="assetName" name="assetName" [(ngModel)]="keywords" (keyup)="($event.which === 13) ? search() : 0"  style="width: 220px; margin-left: -50px;" />
+                                        </clr-input-container>
+                                </div>
+                                <div class="clr-col-1" style="margin-left: -54px; margin-top: 7px;">
+                                        <button [clrLoading]="searchBtnState"  class="btn btn-md" (click)="search();" >Search</button>
+                                </div>
+                                <div class="clr-col-5">
+                                         <clr-checkbox-container clrInline >
+                                                <label>MappedAsset:</label>
+                                                <clr-checkbox-wrapper *ngFor="let asset of mappedSensors"   style="padding-left: 20px">
+                                                  <input type="checkbox" clrCheckbox  [ngModelOptions]="{standalone: true}" [(ngModel)]="asset.enable"/>
+                                                  <label>{{asset.assetName}}</label>
+                                                </clr-checkbox-wrapper>
+                                        </clr-checkbox-container>
+                                </div>
+                        </div>
+                </form>
+                <clr-datagrid [(clrDgSelected)]="selectedSensors"  [clrDgLoading]="loading">
                         <clr-dg-column>Asset Name</clr-dg-column>
                         <clr-dg-column>Asset Source</clr-dg-column>
                         <clr-dg-column>Serial Number</clr-dg-column>
@@ -338,12 +349,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
                        </clr-dg-row>
                       
                        <clr-dg-footer>
-                                <ul class="pagination">
-                                     <li ><button class="pagination-previous" type="button" on-click="previousAsset()" ></button></li>
-                                     <li class="pagination-current">{{currentPageAsset}}</li>
-                                     <li> <button class="pagination-next" type="button" disabled="{{disabledAsset}}" on-click="nextAsset()"></button></li>
-                                 </ul>
-                       </clr-dg-footer>
+                                <div class="pagination-list ng-star-inserted" style="margin-left: 85%;">
+                                        <button type="button" class="pagination-previous" aria-label="Previous Page" (click)="previousAsset()"><clr-icon shape="angle left" role="none"></clr-icon></button>                                      
+                                        <span aria-label="Total Pages">{{currentPageAsset}}</span> 
+                                        <button type="button" class="pagination-next" aria-label="Next Page" disabled="{{disabledAsset}}" (click)="nextAsset()"><clr-icon shape="angle right" role="none"></clr-icon></button>
+                                </div>
+                        </clr-dg-footer>
                 </clr-datagrid>
         </div>
         <div class="modal-footer">

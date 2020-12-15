@@ -4,9 +4,7 @@
 */
 import { Component, OnInit } from '@angular/core';
 import {Router,ActivatedRoute} from '@angular/router';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
+import { ClrDatagridStateInterface } from '@clr/angular';
 import { SettingService } from '../../setting.service';
 
 
@@ -17,7 +15,7 @@ import { SettingService } from '../../setting.service';
 })
 export class AssetListComponent implements OnInit {
 
-  constructor(private http:Http,private service:SettingService,private router: Router, private route: ActivatedRoute) { }
+  constructor(private service:SettingService,private router: Router, private route: ActivatedRoute) { }
  
   assets = [];
   currentPage:number = 1;
@@ -29,37 +27,29 @@ export class AssetListComponent implements OnInit {
   assetId:string = '';
   clrAlertClosed:boolean = true;
 
-  setInfo(){
-    this.info=this.pageSize;
-    this.getAssetsDatas(this.currentPage,this.pageSize)
-  }
-  previous(){
-    if(this.currentPage>1){
-      this.currentPage--;
-      this.getAssetsDatas(this.currentPage,this.pageSize)
+  loading:boolean = true;
+  currentState:ClrDatagridStateInterface;
+  totalItems:number = 0;
+  refresh(state: ClrDatagridStateInterface){
+    this.assets = [];
+    this.loading = true;
+    if (!state.page) {
+      return;
     }
-  }
-  next(){
-    if(this.currentPage < this.totalPage){
-      this.currentPage++
-      this.getAssetsDatas(this.currentPage,this.pageSize)
-    }
+    this.currentState = state;
+    this.getAssetsDatas(state.page.current,state.page.size);
   }
 
-  getAssetsDatas(currentPage,pageSize){
+  getAssetsDatas(currentPage:number,pageSize:number){
     this.assets = [];
     this.service.getAssetsBySource("flowgate", currentPage, pageSize).subscribe(
-      (data)=>{if(data.status == 200){
-            this.assets =  data.json().content;
-            this.currentPage = data.json().number+1;
-            this.totalPage = data.json().totalPages
-            if(this.totalPage == 1){
-              this.disabled = "disabled";
-            }else{
-              this.disabled = "";
-            }
-      }
-    })
+      (data)=>{
+        this.assets =  data['content'];
+        this.totalItems = data['totalElements'];
+        this.loading = false;
+      },(error)=>{
+        this.loading = false;
+      })
   }
   addAsset(){
     this.router.navigate(["/ui/nav/setting/asset-add"]);
@@ -69,10 +59,9 @@ export class AssetListComponent implements OnInit {
   }
   confirm(){
     this.service.deleteAssetById(this.assetId).subscribe(
-      (data)=>{if(data.status == 200){
+      (data)=>{
         this.basic = false;
-        this.ngOnInit();
-      }
+        this.refresh(this.currentState)
     })
   }
   onClose(){
@@ -87,7 +76,6 @@ export class AssetListComponent implements OnInit {
     this.assetId = id;
   }
   ngOnInit() {
-     this.getAssetsDatas(this.currentPage,this.pageSize);
   }
 
 }

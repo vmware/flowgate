@@ -4,12 +4,11 @@
 */
 import { Component, OnInit } from '@angular/core';
 import { DcimService } from '../dcim.service';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
-import {Router,ActivatedRoute} from '@angular/router';
+import { Router } from '@angular/router';
 import { FacilityModule } from '../../../facility.module';
 import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/facility-adapter.module';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-dcim-add',
   templateUrl: './dcim-add.component.html',
@@ -17,75 +16,88 @@ import { FacilityAdapterModule } from 'app/pages/setting/component/adaptertype/f
 })
 export class DcimAddComponent implements OnInit {
 
-  constructor(private service:DcimService,private router:Router,private activedRoute:ActivatedRoute) { }
-
+  addDCIMForm:FormGroup;
+  constructor(private service:DcimService,private router:Router,private fb: FormBuilder) { 
+    this.addDCIMForm = this.fb.group({
+      type: ['', [
+        Validators.required
+      ]],
+      serverURL: ['', [
+        Validators.required
+      ]],
+      name: ['', [
+        Validators.required
+      ]],
+      description: ['', [
+      ]],
+      userName: ['', [
+        Validators.required
+      ]],
+      password: ['', [
+        Validators.required
+      ]],
+      verifyCert: ['true', [
+        Validators.required
+      ]]
+    });
+  }
  
   loading:boolean = false;
   dcimType:string = "";
   operatingModals:boolean = false;
   ignoreCertificatesModals:boolean = false;
   tip:string = "";
-  nlyteAdvanceSettingShow:boolean = false;
-  powerIQAdvanceSettingShow:boolean = false;
-  commonAdvanceSettingShow:boolean = true;
+
   dcimConfig:FacilityModule = new FacilityModule();
 
   read = "";/** This property is to change the read-only attribute of the password input box*/
   advanceSetting:string = "";
   seclectAdapter:FacilityAdapterModule = new FacilityAdapterModule();
-  
+  predefinedType:string[] = ['Nlyte','PowerIQ'];
   changetype(){
-    let adapter:FacilityAdapterModule = this.adapterMap.get(this.seclectAdapter.displayName);
+    
+    let adapter:FacilityAdapterModule = this.adapterMap.get(this.addDCIMForm.get('type').value);
     this.dcimConfig.type = adapter.type;
-    if(this.dcimConfig.type != adapter.displayName){
-      this.dcimConfig.subCategory = adapter.subCategory;
-    }
     if(this.dcimConfig.type == "Nlyte"){
-      this.nlyteAdvanceSettingShow = true;
-      this.powerIQAdvanceSettingShow = false;
       this.dcimConfig.advanceSetting.PDU_POWER_UNIT = "KW";
     }else if(this.dcimConfig.type == "PowerIQ"){
-      this.powerIQAdvanceSettingShow = true;
-      this.nlyteAdvanceSettingShow = false;
       this.dcimConfig.advanceSetting.PDU_POWER_UNIT = "W";
     }else{
-      this.powerIQAdvanceSettingShow = false;
-      this.nlyteAdvanceSettingShow = false;
       this.dcimConfig.advanceSetting.PDU_POWER_UNIT = "W";
     }
   }
 
   save(){
-      this.read = "readonly";
+      // this.read = "readonly";
       this.loading = true;
+      let advanceSetting:any = this.dcimConfig.advanceSetting;
+      this.dcimConfig =this.addDCIMForm.value;
+      let adapter:FacilityAdapterModule = this.adapterMap.get(this.addDCIMForm.get('type').value);
+      this.dcimConfig.type = adapter.type;
+      if(this.predefinedType.indexOf(adapter.type) == -1){
+        this.dcimConfig.subCategory = adapter.subCategory;
+      }
+      this.dcimConfig.advanceSetting = advanceSetting;
       this.service.AddDcimConfig(this.dcimConfig).subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.loading = false;
-            this.router.navigate(["/ui/nav/facility/dcim/dcim-list"]);
-          }
-        },
-        error=>{
-          if(error.status == 400 && error.json().errors[0] == "Invalid SSL Certificate"){
+          this.loading = false;
+          this.router.navigate(["/ui/nav/facility/dcim/dcim-list"]);
+        },(error:HttpErrorResponse)=>{
+          if(error.status == 400 && error.error.message == "Invalid SSL Certificate"){
             this.loading = false;
             this.ignoreCertificatesModals = true;
-            this.tip = error.json().message+". Are you sure you ignore the certificate check?"
-          }else if(error.status == 400 && error.json().errors[0] == "Unknown Host"){
+            this.tip = error.error.message+". Are you sure you ignore the certificate check?"
+          }else if(error.status == 400){
             this.loading = false;
             this.operatingModals = true;
-            this.tip = error.json().message+". Please check your serverIp. ";
-          }else if(error.status == 401){
-            this.loading = false;
-            this.operatingModals = true;
-            this.tip = error.json().message+". Please check your userName or password. ";
+            this.tip = error.error.message;
           }else{
             this.loading = false;
             this.operatingModals = true;
-            this.tip = error.json().message+". Please check your input. ";
+            this.tip = error.error.message+". Please check your input. ";
           }
         }
       )
-  
   }
   confirmNoVerifyCertModal(){
     this.ignoreCertificatesModals = false;
@@ -112,10 +124,8 @@ export class DcimAddComponent implements OnInit {
   adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
   findAllAdapters(){
     this.service.findAllFacilityAdapters().subscribe(
-      (data)=>{
-        let allFacilityAdapters:FacilityAdapterModule[] = [];
-        allFacilityAdapters = data.json();
-        allFacilityAdapters.forEach(element => {
+      (data:FacilityAdapterModule[])=>{
+        data.forEach(element => {
           if(element.type == "OtherDCIM"){
             this.dcimAdapters.push(element);
           }
@@ -147,7 +157,6 @@ export class DcimAddComponent implements OnInit {
       TEMPERATURE_UNIT:"C",
       HUMIDITY_UNIT:"%"
     }
-    this.dcimConfig.verifyCert = "true";
   }
 
 }

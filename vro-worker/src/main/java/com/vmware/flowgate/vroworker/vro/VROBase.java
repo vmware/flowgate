@@ -21,23 +21,18 @@ public abstract class VROBase {
       if (config == null) {
          config = getDefautlConfig();
       }
-      try {
-         Client tokentClient = ClientConfig.builder().useJson().locale(config.getLocale())
-               .timezone(config.getTimeZone())
-               .serverUrl(String.format(VROConsts.VROSDKURL, config.getServerUrl()))
-               .verify(config.getVerifyCert()).ignoreHostName(config.isIgnoreHostName())
-               .useInternalApis(config.isUseInternalAPI()).build().newClient();
-         UsernamePassword up = new UsernamePassword(config.getUserName(), config.getPassword());
-         AuthToken token = tokentClient.userAndAuthManagementClient().acquireToken(up);
-         client = ClientConfig.builder().tokenAuth(token.getToken())
-               .useJson().locale(config.getLocale()).timezone(config.getTimeZone())
-               .serverUrl(String.format(VROConsts.VROSDKURL, config.getServerUrl()))
-               .verify(config.getVerifyCert()).ignoreHostName(config.isIgnoreHostName())
-               .useInternalApis(config.isUseInternalAPI()).build().newClient();
-      } catch (Exception e) {
-         e.printStackTrace();
-         throw new RuntimeException(e);
-      }
+      Client tokentClient = ClientConfig.builder().useJson().locale(config.getLocale())
+            .timezone(config.getTimeZone())
+            .serverUrl(String.format(VROConsts.VROSDKURL, config.getServerUrl()))
+            .verify(config.getVerifyCert()).ignoreHostName(config.isIgnoreHostName())
+            .useInternalApis(config.isUseInternalAPI()).build().newClient();
+      UsernamePassword up = new UsernamePassword(config.getUserName(), config.getPassword());
+      AuthToken token = tokentClient.userAndAuthManagementClient().acquireToken(up);
+      client = ClientConfig.builder().tokenAuth(token.getToken())
+            .useJson().locale(config.getLocale()).timezone(config.getTimeZone())
+            .serverUrl(String.format(VROConsts.VROSDKURL, config.getServerUrl()))
+            .verify(config.getVerifyCert()).ignoreHostName(config.isIgnoreHostName())
+            .useInternalApis(config.isUseInternalAPI()).build().newClient();
    }
 
    protected Client getClient() {

@@ -3,11 +3,9 @@
  * SPDX-License-Identifier: BSD-2-Clause
 */
 import { Routes, RouterModule }  from '@angular/router';
-
 import { FacilityComponent } from './facility.component';
 import { ModuleWithProviders } from '@angular/core';
 
-// noinspection TypeScriptValidateTypes
 export const routes: Routes = [
     {
         path: '',
@@ -16,13 +14,13 @@ export const routes: Routes = [
           {path: '', redirectTo: '', pathMatch: 'full'},
           {
             path: 'dcim',
-            loadChildren: 'app/pages/facility/component/dcim/dcim.module#DcimModule'
+            loadChildren: () => import('app/pages/facility/component/dcim/dcim.module').then(m => m.DcimModule)
           },{
             path: 'cmdb',
-            loadChildren: 'app/pages/facility/component/cmdb/cmdb.module#CmdbModule'
+            loadChildren: () => import('app/pages/facility/component/cmdb/cmdb.module').then(m => m.CmdbModule)
           }
         ]
       }
 ];
 
-export const routing: ModuleWithProviders = RouterModule.forChild(routes);
+export const ROUTING: ModuleWithProviders<RouterModule> = RouterModule.forChild(routes);

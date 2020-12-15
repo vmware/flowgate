@@ -57,131 +57,131 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <button clrTabLink (click)="getFirstPageData()">Integration Summary</button>
             <clr-tab-content *clrIfActive="true">
                 <h5>Data Center Facility System</h5>
-                <div class="row" style="height:43%;max-height: 200px;">
-                    <div class="col-lg-3 col-sm-3 col-3">
+                <div class="clr-row" style="height:43%;max-height: 200px;">
+                    <div class="clr-col-3">
                         <div class="card" style="height:110%;">
-                            <div class="row">
+                            <div class="clr-row">
                                 <span class="bigTitle">ASSETS</span>
                             </div>
-                            <div class="row">
-                                <span class="bigFont">{{flowgateSummery.assetsNum}}</span>
+                            <div class="clr-row">
+                                <span class="bigFont">{{flowgateSummary.assetsNum}}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-sm-3 col-3">
+                    <div class="clr-col-3">
                         <div class="card btn" style="height:110%;" (click)="showSystemSummary()">
-                            <div class="row">
+                            <div class="clr-row">
                                 <span class="bigTitle">SYSTEM</span>
                             </div>
-                            <div class="row">
-                                <span class="bigFont">{{flowgateSummery.facilitySystemNum}}</span>
+                            <div class="clr-row">
+                                <span class="bigFont">{{flowgateSummary.facilitySystemNum}}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-sm-6 col-6">
+                    <div class="clr-col-6">
                         <div class="card" style="height:110%;">
-                            <div class="row" style="margin: auto;">
-                                <div class="col-lg-4 col-sm-4 col-4">
-                                    <div class="row">
+                            <div class="clr-row" style="margin: auto;">
+                                <div class="clr-col-4">
+                                    <div class="clr-row">
                                         <span class="smallTitle">SERVERS</span>
                                     </div>
-                                    <div class="row">
-                                        <span class="smallFont">{{flowgateSummery.serverNum}}</span>
+                                    <div class="clr-row">
+                                        <span class="smallFont">{{flowgateSummary.serverNum}}</span>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-sm-4 col-4">
-                                    <div class="row">
+                                <div class="clr-col-4">
+                                    <div class="clr-row">
                                         <span class="smallTitle">PDUS</span>
                                     </div>
-                                    <div class="row">
-                                        <span class="smallFont">{{flowgateSummery.pduNum}}</span>
+                                    <div class="clr-row">
+                                        <span class="smallFont">{{flowgateSummary.pduNum}}</span>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-sm-4 col-4">
-                                    <div class="row">
+                                <div class="clr-col-4">
+                                    <div class="clr-row">
                                         <span class="smallTitle">CABINETS</span>
                                     </div>
-                                    <div class="row">
-                                        <span class="smallFont">{{flowgateSummery.cabinetNum}}</span>
+                                    <div class="clr-row">
+                                        <span class="smallFont">{{flowgateSummary.cabinetNum}}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" style="margin: auto;padding-top: 4%;">
-                                <div class="col-lg-4 col-sm-4 col-4">
-                                    <div class="row">
+                            <div class="clr-row" style="margin: auto;padding-top: 4%;">
+                                <div class="clr-col-4">
+                                    <div class="clr-row">
                                         <span class="smallTitle">NETWORK DEVICES</span>
                                     </div>
-                                    <div class="row">
-                                        <span class="smallFont">{{flowgateSummery.switchNum}}</span>
+                                    <div class="clr-row">
+                                        <span class="smallFont">{{flowgateSummary.switchNum}}</span>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-sm-4 col-4">
+                                <div class="clr-col-4">
                                     <div class="card btn" style="border:0px;margin: 0px" (click)="showSensorSummary()">
-                                        <div class="row"  style="line-height: 1.0rem;">
+                                        <div class="clr-row"  style="line-height: 1.0rem;">
                                             <span class="smallTitle">SENSORS</span>
                                         </div>
-                                        <div class="row" style="line-height: 1.0rem;">
-                                            <span class="smallFont">{{flowgateSummery.sensorNum}}</span>
+                                        <div class="clr-row" style="line-height: 1.0rem;">
+                                            <span class="smallFont">{{flowgateSummary.sensorNum}}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-sm-4 col-4">
+                                <div class="clr-col-4">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <h5 style="margin-top:8%;"> IT Management System</h5>
-                <div class="row">
-                    <div class="col-lg-3 col-sm-3 col-3">
+                <div class="clr-row">
+                    <div class="clr-col-3">
                         <div class="card">
-                            <div class="row">
+                            <div class="clr-row">
                                 <span class="bigTitle">USERS</span>
                             </div>
-                            <div class="row">
-                                <span class="bigFont">{{flowgateSummery.userNum}}</span>
+                            <div class="clr-row">
+                                <span class="bigFont">{{flowgateSummary.userNum}}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-sm-3 col-3">
+                    <div class="clr-col-3">
                         <div class="card btn" (click)="showServerSummary()">
-                            <div class="row">
+                            <div class="clr-row">
                                 <span class="bigTitle">SERVERS</span>
                             </div>
-                            <div class="row">
-                                <span class="bigFont">{{flowgateSummery.sddcServerNum}}</span>
+                            <div class="clr-row">
+                                <span class="bigFont">{{flowgateSummary.sddcServerNum}}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-sm-6 col-6">
+                    <div class="clr-col-6">
                         <div class="card">
-                            <div class="row">
-                                <div class="col-lg-6 col-sm-6 col-6">
-                                    <div class="row">
+                            <div class="clr-row">
+                                <div class="clr-col-6">
+                                    <div class="clr-row">
                                         <span class="integrationTitle">Total IT Management System</span>
                                     </div>
-                                    <div class="row">
-                                        <span class="integrationFont">{{flowgateSummery.sddcIntegrationNum}}</span>
+                                    <div class="clr-row">
+                                        <span class="integrationFont">{{flowgateSummary.sddcIntegrationNum}}</span>
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-sm-6 col-6">
-                                    <div class="row">
-                                        <div class="col-lg-12 col-sm-12 col-12">
-                                            <div class="row">
+                                <div class="clr-col-6">
+                                    <div class="clr-row">
+                                        <div class="clr-col-12">
+                                            <div class="clr-row">
                                                 <span class="integrationSmallTitle">VMware vCenter Server</span>
                                             </div>
-                                            <div class="row">
-                                                <span class="integrationSmallFont">{{flowgateSummery.vcNum}}</span>
+                                            <div class="clr-row">
+                                                <span class="integrationSmallFont">{{flowgateSummary.vcNum}}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-lg-12 col-sm-12 col-12">
-                                            <div class="row">
+                                    <div class="clr-row">
+                                        <div class="clr-col-12">
+                                            <div class="clr-row">
                                                 <span class="integrationSmallTitle">vRealize Operations Manager</span>
                                             </div>
-                                            <div class="row">
-                                                <span class="integrationSmallFont">{{flowgateSummery.vroNum}}</span>
+                                            <div class="clr-row">
+                                                <span class="integrationSmallFont">{{flowgateSummary.vroNum}}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -198,14 +198,14 @@ SPDX-License-Identifier: BSD-2-Clause -->
             <clr-tab-content *clrIfActive>
                 <setting-asset></setting-asset>
             </clr-tab-content>
-        </clr-tab>
+        </clr-tab> 
         <clr-tab *appHasPrivilege=syncData>
             <button (click)="getExpiredTimeRange()" clrTabLink>Sync Data</button>
             <clr-tab-content *clrIfActive>
-                <div class="row">
-                    <div class="col-md-10">
+                <div class="clr-row">
+                    <div class="clr-col-10">
                         <h5>Sync Data</h5>
-                        <clr-datagrid>
+                        <clr-datagrid style="margin-top: 10px;">
         
                             <clr-dg-column>Job</clr-dg-column>
                             <clr-dg-column>Description</clr-dg-column>
@@ -251,13 +251,13 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 
                             </clr-dg-row>
                         
-                            </clr-datagrid>
+                        </clr-datagrid>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-10">
+                <div class="clr-row">
+                    <div class="clr-col-10">
                         <h5>Sensors Metrics Data Persistent Time Setting </h5>
-                        <clr-datagrid>
+                        <clr-datagrid style="margin-top: 10px;">
         
                             <clr-dg-column >Time Range</clr-dg-column>
                             <clr-dg-column>Description</clr-dg-column>
@@ -281,37 +281,45 @@ SPDX-License-Identifier: BSD-2-Clause -->
         <clr-tab *appHasPrivilege=syncUnMappedServers>
             <button clrTabLink>Unmapped Servers</button>
             <clr-tab-content *clrIfActive>
-                <div class="row">
-                    <div class="col-md-3">
+                <div class="clr-row">
+                    <div class="clr-col-3">
                         <button [clrLoading]="serverloading" class="btn btn-info-outline "  (click)="getunmappedservers()" style="margin-top:10px;" >
                             Pull Unmapped Servers       
                         </button>
-                    
-                        <clr-datagrid *ngIf="unmappedservershow">
+                        <div *ngIf="unmappedservershow" style="color: crimson">
+                            {{unmappedServerErrorMsg}}
+                        </div>
+                        <div class="clr-row">
+                            <div class="clr-col-12">
+                                <clr-datagrid *ngIf="unmappedservershow">
                             
-                            <clr-dg-column>server</clr-dg-column>
-                            
-                            <clr-dg-placeholder>We couldn't find any unmapped server!</clr-dg-placeholder>
-                            
-                            
-                            <clr-dg-row *ngFor="let item of servers">
-                            
-                                <clr-dg-cell >{{item}}</clr-dg-cell>
+                                    <clr-dg-column>server</clr-dg-column>
+                                    
+                                    <clr-dg-placeholder>We couldn't find any unmapped server!</clr-dg-placeholder>
+                                    
+                                    
+                                    <clr-dg-row *ngFor="let item of servers">
+                                    
+                                        <clr-dg-cell >{{item}}</clr-dg-cell>
+                                        
+                                        
+                                    </clr-dg-row>
                                 
-                                
-                            </clr-dg-row>
+                                </clr-datagrid>
+                            </div>
+
+                        </div>
                         
-                            </clr-datagrid>
                     </div>
                 </div>
             </clr-tab-content>
         </clr-tab>
 
         <clr-tab>
-            <button clrTabLink (click)="changePageSize()">AssetName and IP Mapping</button>
+            <button clrTabLink>AssetName and IP Mapping</button>
             <clr-tab-content *clrIfActive>
-                <div class="row">
-                    <div class="col-md-12"> 
+                <div class="clr-row">
+                    <div class="clr-col-12"> 
                         <clr-alert [clrAlertClosable]="true" *ngIf="searchErrorShow" [clrAlertType]="'danger'">
                             <clr-alert-item>
                                 <span class="alert-text">
@@ -321,17 +329,17 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         </clr-alert>
                     </div>
 
-                    <div class="col-md-8">
-                        <div class="form-group">
+                    <div class="clr-col-12">
+                         <div class="form-group">
                             <table>
                                 <tr>
-                                    <td><input type="text" id="search" placeholder="IP" autocomplete="off" [(ngModel)]="searchIP" (keyup)="($event.which === 13) ? search() : 0" size="35"></td>
-                                    <td><button class="btn btn-sm" (click)="search();" [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled">Search</button></td>
+                                    <td><input clrControl type="text" id="search" placeholder="IP" autocomplete="off" [(ngModel)]="searchIP" (keyup)="($event.which === 13) ? search() : 0" size="35"></td>
+                                    <td><button style="margin-top: 30px;" class="btn btn-sm" (click)="search();" [clrLoading]="searchBtnState" [disabled]="searchBtnDisabled">Search</button></td>
                                 </tr>
                             </table>                
                         </div>
-                      
-                        <clr-datagrid  [(clrDgSelected)]="selectedHostNameAndIPMappings" [clDgRowSelection]="true" [clrDgLoading]="loading">
+                  
+                        <clr-datagrid  [(clrDgSelected)]="selectedHostNameAndIPMappings" (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading"  >
                             <clr-dg-action-bar>
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-sm btn-secondary" (click)="onAdd()"><clr-icon shape="plus"></clr-icon> Add</button>
@@ -346,29 +354,17 @@ SPDX-License-Identifier: BSD-2-Clause -->
                             
                             <clr-dg-placeholder>We couldn't find any mapping!</clr-dg-placeholder>
     
-                            <clr-dg-row *clrDgItems="let mapping of hostNameAndIPMappings" [clrDgItem]="mapping">
+                            <clr-dg-row *ngFor="let mapping of hostNameAndIPMappings" [clrDgItem]="mapping">
                                 <clr-dg-cell>{{mapping.ip}}</clr-dg-cell>
                                 <clr-dg-cell>{{mapping.assetname}}</clr-dg-cell>
                             </clr-dg-row>
-                            
+
                             <clr-dg-footer>
-                                    
-                                <ul class="pagination">
-                                    <li style="padding-top: 5px;">
-                                        <div class="select">
-                                            <select id="mappingpagesize" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;changePageSize()">
-                                                <option>10</option>
-                                                <option>20</option>
-                                                <option>30</option>
-                                                <option>50</option>
-                                            </select>
-                                        </div>
-                                    </li>
-                                        <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
-                                        <li class="pagination-current">{{pageNumber}}/{{mappingsTotalPage}}</li>
-                                        <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button>
-                                    </li>
-                                </ul>
+                                <clr-dg-pagination #pagination [clrDgPageSize]="5" [clrDgTotalItems] = "totalItems">
+                                <clr-dg-page-size [clrPageSizeOptions]="[5,20,30,50]">Mappings per page</clr-dg-page-size>
+                                {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+                                of {{pagination.totalItems}} Mappings
+                                </clr-dg-pagination>
                             </clr-dg-footer>
                     </clr-datagrid>
                     </div>
@@ -380,13 +376,14 @@ SPDX-License-Identifier: BSD-2-Clause -->
 <clr-modal [(clrModalOpen)]="systemSummary" [clrModalStaticBackdrop]="true" [clrModalSize]="'xl'">
     <h3 class="modal-title">Data Center Facility System</h3>
     <div class="modal-body" style="height: 600px;">
-        <div class="row">
-            <div class="col-md-12 trigger-job-text-center">
+        <div class="clr-row">
+            <div class="clr-col-12 trigger-job-text-center">
+                <clr-tree>
                 <clr-tree-node>
                     Nlyte
                     <ng-template [clrIfExpanded]="true">
                         <clr-tree-node>
-                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                            <div class="clr-col-12" style="margin-left:-1.25rem;">
                                 <clr-datagrid>
                                     <clr-dg-column style="min-width: 17rem;">Nlyte System</clr-dg-column>
                                     <clr-dg-column>SERVER</clr-dg-column>
@@ -397,7 +394,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 
                                     <clr-dg-placeholder>We couldn't find any Nlyte System!</clr-dg-placeholder>
 
-                                    <clr-dg-row *ngFor="let nlyte of flowgateSummery.nlyteSummary"> 
+                                    <clr-dg-row *ngFor="let nlyte of flowgateSummary.nlyteSummary"> 
                                         <clr-dg-cell style="min-width: 17rem;text-align: center;">
                                             <span class="systemDetailTitle">{{nlyte.name}}</span>
                                             <br>
@@ -428,7 +425,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     PowerIQ
                     <ng-template [clrIfExpanded]="false">
                         <clr-tree-node>
-                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                            <div class="clr-col" style="margin-left:-1.25rem;">
                                 <clr-datagrid>
                                     <clr-dg-column>PowerIQ System</clr-dg-column>
                                     <clr-dg-column>SENSOR</clr-dg-column>
@@ -436,7 +433,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 
                                     <clr-dg-placeholder>We couldn't find any PowerIQ System!</clr-dg-placeholder>
 
-                                    <clr-dg-row *ngFor="let PowerIQ of flowgateSummery.powerIqSummary"> 
+                                    <clr-dg-row *ngFor="let PowerIQ of flowgateSummary.powerIqSummary"> 
                                         <clr-dg-cell>
                                             <span class="systemDetailTitle">{{PowerIQ.name}}</span>
                                             <br>
@@ -466,6 +463,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         <clr-tree-node>NO DATA.</clr-tree-node>
                     </ng-template>
                 </clr-tree-node>
+            </clr-tree>
             </div>
         </div>
         
@@ -477,20 +475,21 @@ SPDX-License-Identifier: BSD-2-Clause -->
 <clr-modal [(clrModalOpen)]="serverSummary" [clrModalStaticBackdrop]="true" [clrModalSize]="'xl'">
     <h3 class="modal-title">IT Management System</h3>
     <div class="modal-body" style="height: 600px;">
-        <div class="row">
-            <div class="col-md-12 trigger-job-text-center">
+        <div class="clr-row">
+            <div class="clr-col-12 trigger-job-text-center">
+            <clr-tree>
                 <clr-tree-node>
                     VMware vCenter
                     <ng-template [clrIfExpanded]="true">
                         <clr-tree-node>
-                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                            <div class="clr-col-12" style="margin-left:-1.25rem;">
                                 <clr-datagrid>
                                     <clr-dg-column>VMware vCenter Server</clr-dg-column>
                                     <clr-dg-column>Managed Host Number</clr-dg-column>
 
                                     <clr-dg-placeholder>We couldn't find any VMware vCenter Server!</clr-dg-placeholder>
 
-                                    <clr-dg-row *ngFor="let vc of flowgateSummery.vcSummary"> 
+                                    <clr-dg-row *ngFor="let vc of flowgateSummary.vcSummary"> 
                                         <clr-dg-cell>
                                             <span class="systemDetailTitle">{{vc.name}}</span>
                                             <br>
@@ -509,14 +508,14 @@ SPDX-License-Identifier: BSD-2-Clause -->
                     VMware vRealize Operations Manager
                     <ng-template [clrIfExpanded]="false">
                         <clr-tree-node>
-                            <div class="col-md-12" style="margin-left:-1.25rem;">
+                            <div class="clr-col-12" style="margin-left:-1.25rem;">
                                 <clr-datagrid>
                                     <clr-dg-column>VMware vRealize Operations Manager</clr-dg-column>
                                     <clr-dg-column>Managed Host Number</clr-dg-column>
 
                                     <clr-dg-placeholder>We couldn't find any VMware vRealize Operations Manager!</clr-dg-placeholder>
 
-                                    <clr-dg-row *ngFor="let vro of flowgateSummery.vroSummary"> 
+                                    <clr-dg-row *ngFor="let vro of flowgateSummary.vroSummary"> 
                                         <clr-dg-cell>
                                             <span class="systemDetailTitle">{{vro.name}}</span>
                                             <br>
@@ -531,6 +530,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
                         </clr-tree-node>
                     </ng-template>
                 </clr-tree-node>
+            </clr-tree>
             </div>
         </div>
     </div>
@@ -541,61 +541,61 @@ SPDX-License-Identifier: BSD-2-Clause -->
 <clr-modal [(clrModalOpen)]="sensorSummary" [clrModalStaticBackdrop]="true" [clrModalSize]="'lg'">
     <h3 class="modal-title">Sensor Summary</h3>
     <div class="modal-body" style="height: 500px;">
-        <div class="row" style="margin:auto; ">
-            <div class="col-lg-4 col-sm-4 col-4">
+        <div class="clr-row" style="margin:auto; ">
+            <div class="clr-col-4">
                 <div class="card sensorCard" >
-                    <div class="row" style="margin:auto;">
+                    <div class="clr-row" style="margin:auto;">
                         <span class="modalBigTitle">Humidity</span>
                     </div>
-                    <div class="row" style="margin:auto;">
-                        <span class="modalBigFont">{{flowgateSummery.humiditySensorNum}}</span>
+                    <div class="clr-row" style="margin:auto;">
+                        <span class="modalBigFont">{{flowgateSummary.humiditySensorNum}}</span>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-4 col-4">
+            <div class="clr-col-4">
                 <div class="card sensorCard">
-                    <div class="row" style="margin:auto;">
+                    <div class="clr-row" style="margin:auto;">
                         <span class="modalBigTitle">Temperature</span>
                     </div>
-                    <div class="row" style="margin:auto;">
-                        <span class="modalBigFont">{{flowgateSummery.temperatureSensorNum}}</span>
+                    <div class="clr-row" style="margin:auto;">
+                        <span class="modalBigFont">{{flowgateSummary.temperatureSensorNum}}</span>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-4 col-4">
+            <div class="clr-col-4">
                 <div class="card sensorCard">
-                    <div class="row" style="margin:auto;">
+                    <div class="clr-row" style="margin:auto;">
                         <span class="modalBigTitle">AirFlow</span>
                     </div>
-                    <div class="row" style="margin:auto;">
-                        <span class="modalBigFont">{{flowgateSummery.airFlowSensorNum}}</span>
+                    <div class="clr-row" style="margin:auto;">
+                        <span class="modalBigFont">{{flowgateSummary.airFlowSensorNum}}</span>
                     </div>
                 </div>
             </div>
             
         </div>
-        <div class="row" style="margin:auto; padding-top: 100px;">
-            <div class="col-lg-4 col-sm-4 col-4">
+        <div class="clr-row" style="margin:auto; padding-top: 100px;">
+            <div class="clr-col-4">
                 <div class="card sensorCard">
-                    <div class="row" style="margin:auto;">
+                    <div class="clr-row" style="margin:auto;">
                         <span class="modalBigTitle">Smoke</span>
                     </div>
-                    <div class="row" style="margin:auto;">
-                        <span class="modalBigFont">{{flowgateSummery.smokeSensorNum}}</span>
+                    <div class="clr-row" style="margin:auto;">
+                        <span class="modalBigFont">{{flowgateSummary.smokeSensorNum}}</span>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-4 col-4">
+            <div class="clr-col-4">
                 <div class="card sensorCard">
-                    <div class="row" style="margin:auto;">
+                    <div class="clr-row" style="margin:auto;">
                         <span class="modalBigTitle">Water</span>
                     </div>
-                    <div class="row" style="margin:auto;">
-                        <span class="modalBigFont">{{flowgateSummery.waterSensorNum}}</span>
+                    <div class="clr-row" style="margin:auto;">
+                        <span class="modalBigFont">{{flowgateSummary.waterSensorNum}}</span>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-sm-4 col-4">
+            <div class="clr-col-4">
                 
             </div>
         </div>
@@ -674,63 +674,36 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </span>
             </clr-alert-item>
         </clr-alert>
-        <form #mappingForm="ngForm">
-            <div class="form-group" style="margin-top: 30px;">
-                <label class="required" for="ip">IP</label>       
-                <label for="ip"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-sm tooltip-top-right"
-                    [class.invalid]="getIPValidationState()">
-                    <input type="text" id="ip" placeholder="Input a host ip" autocomplete="off"
-                        required style="width: 280px;"
-                        name="serverIP"
-                        [(ngModel)]="hostNameAndIPMapping.ip"
-                        #serverIPInput="ngModel" 
-                        (input)='handleIPValidation(true)' 
-                        (blur)='handleIPValidation(true)'
-                        (change)='handleIPValidation(true)'>
-                    <span class="tooltip-content">
-                        IP is Required.
-                    </span>
-                </label>
-            </div>
-            <div class="form-group" style="margin-top: 20px;">
-                <label class="required"  for="assetName">Asset Name</label>
-                <label for="assetName"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-md tooltip-top-right"
-                    [class.invalid]="assetNameInput.invalid && (assetNameInput.dirty || assetNameInput.touched)">
-                    <input type="text" id="hostname" placeholder="Input an asset name" style="width: 280px;"
-                        required
-                        name="assetName"
-                        [(ngModel)]="hostNameAndIPMapping.assetname"
-                        #assetNameInput="ngModel"
-                        (focus)="focus()"  (blur)="blur()"
-                        autocomplete="off">
-                    <span class="tooltip-content">
-                        Asset Name is Required.
-                    </span>
-                </label>
-              </div>
-            <div style="width: 280px; background-color: white;position: absolute; top: 8.5rem;left: 29.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px black; border-style: solid;" [hidden]="hidden">
+        <form clrForm [formGroup]="addAssetIPAndNameMappingForm" >
+           <clr-control-container>
+               <label>Server</label>
+               <input clrControl placeholder="Server Ip Or Domain Name" formControlName="ip" style="width: 220px;"/>
+               <clr-control-helper>Please enter a valid IP.</clr-control-helper>
+               <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+               <clr-control-error *clrIfError="'pattern'">Invalid IP!</clr-control-error>
+           </clr-control-container>
+            <clr-control-container>
+               <label>Name</label>
+               <input clrControl placeholder="Name" id="hostname" (focus)="focusAdd()"  (blur)="blurAdd()" formControlName="assetname" style="width: 220px;"/>
+               <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+           </clr-control-container>
+           <div style="width: 220px; background-color: white;position: absolute; top: 10rem;left: 19.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px #b2b3b3; border-style: solid;" [hidden]="hidden">
                 <span *ngIf="searchAssetNameloading" class="spinner spinner-md" style="margin-left: 43%; margin-bottom: -26%;">
                     Loading...
                 </span>
                 <ul class="list-unstyled">
-                  <li *ngFor="let ite of assetNames;let key=index" class="lihover" style="padding-left: 10px; font-size: 14px; cursor: pointer;">
-                      <div (click)="selectItem(ite)">
-                              {{ite}}
-                      </div>
-                  </li>
-              </ul>
-          </div>
-        </form>
+                    <li *ngFor="let ite of assetNames;let key=index" class="lihover" style="padding-left: 10px; font-size: 14px; cursor: pointer;">
+                        <div (click)="selectItem(ite)">
+                                {{ite}}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+       </form>
     </div>
     <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="cancelSave()">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="confirmSave()" [clrLoading]="saveMappingLoading" [disabled]="mappingForm.form.invalid || invalidIP">Save</button>
+            <button type="button" class="btn btn-primary" (click)="confirmSave()" [clrLoading]="saveMappingLoading" [disabled]="addAssetIPAndNameMappingForm.invalid">Save</button>
     </div>
 </clr-modal>
 
@@ -744,63 +717,35 @@ SPDX-License-Identifier: BSD-2-Clause -->
                 </span>
             </clr-alert-item>
         </clr-alert>
-        <form #updatemappingForm="ngForm">
-            <div class="form-group" style="margin-top: 30px;">
-                <label class="required" for="ip">IP</label>       
-                <label for="ip"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-sm tooltip-top-right"
-                    [class.invalid]="getIPValidationState()">
-                    <input type="text" id="ip" placeholder="Input a host ip" autocomplete="off"
-                        required style="width: 280px;"
-                        name="serverIP"
-                        [(ngModel)]="hostNameAndIPMapping.ip"
-                        #serverIPInput="ngModel" 
-                        (input)='handleIPValidation(true)' 
-                        (blur)='handleIPValidation(true)'
-                        (change)='handleIPValidation(true)'
-                        disabled>
-                    <span class="tooltip-content">
-                        IP is Required.
-                    </span>
-                </label>
-            </div>
-            <div class="form-group" style="margin-top: 20px;">
-                <label class="required"  for="assetName">Asset Name</label>
-                <label for="assetName"
-                    aria-haspopup="true"
-                    role="tooltip"
-                    class="tooltip tooltip-validation tooltip-md tooltip-top-right"
-                    [class.invalid]="assetNameInput.invalid && (assetNameInput.dirty || assetNameInput.touched)">
-                    <input type="text" id="hostnameedit" placeholder="Input an asset name" style="width: 280px;"
-                        required
-                        name="assetName"
-                        [(ngModel)]="hostNameAndIPMapping.assetname"
-                        #assetNameInput="ngModel"
-                        (focus)="focus()"  (blur)="blur()"
-                        autocomplete="off">
-                    <span class="tooltip-content">
-                        Asset Name is Required.
-                    </span>
-                </label>
-              </div>
-            <div style="width: 280px; background-color: white;position: absolute; top: 8.5rem;left: 29.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px black; border-style: solid;" [hidden]="hidden">
-                <span *ngIf="searchAssetNameloading" class="spinner spinner-md" style="margin-left: 43%; margin-bottom: -26%;">
-                    Loading...
-                </span>
-                <ul class="list-unstyled">
-                  <li *ngFor="let ite of assetNames;let key=index" class="lihover" style="padding-left: 10px; font-size: 14px; cursor: pointer; ">
-                      <div (click)="selectItem(ite)">
-                              {{ite}}
-                      </div>
-                  </li>
-              </ul>
-          </div>
+        <form clrForm [formGroup]="editAssetIPAndNameMappingForm" >
+            <clr-control-container>
+                <label>Server</label>
+                <input clrControl placeholder="Server Ip Or Domain Name" formControlName="ip" readonly style="width: 220px;"/>
+                <clr-control-helper>Please enter an IP.</clr-control-helper>
+                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+                <clr-control-error *clrIfError="'pattern'">Invalid IP!</clr-control-error>
+            </clr-control-container>
+             <clr-control-container>
+                <label>Name</label>
+                <input clrControl placeholder="Name" id="hostnameedit" (focus)="focusEdit()"  (blur)="blurEdit()" formControlName="assetname" style="width: 220px;"/>
+                <clr-control-error *clrIfError="'required'">This field is required!</clr-control-error>
+            </clr-control-container>
+            <div style="width: 220px; background-color: white;position: absolute; top: 10rem;left: 19.5%;z-index: 1002;height: 200px;overflow: auto; border: 1px #b2b3b3; border-style: solid;" [hidden]="hidden">
+                 <span *ngIf="searchAssetNameloading" class="spinner spinner-md" style="margin-left: 43%; margin-bottom: -26%;">
+                     Loading...
+                 </span>
+                 <ul class="list-unstyled">
+                     <li *ngFor="let ite of assetNames;let key=index" class="lihover" style="padding-left: 10px; font-size: 14px; cursor: pointer;">
+                         <div (click)="selectItemForEdit(ite)">
+                                 {{ite}}
+                         </div>
+                     </li>
+                 </ul>
+             </div>
         </form>
     </div>
     <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="cancelSave()">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="confirmUpdate()" [clrLoading]="saveMappingLoading" [disabled]="updatemappingForm.form.invalid || invalidIP || saveMappingLoading">Save</button>
+            <button type="button" class="btn btn-primary" (click)="confirmUpdate()" [clrLoading]="saveMappingLoading" [disabled]="editAssetIPAndNameMappingForm.invalid">Save</button>
     </div>
 </clr-modal>

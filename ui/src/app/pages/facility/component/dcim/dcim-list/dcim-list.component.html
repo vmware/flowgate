@@ -14,10 +14,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
           </span>
       </div>
     </clr-alert>
-    <clr-alert [clrAlertType]="'alert-danger'" [clrAlertAppLevel]="true" [clrAlertClosed]= "isStatusErrorMsgAlertClose" (clrAlertClosedChange)="statusMsgAlertClose()" >
+    <clr-alert [clrAlertType]="'danger'" [clrAlertAppLevel]="true" [clrAlertClosed]= "isStatusErrorMsgAlertClose" (clrAlertClosedChange)="statusMsgAlertClose()" >
         <clr-alert-item>
             <span class="alert-text">
-                {{statusErrorMsg}}you can reactive the integration by click <clr-icon shape="ellipsis-vertical"></clr-icon> > Active , you can update the setting by click Edit Setting button if needed. 
+                {{statusErrorMsg}}you can reactive the integration by click <clr-icon shape="ellipsis-vertical"></clr-icon> > Active , you can update the setting by click Edit Setting button if needed.
             </span>
             <div class="alert-actions">
                 <button class="btn alert-action" (click)="fixError()">Update Setting</button>
@@ -31,8 +31,8 @@ SPDX-License-Identifier: BSD-2-Clause -->
             </span>
         </div>
     </clr-alert>
-  <clr-datagrid [clrDgLoading]="loading">
-  
+  <clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)">
+
 
    <clr-dg-column>Type</clr-dg-column>
    <clr-dg-column>ServerUrl</clr-dg-column>
@@ -41,10 +41,10 @@ SPDX-License-Identifier: BSD-2-Clause -->
    <clr-dg-column>LoginUserName</clr-dg-column>
    <clr-dg-column>VerifyCert</clr-dg-column>
    <clr-dg-column>Status</clr-dg-column>
-   
+
    <clr-dg-placeholder>We couldn't find any integration!</clr-dg-placeholder>
-  
-  
+
+
   <clr-dg-row *ngFor="let dcimConfig of dcimConfigs">
         <clr-dg-action-overflow>
             <button class="action-item" (click)="onEdit(dcimConfig.id)" *appHasPrivilege=updatefacility>Edit</button>
@@ -56,36 +56,28 @@ SPDX-License-Identifier: BSD-2-Clause -->
        <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.type}}">{{dcimConfig.type}}</clr-dg-cell>
        <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.serverURL}}">{{dcimConfig.serverURL}}</clr-dg-cell>
        <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.name}}">{{dcimConfig.name}}</clr-dg-cell>
-       <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.description}}">{{dcimConfig.description}}</clr-dg-cell>    
+       <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.description}}">{{dcimConfig.description}}</clr-dg-cell>
        <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.userName}}">{{dcimConfig.userName}}</clr-dg-cell>
        <clr-dg-cell class = "flowgate-overflow" title="{{dcimConfig.verifyCert}}">{{dcimConfig.verifyCert}}</clr-dg-cell>
        <clr-dg-cell>{{dcimConfig.integrationStatus.status}}
-            <clr-icon *ngIf="dcimConfig.integrationStatus.status == 'ERROR'" class="alert-icon" style="color: #c92100;cursor: pointer;" shape="exclamation-circle" (click)="showErrorMsg(dcimConfig)"></clr-icon>       
+            <clr-icon *ngIf="dcimConfig.integrationStatus.status == 'ERROR'" class="alert-icon" style="color: #c92100;cursor: pointer;" shape="exclamation-circle" (click)="showErrorMsg(dcimConfig)"></clr-icon>
             <clr-icon *ngIf="dcimConfig.integrationStatus.status == 'ACTIVE'" class="alert-icon" shape="check-circle" style="color: #318700;"></clr-icon>
             <clr-icon *ngIf="dcimConfig.integrationStatus.status == 'PENDING'" class="alert-icon" shape="exclamation-triangle" style="color: #ffdc0b;"></clr-icon>
         </clr-dg-cell>
     </clr-dg-row>
-  
-  
-  <clr-dg-footer *ngIf="dcimConfigs.length>0">
-           <ul class="pagination">
-               <li style="padding-top: 5px;"><div class="select">
-                 <select id="selects_1" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;setInfo()">
-                   <option>20</option>
-                   <option>30</option>
-                   <option>50</option>
-               </select></div>
-             </li>
-                <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
-                <li class="pagination-current">{{currentPage}}/{{totalPage}}</li>
-                <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button></li>
-            </ul>
-  </clr-dg-footer>
+    <clr-dg-footer>
+        <clr-dg-pagination #pagination [clrDgPageSize]="10" [clrDgTotalItems] = "totalItems">
+        <clr-dg-page-size [clrPageSizeOptions]="[10,20,50]">Integrations of DCIM per page</clr-dg-page-size>
+        {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+        of {{pagination.totalItems}} Integrations
+        </clr-dg-pagination>
+    </clr-dg-footer>
+
   </clr-datagrid>
   <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
      <h3 class="modal-title">Operation Tips</h3>
      <div class="modal-body">
-         <clr-alert [(clrAlertClosed)] = "clrAlertClosed"  [clrAlertType]="'alert-danger'" (clrAlertClosedChange)="onClose()">
+         <clr-alert [(clrAlertClosed)] = "clrAlertClosed"  [clrAlertType]="'danger'" (clrAlertClosedChange)="onClose()">
              <div class="alert-item">
                  <span class="alert-text">
                      Operation Error
@@ -99,4 +91,3 @@ SPDX-License-Identifier: BSD-2-Clause -->
          <button type="button" class="btn btn-primary" (click)="confirm()">Ok</button>
      </div>
   </clr-modal>
-  

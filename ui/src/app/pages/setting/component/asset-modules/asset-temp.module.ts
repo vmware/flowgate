@@ -7,13 +7,15 @@ import { CommonModule } from '@angular/common';
 import { AssetStatusModule } from './assetstatus.module';
 import { AssetRealtimeDataSpecModule } from './assetrealtimedataspec.module';
 
+
+
 @NgModule({
+  declarations: [],
   imports: [
     CommonModule
-  ],
-  declarations: []
+  ]
 })
-export class AssetModule {
+export class AssetTempModule {
   id:string;
   assetNumber:number;
   assetName:string;
@@ -50,4 +52,7 @@ export class AssetModule {
   lastupdate:number;
   created:number;
   tenant:any;
+  unit:string;
+  validNumMin:any;
+  validNumMax:any;
  }

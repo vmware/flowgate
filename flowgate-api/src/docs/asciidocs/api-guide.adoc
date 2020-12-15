@@ -128,7 +128,7 @@ include::{snippets}/assets-getAssetByAssetNumberAndName-example/response-fields.
 [[resources-assets-getBySourceAndType]]
 === getAssetsBySourceAndType
 
-A `GET` request is used to access the Asset read by source and type.
+A `GET` request is used to access the Asset read by source and type.Support fuzzy search based on source.
 
 ==== Request structure
 
@@ -145,6 +145,27 @@ include::{snippets}/assets-getBySourceAndType-example/curl-request.adoc[]
 ==== Response Fields
 
 include::{snippets}/assets-getBySourceAndType-example/response-fields.adoc[]
+
+[[resources-assets-getBySource]]
+=== getAssetsBySource
+
+(Deprecated)A `GET` request is used to access the assets read by source.No Support fuzzy search based on source.
+
+==== Request structure
+
+include::{snippets}/assets-getBySource-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getBySource-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getBySource-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getBySource-example/response-fields.adoc[]
 
 [[resources-assets-getByType]]
 === getAssetsByType

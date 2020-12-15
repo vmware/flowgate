@@ -4,11 +4,10 @@
 */
 import { Component, OnInit } from '@angular/core';
 import {Router,ActivatedRoute} from '@angular/router';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
 import { VmwareService } from '../vmware.service';
 import { SddcsoftwareModule } from '../../../sddcsoftware.module';
+import { ClrDatagridStateInterface } from '@clr/angular';
+import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-vmware-config-list',
   templateUrl: './vmware-config-list.component.html',
@@ -16,7 +15,7 @@ import { SddcsoftwareModule } from '../../../sddcsoftware.module';
 })
 export class VmwareConfigListComponent implements OnInit {
 
-  constructor(private http:Http,private service:VmwareService,private router: Router, private route: ActivatedRoute) { }
+  constructor(private service:VmwareService,private router: Router, private route: ActivatedRoute) { }
 
   vmwareConfigs = [];
   currentPage:number = 1;
@@ -95,80 +94,63 @@ export class VmwareConfigListComponent implements OnInit {
     }
     this.service.updateStatus(toUpdateSddc).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.updateStatusAlertType = "alert-success";
-          if(toUpdateSddc.integrationStatus.status == "ACTIVE"){
-            this.updateStatusAlertcontent = "The server "+sddc.name+" has been activated.";
-          }else{
-            this.updateStatusAlertcontent = "The server "+sddc.name+" has been suspended.";
-          }
-          this.updateStatusAlertclose = false;
-          setTimeout(() => {
-            this.updateStatusAlertclose = true  
-          },2000);
-          this.getVmareConfigdatas(this.currentPage,this.pageSize);
+        this.updateStatusAlertType = "success";
+        if(toUpdateSddc.integrationStatus.status == "ACTIVE"){
+          this.updateStatusAlertcontent = "The server "+sddc.name+" has been activated.";
+        }else{
+          this.updateStatusAlertcontent = "The server "+sddc.name+" has been suspended.";
         }
+        this.updateStatusAlertclose = false;
+        setTimeout(() => {
+          this.updateStatusAlertclose = true  
+        },2000);
+        this.refresh(this.currentState)
       },error=>{
-        this.updateStatusAlertType = "alert-danger";
+        this.updateStatusAlertType = "danger";
         this.updateStatusAlertcontent = "Activation or suspension of the server failed.";
         this.updateStatusAlertclose = false;
         setTimeout(() => {
           this.updateStatusAlertclose = true  
         },2000);
-        this.getVmareConfigdatas(this.currentPage,this.pageSize);
+        this.refresh(this.currentState)
       }
     )
   }
 
-  setInfo(){
-    this.info=this.pageSize;
-    this.getVmareConfigdatas(this.currentPage,this.pageSize)
-  }
-  previous(){
-    if(this.currentPage>1){
-      this.currentPage--;
-      this.getVmareConfigdatas(this.currentPage,this.pageSize)
-    }
-  }
-  next(){
-    if(this.currentPage < this.totalPage){
-      this.currentPage++
-      this.getVmareConfigdatas(this.currentPage,this.pageSize)
-    }
-  }
   loading:boolean = true;
-  getVmareConfigdatas(currentPage,pageSize){
+  currentState:ClrDatagridStateInterface;
+  totalItems:number = 0;
+  refresh(state: ClrDatagridStateInterface){
+    this.vmwareConfigs = [];
+    if (!state.page) {
+      return;
+    }
+    this.currentState = state;
+    this.getVmareConfigdatas(state.page.current,state.page.size);
+  }
+  getVmareConfigdatas(currentPage:number,pageSize:number){
     this.loading = true;
     this.service.getVmwareConfigData(currentPage,pageSize).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.vmwareConfigs = data.json().content;
-          this.vmwareConfigs.forEach(element=>{  
-          if(element.type == "VRO"){
-            element.type = "vROps";
-          }else if(element.type == "VCENTER"){
-            element.type ="vCenter";
-          }  
+        this.vmwareConfigs = data['content'];
+        this.vmwareConfigs.forEach(element=>{  
+        if(element.type == "VRO"){
+          element.type = "vROps";
+        }else if(element.type == "VCENTER"){
+          element.type ="vCenter";
+        }  
           this.checkStatus(element);
         })
-        this.currentPage = data.json().number+1;
-        this.totalPage = data.json().totalPages;
-        if(this.totalPage == 1){
-          this.disabled = "disabled";
-        }else{
-          this.disabled = "";
-        }
+        this.totalItems = data['totalElements'];
         this.loading = false;
-      }
-    },
-    (error)=>{
-      this.loading = false;
-      this.alertType = "alert-danger";
-      this.alertcontent = "Internal error";
-      if(error._body != null && error.status != "0"){
-        this.alertcontent = error.json().message;
-      }
-      this.alertclose = false;
+    },(error:HttpErrorResponse)=>{
+        this.loading = false;
+        this.alertType = "danger";
+        this.alertcontent = "Internal error";
+        if(error.status != 0){
+          this.alertcontent = error.error.message;
+        }
+        this.alertclose = false;
     })
   }
   addNewSddc(){
@@ -179,15 +161,9 @@ export class VmwareConfigListComponent implements OnInit {
   }
   confirmDelete(){
     this.service.deleteVmwareConfig(this.vmwareConfigId).subscribe(data=>{
-      
-      if(data.status == 200){
         this.deleteOperationConfirm = false;
-        this.getVmareConfigdatas(this.currentPage,this.pageSize)
-      }else{
-        this.deleteOperationAlertClosed = false;
-      }
-    },
-    error=>{
+        this.refresh(this.currentState)
+    }, error=>{
       this.deleteOperationAlertClosed = false;
     })
   }
@@ -204,23 +180,14 @@ export class VmwareConfigListComponent implements OnInit {
   syncData(id:string,url:string){
     this.service.syncData(id).subscribe(
       (data)=>{
-        if(data.status == 201){
-            this.alertType = "alert-success";
-            this.alertcontent = "The sync job has been scheduled.";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },2000);
-        }else{
-          this.alertType = "alert-danger";
-          this.alertcontent = "Failed to sync data for " +url;
-          this.alertclose = false;
-          setTimeout(() => {
-            this.alertclose = true  
-          },2000);
-        }
+        this.alertType = "success";
+        this.alertcontent = "The sync job has been scheduled.";
+        this.alertclose = false;
+        setTimeout(() => {
+          this.alertclose = true  
+        },2000);
       },error=>{
-        this.alertType = "alert-danger";
+        this.alertType = "danger";
         this.alertcontent = "Failed to sync data for " +url;
         this.alertclose = false;
         setTimeout(() => {
@@ -230,7 +197,6 @@ export class VmwareConfigListComponent implements OnInit {
     )
   }
   ngOnInit() {
-     this.getVmareConfigdatas(this.currentPage,this.pageSize); 
   
   }
 }

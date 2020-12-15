@@ -13,4 +13,4 @@ export const routes: Routes = [
     {path: 'server-mapping',component: ServermappingComponent}
 ];
 
-export const routing: ModuleWithProviders = RouterModule.forChild(routes);
+export const ROUTING: ModuleWithProviders<RouterModule> = RouterModule.forChild(routes);

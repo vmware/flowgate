@@ -5,26 +5,25 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SddcsoftwareComponent } from './sddcsoftware.component';
-import { routing } from './sddcsoftware.routing';
-import { VmwareComponent } from './component/vmware/vmware.component';
+import { ROUTING } from './sddcsoftware.routing';
 
 @NgModule({
   imports: [
     CommonModule,
-    routing,
+    ROUTING,
     
   ],
   declarations: [SddcsoftwareComponent]
 })
 export class SddcsoftwareModule {
-  public id;
-  public name;
-  public description;
-  public userName;
-  public password;
-  public serverURL;
-  public type;
-  public userId;
-  public verifyCert;
-  public integrationStatus;
+  id:string;
+  name:string;
+  description:string;
+  userName:string;
+  password:string;
+  serverURL:string;
+  type:string;
+  userId:string;
+  verifyCert:boolean;
+  integrationStatus:any;
  }

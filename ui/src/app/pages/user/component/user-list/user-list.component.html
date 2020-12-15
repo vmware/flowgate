@@ -14,50 +14,38 @@ SPDX-License-Identifier: BSD-2-Clause -->
       </span>
   </div>
 </clr-alert>
-<clr-datagrid [clrDgLoading]="loading">
- 
+<clr-datagrid (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">
+
   <clr-dg-column>Username</clr-dg-column>
   <clr-dg-column>Role Name</clr-dg-column>
   <clr-dg-column>Email</clr-dg-column>
   <clr-dg-column>Creation Date</clr-dg-column>
   <clr-dg-placeholder>We couldn't find any users!</clr-dg-placeholder>
 
+  <clr-dg-row *ngFor="let user of users">
+      <clr-dg-action-overflow>
+          <button class="action-item" [disabled]="checkadmin(user.userName)" (click)="onEdit(user.id)" *appHasPrivilege=updateUser>Edit</button>
+          <button class="action-item" [disabled]="checkadmin(user.userName)" (click)="onDelete(user.id)" *appHasPrivilege=deleteUser>Delete</button>
+      </clr-dg-action-overflow>
+        <clr-dg-cell>{{user.userName}}</clr-dg-cell>
+        <clr-dg-cell>{{user.roleNames}}</clr-dg-cell>
+        <clr-dg-cell>{{user.emailAddress}}</clr-dg-cell>
+        <clr-dg-cell>{{user.createTime | date:"yyyy-MM-dd HH:mm:ss"}}</clr-dg-cell>
 
-<clr-dg-row *ngFor="let user of users">
-    <clr-dg-action-overflow>
-        <button class="action-item" [disabled]="checkadmin(user.userName)" (click)="onEdit(user.id)" *appHasPrivilege=updateUser>Edit</button>
-        <button class="action-item" [disabled]="checkadmin(user.userName)" (click)="onDelete(user.id)" *appHasPrivilege=deleteUser>Delete</button>
-    </clr-dg-action-overflow>
-      <clr-dg-cell>{{user.userName}}</clr-dg-cell>
-      <clr-dg-cell>{{user.roleNames}}</clr-dg-cell>
-      <clr-dg-cell>{{user.emailAddress}}</clr-dg-cell>
-      <clr-dg-cell>{{createTime(user.createTime)}}</clr-dg-cell>
-      
-</clr-dg-row>
+  </clr-dg-row>
 
-
-<clr-dg-footer *ngIf="users.length>0">
-        <!-- <clr-dg-pagination #pagination [clrDgPageSize]="1"> -->
-          <ul class="pagination">
-              <li style="padding-top: 5px;"><div class="select">
-                <select id="selects_1" [ngModel]="pageSize" (ngModelChange)="pageSize=$event;setInfo()">
-                  <option>5</option>
-                  <option>10</option>
-                  <option>20</option>
-                  <option>50</option>
-              </select></div>
-            </li>
-               <li ><button class="pagination-previous" type="button" on-click="previous()" ></button></li>
-               <li class="pagination-current">{{currentPage}}/{{totalPage}}</li>
-               <li> <button class="pagination-next" type="button" disabled="{{disabled}}" on-click="next()"></button></li>
-           </ul>
-        <!-- </clr-dg-pagination> -->
-</clr-dg-footer>
+  <clr-dg-footer>
+    <clr-dg-pagination #pagination [clrDgPageSize]="5" [clrDgTotalItems] = "totalItems">
+      <clr-dg-page-size [clrPageSizeOptions]="[5,10,20,50]">Users per page</clr-dg-page-size>
+      {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+      of {{pagination.totalItems}} users
+    </clr-dg-pagination>
+  </clr-dg-footer>
 </clr-datagrid>
 <clr-modal [(clrModalOpen)]="basic" [clrModalStaticBackdrop]="true">
     <h3 class="modal-title">Operation Tips</h3>
     <div class="modal-body">
-        <clr-alert [(clrAlertClosed)] = "clrAlertClosed"  [clrAlertType]="'alert-danger'" (clrAlertClosedChange)="onClose()">
+        <clr-alert [(clrAlertClosed)] = "clrAlertClosed"  [clrAlertType]="'danger'" (clrAlertClosedChange)="onClose()">
             <div class="alert-item">
                 <span class="alert-text">
                     Operation Error

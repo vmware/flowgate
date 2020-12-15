@@ -4,14 +4,16 @@
 */
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { SettingService } from '../../setting.service';
-import { NgForm } from '@angular/forms';
+import { FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { HostNameAndIpmappingModule } from '../../host-name-and-ipmapping/host-name-and-ipmapping.module';
-import { fromEvent } from 'rxjs/observable/fromEvent';
+import { fromEvent ,  of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs/observable/of';
 import { FileUploader, ParsedResponseHeaders, FileItem } from 'ng2-file-upload';
 import {environment} from '../../../../../environments/environment.prod';
 import { AuthenticationService } from '../../../auth/authenticationService';
+import { ClrDatagridStateInterface } from '@clr/angular';
+import { HttpErrorResponse } from '@angular/common/http';
+import { SummaryModule } from '../../summary/summary.module';
 
 @Component({
   selector: 'app-trigger-job',
@@ -19,10 +21,38 @@ import { AuthenticationService } from '../../../auth/authenticationService';
   styleUrls: ['./trigger-job.component.scss']
 })
 export class TriggerJobComponent implements OnInit {
-  constructor(private service:SettingService, private auth:AuthenticationService) { 
+  addAssetIPAndNameMappingForm:FormGroup;
+  editAssetIPAndNameMappingForm:FormGroup;
+  ipRegx:string =  "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
+
+  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+  
+  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+  
+  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$";
+  constructor(private service:SettingService, private auth:AuthenticationService,private fb: FormBuilder) { 
     this.uploader.onSuccessItem = this.successItem.bind(this);
     this.uploader.onErrorItem = this.errorItem.bind(this);
-    // this.uploader.onBuildItemForm = this.onBuildItemForm.bind(this);
+    this.addAssetIPAndNameMappingForm =  this.fb.group({
+      ip: ['', [
+        Validators.required,
+        Validators.pattern(this.ipRegx)
+      ]],
+      assetname: ['', [
+        Validators.required
+      ]]
+    });
+    this.editAssetIPAndNameMappingForm =  this.fb.group({
+      id: ['', [
+      ]],
+      ip: ['', [
+        Validators.required,
+        Validators.pattern(this.ipRegx)
+      ]],
+      assetname: ['', [
+        Validators.required
+      ]]
+    });
   }
   triggerTipBox:boolean=false;
   syncData:string[]=["startFullMappingAggregation","generateServerPDUMapping"];
@@ -42,7 +72,7 @@ export class TriggerJobComponent implements OnInit {
       "description":"Manually Trigger the aggregate PDUs and Server mapping job. It will try to find out the possible PDUs that a server is connected to. The job will automatically executed by daily."
     }
   ]
-  servers=[];
+  servers:string[]=[];
   serverloading:boolean=false;
  
   serverMapping:boolean=false;
@@ -63,31 +93,9 @@ export class TriggerJobComponent implements OnInit {
   userFormRef:NgForm;
   errorShow:boolean = false;
   errorMsg:string = "";
-  flowgateSummery={
-    "assetsNum": 0,
-    "facilitySystemNum": 0,
-    "serverNum": 0,
-    "pduNum": 0,
-    "cabinetNum": 0,
-    "switchNum": 0,
-    "sensorNum": 0,
-    "categoryIsUpsNum": 0,
-    "userNum": 0,
-    "sddcServerNum": 0,
-    "sddcIntegrationNum": 0,
-    "vcNum": 0,
-    "vroNum": 0,
-    "humiditySensorNum": 0,
-    "temperatureSensorNum": 0,
-    "airFlowSensorNum": 0,
-    "smokeSensorNum": 0,
-    "waterSensorNum": 0,
-    "nlyteSummary": [],
-    "powerIqSummary": [],
-    "vcSummary": [],
-    "vroSummary": []
-  }
-
+  unmappedServerErrorMsg:string = "";
+  flowgateSummary:SummaryModule = new SummaryModule();
+  
   close(){
     this.alertclose = true
   }
@@ -97,93 +105,67 @@ export class TriggerJobComponent implements OnInit {
       this.serverMapping = true;
       this.service.mergeserverMapping().subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.serverMapping = false;
-            this.alertType = "alert-success";
-            this.alertcontent = "Trigger Success";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },2000);
-          }else{
-            this.serverMapping = false;
-            this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
-          }
+          this.serverMapping = false;
+          this.alertType = "success";
+          this.alertcontent = "Trigger Success";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },2000);
         },error=>{
           this.serverMapping = false;
-          this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
+          this.alertType = "danger";
+          this.alertcontent = "Trigger Failed";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },5000);
         }
       )
     }else if(jobname == "job2"){
       this.pduMapping = true;
       this.service.mergePduServerMapping().subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.pduMapping = false;
-            this.alertType = "alert-success";
-            this.alertcontent = "Trigger Success";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },2000);
-          }else{
-            this.pduMapping = false;
-            this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
-          }
+        
+          this.pduMapping = false;
+          this.alertType = "success";
+          this.alertcontent = "Trigger Success";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },2000);
+
         },error=>{
           this.pduMapping = false;
-          this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
+          this.alertType = "danger";
+          this.alertcontent = "Trigger Failed";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },5000);
         }
       )
     }else if(jobname == "job3"){
       this.temphumidityMapping = true;
       this.service.fullSyncTempAndHumiditySensors(true).subscribe(
         (data)=>{
-          if(data.status == 201){
-            this.temphumidityMapping = false;
-            this.alertType = "alert-success";
-            this.alertcontent = "Trigger Success";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },2000);
-          }else{
-            this.temphumidityMapping = false;
-            this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
-          }
+
+          this.temphumidityMapping = false;
+          this.alertType = "success";
+          this.alertcontent = "Trigger Success";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },2000);
+      
         },error=>{
           this.temphumidityMapping = false;
-          this.alertType = "alert-danger";
-            this.alertcontent = "Trigger Failed";
-            this.alertclose = false;
-            setTimeout(() => {
-              this.alertclose = true  
-            },5000);
+          this.alertType = "danger";
+          this.alertcontent = "Trigger Failed";
+          this.alertclose = false;
+          setTimeout(() => {
+            this.alertclose = true  
+          },5000);
         }
       )
     }
@@ -201,20 +183,19 @@ export class TriggerJobComponent implements OnInit {
     this.validExpiredTime = false;
     this.errorShow = false;
     this.errorMsg = "";
+    this.unmappedServerErrorMsg = "";
   }
   save(){
     let tosaveTime = this.toUpdateExpiredTimeRange*24*3600*1000;
     this.service.updatesTimeRange(tosaveTime).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.updateExpiredTime = false;
-          this.errorShow = false;
-          this.errorMsg = "";
-          this.getExpiredTimeRange();
-        }
-      },error=>{
+        this.updateExpiredTime = false;
+        this.errorShow = false;
+        this.errorMsg = "";
+        this.getExpiredTimeRange();
+      },(error:HttpErrorResponse)=>{
         this.errorShow = true;
-        this.errorMsg = error.json().message;
+        this.errorMsg = error.message;
       }
     )
   }
@@ -230,8 +211,8 @@ export class TriggerJobComponent implements OnInit {
 
   getExpiredTimeRange(){
     this.service.getExpiredTimeRange().subscribe(
-      (data)=>{
-        this.expiredTimeRange = data.text();
+      (data:Number)=>{
+        this.expiredTimeRange = data;
         this.expiredTimeRange = this.expiredTimeRange/(3600*1000*24)
         this.toUpdateExpiredTimeRange = this.expiredTimeRange;
       }
@@ -263,11 +244,13 @@ export class TriggerJobComponent implements OnInit {
     setTimeout(() => {
       this.unmappedservershow = true;
       this.service.getUnmappedserver().subscribe(
-        (data)=>{
-          if(data.status == 200){
-            this.servers = data.json();
-            this.serverloading = false;
-          }
+        (data:string[])=>{
+          this.servers = data;
+          this.serverloading = false;
+          this.unmappedServerErrorMsg = "";
+        },(error:HttpErrorResponse)=>{
+          this.unmappedservershow = true;
+          this.unmappedServerErrorMsg = error.message;
         }
       )
     },2000);
@@ -275,10 +258,8 @@ export class TriggerJobComponent implements OnInit {
   }
   getFirstPageData(){
     this.service.getSystemSummaryData().subscribe(
-      (data)=>{
-        if(data.status == 200){
-          this.flowgateSummery = data.json();
-        }
+      (data:SummaryModule)=>{
+        this.flowgateSummary = data;
       }
     )
   }
@@ -293,24 +274,10 @@ export class TriggerJobComponent implements OnInit {
   pageSize:number = 10;
   pageNumber:number = 1;
   mappingsTotalPage:number = 0;
-  loading:boolean = false;
+  loading:boolean = true;
   disabled:string="";
   selectedAssetName:string="";
-  changePageSize(){
-    this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
-  }
-  previous(){
-    if(this.pageNumber>1){
-      this.pageNumber--;
-      this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
-    }
-  }
-  next(){
-    if(this.pageNumber < this.mappingsTotalPage){
-      this.pageNumber++
-      this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
-    }
-  }
+
   searchIP:string = null;
   searchBtnState:boolean = false;
   searchBtnDisabled:boolean = false;
@@ -320,13 +287,14 @@ export class TriggerJobComponent implements OnInit {
     if(this.searchIP != null){
       let ip = this.searchIP.trim();
       if(ip == ""){
-        this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,null);
+        this.searchIP = null;
+        this.refresh(this.currentState);
       }else{
         if(ip.match(this.ipRegx)){
           this.pageSize = 10;
           this.pageNumber = 1;
           this.searchErrorShow = false;
-          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,ip);
+          this.refresh(this.currentState);
         }else{
           this.searchErrorShow = true;
           this.searchErrorMsg = "Please enter a valid IP";
@@ -334,24 +302,25 @@ export class TriggerJobComponent implements OnInit {
       }
     }
   }
-  getHostNameAndIPMappings(pagesize:number,pagenumber:number,searchIP:string){
+  currentState:ClrDatagridStateInterface;
+  totalItems:number = 0;
+  refresh(state: ClrDatagridStateInterface){
+    if (!state.page) {
+      return;
+    }
+    this.currentState = state;
     this.loading = true;
-    this.service.getHostNameAndIPMapping(pagenumber,pagesize,searchIP).subscribe(
+    this.getHostNameAndIPMappings(state.page.size,state.page.current);
+  }
+
+  getHostNameAndIPMappings(pagesize:number,pagenumber:number){
+    this.service.getHostNameAndIPMapping(pagenumber,pagesize,this.searchIP).subscribe(
       data=>{
-        if(data.status == 200){
-          this.loading = false;
-          if(data.text() != null){
-            this.hostNameAndIPMappings = data.json().content;
-            this.mappingsTotalPage = data.json()
-            this.pageNumber = data.json().number+1;
-            this.mappingsTotalPage = data.json().totalPages
-            if(this.mappingsTotalPage == 1){
-              this.disabled = "disabled";
-            }else{
-              this.disabled = "";
-            }
-          }
-        }
+        this.selectedHostNameAndIPMappings = [];
+        this.hostNameAndIPMappings = [];
+        this.loading = false;
+        this.hostNameAndIPMappings = data['content'];
+        this.totalItems = data['totalElements'];
       },(error)=>{
         this.loading = false;
       }
@@ -371,14 +340,14 @@ export class TriggerJobComponent implements OnInit {
     this.deleteHostNameAndIPMapping = false;
     this.service.deleteHostNameAndIPMapping(this.selectedHostNameAndIPMappings[0].id).subscribe(
       data=>{
-        if(data.status == 200){
-          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
-        }
+        this.selectedHostNameAndIPMappings = [];
+        this.refresh(this.currentState);
       }
     )
   }
   onAdd(){
     this.AddHostNameAndIPMapping = true;
+    this.saveMappingErrorShow = false;
     this.hostNameAndIPMapping = new HostNameAndIpmappingModule();
     setTimeout(() => {
       const input = document.querySelector('#hostname');
@@ -387,13 +356,13 @@ export class TriggerJobComponent implements OnInit {
         debounceTime(700),
         distinctUntilChanged(),
         switchMap(
-          e => this.searchAssetName(this.hostNameAndIPMapping.assetname)
+          e => this.searchAssetName(this.addAssetIPAndNameMappingForm.get('assetname').value)
         )
       ).subscribe(
-        (response)=>{
+        (response:string[])=>{
           this.searchAssetNameloading = false;
           if(response != null){
-            this.assetNames = response.json();
+            this.assetNames = response;
           }
         }
       )   
@@ -401,8 +370,11 @@ export class TriggerJobComponent implements OnInit {
   }
   onEdit(){
     this.editHostNameAndIPMapping = true;
-    this.hostNameAndIPMapping = this.selectedHostNameAndIPMappings[0];
-    this.selectedAssetName = this.hostNameAndIPMapping.assetname;
+    this.saveMappingErrorShow = false;
+    this.editAssetIPAndNameMappingForm.get("id").setValue(this.selectedHostNameAndIPMappings[0].id);
+    this.editAssetIPAndNameMappingForm.get("ip").setValue(this.selectedHostNameAndIPMappings[0].ip);
+    this.editAssetIPAndNameMappingForm.get("assetname").setValue(this.selectedHostNameAndIPMappings[0].assetname);
+    this.selectedAssetName = this.selectedHostNameAndIPMappings[0].assetname;
     setTimeout(() => {
       const input = document.querySelector('#hostnameedit');
       const input$ = fromEvent(input, 'input');
@@ -410,32 +382,41 @@ export class TriggerJobComponent implements OnInit {
         debounceTime(700),
         distinctUntilChanged(),
         switchMap(
-          e => this.searchAssetName(this.hostNameAndIPMapping.assetname)
+          e => this.searchAssetName(this.editAssetIPAndNameMappingForm.get('assetname').value)
         )
       ).subscribe(
-        (response)=>{
+        (response:string[])=>{
           this.searchAssetNameloading = false;
           if(response != null){
-            this.assetNames = response.json();
+            this.assetNames = response;
           }
         }
       )   
       }, 100);
   }
   selectItem(item:any){
-    this.hostNameAndIPMapping.assetname = item;
+    this.selectedAssetName = item;
+  }
+  selectItemForEdit(item:any){
     this.selectedAssetName = item;
   }
   hidden:boolean = true;
-  focus(){
+  focusAdd(){
     this.hidden = false;
-    this.hostNameAndIPMapping.assetname = this.selectedAssetName;
-    
   }
-  blur(){
+  focusEdit(){
+    this.hidden = false;
+  }
+  blurAdd(){
     setTimeout(() => {
     this.hidden = true;
-    this.hostNameAndIPMapping.assetname = this.selectedAssetName;
+    this.addAssetIPAndNameMappingForm.get("assetname").setValue(this.selectedAssetName);
+    }, 150);
+  }
+  blurEdit(){
+    setTimeout(() => {
+    this.hidden = true;
+    this.editAssetIPAndNameMappingForm.get("assetname").setValue(this.selectedAssetName);
     }, 150);
   }
   searchAssetNameloading:boolean = false;
@@ -452,6 +433,8 @@ export class TriggerJobComponent implements OnInit {
     this.AddHostNameAndIPMapping = false;
     this.selectedAssetName = "";
     this.editHostNameAndIPMapping = false;
+    this.addAssetIPAndNameMappingForm.reset();
+    this.editAssetIPAndNameMappingForm.reset();
     this.assetNames = [];
   }
   saveMappingErrorShow:boolean = false;
@@ -459,51 +442,45 @@ export class TriggerJobComponent implements OnInit {
   saveMappingLoading:boolean = false;
   confirmSave(){
     this.saveMappingLoading = true;
-    this.service.saveHostNameAndIPMapping(this.hostNameAndIPMapping).subscribe(
+    let hostNameAndIPMapping:HostNameAndIpmappingModule = this.addAssetIPAndNameMappingForm.value;
+    this.service.saveHostNameAndIPMapping(hostNameAndIPMapping).subscribe(
       (data)=>{
-        if(data.status == 201){
-          this.selectedAssetName = "";
-          this.saveMappingLoading = false;
-          this.AddHostNameAndIPMapping = false;
-          this.assetNames = [];
-          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP) 
-        }
-      },error=>{
+        this.selectedAssetName = "";
+        this.saveMappingLoading = false;
+        this.AddHostNameAndIPMapping = false;
+        this.assetNames = [];
+        this.addAssetIPAndNameMappingForm.reset();
+        this.refresh(this.currentState);
+      },(error:HttpErrorResponse)=>{
         this.saveMappingLoading = false;
         this.saveMappingErrorShow = true;
         this.assetNames = [];
-        this.saveMappingError = error.json().message;
+        this.saveMappingError = error.error.message;
       }
     )
   }
 
   confirmUpdate(){
     this.saveMappingLoading = true;
-    this.service.updateHostNameAndIPMapping(this.hostNameAndIPMapping).subscribe(
+    let hostNameAndIPMapping:HostNameAndIpmappingModule = this.editAssetIPAndNameMappingForm.value;
+    this.service.updateHostNameAndIPMapping(hostNameAndIPMapping).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.selectedAssetName = "";
-          this.saveMappingLoading = false;
-          this.editHostNameAndIPMapping = false;
-          this.assetNames = [];
-          this.getHostNameAndIPMappings(this.pageSize,this.pageNumber,this.searchIP)
-        }
-      },error=>{
+        this.selectedAssetName = "";
+        this.saveMappingLoading = false;
+        this.editHostNameAndIPMapping = false;
+        this.selectedHostNameAndIPMappings = [];
+        this.assetNames = [];
+        this.refresh(this.currentState);
+      },(error:HttpErrorResponse)=>{
         this.saveMappingLoading = false;
         this.saveMappingErrorShow = true;
         this.assetNames = [];
-        this.saveMappingError = error.json().message;
+        this.selectedHostNameAndIPMappings = [];
+        this.saveMappingError = error.error.message;
       }
     )
   }
   invalidIP = false;
-  ipRegx:string =  "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
-
-  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
-  
-  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
-  
-  +"(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$";
   getIPValidationState(){
     return this.invalidIP;
   }
@@ -584,10 +561,8 @@ export class TriggerJobComponent implements OnInit {
       this.uploadError = true;
       this.uploadErrorMsg = "Upload failure" + response;
     }else{
-      this.pageSize = 10;
-      this.pageNumber = 1;
+      this.refresh(this.currentState);
       this.searchIP = null;
-      this.changePageSize();
       this.failureMappings = JSON.parse(response);
       if(this.failureMappings.length == 0){
         this.uploadMappingFile = false;

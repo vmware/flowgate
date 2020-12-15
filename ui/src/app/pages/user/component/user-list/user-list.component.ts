@@ -4,11 +4,10 @@
 */
 import { Component, OnInit,Input } from '@angular/core';
 import { DataServiceService } from '../../../../data-service.service';
-import {Router,ActivatedRoute} from '@angular/router';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
+import {Router} from '@angular/router';
 import { UserService } from '../../user.service';
+import { ClrDatagridStateInterface } from '@clr/angular';
+import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
@@ -17,7 +16,7 @@ import { UserService } from '../../user.service';
 })
 export class UserListComponent implements OnInit {
   @Input()auth;
-  constructor(private http:Http,private data:UserService,private router: Router, private route: ActivatedRoute) { }
+  constructor(private data:UserService,private router: Router) { }
   users = [];
   currentPage:number = 1;
   totalPage:number = 1;
@@ -37,31 +36,6 @@ export class UserListComponent implements OnInit {
     }
     return false;
   }
-  setInfo(){
-    this.info=this.pageSize;
-    this.getUserdatas(this.currentPage,this.pageSize)
-  }
-  previous(){
-    if(this.currentPage>1){
-      this.currentPage--;
-      this.getUserdatas(this.currentPage,this.pageSize)
-    }
-  }
-  next(){
-    if(this.currentPage < this.totalPage){
-      this.currentPage++
-      this.getUserdatas(this.currentPage,this.pageSize)
-    }
-  }
-  createTime(time){
-		var da = time;
-	    da = new Date(da);
-	    var year = da.getFullYear()+'-';
-	    var month = da.getMonth()+1+'-';
-	    var date = da.getDate();
-	    return year+month+date;
-  }
-
   alertclose:boolean = true;
   alertType:string = "";
   alertcontent:string = "";
@@ -70,30 +44,34 @@ export class UserListComponent implements OnInit {
   }
   
   loading:boolean = true;
-  getUserdatas(currentPage,pageSize){
+  currentState:ClrDatagridStateInterface;
+  totalItems:number = 0;
+  refresh(state: ClrDatagridStateInterface){
+    this.users = [];
+    if (!state.page) {
+      return;
+    }
+    this.currentState = state;
+    this.getUsers(state.page.current,state.page.size);
+  }
+  getUsers(currentPage:number,pageSize:number){
+    this.loading = true;
     this.data.getUserData(currentPage,pageSize).subscribe(
       (data)=>{
-        if(data.status == 200){
-          this.loading = false;
-          this.users = data.json().content;
-          this.currentPage = data.json().number+1;
-          this.totalPage = data.json().totalPages
-          if(this.totalPage == 1){
-            this.disabled = "disabled";
-          }else{
-            this.disabled = "";
-          }  
-      }
-    },(error)=>{
-      this.loading = false;
-      this.alertType = "alert-danger";
-      this.alertcontent = "Internal error";
-      if(error._body != null && error.status != "0"){
-        this.alertcontent = error.json().message;
-      }
-      this.alertclose = false;
+        this.loading = false;
+        this.users = data['content'];
+        this.totalItems = data['totalElements'];  
+    },(error:HttpErrorResponse)=>{
+        this.loading = false;
+        this.alertType = "danger";
+        this.alertcontent = "Internal error";
+        if(error.status != 0){
+          this.alertcontent = error.error.message;
+        }
+        this.alertclose = false;
     })
   }
+
   toEditUser(){
     this.router.navigate(["/ui/nav/user/user-add"]);
   }
@@ -101,16 +79,12 @@ export class UserListComponent implements OnInit {
     this.router.navigate(['/ui/nav/user/user-edit',id]);
   }
   confirm(){
-    this.data.deleteUser(this.userId).subscribe(data=>{
-      if(data.status == 200){
+    this.data.deleteUser(this.userId).subscribe(
+      data=>{
         this.basic = false;
-        this.getUserdatas(this.currentPage,this.pageSize)
-      }else{
+        this.refresh(this.currentState);
+    },error=>{
         this.clrAlertClosed = false;
-      }
-    },
-    error=>{
-      this.clrAlertClosed = false;
     })
   }
   onClose(){
@@ -125,7 +99,6 @@ export class UserListComponent implements OnInit {
     this.userId = id;
   }
   ngOnInit() {
-     this.getUserdatas(this.currentPage,this.pageSize); 
   
   }
 }

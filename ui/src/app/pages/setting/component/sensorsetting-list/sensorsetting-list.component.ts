@@ -4,9 +4,6 @@
 */
 import { Component, OnInit } from '@angular/core';
 import {Router,ActivatedRoute} from '@angular/router';
-import { error } from 'util';
-import {Http,RequestOptions } from '@angular/http'
-import { Headers, URLSearchParams } from '@angular/http';
 import { SettingService } from '../../setting.service';
 @Component({
   selector: 'app-sensorsetting-list',
@@ -14,7 +11,7 @@ import { SettingService } from '../../setting.service';
   styleUrls: ['./sensorsetting-list.component.scss']
 })
 export class SensorsettingListComponent implements OnInit {
-  constructor(private http:Http,private data:SettingService,private router: Router, private route: ActivatedRoute) { }
+  constructor(private data:SettingService,private router: Router) { }
   sensorsettings = [];
   currentPage:number = 1;
   totalPage:number = 1;
@@ -45,26 +42,18 @@ export class SensorsettingListComponent implements OnInit {
       this.getsensorsettingdatas(this.currentPage,this.pageSize)
     }
   }
-  createTime(time){
-		var da = time;
-	    da = new Date(da);
-	    var year = da.getFullYear()+'-';
-	    var month = da.getMonth()+1+'-';
-	    var date = da.getDate();
-	    return year+month+date;
-	}
+
   getsensorsettingdatas(currentPage,pageSize){
     this.data.getsensorsettingData(currentPage,pageSize).subscribe(
-      (data)=>{if(data.status == 200){
-            this.sensorsettings = data.json().content;
-            this.currentPage = data.json().number+1;
-            this.totalPage = data.json().totalPages
-            if(this.totalPage == 1){
-              this.disabled = "disabled";
-            }else{
-              this.disabled = "";
-            }  
-      }
+      (data)=>{
+        this.sensorsettings = data['content'];
+        this.currentPage = data['number']+1;
+        this.totalPage = data['totalPages']
+        if(this.totalPage == 1){
+          this.disabled = "disabled";
+        }else{
+          this.disabled = "";
+        }  
     })
   }
   toEditSensorsetting(){
@@ -74,16 +63,12 @@ export class SensorsettingListComponent implements OnInit {
     this.router.navigate(['/ui/nav/setting/sensorsetting-edit',id]);
   }
   confirm(){
-    this.data.deletesensorsetting(this.sensorsettingId).subscribe(data=>{
-      if(data.status == 200){
+    this.data.deletesensorsetting(this.sensorsettingId).subscribe(
+      data=>{
         this.basic = false;
         this.getsensorsettingdatas(this.currentPage,this.pageSize)
-      }else{
+    }, error=>{
         this.clrAlertClosed = false;
-      }
-    },
-    error=>{
-      this.clrAlertClosed = false;
     })
   }
   onClose(){
