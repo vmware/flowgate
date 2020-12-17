@@ -83,7 +83,7 @@ public class SycnRealTimeDataJobTest {
    @Before
    public void before() {
       MockitoAnnotations.initMocks(this);
-      Mockito.when(this.wormholeAPIClient.getFacilitySoftwareByType(SoftwareType.Nlyte)).thenReturn(getFacilitySoftwareByType());
+      Mockito.when(this.wormholeAPIClient.getFacilitySoftwareInternalByType(SoftwareType.Nlyte)).thenReturn(getFacilitySoftwareByType());
       Mockito.when(this.wormholeAPIClient.getMappedAsset(AssetCategory.Server)).thenReturn(getMappedAsset());
       Mockito.when(this.wormholeAPIClient.getAssetByID("5x4ff46982db22e1b040e0f2")).thenReturn(getAssetByID());
       Mockito.when(this.wormholeAPIClient.saveRealTimeData(anyList())).thenReturn(saveRealTimeData());

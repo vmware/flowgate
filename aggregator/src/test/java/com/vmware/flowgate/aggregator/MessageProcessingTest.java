@@ -4,7 +4,6 @@
 */
 package com.vmware.flowgate.aggregator;
 
-import static org.hamcrest.CoreMatchers.anything;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -25,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.internal.matchers.Any;
 import org.quartz.JobExecutionException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -256,14 +254,14 @@ public class MessageProcessingTest {
       FacilitySoftwareConfig fac1 = createFacilitySoftware();
       String unique_value1 = UUID.randomUUID().toString();
       fac1.setSubCategory("OtherDCIM_"+unique_value1);
-      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
+      when(restClient.getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
 
       FacilitySoftwareConfig fac2 = createFacilitySoftware();
-      fac2.setType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB);
+      fac2.setType(FacilitySoftwareConfig.SoftwareType.OtherCMDB);
       String unique_value2 = UUID.randomUUID().toString();
       fac2.setSubCategory("OtherCMDB_"+unique_value2);
 
-      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(getFacilitySoftwareByType(fac2));
+      when(restClient.getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(getFacilitySoftwareByType(fac2));
 
       FacilityAdapter adapter = new FacilityAdapter();
       adapter.setSubCategory("OtherDCIM_"+unique_value1);
@@ -306,14 +304,14 @@ public class MessageProcessingTest {
       FacilitySoftwareConfig fac1 = createFacilitySoftware();
       String unique_value1 = UUID.randomUUID().toString();
       fac1.setSubCategory("OtherDCIM_"+unique_value1);
-      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
+      when(restClient.getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
 
       FacilitySoftwareConfig fac2 = createFacilitySoftware();
-      fac2.setType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB);
+      fac2.setType(FacilitySoftwareConfig.SoftwareType.OtherCMDB);
       String unique_value2 = UUID.randomUUID().toString();
       fac2.setSubCategory("OtherCMDB_"+unique_value2);
 
-      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(getFacilitySoftwareByType(fac2));
+      when(restClient.getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(getFacilitySoftwareByType(fac2));
 
       FacilityAdapter adapter = new FacilityAdapter();
       adapter.setSubCategory("OtherDCIM_"+unique_value1);
@@ -349,8 +347,8 @@ public class MessageProcessingTest {
       FacilitySoftwareConfig fac1 = createFacilitySoftware();
       String unique_value1 = UUID.randomUUID().toString();
       fac1.setSubCategory("OtherDCIM_"+unique_value1);
-      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
-      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(new ResponseEntity<FacilitySoftwareConfig[]>(new FacilitySoftwareConfig[0], HttpStatus.OK));
+      when(restClient.getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(getFacilitySoftwareByType(fac1));
+      when(restClient.getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(new ResponseEntity<FacilitySoftwareConfig[]>(new FacilitySoftwareConfig[0], HttpStatus.OK));
 
       FacilityAdapter adapter = new FacilityAdapter();
       adapter.setSubCategory("OtherDCIM_"+unique_value1);
@@ -381,8 +379,8 @@ public class MessageProcessingTest {
       FacilitySoftwareConfig fac1 = createFacilitySoftware();
       String unique_value1 = UUID.randomUUID().toString();
       fac1.setSubCategory("OtherDCIM_"+unique_value1);
-      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(new ResponseEntity<FacilitySoftwareConfig[]>(new FacilitySoftwareConfig[0], HttpStatus.OK));
-      when(restClient.getFacilitySoftwareByType(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(new ResponseEntity<FacilitySoftwareConfig[]>(new FacilitySoftwareConfig[0], HttpStatus.OK));
+      when(restClient.getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.OtherDCIM)).thenReturn(new ResponseEntity<FacilitySoftwareConfig[]>(new FacilitySoftwareConfig[0], HttpStatus.OK));
+      when(restClient.getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.OtherCMDB)).thenReturn(new ResponseEntity<FacilitySoftwareConfig[]>(new FacilitySoftwareConfig[0], HttpStatus.OK));
 
       FacilityAdapter adapter = new FacilityAdapter();
       adapter.setSubCategory("OtherDCIM_"+unique_value1);

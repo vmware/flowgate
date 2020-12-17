@@ -57,7 +57,7 @@ public class PowerIQJobDispatcher extends BaseJob implements Job {
       }catch(Exception e) {
          logger.error("Failed to set execount", e);
       }
-      FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
+      FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareInternalByType(SoftwareType.PowerIQ).getBody();
       if(powerIQs ==null || powerIQs.length==0) {
          logger.info("No PowerIQ server find");
          return;

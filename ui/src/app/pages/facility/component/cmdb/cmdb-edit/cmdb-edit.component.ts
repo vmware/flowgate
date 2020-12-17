@@ -46,7 +46,6 @@ export class CmdbEditComponent implements OnInit {
         Validators.required
       ]],
       password: ['', [
-        Validators.required
       ]],
       verifyCert: ['true', [
         Validators.required
@@ -73,15 +72,12 @@ export class CmdbEditComponent implements OnInit {
   enableProxySearch:boolean = false;
   checkIsLabsDB(){
     this.editCMDBForm.controls["userName"].setValidators([Validators.required]);
-    this.editCMDBForm.controls["password"].setValidators([Validators.required]);
     this.isInfoblox = false;
     let subcategory:string =  this.editCMDBForm.get('type').value;
     let adapter:FacilityAdapterModule = this.adapterMap.get(subcategory);
     if(adapter.type == "Labsdb"){
       this.editCMDBForm.controls["userName"].clearValidators();
       this.editCMDBForm.controls["userName"].setValidators([Validators.nullValidator]);
-      this.editCMDBForm.controls["password"].clearValidators();
-      this.editCMDBForm.controls["password"].setValidators([Validators.nullValidator]);
     }else if(adapter.type == "InfoBlox"){
       this.isInfoblox = true;
       if(this.editCMDBForm.get('advanceSetting').value != null && this.editCMDBForm.get('advanceSetting').value.INFOBLOX_PROXY_SEARCH != ""){
@@ -90,7 +86,6 @@ export class CmdbEditComponent implements OnInit {
       }
     }
     this.editCMDBForm.controls['userName'].updateValueAndValidity();
-    this.editCMDBForm.controls['password'].updateValueAndValidity();
   }
 
   save(){

@@ -58,7 +58,7 @@ public class SyncPduAssetJobTest {
    @Before
    public void before() {
       MockitoAnnotations.initMocks(this);
-      Mockito.when(this.wormholeAPIClient.getFacilitySoftwareByType(SoftwareType.PowerIQ))
+      Mockito.when(this.wormholeAPIClient.getFacilitySoftwareInternalByType(SoftwareType.PowerIQ))
             .thenReturn(new SyncSensorMetaDataJobTest().getFacilitySoftwareByType(SoftwareType.PowerIQ));
       Mockito.when(this.wormholeAPIClient.getAllAssetsBySourceAndType("l9i8728d55368540fcba1692",
             AssetCategory.PDU)).thenReturn(getAssets());

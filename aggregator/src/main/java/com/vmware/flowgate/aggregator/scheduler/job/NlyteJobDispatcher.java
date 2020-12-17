@@ -64,7 +64,7 @@ public class NlyteJobDispatcher extends BaseJob implements Job {
          logger.error("Failed to set execount", e);
       }
       FacilitySoftwareConfig[] nlytes =
-            restClient.getFacilitySoftwareByType(SoftwareType.Nlyte).getBody();
+            restClient.getFacilitySoftwareInternalByType(SoftwareType.Nlyte).getBody();
       if (nlytes == null || nlytes.length == 0) {
          logger.info("No Nlyte server find");
          return;

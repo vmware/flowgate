@@ -255,7 +255,7 @@ public class PowerIQService implements AsyncService {
    public void syncAllSensorMetricFormula() {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       FacilitySoftwareConfig[] powerIQs =
-            restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
+            restClient.getFacilitySoftwareInternalByType(SoftwareType.PowerIQ).getBody();
       for(FacilitySoftwareConfig powerIQ : powerIQs) {
          logger.info("Start sync sensor metrics formula for " + powerIQ.getName());
          List<Asset> pdusFromFlowgate = restClient.getAllAssetsBySourceAndType(powerIQ.getId(), AssetCategory.PDU);

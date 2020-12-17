@@ -162,7 +162,7 @@ public class AggregatorService implements AsyncService {
    public void aggregateAndCleanPDUFromPowerIQ() {
       logger.info("Start aggregate pdu from PowerIQ to other systems");
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareByType(SoftwareType.PowerIQ).getBody();
+      FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareInternalByType(SoftwareType.PowerIQ).getBody();
       if(powerIQs ==null || powerIQs.length==0) {
          logger.info("No PowerIQ server find");
          return;

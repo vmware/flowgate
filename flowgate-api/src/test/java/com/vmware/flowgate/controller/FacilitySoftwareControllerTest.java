@@ -260,12 +260,13 @@ public class FacilitySoftwareControllerTest {
    }
 
    @Test
-   public void updateAnFacilitySoftware() throws JsonProcessingException, Exception {
+   public void updateAnFacilitySoftware() throws Exception {
       NlyteAuth nlyteAuth = Mockito.mock(NlyteAuth.class);
       Mockito.doReturn(false).when(nlyteAuth).auth(Mockito.any(FacilitySoftwareConfig.class));
       Mockito.doReturn(nlyteAuth).when(serverValidationService).createNlyteAuth();
 
       FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
+      facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
       facilitySoftwareRepository.save(facilitySoftware);
       facilitySoftware.setDescription("for generalUser");
       facilitySoftware.setUserName("generalUser");
@@ -297,6 +298,34 @@ public class FacilitySoftwareControllerTest {
                      fieldWithPath("integrationStatus.status").type(IntegrationStatus.Status.class).description("The status of integration.").optional(),
                      fieldWithPath("integrationStatus.detail").type(String.class).description("If the status is error, it means error message").optional(),
                      fieldWithPath("integrationStatus.retryCounter").type(JsonFieldType.NUMBER).description("Retry counter").optional())));
+
+         facilitySoftware.setPassword(null);
+         this.mockMvc
+                  .perform(put("/v1/facilitysoftware").contentType(MediaType.APPLICATION_JSON)
+                           .content(objectMapper.writeValueAsString(facilitySoftware)))
+                  .andDo(document("facilitySoftware-update-example", requestFields(
+                           fieldWithPath("id")
+                                    .description("ID of the facilitySoftware, created by flowgate"),
+                           fieldWithPath("name").description("The facilitySoftware name."),
+                           fieldWithPath("description").description("The facilitySoftware description."),
+                           fieldWithPath("serverURL")
+                                    .description("The server's address, it can be an IP or FQDN."),
+                           fieldWithPath("userName")
+                                    .description("An username used to obtain authorization"),
+                           fieldWithPath("password")
+                                    .description(" A password used to obtain authorization."),
+                           fieldWithPath("type").description(
+                                    "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB")
+                                    .type(AssetSubCategory.class).optional(),
+                           fieldWithPath("userId").description("userId"),
+                           fieldWithPath("subCategory").description(
+                                    "subCategory"),
+                           fieldWithPath("verifyCert").description(
+                                    "Whether to verify the certificate when accessing the serverURL."),
+                           fieldWithPath("advanceSetting").description("advanceSetting"),
+                           fieldWithPath("integrationStatus.status").type(IntegrationStatus.Status.class).description("The status of integration.").optional(),
+                           fieldWithPath("integrationStatus.detail").type(String.class).description("If the status is error, it means error message").optional(),
+                           fieldWithPath("integrationStatus.retryCounter").type(JsonFieldType.NUMBER).description("Retry counter").optional())));
       } catch (Exception e) {
          TestCase.fail();
       }finally {
@@ -464,7 +493,82 @@ public class FacilitySoftwareControllerTest {
          facilitySoftwareRepository.deleteById(facilitySoftware1.getId());
          facilitySoftwareRepository.deleteById(facilitySoftware2.getId());
       }
+   }
 
+   @Test
+   public void getInternalFacilitySoftwareConfigByTypeExample() throws Exception {
+      Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
+      FacilitySoftwareConfig facilitySoftware1 = createFacilitySoftware();
+      facilitySoftware1.setName("1");
+      facilitySoftware1.setPassword(EncryptionGuard.encode(facilitySoftware1.getPassword()));
+      facilitySoftwareRepository.save(facilitySoftware1);
+      FacilitySoftwareConfig facilitySoftware2 = createFacilitySoftware();
+      facilitySoftware1.setName("2");
+      facilitySoftware2.setPassword(EncryptionGuard.encode(facilitySoftware2.getPassword()));
+      facilitySoftwareRepository.save(facilitySoftware2);
+
+      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
+               fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
+               fieldWithPath("name").description("The facilitySoftware name."),
+               fieldWithPath("description").description("The facilitySoftware description."),
+               fieldWithPath("userName").description(
+                        "An username used to obtain authorization"),
+               fieldWithPath("password").description(
+                        " A password used to obtain authorization."),
+               fieldWithPath("serverURL").description(
+                        "The server's address, it can be an IP or FQDN."),
+               fieldWithPath("type").description(
+                        "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
+               fieldWithPath("userId").description(
+                        "userId"),
+               fieldWithPath("subCategory").description(
+                        "subCategory"),
+               fieldWithPath("verifyCert").description(
+                        "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
+               subsectionWithPath("integrationStatus").description("The status of integration."),
+               fieldWithPath("advanceSetting").description("Advance setting.").type(JsonFieldType.OBJECT)
+      };
+      try {
+         this.mockMvc
+                  .perform(get("/v1/facilitysoftware/internal/type/" + facilitySoftware1.getType() + ""))
+                  .andExpect(status().isOk())
+                  .andDo(document("facilitySoftware-getInternalFacilitySoftwareConfigByType-example",responseFields(
+                           fieldWithPath("[]").description("An array of facility software configs"))
+                           .andWithPrefix("[].", fieldpath)));
+      }finally {
+         facilitySoftwareRepository.deleteById(facilitySoftware1.getId());
+         facilitySoftwareRepository.deleteById(facilitySoftware2.getId());
+      }
+   }
+
+   @Test
+   public void getInternalFacilitySoftwareConfigByIDExample() throws Exception {
+      Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
+      FacilitySoftwareConfig facilitySoftware1 = createFacilitySoftware();
+      facilitySoftware1.setName("1");
+      facilitySoftware1.setPassword(EncryptionGuard.encode(facilitySoftware1.getPassword()));
+      facilitySoftwareRepository.save(facilitySoftware1);
+      try {
+         this.mockMvc
+                  .perform(get("/v1/facilitysoftware/internal/" + facilitySoftware1.getId()))
+                  .andExpect(status().isOk())
+                  .andDo(document("getInternalFacilitySoftwareConfigByIDExample", responseFields(
+                           fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
+                           fieldWithPath("name").description("The facilitySoftware name."),
+                           fieldWithPath("description").description("The facilitySoftware description."),
+                           fieldWithPath("userName").description("An username used to obtain authorization"),
+                           fieldWithPath("password").description("A password used to obtain authorization."),
+                           fieldWithPath("serverURL").description("The server's address, it can be an IP or FQDN."),
+                           fieldWithPath("type").description("A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
+                           fieldWithPath("userId").description("userId"),
+                           fieldWithPath("subCategory").description("subCategory"),
+                           fieldWithPath("verifyCert").description("Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
+                           subsectionWithPath("integrationStatus").description("The status of integration."),
+                           fieldWithPath("advanceSetting").description("Advance setting.").type(JsonFieldType.OBJECT)
+                  )));
+      }finally {
+         facilitySoftwareRepository.deleteById(facilitySoftware1.getId());
+      }
    }
 
    @Test
