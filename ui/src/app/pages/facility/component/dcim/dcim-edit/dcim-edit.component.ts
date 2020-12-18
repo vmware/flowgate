@@ -95,7 +95,7 @@ export class DcimEditComponent implements OnInit {
           this.loading = false;
           this.router.navigate(["/ui/nav/facility/dcim/dcim-list"]);
         },(error:HttpErrorResponse)=>{
-          if(error.status == 400 && error.error.message == "Invalid SSL Certificate"){
+          if(error.status == 400 && error.error.errors[0] == "Invalid SSL Certificate"){
             this.loading = false;
             this.ignoreCertificatesModals = true;
             this.tip = error.error.message+". Are you sure you ignore the certificate check?"

@@ -111,7 +111,7 @@ export class CmdbEditComponent implements OnInit {
           this.router.navigate(["/ui/nav/facility/cmdb/cmdb-list"]);
         },(error:HttpErrorResponse)=>{
           this.loading = false;
-          if(error.status == 400 && error.error.message == "Invalid SSL Certificate"){
+          if(error.status == 400 && error.error.errors[0] == "Invalid SSL Certificate"){
             this.verify = true;
             this.ignoreCertificatesModals = true;
             this.tip = error.error.message+". Are you sure you ignore the certificate check?"
