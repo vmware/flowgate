@@ -2168,6 +2168,324 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void testRealtimedataPDUExample() throws Exception {
+      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
+               fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
+               fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
+               fieldWithPath("value").description("value").type(JsonFieldType.NULL),
+               fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
+      List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
+      Long currentTime = System.currentTimeMillis();
+      RealTimeData pduRealTimeData = createPduRealTimeData(currentTime);
+      pduRealTimeData.setAssetID("00040717c4154b5b924ced78eafcea7a");
+
+      RealTimeData sensorRealTimeData = createSensorRealtimeData(currentTime);
+      sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
+      realTimeDatas.add(pduRealTimeData);
+      realTimeDatas.add(sensorRealTimeData);
+      Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
+
+      Asset asset = createAsset();
+      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+
+      Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> tempSensor = new HashMap<String,String>();
+      tempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.PDU_TEMPERATURE, tempSensor);
+
+      Map<String, String> humiditySensor = new HashMap<String,String>();
+      humiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.PDU_HUMIDITY, humiditySensor);
+
+      formulars.put(FlowgateConstant.SENSOR, sensorMetricFormulars);
+      asset.setCategory(AssetCategory.PDU);
+      asset.setMetricsformulars(formulars);
+      asset.setId("00040717c4154b5b924ced78eafcea7a");
+      asset = assetRepository.save(asset);
+
+      MvcResult result1 = this.mockMvc
+               .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
+                        String.valueOf(currentTime)).param("duration", "300000"))
+               .andDo(document("assets-getMetricsData-example",
+                        responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
+                                 .andWithPrefix("[].", fieldpath)))
+               .andReturn();
+      ObjectMapper mapper = new ObjectMapper();
+      String res = result1.getResponse().getContentAsString();
+      MetricData [] datas = mapper.readValue(res, MetricData[].class);
+      try {
+         for(MetricData pduMetricdata:datas) {
+            String metricName = pduMetricdata.getMetricName();
+            if(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,"OUTLET:1").
+                     equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 2.0);
+            }else if(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,"OUTLET:1").
+                     equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 2.38);
+            }else if(String.format(MetricKeyName.PDU_XLET_CURRENT,"OUTLET:1").
+                     equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
+            }else if(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY, "OUTLET:1").
+                     equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
+            }else if(String.format(MetricKeyName.PDU_XLET_VOLTAGE, "OUTLET:1").
+                     equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 208.0);
+            }else if(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX, "OUTLET").
+                     equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
+            }else if(String.format(MetricKeyName.PDU_TEMPERATURE_LOCATIONX, "INLET").
+                     equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 32.0);
+            }else if(MetricName.PDU_CURRENT_LOAD.equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
+            }else if(MetricName.PDU_POWER_LOAD.equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
+            }else if(MetricName.PDU_TOTAL_CURRENT.equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 196.0);
+            }else if(MetricName.PDU_TOTAL_POWER.equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 200.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, "INLET:1","L1").
+                     equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, "INLET:1","L1").
+                     equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 34.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_VOLTAGE, "INLET:1","L1").
+                     equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 220.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, "INLET:2","L1").
+                     equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, "INLET:2","L1").
+                     equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 24.0);
+            }else if(String.format(MetricKeyName.PDU_INLET_POLE_VOLTAGE, "INLET:2","L1").
+                     equals(metricName)){
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 240.0);
+            }else {
+               TestCase.fail("Unkown metric");
+            }
+         }
+      }finally {
+         assetRepository.deleteById(asset.getId());
+         realtimeDataRepository.deleteById(pduRealTimeData.getId());
+         realtimeDataRepository.deleteById(sensorRealTimeData.getId());
+      }
+   }
+
+   @Test
+   public void testRealtimedataServerExample() throws Exception {
+      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
+               fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
+               fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
+               fieldWithPath("value").description("value").type(JsonFieldType.NULL),
+               fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
+      List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
+      Long currentTime = System.currentTimeMillis();
+      RealTimeData pduRealTimeData = createServerPDURealTimeData(currentTime);
+      pduRealTimeData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
+      RealTimeData sensorRealTimeData = createSensorRealtimeData(currentTime);
+      sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
+      realTimeDatas.add(pduRealTimeData);
+      realTimeDatas.add(sensorRealTimeData);
+      Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
+
+      Asset asset = createAsset();
+      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
+      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricFormulars.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
+      formulars.put(FlowgateConstant.PDU, pduMetricFormulars);
+
+      Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> frontTempSensor = new HashMap<String,String>();
+      frontTempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempSensor);
+      Map<String, String> backTempSensor = new HashMap<String,String>();
+      backTempSensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_BACK_TEMPREATURE, backTempSensor);
+
+      Map<String, String> frontHumiditySensor = new HashMap<String,String>();
+      frontHumiditySensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumiditySensor);
+
+      Map<String, String> backHumiditySensor = new HashMap<String,String>();
+      backHumiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_BACK_HUMIDITY, backHumiditySensor);
+
+      formulars.put(FlowgateConstant.SENSOR, sensorMetricFormulars);
+      asset.setMetricsformulars(formulars);
+      asset = assetRepository.save(asset);
+
+      MvcResult result1 = this.mockMvc
+               .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
+                        String.valueOf(currentTime)).param("duration", "300000"))
+               .andDo(document("assets-getMetricsData-example",
+                        responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
+                                 .andWithPrefix("[].", fieldpath)))
+               .andReturn();
+      ObjectMapper mapper = new ObjectMapper();
+      String res = result1.getResponse().getContentAsString();
+      MetricData [] datas = mapper.readValue(res, MetricData[].class);
+      try {
+         for(MetricData serverdata:datas) {
+            String metricName = serverdata.getMetricName();
+            if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 20.0);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 2.38);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 208.0);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 196.0);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, "0001bdc8b25d4c2badfd045ab61aabfa").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 200.0);
+            }else if(String.format(MetricKeyName.SERVER_BACK_HUMIDITY_LOCATIONX, "OUTLET").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 20.0);
+            }else if(String.format(MetricKeyName.SERVER_BACK_TEMPREATURE_LOCATIONX, "OUTLET").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 32.0);
+            }else if(String.format(MetricKeyName.SERVER_FRONT_HUMIDITY_LOCATIONX, "INLET").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 20.0);
+            }else if(String.format(MetricKeyName.SERVER_FRONT_TEMPERATURE_LOCATIONX, "INLET").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 32.0);
+            }else if(MetricName.SERVER_VOLTAGE.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 208.0);
+            }else {
+               TestCase.fail();
+            }
+         }
+      }finally {
+         assetRepository.deleteById(asset.getId());
+         realtimeDataRepository.deleteById(pduRealTimeData.getId());
+         realtimeDataRepository.deleteById(sensorRealTimeData.getId());
+      }
+   }
+
+   @Test
+   public void testRealtimedataOtherExample() throws Exception {
+      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
+               fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
+               fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
+               fieldWithPath("value").description("value").type(JsonFieldType.NULL),
+               fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
+
+      List<RealTimeData> realTimeDatas = new ArrayList<>();
+      long currentTime = System.currentTimeMillis();
+      RealTimeData sensorRealTimeData = createSensorRealtimeData(currentTime);
+      sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
+      realTimeDatas.add(sensorRealTimeData);
+      realtimeDataRepository.saveAll(realTimeDatas);
+
+      Asset asset = createAsset();
+      asset.setId("00027ca37b004a9890d1bf20349d5ac1");
+      asset.setCategory(AssetCategory.Sensors);
+      asset = assetRepository.save(asset);
+
+      MvcResult result1 = this.mockMvc
+               .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
+                        String.valueOf(currentTime)).param("duration", "300000"))
+               .andDo(document("assets-getMetricsData-example",
+                        responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
+                                 .andWithPrefix("[].", fieldpath)))
+               .andReturn();
+
+      ObjectMapper mapper = new ObjectMapper();
+      String res = result1.getResponse().getContentAsString();
+      MetricData [] datas = mapper.readValue(res, MetricData[].class);
+      try {
+         for(MetricData metricData : datas) {
+            String metricName = metricData.getMetricName();
+            if (metricName.equals(MetricName.TEMPERATURE)) {
+               TestCase.assertEquals(32.0, metricData.getValueNum());
+            } else if(metricName.equals(MetricName.HUMIDITY)) {
+               TestCase.assertEquals(20.0, metricData.getValueNum());
+            } else {
+               TestCase.fail();
+            }
+         }
+      } finally {
+         assetRepository.deleteById(asset.getId());
+         realtimeDataRepository.deleteById(sensorRealTimeData.getId());
+      }
+   }
+
+   @Test
+   public void testRealtimedataNotDataExample() throws Exception {
+      Asset asset = createAsset();
+      asset.setId("00027ca37b004a9890d1bf20349d5ac1");
+      asset.setCategory(AssetCategory.Sensors);
+      asset = assetRepository.save(asset);
+
+      List<RealTimeData> realTimeDatas = new ArrayList<>();
+      long currentTime = System.currentTimeMillis();
+      RealTimeData sensorRealTimeData = createSensorRealtimeData(currentTime);
+      sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
+      sensorRealTimeData.setValues(null);
+      realTimeDatas.add(sensorRealTimeData);
+      realtimeDataRepository.saveAll(realTimeDatas);
+
+      try {
+         MvcResult result = this.mockMvc
+                  .perform(get("/v1/assets/" + asset.getId() + "/realtimedata"))
+                  .andExpect(status().isOk())
+                  .andReturn();
+         MetricData [] datas = getMetricDataByJsonString(result.getResponse().getContentAsString());
+         TestCase.assertEquals(0, datas.length);
+
+         MvcResult result1 = this.mockMvc
+                  .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime", String.valueOf(currentTime)).param("duration", "300000"))
+                  .andExpect(status().isOk())
+                  .andReturn();
+         MetricData [] datas1 = getMetricDataByJsonString(result1.getResponse().getContentAsString());
+         TestCase.assertEquals(0, datas1.length);
+
+         MvcResult result2 = this.mockMvc
+                  .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime", String.valueOf(currentTime + 30000000)).param("duration", "1"))
+                  .andExpect(status().isOk())
+                  .andReturn();
+         MetricData [] data2 = getMetricDataByJsonString(result2.getResponse().getContentAsString());
+         TestCase.assertEquals(0, data2.length);
+      } finally {
+         assetRepository.deleteById(asset.getId());
+         realtimeDataRepository.deleteById(sensorRealTimeData.getId());
+      }
+   }
+
+   private MetricData[] getMetricDataByJsonString (String jsonString) throws JsonProcessingException {
+      return new ObjectMapper().readValue(jsonString, MetricData[].class);
+
+   }
+
+   @Test
+   public void testRealtimedataExceptionExample() throws Exception {
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("Failed to find asset with field: id  and value: 00027ca37b004a9890d1bf20349d5ac1");
+      long currentTime = System.currentTimeMillis();
+      MvcResult result = this.mockMvc
+               .perform(get("/v1/assets/00027ca37b004a9890d1bf20349d5ac1/realtimedata").param("starttime", String.valueOf(currentTime)).param("duration", "300000"))
+               .andExpect(status().is4xxClientError())
+               .andReturn();
+      if (result.getResolvedException() != null) {
+         throw result.getResolvedException();
+      }
+   }
+
+   @Test
    public void testParseAssetIPMapingByString() {
       String contentString = "\t"+"\t"+"192.168.1.1"+" "+"\t"+" "+"cloud_server1";
       AssetIPMapping mapping = AssetService.parseAssetIPMapingByString(contentString);

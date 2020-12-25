@@ -167,6 +167,35 @@ public class AssetService {
       return result;
    }
 
+   private List<MetricData> getOtherMetricsDataById(String assetID, Long starttime, Integer duration) {
+      List<MetricData> metricDataList = new ArrayList<>();
+      List<RealTimeData> realTimeData = realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
+      if (realTimeData == null || realTimeData.isEmpty()) {
+         return metricDataList;
+      }
+      RealTimeData latestData = findLatestData(realTimeData);
+      List<ValueUnit> latestDataValues = latestData.getValues();
+      if (latestDataValues == null || latestDataValues.isEmpty()) {
+         return metricDataList;
+      }
+      metricDataList.addAll(generateOtherMetricData(latestDataValues));
+      return metricDataList;
+   }
+
+   public List<MetricData> getMetricsDataById(String assetID, Long starttime, Integer duration) {
+      Optional<Asset> assetOptional = assetRepository.findById(assetID);
+      if (!assetOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("asset", "id", assetID);
+      }
+      Asset asset = assetOptional.get();
+      if (asset.getCategory() == AssetCategory.PDU) {
+         return getPduMetricsDataById(assetID, starttime, duration);
+      } else if (asset.getCategory() == AssetCategory.Server) {
+         return getServerMetricsDataById(assetID, starttime, duration);
+      }
+      return getOtherMetricsDataById(assetID, starttime, duration);
+   }
+
    public boolean isAssetNameValidate(String assetName) {
       if(assetName == null) {
          return false;
@@ -377,6 +406,23 @@ public class AssetService {
       return result;
    }
 
+   private List<MetricData> generateOtherMetricData(List<ValueUnit> valueUnits) {
+      List<MetricData> result = new ArrayList<>();
+      if(valueUnits == null || valueUnits.isEmpty()) {
+         return result;
+      }
+      MetricData data;
+      for (ValueUnit value : valueUnits) {
+         data = new MetricData();
+         data.setTimeStamp(value.getTime());
+         data.setValueNum(value.getValueNum());
+         data.setValue(value.getValue());
+         data.setMetricName(value.getKey());
+         result.add(data);
+      }
+      return result;
+   }
+
    private RealTimeData findLatestData(List<RealTimeData> realtimeDatas) {
       RealTimeData latestResult = realtimeDatas.get(0);
       for(int i=0;i<realtimeDatas.size()-1;i++) {
@@ -404,7 +450,7 @@ public class AssetService {
 
    private List<ValueUnit> generateSensorValueUnit(Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap,
          long starttime, int duration, Map<String,String> locationAndIdMap, String metricName){
-      List<ValueUnit> valueunits = new ArrayList<>();;
+      List<ValueUnit> valueunits = new ArrayList<>();
       for(Map.Entry<String, String> locationInfoAndId : locationAndIdMap.entrySet()) {
          String formula = locationInfoAndId.getValue();
          String location = locationInfoAndId.getKey();
