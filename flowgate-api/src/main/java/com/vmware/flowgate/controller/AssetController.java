@@ -367,7 +367,7 @@ public class AssetController {
 
    //starttime miliseconds.
    @RequestMapping(value = "/server/{id}/realtimedata", method = RequestMethod.GET)
-   public List<MetricData> getServerSensorData(@PathVariable("id") String assetID,
+   public List<MetricData> getServerMetricsData(@PathVariable("id") String assetID,
          @RequestParam(value = "starttime", required = false) Long starttime,
          @RequestParam(value = "duration", required = false) Integer duration) {
       if (starttime == null || starttime <= 0) {
@@ -377,6 +377,20 @@ public class AssetController {
          duration = FIVE_MINUTES;
       }
       return assetService.getServerMetricsDataById(assetID, starttime, duration);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/{id}/realtimedata", method = RequestMethod.GET)
+   public List<MetricData> getMetricsData(@PathVariable("id") String assetID,
+                                          @RequestParam(value = "starttime", required = false) Long starttime,
+                                          @RequestParam(value = "duration", required = false) Integer duration) {
+      if (starttime == null || starttime <= 0) {
+         starttime = System.currentTimeMillis() - FIVE_MINUTES;
+      }
+      if (duration == null || duration <= 0 || duration > FIVE_MINUTES * 24) {
+         duration = FIVE_MINUTES;
+      }
+      return assetService.getMetricsDataById(assetID, starttime, duration);
    }
 
    private RealTimeData getMostClostData(List<RealTimeData> datas, long time) {
