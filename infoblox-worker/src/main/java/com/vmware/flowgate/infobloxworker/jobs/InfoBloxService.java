@@ -58,7 +58,7 @@ public class InfoBloxService implements AsyncService {
       //check message , make sure it is an valid ip address;
       wormholeAPIClient.setServiceKey(serviceKeyConfig.getServiceKey());
       FacilitySoftwareConfig[] infoBloxes =
-            wormholeAPIClient.getFacilitySoftwareByType(SoftwareType.InfoBlox).getBody();
+            wormholeAPIClient.getFacilitySoftwareInternalByType(SoftwareType.InfoBlox).getBody();
       List<InfoBloxIPInfoResult> infoBloxIPInfoResults = new ArrayList<>();
       List<InfoBloxIPInfoResult> hostRecordResults = null;
       List<InfoBloxIPInfoResult> ipv4addressResults = null;

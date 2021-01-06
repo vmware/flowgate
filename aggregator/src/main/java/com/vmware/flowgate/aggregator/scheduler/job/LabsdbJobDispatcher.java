@@ -54,7 +54,7 @@ public class LabsdbJobDispatcher extends BaseJob implements Job {
          logger.error("Failed to set execount", e);
       }
       FacilitySoftwareConfig[] labsdbs =
-            restClient.getFacilitySoftwareByType(SoftwareType.Labsdb).getBody();
+            restClient.getFacilitySoftwareInternalByType(SoftwareType.Labsdb).getBody();
       if (labsdbs == null || labsdbs.length == 0) {
          logger.info("No labsdb server find");
          return;

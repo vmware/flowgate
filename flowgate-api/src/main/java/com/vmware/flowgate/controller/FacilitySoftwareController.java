@@ -99,13 +99,33 @@ public class FacilitySoftwareController {
    public FacilitySoftwareConfig getFacilitySoftwareConfigByID(@PathVariable String id) {
       Optional<FacilitySoftwareConfig> serverOptional = repository.findById(id);
       FacilitySoftwareConfig server = serverOptional.get();
-      decryptServerPassword(server);
+      server.setPassword(null);
       return server;
    }
 
    @RequestMapping(value = "/type/{type}", method = RequestMethod.GET)
    public List<FacilitySoftwareConfig> getFacilitySoftwareConfigByType(
          @PathVariable SoftwareType type) {
+      List<FacilitySoftwareConfig> result = repository.findAllByType(type.name());
+      if (result != null) {
+         for (FacilitySoftwareConfig facilitySoftwareConfig : result) {
+            facilitySoftwareConfig.setPassword(null);
+         }
+      }
+      return result;
+   }
+
+   @RequestMapping(value = "/internal/{id}", method = RequestMethod.GET)
+   public FacilitySoftwareConfig getInternalFacilitySoftwareConfigByID(@PathVariable String id) {
+      Optional<FacilitySoftwareConfig> serverOptional = repository.findById(id);
+      FacilitySoftwareConfig server = serverOptional.get();
+      decryptServerPassword(server);
+      return server;
+   }
+
+   @RequestMapping(value = "/internal/type/{type}", method = RequestMethod.GET)
+   public List<FacilitySoftwareConfig> getInternalFacilitySoftwareConfigByType (
+            @PathVariable SoftwareType type) {
       List<FacilitySoftwareConfig> result = repository.findAllByType(type.name());
       if (result != null) {
          decryptServerListPassword(result);
@@ -150,7 +170,11 @@ public class FacilitySoftwareController {
             result = repository.findAllByUserIdAndTypeIn(user.getUserId(), types, pageRequest);
          }
       }
-      decryptServerListPassword(result.getContent());
+      if (result != null) {
+         for (FacilitySoftwareConfig facilitySoftwareConfig : result.getContent()) {
+            facilitySoftwareConfig.setPassword(null);
+         }
+      }
       return result;
    }
 
@@ -186,12 +210,14 @@ public class FacilitySoftwareController {
       old.setName(config.getName());
       old.setDescription(config.getDescription());
       old.setUserName(config.getUserName());
-      if (StringUtils.isNotBlank(config.getPassword())) {
-         old.setPassword(config.getPassword());
-      }
       old.setVerifyCert(config.isVerifyCert());
       old.setAdvanceSetting(config.getAdvanceSetting());
       old.setIntegrationStatus(config.getIntegrationStatus());
+      if (StringUtils.isNotBlank(config.getPassword())) {
+         old.setPassword(config.getPassword());
+      } else {
+         decryptServerPassword(old);
+      }
       serverValidationService.validateFacilityServer(old);
       encryptServerPassword(old);
       repository.save(old);

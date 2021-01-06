@@ -46,7 +46,6 @@ export class DcimEditComponent implements OnInit {
         Validators.required
       ]],
       password: ['', [
-        Validators.required
       ]],
       verifyCert: ['true', [
         Validators.required

@@ -57,7 +57,7 @@ public class InfobloxServiceTest {
       Mockito.doReturn(new ArrayList<>()).when(infobloxClient).queryHostRecordByIP(Mockito.anyString());
       Mockito.doReturn(this.getInfoBloxIPInfoResults()).when(infobloxClient).queryIpv4addressByIP(Mockito.anyString());
       Mockito.doReturn(new ResponseEntity<>(new Asset(), HttpStatus.OK)).when(wormholeAPIClient).getAssetByName(Mockito.anyString());
-      Mockito.doReturn(infobloxFacilitySoftware).when(wormholeAPIClient).getFacilitySoftwareByType(FacilitySoftwareConfig.SoftwareType.InfoBlox);
+      Mockito.doReturn(infobloxFacilitySoftware).when(wormholeAPIClient).getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.InfoBlox);
       Mockito.doReturn(new ResponseEntity<>(new AssetIPMapping[0], HttpStatus.OK)).when(wormholeAPIClient).getHostnameIPMappingByIP(Mockito.anyString());
       infoBloxService.executeAsync(eventMessage);
       TestCase.assertEquals(IntegrationStatus.Status.WARNING, Objects.requireNonNull(infobloxFacilitySoftware.getBody())[0].getIntegrationStatus().getStatus());
@@ -69,7 +69,7 @@ public class InfobloxServiceTest {
       ResponseEntity<FacilitySoftwareConfig[]> infobloxFacilitySoftware = this.getInfobloxFacilitySoftware();
       Mockito.doReturn(this.getInfoBloxIPInfoResults()).when(infobloxClient).queryHostRecordByIP(Mockito.anyString());
       Mockito.doReturn(new ResponseEntity<>(new Asset(), HttpStatus.OK)).when(wormholeAPIClient).getAssetByName(Mockito.anyString());
-      Mockito.doReturn(infobloxFacilitySoftware).when(wormholeAPIClient).getFacilitySoftwareByType(FacilitySoftwareConfig.SoftwareType.InfoBlox);
+      Mockito.doReturn(infobloxFacilitySoftware).when(wormholeAPIClient).getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.InfoBlox);
       Mockito.doReturn(new ResponseEntity<>(new AssetIPMapping[0], HttpStatus.OK)).when(wormholeAPIClient).getHostnameIPMappingByIP(Mockito.anyString());
       infoBloxService.executeAsync(eventMessage);
       TestCase.assertEquals(IntegrationStatus.Status.ACTIVE, Objects.requireNonNull(infobloxFacilitySoftware.getBody())[0].getIntegrationStatus().getStatus());
@@ -79,7 +79,7 @@ public class InfobloxServiceTest {
    public void testExecuteAsyncNotFindIP() {
       EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.InfoBlox, null, "10.161.71.154");
       ResponseEntity<FacilitySoftwareConfig[]> infobloxFacilitySoftware = this.getInfobloxFacilitySoftware();
-      Mockito.doReturn(infobloxFacilitySoftware).when(wormholeAPIClient).getFacilitySoftwareByType(FacilitySoftwareConfig.SoftwareType.InfoBlox);
+      Mockito.doReturn(infobloxFacilitySoftware).when(wormholeAPIClient).getFacilitySoftwareInternalByType(FacilitySoftwareConfig.SoftwareType.InfoBlox);
       Mockito.doReturn(new ArrayList<>()).when(infobloxClient).queryHostRecordByIP(Mockito.anyString());
       Mockito.doReturn(null).when(infobloxClient).queryIpv4addressByIP(Mockito.anyString());
       infoBloxService.executeAsync(eventMessage);

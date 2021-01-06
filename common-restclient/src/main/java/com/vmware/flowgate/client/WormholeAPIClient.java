@@ -59,6 +59,7 @@ public class WormholeAPIClient extends RestClientBase {
 
    private static final String GetAssetBySourceAndTypeURL = "/v1/assets/source/%s/type/%s?currentPage=%s&pageSize=%s";
    private static final String GetFacilitySoftwareByTypeURL = "/v1/facilitysoftware/type/%s";
+   private static final String GetFacilitySoftwareInternalByTypeURL = "/v1/facilitysoftware/internal/type/%s";
    private static final String GetMappedAssetURL = "/v1/assets/mappedasset/category/%s";
    private static final String AssetByIdURL = "/v1/assets/%s";
    private static final String GetAssetBySource = "/v1/assets/source/%s?currentPage=%s&pageSize=%s";
@@ -66,6 +67,7 @@ public class WormholeAPIClient extends RestClientBase {
    private static final String DeleteRealTimeDatasURL = "/v1/assets/realtimedata/%s";
    private static final String RealTimeDatasURL = "/v1/assets/sensordata/batchoperation";
    private static final String GetFacilitySoftwareById = "/v1/facilitysoftware/%s";
+   private static final String GetFacilitySoftwareInternalById = "/v1/facilitysoftware/internal/%s";
    private static final String UpdateFacilitySoftwareStatus = "/v1/facilitysoftware/status";
    private static final String UpdateSDDCSoftwareStatus = "/v1/sddc/status";
 
@@ -367,10 +369,22 @@ public class WormholeAPIClient extends RestClientBase {
             HttpMethod.GET, getDefaultEntity(), FacilitySoftwareConfig[].class);
    }
 
+   public ResponseEntity<FacilitySoftwareConfig[]> getFacilitySoftwareInternalByType(SoftwareType type) {
+      return this.restTemplate.exchange(
+               getAPIServiceEndpoint() + String.format(GetFacilitySoftwareInternalByTypeURL, type),
+               HttpMethod.GET, getDefaultEntity(), FacilitySoftwareConfig[].class);
+   }
+
    public ResponseEntity<FacilitySoftwareConfig> getFacilitySoftwareById(String id) {
       return this.restTemplate.exchange(
             getAPIServiceEndpoint() + String.format(GetFacilitySoftwareById, id), HttpMethod.GET,
             getDefaultEntity(), FacilitySoftwareConfig.class);
+   }
+
+   public ResponseEntity<FacilitySoftwareConfig> getFacilitySoftwareInternalById(String id) {
+      return this.restTemplate.exchange(
+               getAPIServiceEndpoint() + String.format(GetFacilitySoftwareInternalById, id), HttpMethod.GET,
+               getDefaultEntity(), FacilitySoftwareConfig.class);
    }
 
    public ResponseEntity<Void> updateFacility(FacilitySoftwareConfig config) {

@@ -86,8 +86,8 @@ public class CustomerAdapterJobDispatcher extends BaseJob implements Job {
    }
 
    private List<FacilitySoftwareConfig> getIntegrations(){
-      FacilitySoftwareConfig[] customer_cmdbs = restClient.getFacilitySoftwareByType(SoftwareType.OtherCMDB).getBody();
-      FacilitySoftwareConfig[] customer_dcims = restClient.getFacilitySoftwareByType(SoftwareType.OtherDCIM).getBody();
+      FacilitySoftwareConfig[] customer_cmdbs = restClient.getFacilitySoftwareInternalByType(SoftwareType.OtherCMDB).getBody();
+      FacilitySoftwareConfig[] customer_dcims = restClient.getFacilitySoftwareInternalByType(SoftwareType.OtherDCIM).getBody();
       List<FacilitySoftwareConfig> facilityIntegrations = new ArrayList<FacilitySoftwareConfig>();
       if(customer_cmdbs != null && customer_cmdbs.length != 0) {
          facilityIntegrations.addAll(Arrays.asList(customer_cmdbs));
