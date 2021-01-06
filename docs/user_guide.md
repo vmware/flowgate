@@ -24,6 +24,10 @@
     - [Asset Name and IP Mapping](#asset-name-and-ip-mapping)
       - [Create Mapping](#create-mapping)
       - [Edit Mapping](#edit-mapping)
+    - [Asset Management](#asset-management)
+      - [Add Asset](#add-asset)
+      - [Edit Asset](#edit-asset)
+      - [Delete Asset](#delete-asset)
   - [IT System Integration Management](#it-system-integration-management)
     - [IT system integration](#it-system-integration)
     - [Integrate with vROPs](#integrate-with-vrops)
@@ -294,6 +298,45 @@ IP2 assetName2
 4.	In case you see the follow screen, it means that some item in the file are not valid. Please check it accordingly and import the failed items again.
 
 <img alt="system_setting_asset_Ip_mapping_batch" src="images/user guide/system_setting_asset_Ip_mapping_batch2.png">
+
+#### Asset Management
+
+User can manage the assets created through the UI here. Other assets feed by DCIM adapters are not supported.
+
+##### Add Asset
+
+1. Click "ADD NEW ASSET" button
+<img alt="asset_management" src="images/user guide/asset_management.png">
+
+2. Fill in asset information
+<img alt="asset_management" src="images/user guide/asset_management_add_info.png">
+
+3. Add asset location and click "Submit" button
+<img alt="asset_management" src="images/user guide/asset_management_add_location.png">
+
+4. Then you can see it in the asset list
+<img alt="asset_management" src="images/user guide/asset_management_list.png">
+
+##### Edit Asset
+
+1. Click <img alt="asset_management" src="images/user guide/edit_icon.png"> and click "Edit" button
+<img alt="asset_management" src="images/user guide/asset_management_edit.png">
+
+2. Edit your asset
+<img alt="asset_management" src="images/user guide/asset_management_edit_info.png">
+
+3. You can also edit json directly through advanced function
+<img alt="asset_management" src="images/user guide/asset_management_edit_advance.png">
+
+
+##### Delete Asset
+
+1. Click <img alt="asset_management" src="images/user guide/edit_icon.png"> and click "delete" button
+<img alt="asset_management" src="images/user guide/asset_management_delete.png">
+
+2. Click "OK" to delete asset
+<img alt="asset_management" src="images/user guide/asset_management_delete_tips.png">
+
 
 ### IT System Integration Management
 
