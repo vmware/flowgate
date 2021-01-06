@@ -30,7 +30,7 @@ public class FacilitySoftwareConfig implements Serializable, BaseDocument {
    private HashMap<AdvanceSettingType, String> advanceSetting;
 
    public enum SoftwareType {
-      Nlyte, PowerIQ, Device42, InfoBlox, OtherDCIM, OtherCMDB, Labsdb
+      Nlyte, PowerIQ, Device42, InfoBlox, OpenManage, OtherDCIM, OtherCMDB, Labsdb
    }
 
    public enum AdvanceSettingType {
