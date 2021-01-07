@@ -1,0 +1,27 @@
+{"properties": [
+  {
+    "name": "apiserver.url",
+    "type": "java.lang.String",
+    "description": "A description for 'apiserver.url'"
+  },
+  {
+    "name": "wormhole.apiclient.socket.timeout",
+    "type": "java.lang.String",
+    "description": "A description for 'wormhole.apiclient.socket.timeout'"
+  },
+  {
+    "name": "api.servicekey",
+    "type": "java.lang.String",
+    "description": "A description for 'api.servicekey'"
+  },
+  {
+    "name": "adapter.topic",
+    "type": "java.lang.String",
+    "description": "A description for 'adapter.topic'"
+  },
+  {
+    "name": "adapter.queue",
+    "type": "java.lang.String",
+    "description": "A description for 'adapter.queue'"
+  }
+]}

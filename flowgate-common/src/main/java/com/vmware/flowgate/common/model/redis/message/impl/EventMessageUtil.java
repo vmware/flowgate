@@ -32,12 +32,14 @@ public class EventMessageUtil {
    public static final String POWERIQTopic = "poweriqtopic";
    public static final String NLYTETOPIC = "nlytetopic";
    public static final String LabsdbTopic = "labsdbtopic";
+   public static final String OpenManageTopic = "openmanagetopic";
 
    public static final String powerIQJobList = "poweriqjobList";
    public static final String nlyteJobList = "nlytejobList";
    public static final String vcJobList = "vcjobList";
    public static final String vroJobList = "vrojobList";
    public static final String labsdbJobList = "labsdbjoblist";
+   public static final String OpenManageJobList = "openmanagejoblist";
    public static final String HostNameIPMappingCommand = "hostnameipmapping";
    public static final String FullMappingCommand = "fullservermapping";
    public static final String PDUServerMappingCommand = "pduservermapping";
@@ -53,10 +55,10 @@ public class EventMessageUtil {
    public static final String VCENTER_SyncCustomerAttrsData = "vcenter.synccustomerattrsdata";
    public static final String VCENTER_SyncData = "vcenter.syncdata";
    public static final String VCENTER_EXECOUNT = "vcenter.execount";
-   
+
    public static final String VCENTER_QueryHostMetaData = "vcenter.queryhostmetadata";
    public static final String VCENTER_QueryHostUsageData = "vcenter.queryhostusagedata";
-   
+
    public static final String VRO_SyncData = "vro.syncdata";
    public static final String VRO_SyncMetricData = "vro.syncmetricdata";
    public static final String VRO_SyncMetricPropertyAndAlert = "vro.syncmetricpropertyalert";
@@ -81,6 +83,9 @@ public class EventMessageUtil {
    public static final String Labsdb_SyncUnMappedAssetWiremapData = "labsdb.syncunmappedassetwiremapdata";
    public static final String Labsdb_SyncData = "labsdb.syncdata";
    public static final String LABSDB_EXECOUNT = "labsdb.execount";
+
+   public static final String OpenManage_SyncRealtimeData="openmanage.syncrealtimedata";
+   public static final String OpenManage_SyncAssetsMetaData="openmanage.syncassetsmetadata";
 
    public static String EXPIREDTIMERANGE = "EXPIREDTIMERANGE";
    public static String CUSTOMER_ADAPTER_EXECOUNT = "customerAdapter.execount";
