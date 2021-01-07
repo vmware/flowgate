@@ -8,11 +8,6 @@
     <appender name="fileInfoLog"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<File>/log/infoblox-info.log</File>
-		<filter class="ch.qos.logback.classic.filter.LevelFilter">
-			<level>INFO</level>
-			<onMatch>ACCEPT</onMatch>
-			<onMismatch>DENY</onMismatch>
-		</filter>
 		<!-- TimeBasedRollingPolicy -->
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<FileNamePattern>/log/infoblox-info.%d{yyyy-MM-dd}.gz
