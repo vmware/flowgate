@@ -15,4 +15,5 @@ public class DevicesResult<T> extends OdataResult{
    public void setValue(List<T> value) {
       this.value = value;
    }
+
 }

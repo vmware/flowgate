@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -138,25 +139,29 @@ public class OpenManageJobService implements AsyncService{
       wormholeApiClient.updateFacility(integration);
    }
 
-   private void checkConnection(OpenManageAPIClient client, FacilitySoftwareConfig integration) {
+   private boolean checkConnection(OpenManageAPIClient client, FacilitySoftwareConfig integration) {
       try {
          client.checkConnection();
-      } catch (ResourceAccessException e1) {
-         if (e1.getCause().getCause() instanceof ConnectException) {
-            checkAndUpdateIntegrationStatus(integration, e1.getMessage());
-            return;
+         return true;
+      } catch (ResourceAccessException resourceAccessException) {
+         if (resourceAccessException.getCause().getCause() instanceof ConnectException) {
+            checkAndUpdateIntegrationStatus(integration, resourceAccessException.getMessage());
+            return false;
          }
-      } catch (HttpClientErrorException e) {
-         logger.error("Failed to query data from customer adapter", e);
-         IntegrationStatus integrationStatus = integration.getIntegrationStatus();
-         if (integrationStatus == null) {
-            integrationStatus = new IntegrationStatus();
+         throw resourceAccessException;
+      } catch (HttpClientErrorException httpClientException) {
+         if(httpClientException.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+            IntegrationStatus integrationStatus = integration.getIntegrationStatus();
+            if (integrationStatus == null) {
+               integrationStatus = new IntegrationStatus();
+            }
+            integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
+            integrationStatus.setDetail(httpClientException.getMessage());
+            integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
+            updateIntegrationStatus(integration);
+            return false;
          }
-         integrationStatus.setStatus(IntegrationStatus.Status.ERROR);
-         integrationStatus.setDetail(e.getMessage());
-         integrationStatus.setRetryCounter(FlowgateConstant.DEFAULTNUMBEROFRETRIES);
-         updateIntegrationStatus(integration);
-         return;
+         throw httpClientException;
       }
    }
 
