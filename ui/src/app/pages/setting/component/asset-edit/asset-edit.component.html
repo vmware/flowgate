@@ -55,7 +55,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 
   <clr-control-container>
     <label>AssetNumber</label>
-    <input clrControl placeholder="AssetNumber" formControlName="assetNumber" style="width: 220px;"/>
+    <input clrControl placeholder="AssetNumber" type="number" formControlName="assetNumber" style="width: 220px;"/>
   </clr-control-container>
   <clr-control-container>
     <label>Manufacturer</label>
@@ -80,7 +80,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 
   <clr-control-container *ngIf="editAssetForm.get('category').value !='Cabinet' ">
     <label>CabinetUnitPosition</label>
-    <input clrControl placeholder="CabinetUnitPosition" formControlName="cabinetUnitPosition" style="width: 220px;"/>
+    <input clrControl placeholder="CabinetUnitPosition" type="number" formControlName="cabinetUnitPosition" style="width: 220px;"/>
   </clr-control-container>
 
   <clr-control-container *ngIf="editAssetForm.get('category').value =='Cabinet' ">
@@ -90,7 +90,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 
   <clr-control-container *ngIf="editAssetForm.get('category').value =='Cabinet' ">
     <label>Cabinetsize</label>
-    <input clrControl placeholder="Capacity" formControlName="capacity" style="width: 220px;"/>
+    <input clrControl placeholder="Capacity" type="number" formControlName="capacity" style="width: 220px;"/>
   </clr-control-container>
 
   <clr-select-container *ngIf="editAssetForm.get('category').value =='Sensors' ">
@@ -112,12 +112,12 @@ SPDX-License-Identifier: BSD-2-Clause -->
     <input clrControl placeholder="ValidNumMin" formControlName="validNumMin" style="width: 220px;"/>
   </clr-control-container>
 
-  <clr-control-container *ngIf="editAssetForm.get('category').value =='Sensors' "> 
+  <clr-control-container *ngIf="editAssetForm.get('category').value =='Sensors' ">
     <label>ValidNumMax</label>
     <input clrControl placeholder="ValidNumMax" formControlName="validNumMax" style="width: 220px;"/>
   </clr-control-container>
 
-  
+
   <clr-stack-view style="margin-top: 10px;">
     <clr-stack-block >
         <clr-stack-label>Location</clr-stack-label>
@@ -169,7 +169,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
 </form>
 
 <clr-textarea-container *ngIf="advance">
-  <textarea clrTextarea [(ngModel)]="assetjsondata" [class.invalid]="true" name="assetjson" style="height: 50em;min-width: 80em;" (keyup)="checkJsonFormat()" 
+  <textarea clrTextarea [(ngModel)]="assetjsondata" [class.invalid]="true" name="assetjson" style="height: 50em;min-width: 80em;" (keyup)="checkJsonFormat()"
   [ngStyle]="{'border-color':jsonerror === true ? 'red' : 'white', 'border-width':jsonerror === true ? '2px' : '1px'}" required></textarea>
 </clr-textarea-container>
 <div style="margin-top: 50px;">
