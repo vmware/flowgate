@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +56,7 @@ public class AssetService {
    public static final String SERVER_ASSET_NAME_LIST = "asset:servernamelist";
    private static final int SERVER_ASSET_NAME_TIME_OUT = 7200;
    private static final int LIMIT_RESULT = 100;
+   private static final String UnknownOulet = "unknownoutlet";
 
    @Autowired
    private AssetIPMappingRepository assetIPMappingRepository;
@@ -134,6 +137,24 @@ public class AssetService {
       if(metricFormula == null || metricFormula.isEmpty()) {
          return result;
       }
+      Map<String,String> justficationfileds = server.getJustificationfields();
+      String allPduPortInfo = justficationfileds.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
+      List<String> pduPorts = null;
+      Map<String, String> pduAssetIdAndUsedOutletMap = null;
+      if (!StringUtils.isEmpty(allPduPortInfo)) {
+         pduPorts = Arrays.asList(allPduPortInfo.split(FlowgateConstant.SPILIT_FLAG));
+         pduAssetIdAndUsedOutletMap = new HashMap<String, String>();
+         for (String pduPortInfo : pduPorts) {
+            // startport_FIELDSPLIT_endDeviceName_FIELDSPLIT_endport_FIELDSPLIT_endDeviceAssetID
+            // item[0] start port
+            // item[1] device name
+            // item[2] end port
+            // itme[3] assetid
+            String items[] = pduPortInfo.split(FlowgateConstant.SEPARATOR);
+            pduAssetIdAndUsedOutletMap.put(items[3], items[2]);
+         }
+      }
+
       Map<String, Map<String, String>> pduMetrics = metricFormula.get(FlowgateConstant.PDU);
       if(pduMetrics != null && !pduMetrics.isEmpty()) {
          List<String> metricNames = new ArrayList<String>();
@@ -148,7 +169,11 @@ public class AssetService {
             List<RealTimeData> realtimedatas =
                   realtimeDataRepository.getDataByIDAndTimeRange(pduId, starttime, duration);
             List<ValueUnit> valueUnits = getValueUnits(realtimedatas, metricNames);
-            result.addAll(generateServerPduMetricData(valueUnits, pduId));
+            String outlet = UnknownOulet;
+            if(pduAssetIdAndUsedOutletMap != null) {
+               outlet = pduAssetIdAndUsedOutletMap.get(pduId);
+            }
+            result.addAll(generateServerPduMetricData(valueUnits, pduId, outlet));
          }
       }
 
@@ -295,7 +320,7 @@ public class AssetService {
       return mapping;
    }
 
-   private List<MetricData> generateServerPduMetricData(List<ValueUnit> valueUnits, String pduAssetId){
+   private List<MetricData> generateServerPduMetricData(List<ValueUnit> valueUnits, String pduAssetId, String outLet){
       List<MetricData> result = new ArrayList<MetricData>();
       Double serverVoltage = null;
       long serverVoltageReadTime = 0;
@@ -314,14 +339,14 @@ public class AssetService {
             break;
          case MetricName.PDU_APPARENT_POWER:
             String outlet_pdu_power_extraidentifier = value.getExtraidentifier();
-            if(outlet_pdu_power_extraidentifier.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
+            if(outLet.equals(outlet_pdu_power_extraidentifier)) {
                data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, pduAssetId, value.getExtraidentifier()));
                result.add(data);
             }
             break;
          case MetricName.PDU_CURRENT:
             String outlet_pdu_current_extraidentifier = value.getExtraidentifier();
-            if(outlet_pdu_current_extraidentifier.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
+            if(outLet.equals(outlet_pdu_current_extraidentifier)) {
                data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, pduAssetId, value.getExtraidentifier()));
                result.add(data);
             }
@@ -333,7 +358,7 @@ public class AssetService {
             if(serverVoltage == null) {
                serverVoltage = data.getValueNum();
             }
-            if(extraidentifier != null && extraidentifier.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
+            if(outLet.equals(extraidentifier)) {
                data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, pduAssetId, value.getExtraidentifier()));
                result.add(data);
                serverVoltage = data.getValueNum();

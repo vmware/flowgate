@@ -1976,6 +1976,9 @@ public class AssetControllerTest {
       Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
 
       Asset asset = createAsset();
+      HashMap<String, String> justficationfields = new HashMap<String, String>();
+      justficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_sc2-a26-pdu-blue_FIELDSPLIT_OUTLET:1_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
+      asset.setJustificationfields(justficationfields);
       Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
       Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
       Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
