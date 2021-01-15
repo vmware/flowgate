@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 VMware, Inc.
+ * Copyright 2021 VMware, Inc.
  * SPDX-License-Identifier: BSD-2-Clause
 */
 package com.vmware.flowgate.openmanage.datamodel;
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Device {
    @JsonProperty(value="Id")
-   private int id;
+   private long id;
    @JsonProperty(value="Type")
    private int type;
    @JsonProperty(value="Identifier")
@@ -85,10 +85,10 @@ public class Device {
    private CommonObject graphicInfo;
    @JsonProperty(value="DeployRequired")
    private CommonObject deployRequired;
-   public int getId() {
+   public long getId() {
       return id;
    }
-   public void setId(int id) {
+   public void setId(long id) {
       this.id = id;
    }
    public int getType() {
