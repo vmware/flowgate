@@ -10,4 +10,13 @@ public class Server extends Device{
 
    @JsonProperty(value="DeviceSpecificData")
    private ServerSpecificData deviceSpecificData;
+
+   public ServerSpecificData getDeviceSpecificData() {
+      return deviceSpecificData;
+   }
+
+   public void setDeviceSpecificData(ServerSpecificData deviceSpecificData) {
+      this.deviceSpecificData = deviceSpecificData;
+   }
+
 }

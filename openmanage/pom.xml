@@ -5,7 +5,7 @@
 
 	<groupId>com.vmware.flowgate</groupId>
 	<artifactId>openmanage</artifactId>
-	<version>1.0.0</version>
+	<version>${flowgate.version}</version>
 	<packaging>jar</packaging>
 
 	<name>openmanage</name>

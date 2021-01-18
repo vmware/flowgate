@@ -7,7 +7,6 @@ package com.vmware.flowgate.openmanage.redis;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -17,12 +16,10 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
 import com.vmware.flowgate.common.model.redis.message.MessageReceiver;
+import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 
 @Configuration
 public class RedisConfig {
-
-   @Value("${adapter.topic}")
-   private String topic;
 
    @Bean
    RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
@@ -30,7 +27,7 @@ public class RedisConfig {
       RedisMessageListenerContainer container = new RedisMessageListenerContainer();
       container.setConnectionFactory(connectionFactory);
       List<ChannelTopic> topics = new ArrayList<ChannelTopic>();
-      topics.add(new ChannelTopic(topic));
+      topics.add(new ChannelTopic(EventMessageUtil.OpenManageTopic));
       container.addMessageListener(generalListenerAdapter, topics);
       return container;
    }

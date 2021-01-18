@@ -4,30 +4,50 @@
 */
 package com.vmware.flowgate.openmanage.client;
 
-import org.springframework.stereotype.Service;
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.vmware.flowgate.client.RestTemplateBuilder;
 import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.openmanage.datamodel.AuthInfo;
+import com.vmware.flowgate.openmanage.datamodel.Chassis;
+import com.vmware.flowgate.openmanage.datamodel.DeviceType;
+import com.vmware.flowgate.openmanage.datamodel.DevicesResult;
+import com.vmware.flowgate.openmanage.datamodel.Server;
 
-@Service
 public class OpenManageAPIClient {
 
-   private static final String CHECK_CONNECTION_API = "";
-   private static final String GET_DATA_API = "";
-   private String username;
-   private String password;
+   private static final String GetDviceUri = "/api/DeviceService/Devices?$filter=Type eq %s&$skip=%s&$top=%s";
+   private static final String SessionUri = "/api/SessionService/Sessions";
+   private static final String LogOutUri = "/api/SessionService/Actions/SessionService.Logoff";
+   private static final String APISessionType = "API";
    private RestTemplate restTemplate;
    private String serviceEndPoint;
-
-   public OpenManageAPIClient() {
+   private AuthInfo authInfo;
+   private String token;
+   private static Map<Class<?>,Integer> deviceTypeMap = new HashMap<Class<?>,Integer>();
+   private String AuthHeader = "x-auth-token";
+   static {
+      deviceTypeMap.put(Server.class, DeviceType.SERVER.getValue());
+      deviceTypeMap.put(Chassis.class, DeviceType.CHASSIS.getValue());
+      deviceTypeMap = Collections.unmodifiableMap(deviceTypeMap);
    }
 
    public OpenManageAPIClient(FacilitySoftwareConfig config) {
-      this.password = config.getPassword();
-      this.username = config.getUserName();
       this.serviceEndPoint = config.getServerURL();
+      this.authInfo = new AuthInfo(config.getUserName(),config.getPassword(), APISessionType);
       try {
          this.restTemplate =
                RestTemplateBuilder.buildTemplate(config.isVerifyCert(), 60000);
@@ -36,35 +56,49 @@ public class OpenManageAPIClient {
       }
    }
 
-   public String getUsername() {
-      return username;
-   }
-
-   public void setUsername(String username) {
-      this.username = username;
-   }
-
-   public String getPassword() {
-      return password;
-   }
-
-   public void setPassword(String password) {
-      this.password = password;
-   }
-
    public String getServiceEndPoint() {
       return serviceEndPoint;
    }
 
-//   public ResponseEntity<MyDataModel1> getDataFromCustomerApi(){
-//      return this.restTemplate.
-//            exchange(getServiceEndPoint() + GET_DATA_API,
-//                  HttpMethod.GET, RestTemplateBuilder.getDefaultEntity(), MyDataModel1.class);
-//   }
+   private HttpHeaders buildHeaders() {
+      HttpHeaders headers = RestTemplateBuilder.getDefaultHeader();
+      headers.add(AuthHeader, this.token);
+      return headers;
+   }
 
-   public boolean checkConnection() {
-      //TODO
-      return true;
+   private HttpEntity<String> getDefaultEntity() {
+      return new HttpEntity<String>(buildHeaders());
+   }
+
+   public void getToken() {
+      HttpEntity<Object> postEntity = new HttpEntity<Object>(this.authInfo, RestTemplateBuilder.getDefaultHeader());
+      ResponseEntity<Void> entity = this.restTemplate.exchange(getServiceEndPoint() + SessionUri,
+            HttpMethod.POST, postEntity , Void.class);
+      if(entity.getStatusCode().is2xxSuccessful() &&
+            !entity.getHeaders().get(AuthHeader).isEmpty()) {
+         this.token = entity.getHeaders().get(AuthHeader).get(0);
+      }
+   }
+
+   public void logOut() {
+      this.restTemplate.exchange(getServiceEndPoint() + LogOutUri,
+            HttpMethod.POST, getDefaultEntity() , Void.class);
+   }
+
+   public <T> DevicesResult<T> getDevices(int skip, int limit, Class<T> type) {
+      String url = getServiceEndPoint()
+            + String.format(GetDviceUri, deviceTypeMap.get(type), skip, limit);
+      UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
+      URI uri = builder.build().encode().toUri();
+      ResolvableType resolvableType = ResolvableType.forClassWithGenerics(DevicesResult.class, type);
+      ParameterizedTypeReference<DevicesResult<T>> typeRef = ParameterizedTypeReference.forType(resolvableType.getType());
+      ResponseEntity<DevicesResult<T>> entity = this.restTemplate.exchange(uri, HttpMethod.GET,
+            getDefaultEntity(), typeRef);
+      DevicesResult<T> result = null;
+      if (entity.hasBody()) {
+         result = entity.getBody();
+      }
+      return result;
    }
 
 }
