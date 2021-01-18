@@ -3,37 +3,13 @@
  */
 package com.vmware.flowgate.vcworker;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.model.Asset;
+import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
-import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.vcworker.client.VsphereClient;
 import com.vmware.flowgate.vcworker.config.ServiceKeyConfig;
 import com.vmware.flowgate.vcworker.model.EsxiMetadata;
@@ -48,15 +24,13 @@ import com.vmware.vim.binding.vim.HostSystem;
 import com.vmware.vim.binding.vim.HostSystem.ConnectionState;
 import com.vmware.vim.binding.vim.HostSystem.PowerState;
 import com.vmware.vim.binding.vim.PerformanceManager;
-import com.vmware.vim.binding.vim.ServiceInstanceContent;
 import com.vmware.vim.binding.vim.PerformanceManager.CounterInfo;
 import com.vmware.vim.binding.vim.PerformanceManager.EntityMetric;
-import com.vmware.vim.binding.vim.PerformanceManager.EntityMetricBase;
 import com.vmware.vim.binding.vim.PerformanceManager.IntSeries;
 import com.vmware.vim.binding.vim.PerformanceManager.MetricId;
-import com.vmware.vim.binding.vim.PerformanceManager.MetricSeries;
 import com.vmware.vim.binding.vim.PerformanceManager.ProviderSummary;
 import com.vmware.vim.binding.vim.PerformanceManager.SampleInfo;
+import com.vmware.vim.binding.vim.ServiceInstanceContent;
 import com.vmware.vim.binding.vim.cluster.ConfigInfoEx;
 import com.vmware.vim.binding.vim.cluster.DpmConfigInfo;
 import com.vmware.vim.binding.vim.cluster.DpmHostConfigInfo;
@@ -65,19 +39,41 @@ import com.vmware.vim.binding.vim.cluster.DrsConfigInfo.DrsBehavior;
 import com.vmware.vim.binding.vim.host.Capability;
 import com.vmware.vim.binding.vim.host.ConfigInfo;
 import com.vmware.vim.binding.vim.host.ConnectInfo;
+import com.vmware.vim.binding.vim.host.ConnectInfo.DatastoreInfo;
 import com.vmware.vim.binding.vim.host.NetworkInfo;
 import com.vmware.vim.binding.vim.host.PhysicalNic;
 import com.vmware.vim.binding.vim.host.PhysicalNic.LinkSpeedDuplex;
 import com.vmware.vim.binding.vim.host.RuntimeInfo;
 import com.vmware.vim.binding.vim.host.Summary;
-import com.vmware.vim.binding.vim.host.ConnectInfo.DatastoreInfo;
 import com.vmware.vim.binding.vim.host.Summary.ConfigSummary;
 import com.vmware.vim.binding.vim.host.Summary.HardwareSummary;
 import com.vmware.vim.binding.vim.host.Summary.QuickStats;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.vmomi.client.Client;
-
 import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 public class VCDataServiceTest {
 
@@ -199,6 +195,56 @@ public class VCDataServiceTest {
       clusterComputeResources.add(cluster);
       clusterComputeResources.add(cluster);
       when(vsphereClient.getAllClusterComputeResource()).thenReturn(clusterComputeResources);
+
+      ManagedObjectReference mor1 = Mockito.mock(ManagedObjectReference.class);
+      ManagedObjectReference mor2 = Mockito.mock(ManagedObjectReference.class);
+      when(host1._getRef()).thenReturn(mor1);
+      when(mor1.getValue()).thenReturn("vc1");
+      when(host2._getRef()).thenReturn(mor2);
+      when(mor2.getValue()).thenReturn("vc2");
+
+      Asset asset = new Asset();
+      asset.setId("asset1");
+      HashMap<String, String> hostJustification = new HashMap<String, String>();
+      HostInfo hostInfo = new HostInfo();
+      String vcHostObjStr = mapper.writeValueAsString(hostInfo);
+      hostJustification.put(FlowgateConstant.HOST_METADATA, vcHostObjStr);
+      asset.setJustificationfields(hostJustification);
+
+      ResponseEntity<Asset> assets = Mockito.mock(ResponseEntity.class);
+      when(restClient.getAssetByID(anyString())).thenReturn(assets);
+      when(assets.getBody()).thenReturn(asset);
+
+      doReturn(true).when(service).feedHostMetaData(any(), any());
+      doReturn(true).when(service).feedClusterMetaData(any(), any(), any(), anyString());
+
+      service.queryHostMetaData(vc);
+   }
+
+   @Test
+   public void testQueryHostMetaDataForclustersIsNull() throws Exception {
+
+      SDDCSoftwareConfig vc = Mockito.mock(SDDCSoftwareConfig.class);
+      HashMap<String, ServerMapping> serverMappingMap = new HashMap<String, ServerMapping>();
+      ServerMapping mapping1 = new ServerMapping();
+      mapping1.setVcMobID("vc1");
+      mapping1.setAsset("asset1");
+      serverMappingMap.put(mapping1.getVcMobID(), mapping1);
+      ServerMapping mapping2 = new ServerMapping();
+      mapping2.setVcMobID("vc2");
+      mapping2.setAsset("asset2");
+      serverMappingMap.put(mapping2.getVcMobID(), mapping2);
+      doReturn(serverMappingMap).when(service).getVaildServerMapping(any());
+      doReturn(vsphereClient).when(service).connectVsphere(any());
+
+      HostSystem host1 = Mockito.mock(HostSystem.class);
+      HostSystem host2 = Mockito.mock(HostSystem.class);
+      Collection<HostSystem> hosts = new ArrayList<>();
+      hosts.add(host1);
+      hosts.add(host2);
+      when(vsphereClient.getAllHost()).thenReturn(hosts);
+
+      when(vsphereClient.getAllClusterComputeResource()).thenReturn(null);
 
       ManagedObjectReference mor1 = Mockito.mock(ManagedObjectReference.class);
       ManagedObjectReference mor2 = Mockito.mock(ManagedObjectReference.class);

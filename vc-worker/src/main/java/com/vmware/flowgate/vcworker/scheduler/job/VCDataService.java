@@ -1209,6 +1209,10 @@ public class VCDataService implements AsyncService {
       for (ServerMapping validServer : validMapping) {
          HostSystem host = hostDictionary.get(validServer.getVcMobID());
          Asset asset = assetDictionary.get(validServer.getAsset());
+         Map<String, Map<String, String>> hostMetricsMap = asset.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
+         if (hostMetricsMap == null || hostMetricsMap.isEmpty()) {
+            feedAssetMetricsFormulars(asset);
+         }
          BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(asset);
          for (String key : VCConstants.hostCustomAttrMapping.keySet()) {
             host.setCustomValue(VCConstants.hostCustomAttrMapping.get(key),
