@@ -27,7 +27,7 @@ import com.vmware.flowgate.openmanage.datamodel.DeviceType;
 import com.vmware.flowgate.openmanage.datamodel.DevicesResult;
 import com.vmware.flowgate.openmanage.datamodel.Server;
 
-public class OpenManageAPIClient {
+public class OpenManageAPIClient implements AutoCloseable{
 
    private static final String GetDeviceUri = "/api/DeviceService/Devices?$filter=Type eq %s&$skip=%s&$top=%s";
    private static final String SessionUri = "/api/SessionService/Sessions";
@@ -81,11 +81,6 @@ public class OpenManageAPIClient {
       }
    }
 
-   public void logOut() {
-      this.restTemplate.exchange(getServiceEndPoint() + LogOutUri,
-            HttpMethod.POST, getDefaultEntity() , Void.class);
-   }
-
    public <T> DevicesResult<T> getDevices(int skip, int limit, Class<T> type) {
       String url = getServiceEndPoint()
             + String.format(GetDeviceUri, deviceTypeMap.get(type), skip, limit);
@@ -100,5 +95,11 @@ public class OpenManageAPIClient {
          result = entity.getBody();
       }
       return result;
+   }
+
+   @Override
+   public void close() {
+      this.restTemplate.exchange(getServiceEndPoint() + LogOutUri,
+            HttpMethod.POST, getDefaultEntity() , Void.class);
    }
 }
