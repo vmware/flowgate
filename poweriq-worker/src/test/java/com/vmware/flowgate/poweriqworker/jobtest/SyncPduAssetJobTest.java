@@ -1,6 +1,6 @@
 package com.vmware.flowgate.poweriqworker.jobtest;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +33,6 @@ import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.Parent;
 import com.vmware.flowgate.poweriqworker.client.PowerIQAPIClient;
 import com.vmware.flowgate.poweriqworker.jobs.PowerIQService;
-import com.vmware.flowgate.poweriqworker.model.Pdu;
 
 import junit.framework.TestCase;
 
@@ -70,34 +69,6 @@ public class SyncPduAssetJobTest {
       List<Asset> pdusFromFlowgate = getAssets();
       Map<String, Asset> map = powerIQService.getPDUIDAndAssetMap(pdusFromFlowgate);
       TestCase.assertEquals(pdusFromFlowgate.get(0).getAssetName(), map.get("128").getAssetName());
-   }
-
-   @Test
-   public void testGeneratePduRateInfoMap() {
-      Pdu pdu = new Pdu();
-      pdu.setRatedAmps("34A");
-      pdu.setRatedVa("6.4-7.7kVA");
-      pdu.setRatedVolts("220-240V");
-      Map<String,String> map = powerIQService.generatePduRateInfoMap(pdu);
-      TestCase.assertEquals("34", map.get(FlowgateConstant.PDU_RATE_AMPS));
-      TestCase.assertEquals("6.4", map.get(FlowgateConstant.PDU_MIN_RATE_POWER));
-      TestCase.assertEquals("7.7", map.get(FlowgateConstant.PDU_MAX_RATE_POWER));
-      TestCase.assertEquals("220", map.get(FlowgateConstant.PDU_MIN_RATE_VOLTS));
-      TestCase.assertEquals("240", map.get(FlowgateConstant.PDU_MAX_RATE_VOLTS));
-   }
-
-   @Test
-   public void testGeneratePduRateInfoMap1() {
-      Pdu pdu = new Pdu();
-      pdu.setRatedAmps("34A");
-      pdu.setRatedVa("7.7kVA");
-      pdu.setRatedVolts("240V");
-      Map<String,String> map = powerIQService.generatePduRateInfoMap(pdu);
-      TestCase.assertEquals("34", map.get(FlowgateConstant.PDU_RATE_AMPS));
-      TestCase.assertEquals("7.7", map.get(FlowgateConstant.PDU_MIN_RATE_POWER));
-      TestCase.assertEquals("7.7", map.get(FlowgateConstant.PDU_MAX_RATE_POWER));
-      TestCase.assertEquals("240", map.get(FlowgateConstant.PDU_MIN_RATE_VOLTS));
-      TestCase.assertEquals("240", map.get(FlowgateConstant.PDU_MAX_RATE_VOLTS));
    }
 
    @Test
