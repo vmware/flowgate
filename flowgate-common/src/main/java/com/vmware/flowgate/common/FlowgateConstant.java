@@ -105,17 +105,23 @@ public class FlowgateConstant {
    public static String Role_admin = "admin";
 
    public static String SERVICE_KEY_SET = "adapter:servicekeylist";
-   
+
    public static String HOST_METADATA ="HOST_METADATA";
-   
+
    public static String HOST_METRICS = "HOSTMETRICS";
-   
+
    public static String HOST_CPU = "CPU";
 
    public static String HOST_MEMORY = "MEMORY";
 
    public static String HOST_MEMORY_CONSUMED = "CONSUMED";
-   
+
    public static String HOST_STORAGE = "STORAGE";
-    
+
+   public static String POWERSTATE = "POWERSTATE";
+
+   public static String OPENMANAGE = "openManage";
+
+   public static String ASSETNUMBER = "assetNumber";//used in asset's justficationfield for non-Nlyte system
+
 }
