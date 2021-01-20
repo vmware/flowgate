@@ -114,7 +114,7 @@ export class DcimEditComponent implements OnInit {
   confirmNoVerifyCertModal(){
     this.ignoreCertificatesModals = false;
     this.read = "";
-    this.dcimConfig.verifyCert = "false";
+    this.editDCIMForm.get('verifyCert').setValue('false');
     this.save();
   }
   closeVerifyCertModal(){
@@ -152,6 +152,11 @@ export class DcimEditComponent implements OnInit {
         powerIQ.displayName = "PowerIQ";
         powerIQ.subCategory = "PowerIQ";
         powerIQ.type = "PowerIQ";
+        let openManage:FacilityAdapterModule = new FacilityAdapterModule();
+        openManage.displayName = "OpenManage";
+        openManage.subCategory = "OpenManage";
+        openManage.type = "OpenManage";
+        this.dcimAdapters.push(openManage);
         this.dcimAdapters.push(powerIQ);
         this.dcimAdapters.forEach(element => {
           this.adapterMap.set(element.subCategory,element);

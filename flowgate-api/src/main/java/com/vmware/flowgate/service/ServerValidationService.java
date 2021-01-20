@@ -23,6 +23,7 @@ import org.springframework.web.client.ResourceAccessException;
 import com.vmware.flowgate.auth.AuthVcUser;
 import com.vmware.flowgate.auth.InfobloxAuth;
 import com.vmware.flowgate.auth.NlyteAuth;
+import com.vmware.flowgate.auth.OpenManageAuth;
 import com.vmware.flowgate.auth.PowerIQAuth;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
@@ -106,6 +107,13 @@ public class ServerValidationService {
                      "Invalid user name or password.", null);
             }
             break;
+         case OpenManage:
+            OpenManageAuth openmanageAuth = createOpenManageAuth();
+            if (!openmanageAuth.auth(config)) {
+               throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                     "Invalid user name or password.", null);
+            }
+            break;
          case Device42:
             break;
          case OtherDCIM:
@@ -125,6 +133,8 @@ public class ServerValidationService {
          } else if (e.getCause() instanceof UnknownHostException) {
             throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host.Please check your server IP.", e.getCause(),
                   WormholeRequestException.UnknownHostCode);
+         } else if (e.getCause() instanceof ConnectException) {
+            throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Connect failed.", e.getCause());
          }
          throw new WormholeRequestException(HttpStatus.BAD_REQUEST, e.getMessage(), e.getCause());
       } catch (UnknownHostException e) {
@@ -144,6 +154,11 @@ public class ServerValidationService {
          }
       }
    }
+
+   public OpenManageAuth createOpenManageAuth() {
+      return new OpenManageAuth();
+   }
+
    public NlyteAuth createNlyteAuth() {
       return new NlyteAuth();
    }

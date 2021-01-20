@@ -49,6 +49,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.auth.NlyteAuth;
+import com.vmware.flowgate.auth.OpenManageAuth;
 import com.vmware.flowgate.common.AssetSubCategory;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
@@ -156,6 +157,59 @@ public class FacilitySoftwareControllerTest {
    }
 
    @Test
+   public void createOpenManageThrowConnectException() throws JsonProcessingException, Exception {
+      Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
+      ListOperations<String, String> listOperations = Mockito.mock(ListOperations.class);
+      Mockito.doReturn(0L).when(listOperations).leftPush(Mockito.anyString(), Mockito.anyString());
+      Mockito.doReturn(listOperations).when(template).opsForList();
+      Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("Connect failed.");
+      FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
+      facilitySoftware.setType(SoftwareType.OpenManage);
+      facilitySoftware.setName("myOpenManage");
+      MvcResult result = this.mockMvc
+            .perform(post("/v1/facilitysoftware").contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(facilitySoftware)))
+            .andExpect(status().is4xxClientError())
+            .andReturn();
+      if (result.getResolvedException() != null) {
+         throw result.getResolvedException();
+      } else {
+         TestCase.fail();
+      }
+
+   }
+
+   @Test
+   public void createOpenManageThrowAuthException() throws JsonProcessingException, Exception {
+      OpenManageAuth openmanageAuth = Mockito.mock(OpenManageAuth.class);
+      Mockito.doReturn(false).when(openmanageAuth).auth(Mockito.any(FacilitySoftwareConfig.class));
+      Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
+      Mockito.doReturn(openmanageAuth).when(serverValidationService).createOpenManageAuth();
+      ListOperations<String, String> listOperations = Mockito.mock(ListOperations.class);
+      Mockito.doReturn(0L).when(listOperations).leftPush(Mockito.anyString(), Mockito.anyString());
+      Mockito.doReturn(listOperations).when(template).opsForList();
+      Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("Invalid user name or password");
+      FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
+      facilitySoftware.setType(SoftwareType.OpenManage);
+      facilitySoftware.setName("myOpenManage");
+      MvcResult result = this.mockMvc
+            .perform(post("/v1/facilitysoftware").contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(facilitySoftware)))
+            .andExpect(status().is4xxClientError())
+            .andReturn();
+      if (result.getResolvedException() != null) {
+         throw result.getResolvedException();
+      } else {
+         TestCase.fail();
+      }
+
+   }
+
+   @Test
    public void syncFacilityServerDataExample() throws JsonProcessingException, Exception {
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("Failed to find FacilitySoftwareConfig with field: id  and value: 5c3704c69662e37c30a8db2f");
@@ -197,6 +251,29 @@ public class FacilitySoftwareControllerTest {
       Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
       FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
       facilitySoftware.setType(FacilitySoftwareConfig.SoftwareType.PowerIQ);
+      facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
+      facilitySoftware = facilitySoftwareRepository.save(facilitySoftware);
+      try {
+         MvcResult result = this.mockMvc
+               .perform(post("/v1/facilitysoftware/syncdatabyserverid/"+facilitySoftware.getId()+""))
+               .andDo(document("facilitySoftware-syncFacilityServerData-example"))
+               .andReturn();
+         if (result.getResolvedException() != null) {
+            throw result.getResolvedException();
+         }
+      }finally {
+         facilitySoftwareRepository.deleteById(facilitySoftware.getId());
+      }
+   }
+
+   @Test
+   public void syncDataForOpenmanageExample() throws JsonProcessingException, Exception {
+      ListOperations<String, String> listOperations = Mockito.mock(ListOperations.class);
+      Mockito.doReturn(0L).when(listOperations).leftPush(Mockito.anyString(), Mockito.anyString());
+      Mockito.doReturn(listOperations).when(template).opsForList();
+      Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
+      FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
+      facilitySoftware.setType(FacilitySoftwareConfig.SoftwareType.OpenManage);
       facilitySoftware.setPassword(EncryptionGuard.encode(facilitySoftware.getPassword()));
       facilitySoftware = facilitySoftwareRepository.save(facilitySoftware);
       try {
