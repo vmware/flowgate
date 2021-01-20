@@ -7,7 +7,9 @@ package com.vmware.flowgate.controller;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -281,6 +283,21 @@ public class FacilitySoftwareController {
                         new FacilitySoftwareConfig[] { server }));
             publisher.publish(EventMessageUtil.LabsdbTopic,
                   EventMessageUtil.generateFacilityNotifyMessage(EventType.Labsdb));
+            logger.info("Notify message sent out.");
+         } catch (IOException e) {
+            logger.error("Failed to send out message", e);
+         }
+         break;
+      case OpenManage:
+         try {
+            logger.info("Notify {} worker to start sync data, job queue:{}, notifytopic:{}",
+                  server.getType(), EventMessageUtil.OpenManageJobList, EventMessageUtil.OpenManageTopic);
+            template.opsForList().leftPushAll(EventMessageUtil.OpenManageJobList,
+                  EventMessageUtil.generateFacilityMessageListByType(EventType.OpenManage,
+                        EventMessageUtil.OpenManage_SyncAssetsMetaData,
+                        new FacilitySoftwareConfig[] { server }));
+            publisher.publish(EventMessageUtil.OpenManageTopic,
+                  EventMessageUtil.generateFacilityNotifyMessage(EventType.OpenManage));
             logger.info("Notify message sent out.");
          } catch (IOException e) {
             logger.error("Failed to send out message", e);

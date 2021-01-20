@@ -11,8 +11,8 @@ public enum EventType {
    VROps("VROpsAction"),
    Nlyte("NlyteAction"),
    Aggregator("AggregatorAction"),
-   Labsdb("LabsdbAction");
-
+   Labsdb("LabsdbAction"),
+   OpenManage("OpenManageAction");
 
    private final String desc;
 
