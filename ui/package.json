@@ -70,6 +70,7 @@
     "protractor": "~7.0.0",
     "querystringify": "2.0.0",
     "set-value": "2.0.1",
+    "socket.io": "^2.4.1",
     "stringstream": "0.0.6",
     "ts-node": "^3.0.4",
     "tslint": "~6.1.0",
