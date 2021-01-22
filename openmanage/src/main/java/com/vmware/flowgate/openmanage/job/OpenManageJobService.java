@@ -141,7 +141,7 @@ public class OpenManageJobService implements AsyncService{
 
    private boolean checkConnection(OpenManageAPIClient client, FacilitySoftwareConfig integration) {
       try {
-         client.checkConnection();
+         client.getToken();
          return true;
       } catch (ResourceAccessException resourceAccessException) {
          if (resourceAccessException.getCause().getCause() instanceof ConnectException) {

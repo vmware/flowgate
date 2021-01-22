@@ -63,6 +63,12 @@ coverage:
           - vro
         if_not_found: success
         if_ci_failed: error
+      openmanage:
+        threshold: 0%
+        flags:
+          - openmanage
+        if_not_found: success
+        if_ci_failed: error
     patch: off
     changes: no
 
@@ -102,6 +108,10 @@ flags:
   vro:
     paths:
       - vro-worker/
+    carryforward: true
+  openmanage:
+    paths:
+      - openmanage/
     carryforward: true
 
 parsers:
