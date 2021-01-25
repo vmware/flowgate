@@ -34,17 +34,17 @@ public class MetricName {
    public static final String SERVER_USED_PDU_OUTLET_CURRENT = "ConnectedPDUOutletCurrent";
    public static final String SERVER_USED_PDU_OUTLET_POWER = "ConnectedPDUOutletPower";
 
-   public static final String VC_HOST_CPUUSEDINMHZ = "CpuUsedInMhz";//(MHZ)
-   public static final String VC_HOST_CPUUSAGE = "CpuUsage";//(Percentage)
-   public static final String VC_HOST_ACTIVEMEMORY = "ActiveMemory";//(KB)
-   public static final String VC_HOST_SWAPMEMORY = "SwapMemory";//(KB)
-   public static final String VC_HOST_SHAREDMEMORY = "SharedMemory";//(KB)
-   public static final String VC_HOST_BALLOONMEMORY = "BalloonMemory";//(KB)
-   public static final String VC_HOST_CONSUMEDMEMORY = "ConsumedMemory";//(KB)
-   public static final String VC_HOST_MEMORYUSAGE = "MemoryUsage";//(Percentage)
-   public static final String VC_HOST_STORAGEUSED = "StorageUsed";//(MB)
-   public static final String VC_HOST_STORAGEUSAGE = "StorageUsage";//(Percentage)
-   public static final String VC_HOST_STORAGEIORATEUSAGE = "StorageIORateUsage";//(KBps)
-   public static final String VC_HOST_NETWORKUTILIZATION = "NetworkUtilization";//(KBps)Combined transmit-rates and receive-rates
+   public static final String SERVER_CPUUSEDINMHZ = "CpuUsedInMhz";//(MHZ)
+   public static final String SERVER_CPUUSAGE = "CpuUsage";//(Percentage)
+   public static final String SERVER_ACTIVEMEMORY = "ActiveMemory";//(KB)
+   public static final String SERVER_SWAPMEMORY = "SwapMemory";//(KB)
+   public static final String SERVER_SHAREDMEMORY = "SharedMemory";//(KB)
+   public static final String SERVER_BALLOONMEMORY = "BalloonMemory";//(KB)
+   public static final String SERVER_CONSUMEDMEMORY = "ConsumedMemory";//(KB)
+   public static final String SERVER_MEMORYUSAGE = "MemoryUsage";//(Percentage)
+   public static final String SERVER_STORAGEUSED = "StorageUsed";//(MB)
+   public static final String SERVER_STORAGEUSAGE = "StorageUsage";//(Percentage)
+   public static final String SERVER_STORAGEIORATEUSAGE = "StorageIORateUsage";//(KBps)
+   public static final String SERVER_NETWORKUTILIZATION = "NetworkUtilization";//(KBps)Combined transmit-rates and receive-rates
 
 }

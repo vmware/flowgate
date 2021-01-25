@@ -394,23 +394,23 @@ public class VCDataService implements AsyncService {
          
          metrics = new HashMap<>();
          Map<String, String> cpuMap = new HashMap<>();
-         cpuMap.put(FlowgateConstant.HOST_CPU_USAGE, assetId);
-         cpuMap.put(FlowgateConstant.HOST_CPU_USED, assetId);
+         cpuMap.put(MetricName.SERVER_CPUUSAGE, assetId);
+         cpuMap.put(MetricName.SERVER_CPUUSEDINMHZ, assetId);
          metrics.put(FlowgateConstant.HOST_CPU, cpuMap);
          
          Map<String, String> memoryMap = new HashMap<>();
-         memoryMap.put(FlowgateConstant.HOST_MEMORY_ACTIVE, assetId);
-         memoryMap.put(FlowgateConstant.HOST_MEMORY_BALLOON, assetId);
-         memoryMap.put(FlowgateConstant.HOST_MEMORY_CONSUMED, assetId);
-         memoryMap.put(FlowgateConstant.HOST_MEMORY_SHARED, assetId);
-         memoryMap.put(FlowgateConstant.HOST_MEMORY_SWAP, assetId);
-         memoryMap.put(FlowgateConstant.HOST_MEMORY_USAGE, assetId);
+         memoryMap.put(MetricName.SERVER_ACTIVEMEMORY, assetId);
+         memoryMap.put(MetricName.SERVER_BALLOONMEMORY, assetId);
+         memoryMap.put(MetricName.SERVER_CONSUMEDMEMORY, assetId);
+         memoryMap.put(MetricName.SERVER_SHAREDMEMORY, assetId);
+         memoryMap.put(MetricName.SERVER_SWAPMEMORY, assetId);
+         memoryMap.put(MetricName.SERVER_MEMORYUSAGE, assetId);
          metrics.put(FlowgateConstant.HOST_MEMORY, memoryMap);
          
          Map<String, String> storageMap = new HashMap<>();
-         storageMap.put(FlowgateConstant.HOST_STORAGE_IORATEUSAGE, assetId);
-         storageMap.put(FlowgateConstant.HOST_STORAGE_USAGE, assetId);
-         storageMap.put(FlowgateConstant.HOST_STORAGE_USED, assetId);
+         storageMap.put(MetricName.SERVER_STORAGEIORATEUSAGE, assetId);
+         storageMap.put(MetricName.SERVER_STORAGEUSAGE, assetId);
+         storageMap.put(MetricName.SERVER_STORAGEUSED, assetId);
          metrics.put(FlowgateConstant.HOST_STORAGE, storageMap);
          metricsFormulars.put(FlowgateConstant.HOST_METRICS, metrics);
          
@@ -455,7 +455,7 @@ public class VCDataService implements AsyncService {
                   case VCConstants.HOST_METRIC_USAGE:
                      counters.put(new Integer(counterId), groupKey.concat(nameKey));
                      break;
-               } 
+               }
                break;
             case VCConstants.HOST_NETWORK_GROUP:
                switch(nameKey) {
@@ -608,52 +608,52 @@ public class VCDataService implements AsyncService {
                   
                   switch(counters.get(counterId)) {
                      case VCConstants.HOST_CPU_GROUP + VCConstants.HOST_METRIC_USAGE:
-                        valueUnit.setKey(MetricName.VC_HOST_CPUUSAGE);
+                        valueUnit.setKey(MetricName.SERVER_CPUUSAGE);
                         valueUnit.setValueNum(value / 100.0);
                         valueUnit.setUnit(RealtimeDataUnit.Percent.toString());
                         break;
                      case VCConstants.HOST_CPU_GROUP + VCConstants.HOST_METRIC_USAGEMHZ:
-                        valueUnit.setKey(MetricName.VC_HOST_CPUUSEDINMHZ);
+                        valueUnit.setKey(MetricName.SERVER_CPUUSEDINMHZ);
                         valueUnit.setValueNum(value);
                         valueUnit.setUnit(RealtimeDataUnit.Mhz.toString());
                         break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_USAGE:
-                        valueUnit.setKey(MetricName.VC_HOST_MEMORYUSAGE);
+                        valueUnit.setKey(MetricName.SERVER_MEMORYUSAGE);
                         valueUnit.setValueNum(value / 100.0);
                         valueUnit.setUnit(RealtimeDataUnit.Percent.toString());
                         break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_ACTIVE:
-                        valueUnit.setKey(MetricName.VC_HOST_ACTIVEMEMORY);
+                        valueUnit.setKey(MetricName.SERVER_ACTIVEMEMORY);
                         valueUnit.setValueNum(value);
                         valueUnit.setUnit(RealtimeDataUnit.KB.toString());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_SHARED:
-                        valueUnit.setKey(MetricName.VC_HOST_SHAREDMEMORY);
+                        valueUnit.setKey(MetricName.SERVER_SHAREDMEMORY);
                         valueUnit.setValueNum(value);
                         valueUnit.setUnit(RealtimeDataUnit.KB.toString());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_CONSUMED:
-                        valueUnit.setKey(MetricName.VC_HOST_CONSUMEDMEMORY);
+                        valueUnit.setKey(MetricName.SERVER_CONSUMEDMEMORY);
                         valueUnit.setValueNum(value);
                         valueUnit.setUnit(RealtimeDataUnit.KB.toString());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_SWAP:
-                        valueUnit.setKey(MetricName.VC_HOST_SWAPMEMORY);
+                        valueUnit.setKey(MetricName.SERVER_SWAPMEMORY);
                         valueUnit.setValueNum(value);
                         valueUnit.setUnit(RealtimeDataUnit.KB.toString());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_BALLON:
-                        valueUnit.setKey(MetricName.VC_HOST_BALLOONMEMORY);
+                        valueUnit.setKey(MetricName.SERVER_BALLOONMEMORY);
                         valueUnit.setValueNum(value);
                         valueUnit.setUnit(RealtimeDataUnit.KB.toString());
                      break;
                      case VCConstants.HOST_DISK_GROUP + VCConstants.HOST_METRIC_USAGE:
-                        valueUnit.setKey(MetricName.VC_HOST_STORAGEIORATEUSAGE);
+                        valueUnit.setKey(MetricName.SERVER_STORAGEIORATEUSAGE);
                         valueUnit.setValueNum(value);
                         valueUnit.setUnit(RealtimeDataUnit.KBps.toString());
                      break;
                      case VCConstants.HOST_NETWORK_GROUP + VCConstants.HOST_METRIC_USAGE:
-                        valueUnit.setKey(MetricName.VC_HOST_NETWORKUTILIZATION);
+                        valueUnit.setKey(MetricName.SERVER_NETWORKUTILIZATION);
                         valueUnit.setValueNum(value);
                         valueUnit.setUnit(RealtimeDataUnit.KBps.toString());
                      break;  
@@ -1258,7 +1258,7 @@ public class VCDataService implements AsyncService {
          String allPduPortString = enhanceFields.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
          List<String> devicePorts = new ArrayList<String>();
          if (!StringUtils.isEmpty(allPduPortString)) {
-            devicePorts = Arrays.asList(allPduPortString.split(FlowgateConstant.SPILIT_FLAG));
+            devicePorts.addAll(Arrays.asList(allPduPortString.split(FlowgateConstant.SPILIT_FLAG)));
          }
 
          String allSwitchPortString = enhanceFields.get(FlowgateConstant.NETWORK_PORT_FOR_SERVER);

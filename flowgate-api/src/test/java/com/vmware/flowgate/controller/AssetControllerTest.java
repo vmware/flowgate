@@ -2284,6 +2284,9 @@ public class AssetControllerTest {
                fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
                fieldWithPath("value").description("value").type(JsonFieldType.NULL),
                fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
+
+      Asset asset = createAsset();
+
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
       Long currentTime = System.currentTimeMillis();
       RealTimeData pduRealTimeData = createServerPDURealTimeData(currentTime);
@@ -2292,9 +2295,12 @@ public class AssetControllerTest {
       sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
       realTimeDatas.add(pduRealTimeData);
       realTimeDatas.add(sensorRealTimeData);
+      RealTimeData hostRealTimeData = createServerHostRealTimeData(currentTime);
+      hostRealTimeData.setId("00027ca37b004a9890d1bf20349d5ac99");
+      hostRealTimeData.setAssetID(asset.getId());
+      realTimeDatas.add(hostRealTimeData);
       Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
 
-      Asset asset = createAsset();
       Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
       Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
       Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
@@ -2305,6 +2311,28 @@ public class AssetControllerTest {
       pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricFormulars.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
       formulars.put(FlowgateConstant.PDU, pduMetricFormulars);
+
+      Map<String, Map<String, String>> hostMetrics = new HashMap<>();
+      Map<String, String> cpuMap = new HashMap<>();
+      cpuMap.put(MetricName.SERVER_CPUUSAGE, asset.getId());
+      cpuMap.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
+      hostMetrics.put(FlowgateConstant.HOST_CPU, cpuMap);
+
+      Map<String, String> memoryMap = new HashMap<>();
+      memoryMap.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
+      memoryMap.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
+      memoryMap.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
+      memoryMap.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
+      memoryMap.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
+      memoryMap.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
+      hostMetrics.put(FlowgateConstant.HOST_MEMORY, memoryMap);
+
+      Map<String, String> storageMap = new HashMap<>();
+      storageMap.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
+      storageMap.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
+      storageMap.put(MetricName.SERVER_STORAGEUSED, asset.getId());
+      hostMetrics.put(FlowgateConstant.HOST_STORAGE, storageMap);
+      formulars.put(FlowgateConstant.HOST_METRICS, hostMetrics);
 
       Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
       Map<String, String> frontTempSensor = new HashMap<String,String>();
@@ -2368,7 +2396,61 @@ public class AssetControllerTest {
                TestCase.assertEquals(serverdata.getValueNum(), 32.0);
             }else if(MetricName.SERVER_VOLTAGE.equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 208.0);
+            }else if(MetricName.SERVER_STORAGEUSAGE.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 1) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 0.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 2) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               }
+            }else if(MetricName.SERVER_MEMORYUSAGE.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 1) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.81);
+               } else if (serverdata.getTimeStamp() == currentTime + 2) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.8);
+               }
+            }else if(MetricName.SERVER_CPUUSEDINMHZ.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 1) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 90.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 2) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 70.0);
+               }
+            }else if(MetricName.SERVER_CPUUSAGE.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 1) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 0.47);
+               } else if (serverdata.getTimeStamp() == currentTime + 2) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 0.37);
+               }
+            }else if(MetricName.SERVER_ACTIVEMEMORY.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 1) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 57204.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 2) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 56968.0);
+               }
+            }else if(MetricName.SERVER_SHAREDMEMORY.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 1) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 2) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 9.0);
+               }
+            }else if(MetricName.SERVER_CONSUMEDMEMORY.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 1) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1847824.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 2) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1847044.0);
+               }
+            }else if(MetricName.SERVER_SWAPMEMORY.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.0);
+            }else if(MetricName.SERVER_BALLOONMEMORY.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.0);
+            }else if(MetricName.SERVER_NETWORKUTILIZATION.equals(metricName)){
+               if (serverdata.getTimeStamp() == currentTime + 1) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 22.0);
+               }
+               if (serverdata.getTimeStamp() == currentTime + 2) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 12.0);
+               }
             }else {
+               System.out.println(serverdata.getMetricName());
                TestCase.fail();
             }
          }
@@ -2376,6 +2458,7 @@ public class AssetControllerTest {
          assetRepository.deleteById(asset.getId());
          realtimeDataRepository.deleteById(pduRealTimeData.getId());
          realtimeDataRepository.deleteById(sensorRealTimeData.getId());
+         realtimeDataRepository.deleteById(hostRealTimeData.getId());
       }
    }
 
@@ -2600,6 +2683,157 @@ public class AssetControllerTest {
       valueunits.add(valueunit1L1Voltage);
 
       realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setValues(valueunits);
+      realTimeData.setTime(time);
+      return realTimeData;
+   }
+
+   RealTimeData createServerHostRealTimeData(long time) {
+      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+
+      ValueUnit storageUsageValueUnit1 = new ValueUnit();
+      storageUsageValueUnit1.setKey(MetricName.SERVER_STORAGEUSAGE);
+      storageUsageValueUnit1.setUnit("KBps");
+      storageUsageValueUnit1.setValueNum(0);
+      storageUsageValueUnit1.setTime(time + 1);
+      valueunits.add(storageUsageValueUnit1);
+
+      ValueUnit storageUsageValueUnit2 = new ValueUnit();
+      storageUsageValueUnit2.setKey(MetricName.SERVER_STORAGEUSAGE);
+      storageUsageValueUnit2.setUnit("KBps");
+      storageUsageValueUnit2.setValueNum(65);
+      storageUsageValueUnit2.setTime(time + 2);
+      valueunits.add(storageUsageValueUnit2);
+
+      ValueUnit memoryUsageValueUnit1 = new ValueUnit();
+      memoryUsageValueUnit1.setKey(MetricName.SERVER_MEMORYUSAGE);
+      memoryUsageValueUnit1.setUnit("Percent");
+      memoryUsageValueUnit1.setValueNum(8.81);
+      memoryUsageValueUnit1.setTime(time + 1);
+      valueunits.add(memoryUsageValueUnit1);
+
+      ValueUnit memoryUsageValueUnit2 = new ValueUnit();
+      memoryUsageValueUnit2.setKey(MetricName.SERVER_MEMORYUSAGE);
+      memoryUsageValueUnit2.setUnit("Percent");
+      memoryUsageValueUnit2.setValueNum(8.8);
+      memoryUsageValueUnit2.setTime(time + 2);
+      valueunits.add(memoryUsageValueUnit2);
+
+      ValueUnit cpuUsedInMhzValueUnit1 = new ValueUnit();
+      cpuUsedInMhzValueUnit1.setKey(MetricName.SERVER_CPUUSEDINMHZ);
+      cpuUsedInMhzValueUnit1.setUnit("Mhz");
+      cpuUsedInMhzValueUnit1.setValueNum(90);
+      cpuUsedInMhzValueUnit1.setTime(time + 1);
+      valueunits.add(cpuUsedInMhzValueUnit1);
+
+      ValueUnit cpuUsedInMhzValueUnit2 = new ValueUnit();
+      cpuUsedInMhzValueUnit2.setKey(MetricName.SERVER_CPUUSEDINMHZ);
+      cpuUsedInMhzValueUnit2.setUnit("Mhz");
+      cpuUsedInMhzValueUnit2.setValueNum(70);
+      cpuUsedInMhzValueUnit2.setTime(time + 2);
+      valueunits.add(cpuUsedInMhzValueUnit2);
+
+      ValueUnit cpuUsageValueUnit1 = new ValueUnit();
+      cpuUsageValueUnit1.setKey(MetricName.SERVER_CPUUSAGE);
+      cpuUsageValueUnit1.setUnit("Percent");
+      cpuUsageValueUnit1.setValueNum(0.47);
+      cpuUsageValueUnit1.setTime(time + 1);
+      valueunits.add(cpuUsageValueUnit1);
+
+      ValueUnit cpuUsageValueUnit2 = new ValueUnit();
+      cpuUsageValueUnit2.setKey(MetricName.SERVER_CPUUSAGE);
+      cpuUsageValueUnit2.setUnit("Percent");
+      cpuUsageValueUnit2.setValueNum(0.37);
+      cpuUsageValueUnit2.setTime(time + 2);
+      valueunits.add(cpuUsageValueUnit2);
+
+      ValueUnit activeMemoryValueUnit1 = new ValueUnit();
+      activeMemoryValueUnit1.setKey(MetricName.SERVER_ACTIVEMEMORY);
+      activeMemoryValueUnit1.setUnit("KB");
+      activeMemoryValueUnit1.setValueNum(57204);
+      activeMemoryValueUnit1.setTime(time + 1);
+      valueunits.add(activeMemoryValueUnit1);
+
+      ValueUnit activeMemoryValueUnit2 = new ValueUnit();
+      activeMemoryValueUnit2.setKey(MetricName.SERVER_ACTIVEMEMORY);
+      activeMemoryValueUnit2.setUnit("KB");
+      activeMemoryValueUnit2.setValueNum(56968);
+      activeMemoryValueUnit2.setTime(time + 2);
+      valueunits.add(activeMemoryValueUnit2);
+
+      ValueUnit sharedMemoryValueUnit1 = new ValueUnit();
+      sharedMemoryValueUnit1.setKey(MetricName.SERVER_SHAREDMEMORY);
+      sharedMemoryValueUnit1.setUnit("KB");
+      sharedMemoryValueUnit1.setValueNum(8);
+      sharedMemoryValueUnit1.setTime(time + 1);
+      valueunits.add(sharedMemoryValueUnit1);
+
+      ValueUnit sharedMemoryValueUnit2 = new ValueUnit();
+      sharedMemoryValueUnit2.setKey(MetricName.SERVER_SHAREDMEMORY);
+      sharedMemoryValueUnit2.setUnit("KB");
+      sharedMemoryValueUnit2.setValueNum(9);
+      sharedMemoryValueUnit2.setTime(time + 2);
+      valueunits.add(sharedMemoryValueUnit2);
+
+      ValueUnit consumedMemoryValueUnit1 = new ValueUnit();
+      consumedMemoryValueUnit1.setKey(MetricName.SERVER_CONSUMEDMEMORY);
+      consumedMemoryValueUnit1.setUnit("KB");
+      consumedMemoryValueUnit1.setValueNum(1847824);
+      consumedMemoryValueUnit1.setTime(time + 1);
+      valueunits.add(consumedMemoryValueUnit1);
+
+      ValueUnit consumedMemoryValueUnit2 = new ValueUnit();
+      consumedMemoryValueUnit2.setKey(MetricName.SERVER_CONSUMEDMEMORY);
+      consumedMemoryValueUnit2.setUnit("KB");
+      consumedMemoryValueUnit2.setValueNum(1847044);
+      consumedMemoryValueUnit2.setTime(time + 2);
+      valueunits.add(consumedMemoryValueUnit2);
+
+      ValueUnit swapMemoryValueUnit1 = new ValueUnit();
+      swapMemoryValueUnit1.setKey(MetricName.SERVER_SWAPMEMORY);
+      swapMemoryValueUnit1.setUnit("KB");
+      swapMemoryValueUnit1.setValueNum(0);
+      swapMemoryValueUnit1.setTime(time + 1);
+      valueunits.add(swapMemoryValueUnit1);
+
+      ValueUnit swapMemoryValueUnit2 = new ValueUnit();
+      swapMemoryValueUnit2.setKey(MetricName.SERVER_SWAPMEMORY);
+      swapMemoryValueUnit2.setUnit("KB");
+      swapMemoryValueUnit2.setValueNum(0);
+      swapMemoryValueUnit2.setTime(time + 2);
+      valueunits.add(swapMemoryValueUnit2);
+
+      ValueUnit balloonMemoryValueUnit1 = new ValueUnit();
+      balloonMemoryValueUnit1.setKey(MetricName.SERVER_BALLOONMEMORY);
+      balloonMemoryValueUnit1.setUnit("KB");
+      balloonMemoryValueUnit1.setValueNum(0);
+      balloonMemoryValueUnit1.setTime(time + 1);
+      valueunits.add(balloonMemoryValueUnit1);
+
+      ValueUnit balloonMemoryValueUnit2 = new ValueUnit();
+      balloonMemoryValueUnit2.setKey(MetricName.SERVER_BALLOONMEMORY);
+      balloonMemoryValueUnit2.setUnit("KB");
+      balloonMemoryValueUnit2.setValueNum(0);
+      balloonMemoryValueUnit2.setTime(time + 2);
+      valueunits.add(balloonMemoryValueUnit2);
+
+      ValueUnit networkUtilizationValueUnit1 = new ValueUnit();
+      networkUtilizationValueUnit1.setKey(MetricName.SERVER_NETWORKUTILIZATION);
+      networkUtilizationValueUnit1.setUnit("KB");
+      networkUtilizationValueUnit1.setValueNum(22);
+      networkUtilizationValueUnit1.setTime(time + 1);
+      valueunits.add(networkUtilizationValueUnit1);
+
+      ValueUnit networkUtilizationValueUnit2 = new ValueUnit();
+      networkUtilizationValueUnit2.setKey(MetricName.SERVER_NETWORKUTILIZATION);
+      networkUtilizationValueUnit2.setUnit("KB");
+      networkUtilizationValueUnit2.setValueNum(12);
+      networkUtilizationValueUnit2.setTime(time + 2);
+      valueunits.add(networkUtilizationValueUnit2);
+
+      RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
       realTimeData.setValues(valueunits);
       realTimeData.setTime(time);
       return realTimeData;

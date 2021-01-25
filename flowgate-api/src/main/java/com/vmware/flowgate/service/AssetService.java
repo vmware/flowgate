@@ -137,6 +137,9 @@ public class AssetService {
       if(metricFormula == null || metricFormula.isEmpty()) {
          return result;
       }
+
+      result.addAll(getServerHostMetric(server, starttime, duration));
+
       Map<String,String> justficationfileds = server.getJustificationfields();
       String allPduPortInfo = justficationfileds.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
       List<String> pduPorts = null;
@@ -190,6 +193,34 @@ public class AssetService {
          }
       }
       return result;
+   }
+
+   private List<MetricData> getServerHostMetric(Asset server, long starttime, int duration) {
+      List<MetricData> metricDataList = new ArrayList<>();
+      Map<String, Map<String, String>> hostMetricsFormula = server.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
+      if (hostMetricsFormula == null || hostMetricsFormula.isEmpty()) {
+         return metricDataList;
+      }
+      List<RealTimeData> realtimeDatas = realtimeDataRepository.getDataByIDAndTimeRange(server.getId(), starttime, duration);
+      if(realtimeDatas == null || realtimeDatas.isEmpty()) {
+         return metricDataList;
+      }
+      MetricData metricData;
+      for (RealTimeData realtimeData : realtimeDatas) {
+         List<ValueUnit> realtimeDataValues = realtimeData.getValues();
+         if (realtimeDataValues == null || realtimeDataValues.isEmpty()) {
+            continue;
+         }
+         for (ValueUnit valueUnit : realtimeDataValues) {
+            metricData = new MetricData();
+            metricData.setMetricName(valueUnit.getKey());
+            metricData.setTimeStamp(valueUnit.getTime());
+            metricData.setValue(valueUnit.getValue());
+            metricData.setValueNum(valueUnit.getValueNum());
+            metricDataList.add(metricData);
+         }
+      }
+      return metricDataList;
    }
 
    private List<MetricData> getOtherMetricsDataById(String assetID, Long starttime, Integer duration) {
