@@ -6,9 +6,12 @@ package com.vmware.flowgate.common.model.redis.message.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -84,11 +87,21 @@ public class EventMessageUtil {
    public static final String Labsdb_SyncData = "labsdb.syncdata";
    public static final String LABSDB_EXECOUNT = "labsdb.execount";
 
+   public static final String OpenManage_SyncData= "openmanage.syncdata";
    public static final String OpenManage_SyncRealtimeData="openmanage.syncrealtimedata";
    public static final String OpenManage_SyncAssetsMetaData="openmanage.syncassetsmetadata";
 
    public static String EXPIREDTIMERANGE = "EXPIREDTIMERANGE";
    public static String CUSTOMER_ADAPTER_EXECOUNT = "customerAdapter.execount";
+
+   private static Map<EventType, String> typeAndCommandIdMap = new HashMap<EventType, String>();
+   static {
+      typeAndCommandIdMap.put(EventType.Nlyte, EventMessageUtil.NLYTE_SyncData);
+      typeAndCommandIdMap.put(EventType.PowerIQ, EventMessageUtil.POWERIQ_SyncData);
+      typeAndCommandIdMap.put(EventType.Labsdb, EventMessageUtil.Labsdb_SyncData);
+      typeAndCommandIdMap.put(EventType.OpenManage, EventMessageUtil.OpenManage_SyncData);
+      typeAndCommandIdMap = Collections.unmodifiableMap(typeAndCommandIdMap);
+   }
    public static EventMessage convertToEventMessage(EventType type, String message) {
       EventMessage eventMessage =
             new EventMessageImpl(type, null, null, null, new Date().getTime(), message);
@@ -144,7 +157,6 @@ public class EventMessageUtil {
       return result;
    }
 
-
    public static String generateSDDCNotifyMessage(EventType type) throws IOException {
       EventMessage message = null;
       switch (type) {
@@ -159,21 +171,13 @@ public class EventMessageUtil {
       }
       return EventMessageUtil.convertEventMessageAsString(message);
    }
+
    public static String generateFacilityNotifyMessage(EventType type) throws IOException {
-      EventMessage message = null;
-      switch (type) {
-      case Nlyte:
-         message = EventMessageUtil.createEventMessage(type, EventMessageUtil.NLYTE_SyncData, "");
-         break;
-      case PowerIQ:
-         message = EventMessageUtil.createEventMessage(type, EventMessageUtil.POWERIQ_SyncData, "");
-         break;
-      case Labsdb:
-         message = EventMessageUtil.createEventMessage(type, EventMessageUtil.Labsdb_SyncData, "");
-         break;
-      default:
+      String command = typeAndCommandIdMap.get(type);
+      if(command == null) {
          return null;
       }
+      EventMessage message = EventMessageUtil.createEventMessage(type, command, "");;
       return EventMessageUtil.convertEventMessageAsString(message);
    }
 }
