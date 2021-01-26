@@ -45,7 +45,7 @@ export class DcimListComponent implements OnInit {
   editStatusDcimId:string = "";
   statusErrorMsg = "";
   dcimModule:FacilityModule = new FacilityModule();
-  types:string = "Nlyte,PowerIQ,OtherDCIM";
+  types:string = "Nlyte,PowerIQ,OpenManage,OtherDCIM";
   checkStatus(element:any):any{
     var status = {
       "status":"ACTIVE",

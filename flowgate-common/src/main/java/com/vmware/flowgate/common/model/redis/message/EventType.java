@@ -14,7 +14,6 @@ public enum EventType {
    Labsdb("LabsdbAction"),
    OpenManage("OpenManageAction");
 
-
    private final String desc;
 
    EventType(String desc) {

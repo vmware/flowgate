@@ -53,7 +53,7 @@ export class DcimAddComponent implements OnInit {
   read = "";/** This property is to change the read-only attribute of the password input box*/
   advanceSetting:string = "";
   seclectAdapter:FacilityAdapterModule = new FacilityAdapterModule();
-  predefinedType:string[] = ['Nlyte','PowerIQ'];
+  predefinedType:string[] = ['Nlyte','PowerIQ','OpenManage'];
   changetype(){
     
     let adapter:FacilityAdapterModule = this.adapterMap.get(this.addDCIMForm.get('type').value);
@@ -102,7 +102,7 @@ export class DcimAddComponent implements OnInit {
   confirmNoVerifyCertModal(){
     this.ignoreCertificatesModals = false;
     this.read = "";
-    this.dcimConfig.verifyCert = "false";
+    this.addDCIMForm.get('verifyCert').setValue('false');
     this.save();
   }
   closeVerifyCertModal(){
@@ -140,6 +140,11 @@ export class DcimAddComponent implements OnInit {
         powerIQ.subCategory = "PowerIQ";
         powerIQ.type = "PowerIQ";
         this.dcimAdapters.push(powerIQ);
+        let openManage:FacilityAdapterModule = new FacilityAdapterModule();
+        openManage.displayName = "OpenManage";
+        openManage.subCategory = "OpenManage";
+        openManage.type = "OpenManage";
+        this.dcimAdapters.push(openManage);
         this.dcimAdapters.forEach(element => {
           this.adapterMap.set(element.displayName,element);
         });
