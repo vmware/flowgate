@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.vmware.flowgate.common.RealtimeDataUnit;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -395,6 +397,7 @@ public class AssetControllerTest {
       long time = System.currentTimeMillis();
       RealTimeData realtimedata = createServerPDURealTimeData(time);
       List<ValueUnit> valueunits = realtimedata.getValues();
+      valueunits.addAll(createServerHostRealTimeData(time).getValues());
       ValueUnit tempValue = new ValueUnit();
       tempValue.setValueNum(32);
       tempValue.setTime(time);
@@ -1965,17 +1968,20 @@ public class AssetControllerTest {
             fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
             fieldWithPath("value").description("value").type(JsonFieldType.NULL),
             fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
+      Asset asset = createAsset();
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
       Long currentTime = System.currentTimeMillis();
       RealTimeData pduRealTimeData = createServerPDURealTimeData(currentTime);
       pduRealTimeData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
       RealTimeData sensorRealTimeData = createSensorRealtimeData(currentTime);
       sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
+      RealTimeData serverHostRealTimeData = createServerHostRealTimeData(currentTime);
+      serverHostRealTimeData.setAssetID(asset.getId());
       realTimeDatas.add(pduRealTimeData);
       realTimeDatas.add(sensorRealTimeData);
+      realTimeDatas.add(serverHostRealTimeData);
       Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
 
-      Asset asset = createAsset();
       HashMap<String, String> justficationfields = new HashMap<String, String>();
       justficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_sc2-a26-pdu-blue_FIELDSPLIT_OUTLET:1_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
       asset.setJustificationfields(justficationfields);
@@ -2007,6 +2013,29 @@ public class AssetControllerTest {
       sensorMetricFormulars.put(MetricName.SERVER_BACK_HUMIDITY, backHumiditySensor);
 
       formulars.put(FlowgateConstant.SENSOR, sensorMetricFormulars);
+
+      Map<String, Map<String, String>> hostMetrics = new HashMap<>();
+      Map<String, String> cpuMap = new HashMap<>();
+      cpuMap.put(MetricName.SERVER_CPUUSAGE, asset.getId());
+      cpuMap.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
+      hostMetrics.put(FlowgateConstant.HOST_CPU, cpuMap);
+
+      Map<String, String> memoryMap = new HashMap<>();
+      memoryMap.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
+      memoryMap.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
+      memoryMap.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
+      memoryMap.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
+      memoryMap.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
+      memoryMap.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
+      hostMetrics.put(FlowgateConstant.HOST_MEMORY, memoryMap);
+
+      Map<String, String> storageMap = new HashMap<>();
+      storageMap.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
+      storageMap.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
+      storageMap.put(MetricName.SERVER_STORAGEUSED, asset.getId());
+      hostMetrics.put(FlowgateConstant.HOST_STORAGE, storageMap);
+      formulars.put(FlowgateConstant.HOST_METRICS, hostMetrics);
+
       asset.setMetricsformulars(formulars);
       asset = assetRepository.save(asset);
 
@@ -2052,7 +2081,299 @@ public class AssetControllerTest {
                TestCase.assertEquals(serverdata.getValueNum(), 32.0);
             }else if(MetricName.SERVER_VOLTAGE.equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 208.0);
-            }else {
+            }else if(MetricName.SERVER_STORAGEUSAGE.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 0.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               }
+            }else if(MetricName.SERVER_MEMORYUSAGE.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               }
+            }else if(MetricName.SERVER_CPUUSEDINMHZ.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 746.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 570.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 552.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 844.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 651.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 566.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 552.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 569.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 538.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 836.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 655.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 565.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 571.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 551.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 570.00);
+               }
+            }else if(MetricName.SERVER_CPUUSAGE.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 4.67);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.57);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.46);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 5.28);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 4.08);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.55);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.45);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.56);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.37);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 5.23);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 4.1);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.53);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.57);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.45);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.57);
+               }
+            }else if(MetricName.SERVER_ACTIVEMEMORY.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1561416.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1561416.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065824.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065824.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065824.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065428.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065428.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065428.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1729924.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1729924.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1729924.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1561072.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1561072.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1561072.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2063852.00);
+               }
+            }else if(MetricName.SERVER_SHAREDMEMORY.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               }
+            }else if(MetricName.SERVER_CONSUMEDMEMORY.equals(metricName)) {
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291220.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291236.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291236.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291236.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291252.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291252.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291252.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291156.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291156.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291200.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291060.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291172.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291172.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291188.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291188.00);
+               }
+            }else if(MetricName.SERVER_SWAPMEMORY.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.00);
+            }else if(MetricName.SERVER_BALLOONMEMORY.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.0);
+            }else if(MetricName.SERVER_NETWORKUTILIZATION.equals(metricName)){
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 146.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 15.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 16.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 16.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 12.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 9.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 16.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 10.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 16.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 17.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 12.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 12.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 19.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 29.00);
+               }
+            }else if(MetricName.SERVER_STORAGEIORATEUSAGE.equals(metricName)){
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 330.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 98.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 57.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 852.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 224.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 95.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 209.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 66.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 56.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 798.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 236.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 81.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 213.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 63.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 61.00);
+               }
+            } else {
                TestCase.fail();
             }
           }
@@ -2060,6 +2381,7 @@ public class AssetControllerTest {
          assetRepository.deleteById(asset.getId());
          realtimeDataRepository.deleteById(pduRealTimeData.getId());
          realtimeDataRepository.deleteById(sensorRealTimeData.getId());
+         realtimeDataRepository.deleteById(serverHostRealTimeData.getId());
       }
    }
 
@@ -2209,9 +2531,6 @@ public class AssetControllerTest {
       MvcResult result1 = this.mockMvc
                .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
                         String.valueOf(currentTime)).param("duration", "300000"))
-               .andDo(document("assets-getMetricsData-example",
-                        responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
-                                 .andWithPrefix("[].", fieldpath)))
                .andReturn();
       ObjectMapper mapper = new ObjectMapper();
       String res = result1.getResponse().getContentAsString();
@@ -2357,7 +2676,7 @@ public class AssetControllerTest {
       MvcResult result1 = this.mockMvc
                .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
                         String.valueOf(currentTime)).param("duration", "300000"))
-               .andDo(document("assets-getMetricsData-example",
+               .andDo(document("assets-getMetricsData-Server-example",
                         responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
                                  .andWithPrefix("[].", fieldpath)))
                .andReturn();
@@ -2397,57 +2716,296 @@ public class AssetControllerTest {
             }else if(MetricName.SERVER_VOLTAGE.equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 208.0);
             }else if(MetricName.SERVER_STORAGEUSAGE.equals(metricName)) {
-               if (serverdata.getTimeStamp() == currentTime + 1) {
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
                   TestCase.assertEquals(serverdata.getValueNum(), 0.0);
-               } else if (serverdata.getTimeStamp() == currentTime + 2) {
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 65.0);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
                   TestCase.assertEquals(serverdata.getValueNum(), 65.0);
                }
             }else if(MetricName.SERVER_MEMORYUSAGE.equals(metricName)) {
-               if (serverdata.getTimeStamp() == currentTime + 1) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 8.81);
-               } else if (serverdata.getTimeStamp() == currentTime + 2) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 8.8);
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 87.22);
                }
             }else if(MetricName.SERVER_CPUUSEDINMHZ.equals(metricName)) {
-               if (serverdata.getTimeStamp() == currentTime + 1) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 90.0);
-               } else if (serverdata.getTimeStamp() == currentTime + 2) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 70.0);
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 746.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 570.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 552.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 844.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 651.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 566.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 552.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 569.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 538.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 836.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 655.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 565.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 571.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 551.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 570.00);
                }
             }else if(MetricName.SERVER_CPUUSAGE.equals(metricName)) {
-               if (serverdata.getTimeStamp() == currentTime + 1) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 0.47);
-               } else if (serverdata.getTimeStamp() == currentTime + 2) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 0.37);
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 4.67);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.57);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.46);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 5.28);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 4.08);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.55);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.45);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.56);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.37);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 5.23);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 4.1);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.53);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.57);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.45);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 3.57);
                }
             }else if(MetricName.SERVER_ACTIVEMEMORY.equals(metricName)) {
-               if (serverdata.getTimeStamp() == currentTime + 1) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 57204.0);
-               } else if (serverdata.getTimeStamp() == currentTime + 2) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 56968.0);
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1561416.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1561416.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065824.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065824.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065824.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065428.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065428.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2065428.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1729924.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1729924.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1729924.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1561072.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1561072.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 1561072.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 2063852.00);
                }
             }else if(MetricName.SERVER_SHAREDMEMORY.equals(metricName)) {
-               if (serverdata.getTimeStamp() == currentTime + 1) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 8.0);
-               } else if (serverdata.getTimeStamp() == currentTime + 2) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 9.0);
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 8.00);
                }
             }else if(MetricName.SERVER_CONSUMEDMEMORY.equals(metricName)) {
-               if (serverdata.getTimeStamp() == currentTime + 1) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 1847824.0);
-               } else if (serverdata.getTimeStamp() == currentTime + 2) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 1847044.0);
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291220.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291236.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291236.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291236.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291252.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291252.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291252.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291156.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291156.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291200.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291060.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291172.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291172.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291188.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18291188.00);
                }
             }else if(MetricName.SERVER_SWAPMEMORY.equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 0.0);
+               TestCase.assertEquals(serverdata.getValueNum(), 0.00);
             }else if(MetricName.SERVER_BALLOONMEMORY.equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 0.0);
             }else if(MetricName.SERVER_NETWORKUTILIZATION.equals(metricName)){
-               if (serverdata.getTimeStamp() == currentTime + 1) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 22.0);
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 146.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 18.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 15.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 16.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 16.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 12.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 9.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 16.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 10.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 16.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 17.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 12.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 12.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 19.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 29.00);
                }
-               if (serverdata.getTimeStamp() == currentTime + 2) {
-                  TestCase.assertEquals(serverdata.getValueNum(), 12.0);
+            }else if(MetricName.SERVER_STORAGEIORATEUSAGE.equals(metricName)){
+               if (serverdata.getTimeStamp() == currentTime + 20000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 330.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 40000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 98.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 60000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 57.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 80000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 852.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 100000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 224.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 120000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 95.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 140000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 209.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 160000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 66.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 180000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 56.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 200000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 798.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 220000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 236.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 240000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 81.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 260000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 213.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 280000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 63.00);
+               } else if (serverdata.getTimeStamp() == currentTime + 300000) {
+                  TestCase.assertEquals(serverdata.getValueNum(), 61.00);
                }
             }else {
                System.out.println(serverdata.getMetricName());
@@ -2485,9 +3043,6 @@ public class AssetControllerTest {
       MvcResult result1 = this.mockMvc
                .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
                         String.valueOf(currentTime)).param("duration", "300000"))
-               .andDo(document("assets-getMetricsData-example",
-                        responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
-                                 .andWithPrefix("[].", fieldpath)))
                .andReturn();
 
       ObjectMapper mapper = new ObjectMapper();
@@ -2546,6 +3101,12 @@ public class AssetControllerTest {
                   .andReturn();
          MetricData [] data2 = getMetricDataByJsonString(result2.getResponse().getContentAsString());
          TestCase.assertEquals(0, data2.length);
+         asset.setCategory(AssetCategory.Server);
+         asset = assetRepository.save(asset);
+         MvcResult result3 = this.mockMvc
+                  .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime", String.valueOf(currentTime + 30000000)).param("duration", "1"))
+                  .andExpect(status().isOk())
+                  .andReturn();
       } finally {
          assetRepository.deleteById(asset.getId());
          realtimeDataRepository.deleteById(sensorRealTimeData.getId());
@@ -2689,152 +3250,96 @@ public class AssetControllerTest {
    }
 
    RealTimeData createServerHostRealTimeData(long time) {
-      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+      double[] storageIORateUsageValues = {330, 98, 57, 852, 224, 95, 209, 66, 56, 798, 236, 81, 213, 63, 61 };
+      double[] memoryUsageValues = { 87.22, 87.22, 87.22, 87.22, 87.22, 87.22, 87.22, 87.22, 87.22, 87.22, 87.22, 87.22, 87.22, 87.22, 87.22 };
+      double[] cpuUsedInMhzValues = { 746, 570, 552, 844, 651, 566, 552, 569, 538, 836, 655, 565, 571, 551, 570 };
+      double[] cpuUsageValues = { 4.67, 3.57, 3.46, 5.28, 4.08, 3.55, 3.45, 3.56, 3.37, 5.23, 4.1, 3.53, 3.57, 3.45, 3.57 };
+      double[] activeMemoryValues = { 1561416, 1561416, 2065824, 2065824, 2065824, 2065428, 2065428, 2065428, 1729924, 1729924, 1729924, 1561072, 1561072, 1561072, 2063852 };
+      double[] sharedMemoryValues = { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 };
+      double[] consumedMemoryValues = { 18291220, 18291236, 18291236, 18291236, 18291252, 18291252, 18291252, 18291156, 18291156, 18291200, 18291060, 18291172, 18291172, 18291188, 18291188 };
+      double[] swapMemoryValues = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      double[] balloonMemoryValues = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      double[] networkUtilizationValues = { 146, 18, 15, 16, 16, 12, 9, 16, 10, 16, 17, 12, 12, 19, 29 };
 
-      ValueUnit storageUsageValueUnit1 = new ValueUnit();
-      storageUsageValueUnit1.setKey(MetricName.SERVER_STORAGEUSAGE);
-      storageUsageValueUnit1.setUnit("KBps");
-      storageUsageValueUnit1.setValueNum(0);
-      storageUsageValueUnit1.setTime(time + 1);
-      valueunits.add(storageUsageValueUnit1);
+      List<ValueUnit> valueUnits = new ArrayList<>();
+      ValueUnit valueUnit;
+      for (int i = 0; i < 15; i++) {
+         long tempTime = time + ((i + 1) * 20000);
+         valueUnit = new ValueUnit();
+         valueUnit.setTime(tempTime);
+         valueUnit.setKey(MetricName.SERVER_STORAGEIORATEUSAGE);
+         valueUnit.setUnit(RealtimeDataUnit.KBps.toString());
+         valueUnit.setValueNum(storageIORateUsageValues[i]);
+         valueUnits.add(valueUnit);
 
-      ValueUnit storageUsageValueUnit2 = new ValueUnit();
-      storageUsageValueUnit2.setKey(MetricName.SERVER_STORAGEUSAGE);
-      storageUsageValueUnit2.setUnit("KBps");
-      storageUsageValueUnit2.setValueNum(65);
-      storageUsageValueUnit2.setTime(time + 2);
-      valueunits.add(storageUsageValueUnit2);
+         valueUnit = new ValueUnit();
+         valueUnit.setTime(tempTime);
+         valueUnit.setKey(MetricName.SERVER_MEMORYUSAGE);
+         valueUnit.setUnit(RealtimeDataUnit.Percent.toString());
+         valueUnit.setValueNum(memoryUsageValues[i]);
+         valueUnits.add(valueUnit);
 
-      ValueUnit memoryUsageValueUnit1 = new ValueUnit();
-      memoryUsageValueUnit1.setKey(MetricName.SERVER_MEMORYUSAGE);
-      memoryUsageValueUnit1.setUnit("Percent");
-      memoryUsageValueUnit1.setValueNum(8.81);
-      memoryUsageValueUnit1.setTime(time + 1);
-      valueunits.add(memoryUsageValueUnit1);
+         valueUnit = new ValueUnit();
+         valueUnit.setTime(tempTime);
+         valueUnit.setKey(MetricName.SERVER_CPUUSEDINMHZ);
+         valueUnit.setUnit(RealtimeDataUnit.Mhz.toString());
+         valueUnit.setValueNum(cpuUsedInMhzValues[i]);
+         valueUnits.add(valueUnit);
 
-      ValueUnit memoryUsageValueUnit2 = new ValueUnit();
-      memoryUsageValueUnit2.setKey(MetricName.SERVER_MEMORYUSAGE);
-      memoryUsageValueUnit2.setUnit("Percent");
-      memoryUsageValueUnit2.setValueNum(8.8);
-      memoryUsageValueUnit2.setTime(time + 2);
-      valueunits.add(memoryUsageValueUnit2);
+         valueUnit = new ValueUnit();
+         valueUnit.setTime(tempTime);
+         valueUnit.setKey(MetricName.SERVER_CPUUSAGE);
+         valueUnit.setUnit(RealtimeDataUnit.Percent.toString());
+         valueUnit.setValueNum(cpuUsageValues[i]);
+         valueUnits.add(valueUnit);
 
-      ValueUnit cpuUsedInMhzValueUnit1 = new ValueUnit();
-      cpuUsedInMhzValueUnit1.setKey(MetricName.SERVER_CPUUSEDINMHZ);
-      cpuUsedInMhzValueUnit1.setUnit("Mhz");
-      cpuUsedInMhzValueUnit1.setValueNum(90);
-      cpuUsedInMhzValueUnit1.setTime(time + 1);
-      valueunits.add(cpuUsedInMhzValueUnit1);
+         valueUnit = new ValueUnit();
+         valueUnit.setTime(tempTime);
+         valueUnit.setKey(MetricName.SERVER_ACTIVEMEMORY);
+         valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+         valueUnit.setValueNum(activeMemoryValues[i]);
+         valueUnits.add(valueUnit);
 
-      ValueUnit cpuUsedInMhzValueUnit2 = new ValueUnit();
-      cpuUsedInMhzValueUnit2.setKey(MetricName.SERVER_CPUUSEDINMHZ);
-      cpuUsedInMhzValueUnit2.setUnit("Mhz");
-      cpuUsedInMhzValueUnit2.setValueNum(70);
-      cpuUsedInMhzValueUnit2.setTime(time + 2);
-      valueunits.add(cpuUsedInMhzValueUnit2);
+         valueUnit = new ValueUnit();
+         valueUnit.setTime(tempTime);
+         valueUnit.setKey(MetricName.SERVER_SHAREDMEMORY);
+         valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+         valueUnit.setValueNum(sharedMemoryValues[i]);
+         valueUnits.add(valueUnit);
 
-      ValueUnit cpuUsageValueUnit1 = new ValueUnit();
-      cpuUsageValueUnit1.setKey(MetricName.SERVER_CPUUSAGE);
-      cpuUsageValueUnit1.setUnit("Percent");
-      cpuUsageValueUnit1.setValueNum(0.47);
-      cpuUsageValueUnit1.setTime(time + 1);
-      valueunits.add(cpuUsageValueUnit1);
+         valueUnit = new ValueUnit();
+         valueUnit.setTime(tempTime);
+         valueUnit.setKey(MetricName.SERVER_CONSUMEDMEMORY);
+         valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+         valueUnit.setValueNum(consumedMemoryValues[i]);
+         valueUnits.add(valueUnit);
 
-      ValueUnit cpuUsageValueUnit2 = new ValueUnit();
-      cpuUsageValueUnit2.setKey(MetricName.SERVER_CPUUSAGE);
-      cpuUsageValueUnit2.setUnit("Percent");
-      cpuUsageValueUnit2.setValueNum(0.37);
-      cpuUsageValueUnit2.setTime(time + 2);
-      valueunits.add(cpuUsageValueUnit2);
+         valueUnit = new ValueUnit();
+         valueUnit.setTime(tempTime);
+         valueUnit.setKey(MetricName.SERVER_SWAPMEMORY);
+         valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+         valueUnit.setValueNum(swapMemoryValues[i]);
+         valueUnits.add(valueUnit);
 
-      ValueUnit activeMemoryValueUnit1 = new ValueUnit();
-      activeMemoryValueUnit1.setKey(MetricName.SERVER_ACTIVEMEMORY);
-      activeMemoryValueUnit1.setUnit("KB");
-      activeMemoryValueUnit1.setValueNum(57204);
-      activeMemoryValueUnit1.setTime(time + 1);
-      valueunits.add(activeMemoryValueUnit1);
+         valueUnit = new ValueUnit();
+         valueUnit.setTime(tempTime);
+         valueUnit.setKey(MetricName.SERVER_BALLOONMEMORY);
+         valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+         valueUnit.setValueNum(balloonMemoryValues[i]);
+         valueUnits.add(valueUnit);
 
-      ValueUnit activeMemoryValueUnit2 = new ValueUnit();
-      activeMemoryValueUnit2.setKey(MetricName.SERVER_ACTIVEMEMORY);
-      activeMemoryValueUnit2.setUnit("KB");
-      activeMemoryValueUnit2.setValueNum(56968);
-      activeMemoryValueUnit2.setTime(time + 2);
-      valueunits.add(activeMemoryValueUnit2);
-
-      ValueUnit sharedMemoryValueUnit1 = new ValueUnit();
-      sharedMemoryValueUnit1.setKey(MetricName.SERVER_SHAREDMEMORY);
-      sharedMemoryValueUnit1.setUnit("KB");
-      sharedMemoryValueUnit1.setValueNum(8);
-      sharedMemoryValueUnit1.setTime(time + 1);
-      valueunits.add(sharedMemoryValueUnit1);
-
-      ValueUnit sharedMemoryValueUnit2 = new ValueUnit();
-      sharedMemoryValueUnit2.setKey(MetricName.SERVER_SHAREDMEMORY);
-      sharedMemoryValueUnit2.setUnit("KB");
-      sharedMemoryValueUnit2.setValueNum(9);
-      sharedMemoryValueUnit2.setTime(time + 2);
-      valueunits.add(sharedMemoryValueUnit2);
-
-      ValueUnit consumedMemoryValueUnit1 = new ValueUnit();
-      consumedMemoryValueUnit1.setKey(MetricName.SERVER_CONSUMEDMEMORY);
-      consumedMemoryValueUnit1.setUnit("KB");
-      consumedMemoryValueUnit1.setValueNum(1847824);
-      consumedMemoryValueUnit1.setTime(time + 1);
-      valueunits.add(consumedMemoryValueUnit1);
-
-      ValueUnit consumedMemoryValueUnit2 = new ValueUnit();
-      consumedMemoryValueUnit2.setKey(MetricName.SERVER_CONSUMEDMEMORY);
-      consumedMemoryValueUnit2.setUnit("KB");
-      consumedMemoryValueUnit2.setValueNum(1847044);
-      consumedMemoryValueUnit2.setTime(time + 2);
-      valueunits.add(consumedMemoryValueUnit2);
-
-      ValueUnit swapMemoryValueUnit1 = new ValueUnit();
-      swapMemoryValueUnit1.setKey(MetricName.SERVER_SWAPMEMORY);
-      swapMemoryValueUnit1.setUnit("KB");
-      swapMemoryValueUnit1.setValueNum(0);
-      swapMemoryValueUnit1.setTime(time + 1);
-      valueunits.add(swapMemoryValueUnit1);
-
-      ValueUnit swapMemoryValueUnit2 = new ValueUnit();
-      swapMemoryValueUnit2.setKey(MetricName.SERVER_SWAPMEMORY);
-      swapMemoryValueUnit2.setUnit("KB");
-      swapMemoryValueUnit2.setValueNum(0);
-      swapMemoryValueUnit2.setTime(time + 2);
-      valueunits.add(swapMemoryValueUnit2);
-
-      ValueUnit balloonMemoryValueUnit1 = new ValueUnit();
-      balloonMemoryValueUnit1.setKey(MetricName.SERVER_BALLOONMEMORY);
-      balloonMemoryValueUnit1.setUnit("KB");
-      balloonMemoryValueUnit1.setValueNum(0);
-      balloonMemoryValueUnit1.setTime(time + 1);
-      valueunits.add(balloonMemoryValueUnit1);
-
-      ValueUnit balloonMemoryValueUnit2 = new ValueUnit();
-      balloonMemoryValueUnit2.setKey(MetricName.SERVER_BALLOONMEMORY);
-      balloonMemoryValueUnit2.setUnit("KB");
-      balloonMemoryValueUnit2.setValueNum(0);
-      balloonMemoryValueUnit2.setTime(time + 2);
-      valueunits.add(balloonMemoryValueUnit2);
-
-      ValueUnit networkUtilizationValueUnit1 = new ValueUnit();
-      networkUtilizationValueUnit1.setKey(MetricName.SERVER_NETWORKUTILIZATION);
-      networkUtilizationValueUnit1.setUnit("KB");
-      networkUtilizationValueUnit1.setValueNum(22);
-      networkUtilizationValueUnit1.setTime(time + 1);
-      valueunits.add(networkUtilizationValueUnit1);
-
-      ValueUnit networkUtilizationValueUnit2 = new ValueUnit();
-      networkUtilizationValueUnit2.setKey(MetricName.SERVER_NETWORKUTILIZATION);
-      networkUtilizationValueUnit2.setUnit("KB");
-      networkUtilizationValueUnit2.setValueNum(12);
-      networkUtilizationValueUnit2.setTime(time + 2);
-      valueunits.add(networkUtilizationValueUnit2);
+         valueUnit = new ValueUnit();
+         valueUnit.setTime(tempTime);
+         valueUnit.setKey(MetricName.SERVER_NETWORKUTILIZATION);
+         valueUnit.setUnit(RealtimeDataUnit.KBps.toString());
+         valueUnit.setValueNum(networkUtilizationValues[i]);
+         valueUnits.add(valueUnit);
+      }
 
       RealTimeData realTimeData = new RealTimeData();
       realTimeData.setId(UUID.randomUUID().toString());
       realTimeData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
-      realTimeData.setValues(valueunits);
+      realTimeData.setValues(valueUnits);
       realTimeData.setTime(time);
       return realTimeData;
    }
