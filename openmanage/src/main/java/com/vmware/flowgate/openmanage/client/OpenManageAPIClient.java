@@ -29,9 +29,10 @@ import com.vmware.flowgate.openmanage.datamodel.Server;
 
 public class OpenManageAPIClient {
 
-   private static final String GetDviceUri = "/api/DeviceService/Devices?$filter=Type eq %s&$skip=%s&$top=%s";
+   private static final String GetDeviceUri = "/api/DeviceService/Devices?$filter=Type eq %s&$skip=%s&$top=%s";
    private static final String SessionUri = "/api/SessionService/Sessions";
    private static final String LogOutUri = "/api/SessionService/Actions/SessionService.Logoff";
+   private static final String GetDeviceTemperatureUri = "/api/DeviceService/Devices(%s)/Temperature";
    private static final String APISessionType = "API";
    private RestTemplate restTemplate;
    private String serviceEndPoint;
@@ -87,7 +88,7 @@ public class OpenManageAPIClient {
 
    public <T> DevicesResult<T> getDevices(int skip, int limit, Class<T> type) {
       String url = getServiceEndPoint()
-            + String.format(GetDviceUri, deviceTypeMap.get(type), skip, limit);
+            + String.format(GetDeviceUri, deviceTypeMap.get(type), skip, limit);
       UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
       URI uri = builder.build().encode().toUri();
       ResolvableType resolvableType = ResolvableType.forClassWithGenerics(DevicesResult.class, type);
@@ -100,5 +101,4 @@ public class OpenManageAPIClient {
       }
       return result;
    }
-
 }
