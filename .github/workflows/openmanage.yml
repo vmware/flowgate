@@ -25,8 +25,4 @@ jobs:
         cd $FLOWGATEPWD/openmanage
         sudo mvn clean test
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-          flags: openmanage
-          name: codecov-openmanage
-          fail_ci_if_error: true
+      run: bash <(curl -s https://codecov.io/bash) -n codecov-openmanage -F openmanage -Z -N e33ebd61ed24dd3f5d27416fcc58335635cdf226

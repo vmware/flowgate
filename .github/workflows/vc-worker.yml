@@ -48,8 +48,4 @@ jobs:
         sudo mvn initialize
         sudo mvn test
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-          flags: vc
-          name: codecov-vc-worker
-          fail_ci_if_error: true
+      run: bash <(curl -s https://codecov.io/bash) -n codecov-vc-worker -F vc -Z -N e33ebd61ed24dd3f5d27416fcc58335635cdf226

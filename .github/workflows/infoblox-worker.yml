@@ -25,8 +25,4 @@ jobs:
         cd $FLOWGATEPWD/infoblox-worker
         sudo mvn clean test
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-          flags: infoblox
-          name: codecov-infoblox-worker
-          fail_ci_if_error: true
+      run: bash <(curl -s https://codecov.io/bash) -n codecov-infoblox-worker -F infoblox -Z -N e33ebd61ed24dd3f5d27416fcc58335635cdf226
