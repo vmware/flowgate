@@ -77,6 +77,7 @@ public class AssetController {
    // @Value("${}")
    private int RealtimeQueryDurationLimitation;
    private static final int FIVE_MINUTES = 305000;//add extra 5 seconds;
+   private static final String FLOWGATE_SOURCE = "flowgate";
    private static String TIME = "time";
 
    // Create a new Asset
@@ -233,13 +234,13 @@ public class AssetController {
             keyWords, category.name(), pageSize, pageSize*(pageNumber - 1));
       PageImpl<Asset> assetPage = new PageImpl<Asset>(assets,pageable,0);
       HashMap<String, String> assetSourceIDAndAssetSourceNameMap = new HashMap<String, String>();
-
+      assetSourceIDAndAssetSourceNameMap.put(FLOWGATE_SOURCE, FLOWGATE_SOURCE);
       for (Asset asset : assetPage.getContent()) {
          String assetSourceID = asset.getAssetSource();
          if(assetSourceID == null) {
             continue;
          }
-         String assetSource [] = assetSourceID.split(FlowgateConstant.SPILIT_FLAG);
+         String[] assetSource = assetSourceID.split(FlowgateConstant.SPILIT_FLAG);
          List<String> assetSourceNames = new ArrayList<String>();
          for(String sourceId : assetSource) {
             String assetSourceName = assetSourceIDAndAssetSourceNameMap.get(sourceId);
