@@ -533,6 +533,27 @@ include::{snippets}/assets-getPduMetricsData-example/curl-request.adoc[]
 
 include::{snippets}/assets-getPduMetricsData-example/response-fields.adoc[]
 
+[[resources-assets-getMetricsData]]
+=== getMetricsData
+
+A `GET` request is used to get metrics Data By AssetId.
+
+==== Request structure
+
+include::{snippets}/assets-getMetricsData-Server-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getMetricsData-Server-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getMetricsData-Server-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getMetricsData-Server-example/response-fields.adoc[]
+
 [[resources-assets-removeRealTimeData]]
 === removeRealTimeData
 
