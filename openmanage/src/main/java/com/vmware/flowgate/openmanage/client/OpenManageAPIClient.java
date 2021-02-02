@@ -23,8 +23,11 @@ import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.openmanage.datamodel.AuthInfo;
 import com.vmware.flowgate.openmanage.datamodel.Chassis;
+import com.vmware.flowgate.openmanage.datamodel.DevicePower;
+import com.vmware.flowgate.openmanage.datamodel.DeviceTemperature;
 import com.vmware.flowgate.openmanage.datamodel.DeviceType;
 import com.vmware.flowgate.openmanage.datamodel.DevicesResult;
+import com.vmware.flowgate.openmanage.datamodel.Plugin;
 import com.vmware.flowgate.openmanage.datamodel.Server;
 
 public class OpenManageAPIClient implements AutoCloseable{
@@ -99,6 +102,43 @@ public class OpenManageAPIClient implements AutoCloseable{
          result = entity.getBody();
       }
       return result;
+   }
+
+   public DevicePower getDevicePowerMetrics(String deviceId) {
+      ResponseEntity<DevicePower> powerMetricsEntity = this.restTemplate.exchange(
+            getServiceEndPoint() + String.format(GetDevicePowerUri, deviceId), HttpMethod.GET,
+            getDefaultEntity(), DevicePower.class);
+      if(powerMetricsEntity.hasBody()) {
+         return powerMetricsEntity.getBody();
+      }
+      return null;
+   }
+
+   public DeviceTemperature getDeviceTemperatureMetrics(String deviceId) {
+      ResponseEntity<DeviceTemperature> temperatureEntity = this.restTemplate.exchange(
+            getServiceEndPoint() + String.format(GetDeviceTemperatureUri, deviceId), HttpMethod.GET,
+            getDefaultEntity(), DeviceTemperature.class);
+      if(temperatureEntity.hasBody()) {
+         return temperatureEntity.getBody();
+      }
+      return null;
+   }
+
+   public Plugin getPowerManagePlugin() {
+      ResolvableType resolvableType = ResolvableType.forClassWithGenerics(DevicesResult.class, Plugin.class);
+      ParameterizedTypeReference<DevicesResult<Plugin>> typeRef = ParameterizedTypeReference.forType(resolvableType.getType());
+      ResponseEntity<DevicesResult<Plugin>> entity = this.restTemplate.exchange(getServiceEndPoint() + GetPluginUri, HttpMethod.GET,
+            getDefaultEntity(), typeRef);
+      if(!entity.hasBody()) {
+         return null;
+      }
+      DevicesResult<Plugin> result = entity.getBody();
+      for(Plugin plugin:result.getValue()) {
+         if(PowerManager.equals(plugin.getName()) && plugin.isInstalled() && plugin.isEnabled()) {
+            return plugin;
+         }
+      }
+      return null;
    }
 
    @Override
