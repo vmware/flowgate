@@ -33,6 +33,10 @@ public class OpenManageAPIClient implements AutoCloseable{
    private static final String SessionUri = "/api/SessionService/Sessions";
    private static final String LogOutUri = "/api/SessionService/Actions/SessionService.Logoff";
    private static final String GetDeviceTemperatureUri = "/api/DeviceService/Devices(%s)/Temperature";
+   private static final String GetDevicePowerUri = "/api/DeviceService/Devices(%s)/Power";
+   private static final String GetPluginUri = "/api/PluginService/Plugins";
+   private static final String GetMetricsUri = "/api/MetricService/Metrics";
+   private static final String PowerManager = "Power Manager";
    private static final String APISessionType = "API";
    private RestTemplate restTemplate;
    private String serviceEndPoint;
