@@ -238,7 +238,7 @@ public class AssetService {
       return metricDataList;
    }
 
-   public List<MetricData> getMetricsDataById(String assetID, Long starttime, Integer duration) {
+   public List<MetricData> getAssetMetricsDataById(String assetID, Long starttime, Integer duration) {
       Optional<Asset> assetOptional = assetRepository.findById(assetID);
       if (!assetOptional.isPresent()) {
          throw WormholeRequestException.NotFound("asset", "id", assetID);

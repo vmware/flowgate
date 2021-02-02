@@ -494,7 +494,7 @@ include::{snippets}/assets-getAssetsByVroId-example/request-fields.adoc[]
 [[resources-assets-getServerMetricsData]]
 === getServerMetricsData
 
-A `GET` request is used to get server's metrics Data.
+(Deprecated)A `GET` request is used to get server's metrics Data.
 
 ==== Request structure
 
@@ -515,7 +515,7 @@ include::{snippets}/assets-getServerMetricsData-example/response-fields.adoc[]
 [[resources-assets-getPduMetricsData]]
 === getPduMetricsData
 
-A `GET` request is used to get PDU metrics Data.
+(Deprecated)A `GET` request is used to get PDU metrics Data.
 
 ==== Request structure
 
@@ -533,26 +533,26 @@ include::{snippets}/assets-getPduMetricsData-example/curl-request.adoc[]
 
 include::{snippets}/assets-getPduMetricsData-example/response-fields.adoc[]
 
-[[resources-assets-getMetricsData]]
-=== getMetricsData
+[[resources-assets-getAssetMetricsData]]
+=== getAssetMetricsData
 
-A `GET` request is used to get metrics Data By AssetId.
+A `GET` request is used to get asset metrics Data By AssetId.
 
 ==== Request structure
 
-include::{snippets}/assets-getMetricsData-Server-example/http-request.adoc[]
+include::{snippets}/assets-getAssetMetricsData-Server-example/http-request.adoc[]
 
 ==== Example response
 
-include::{snippets}/assets-getMetricsData-Server-example/http-response.adoc[]
+include::{snippets}/assets-getAssetMetricsData-Server-example/http-response.adoc[]
 
 ==== CURL request
 
-include::{snippets}/assets-getMetricsData-Server-example/curl-request.adoc[]
+include::{snippets}/assets-getAssetMetricsData-Server-example/curl-request.adoc[]
 
 ==== Response Fields
 
-include::{snippets}/assets-getMetricsData-Server-example/response-fields.adoc[]
+include::{snippets}/assets-getAssetMetricsData-Server-example/response-fields.adoc[]
 
 [[resources-assets-removeRealTimeData]]
 === removeRealTimeData
