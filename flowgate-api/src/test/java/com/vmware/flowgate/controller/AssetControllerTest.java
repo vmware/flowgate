@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.vmware.flowgate.common.RealtimeDataUnit;
 import org.junit.Before;
 import org.junit.Rule;
@@ -1982,9 +1981,9 @@ public class AssetControllerTest {
       realTimeDatas.add(serverHostRealTimeData);
       Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
 
-      HashMap<String, String> justficationfields = new HashMap<String, String>();
-      justficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_sc2-a26-pdu-blue_FIELDSPLIT_OUTLET:1_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
-      asset.setJustificationfields(justficationfields);
+      HashMap<String, String> justificationfields = new HashMap<>();
+      justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:7_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
+      asset.setJustificationfields(justificationfields);
       Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
       Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
       Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
@@ -2052,35 +2051,41 @@ public class AssetControllerTest {
       try {
          for(MetricData serverdata:datas) {
             String metricName = serverdata.getMetricName();
-            if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
-                  equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 20.0);
-            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
-                  equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 2.38);
-            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
-                  equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 208.0);
+            if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:7").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.633);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:7").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 1.033);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:7").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 226.0);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.134);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.1427);
             }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa").
-                  equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 196.0);
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 4.566);
             }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, "0001bdc8b25d4c2badfd045ab61aabfa").
-                  equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 200.0);
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 1.033);
             }else if(String.format(MetricKeyName.SERVER_BACK_HUMIDITY_LOCATIONX, "OUTLET").
-                  equals(metricName)) {
+                     equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 20.0);
             }else if(String.format(MetricKeyName.SERVER_BACK_TEMPREATURE_LOCATIONX, "OUTLET").
-                  equals(metricName)) {
+                     equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 32.0);
             }else if(String.format(MetricKeyName.SERVER_FRONT_HUMIDITY_LOCATIONX, "INLET").
-                  equals(metricName)) {
+                     equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 20.0);
             }else if(String.format(MetricKeyName.SERVER_FRONT_TEMPERATURE_LOCATIONX, "INLET").
-                  equals(metricName)) {
+                     equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 32.0);
             }else if(MetricName.SERVER_VOLTAGE.equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 208.0);
+               TestCase.assertEquals(serverdata.getValueNum(), 226.0);
             }else if(MetricName.SERVER_STORAGEUSAGE.equals(metricName)) {
                if (serverdata.getTimeStamp() == currentTime + 20000) {
                   TestCase.assertEquals(serverdata.getValueNum(), 0.0);
@@ -2434,21 +2439,21 @@ public class AssetControllerTest {
       try {
          for(MetricData pduMetricdata:datas) {
             String metricName = pduMetricdata.getMetricName();
-            if(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,"OUTLET:1").
+            if(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,"OUTLET:7").
                   equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 2.0);
-            }else if(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,"OUTLET:1").
+            }else if(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,"OUTLET:7").
                   equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 2.38);
-            }else if(String.format(MetricKeyName.PDU_XLET_CURRENT,"OUTLET:1").
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
+            }else if(String.format(MetricKeyName.PDU_XLET_CURRENT,"OUTLET:7").
+                  equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.633);
+            }else if(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY, "OUTLET:7").
                   equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
-            }else if(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY, "OUTLET:1").
+            }else if(String.format(MetricKeyName.PDU_XLET_VOLTAGE, "OUTLET:7").
                   equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
-            }else if(String.format(MetricKeyName.PDU_XLET_VOLTAGE, "OUTLET:1").
-                  equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 208.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 226.0);
             }else if(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX, "OUTLET").
                   equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
@@ -2456,13 +2461,13 @@ public class AssetControllerTest {
                   equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 32.0);
             }else if(MetricName.PDU_CURRENT_LOAD.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.1427);
             }else if(MetricName.PDU_POWER_LOAD.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.134);
             }else if(MetricName.PDU_TOTAL_CURRENT.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 196.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 4.566);
             }else if(MetricName.PDU_TOTAL_POWER.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 200.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
             }else if(String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, "INLET:1","L1").
                   equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
@@ -2538,21 +2543,21 @@ public class AssetControllerTest {
       try {
          for(MetricData pduMetricdata:datas) {
             String metricName = pduMetricdata.getMetricName();
-            if(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,"OUTLET:1").
+            if(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,"OUTLET:7").
                      equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 2.0);
-            }else if(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,"OUTLET:1").
+            }else if(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,"OUTLET:7").
                      equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 2.38);
-            }else if(String.format(MetricKeyName.PDU_XLET_CURRENT,"OUTLET:1").
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
+            }else if(String.format(MetricKeyName.PDU_XLET_CURRENT,"OUTLET:7").
+                     equals(metricName)) {
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.633);
+            }else if(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY, "OUTLET:7").
                      equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
-            }else if(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY, "OUTLET:1").
+            }else if(String.format(MetricKeyName.PDU_XLET_VOLTAGE, "OUTLET:7").
                      equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
-            }else if(String.format(MetricKeyName.PDU_XLET_VOLTAGE, "OUTLET:1").
-                     equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 208.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 226.0);
             }else if(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX, "OUTLET").
                      equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
@@ -2560,13 +2565,13 @@ public class AssetControllerTest {
                      equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 32.0);
             }else if(MetricName.PDU_CURRENT_LOAD.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.1427);
             }else if(MetricName.PDU_POWER_LOAD.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.134);
             }else if(MetricName.PDU_TOTAL_CURRENT.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 196.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 4.566);
             }else if(MetricName.PDU_TOTAL_POWER.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 200.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
             }else if(String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, "INLET:1","L1").
                      equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
@@ -2671,12 +2676,17 @@ public class AssetControllerTest {
 
       formulars.put(FlowgateConstant.SENSOR, sensorMetricFormulars);
       asset.setMetricsformulars(formulars);
+
+      HashMap<String, String> justificationfields = new HashMap<>();
+      justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:7_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
+      asset.setJustificationfields(justificationfields);
+
       asset = assetRepository.save(asset);
 
       MvcResult result1 = this.mockMvc
                .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
                         String.valueOf(currentTime)).param("duration", "300000"))
-               .andDo(document("assets-getMetricsData-Server-example",
+               .andDo(document("assets-getAssetMetricsData-Server-example",
                         responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
                                  .andWithPrefix("[].", fieldpath)))
                .andReturn();
@@ -2686,21 +2696,27 @@ public class AssetControllerTest {
       try {
          for(MetricData serverdata:datas) {
             String metricName = serverdata.getMetricName();
-            if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+            if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:7").
                      equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 20.0);
-            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+               TestCase.assertEquals(serverdata.getValueNum(), 0.633);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:7").
                      equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 2.38);
-            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+               TestCase.assertEquals(serverdata.getValueNum(), 1.033);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:7").
                      equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 208.0);
+               TestCase.assertEquals(serverdata.getValueNum(), 226.0);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.134);
+            }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa").
+                     equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.1427);
             }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa").
                      equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 196.0);
+               TestCase.assertEquals(serverdata.getValueNum(), 4.566);
             }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, "0001bdc8b25d4c2badfd045ab61aabfa").
                      equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 200.0);
+               TestCase.assertEquals(serverdata.getValueNum(), 1.033);
             }else if(String.format(MetricKeyName.SERVER_BACK_HUMIDITY_LOCATIONX, "OUTLET").
                      equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 20.0);
@@ -2714,7 +2730,7 @@ public class AssetControllerTest {
                      equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 32.0);
             }else if(MetricName.SERVER_VOLTAGE.equals(metricName)) {
-               TestCase.assertEquals(serverdata.getValueNum(), 208.0);
+               TestCase.assertEquals(serverdata.getValueNum(), 226.0);
             }else if(MetricName.SERVER_STORAGEUSAGE.equals(metricName)) {
                if (serverdata.getTimeStamp() == currentTime + 20000) {
                   TestCase.assertEquals(serverdata.getValueNum(), 0.0);
@@ -3166,7 +3182,7 @@ public class AssetControllerTest {
       ValueUnit valueunitActivePower = new ValueUnit();
       valueunitActivePower.setKey(MetricName.PDU_ACTIVE_POWER);
       valueunitActivePower.setUnit("W");
-      valueunitActivePower.setExtraidentifier("OUTLET:1");
+      valueunitActivePower.setExtraidentifier("OUTLET:7");
       valueunitActivePower.setValueNum(2);
       valueunitActivePower.setTime(time);
       valueunits.add(valueunitActivePower);
@@ -3174,26 +3190,10 @@ public class AssetControllerTest {
       ValueUnit valueunitFreeCapacity = new ValueUnit();
       valueunitFreeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
       valueunitFreeCapacity.setUnit("Amps");
-      valueunitFreeCapacity.setExtraidentifier("OUTLET:1");
+      valueunitFreeCapacity.setExtraidentifier("OUTLET:7");
       valueunitFreeCapacity.setValueNum(20);
       valueunitFreeCapacity.setTime(time);
       valueunits.add(valueunitFreeCapacity);
-
-      ValueUnit valueunitCurrentLoad = new ValueUnit();
-      valueunitCurrentLoad.setKey(MetricName.PDU_CURRENT_LOAD);
-      valueunitCurrentLoad.setUnit("%");
-      valueunitCurrentLoad.setExtraidentifier("OUTLET:1");
-      valueunitCurrentLoad.setValueNum(20);
-      valueunitCurrentLoad.setTime(time);
-      valueunits.add(valueunitCurrentLoad);
-
-      ValueUnit valueunitPowerLoad = new ValueUnit();
-      valueunitPowerLoad.setKey(MetricName.PDU_POWER_LOAD);
-      valueunitPowerLoad.setUnit("%");
-      valueunitPowerLoad.setExtraidentifier("OUTLET:1");
-      valueunitPowerLoad.setValueNum(20);
-      valueunitPowerLoad.setTime(time);
-      valueunits.add(valueunitPowerLoad);
 
       ValueUnit valueunitL1FreeCapacity = new ValueUnit();
       valueunitL1FreeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
@@ -3346,42 +3346,57 @@ public class AssetControllerTest {
 
    RealTimeData createServerPDURealTimeData(long time) {
       List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
-      ValueUnit valueunitvoltage = new ValueUnit();
-      valueunitvoltage.setKey(MetricName.PDU_VOLTAGE);
-      valueunitvoltage.setUnit("Volts");
-      valueunitvoltage.setExtraidentifier("OUTLET:1");
-      valueunitvoltage.setValueNum(208);
-      valueunitvoltage.setTime(time);
-      valueunits.add(valueunitvoltage);
-      ValueUnit valueunitpower = new ValueUnit();
-      valueunitpower.setKey(MetricName.PDU_APPARENT_POWER);
-      valueunitpower.setUnit("W");
-      valueunitpower.setExtraidentifier("OUTLET:1");
-      valueunitpower.setValueNum(2.38);
-      valueunitpower.setTime(time);
-      valueunits.add(valueunitpower);
-      ValueUnit valueunitCurrent = new ValueUnit();
-      valueunitCurrent.setExtraidentifier("OUTLET:1");
-      valueunitCurrent.setKey(MetricName.PDU_CURRENT);
-      valueunitCurrent.setUnit("Amps");
-      valueunitCurrent.setValueNum(20);
-      valueunitCurrent.setTime(time);
-      valueunits.add(valueunitCurrent);
+      ValueUnit totalPowerValueUnit = new ValueUnit();
+      totalPowerValueUnit.setKey(MetricName.PDU_TOTAL_POWER);
+      totalPowerValueUnit.setValueNum(1.033);
+      totalPowerValueUnit.setTime(time);
+      totalPowerValueUnit.setUnit(RealtimeDataUnit.KW.toString());
+      valueunits.add(totalPowerValueUnit);
 
-      ValueUnit valueunitTotalCurrent = new ValueUnit();
-      valueunitTotalCurrent.setKey(MetricName.PDU_TOTAL_CURRENT);
-      valueunitTotalCurrent.setUnit("Amps");
-      valueunitTotalCurrent.setValueNum(196);
-      valueunitTotalCurrent.setTime(time);
-      valueunits.add(valueunitTotalCurrent);
+      ValueUnit totalCurrentValueUnit = new ValueUnit();
+      totalCurrentValueUnit.setKey(MetricName.PDU_TOTAL_CURRENT);
+      totalCurrentValueUnit.setValueNum(4.566);
+      totalCurrentValueUnit.setTime(time);
+      totalCurrentValueUnit.setUnit(RealtimeDataUnit.Amps.toString());
+      valueunits.add(totalCurrentValueUnit);
 
-      ValueUnit valueunitTotalPower = new ValueUnit();
-      valueunitTotalPower.setExtraidentifier("OUTLET:1");
-      valueunitTotalPower.setKey(MetricName.PDU_TOTAL_POWER);
-      valueunitTotalPower.setUnit("W");
-      valueunitTotalPower.setValueNum(200);
-      valueunitTotalPower.setTime(time);
-      valueunits.add(valueunitTotalPower);
+      ValueUnit apparentPowerValueUnit = new ValueUnit();
+      apparentPowerValueUnit.setKey(MetricName.PDU_APPARENT_POWER);
+      apparentPowerValueUnit.setValueNum(1.033);
+      apparentPowerValueUnit.setExtraidentifier("OUTLET:7");
+      apparentPowerValueUnit.setTime(time);
+      apparentPowerValueUnit.setUnit(RealtimeDataUnit.KW.toString());
+      valueunits.add(apparentPowerValueUnit);
+
+      ValueUnit currentValueUnit = new ValueUnit();
+      currentValueUnit.setKey(MetricName.PDU_CURRENT);
+      currentValueUnit.setValueNum(0.633);
+      currentValueUnit.setExtraidentifier("OUTLET:7");
+      currentValueUnit.setTime(time);
+      currentValueUnit.setUnit(RealtimeDataUnit.Amps.toString());
+      valueunits.add(currentValueUnit);
+
+      ValueUnit voltageValueUnit = new ValueUnit();
+      voltageValueUnit.setKey(MetricName.PDU_VOLTAGE);
+      voltageValueUnit.setValueNum(226);
+      voltageValueUnit.setExtraidentifier("OUTLET:7");
+      voltageValueUnit.setTime(time);
+      voltageValueUnit.setUnit(RealtimeDataUnit.Volts.toString());
+      valueunits.add(voltageValueUnit);
+
+      ValueUnit powerLoadValueUnit = new ValueUnit();
+      powerLoadValueUnit.setKey(MetricName.PDU_POWER_LOAD);
+      powerLoadValueUnit.setValueNum(0.134);
+      powerLoadValueUnit.setTime(time);
+      powerLoadValueUnit.setUnit(RealtimeDataUnit.Percent.toString());
+      valueunits.add(powerLoadValueUnit);
+
+      ValueUnit currentLoadValueUnit = new ValueUnit();
+      currentLoadValueUnit.setKey(MetricName.PDU_CURRENT_LOAD);
+      currentLoadValueUnit.setValueNum(0.1427);
+      currentLoadValueUnit.setTime(time);
+      currentLoadValueUnit.setUnit(RealtimeDataUnit.Percent.toString());
+      valueunits.add(currentLoadValueUnit);
 
       RealTimeData realTimeData = new RealTimeData();
       realTimeData.setId(UUID.randomUUID().toString());
