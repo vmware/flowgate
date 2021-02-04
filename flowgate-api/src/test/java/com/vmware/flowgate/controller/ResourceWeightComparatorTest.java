@@ -4,15 +4,15 @@
 */
 package com.vmware.flowgate.controller;
 
+import com.vmware.flowgate.common.model.WormholeResources;
+import com.vmware.flowgate.util.WormholeResourceWeightComparator;
+import junit.framework.TestCase;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import org.junit.Test;
-import com.vmware.flowgate.common.model.WormholeResources;
-import com.vmware.flowgate.util.WormholeResourceWeightComparator;
-
-import junit.framework.TestCase;
 
 public class ResourceWeightComparatorTest {
 
@@ -49,10 +49,10 @@ public class ResourceWeightComparatorTest {
          resources.add(entry.getKey());
       }
       
-      TestCase.assertEquals(resources.get(0).getPattern(), "/v1/assets/mapping/vrops/**");
-      TestCase.assertEquals(resources.get(1).getPattern(), "/v1/auth/user/page/**");
-      TestCase.assertEquals(resources.get(2).getPattern(), "/v1/assets/mapping/**");
-      TestCase.assertEquals(resources.get(3).getPattern(), "/v1/auth/user/**");
+      TestCase.assertEquals("/v1/assets/mapping/vrops/**", resources.get(0).getPattern());
+      TestCase.assertEquals("/v1/auth/user/page/**", resources.get(1).getPattern());
+      TestCase.assertEquals("/v1/assets/mapping/**", resources.get(2).getPattern());
+      TestCase.assertEquals("/v1/auth/user/**", resources.get(3).getPattern());
    }
    
    WormholeResources create() {
