@@ -23,11 +23,14 @@ import com.vmware.flowgate.common.exception.WormholeException;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.openmanage.datamodel.AuthInfo;
 import com.vmware.flowgate.openmanage.datamodel.Chassis;
+import com.vmware.flowgate.openmanage.datamodel.CommonResult;
+import com.vmware.flowgate.openmanage.datamodel.DeviceMetricsResult;
 import com.vmware.flowgate.openmanage.datamodel.DevicePower;
 import com.vmware.flowgate.openmanage.datamodel.DeviceTemperature;
 import com.vmware.flowgate.openmanage.datamodel.DeviceType;
-import com.vmware.flowgate.openmanage.datamodel.DevicesResult;
 import com.vmware.flowgate.openmanage.datamodel.Plugin;
+import com.vmware.flowgate.openmanage.datamodel.PowerManageMetricsRequestBody;
+import com.vmware.flowgate.openmanage.datamodel.PowerSetting;
 import com.vmware.flowgate.openmanage.datamodel.Server;
 
 public class OpenManageAPIClient implements AutoCloseable{
@@ -39,18 +42,22 @@ public class OpenManageAPIClient implements AutoCloseable{
    private static final String GetDevicePowerUri = "/api/DeviceService/Devices(%s)/Power";
    private static final String GetPluginUri = "/api/PluginService/Plugins";
    private static final String GetMetricsUri = "/api/MetricService/Metrics";
-   private static final String PowerManager = "Power Manager";
+   private static final String GetPowerSettingsUri = "/api/PowerService/Settings";
    private static final String APISessionType = "API";
    private RestTemplate restTemplate;
    private String serviceEndPoint;
    private AuthInfo authInfo;
    private String token;
    private static Map<Class<?>,Integer> deviceTypeMap = new HashMap<Class<?>,Integer>();
+   private static Map<Class<?>, String> resourceUriMap = new HashMap<Class<?>,String>();
    private String AuthHeader = "x-auth-token";
    static {
       deviceTypeMap.put(Server.class, DeviceType.SERVER.getValue());
       deviceTypeMap.put(Chassis.class, DeviceType.CHASSIS.getValue());
       deviceTypeMap = Collections.unmodifiableMap(deviceTypeMap);
+      resourceUriMap.put(Plugin.class, GetPluginUri);
+      resourceUriMap.put(PowerSetting.class, GetPowerSettingsUri);
+      resourceUriMap = Collections.unmodifiableMap(resourceUriMap);
    }
 
    public OpenManageAPIClient(FacilitySoftwareConfig config) {
@@ -88,16 +95,16 @@ public class OpenManageAPIClient implements AutoCloseable{
       }
    }
 
-   public <T> DevicesResult<T> getDevices(int skip, int limit, Class<T> type) {
+   public <T> CommonResult<T> getDevices(int skip, int limit, Class<T> type) {
       String url = getServiceEndPoint()
             + String.format(GetDeviceUri, deviceTypeMap.get(type), skip, limit);
       UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
       URI uri = builder.build().encode().toUri();
-      ResolvableType resolvableType = ResolvableType.forClassWithGenerics(DevicesResult.class, type);
-      ParameterizedTypeReference<DevicesResult<T>> typeRef = ParameterizedTypeReference.forType(resolvableType.getType());
-      ResponseEntity<DevicesResult<T>> entity = this.restTemplate.exchange(uri, HttpMethod.GET,
+      ResolvableType resolvableType = ResolvableType.forClassWithGenerics(CommonResult.class, type);
+      ParameterizedTypeReference<CommonResult<T>> typeRef = ParameterizedTypeReference.forType(resolvableType.getType());
+      ResponseEntity<CommonResult<T>> entity = this.restTemplate.exchange(uri, HttpMethod.GET,
             getDefaultEntity(), typeRef);
-      DevicesResult<T> result = null;
+      CommonResult<T> result = null;
       if (entity.hasBody()) {
          result = entity.getBody();
       }
@@ -124,26 +131,32 @@ public class OpenManageAPIClient implements AutoCloseable{
       return null;
    }
 
-   public Plugin getPowerManagePlugin() {
-      ResolvableType resolvableType = ResolvableType.forClassWithGenerics(DevicesResult.class, Plugin.class);
-      ParameterizedTypeReference<DevicesResult<Plugin>> typeRef = ParameterizedTypeReference.forType(resolvableType.getType());
-      ResponseEntity<DevicesResult<Plugin>> entity = this.restTemplate.exchange(getServiceEndPoint() + GetPluginUri, HttpMethod.GET,
+   public <T> CommonResult<T> getCommonResult(Class<T> type) {
+      ResolvableType resolvableType = ResolvableType.forClassWithGenerics(CommonResult.class, type);
+      ParameterizedTypeReference<CommonResult<T>> typeRef = ParameterizedTypeReference.forType(resolvableType.getType());
+      ResponseEntity<CommonResult<T>> entity = this.restTemplate.exchange(getServiceEndPoint() + resourceUriMap.get(type), HttpMethod.GET,
             getDefaultEntity(), typeRef);
-      if(!entity.hasBody()) {
-         return null;
+      CommonResult<T> result = null;
+      if (entity.hasBody()) {
+         result = entity.getBody();
       }
-      DevicesResult<Plugin> result = entity.getBody();
-      for(Plugin plugin:result.getValue()) {
-         if(PowerManager.equals(plugin.getName()) && plugin.isInstalled() && plugin.isEnabled()) {
-            return plugin;
-         }
+      return result;
+   }
+
+   public DeviceMetricsResult getMetricsFromPowerManage(PowerManageMetricsRequestBody body) {
+      DeviceMetricsResult result = null;
+      HttpEntity<Object> postEntity = new HttpEntity<Object>(body, buildHeaders());
+      ResponseEntity<DeviceMetricsResult> responseEntity = this.restTemplate.exchange(getServiceEndPoint() + GetMetricsUri,
+            HttpMethod.POST, postEntity , DeviceMetricsResult.class);
+      if(responseEntity.hasBody()) {
+         result = responseEntity.getBody();
       }
-      return null;
+      return result;
    }
 
    @Override
    public void close() {
       this.restTemplate.exchange(getServiceEndPoint() + LogOutUri,
-            HttpMethod.POST, getDefaultEntity() , Void.class);
+            HttpMethod.POST, getDefaultEntity(), Void.class);
    }
 }
