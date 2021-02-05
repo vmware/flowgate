@@ -6,7 +6,7 @@ package com.vmware.flowgate.openmanage.datamodel;
 
 import java.util.List;
 
-public class DevicesResult<T> extends OdataResult{
+public class CommonResult<T> extends OdataResult{
 
    private List<T> value;
    public List<T> getValue() {

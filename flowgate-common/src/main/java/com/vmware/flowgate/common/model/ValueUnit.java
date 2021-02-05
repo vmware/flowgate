@@ -66,7 +66,7 @@ public class ValueUnit {
        MV("VOLTAGE",0.001), V("VOLTAGE",1), KV("VOLTAGE",1000), VOLTS("VOLTAGE",1),
        MW("POWER",0.001), W("POWER",1), KW("POWER",1000), KWH("ENERGY",1000),
        MA("CURRRNT",0.001), A("CURRENT",1), KA("CURRENT",1000), AMPS("CURRENT",1),
-       C("TEMPRETURE",1), F("TEMPRETURE",1), PERCENT("PERCENT",1);
+       C("TEMPRETURE",1), F("TEMPRETURE",1), PERCENT("PERCENT",1), BTUPerHr("POWER",0.293071);
 
        private final String group;
        private final double factor;
