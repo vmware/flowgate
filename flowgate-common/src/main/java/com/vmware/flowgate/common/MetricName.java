@@ -40,6 +40,7 @@ public class MetricName {
    public static final String SERVER_AVERAGE_TEMPERATURE = "AverageTemperature";//(celsius)
    public static final String SERVER_TEMPERATURE = "Temperature";//(celsius)
    public static final String SERVER_PEAK_TEMPERATURE = "PeakTemperature";//(celsius)
+   public static final String SERVER_POWER = "Power";
 
    public static final String SERVER_CPUUSEDINMHZ = "CpuUsedInMhz";//(MHZ)
    public static final String SERVER_CPUUSAGE = "CpuUsage";//(Percentage)
