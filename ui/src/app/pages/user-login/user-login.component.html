@@ -18,7 +18,7 @@ SPDX-License-Identifier: BSD-2-Clause -->
             </clr-password-container>
             <clr-checkbox-wrapper>
                 <label>Remember me</label>
-                <input type="checkbox" name="rememberMe" clrCheckbox />
+                <input type="checkbox" name="rememberMe" clrCheckbox [(ngModel)]="user.rememberMe"/>
             </clr-checkbox-wrapper>
             <div *ngIf="tips" class="error active" >
                 {{textContent}}
