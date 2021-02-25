@@ -19,7 +19,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,7 +142,7 @@ public class AssetService {
          return result;
       }
 
-      //result.addAll(getServerHostMetric(server, starttime, duration));
+      result.addAll(getServerHostMetric(server, starttime, duration));
 
       Map<String,String> justficationfileds = server.getJustificationfields();
       String allPduPortInfo = justficationfileds.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
@@ -200,33 +202,45 @@ public class AssetService {
       return result;
    }
 
-//   private List<MetricData> getServerHostMetric(Asset server, long starttime, int duration) {
-//      List<MetricData> metricDataList = new ArrayList<>();
-//      Map<String, Map<String, String>> hostMetricsFormula = server.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
-//      if (hostMetricsFormula == null || hostMetricsFormula.isEmpty()) {
-//         return metricDataList;
-//      }
-//      List<RealTimeData> realtimeDatas = realtimeDataRepository.getDataByIDAndTimeRange(server.getId(), starttime, duration);
-//      if(realtimeDatas == null || realtimeDatas.isEmpty()) {
-//         return metricDataList;
-//      }
-//      MetricData metricData;
-//      for (RealTimeData realtimeData : realtimeDatas) {
-//         List<ValueUnit> realtimeDataValues = realtimeData.getValues();
-//         if (realtimeDataValues == null || realtimeDataValues.isEmpty()) {
-//            continue;
-//         }
-//         for (ValueUnit valueUnit : realtimeDataValues) {
-//            metricData = new MetricData();
-//            metricData.setMetricName(valueUnit.getKey());
-//            metricData.setTimeStamp(valueUnit.getTime());
-//            metricData.setValue(valueUnit.getValue());
-//            metricData.setValueNum(valueUnit.getValueNum());
-//            metricDataList.add(metricData);
-//         }
-//      }
-//      return metricDataList;
-//   }
+   private List<MetricData> getServerHostMetric(Asset server, long starttime, int duration) {
+      List<MetricData> metricDataList = Lists.newArrayList();
+      String hostMetricsFormulaString = server.getMetricsformulas().get(FlowgateConstant.HOST_METRICS);
+      if (StringUtils.isBlank(hostMetricsFormulaString)) {
+         return metricDataList;
+      }
+      Map<String, String> hostMetricsFormula = server.metricsFormulaToMap(hostMetricsFormulaString, new TypeReference<Map<String, String>>() {});
+      if (hostMetricsFormula == null || hostMetricsFormula.isEmpty()) {
+         return metricDataList;
+      }
+      Map<String, List<String>> assetIdAndMetricsNameList = Maps.newHashMap();
+      for (Map.Entry<String, String> itemEntry : hostMetricsFormula.entrySet()) {
+         List<String> metricsNameList = assetIdAndMetricsNameList.computeIfAbsent(itemEntry.getValue(), k -> Lists.newArrayList());
+         metricsNameList.add(itemEntry.getKey());
+      }
+
+      Map<String, List<RealTimeData>> realtimeDataMap = Maps.newHashMap();
+      for (Map.Entry<String, List<String>> entry : assetIdAndMetricsNameList.entrySet()) {
+         realtimeDataMap.put(entry.getKey(), realtimeDataRepository.getDataByIDAndTimeRange(entry.getKey(), starttime, duration));
+      }
+
+      MetricData metricData;
+      for (Map.Entry<String, List<RealTimeData>> realtimeDataEntry : realtimeDataMap.entrySet()) {
+         List<String> metricsNameList = assetIdAndMetricsNameList.get(realtimeDataEntry.getKey());
+         for (RealTimeData realTimeData : realtimeDataEntry.getValue()) {
+            for (ValueUnit valueUnit : realTimeData.getValues()) {
+               if (metricsNameList.contains(valueUnit.getKey())) {
+                  metricData = new MetricData();
+                  metricData.setMetricName(valueUnit.getKey());
+                  metricData.setTimeStamp(valueUnit.getTime());
+                  metricData.setValue(valueUnit.getValue());
+                  metricData.setValueNum(valueUnit.getValueNum());
+                  metricDataList.add(metricData);
+               }
+            }
+         }
+      }
+      return metricDataList;
+   }
 
    private List<MetricData> getOtherMetricsDataById(String assetID, Long starttime, Integer duration) {
       List<MetricData> metricDataList = new ArrayList<>();

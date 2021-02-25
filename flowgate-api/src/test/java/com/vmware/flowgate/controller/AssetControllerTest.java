@@ -2033,27 +2033,21 @@ public class AssetControllerTest {
       formulars.put(FlowgateConstant.PDU, pduFormulaInfo);
       formulars.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
 
-//      Map<String, Map<String, String>> hostMetrics = new HashMap<>();
-//      Map<String, String> cpuMap = new HashMap<>();
-//      cpuMap.put(MetricName.SERVER_CPUUSAGE, asset.getId());
-//      cpuMap.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
-//      hostMetrics.put(FlowgateConstant.HOST_CPU, cpuMap);
-//
-//      Map<String, String> memoryMap = new HashMap<>();
-//      memoryMap.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
-//      memoryMap.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
-//      memoryMap.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
-//      memoryMap.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
-//      memoryMap.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
-//      memoryMap.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
-//      hostMetrics.put(FlowgateConstant.HOST_MEMORY, memoryMap);
-//
-//      Map<String, String> storageMap = new HashMap<>();
-//      storageMap.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
-//      storageMap.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
-//      storageMap.put(MetricName.SERVER_STORAGEUSED, asset.getId());
-//      hostMetrics.put(FlowgateConstant.HOST_STORAGE, storageMap);
-//      formulars.put(FlowgateConstant.HOST_METRICS, hostMetrics);
+      Map<String, String> hostMetrics = new HashMap<>();
+      hostMetrics.put(MetricName.SERVER_CPUUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
+
+      hostMetrics.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
+
+      hostMetrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEUSED, asset.getId());
+      formulars.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(hostMetrics));
 
       asset.setMetricsformulas(formulars);
       asset = assetRepository.save(asset);
@@ -2667,27 +2661,21 @@ public class AssetControllerTest {
       pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricFormulas.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
 
-//      Map<String, Map<String, String>> hostMetrics = new HashMap<>();
-//      Map<String, String> cpuMap = new HashMap<>();
-//      cpuMap.put(MetricName.SERVER_CPUUSAGE, asset.getId());
-//      cpuMap.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
-//      hostMetrics.put(FlowgateConstant.HOST_CPU, cpuMap);
-//
-//      Map<String, String> memoryMap = new HashMap<>();
-//      memoryMap.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
-//      memoryMap.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
-//      memoryMap.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
-//      memoryMap.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
-//      memoryMap.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
-//      memoryMap.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
-//      hostMetrics.put(FlowgateConstant.HOST_MEMORY, memoryMap);
-//
-//      Map<String, String> storageMap = new HashMap<>();
-//      storageMap.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
-//      storageMap.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
-//      storageMap.put(MetricName.SERVER_STORAGEUSED, asset.getId());
-//      hostMetrics.put(FlowgateConstant.HOST_STORAGE, storageMap);
-//      formulas.put(FlowgateConstant.HOST_METRICS, hostMetrics);
+      Map<String, String> hostMetrics = new HashMap<>();
+      hostMetrics.put(MetricName.SERVER_CPUUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
+
+      hostMetrics.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
+
+      hostMetrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEUSED, asset.getId());
+      formulas.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(hostMetrics));
 
       Map<String, Map<String, String>> sensorMetricFormulas = new HashMap<String, Map<String, String>>();
       Map<String, String> frontTempSensor = new HashMap<String,String>();
