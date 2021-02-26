@@ -9,6 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +47,8 @@ public class CleanDataJobTest {
    @Mock
    private ServiceKeyConfig config;
 
+   private ObjectMapper mapper = new ObjectMapper();
+
    @Spy
    @InjectMocks
    private NlyteDataService nlyteDataService = new NlyteDataService();
@@ -67,8 +73,7 @@ public class CleanDataJobTest {
       server.setJustificationfields(justifications);
 
 
-      Map<String, Map<String, Map<String, String>>> formulars =
-            new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, String> formulars = new HashMap<>();
 
       Map<String, Map<String, String>> pduMap = new HashMap<String, Map<String, String>>();
       Map<String, String> metricNameAndId = new HashMap<String, String>();
@@ -76,8 +81,12 @@ public class CleanDataJobTest {
       metricNameAndId.put(MetricName.PDU_TOTAL_POWER, "5x4ff46982db22e1b040e0f2");
       metricNameAndId.put(MetricName.PDU_VOLTAGE, "5x4ff46982db22e1b040e0f2");
       pduMap.put("5x4ff46982db22e1b040e0f2", metricNameAndId);
-      formulars.put(FlowgateConstant.PDU, pduMap);
-      server.setMetricsformulars(formulars);;
+      try {
+         formulars.put(FlowgateConstant.PDU, mapper.writeValueAsString(pduMap));
+      } catch (JsonProcessingException e) {
+         e.printStackTrace();
+      }
+      server.setMetricsformulas(formulars);
       servers.add(server);
 
       Asset server2 = new Asset();
@@ -90,9 +99,16 @@ public class CleanDataJobTest {
       servers = nlyteDataService.removePduFromServer(servers, "0364");
       TestCase.assertEquals(1, servers.size());
       TestCase.assertEquals(1, servers.get(0).getPdus().size());
-      TestCase.assertEquals(1, servers.get(0).getMetricsformulars().size());
+      TestCase.assertEquals(1, servers.get(0).getMetricsformulas().size());
 
-      TestCase.assertEquals("5x4ff46982db22e1b040e0f2", servers.get(0).getMetricsformulars().get(FlowgateConstant.PDU).entrySet().iterator().next().getKey());
+      Map<String, Map<String, String>> pduMetricsformulas = new HashMap<>();
+      try {
+         pduMetricsformulas = mapper.readValue(servers.get(0).getMetricsformulas().get(FlowgateConstant.PDU), new TypeReference<Map<String, Map<String, String>>>() {});
+      } catch (JsonProcessingException e) {
+         e.printStackTrace();
+      }
+
+      TestCase.assertEquals("5x4ff46982db22e1b040e0f2", pduMetricsformulas.entrySet().iterator().next().getKey());
       TestCase.assertEquals("onboard:1gb-nic:4_FIELDSPLIT_cloud-sw02-sha1_FIELDSPLIT_08_FIELDSPLIT_3fc319e50d21476684d841aa0842bd52", servers.get(0).getJustificationfields().get(FlowgateConstant.PDU_PORT_FOR_SERVER));
    }
 }
