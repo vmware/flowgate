@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,6 +70,8 @@ public class SyncSensorMetaDataJobTest {
    @Spy
    @InjectMocks
    private PowerIQService powerIQService = new PowerIQService();
+
+   private ObjectMapper mapper = new ObjectMapper();
 
    @Before
    public void before() {
@@ -299,30 +302,39 @@ public class SyncSensorMetaDataJobTest {
    }
 
    @Test
-   public void testUpdateServer() {
+   public void testUpdateServer() throws JsonProcessingException {
       List<Asset> assets = new ArrayList<Asset>();
       Asset server = createAsset();
       server.setAssetName("pek-wor-server");
       server.setCategory(AssetCategory.Server);
-      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, String> formulars = new HashMap<>();
       Map<String,String> sensorLocationAndId = new HashMap<String,String>();
       sensorLocationAndId.put("Rack01", "256");
       sensorLocationAndId.put("Rack02", "128");
       Map<String, Map<String, String>> sensorInfo = new HashMap<String, Map<String, String>>();
       sensorInfo.put("FRONT", sensorLocationAndId);
-      formulars.put(FlowgateConstant.SENSOR, sensorInfo);
-      server.setMetricsformulars(formulars);
+      formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo));
+      server.setMetricsformulas(formulars);
       assets.add(server);
       List<Asset> servers = powerIQService.updateServer(assets, "128");
       TestCase.assertEquals(assets.size(), servers.size());
       Asset updatedServer = servers.get(0);
 
 
-      Map<String, Map<String, Map<String, String>>> formulars1 = updatedServer.getMetricsformulars();
-      Map<String, Map<String, String>> sensorInfo1 = formulars1.get(FlowgateConstant.SENSOR);
+      Map<String, String> formulars1 = updatedServer.getMetricsformulas();
+      Map<String, Map<String, String>> sensorInfo1 = formatSensorFormulas(formulars1.get(FlowgateConstant.SENSOR));
       Map<String,String> sensorLocationAndId1 = sensorInfo1.get("FRONT");
       TestCase.assertEquals(1, sensorLocationAndId1.size());
       TestCase.assertEquals("256", sensorLocationAndId1.entrySet().iterator().next().getValue());
+   }
+
+   private Map<String, Map<String, String>> formatSensorFormulas(String stringSensorFormulas) {
+      try {
+         return mapper.readValue(stringSensorFormulas, new TypeReference<Map<String, Map<String, String>>>() {});
+      } catch (JsonProcessingException e) {
+         e.printStackTrace();
+      }
+      return null;
    }
 
    @Test

@@ -306,15 +306,15 @@ public class PowerIQService implements AsyncService {
       }
    }
 
-   public List<Asset> updateServer(List<Asset> servers, String sensorId){
+   public List<Asset> updateServer(List<Asset> servers, String sensorId) {
       List<Asset> needToUpdate = new ArrayList<Asset>();
       for(Asset server : servers) {
          boolean changed = false;
-         Map<String, Map<String, Map<String, String>>> formulars = server.getMetricsformulars();
+         Map<String, String> formulars = server.getMetricsformulas();
          if(formulars == null || formulars.isEmpty()) {
             continue;
          }
-         Map<String, Map<String, String>> sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+         Map<String, Map<String, String>> sensorFormulars = formatSensorFormulas(formulars.get(FlowgateConstant.SENSOR));
          for(Map.Entry<String, Map<String, String>> sensorFormularMap : sensorFormulars.entrySet()) {
             Map<String, String> sensorLocationAndIdMap = sensorFormularMap.getValue();
             Iterator<Map.Entry<String, String>> ite = sensorLocationAndIdMap.entrySet().iterator();
@@ -327,12 +327,27 @@ public class PowerIQService implements AsyncService {
                }
             }
          }
-         server.setMetricsformulars(formulars);
+         try {
+            formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorFormulars));
+         } catch (JsonProcessingException e) {
+            logger.error("Format metric formula error" ,e);
+         }
+         server.setMetricsformulas(formulars);
          if(changed) {
             needToUpdate.add(server);
          }
       }
       return needToUpdate;
+   }
+
+   private Map<String, Map<String, String>> formatSensorFormulas(String stringSensorFormulas) {
+      Map<String, Map<String, String>> sensorFormulas = null;
+      try {
+         sensorFormulas = mapper.readValue(stringSensorFormulas, new TypeReference<Map<String, Map<String, String>>>() {});
+      } catch (JsonProcessingException e) {
+         return new HashMap<>();
+      }
+      return sensorFormulas;
    }
 
    public LocationInfo getLocationInfo(PowerIQAPIClient client) {
@@ -635,7 +650,7 @@ public class PowerIQService implements AsyncService {
       }
    }
 
-   public Set<Asset> updatePduMetricformular(List<Asset> sensorAssets, Map<String,Asset> pduIdAndAssetMap){
+   public Set<Asset> updatePduMetricformular(List<Asset> sensorAssets, Map<String,Asset> pduIdAndAssetMap) {
       //Different sensors may have the same pduId.
       Set<Asset> pduAssets = new HashSet<Asset>();
       for(Asset sensorAsset : sensorAssets) {
@@ -649,22 +664,30 @@ public class PowerIQService implements AsyncService {
             continue;
          }
          String positionInfo = getSensorPositionInfo(sensorAsset);
-         Map<String, Map<String, Map<String, String>>> formulars = pduAsset.getMetricsformulars();
+         Map<String, String> formulars = pduAsset.getMetricsformulas();
          if(formulars == null || formulars.isEmpty()) {
-            formulars = new HashMap<String, Map<String, Map<String, String>>>();
+            formulars = new HashMap<>();
             Map<String, Map<String, String>> sensorFormulars = generateNewMetricformular(sensorAsset, positionInfo);
             if(sensorFormulars.isEmpty()) {
                continue;
             }
-            formulars.put(FlowgateConstant.SENSOR, sensorFormulars);
+            try {
+               formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorFormulars));
+            } catch (JsonProcessingException e) {
+               logger.error("Format metric formula error" ,e);
+            }
          }else {
-            Map<String, Map<String, String>> sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+            Map<String, Map<String, String>> sensorFormulars = formatSensorFormulas(formulars.get(FlowgateConstant.SENSOR));
             if(sensorFormulars == null || sensorFormulars.isEmpty()) {
                sensorFormulars = generateNewMetricformular(sensorAsset, positionInfo);
                if(sensorFormulars.isEmpty()) {
                   continue;
                }
-               formulars.put(FlowgateConstant.SENSOR, sensorFormulars);
+               try {
+                  formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorFormulars));
+               } catch (JsonProcessingException e) {
+                  logger.error("Format metric formula error" ,e);
+               }
             }else {
                Map<String,String> locationAndMetricMap = null;
                switch (sensorAsset.getSubCategory()) {
@@ -688,9 +711,13 @@ public class PowerIQService implements AsyncService {
                   break;
                }
             }
-            formulars.put(FlowgateConstant.SENSOR, sensorFormulars);
+            try {
+               formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorFormulars));
+            } catch (JsonProcessingException e) {
+               logger.error("Format metric formula error" ,e);
+            }
          }
-         pduAsset.setMetricsformulars(formulars);
+         pduAsset.setMetricsformulas(formulars);
          pduAssets.add(pduAsset);
       }
       return pduAssets;
@@ -1508,11 +1535,11 @@ public class PowerIQService implements AsyncService {
    public Set<String> getAssetIdfromformular(List<Asset> mappedAssets) {
       Set<String> assetIds = new HashSet<String>();
       for (Asset asset : mappedAssets) {
-         Map<String, Map<String, Map<String, String>>> formulars = asset.getMetricsformulars();
+         Map<String, String> formulars = asset.getMetricsformulas();
          if(formulars == null || formulars.isEmpty()) {
             continue;
          }
-         Map<String, Map<String, String>> sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+         Map<String, Map<String, String>> sensorFormulars = formatSensorFormulas(formulars.get(FlowgateConstant.SENSOR));
          if(sensorFormulars == null || sensorFormulars.isEmpty()) {
             continue;
          }
