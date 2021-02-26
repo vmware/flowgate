@@ -37,6 +37,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.aggregator.config.ServiceKeyConfig;
 import com.vmware.flowgate.aggregator.scheduler.job.AggregatorService;
@@ -75,13 +76,13 @@ public class MessageProcessingTest {
 
    @SpyBean
    private CustomerAdapterJobDispatcher customerAdapter;
-   
+
    @SpyBean
    private VCenterJobDispatcher vcenterJobDispatcher;
 
    @MockBean
    private WormholeAPIClient restClient;
-   
+
    @MockBean
    private ServiceKeyConfig serviceKeyConfig;
 
@@ -205,18 +206,24 @@ public class MessageProcessingTest {
             + "02"+FlowgateConstant.SEPARATOR+"pdu2"+FlowgateConstant.SEPARATOR+"02"+FlowgateConstant.SEPARATOR+"mienoas2389asddsfqzda";
       justficationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, pduPorts);
       server.setJustificationfields(justficationfields);
-      Map<String,Map<String,Map<String,String>>> metricsFormular =
-            new HashMap<String,Map<String,Map<String,String>>>();
-      Map<String,Map<String,String>> pduMetrics = new HashMap<String,Map<String,String>>();
+      Map<String, String> metricsFormular = new HashMap<String, String>();
+      Map<String,Map<String,String>> pduMetricsFormula = new HashMap<String,Map<String,String>>();
       Map<String,String> pduinfo1 = new HashMap<String,String>();
       pduinfo1.put(MetricName.PDU_ACTIVE_POWER, "mienoas2389asddsfqzda");
-      pduMetrics.put("mienoas2389asddsfqzda", pduinfo1);
+      pduMetricsFormula.put("mienoas2389asddsfqzda", pduinfo1);
 
       Map<String,String> pduinfo2 = new HashMap<String,String>();
       pduinfo2.put(MetricName.PDU_ACTIVE_POWER, "asdasdw2213dsdfaewwqe");
-      pduMetrics.put("asdasdw2213dsdfaewwqe", pduinfo2);
-      metricsFormular.put(FlowgateConstant.PDU, pduMetrics);
-      server.setMetricsformulars(metricsFormular);
+      pduMetricsFormula.put("asdasdw2213dsdfaewwqe", pduinfo2);
+      ObjectMapper mapper = new ObjectMapper();
+      String pduMetricFormulasInfo = null;
+      try {
+         pduMetricFormulasInfo = mapper.writeValueAsString(pduMetricsFormula);
+      } catch (JsonProcessingException e) {
+        TestCase.fail(e.getMessage());
+      }
+      metricsFormular.put(FlowgateConstant.PDU, pduMetricFormulasInfo);
+      server.setMetricsformulas(metricsFormular);
       servers[0] = server;
 
       Asset server1 = new Asset();
@@ -236,10 +243,15 @@ public class MessageProcessingTest {
             needupdateServer.getJustificationfields().get(FlowgateConstant.PDU_PORT_FOR_SERVER));
       TestCase.assertEquals(1,needupdateServer.getPdus().size());
       TestCase.assertEquals("qwiounasdyi2avewrasdf", needupdateServer.getPdus().get(0));
-      Map<String,Map<String,Map<String,String>>> metricsFormulars =
-            needupdateServer.getMetricsformulars();
+      Map<String, String> metricsFormulars = needupdateServer.getMetricsformulas();
       TestCase.assertEquals(1, metricsFormulars.size());
-      TestCase.assertEquals("asdasdw2213dsdfaewwqe", metricsFormulars.get(FlowgateConstant.PDU).keySet().iterator().next());
+      Map<String, Map<String, String>> pduMetricsFormulaMap = null;
+      try {
+         pduMetricsFormulaMap = mapper.readValue(metricsFormulars.get(FlowgateConstant.PDU), new TypeReference<Map<String, Map<String, String>>>() {});
+      } catch (IOException e) {
+         TestCase.fail(e.getMessage());
+      }
+      TestCase.assertEquals("asdasdw2213dsdfaewwqe", pduMetricsFormulaMap.keySet().iterator().next());
    }
 
    @Test
@@ -397,10 +409,10 @@ public class MessageProcessingTest {
       when(restClient.getAllCustomerFacilityAdapters()).thenReturn(new ResponseEntity<FacilityAdapter[]>(adapters, HttpStatus.OK));
       customerAdapter.execute(null);
    }
-   
+
    @Test
    public void testVcJobExecute() throws JobExecutionException, JsonProcessingException {
-      
+
       ListOperations<String, String> listOp = Mockito.mock(ListOperations.class);
       ValueOperations<String, String> valueOp = Mockito.mock(ValueOperations.class);
       SDDCSoftwareConfig[] sDDCSoftwareConfigs = new SDDCSoftwareConfig[2];
@@ -416,16 +428,16 @@ public class MessageProcessingTest {
 
       when(restClient.getVCServers()).thenReturn(resp);
       when(resp.getBody()).thenReturn(sDDCSoftwareConfigs);
-      
+
       when(sDDCSoftwareConfigs[0].checkIsActive()).thenReturn(true);
       when(sDDCSoftwareConfigs[1].checkIsActive()).thenReturn(true);
-      
+
       when(template.opsForList()).thenReturn(listOp);
-      
+
       doReturn(lists).when(vcenterJobDispatcher).generateSDDCMessageListByType("", sDDCSoftwareConfigs);
-      
+
       when(listOp.leftPushAll("", lists)).thenReturn(1L);
-      
+
       vcenterJobDispatcher.execute(null);
    }
 

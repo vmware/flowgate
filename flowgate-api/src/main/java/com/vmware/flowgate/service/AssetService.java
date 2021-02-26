@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.AssetCategory;
@@ -64,9 +65,9 @@ public class AssetService {
    private AssetRepository assetRepository;
    @Autowired
    private AssetRealtimeDataRepository realtimeDataRepository;
-
    @Autowired
    private StringRedisTemplate redisTemplate;
+   ObjectMapper mapper = new ObjectMapper();
 
    private static Map<String,String> metricNameMap = new HashMap<String,String>();
    static {
@@ -104,20 +105,21 @@ public class AssetService {
 
       Asset pdu = pduAssetOptional.get();
       //sensor metrics data, such as temperature or humidity
-      Map<String, Map<String, Map<String, String>>> formulars = pdu.getMetricsformulars();
-      Map<String, Map<String, String>> sensorFormulars = null;
-      if(formulars != null && !formulars.isEmpty()) {
-         sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+      Map<String, String> formulars = pdu.getMetricsformulas();
+      String sensorFormulasInfo = formulars.get(FlowgateConstant.SENSOR);
+      Map<String, Map<String, String>> sensorFormulasMap = null;
+      if(sensorFormulasInfo != null) {
+         sensorFormulasMap = metricsFormulaToMap(sensorFormulasInfo);
       }
 
-      if(sensorFormulars != null) {
+      if(sensorFormulasMap != null) {
          Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap = new HashMap<String,List<RealTimeData>>();
-         Map<String,String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
+         Map<String,String> humidityLocationAndIdMap = sensorFormulasMap.get(MetricName.PDU_HUMIDITY);
          if (humidityLocationAndIdMap != null && !humidityLocationAndIdMap.isEmpty()) {
             valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,duration,
                   humidityLocationAndIdMap, MetricName.PDU_HUMIDITY));
          }
-         Map<String,String> temperatureLocationAndIdMap = sensorFormulars.get(MetricName.PDU_TEMPERATURE);
+         Map<String,String> temperatureLocationAndIdMap = sensorFormulasMap.get(MetricName.PDU_TEMPERATURE);
          if(temperatureLocationAndIdMap != null && !temperatureLocationAndIdMap.isEmpty()) {
             valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,duration,
                   temperatureLocationAndIdMap, MetricName.PDU_TEMPERATURE));
@@ -133,12 +135,12 @@ public class AssetService {
       }
       Asset server = serverAssetOptional.get();
       List<MetricData> result = new ArrayList<MetricData>();
-      Map<String, Map<String, Map<String, String>>> metricFormula = server.getMetricsformulars();
+      Map<String, String> metricFormula = server.getMetricsformulas();
       if(metricFormula == null || metricFormula.isEmpty()) {
          return result;
       }
 
-      result.addAll(getServerHostMetric(server, starttime, duration));
+      //result.addAll(getServerHostMetric(server, starttime, duration));
 
       Map<String,String> justficationfileds = server.getJustificationfields();
       String allPduPortInfo = justficationfileds.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
@@ -157,9 +159,9 @@ public class AssetService {
             pduAssetIdAndUsedOutletMap.put(items[3], items[2]);
          }
       }
-
-      Map<String, Map<String, String>> pduMetrics = metricFormula.get(FlowgateConstant.PDU);
-      if(pduMetrics != null && !pduMetrics.isEmpty()) {
+      String pduFormulasInfo = metricFormula.get(FlowgateConstant.PDU);
+      if(pduFormulasInfo != null) {
+         Map<String, Map<String, String>> pduMetrics = metricsFormulaToMap(pduFormulasInfo);
          List<String> metricNames = new ArrayList<String>();
          metricNames.add(MetricName.PDU_TOTAL_POWER);
          metricNames.add(MetricName.PDU_TOTAL_CURRENT);
@@ -180,8 +182,9 @@ public class AssetService {
          }
       }
 
-      Map<String, Map<String, String>> sensorFormulars = metricFormula.get(FlowgateConstant.SENSOR);
-      if (sensorFormulars != null) {
+      String sensorFormulasInfo = metricFormula.get(FlowgateConstant.SENSOR);
+      if (sensorFormulasInfo != null) {
+         Map<String, Map<String, String>> sensorFormulars = metricsFormulaToMap(sensorFormulasInfo);
          Map<String, List<RealTimeData>> assetIdAndRealtimeDataMap =
                new HashMap<String, List<RealTimeData>>();
          for (Map.Entry<String, Map<String, String>> sensorFormula : sensorFormulars.entrySet()) {
@@ -195,33 +198,33 @@ public class AssetService {
       return result;
    }
 
-   private List<MetricData> getServerHostMetric(Asset server, long starttime, int duration) {
-      List<MetricData> metricDataList = new ArrayList<>();
-      Map<String, Map<String, String>> hostMetricsFormula = server.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
-      if (hostMetricsFormula == null || hostMetricsFormula.isEmpty()) {
-         return metricDataList;
-      }
-      List<RealTimeData> realtimeDatas = realtimeDataRepository.getDataByIDAndTimeRange(server.getId(), starttime, duration);
-      if(realtimeDatas == null || realtimeDatas.isEmpty()) {
-         return metricDataList;
-      }
-      MetricData metricData;
-      for (RealTimeData realtimeData : realtimeDatas) {
-         List<ValueUnit> realtimeDataValues = realtimeData.getValues();
-         if (realtimeDataValues == null || realtimeDataValues.isEmpty()) {
-            continue;
-         }
-         for (ValueUnit valueUnit : realtimeDataValues) {
-            metricData = new MetricData();
-            metricData.setMetricName(valueUnit.getKey());
-            metricData.setTimeStamp(valueUnit.getTime());
-            metricData.setValue(valueUnit.getValue());
-            metricData.setValueNum(valueUnit.getValueNum());
-            metricDataList.add(metricData);
-         }
-      }
-      return metricDataList;
-   }
+//   private List<MetricData> getServerHostMetric(Asset server, long starttime, int duration) {
+//      List<MetricData> metricDataList = new ArrayList<>();
+//      Map<String, Map<String, String>> hostMetricsFormula = server.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
+//      if (hostMetricsFormula == null || hostMetricsFormula.isEmpty()) {
+//         return metricDataList;
+//      }
+//      List<RealTimeData> realtimeDatas = realtimeDataRepository.getDataByIDAndTimeRange(server.getId(), starttime, duration);
+//      if(realtimeDatas == null || realtimeDatas.isEmpty()) {
+//         return metricDataList;
+//      }
+//      MetricData metricData;
+//      for (RealTimeData realtimeData : realtimeDatas) {
+//         List<ValueUnit> realtimeDataValues = realtimeData.getValues();
+//         if (realtimeDataValues == null || realtimeDataValues.isEmpty()) {
+//            continue;
+//         }
+//         for (ValueUnit valueUnit : realtimeDataValues) {
+//            metricData = new MetricData();
+//            metricData.setMetricName(valueUnit.getKey());
+//            metricData.setTimeStamp(valueUnit.getTime());
+//            metricData.setValue(valueUnit.getValue());
+//            metricData.setValueNum(valueUnit.getValueNum());
+//            metricDataList.add(metricData);
+//         }
+//      }
+//      return metricDataList;
+//   }
 
    private List<MetricData> getOtherMetricsDataById(String assetID, Long starttime, Integer duration) {
       List<MetricData> metricDataList = new ArrayList<>();
@@ -650,19 +653,23 @@ public class AssetService {
       if(switchs != null) {
          oldAsset.setSwitches(switchs);
       }
-      Map<String, Map<String, Map<String, String>>> newMetricsformulas =
-            asset.getMetricsformulars();
+      Map<String, String> newMetricsformulas = asset.getMetricsformulas();
       if(newMetricsformulas != null && newMetricsformulas.containsKey(FlowgateConstant.SENSOR)) {
-         Map<String, Map<String, Map<String, String>>> oldMetricsformulas = oldAsset.getMetricsformulars();
-         Map<String, Map<String, String>> oldSensorformulas = null;
+         Map<String, String> oldMetricsformulas = oldAsset.getMetricsformulas();
+         Map<String, Map<String, String>> oldSensorformulasMap = null;
+         String oldSensorFormulasInfo  = null;
          if(oldMetricsformulas.containsKey(FlowgateConstant.SENSOR)) {
-            oldSensorformulas = oldMetricsformulas.get(FlowgateConstant.SENSOR);
+            oldSensorFormulasInfo = oldMetricsformulas.get(FlowgateConstant.SENSOR);
+            oldSensorformulasMap = metricsFormulaToMap(oldSensorFormulasInfo);
          }else {
-            oldSensorformulas = new HashMap<String,Map<String, String>>();
+            oldSensorformulasMap = new HashMap<String,Map<String, String>>();
          }
-         generateSensorFormula(oldSensorformulas, newMetricsformulas.get(FlowgateConstant.SENSOR));
-         oldMetricsformulas.put(FlowgateConstant.SENSOR, oldSensorformulas);
-         oldAsset.setMetricsformulars(oldMetricsformulas);
+         String newSensorFormulaInfo = newMetricsformulas.get(FlowgateConstant.SENSOR);
+         Map<String, Map<String, String>> newSensorformulasMap = metricsFormulaToMap(newSensorFormulaInfo);;
+         generateSensorFormula(oldSensorformulasMap, newSensorformulasMap);
+         oldSensorFormulasInfo = metricsFormulatoString(oldSensorformulasMap);
+         oldMetricsformulas.put(FlowgateConstant.SENSOR, oldSensorFormulasInfo);
+         oldAsset.setMetricsformulas(oldMetricsformulas);
       }
       oldAsset.setLastupdate(System.currentTimeMillis());
       assetRepository.save(oldAsset);
@@ -703,7 +710,6 @@ public class AssetService {
    }
 
    private String getSensorPositionInfo(Asset asset) {
-      ObjectMapper mapper = new ObjectMapper();
       StringBuilder positionInfo = new StringBuilder();
       Map<String,String> sensorAssetJustfication = asset.getJustificationfields();
       int rackUnitNumber = asset.getCabinetUnitPosition();
@@ -748,5 +754,25 @@ public class AssetService {
          }
       }
       return positionInfo.toString();
+   }
+
+   private Map<String, Map<String, String>> metricsFormulaToMap(String pduFormulasInfo){
+      Map<String, Map<String, String>> pduFormulasMap = null;
+      try {
+         pduFormulasMap = mapper.readValue(pduFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
+      }  catch (IOException e) {
+         logger.error("Format metric formula error ",e.getMessage());
+      }
+      return pduFormulasMap;
+   }
+
+   private String metricsFormulatoString(Map<String, Map<String, String>> pduFormulasMap) {
+      String pduFormulaInfo = null;
+      try {
+         pduFormulaInfo = mapper.writeValueAsString(pduFormulasMap);
+      } catch (JsonProcessingException e) {
+         logger.error("Format metric formula error ",e.getMessage());
+      }
+      return pduFormulaInfo;
    }
 }
