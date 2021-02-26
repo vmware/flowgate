@@ -76,6 +76,8 @@ public class SycnRealTimeDataJobTest {
    @Mock
    private ServiceKeyConfig config;
 
+   private ObjectMapper mapper = new ObjectMapper();
+
    @Spy
    @InjectMocks
    private NlyteDataService nlyteDataService = new NlyteDataService();
@@ -1053,8 +1055,7 @@ public class SycnRealTimeDataJobTest {
    public ResponseEntity<Asset[]> getMappedAsset(){
       Asset[] assets = new Asset[2];
       assets[0] = createAsset();
-      Map<String, Map<String, Map<String, String>>> formulars =
-            new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, String> formulars = new HashMap<>();
 
       Map<String, Map<String, String>> pduMap = new HashMap<String, Map<String, String>>();
       Map<String, String> metricNameAndId = new HashMap<String, String>();
@@ -1062,10 +1063,14 @@ public class SycnRealTimeDataJobTest {
       metricNameAndId.put(MetricName.PDU_TOTAL_POWER, "5x4ff46982db22e1b040e0f2");
       metricNameAndId.put(MetricName.PDU_VOLTAGE, "5x4ff46982db22e1b040e0f2");
       pduMap.put("5x4ff46982db22e1b040e0f2", metricNameAndId);
-      formulars.put(FlowgateConstant.PDU, pduMap);
-      assets[0].setMetricsformulars(formulars);
+      try {
+         formulars.put(FlowgateConstant.PDU, mapper.writeValueAsString(pduMap));
+      } catch (JsonProcessingException e) {
+         e.printStackTrace();
+      }
+      assets[0].setMetricsformulas(formulars);
       assets[1] = createAsset();
-      assets[1].setMetricsformulars(formulars);
+      assets[1].setMetricsformulas(formulars);
       return new ResponseEntity<Asset[]>(assets,HttpStatus.OK);
    }
 
