@@ -154,8 +154,7 @@ public class Asset implements Serializable, BaseDocument {
     */
    private HashMap<String, String> Justificationfields = new HashMap<String, String>();
 
-   private Map<String, Map<String, Map<String, String>>> metricsformulars =
-         new HashMap<String, Map<String, Map<String, String>>>();
+   private Map<String, String> metricsformulas = new HashMap<String, String>();
 
    private long lastupdate;
    private long created;
@@ -167,10 +166,12 @@ public class Asset implements Serializable, BaseDocument {
 
    private Tenant tenant;
 
+   @Override
    public String getId() {
       return id;
    }
 
+   @Override
    public void setId(String id) {
       this.id = id;
    }
@@ -454,12 +455,12 @@ public class Asset implements Serializable, BaseDocument {
       this.parent = parent;
    }
 
-   public Map<String, Map<String, Map<String, String>>> getMetricsformulars() {
-      return metricsformulars;
+   public Map<String, String> getMetricsformulas() {
+      return metricsformulas;
    }
 
-   public void setMetricsformulars(Map<String, Map<String, Map<String, String>>> metricsformulars) {
-      this.metricsformulars = metricsformulars;
+   public void setMetricsformulas(Map<String, String> metricsformulas) {
+      this.metricsformulas = metricsformulas;
    }
 
    /**
