@@ -4,12 +4,16 @@
 */
 package com.vmware.flowgate.common.model;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.couchbase.client.java.repository.annotation.Id;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
 import com.vmware.flowgate.common.AssetSubCategory;
@@ -476,6 +480,24 @@ public class Asset implements Serializable, BaseDocument {
     */
    public void setTenant(Tenant tenant) {
       this.tenant = tenant;
+   }
+
+   private <T> T metricsFormulaToMap(String formulasInfo, TypeReference<T> type){
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         return mapper.readValue(formulasInfo, type);
+      }  catch (IOException e) {
+         return null;
+      }
+   }
+
+   private String metricsFormulatoString(Object value) {
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         return mapper.writeValueAsString(value);
+      } catch (JsonProcessingException e) {
+         return null;
+      }
    }
 
 }
