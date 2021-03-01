@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -386,34 +387,37 @@ public class VCDataService implements AsyncService {
    private void feedAssetMetricsFormulars(Asset asset) {
       
       String assetId = asset.getId();
-      Map<String, Map<String, Map<String, String>>> metricsFormulars =
-            asset.getMetricsformulars();
-      Map<String, Map<String, String>> metrics =
-            metricsFormulars.get(FlowgateConstant.HOST_METRICS);
+      Map<String, String> metricsFormulars = asset.getMetricsformulas();
+      Map<String, String> metrics = null;
+      try {
+         metrics = mapper.readValue(metricsFormulars.get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
+      } catch (JsonProcessingException e) {
+         logger.error("Format host info map error", e);
+      }
       if (metrics == null || metrics.isEmpty()) {
-         
          metrics = new HashMap<>();
-         Map<String, String> cpuMap = new HashMap<>();
-         cpuMap.put(MetricName.SERVER_CPUUSAGE, assetId);
-         cpuMap.put(MetricName.SERVER_CPUUSEDINMHZ, assetId);
-         metrics.put(FlowgateConstant.HOST_CPU, cpuMap);
-         
-         Map<String, String> memoryMap = new HashMap<>();
-         memoryMap.put(MetricName.SERVER_ACTIVEMEMORY, assetId);
-         memoryMap.put(MetricName.SERVER_BALLOONMEMORY, assetId);
-         memoryMap.put(MetricName.SERVER_CONSUMEDMEMORY, assetId);
-         memoryMap.put(MetricName.SERVER_SHAREDMEMORY, assetId);
-         memoryMap.put(MetricName.SERVER_SWAPMEMORY, assetId);
-         memoryMap.put(MetricName.SERVER_MEMORYUSAGE, assetId);
-         metrics.put(FlowgateConstant.HOST_MEMORY, memoryMap);
-         
-         Map<String, String> storageMap = new HashMap<>();
-         storageMap.put(MetricName.SERVER_STORAGEIORATEUSAGE, assetId);
-         storageMap.put(MetricName.SERVER_STORAGEUSAGE, assetId);
-         storageMap.put(MetricName.SERVER_STORAGEUSED, assetId);
-         metrics.put(FlowgateConstant.HOST_STORAGE, storageMap);
-         metricsFormulars.put(FlowgateConstant.HOST_METRICS, metrics);
-         
+         // cpu
+         metrics.put(MetricName.SERVER_CPUUSAGE, assetId);
+         metrics.put(MetricName.SERVER_CPUUSEDINMHZ, assetId);
+
+         // memory
+         metrics.put(MetricName.SERVER_ACTIVEMEMORY, assetId);
+         metrics.put(MetricName.SERVER_BALLOONMEMORY, assetId);
+         metrics.put(MetricName.SERVER_CONSUMEDMEMORY, assetId);
+         metrics.put(MetricName.SERVER_SHAREDMEMORY, assetId);
+         metrics.put(MetricName.SERVER_SWAPMEMORY, assetId);
+         metrics.put(MetricName.SERVER_MEMORYUSAGE, assetId);
+
+         // storage
+         metrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, assetId);
+         metrics.put(MetricName.SERVER_STORAGEUSAGE, assetId);
+         metrics.put(MetricName.SERVER_STORAGEUSED, assetId);
+         try {
+            metricsFormulars.put(FlowgateConstant.HOST_METRICS, mapper.writeValueAsString(metrics));
+         } catch (JsonProcessingException e) {
+            logger.error("Format host info map error", e);
+         }
+
          restClient.saveAssets(asset);
       }
    }
@@ -1209,7 +1213,12 @@ public class VCDataService implements AsyncService {
       for (ServerMapping validServer : validMapping) {
          HostSystem host = hostDictionary.get(validServer.getVcMobID());
          Asset asset = assetDictionary.get(validServer.getAsset());
-         Map<String, Map<String, String>> hostMetricsMap = asset.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
+         Map<String, String> hostMetricsMap = null;
+         try {
+            hostMetricsMap = mapper.readValue(asset.getMetricsformulas().get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
+         } catch (JsonProcessingException e) {
+            logger.error("Format host info map error", e);
+         }
          if (hostMetricsMap == null || hostMetricsMap.isEmpty()) {
             feedAssetMetricsFormulars(asset);
          }

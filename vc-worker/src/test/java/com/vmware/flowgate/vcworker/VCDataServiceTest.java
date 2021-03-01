@@ -579,10 +579,10 @@ public class VCDataServiceTest {
 
       Asset asset = new Asset();
       asset.setId("asset1");
-      Map<String, Map<String, Map<String, String>>>  metricsFormulars = new HashMap<>();
-      Map<String, Map<String, String>> metrics = new HashMap<>();
-      metricsFormulars.put(FlowgateConstant.HOST_METRICS, metrics);
-      asset.setMetricsformulars(metricsFormulars);
+      Map<String, String>  metricsFormulars = new HashMap<>();
+      Map<String, String> metrics = new HashMap<>();
+      metricsFormulars.put(FlowgateConstant.HOST_METRICS, mapper.writeValueAsString(metrics));
+      asset.setMetricsformulas(metricsFormulars);
 
       ResponseEntity<Asset> assets = Mockito.mock(ResponseEntity.class);
       when(restClient.getAssetByID(anyString())).thenReturn(assets);
