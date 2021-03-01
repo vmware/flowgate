@@ -334,7 +334,7 @@ public class NlyteDataService implements AsyncService {
          try {
             formulars.put(FlowgateConstant.PDU, mapper.writeValueAsString(pduFormulars));
          } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            logger.error("Format metric formula error", e);
          }
          server.setMetricsformulas(formulars);
          if(changed) {
