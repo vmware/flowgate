@@ -387,13 +387,8 @@ public class VCDataService implements AsyncService {
    private void feedAssetMetricsFormulars(Asset asset) {
       
       String assetId = asset.getId();
-      Map<String, String> metricsFormulars = asset.getMetricsformulas();
-      Map<String, String> metrics = null;
-      try {
-         metrics = mapper.readValue(metricsFormulars.get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
-      } catch (JsonProcessingException e) {
-         logger.error("Format host info map error", e);
-      }
+      Map<String, String> metricsFormulas = asset.getMetricsformulas();
+      Map<String, String> metrics = asset.metricsFormulaToMap(metricsFormulas.get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
       if (metrics == null || metrics.isEmpty()) {
          metrics = new HashMap<>();
          // cpu
@@ -412,11 +407,7 @@ public class VCDataService implements AsyncService {
          metrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, assetId);
          metrics.put(MetricName.SERVER_STORAGEUSAGE, assetId);
          metrics.put(MetricName.SERVER_STORAGEUSED, assetId);
-         try {
-            metricsFormulars.put(FlowgateConstant.HOST_METRICS, mapper.writeValueAsString(metrics));
-         } catch (JsonProcessingException e) {
-            logger.error("Format host info map error", e);
-         }
+         metricsFormulas.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(metrics));
 
          restClient.saveAssets(asset);
       }
@@ -1213,12 +1204,7 @@ public class VCDataService implements AsyncService {
       for (ServerMapping validServer : validMapping) {
          HostSystem host = hostDictionary.get(validServer.getVcMobID());
          Asset asset = assetDictionary.get(validServer.getAsset());
-         Map<String, String> hostMetricsMap = null;
-         try {
-            hostMetricsMap = mapper.readValue(asset.getMetricsformulas().get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
-         } catch (JsonProcessingException e) {
-            logger.error("Format host info map error", e);
-         }
+         Map<String, String> hostMetricsMap = asset.metricsFormulaToMap(asset.getMetricsformulas().get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
          if (hostMetricsMap == null || hostMetricsMap.isEmpty()) {
             feedAssetMetricsFormulars(asset);
          }

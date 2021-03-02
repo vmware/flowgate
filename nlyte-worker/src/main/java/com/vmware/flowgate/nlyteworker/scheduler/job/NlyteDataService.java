@@ -317,11 +317,11 @@ public class NlyteDataService implements AsyncService {
          if(formulars == null || formulars.isEmpty()) {
             continue;
          }
-         Map<String, Map<String, String>> pduFormulars = formatPDUFormulas(formulars.get(FlowgateConstant.PDU));
-         if (pduFormulars == null || pduFormulars.isEmpty()) {
+         Map<String, Map<String, String>> pduFormulas = server.metricsFormulaToMap(formulars.get(FlowgateConstant.PDU), new TypeReference<Map<String, Map<String, String>>>() {});
+         if (pduFormulas == null || pduFormulas.isEmpty()) {
             continue;
          }
-         Iterator<Map.Entry<String, Map<String, String>>> ite = pduFormulars.entrySet().iterator();
+         Iterator<Map.Entry<String, Map<String, String>>> ite = pduFormulas.entrySet().iterator();
          while(ite.hasNext()) {
             Map.Entry<String, Map<String, String>> map = ite.next();
             String pduAssetID = map.getKey();
@@ -331,27 +331,13 @@ public class NlyteDataService implements AsyncService {
             }
          }
 
-         try {
-            formulars.put(FlowgateConstant.PDU, mapper.writeValueAsString(pduFormulars));
-         } catch (JsonProcessingException e) {
-            logger.error("Format metric formula error", e);
-         }
+         formulars.put(FlowgateConstant.PDU, server.metricsFormulaToString(pduFormulas));
          server.setMetricsformulas(formulars);
          if(changed) {
             needToUpdate.add(server);
          }
       }
       return needToUpdate;
-   }
-
-   private Map<String, Map<String, String>> formatPDUFormulas(String stringPduFormulas) {
-      Map<String, Map<String, String>> sensorFormulas;
-      try {
-         sensorFormulas = mapper.readValue(stringPduFormulas, new TypeReference<Map<String, Map<String, String>>>() {});
-      } catch (JsonProcessingException e) {
-         return new HashMap<>();
-      }
-      return sensorFormulas;
    }
 
    public List<Asset> removeNetworkFromServer(List<Asset> servers, String networkId) {
@@ -761,11 +747,11 @@ public class NlyteDataService implements AsyncService {
             continue;
          }
          //{"pduAssetID",{"type_1","pduAssetID"}}
-         Map<String, Map<String, String>> pduFormulars = formatPDUFormulas(formulars.get(FlowgateConstant.PDU));
-         if(pduFormulars == null || pduFormulars.isEmpty()) {
+         Map<String, Map<String, String>> pduFormulas = asset.metricsFormulaToMap(formulars.get(FlowgateConstant.PDU), new TypeReference<Map<String, Map<String, String>>>() {});
+         if(pduFormulas == null || pduFormulas.isEmpty()) {
             continue;
          }
-         for(Map.Entry<String, Map<String, String>> pduFormularMap : pduFormulars.entrySet()) {
+         for(Map.Entry<String, Map<String, String>> pduFormularMap : pduFormulas.entrySet()) {
             assetIds.add(pduFormularMap.getKey());
          }
       }
