@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.cis.tagging.CategoryModel;
 import com.vmware.cis.tagging.CategoryModel.Cardinality;
@@ -60,6 +60,7 @@ import com.vmware.flowgate.vcworker.model.EsxiMetadata;
 import com.vmware.flowgate.vcworker.model.HostInfo;
 import com.vmware.flowgate.vcworker.model.HostNic;
 import com.vmware.flowgate.vcworker.model.VCConstants;
+import com.vmware.vim.binding.impl.vim.PerformanceManager_Impl.QuerySpecImpl;
 import com.vmware.vim.binding.vim.AboutInfo;
 import com.vmware.vim.binding.vim.ClusterComputeResource;
 import com.vmware.vim.binding.vim.HostSystem;
@@ -77,6 +78,7 @@ import com.vmware.vim.binding.vim.cluster.ConfigInfoEx;
 import com.vmware.vim.binding.vim.cluster.DpmHostConfigInfo;
 import com.vmware.vim.binding.vim.fault.InvalidLogin;
 import com.vmware.vim.binding.vim.host.Capability;
+import com.vmware.vim.binding.vim.host.ConnectInfo.DatastoreInfo;
 import com.vmware.vim.binding.vim.host.NetworkInfo;
 import com.vmware.vim.binding.vim.host.PhysicalNic;
 import com.vmware.vim.binding.vim.host.PhysicalNic.LinkSpeedDuplex;
@@ -84,10 +86,8 @@ import com.vmware.vim.binding.vim.host.RuntimeInfo;
 import com.vmware.vim.binding.vim.host.Summary;
 import com.vmware.vim.binding.vim.host.Summary.HardwareSummary;
 import com.vmware.vim.binding.vim.host.Summary.QuickStats;
-import com.vmware.vim.binding.vim.host.ConnectInfo.DatastoreInfo;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.vmomi.client.exception.ConnectionException;
-import com.vmware.vim.binding.impl.vim.PerformanceManager_Impl.QuerySpecImpl;
 
 
 @Service
@@ -252,7 +252,7 @@ public class VCDataService implements AsyncService {
       }
 
       try (VsphereClient vsphereClient = connectVsphere(vc);) {
-         
+
          String vcInstanceUUID = vsphereClient.getVCUUID();
          Collection<HostSystem> hosts = vsphereClient.getAllHost();
          if (hosts == null || hosts.isEmpty()) {
@@ -383,11 +383,11 @@ public class VCDataService implements AsyncService {
          return;
       }
    }
-   
+
    private void feedAssetMetricsFormulars(Asset asset) {
-      
+
       String assetId = asset.getId();
-      Map<String, String> metricsFormulas = asset.getMetricsformulas();
+      Map<String, String> metricsFormulas = asset.getMetricsformulars();
       Map<String, String> metrics = asset.metricsFormulaToMap(metricsFormulas.get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
       if (metrics == null || metrics.isEmpty()) {
          metrics = new HashMap<>();
@@ -423,7 +423,7 @@ public class VCDataService implements AsyncService {
          int counterId = counterInfo.getKey();
          String groupKey = counterInfo.getGroupInfo().getKey();
          String nameKey = counterInfo.getNameInfo().getKey();
-         
+
          switch(groupKey) {
             case VCConstants.HOST_CPU_GROUP:
                switch(nameKey) {
@@ -460,18 +460,18 @@ public class VCDataService implements AsyncService {
                }
                break;
             default:
-               break;   
+               break;
          }
       }
-      
+
       return counters;
    }
-   
+
    private List<MetricId> getPerformenceMetricsIds(PerformanceManager performanceManager, ManagedObjectReference hostRef, Map<Integer, String> counters) {
-      
+
       MetricId[] queryAvailableMetric =
             performanceManager.queryAvailableMetric(hostRef, null, null, new Integer(20));
-      
+
       List<MetricId> metricIdList = new ArrayList<MetricId>();
       if (queryAvailableMetric.length > 0) {
          for (int i = 0; i < queryAvailableMetric.length; i++) {
@@ -486,7 +486,7 @@ public class VCDataService implements AsyncService {
 
       return metricIdList;
    }
-   
+
    public void feedHostUsageData(VsphereClient vsphereClient, String assetId,
          ManagedObjectReference hostRef) {
 
@@ -494,7 +494,7 @@ public class VCDataService implements AsyncService {
       RealTimeData realTimeData = new RealTimeData();
       realTimeData.setAssetID(assetId);
       List<ValueUnit> valueUnits = new ArrayList<ValueUnit>();
- 
+
       PerformanceManager performanceManager = vsphereClient.getPerformanceManager();
 
       Map<Integer, String> counters = getMetricsCounters(performanceManager);
@@ -545,7 +545,7 @@ public class VCDataService implements AsyncService {
                   dynamicType = null,
                   dynamicProperty = null,
                   counterId = 125,
-                  instance = 
+                  instance =
                },
                value = (LONG) [
                   667,
@@ -575,7 +575,7 @@ public class VCDataService implements AsyncService {
                   dynamicType = null,
                   dynamicProperty = null,
                   counterId = 125,
-                  instance = 
+                  instance =
                },
                value = (LONG) [101,134,667,282,90,224,99,129,667,251,96,298,99,119,492]
             }
@@ -597,10 +597,10 @@ public class VCDataService implements AsyncService {
                int counterId = metricSerie.getId().getCounterId();
                for(int index = 0; index < values.length; index++) {
                   long timeStamp = sampleInfos[index].getTimestamp().getTimeInMillis();
-                  
+
                   ValueUnit valueUnit = new ValueUnit();
                   long value = values[index];
-                  
+
                   switch(counters.get(counterId)) {
                      case VCConstants.HOST_CPU_GROUP + VCConstants.HOST_METRIC_USAGE:
                         valueUnit.setKey(MetricName.SERVER_CPUUSAGE);
@@ -651,14 +651,14 @@ public class VCDataService implements AsyncService {
                         valueUnit.setKey(MetricName.SERVER_NETWORKUTILIZATION);
                         valueUnit.setValueNum(value);
                         valueUnit.setUnit(RealtimeDataUnit.KBps.toString());
-                     break;  
+                     break;
                   }
                   valueUnit.setTime(timeStamp);
                   valueUnits.add(valueUnit);
                }
             }
          }
-         
+
       }
       if(valueUnits == null || valueUnits.isEmpty()) {
          logger.error("ValueUnits of asset: {} is empty.", assetId);
@@ -1017,7 +1017,7 @@ public class VCDataService implements AsyncService {
       if (datastores != null && datastores.length > 0) {
          for (DatastoreInfo datastore : datastores) {
             //TODO: only count writable data store.
-            //count shared data store for each host, 
+            //count shared data store for each host,
             //which will cause problem in calculate the total available storage among multiple hosts.
             diskCapacity += datastore.getSummary().getCapacity();
          }
@@ -1029,7 +1029,7 @@ public class VCDataService implements AsyncService {
 
       return needUpdate;
    }
-   
+
    private void syncCustomAttributes(SDDCSoftwareConfig vc) {
       // TODO need to allow only update 1 vcenter instead of all the vcenter.
 
@@ -1204,7 +1204,7 @@ public class VCDataService implements AsyncService {
       for (ServerMapping validServer : validMapping) {
          HostSystem host = hostDictionary.get(validServer.getVcMobID());
          Asset asset = assetDictionary.get(validServer.getAsset());
-         Map<String, String> hostMetricsMap = asset.metricsFormulaToMap(asset.getMetricsformulas().get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
+         Map<String, String> hostMetricsMap = asset.metricsFormulaToMap(asset.getMetricsformulars().get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
          if (hostMetricsMap == null || hostMetricsMap.isEmpty()) {
             feedAssetMetricsFormulars(asset);
          }

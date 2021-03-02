@@ -216,7 +216,7 @@ public class AssetControllerTest {
                         .description("Only valid for sensor type of asset.")
                         .type(AssetRealtimeDataSpec.class).optional(),
                   subsectionWithPath("justificationfields").ignored(),
-                  subsectionWithPath("metricsformulas").ignored(),
+                  subsectionWithPath("metricsformulars").ignored(),
                   fieldWithPath("lastupdate").ignored(), fieldWithPath("created").ignored(),
                   fieldWithPath("capacity").description("The capacity of asset.").type(int.class)
                         .optional(),
@@ -277,7 +277,7 @@ public class AssetControllerTest {
       List<String> switches = new ArrayList<String>();
       switches.add("ow23aw312e3nr3d2a57788i");
       newAsset.setSwitches(switches);
-      Map<String, String> metricsformulas = new HashMap<String, String>();
+      Map<String, String> metricsformulars = new HashMap<String, String>();
       Map<String, Map<String, String>> sensorMap =
             new HashMap<String, Map<String, String>>();
       Map<String, String> positionInfo = new HashMap<String, String>();
@@ -305,8 +305,8 @@ public class AssetControllerTest {
       } catch (JsonProcessingException e) {
          TestCase.fail(e.getMessage());
       }
-      metricsformulas.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
-      newAsset.setMetricsformulas(metricsformulas);
+      metricsformulars.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
+      newAsset.setMetricsformulars(metricsformulars);
 
       this.mockMvc
       .perform(put("/v1/assets/mappingfacility").contentType(MediaType.APPLICATION_JSON)
@@ -365,7 +365,7 @@ public class AssetControllerTest {
                   .description("Only valid for sensor type of asset.")
                   .type(AssetRealtimeDataSpec.class).optional(),
             fieldWithPath("justificationfields").ignored(),
-            subsectionWithPath("metricsformulas").description("Possible PDUs And sensors that this server connected with"),
+            subsectionWithPath("metricsformulars").description("Possible PDUs And sensors that this server connected with"),
             fieldWithPath("pdus")
                   .description("Possible PDUs that this server connected with"),
             fieldWithPath("switches")
@@ -392,7 +392,7 @@ public class AssetControllerTest {
 
       Map<String, Map<String, String>> sensorFormulaMap = null;
       try {
-         sensorFormulaMap = mapper.readValue(testAsset.getMetricsformulas().get(FlowgateConstant.SENSOR), new TypeReference<Map<String, Map<String, String>>>() {});
+         sensorFormulaMap = mapper.readValue(testAsset.getMetricsformulars().get(FlowgateConstant.SENSOR), new TypeReference<Map<String, Map<String, String>>>() {});
       } catch (IOException e) {
          TestCase.fail(e.getMessage());
       }
@@ -506,7 +506,7 @@ public class AssetControllerTest {
                   .type(AssetRealtimeDataSpec.class).optional(),
             subsectionWithPath("justificationfields")
                   .description("Justification fields that input by user."),
-            subsectionWithPath("metricsformulas")
+            subsectionWithPath("metricsformulars")
                   .description("The sensor data generator logic for this asset."),
             fieldWithPath("lastupdate").description("When this asset was last upated"),
             fieldWithPath("created").description("When this asset was created"),
@@ -783,7 +783,7 @@ public class AssetControllerTest {
                   .type(AssetRealtimeDataSpec.class).optional(),
             subsectionWithPath("justificationfields")
                   .description("Justification fields that input by user."),
-            subsectionWithPath("metricsformulas")
+            subsectionWithPath("metricsformulars")
                   .description("The sensor data generator logic for this asset."),
             fieldWithPath("lastupdate").description("When this asset was last upated"),
             fieldWithPath("created").description("When this asset was created"),
@@ -966,7 +966,7 @@ public class AssetControllerTest {
                   .type(AssetRealtimeDataSpec.class).optional(),
             subsectionWithPath("justificationfields")
                   .description("Justification fields that input by user."),
-            subsectionWithPath("metricsformulas")
+            subsectionWithPath("metricsformulars")
                   .description("The formula of metrics data for this asset."),
             fieldWithPath("lastupdate").description("When this asset was last upated"),
             fieldWithPath("created").description("When this asset was created"),
@@ -1065,7 +1065,7 @@ public class AssetControllerTest {
                   .type(AssetRealtimeDataSpec.class).optional(),
             subsectionWithPath("justificationfields")
                   .description("Justification fields that input by user."),
-            subsectionWithPath("metricsformulas")
+            subsectionWithPath("metricsformulars")
                   .description("The sensor data generator logic for this asset."),
             fieldWithPath("lastupdate").description("When this asset was last upated"),
             fieldWithPath("created").description("When this asset was created"),
@@ -1575,7 +1575,7 @@ public class AssetControllerTest {
                            .type(AssetRealtimeDataSpec.class).optional(),
                      subsectionWithPath("justificationfields")
                            .description("Justification fields that input by user."),
-                     subsectionWithPath("metricsformulas")
+                     subsectionWithPath("metricsformulars")
                            .description("The sensor data generator logic for this asset."),
                      fieldWithPath("lastupdate").description("When this asset was last upated"),
                      fieldWithPath("created").description("When this asset was created"),
@@ -1667,7 +1667,7 @@ public class AssetControllerTest {
                            .type(AssetRealtimeDataSpec.class).optional(),
                      subsectionWithPath("justificationfields")
                            .description("Justification fields that input by user."),
-                     subsectionWithPath("metricsformulas")
+                     subsectionWithPath("metricsformulars")
                            .description("The sensor data generator logic for this asset."),
                      fieldWithPath("lastupdate").description("When this asset was last upated"),
                      fieldWithPath("created").description("When this asset was created"),
@@ -1759,7 +1759,7 @@ public class AssetControllerTest {
                            .description("Only valid for sensor type of asset.")
                            .type(AssetRealtimeDataSpec.class).optional(),
                      subsectionWithPath("justificationfields").ignored(),
-                     subsectionWithPath("metricsformulas").ignored(),
+                     subsectionWithPath("metricsformulars").ignored(),
                      fieldWithPath("lastupdate").ignored(), fieldWithPath("created").ignored(),
                      fieldWithPath("capacity").description("The capacity of asset.").type(int.class)
                            .optional(),
@@ -1947,7 +1947,7 @@ public class AssetControllerTest {
                            .type(AssetRealtimeDataSpec.class).optional(),
                      subsectionWithPath("justificationfields")
                            .description("Justification fields that input by user."),
-                     subsectionWithPath("metricsformulas")
+                     subsectionWithPath("metricsformulars")
                            .description("The sensor data generator logic for this asset."),
                      fieldWithPath("lastupdate").description("When this asset was last upated"),
                      fieldWithPath("created").description("When this asset was created"),
@@ -2049,7 +2049,7 @@ public class AssetControllerTest {
       hostMetrics.put(MetricName.SERVER_STORAGEUSED, asset.getId());
       formulars.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(hostMetrics));
 
-      asset.setMetricsformulas(formulars);
+      asset.setMetricsformulars(formulars);
       asset = assetRepository.save(asset);
 
       MvcResult result1 = this.mockMvc
@@ -2442,7 +2442,7 @@ public class AssetControllerTest {
       }
       formulas.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
       asset.setCategory(AssetCategory.PDU);
-      asset.setMetricsformulas(formulas);
+      asset.setMetricsformulars(formulas);
       asset.setId("00040717c4154b5b924ced78eafcea7a");
       asset = assetRepository.save(asset);
 
@@ -2556,7 +2556,7 @@ public class AssetControllerTest {
 
       formulas.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
       asset.setCategory(AssetCategory.PDU);
-      asset.setMetricsformulas(formulas);
+      asset.setMetricsformulars(formulas);
       asset.setId("00040717c4154b5b924ced78eafcea7a");
       asset = assetRepository.save(asset);
 
@@ -2704,7 +2704,7 @@ public class AssetControllerTest {
       }
       formulas.put(FlowgateConstant.PDU, pduFormulaInfo);
       formulas.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
-      asset.setMetricsformulas(formulas);
+      asset.setMetricsformulars(formulas);
 
       HashMap<String, String> justificationfields = new HashMap<>();
       justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:7_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
@@ -3510,7 +3510,7 @@ public class AssetControllerTest {
          TestCase.fail(e.getMessage());
       }
       formulas.put(FlowgateConstant.PDU, pduFormulaInfo);
-      asset.setMetricsformulas(formulas);
+      asset.setMetricsformulars(formulas);
       return asset;
    }
 

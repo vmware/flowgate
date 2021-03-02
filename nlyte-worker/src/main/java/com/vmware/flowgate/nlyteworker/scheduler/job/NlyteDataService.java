@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -313,7 +312,7 @@ public class NlyteDataService implements AsyncService {
          }
          server.setPdus(pduIds);
 
-         Map<String, String> formulars = server.getMetricsformulas();
+         Map<String, String> formulars = server.getMetricsformulars();
          if(formulars == null || formulars.isEmpty()) {
             continue;
          }
@@ -332,7 +331,7 @@ public class NlyteDataService implements AsyncService {
          }
 
          formulars.put(FlowgateConstant.PDU, server.metricsFormulaToString(pduFormulas));
-         server.setMetricsformulas(formulars);
+         server.setMetricsformulars(formulars);
          if(changed) {
             needToUpdate.add(server);
          }
@@ -742,7 +741,7 @@ public class NlyteDataService implements AsyncService {
    public Set<String> getAssetIdfromformular(List<Asset> mappedServers) {
       Set<String> assetIds = new HashSet<String>();
       for (Asset asset : mappedServers) {
-         Map<String, String> formulars = asset.getMetricsformulas();
+         Map<String, String> formulars = asset.getMetricsformulars();
          if(formulars == null || formulars.isEmpty()) {
             continue;
          }

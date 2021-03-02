@@ -1068,9 +1068,9 @@ public class SycnRealTimeDataJobTest {
       } catch (JsonProcessingException e) {
          e.printStackTrace();
       }
-      assets[0].setMetricsformulas(formulars);
+      assets[0].setMetricsformulars(formulars);
       assets[1] = createAsset();
-      assets[1].setMetricsformulas(formulars);
+      assets[1].setMetricsformulars(formulars);
       return new ResponseEntity<Asset[]>(assets,HttpStatus.OK);
    }
 

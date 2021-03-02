@@ -223,7 +223,7 @@ public class MessageProcessingTest {
         TestCase.fail(e.getMessage());
       }
       metricsFormular.put(FlowgateConstant.PDU, pduMetricFormulasInfo);
-      server.setMetricsformulas(metricsFormular);
+      server.setMetricsformulars(metricsFormular);
       servers[0] = server;
 
       Asset server1 = new Asset();
@@ -243,7 +243,7 @@ public class MessageProcessingTest {
             needupdateServer.getJustificationfields().get(FlowgateConstant.PDU_PORT_FOR_SERVER));
       TestCase.assertEquals(1,needupdateServer.getPdus().size());
       TestCase.assertEquals("qwiounasdyi2avewrasdf", needupdateServer.getPdus().get(0));
-      Map<String, String> metricsFormulars = needupdateServer.getMetricsformulas();
+      Map<String, String> metricsFormulars = needupdateServer.getMetricsformulars();
       TestCase.assertEquals(1, metricsFormulars.size());
       Map<String, Map<String, String>> pduMetricsFormulaMap = null;
       try {
