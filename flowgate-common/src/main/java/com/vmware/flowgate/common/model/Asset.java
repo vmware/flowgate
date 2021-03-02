@@ -482,7 +482,7 @@ public class Asset implements Serializable, BaseDocument {
       this.tenant = tenant;
    }
 
-   private <T> T metricsFormulaToMap(String formulasInfo, TypeReference<T> type){
+   public <T> T metricsFormulaToMap(String formulasInfo, TypeReference<T> type){
       ObjectMapper mapper = new ObjectMapper();
       try {
          return mapper.readValue(formulasInfo, type);
@@ -491,7 +491,7 @@ public class Asset implements Serializable, BaseDocument {
       }
    }
 
-   private String metricsFormulatoString(Object value) {
+   public String metricsFormulaToString(Object value) {
       ObjectMapper mapper = new ObjectMapper();
       try {
          return mapper.writeValueAsString(value);
