@@ -310,13 +310,13 @@ public class PowerIQService implements AsyncService {
       List<Asset> needToUpdate = new ArrayList<Asset>();
       for(Asset server : servers) {
          boolean changed = false;
-         Map<String, String> formulars = server.getMetricsformulas();
-         if(formulars == null || formulars.isEmpty()) {
+         Map<String, String> formulas = server.getMetricsformulas();
+         if(formulas == null || formulas.isEmpty()) {
             continue;
          }
-         Map<String, Map<String, String>> sensorFormulars = formatSensorFormulas(formulars.get(FlowgateConstant.SENSOR));
-         for(Map.Entry<String, Map<String, String>> sensorFormularMap : sensorFormulars.entrySet()) {
-            Map<String, String> sensorLocationAndIdMap = sensorFormularMap.getValue();
+         Map<String, Map<String, String>> sensorFormulas = server.metricsFormulaToMap(formulas.get(FlowgateConstant.SENSOR), new TypeReference<Map<String, Map<String, String>>>() {});
+         for(Map.Entry<String, Map<String, String>> sensorFormulaMap : sensorFormulas.entrySet()) {
+            Map<String, String> sensorLocationAndIdMap = sensorFormulaMap.getValue();
             Iterator<Map.Entry<String, String>> ite = sensorLocationAndIdMap.entrySet().iterator();
             while(ite.hasNext()) {
                Map.Entry<String, String> map = ite.next();
@@ -327,27 +327,13 @@ public class PowerIQService implements AsyncService {
                }
             }
          }
-         try {
-            formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorFormulars));
-         } catch (JsonProcessingException e) {
-            logger.error("Format metric formula error" ,e);
-         }
-         server.setMetricsformulas(formulars);
+         formulas.put(FlowgateConstant.SENSOR, server.metricsFormulaToString(sensorFormulas));
+         server.setMetricsformulas(formulas);
          if(changed) {
             needToUpdate.add(server);
          }
       }
       return needToUpdate;
-   }
-
-   private Map<String, Map<String, String>> formatSensorFormulas(String stringSensorFormulas) {
-      Map<String, Map<String, String>> sensorFormulas = null;
-      try {
-         sensorFormulas = mapper.readValue(stringSensorFormulas, new TypeReference<Map<String, Map<String, String>>>() {});
-      } catch (JsonProcessingException e) {
-         return new HashMap<>();
-      }
-      return sensorFormulas;
    }
 
    public LocationInfo getLocationInfo(PowerIQAPIClient client) {
@@ -664,30 +650,22 @@ public class PowerIQService implements AsyncService {
             continue;
          }
          String positionInfo = getSensorPositionInfo(sensorAsset);
-         Map<String, String> formulars = pduAsset.getMetricsformulas();
-         if(formulars == null || formulars.isEmpty()) {
-            formulars = new HashMap<>();
+         Map<String, String> formulas = pduAsset.getMetricsformulas();
+         if(formulas == null || formulas.isEmpty()) {
+            formulas = new HashMap<>();
             Map<String, Map<String, String>> sensorFormulars = generateNewMetricformular(sensorAsset, positionInfo);
             if(sensorFormulars.isEmpty()) {
                continue;
             }
-            try {
-               formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorFormulars));
-            } catch (JsonProcessingException e) {
-               logger.error("Format metric formula error" ,e);
-            }
+            formulas.put(FlowgateConstant.SENSOR, pduAsset.metricsFormulaToString(sensorFormulars));
          }else {
-            Map<String, Map<String, String>> sensorFormulars = formatSensorFormulas(formulars.get(FlowgateConstant.SENSOR));
+            Map<String, Map<String, String>> sensorFormulars = pduAsset.metricsFormulaToMap(formulas.get(FlowgateConstant.SENSOR), new TypeReference<Map<String, Map<String, String>>>() {});
             if(sensorFormulars == null || sensorFormulars.isEmpty()) {
                sensorFormulars = generateNewMetricformular(sensorAsset, positionInfo);
                if(sensorFormulars.isEmpty()) {
                   continue;
                }
-               try {
-                  formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorFormulars));
-               } catch (JsonProcessingException e) {
-                  logger.error("Format metric formula error" ,e);
-               }
+               formulas.put(FlowgateConstant.SENSOR, pduAsset.metricsFormulaToString(sensorFormulars));
             }else {
                Map<String,String> locationAndMetricMap = null;
                switch (sensorAsset.getSubCategory()) {
@@ -711,13 +689,9 @@ public class PowerIQService implements AsyncService {
                   break;
                }
             }
-            try {
-               formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorFormulars));
-            } catch (JsonProcessingException e) {
-               logger.error("Format metric formula error" ,e);
-            }
+            formulas.put(FlowgateConstant.SENSOR, pduAsset.metricsFormulaToString(sensorFormulars));
          }
-         pduAsset.setMetricsformulas(formulars);
+         pduAsset.setMetricsformulas(formulas);
          pduAssets.add(pduAsset);
       }
       return pduAssets;
@@ -1535,11 +1509,11 @@ public class PowerIQService implements AsyncService {
    public Set<String> getAssetIdfromformular(List<Asset> mappedAssets) {
       Set<String> assetIds = new HashSet<String>();
       for (Asset asset : mappedAssets) {
-         Map<String, String> formulars = asset.getMetricsformulas();
-         if(formulars == null || formulars.isEmpty()) {
+         Map<String, String> formulas = asset.getMetricsformulas();
+         if(formulas == null || formulas.isEmpty()) {
             continue;
          }
-         Map<String, Map<String, String>> sensorFormulars = formatSensorFormulas(formulars.get(FlowgateConstant.SENSOR));
+         Map<String, Map<String, String>> sensorFormulars = asset.metricsFormulaToMap(formulas.get(FlowgateConstant.SENSOR), new TypeReference<Map<String, Map<String, String>>>() {});
          if(sensorFormulars == null || sensorFormulars.isEmpty()) {
             continue;
          }
