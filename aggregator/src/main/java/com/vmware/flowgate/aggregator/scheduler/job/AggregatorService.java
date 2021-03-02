@@ -93,7 +93,7 @@ public class AggregatorService implements AsyncService {
             cleanRealtimeData();
             break;
          case EventMessageUtil.AggregateAndCleanPowerIQPDU:
-            integrateAndCleanPDUFromPowerIQ();
+            aggregateAndCleanPDUFromPowerIQ();
             break;
          case EventMessageUtil.SUMMARY_DATA:
             syncSummaryData();
@@ -160,7 +160,7 @@ public class AggregatorService implements AsyncService {
       }
    }
 
-   public void integrateAndCleanPDUFromPowerIQ() {
+   public void aggregateAndCleanPDUFromPowerIQ() {
       logger.info("Start aggregate pdu from PowerIQ to other systems");
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       FacilitySoftwareConfig[] powerIQs = restClient.getFacilitySoftwareInternalByType(SoftwareType.PowerIQ).getBody();
@@ -343,7 +343,8 @@ public class AggregatorService implements AsyncService {
             Map<String, String> formulas = server.getMetricsformulas();
             if(formulas != null && formulas.get(FlowgateConstant.PDU) != null) {
                String pduFormulasInfo = formulas.get(FlowgateConstant.PDU);
-               Map<String, Map<String, String>> pduFormulasMap = metricsFormulaToMap(pduFormulasInfo);
+               Map<String, Map<String, String>> pduFormulasMap =
+                     server.metricsFormulaToMap(pduFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
                Iterator<Map.Entry<String, Map<String, String>>> ite = pduFormulasMap.entrySet().iterator();
                while(ite.hasNext()) {
                   Map.Entry<String, Map<String, String>> map = ite.next();
@@ -352,7 +353,7 @@ public class AggregatorService implements AsyncService {
                      ite.remove();
                   }
                 }
-               String pduFormulaInfo = metricsFormulatoString(pduFormulasMap);
+               String pduFormulaInfo = server.metricsFormulaToString(pduFormulasMap);
                formulas.put(FlowgateConstant.PDU, pduFormulaInfo);
                server.setMetricsformulas(formulas);
             }
@@ -444,7 +445,7 @@ public class AggregatorService implements AsyncService {
          if(metricsFormulas == null || metricsFormulas.isEmpty()) {
             metricsFormulas = new HashMap<String, String>();
             Map<String,Map<String,String>> pduFormulas = generatePduformulaForServer(pduIds);
-            String pduFormulaInfo = metricsFormulatoString(pduFormulas);
+            String pduFormulaInfo = server.metricsFormulaToString(pduFormulas);
             if(pduFormulaInfo != null) {
                metricsFormulas.put(FlowgateConstant.PDU, pduFormulaInfo);
                server.setMetricsformulas(metricsFormulas);
@@ -454,7 +455,7 @@ public class AggregatorService implements AsyncService {
             String pduFormulaInfo = metricsFormulas.get(FlowgateConstant.PDU);
             if(pduFormulaInfo == null) {
                Map<String,Map<String,String>> pduFormulas = generatePduformulaForServer(pduIds);
-               pduFormulaInfo = metricsFormulatoString(pduFormulas);
+               pduFormulaInfo = server.metricsFormulaToString(pduFormulas);
                if(pduFormulaInfo != null) {
                   metricsFormulas.put(FlowgateConstant.PDU, pduFormulaInfo);
                   server.setMetricsformulas(metricsFormulas);
@@ -462,7 +463,8 @@ public class AggregatorService implements AsyncService {
                }
             }else {
                boolean isNeedUpdated = false;
-               Map<String, Map<String, String>> pduFormulasMap = metricsFormulaToMap(pduFormulaInfo);
+               Map<String, Map<String, String>> pduFormulasMap =
+                     server.metricsFormulaToMap(pduFormulaInfo, new TypeReference<Map<String, Map<String, String>>>() {});
                if(pduFormulasMap != null) {
                   if(pduIds.size() != pduFormulasMap.keySet().size()) {
                      pduFormulasMap = generatePduformulaForServer(pduIds);
@@ -472,12 +474,13 @@ public class AggregatorService implements AsyncService {
                         if(pduFormulasMap.get(pduAssetId) == null) {
                            pduFormulasMap = generatePduformulaForServer(pduIds);
                            isNeedUpdated = true;
+                           break;
                         }
                      }
                   }
                }
                if(isNeedUpdated) {
-                  pduFormulaInfo = metricsFormulatoString(pduFormulasMap);
+                  pduFormulaInfo = server.metricsFormulaToString(pduFormulasMap);
                   if(pduFormulaInfo != null) {
                      metricsFormulas.put(FlowgateConstant.PDU, pduFormulaInfo);
                      server.setMetricsformulas(metricsFormulas);
@@ -536,7 +539,8 @@ public class AggregatorService implements AsyncService {
                if (sensorFormulasInfo == null) {
                   candidateServer.add(asset);
                } else {
-                  Map<String, Map<String, String>> metricFormulaMap = metricsFormulaToMap(sensorFormulasInfo);
+                  Map<String, Map<String, String>> metricFormulaMap =
+                        asset.metricsFormulaToMap(sensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
                   if(metricFormulaMap == null) {
                      continue;
                   }
@@ -599,7 +603,8 @@ public class AggregatorService implements AsyncService {
          if(sensorMetricFormulasInfo == null) {
             sensorMetricsFormulasMap = new HashMap<String,Map<String,String>>();
          }else {
-            sensorMetricsFormulasMap = metricsFormulaToMap(sensorMetricFormulasInfo);
+            sensorMetricsFormulasMap =
+                  server.metricsFormulaToMap(sensorMetricFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
             //If there is a problem with deserialization, the map will be null
             if(sensorMetricsFormulasMap == null) {
                continue;
@@ -653,7 +658,7 @@ public class AggregatorService implements AsyncService {
             needUpdate = true;
          }
          if(needUpdate) {
-            String sensorMetricsFormulaInfo = metricsFormulatoString(sensorMetricsFormulasMap);
+            String sensorMetricsFormulaInfo = server.metricsFormulaToString(sensorMetricsFormulasMap);
             metricsFormulas.put(FlowgateConstant.SENSOR, sensorMetricsFormulaInfo);
             needUpdateServers.add(server);
          }
@@ -777,26 +782,6 @@ public class AggregatorService implements AsyncService {
          }
       }
       return positionInfo.toString();
-   }
-
-   private String metricsFormulatoString(Map<String, Map<String, String>> pduFormulasMap) {
-      String pduFormulaInfo = null;
-      try {
-         pduFormulaInfo = mapper.writeValueAsString(pduFormulasMap);
-      } catch (JsonProcessingException e) {
-         logger.error("Format metric formula error ",e.getMessage());
-      }
-      return pduFormulaInfo;
-   }
-
-   private Map<String, Map<String, String>> metricsFormulaToMap(String pduFormulasInfo){
-      Map<String, Map<String, String>> pduFormulasMap = null;
-      try {
-         pduFormulasMap = mapper.readValue(pduFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
-      }  catch (IOException e) {
-         logger.error("Format metric formula error ",e.getMessage());
-      }
-      return pduFormulasMap;
    }
 
 }

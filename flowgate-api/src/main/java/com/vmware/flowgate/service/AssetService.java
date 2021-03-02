@@ -31,7 +31,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.AssetCategory;
@@ -109,7 +108,8 @@ public class AssetService {
       String sensorFormulasInfo = formulars.get(FlowgateConstant.SENSOR);
       Map<String, Map<String, String>> sensorFormulasMap = null;
       if(sensorFormulasInfo != null) {
-         sensorFormulasMap = metricsFormulaToMap(sensorFormulasInfo);
+         sensorFormulasMap =
+               pdu.metricsFormulaToMap(sensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
       }
 
       if(sensorFormulasMap != null) {
@@ -161,7 +161,8 @@ public class AssetService {
       }
       String pduFormulasInfo = metricFormula.get(FlowgateConstant.PDU);
       if(pduFormulasInfo != null) {
-         Map<String, Map<String, String>> pduMetrics = metricsFormulaToMap(pduFormulasInfo);
+         Map<String, Map<String, String>> pduMetrics =
+               server.metricsFormulaToMap(pduFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
          List<String> metricNames = new ArrayList<String>();
          metricNames.add(MetricName.PDU_TOTAL_POWER);
          metricNames.add(MetricName.PDU_TOTAL_CURRENT);
@@ -184,7 +185,8 @@ public class AssetService {
 
       String sensorFormulasInfo = metricFormula.get(FlowgateConstant.SENSOR);
       if (sensorFormulasInfo != null) {
-         Map<String, Map<String, String>> sensorFormulars = metricsFormulaToMap(sensorFormulasInfo);
+         Map<String, Map<String, String>> sensorFormulars =
+               server.metricsFormulaToMap(sensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
          Map<String, List<RealTimeData>> assetIdAndRealtimeDataMap =
                new HashMap<String, List<RealTimeData>>();
          for (Map.Entry<String, Map<String, String>> sensorFormula : sensorFormulars.entrySet()) {
@@ -660,14 +662,16 @@ public class AssetService {
          String oldSensorFormulasInfo  = null;
          if(oldMetricsformulas.containsKey(FlowgateConstant.SENSOR)) {
             oldSensorFormulasInfo = oldMetricsformulas.get(FlowgateConstant.SENSOR);
-            oldSensorformulasMap = metricsFormulaToMap(oldSensorFormulasInfo);
+            oldSensorformulasMap =
+                  asset.metricsFormulaToMap(oldSensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
          }else {
             oldSensorformulasMap = new HashMap<String,Map<String, String>>();
          }
          String newSensorFormulaInfo = newMetricsformulas.get(FlowgateConstant.SENSOR);
-         Map<String, Map<String, String>> newSensorformulasMap = metricsFormulaToMap(newSensorFormulaInfo);;
+         Map<String, Map<String, String>> newSensorformulasMap =
+               asset.metricsFormulaToMap(newSensorFormulaInfo, new TypeReference<Map<String, Map<String, String>>>() {});
          generateSensorFormula(oldSensorformulasMap, newSensorformulasMap);
-         oldSensorFormulasInfo = metricsFormulatoString(oldSensorformulasMap);
+         oldSensorFormulasInfo = asset.metricsFormulaToString(oldSensorformulasMap);
          oldMetricsformulas.put(FlowgateConstant.SENSOR, oldSensorFormulasInfo);
          oldAsset.setMetricsformulas(oldMetricsformulas);
       }
@@ -754,25 +758,5 @@ public class AssetService {
          }
       }
       return positionInfo.toString();
-   }
-
-   private Map<String, Map<String, String>> metricsFormulaToMap(String pduFormulasInfo){
-      Map<String, Map<String, String>> pduFormulasMap = null;
-      try {
-         pduFormulasMap = mapper.readValue(pduFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
-      }  catch (IOException e) {
-         logger.error("Format metric formula error ",e.getMessage());
-      }
-      return pduFormulasMap;
-   }
-
-   private String metricsFormulatoString(Map<String, Map<String, String>> pduFormulasMap) {
-      String pduFormulaInfo = null;
-      try {
-         pduFormulaInfo = mapper.writeValueAsString(pduFormulasMap);
-      } catch (JsonProcessingException e) {
-         logger.error("Format metric formula error ",e.getMessage());
-      }
-      return pduFormulaInfo;
    }
 }
