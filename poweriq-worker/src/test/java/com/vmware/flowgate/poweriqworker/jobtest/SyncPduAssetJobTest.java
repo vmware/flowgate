@@ -1,6 +1,6 @@
 package com.vmware.flowgate.poweriqworker.jobtest;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
@@ -115,7 +115,7 @@ public class SyncPduAssetJobTest {
       sensorFormulars.put(MetricName.PDU_HUMIDITY, humidityLocationAndIdMap);
       sensorFormulars.put(MetricName.PDU_TEMPERATURE, tempreatureLocationAndIdMap);
       formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorFormulars));
-      asset.setMetricsformulas(formulars);
+      asset.setMetricsformulars(formulars);
       assets.add(asset);
       Set<String> assetIDs = powerIQService.getAssetIdfromformular(assets);
       TestCase.assertEquals(2, assetIDs.size());
@@ -161,7 +161,7 @@ public class SyncPduAssetJobTest {
       Asset pdu = pduNeedTosave.iterator().next();
       TestCase.assertEquals(pduAsset.getAssetName(), pdu.getAssetName());
       try {
-         Map<String, String> formulars = pdu.getMetricsformulas();
+         Map<String, String> formulars = pdu.getMetricsformulars();
          Map<String, Map<String, String>> sensorFormulars = mapper.readValue(formulars.get(FlowgateConstant.SENSOR), new TypeReference<Map<String, Map<String, String>>>() {});
          Map<String, String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
          TestCase.assertEquals("po09imkhdplbvf540fwusy67n", humidityLocationAndIdMap.get(FlowgateConstant.RACK_UNIT_PREFIX + "1"));
@@ -204,7 +204,7 @@ public class SyncPduAssetJobTest {
       Asset pdu = pduNeedTosave.iterator().next();
       TestCase.assertEquals(pduAsset.getAssetName(), pdu.getAssetName());
       try {
-         Map<String, String> formulars = pdu.getMetricsformulas();
+         Map<String, String> formulars = pdu.getMetricsformulars();
          Map<String, Map<String, String>> sensorFormulars = mapper.readValue(formulars.get(FlowgateConstant.SENSOR), new TypeReference<Map<String, Map<String, String>>>() {});
          Map<String, String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
          TestCase.assertEquals("po09imkhdplbvf540fwusy67n", humidityLocationAndIdMap.get(FlowgateConstant.RACK_UNIT_PREFIX + "1"+FlowgateConstant.SEPARATOR+sensorInfoMap.get(FlowgateConstant.POSITION)));

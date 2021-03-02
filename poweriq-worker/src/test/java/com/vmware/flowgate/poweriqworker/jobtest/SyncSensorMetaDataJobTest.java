@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.poweriqworker.jobtest;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
@@ -314,14 +314,14 @@ public class SyncSensorMetaDataJobTest {
       Map<String, Map<String, String>> sensorInfo = new HashMap<String, Map<String, String>>();
       sensorInfo.put("FRONT", sensorLocationAndId);
       formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo));
-      server.setMetricsformulas(formulars);
+      server.setMetricsformulars(formulars);
       assets.add(server);
       List<Asset> servers = powerIQService.updateServer(assets, "128");
       TestCase.assertEquals(assets.size(), servers.size());
       Asset updatedServer = servers.get(0);
 
 
-      Map<String, String> formulars1 = updatedServer.getMetricsformulas();
+      Map<String, String> formulars1 = updatedServer.getMetricsformulars();
       Map<String, Map<String, String>> sensorInfo1 = formatSensorFormulas(formulars1.get(FlowgateConstant.SENSOR));
       Map<String,String> sensorLocationAndId1 = sensorInfo1.get("FRONT");
       TestCase.assertEquals(1, sensorLocationAndId1.size());

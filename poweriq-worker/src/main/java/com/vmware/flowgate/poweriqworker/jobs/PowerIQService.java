@@ -310,7 +310,7 @@ public class PowerIQService implements AsyncService {
       List<Asset> needToUpdate = new ArrayList<Asset>();
       for(Asset server : servers) {
          boolean changed = false;
-         Map<String, String> formulas = server.getMetricsformulas();
+         Map<String, String> formulas = server.getMetricsformulars();
          if(formulas == null || formulas.isEmpty()) {
             continue;
          }
@@ -328,7 +328,7 @@ public class PowerIQService implements AsyncService {
             }
          }
          formulas.put(FlowgateConstant.SENSOR, server.metricsFormulaToString(sensorFormulas));
-         server.setMetricsformulas(formulas);
+         server.setMetricsformulars(formulas);
          if(changed) {
             needToUpdate.add(server);
          }
@@ -650,7 +650,7 @@ public class PowerIQService implements AsyncService {
             continue;
          }
          String positionInfo = getSensorPositionInfo(sensorAsset);
-         Map<String, String> formulas = pduAsset.getMetricsformulas();
+         Map<String, String> formulas = pduAsset.getMetricsformulars();
          if(formulas == null || formulas.isEmpty()) {
             formulas = new HashMap<>();
             Map<String, Map<String, String>> sensorFormulars = generateNewMetricformular(sensorAsset, positionInfo);
@@ -691,7 +691,7 @@ public class PowerIQService implements AsyncService {
             }
             formulas.put(FlowgateConstant.SENSOR, pduAsset.metricsFormulaToString(sensorFormulars));
          }
-         pduAsset.setMetricsformulas(formulas);
+         pduAsset.setMetricsformulars(formulas);
          pduAssets.add(pduAsset);
       }
       return pduAssets;
@@ -1509,7 +1509,7 @@ public class PowerIQService implements AsyncService {
    public Set<String> getAssetIdfromformular(List<Asset> mappedAssets) {
       Set<String> assetIds = new HashSet<String>();
       for (Asset asset : mappedAssets) {
-         Map<String, String> formulas = asset.getMetricsformulas();
+         Map<String, String> formulas = asset.getMetricsformulars();
          if(formulas == null || formulas.isEmpty()) {
             continue;
          }

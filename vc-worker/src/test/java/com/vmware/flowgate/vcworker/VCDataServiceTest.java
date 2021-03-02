@@ -1,7 +1,31 @@
 /**
- * 
+ *
  */
 package com.vmware.flowgate.vcworker;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
@@ -50,30 +74,8 @@ import com.vmware.vim.binding.vim.host.Summary.HardwareSummary;
 import com.vmware.vim.binding.vim.host.Summary.QuickStats;
 import com.vmware.vim.binding.vmodl.ManagedObjectReference;
 import com.vmware.vim.vmomi.client.Client;
+
 import junit.framework.TestCase;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 
 public class VCDataServiceTest {
 
@@ -86,16 +88,16 @@ public class VCDataServiceTest {
 
    @Mock
    private ServiceKeyConfig serviceKeyConfig;
-   
+
    @Mock
    private PerformanceManager performanceManager;
-   
+
    @Mock
    private Client client;
-   
+
    @Mock
    private ServiceInstanceContent sic;
-   
+
    @Mock
    private VsphereClient vsphereClient;
 
@@ -355,7 +357,7 @@ public class VCDataServiceTest {
       when(datastores[1].getSummary()).thenReturn(connectInfoSummary);
       when(connectInfoSummary.getDatastore()).thenReturn(mor1);
       when(mor1.getValue()).thenReturn("datastoreid");
-      
+
       when(host.queryConnectionInfo()).thenReturn(connectInfo);
       when(connectInfo.getDatastore()).thenReturn(datastores);
 
@@ -440,7 +442,7 @@ public class VCDataServiceTest {
       hostNics.add(hostNic1);
       hostNics.add(hostNic2);
       hostInfo.setHostNics(hostNics);
-      
+
       boolean needUpdate = service.feedHostMetaData(host, hostInfo);
       TestCase.assertEquals(needUpdate, true);
    }
@@ -546,7 +548,7 @@ public class VCDataServiceTest {
             service.feedClusterMetaData(clusterMap, host, hostInfo, "vcInstanceUUID");
       TestCase.assertEquals(needUpdate, true);
    }
-   
+
    @Test
    public void testQueryHostMetrics() throws Exception {
 
@@ -582,7 +584,7 @@ public class VCDataServiceTest {
       Map<String, String>  metricsFormulars = new HashMap<>();
       Map<String, String> metrics = new HashMap<>();
       metricsFormulars.put(FlowgateConstant.HOST_METRICS, mapper.writeValueAsString(metrics));
-      asset.setMetricsformulas(metricsFormulars);
+      asset.setMetricsformulars(metricsFormulars);
 
       ResponseEntity<Asset> assets = Mockito.mock(ResponseEntity.class);
       when(restClient.getAssetByID(anyString())).thenReturn(assets);
@@ -602,7 +604,7 @@ public class VCDataServiceTest {
       when(hostMappingAsset.getId()).thenReturn("hostid");
       PerformanceManager performanceManager = Mockito.mock(PerformanceManager.class);
       when(vsphereClient.getPerformanceManager()).thenReturn(performanceManager);
-      
+
       CounterInfo[] counterInfos = new CounterInfo[2];
       counterInfos[0] = Mockito.mock(CounterInfo.class);
       when(counterInfos[0].getKey()).thenReturn(1);
@@ -612,7 +614,7 @@ public class VCDataServiceTest {
       ElementDescription edName = Mockito.mock(ElementDescription.class);
       when(counterInfos[0].getNameInfo()).thenReturn(edName);
       when(edName.getKey()).thenReturn(VCConstants.HOST_METRIC_USAGE);
-      
+
       counterInfos[1] = Mockito.mock(CounterInfo.class);
       when(counterInfos[1].getKey()).thenReturn(2);
       ElementDescription edGroup1 = Mockito.mock(ElementDescription.class);
@@ -621,9 +623,9 @@ public class VCDataServiceTest {
       ElementDescription edName1 = Mockito.mock(ElementDescription.class);
       when(counterInfos[1].getNameInfo()).thenReturn(edName1);
       when(edName1.getKey()).thenReturn(VCConstants.HOST_METRIC_USAGE);
-      
+
       when(performanceManager.getPerfCounter()).thenReturn(counterInfos);
-      
+
       MetricId[] metrics = new MetricId[2];
       metrics[0] = Mockito.mock(MetricId.class);
       metrics[1] = Mockito.mock(MetricId.class);
@@ -631,47 +633,47 @@ public class VCDataServiceTest {
       when(metrics[1].getCounterId()).thenReturn(2);
       when(metrics[0].getInstance()).thenReturn(null);
       when(metrics[1].getInstance()).thenReturn(null);
-      
+
       when(performanceManager.queryAvailableMetric(host._getRef(), null, null, new Integer(20))).thenReturn(metrics);
-      
+
       ProviderSummary summary = Mockito.mock(ProviderSummary.class);
       when(summary.getRefreshRate()).thenReturn(1);
       when(performanceManager.queryProviderSummary(host._getRef())).thenReturn(summary);
-      
+
       EntityMetric[] metricBase = new EntityMetric[2];
       metricBase[0] = Mockito.mock(EntityMetric.class);
       long[] values = {1L, 2L};
-      
+
       IntSeries[] metricSerieses1 = new IntSeries[2];
       metricSerieses1[0] = Mockito.mock(IntSeries.class);
       MetricId metricID = Mockito.mock(MetricId.class);
       when(metricSerieses1[0].getId()).thenReturn(metricID);
       when(metricID.getCounterId()).thenReturn(1);
-      
+
       IntSeries intSeries1 = Mockito.mock(IntSeries.class);
       intSeries1 = metricSerieses1[0];
       when((intSeries1.getValue())).thenReturn(values);
-      
+
       when(metricID.getCounterId()).thenReturn(1);
       metricSerieses1[1] = Mockito.mock(IntSeries.class);
       when(metricSerieses1[1].getId()).thenReturn(metricID);
       when(metricID.getCounterId()).thenReturn(1);
-      
+
       IntSeries intSeries2 = Mockito.mock(IntSeries.class);
       intSeries2 = metricSerieses1[1];
       when(intSeries2.getValue()).thenReturn(values);
-      
+
       when(metricID.getCounterId()).thenReturn(2);
       when(metricBase[0].getValue()).thenReturn(metricSerieses1);
-      
+
       SampleInfo[] sampleInfos1 = new SampleInfo[2];
       sampleInfos1[0] = Mockito.mock(SampleInfo.class);
       Calendar time = Calendar.getInstance();
       when(sampleInfos1[0].getTimestamp()).thenReturn(time);
-      
+
       sampleInfos1[1] = Mockito.mock(SampleInfo.class);
       when(sampleInfos1[1].getTimestamp()).thenReturn(time);
-      
+
       when(metricBase[0].getSampleInfo()).thenReturn(sampleInfos1);
 
       metricBase[1] = Mockito.mock(EntityMetric.class);
@@ -679,10 +681,10 @@ public class VCDataServiceTest {
       when(metricBase[1].getSampleInfo()).thenReturn(sampleInfos1);
 
       when(performanceManager.queryStats(any())).thenReturn(metricBase);
-      
+
       service.feedHostUsageData(vsphereClient, hostMappingAsset.getId(), host._getRef());
    }
-   
+
    @Test
    public void testGetPerformanceManager() {
       ManagedObjectReference mor = Mockito.mock(ManagedObjectReference.class);

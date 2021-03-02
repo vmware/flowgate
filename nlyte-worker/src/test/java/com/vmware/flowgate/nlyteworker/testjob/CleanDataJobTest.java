@@ -9,10 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +20,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricName;
@@ -86,7 +85,7 @@ public class CleanDataJobTest {
       } catch (JsonProcessingException e) {
          e.printStackTrace();
       }
-      server.setMetricsformulas(formulars);
+      server.setMetricsformulars(formulars);
       servers.add(server);
 
       Asset server2 = new Asset();
@@ -99,11 +98,11 @@ public class CleanDataJobTest {
       servers = nlyteDataService.removePduFromServer(servers, "0364");
       TestCase.assertEquals(1, servers.size());
       TestCase.assertEquals(1, servers.get(0).getPdus().size());
-      TestCase.assertEquals(1, servers.get(0).getMetricsformulas().size());
+      TestCase.assertEquals(1, servers.get(0).getMetricsformulars().size());
 
       Map<String, Map<String, String>> pduMetricsformulas = new HashMap<>();
       try {
-         pduMetricsformulas = mapper.readValue(servers.get(0).getMetricsformulas().get(FlowgateConstant.PDU), new TypeReference<Map<String, Map<String, String>>>() {});
+         pduMetricsformulas = mapper.readValue(servers.get(0).getMetricsformulars().get(FlowgateConstant.PDU), new TypeReference<Map<String, Map<String, String>>>() {});
       } catch (JsonProcessingException e) {
          e.printStackTrace();
       }
