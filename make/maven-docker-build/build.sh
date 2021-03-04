@@ -9,7 +9,7 @@ OUTPUTJARPATH=$MAKEDIR/jar-output
 OUTPUTJARNAME=-*.jar
 
 commonproject=("flowgate-common" "common-restclient" "worker-jobs")
-serviceproject=("nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "labsdb-worker")
+serviceproject=("nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "labsdb-worker" "openmanage")
 specialproject=("vc-worker" "flowgate-api" "vro-worker")
 databaseangredis=("database" "redis")
 

@@ -7,7 +7,7 @@
 #####define all path 
 CURRENTPATH=`pwd` #make
 
-OUTPUTJARFILESNUM=9
+OUTPUTJARFILESNUM=10
 UIDISTFILENUM=18
 TIMEOUTSECOND=900
 BUILDLOG=$CURRENTPATH/build-log
@@ -92,7 +92,8 @@ buildDockerImages(){
 	docker rmi flowgate/vro-worker:$FLOWGATE_VERSION flowgate/vc-worker:$FLOWGATE_VERSION flowgate/nlyte-worker:$FLOWGATE_VERSION \
     flowgate/management:$FLOWGATE_VERSION flowgate/infoblox-worker:$FLOWGATE_VERSION flowgate/labsdb-worker:$FLOWGATE_VERSION \
     flowgate/poweriq-worker:$FLOWGATE_VERSION flowgate/aggregator:$FLOWGATE_VERSION flowgate/api:$FLOWGATE_VERSION \
-    flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION maven-build:$FLOWGATE_VERSION database-build:$FLOWGATE_VERSION
+    flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION maven-build:$FLOWGATE_VERSION database-build:$FLOWGATE_VERSION \
+    flowgate/openmanage:$FLOWGATE_VERSION
 
 	if [ ! -d "$OUTPUTIMAGEPATH" ];then
 		mkdir $OUTPUTIMAGEPATH
@@ -100,7 +101,7 @@ buildDockerImages(){
 		rm $OUTPUTIMAGEPATH/* -rf
 	fi
 
-	jarname=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "vc-worker" "labsdb-worker")
+	jarname=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "vc-worker" "labsdb-worker" "openmanage")
 	for j in "${jarname[@]}"
 	do
 		cp $OUTPUTJARPATH/$j-*.jar $CURRENTPATH/$j
@@ -122,7 +123,8 @@ saveDockerImages(){
 	docker save flowgate/vro-worker:$FLOWGATE_VERSION flowgate/vc-worker:$FLOWGATE_VERSION flowgate/nlyte-worker:$FLOWGATE_VERSION \
 	flowgate/management:$FLOWGATE_VERSION flowgate/infoblox-worker:$FLOWGATE_VERSION flowgate/labsdb-worker:$FLOWGATE_VERSION \
 	flowgate/poweriq-worker:$FLOWGATE_VERSION flowgate/aggregator:$FLOWGATE_VERSION flowgate/api:$FLOWGATE_VERSION \
-	flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION >> $FLOWGATEIMAGESTAR
+	flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION >> $FLOWGATEIMAGESTAR \
+	flowgate/openmanage:$FLOWGATE_VERSION
 	mkdir flowgate
 	mkdir -p flowgate/docker-images-output
 	mkdir -p flowgate/maven-docker-build

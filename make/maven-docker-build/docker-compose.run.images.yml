@@ -198,6 +198,23 @@ services:
       - flowgate-api:flowgate-api
     environment:
       FLOWGATESERVICEKEY: serviceKey
+      
+  openmanage:
+    image: flowgate/openmanage:FLOWGATE_VERSION
+    volumes:
+      - /opt/vmware/flowgate/log/openmanage:/log
+      - /opt/vmware/flowgate/conf/openmanage:/conf
+    container_name: flowgate-openmanage-container
+    networks:
+      - services-network
+    depends_on:
+      - redis
+      - flowgate-api
+    links:
+      - redis:redis
+      - flowgate-api:flowgate-api
+    environment:
+      FLOWGATESERVICEKEY: serviceKey
 
 networks:
   db-network:

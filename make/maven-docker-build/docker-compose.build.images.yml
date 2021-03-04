@@ -85,6 +85,14 @@ services:
     depends_on:
       - baseimage
       
+  openmanage:
+    build:
+      context: $PWD/openmanage
+      dockerfile: $PWD/openmanage/Dockerfile
+    image: flowgate/openmanage:FLOWGATE_VERSION
+    depends_on:
+      - baseimage
+      
 networks:
   db-network:
   services-network:
