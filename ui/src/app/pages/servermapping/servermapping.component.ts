@@ -322,7 +322,7 @@ export class ServermappingComponent implements OnInit {
         this.service.getAssetById(assetId).subscribe(
           (data:AssetModule)=>{
               this.mappedServerAsset= data;
-              let sensorformular = this.xah_obj_to_map(this.mappedServerAsset.metricsformulas).get('SENSOR');
+              let sensorformular = this.xah_obj_to_map(this.mappedServerAsset.metricsformulars).get('SENSOR');
               if(sensorformular != null){
                 let sensorMap = this.xah_obj_to_map(JSON.parse(sensorformular));
                 if(sensorMap.has("FrontTemperature")){
@@ -551,7 +551,7 @@ export class ServermappingComponent implements OnInit {
         sensorids.forEach(element =>{
           positionMap.set(element,element);
         })
-        assetToUpdate.metricsformulas = this.generateMetricFormula(positionMap,metricName);
+        assetToUpdate.metricsformulars = this.generateMetricFormula(positionMap,metricName);
       }else{
         sensorids.forEach(element => {
           let positionMap:Map<string,string> = new Map<string,string>();
@@ -559,7 +559,7 @@ export class ServermappingComponent implements OnInit {
           if(!update){
             if(oldsensorId.indexOf(element) == -1){
               update = true;
-              assetToUpdate.metricsformulas = this.generateMetricFormula(positionMap,metricName);
+              assetToUpdate.metricsformulars = this.generateMetricFormula(positionMap,metricName);
             }
           }
         });
