@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.vmware.flowgate.common.RealtimeDataUnit;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,6 +55,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.AssetStatus;
@@ -63,6 +64,7 @@ import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.MountingSide;
+import com.vmware.flowgate.common.RealtimeDataUnit;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetAddress;
 import com.vmware.flowgate.common.model.AssetIPMapping;
@@ -275,8 +277,7 @@ public class AssetControllerTest {
       List<String> switches = new ArrayList<String>();
       switches.add("ow23aw312e3nr3d2a57788i");
       newAsset.setSwitches(switches);
-      Map<String, Map<String, Map<String, String>>> metricsformulars =
-            new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, String> metricsformulars = new HashMap<String, String>();
       Map<String, Map<String, String>> sensorMap =
             new HashMap<String, Map<String, String>>();
       Map<String, String> positionInfo = new HashMap<String, String>();
@@ -298,7 +299,13 @@ public class AssetControllerTest {
       humiditySensorAsset = assetRepository.save(humiditySensorAsset);
       positionInfo.put(humiditySensorAsset.getId(), humiditySensorAsset.getId());
       sensorMap.put(MetricName.SERVER_FRONT_HUMIDITY, positionInfo);
-      metricsformulars.put(FlowgateConstant.SENSOR, sensorMap);
+      String sensorFormulaInfo = null;
+      try {
+         sensorFormulaInfo = mapper.writeValueAsString(sensorMap);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      metricsformulars.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
       newAsset.setMetricsformulars(metricsformulars);
 
       this.mockMvc
@@ -383,8 +390,14 @@ public class AssetControllerTest {
       TestCase.assertEquals(1, testAsset.getSwitches().size());
       TestCase.assertEquals("ow23aw312e3nr3d2a57788i", testAsset.getSwitches().get(0));
 
+      Map<String, Map<String, String>> sensorFormulaMap = null;
+      try {
+         sensorFormulaMap = mapper.readValue(testAsset.getMetricsformulars().get(FlowgateConstant.SENSOR), new TypeReference<Map<String, Map<String, String>>>() {});
+      } catch (IOException e) {
+         TestCase.fail(e.getMessage());
+      }
       TestCase.assertEquals(FlowgateConstant.RACK_UNIT_PREFIX + humiditySensorAsset.getCabinetUnitPosition()+FlowgateConstant.SEPARATOR+"INLET",
-            testAsset.getMetricsformulars().get(FlowgateConstant.SENSOR).get(MetricName.SERVER_FRONT_HUMIDITY).keySet().iterator().next());
+            sensorFormulaMap.get(MetricName.SERVER_FRONT_HUMIDITY).keySet().iterator().next());
       assetRepository.deleteById(testAsset.getId());
       assetRepository.deleteById(humiditySensorAsset.getId());
    }
@@ -1984,7 +1997,7 @@ public class AssetControllerTest {
       HashMap<String, String> justificationfields = new HashMap<>();
       justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:7_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
       asset.setJustificationfields(justificationfields);
-      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, String> formulars = new HashMap<String, String>();
       Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
       Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
       pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
@@ -1993,7 +2006,6 @@ public class AssetControllerTest {
       pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricFormulars.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
-      formulars.put(FlowgateConstant.PDU, pduMetricFormulars);
 
       Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
       Map<String, String> frontTempSensor = new HashMap<String,String>();
@@ -2002,38 +2014,40 @@ public class AssetControllerTest {
       Map<String, String> backTempSensor = new HashMap<String,String>();
       backTempSensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
       sensorMetricFormulars.put(MetricName.SERVER_BACK_TEMPREATURE, backTempSensor);
-
       Map<String, String> frontHumiditySensor = new HashMap<String,String>();
       frontHumiditySensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
       sensorMetricFormulars.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumiditySensor);
-
       Map<String, String> backHumiditySensor = new HashMap<String,String>();
       backHumiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
       sensorMetricFormulars.put(MetricName.SERVER_BACK_HUMIDITY, backHumiditySensor);
 
-      formulars.put(FlowgateConstant.SENSOR, sensorMetricFormulars);
+      String pduFormulaInfo = null;
+      String sensorFormulaInfo = null;
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         pduFormulaInfo = mapper.writeValueAsString(pduMetricFormulars);
+         sensorFormulaInfo = mapper.writeValueAsString(sensorMetricFormulars);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      formulars.put(FlowgateConstant.PDU, pduFormulaInfo);
+      formulars.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
 
-      Map<String, Map<String, String>> hostMetrics = new HashMap<>();
-      Map<String, String> cpuMap = new HashMap<>();
-      cpuMap.put(MetricName.SERVER_CPUUSAGE, asset.getId());
-      cpuMap.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
-      hostMetrics.put(FlowgateConstant.HOST_CPU, cpuMap);
+      Map<String, String> hostMetrics = new HashMap<>();
+      hostMetrics.put(MetricName.SERVER_CPUUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
 
-      Map<String, String> memoryMap = new HashMap<>();
-      memoryMap.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
-      memoryMap.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
-      memoryMap.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
-      memoryMap.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
-      memoryMap.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
-      memoryMap.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
-      hostMetrics.put(FlowgateConstant.HOST_MEMORY, memoryMap);
+      hostMetrics.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
 
-      Map<String, String> storageMap = new HashMap<>();
-      storageMap.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
-      storageMap.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
-      storageMap.put(MetricName.SERVER_STORAGEUSED, asset.getId());
-      hostMetrics.put(FlowgateConstant.HOST_STORAGE, storageMap);
-      formulars.put(FlowgateConstant.HOST_METRICS, hostMetrics);
+      hostMetrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEUSED, asset.getId());
+      formulars.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(hostMetrics));
 
       asset.setMetricsformulars(formulars);
       asset = assetRepository.save(asset);
@@ -2045,7 +2059,6 @@ public class AssetControllerTest {
                   responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
                         .andWithPrefix("[].", fieldpath)))
             .andReturn();
-      ObjectMapper mapper = new ObjectMapper();
       String res = result1.getResponse().getContentAsString();
       MetricData [] datas = mapper.readValue(res, MetricData[].class);
       try {
@@ -2409,20 +2422,27 @@ public class AssetControllerTest {
       Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
 
       Asset asset = createAsset();
-      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, String> formulas = new HashMap<String, String>();
 
-      Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, Map<String, String>> sensorMetricFormulas = new HashMap<String, Map<String, String>>();
       Map<String, String> tempSensor = new HashMap<String,String>();
       tempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.PDU_TEMPERATURE, tempSensor);
+      sensorMetricFormulas.put(MetricName.PDU_TEMPERATURE, tempSensor);
 
       Map<String, String> humiditySensor = new HashMap<String,String>();
       humiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.PDU_HUMIDITY, humiditySensor);
+      sensorMetricFormulas.put(MetricName.PDU_HUMIDITY, humiditySensor);
 
-      formulars.put(FlowgateConstant.SENSOR, sensorMetricFormulars);
+      String sensorFormulaInfo = null;
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         sensorFormulaInfo = mapper.writeValueAsString(sensorMetricFormulas);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      formulas.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
       asset.setCategory(AssetCategory.PDU);
-      asset.setMetricsformulars(formulars);
+      asset.setMetricsformulars(formulas);
       asset.setId("00040717c4154b5b924ced78eafcea7a");
       asset = assetRepository.save(asset);
 
@@ -2433,7 +2453,6 @@ public class AssetControllerTest {
                   responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
                         .andWithPrefix("[].", fieldpath)))
             .andReturn();
-      ObjectMapper mapper = new ObjectMapper();
       String res = result1.getResponse().getContentAsString();
       MetricData [] datas = mapper.readValue(res, MetricData[].class);
       try {
@@ -2516,20 +2535,28 @@ public class AssetControllerTest {
       Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
 
       Asset asset = createAsset();
-      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, String> formulas = new HashMap<String, String>();
 
-      Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, Map<String, String>> sensorMetricFormulas = new HashMap<String, Map<String, String>>();
       Map<String, String> tempSensor = new HashMap<String,String>();
       tempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.PDU_TEMPERATURE, tempSensor);
+      sensorMetricFormulas.put(MetricName.PDU_TEMPERATURE, tempSensor);
 
       Map<String, String> humiditySensor = new HashMap<String,String>();
       humiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.PDU_HUMIDITY, humiditySensor);
+      sensorMetricFormulas.put(MetricName.PDU_HUMIDITY, humiditySensor);
 
-      formulars.put(FlowgateConstant.SENSOR, sensorMetricFormulars);
+      String sensorFormulaInfo = null;
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         sensorFormulaInfo = mapper.writeValueAsString(sensorMetricFormulas);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+
+      formulas.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
       asset.setCategory(AssetCategory.PDU);
-      asset.setMetricsformulars(formulars);
+      asset.setMetricsformulars(formulas);
       asset.setId("00040717c4154b5b924ced78eafcea7a");
       asset = assetRepository.save(asset);
 
@@ -2537,7 +2564,6 @@ public class AssetControllerTest {
                .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
                         String.valueOf(currentTime)).param("duration", "300000"))
                .andReturn();
-      ObjectMapper mapper = new ObjectMapper();
       String res = result1.getResponse().getContentAsString();
       MetricData [] datas = mapper.readValue(res, MetricData[].class);
       try {
@@ -2625,57 +2651,60 @@ public class AssetControllerTest {
       realTimeDatas.add(hostRealTimeData);
       Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
 
-      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
-      Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> formulas = new HashMap<String, String>();
+      Map<String, Map<String, String>> pduMetricFormulas = new HashMap<String, Map<String, String>>();
       Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
       pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricAndIdMap.put(MetricName.SERVER_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricFormulars.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
-      formulars.put(FlowgateConstant.PDU, pduMetricFormulars);
+      pduMetricFormulas.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
 
-      Map<String, Map<String, String>> hostMetrics = new HashMap<>();
-      Map<String, String> cpuMap = new HashMap<>();
-      cpuMap.put(MetricName.SERVER_CPUUSAGE, asset.getId());
-      cpuMap.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
-      hostMetrics.put(FlowgateConstant.HOST_CPU, cpuMap);
+      Map<String, String> hostMetrics = new HashMap<>();
+      hostMetrics.put(MetricName.SERVER_CPUUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
 
-      Map<String, String> memoryMap = new HashMap<>();
-      memoryMap.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
-      memoryMap.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
-      memoryMap.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
-      memoryMap.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
-      memoryMap.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
-      memoryMap.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
-      hostMetrics.put(FlowgateConstant.HOST_MEMORY, memoryMap);
+      hostMetrics.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
 
-      Map<String, String> storageMap = new HashMap<>();
-      storageMap.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
-      storageMap.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
-      storageMap.put(MetricName.SERVER_STORAGEUSED, asset.getId());
-      hostMetrics.put(FlowgateConstant.HOST_STORAGE, storageMap);
-      formulars.put(FlowgateConstant.HOST_METRICS, hostMetrics);
+      hostMetrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEUSED, asset.getId());
+      formulas.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(hostMetrics));
 
-      Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, Map<String, String>> sensorMetricFormulas = new HashMap<String, Map<String, String>>();
       Map<String, String> frontTempSensor = new HashMap<String,String>();
       frontTempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempSensor);
+      sensorMetricFormulas.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempSensor);
       Map<String, String> backTempSensor = new HashMap<String,String>();
       backTempSensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.SERVER_BACK_TEMPREATURE, backTempSensor);
+      sensorMetricFormulas.put(MetricName.SERVER_BACK_TEMPREATURE, backTempSensor);
 
       Map<String, String> frontHumiditySensor = new HashMap<String,String>();
       frontHumiditySensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumiditySensor);
+      sensorMetricFormulas.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumiditySensor);
 
       Map<String, String> backHumiditySensor = new HashMap<String,String>();
       backHumiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.SERVER_BACK_HUMIDITY, backHumiditySensor);
+      sensorMetricFormulas.put(MetricName.SERVER_BACK_HUMIDITY, backHumiditySensor);
 
-      formulars.put(FlowgateConstant.SENSOR, sensorMetricFormulars);
-      asset.setMetricsformulars(formulars);
+      String pduFormulaInfo = null;
+      String sensorFormulaInfo = null;
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         pduFormulaInfo = mapper.writeValueAsString(pduMetricFormulas);
+         sensorFormulaInfo = mapper.writeValueAsString(sensorMetricFormulas);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      formulas.put(FlowgateConstant.PDU, pduFormulaInfo);
+      formulas.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
+      asset.setMetricsformulars(formulas);
 
       HashMap<String, String> justificationfields = new HashMap<>();
       justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:7_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
@@ -2690,7 +2719,6 @@ public class AssetControllerTest {
                         responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
                                  .andWithPrefix("[].", fieldpath)))
                .andReturn();
-      ObjectMapper mapper = new ObjectMapper();
       String res = result1.getResponse().getContentAsString();
       MetricData [] datas = mapper.readValue(res, MetricData[].class);
       try {
@@ -3466,15 +3494,23 @@ public class AssetControllerTest {
       asset.setSwitches(switches);
       AssetStatus status = new AssetStatus();
       asset.setStatus(status);
-      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
-      Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> formulas = new HashMap<String, String>();
+      Map<String, Map<String, String>> pduMetricFormulas = new HashMap<String, Map<String, String>>();
       Map<String, String> MetricAndIdMap = new HashMap<String,String>();
       MetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
       MetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
       MetricAndIdMap.put(MetricName.SERVER_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricFormulars.put("0001bdc8b25d4c2badfd045ab61aabfa", MetricAndIdMap);
-      formulars.put(FlowgateConstant.PDU, pduMetricFormulars);
-      asset.setMetricsformulars(formulars);
+      pduMetricFormulas.put("0001bdc8b25d4c2badfd045ab61aabfa", MetricAndIdMap);
+
+      String pduFormulaInfo = null;
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+         pduFormulaInfo = mapper.writeValueAsString(pduMetricFormulas);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      formulas.put(FlowgateConstant.PDU, pduFormulaInfo);
+      asset.setMetricsformulars(formulas);
       return asset;
    }
 

@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.poweriqworker.jobtest;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
@@ -69,6 +70,8 @@ public class SyncSensorMetaDataJobTest {
    @Spy
    @InjectMocks
    private PowerIQService powerIQService = new PowerIQService();
+
+   private ObjectMapper mapper = new ObjectMapper();
 
    @Before
    public void before() {
@@ -299,18 +302,18 @@ public class SyncSensorMetaDataJobTest {
    }
 
    @Test
-   public void testUpdateServer() {
+   public void testUpdateServer() throws JsonProcessingException {
       List<Asset> assets = new ArrayList<Asset>();
       Asset server = createAsset();
       server.setAssetName("pek-wor-server");
       server.setCategory(AssetCategory.Server);
-      Map<String, Map<String, Map<String, String>>> formulars = new HashMap<String, Map<String, Map<String, String>>>();
+      Map<String, String> formulars = new HashMap<>();
       Map<String,String> sensorLocationAndId = new HashMap<String,String>();
       sensorLocationAndId.put("Rack01", "256");
       sensorLocationAndId.put("Rack02", "128");
       Map<String, Map<String, String>> sensorInfo = new HashMap<String, Map<String, String>>();
       sensorInfo.put("FRONT", sensorLocationAndId);
-      formulars.put(FlowgateConstant.SENSOR, sensorInfo);
+      formulars.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo));
       server.setMetricsformulars(formulars);
       assets.add(server);
       List<Asset> servers = powerIQService.updateServer(assets, "128");
@@ -318,11 +321,20 @@ public class SyncSensorMetaDataJobTest {
       Asset updatedServer = servers.get(0);
 
 
-      Map<String, Map<String, Map<String, String>>> formulars1 = updatedServer.getMetricsformulars();
-      Map<String, Map<String, String>> sensorInfo1 = formulars1.get(FlowgateConstant.SENSOR);
+      Map<String, String> formulars1 = updatedServer.getMetricsformulars();
+      Map<String, Map<String, String>> sensorInfo1 = formatSensorFormulas(formulars1.get(FlowgateConstant.SENSOR));
       Map<String,String> sensorLocationAndId1 = sensorInfo1.get("FRONT");
       TestCase.assertEquals(1, sensorLocationAndId1.size());
       TestCase.assertEquals("256", sensorLocationAndId1.entrySet().iterator().next().getValue());
+   }
+
+   private Map<String, Map<String, String>> formatSensorFormulas(String stringSensorFormulas) {
+      try {
+         return mapper.readValue(stringSensorFormulas, new TypeReference<Map<String, Map<String, String>>>() {});
+      } catch (JsonProcessingException e) {
+         e.printStackTrace();
+      }
+      return null;
    }
 
    @Test

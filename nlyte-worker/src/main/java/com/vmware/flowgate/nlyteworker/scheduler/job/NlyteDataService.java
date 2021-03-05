@@ -312,13 +312,15 @@ public class NlyteDataService implements AsyncService {
          }
          server.setPdus(pduIds);
 
-
-         Map<String, Map<String, Map<String, String>>> formulars = server.getMetricsformulars();
+         Map<String, String> formulars = server.getMetricsformulars();
          if(formulars == null || formulars.isEmpty()) {
             continue;
          }
-         Map<String, Map<String, String>> pduFormulars = formulars.get(FlowgateConstant.PDU);
-         Iterator<Map.Entry<String, Map<String, String>>> ite = pduFormulars.entrySet().iterator();
+         Map<String, Map<String, String>> pduFormulas = server.metricsFormulaToMap(formulars.get(FlowgateConstant.PDU), new TypeReference<Map<String, Map<String, String>>>() {});
+         if (pduFormulas == null || pduFormulas.isEmpty()) {
+            continue;
+         }
+         Iterator<Map.Entry<String, Map<String, String>>> ite = pduFormulas.entrySet().iterator();
          while(ite.hasNext()) {
             Map.Entry<String, Map<String, String>> map = ite.next();
             String pduAssetID = map.getKey();
@@ -326,7 +328,9 @@ public class NlyteDataService implements AsyncService {
                changed = true;
                ite.remove();
             }
-          }
+         }
+
+         formulars.put(FlowgateConstant.PDU, server.metricsFormulaToString(pduFormulas));
          server.setMetricsformulars(formulars);
          if(changed) {
             needToUpdate.add(server);
@@ -737,16 +741,16 @@ public class NlyteDataService implements AsyncService {
    public Set<String> getAssetIdfromformular(List<Asset> mappedServers) {
       Set<String> assetIds = new HashSet<String>();
       for (Asset asset : mappedServers) {
-         Map<String, Map<String, Map<String, String>>> formulars = asset.getMetricsformulars();
+         Map<String, String> formulars = asset.getMetricsformulars();
          if(formulars == null || formulars.isEmpty()) {
             continue;
          }
          //{"pduAssetID",{"type_1","pduAssetID"}}
-         Map<String, Map<String, String>> pduFormulars = formulars.get(FlowgateConstant.PDU);
-         if(pduFormulars == null || pduFormulars.isEmpty()) {
+         Map<String, Map<String, String>> pduFormulas = asset.metricsFormulaToMap(formulars.get(FlowgateConstant.PDU), new TypeReference<Map<String, Map<String, String>>>() {});
+         if(pduFormulas == null || pduFormulas.isEmpty()) {
             continue;
          }
-         for(Map.Entry<String, Map<String, String>> pduFormularMap : pduFormulars.entrySet()) {
+         for(Map.Entry<String, Map<String, String>> pduFormularMap : pduFormulas.entrySet()) {
             assetIds.add(pduFormularMap.getKey());
          }
       }

@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricKeyName;
@@ -64,9 +66,9 @@ public class AssetService {
    private AssetRepository assetRepository;
    @Autowired
    private AssetRealtimeDataRepository realtimeDataRepository;
-
    @Autowired
    private StringRedisTemplate redisTemplate;
+   ObjectMapper mapper = new ObjectMapper();
 
    private static Map<String,String> metricNameMap = new HashMap<String,String>();
    static {
@@ -104,20 +106,22 @@ public class AssetService {
 
       Asset pdu = pduAssetOptional.get();
       //sensor metrics data, such as temperature or humidity
-      Map<String, Map<String, Map<String, String>>> formulars = pdu.getMetricsformulars();
-      Map<String, Map<String, String>> sensorFormulars = null;
-      if(formulars != null && !formulars.isEmpty()) {
-         sensorFormulars = formulars.get(FlowgateConstant.SENSOR);
+      Map<String, String> formulars = pdu.getMetricsformulars();
+      String sensorFormulasInfo = formulars.get(FlowgateConstant.SENSOR);
+      Map<String, Map<String, String>> sensorFormulasMap = null;
+      if(sensorFormulasInfo != null) {
+         sensorFormulasMap =
+               pdu.metricsFormulaToMap(sensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
       }
 
-      if(sensorFormulars != null) {
+      if(sensorFormulasMap != null) {
          Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap = new HashMap<String,List<RealTimeData>>();
-         Map<String,String> humidityLocationAndIdMap = sensorFormulars.get(MetricName.PDU_HUMIDITY);
+         Map<String,String> humidityLocationAndIdMap = sensorFormulasMap.get(MetricName.PDU_HUMIDITY);
          if (humidityLocationAndIdMap != null && !humidityLocationAndIdMap.isEmpty()) {
             valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,duration,
                   humidityLocationAndIdMap, MetricName.PDU_HUMIDITY));
          }
-         Map<String,String> temperatureLocationAndIdMap = sensorFormulars.get(MetricName.PDU_TEMPERATURE);
+         Map<String,String> temperatureLocationAndIdMap = sensorFormulasMap.get(MetricName.PDU_TEMPERATURE);
          if(temperatureLocationAndIdMap != null && !temperatureLocationAndIdMap.isEmpty()) {
             valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,duration,
                   temperatureLocationAndIdMap, MetricName.PDU_TEMPERATURE));
@@ -133,7 +137,7 @@ public class AssetService {
       }
       Asset server = serverAssetOptional.get();
       List<MetricData> result = new ArrayList<MetricData>();
-      Map<String, Map<String, Map<String, String>>> metricFormula = server.getMetricsformulars();
+      Map<String, String> metricFormula = server.getMetricsformulars();
       if(metricFormula == null || metricFormula.isEmpty()) {
          return result;
       }
@@ -157,9 +161,10 @@ public class AssetService {
             pduAssetIdAndUsedOutletMap.put(items[3], items[2]);
          }
       }
-
-      Map<String, Map<String, String>> pduMetrics = metricFormula.get(FlowgateConstant.PDU);
-      if(pduMetrics != null && !pduMetrics.isEmpty()) {
+      String pduFormulasInfo = metricFormula.get(FlowgateConstant.PDU);
+      if(pduFormulasInfo != null) {
+         Map<String, Map<String, String>> pduMetrics =
+               server.metricsFormulaToMap(pduFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
          List<String> metricNames = new ArrayList<String>();
          metricNames.add(MetricName.PDU_TOTAL_POWER);
          metricNames.add(MetricName.PDU_TOTAL_CURRENT);
@@ -180,8 +185,10 @@ public class AssetService {
          }
       }
 
-      Map<String, Map<String, String>> sensorFormulars = metricFormula.get(FlowgateConstant.SENSOR);
-      if (sensorFormulars != null) {
+      String sensorFormulasInfo = metricFormula.get(FlowgateConstant.SENSOR);
+      if (sensorFormulasInfo != null) {
+         Map<String, Map<String, String>> sensorFormulars =
+               server.metricsFormulaToMap(sensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
          Map<String, List<RealTimeData>> assetIdAndRealtimeDataMap =
                new HashMap<String, List<RealTimeData>>();
          for (Map.Entry<String, Map<String, String>> sensorFormula : sensorFormulars.entrySet()) {
@@ -196,28 +203,40 @@ public class AssetService {
    }
 
    private List<MetricData> getServerHostMetric(Asset server, long starttime, int duration) {
-      List<MetricData> metricDataList = new ArrayList<>();
-      Map<String, Map<String, String>> hostMetricsFormula = server.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
+      List<MetricData> metricDataList = Lists.newArrayList();
+      String hostMetricsFormulaString = server.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
+      if (StringUtils.isBlank(hostMetricsFormulaString)) {
+         return metricDataList;
+      }
+      Map<String, String> hostMetricsFormula = server.metricsFormulaToMap(hostMetricsFormulaString, new TypeReference<Map<String, String>>() {});
       if (hostMetricsFormula == null || hostMetricsFormula.isEmpty()) {
          return metricDataList;
       }
-      List<RealTimeData> realtimeDatas = realtimeDataRepository.getDataByIDAndTimeRange(server.getId(), starttime, duration);
-      if(realtimeDatas == null || realtimeDatas.isEmpty()) {
-         return metricDataList;
+      Map<String, List<String>> assetIdAndMetricsNameList = Maps.newHashMap();
+      for (Map.Entry<String, String> itemEntry : hostMetricsFormula.entrySet()) {
+         List<String> metricsNameList = assetIdAndMetricsNameList.computeIfAbsent(itemEntry.getValue(), k -> Lists.newArrayList());
+         metricsNameList.add(itemEntry.getKey());
       }
+
+      Map<String, List<RealTimeData>> realtimeDataMap = Maps.newHashMap();
+      for (Map.Entry<String, List<String>> entry : assetIdAndMetricsNameList.entrySet()) {
+         realtimeDataMap.put(entry.getKey(), realtimeDataRepository.getDataByIDAndTimeRange(entry.getKey(), starttime, duration));
+      }
+
       MetricData metricData;
-      for (RealTimeData realtimeData : realtimeDatas) {
-         List<ValueUnit> realtimeDataValues = realtimeData.getValues();
-         if (realtimeDataValues == null || realtimeDataValues.isEmpty()) {
-            continue;
-         }
-         for (ValueUnit valueUnit : realtimeDataValues) {
-            metricData = new MetricData();
-            metricData.setMetricName(valueUnit.getKey());
-            metricData.setTimeStamp(valueUnit.getTime());
-            metricData.setValue(valueUnit.getValue());
-            metricData.setValueNum(valueUnit.getValueNum());
-            metricDataList.add(metricData);
+      for (Map.Entry<String, List<RealTimeData>> realtimeDataEntry : realtimeDataMap.entrySet()) {
+         List<String> metricsNameList = assetIdAndMetricsNameList.get(realtimeDataEntry.getKey());
+         for (RealTimeData realTimeData : realtimeDataEntry.getValue()) {
+            for (ValueUnit valueUnit : realTimeData.getValues()) {
+               if (metricsNameList.contains(valueUnit.getKey())) {
+                  metricData = new MetricData();
+                  metricData.setMetricName(valueUnit.getKey());
+                  metricData.setTimeStamp(valueUnit.getTime());
+                  metricData.setValue(valueUnit.getValue());
+                  metricData.setValueNum(valueUnit.getValueNum());
+                  metricDataList.add(metricData);
+               }
+            }
          }
       }
       return metricDataList;
@@ -650,18 +669,24 @@ public class AssetService {
       if(switchs != null) {
          oldAsset.setSwitches(switchs);
       }
-      Map<String, Map<String, Map<String, String>>> newMetricsformulas =
-            asset.getMetricsformulars();
+      Map<String, String> newMetricsformulas = asset.getMetricsformulars();
       if(newMetricsformulas != null && newMetricsformulas.containsKey(FlowgateConstant.SENSOR)) {
-         Map<String, Map<String, Map<String, String>>> oldMetricsformulas = oldAsset.getMetricsformulars();
-         Map<String, Map<String, String>> oldSensorformulas = null;
+         Map<String, String> oldMetricsformulas = oldAsset.getMetricsformulars();
+         Map<String, Map<String, String>> oldSensorformulasMap = null;
+         String oldSensorFormulasInfo  = null;
          if(oldMetricsformulas.containsKey(FlowgateConstant.SENSOR)) {
-            oldSensorformulas = oldMetricsformulas.get(FlowgateConstant.SENSOR);
+            oldSensorFormulasInfo = oldMetricsformulas.get(FlowgateConstant.SENSOR);
+            oldSensorformulasMap =
+                  asset.metricsFormulaToMap(oldSensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
          }else {
-            oldSensorformulas = new HashMap<String,Map<String, String>>();
+            oldSensorformulasMap = new HashMap<String,Map<String, String>>();
          }
-         generateSensorFormula(oldSensorformulas, newMetricsformulas.get(FlowgateConstant.SENSOR));
-         oldMetricsformulas.put(FlowgateConstant.SENSOR, oldSensorformulas);
+         String newSensorFormulaInfo = newMetricsformulas.get(FlowgateConstant.SENSOR);
+         Map<String, Map<String, String>> newSensorformulasMap =
+               asset.metricsFormulaToMap(newSensorFormulaInfo, new TypeReference<Map<String, Map<String, String>>>() {});
+         generateSensorFormula(oldSensorformulasMap, newSensorformulasMap);
+         oldSensorFormulasInfo = asset.metricsFormulaToString(oldSensorformulasMap);
+         oldMetricsformulas.put(FlowgateConstant.SENSOR, oldSensorFormulasInfo);
          oldAsset.setMetricsformulars(oldMetricsformulas);
       }
       oldAsset.setLastupdate(System.currentTimeMillis());
@@ -703,7 +728,6 @@ public class AssetService {
    }
 
    private String getSensorPositionInfo(Asset asset) {
-      ObjectMapper mapper = new ObjectMapper();
       StringBuilder positionInfo = new StringBuilder();
       Map<String,String> sensorAssetJustfication = asset.getJustificationfields();
       int rackUnitNumber = asset.getCabinetUnitPosition();

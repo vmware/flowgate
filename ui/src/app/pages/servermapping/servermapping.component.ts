@@ -324,7 +324,7 @@ export class ServermappingComponent implements OnInit {
               this.mappedServerAsset= data;
               let sensorformular = this.xah_obj_to_map(this.mappedServerAsset.metricsformulars).get('SENSOR');
               if(sensorformular != null){
-                let sensorMap = this.xah_obj_to_map(sensorformular);
+                let sensorMap = this.xah_obj_to_map(JSON.parse(sensorformular));
                 if(sensorMap.has("FrontTemperature")){
                   let frontTemMap = this.xah_obj_to_map(sensorMap.get("FrontTemperature"));
                   this.fronTemIds = [];
@@ -603,7 +603,7 @@ export class ServermappingComponent implements OnInit {
     let sensorMap:Map<string,{}> = new Map<string,{}>();
     sensorMap.set(metricName,positinoMapjsonObject);
     let sensorMapjsonObject = this.convertToJsonObject(sensorMap);  
-    metricsFormulaMap.set('SENSOR',sensorMapjsonObject);
+    metricsFormulaMap.set('SENSOR',JSON.stringify(sensorMapjsonObject));
     let metricMapjsonObject = this.convertToJsonObject(metricsFormulaMap);   
     return metricMapjsonObject;
   }
