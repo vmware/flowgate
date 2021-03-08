@@ -1663,8 +1663,8 @@ public class PowerIQService implements AsyncService {
       }
       return pudIdAndAssetMap;
    }
-
-   private String generatePduOutletString(List<Outlet> pduOutlets) throws JsonProcessingException {
+   
+   public String generatePduOutletString(List<Outlet> pduOutlets) throws JsonProcessingException {
       List<PduOutlet> outletsSaveToFlowgate = new ArrayList<PduOutlet>();
       for(Outlet outlet : pduOutlets) {
          PduOutlet pduoutlet = new PduOutlet();
@@ -1681,7 +1681,7 @@ public class PowerIQService implements AsyncService {
       return mapper.writeValueAsString(outletsSaveToFlowgate);
    }
 
-   private String generatePduInletString(List<Inlet> pduInlets) throws JsonProcessingException {
+   public String generatePduInletString(List<Inlet> pduInlets) throws JsonProcessingException {
       List<PduInlet> pduInletsSaveToFlowgate = new ArrayList<PduInlet>();
       for(Inlet inlet : pduInlets) {
          PduInlet pduInlet = new PduInlet();
