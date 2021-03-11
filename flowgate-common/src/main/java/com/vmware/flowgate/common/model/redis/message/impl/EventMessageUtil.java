@@ -90,6 +90,7 @@ public class EventMessageUtil {
    public static final String OpenManage_SyncData= "openmanage.syncdata";
    public static final String OpenManage_SyncRealtimeData="openmanage.syncrealtimedata";
    public static final String OpenManage_SyncAssetsMetaData="openmanage.syncassetsmetadata";
+   public static final String OpenManage_EXECOUNT = "openmanage.execount";
 
    public static String EXPIREDTIMERANGE = "EXPIREDTIMERANGE";
    public static String CUSTOMER_ADAPTER_EXECOUNT = "customerAdapter.execount";

@@ -4,6 +4,7 @@
 */
 package com.vmware.flowgate.aggregator;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -42,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.aggregator.config.ServiceKeyConfig;
 import com.vmware.flowgate.aggregator.scheduler.job.AggregatorService;
 import com.vmware.flowgate.aggregator.scheduler.job.CustomerAdapterJobDispatcher;
+import com.vmware.flowgate.aggregator.scheduler.job.OpenmanageJobDispatcher;
 import com.vmware.flowgate.aggregator.scheduler.job.VCenterJobDispatcher;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
@@ -85,6 +87,9 @@ public class MessageProcessingTest {
 
    @MockBean
    private ServiceKeyConfig serviceKeyConfig;
+
+   @SpyBean
+   private OpenmanageJobDispatcher openmanageJob;
 
    @Test
    public void testMessage() {
@@ -439,6 +444,54 @@ public class MessageProcessingTest {
       when(listOp.leftPushAll("", lists)).thenReturn(1L);
 
       vcenterJobDispatcher.execute(null);
+   }
+
+   @Test
+   public void testOpenManageJobExecute() throws JobExecutionException, JsonProcessingException {
+      ListOperations<String, String> listOp = Mockito.mock(ListOperations.class);
+      ValueOperations<String, String> valueOp = Mockito.mock(ValueOperations.class);
+      FacilitySoftwareConfig[] integrations = new FacilitySoftwareConfig[2];
+      integrations[0] = Mockito.mock(FacilitySoftwareConfig.class);
+      integrations[1] = Mockito.mock(FacilitySoftwareConfig.class);
+      ResponseEntity<FacilitySoftwareConfig[]> resp = Mockito.mock(ResponseEntity.class);
+      List<String> lists = new ArrayList<>();
+
+      when(template.opsForValue()).thenReturn(valueOp);
+      when(valueOp.get(anyString())).thenReturn("2880");
+      when(serviceKeyConfig.getServiceKey()).thenReturn("");
+      doNothing().when(valueOp).set(anyString(), anyString());
+      when(restClient.getFacilitySoftwareInternalByType(any(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.class))).thenReturn(resp);
+      when(resp.getBody()).thenReturn(integrations);
+      when(integrations[0].checkIsActive()).thenReturn(true);
+      when(integrations[1].checkIsActive()).thenReturn(true);
+      when(template.opsForList()).thenReturn(listOp);
+      when(listOp.leftPushAll("", lists)).thenReturn(1L);
+
+      openmanageJob.execute(null);
+   }
+
+   @Test
+   public void testOpenManageJobExecute1() throws JobExecutionException, JsonProcessingException {
+      ListOperations<String, String> listOp = Mockito.mock(ListOperations.class);
+      ValueOperations<String, String> valueOp = Mockito.mock(ValueOperations.class);
+      FacilitySoftwareConfig[] integrations = new FacilitySoftwareConfig[2];
+      integrations[0] = Mockito.mock(FacilitySoftwareConfig.class);
+      integrations[1] = Mockito.mock(FacilitySoftwareConfig.class);
+      ResponseEntity<FacilitySoftwareConfig[]> resp = Mockito.mock(ResponseEntity.class);
+      List<String> lists = new ArrayList<>();
+
+      when(template.opsForValue()).thenReturn(valueOp);
+      when(valueOp.get(anyString())).thenReturn(null);
+      when(serviceKeyConfig.getServiceKey()).thenReturn("");
+      doNothing().when(valueOp).set(anyString(), anyString());
+      when(restClient.getFacilitySoftwareInternalByType(any(com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType.class))).thenReturn(resp);
+      when(resp.getBody()).thenReturn(integrations);
+      when(integrations[0].checkIsActive()).thenReturn(true);
+      when(integrations[1].checkIsActive()).thenReturn(true);
+      when(template.opsForList()).thenReturn(listOp);
+      when(listOp.leftPushAll("", lists)).thenReturn(1L);
+
+      openmanageJob.execute(null);
    }
 
    FacilitySoftwareConfig createFacilitySoftware() {
