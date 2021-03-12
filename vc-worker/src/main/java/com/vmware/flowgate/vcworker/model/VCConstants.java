@@ -67,7 +67,8 @@ public class VCConstants {
    public static final String HOST_MEMORY_GROUP = "mem";
    public static final String HOST_DISK_GROUP = "disk";
    public static final String HOST_NETWORK_GROUP = "net";
-   
+   public static final String HOST_POWER_GROUP = "power";
+
    public static final String HOST_METRIC_USAGE= "usage";
    public static final String HOST_METRIC_USAGEMHZ= "usagemhz";
    public static final String HOST_METRIC_PERCENTAGE = "Percentage";
@@ -76,5 +77,7 @@ public class VCConstants {
    public static final String HOST_METRIC_MEM_CONSUMED = "consumed";
    public static final String HOST_METRIC_MEM_SWAP = "swapused";
    public static final String HOST_METRIC_MEM_BALLON = "vmmemctl";
+   public static final String HOST_METRIC_POWER_POWER = "power";
+   public static final String HOST_METRIC_POWER_ENERGY = "energy";
 
 }

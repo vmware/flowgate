@@ -66,7 +66,8 @@ public class ValueUnit {
        MV("VOLTAGE",0.001), V("VOLTAGE",1), KV("VOLTAGE",1000), VOLTS("VOLTAGE",1),
        MW("POWER",0.001), W("POWER",1), KW("POWER",1000), KWH("ENERGY",1000),
        MA("CURRRNT",0.001), A("CURRENT",1), KA("CURRENT",1000), AMPS("CURRENT",1),
-       C("TEMPRETURE",1), F("TEMPRETURE",1), PERCENT("PERCENT",1), BTUPerHr("POWER",0.293071);
+       C("TEMPRETURE",1), F("TEMPRETURE",1), PERCENT("PERCENT",1), BTUPerHr("POWER",0.293071),
+       KB("STORAGE",1), Mhz("FREQUENCY", 1), KBps("RATE", 1);
 
        private final String group;
        private final double factor;
@@ -83,28 +84,36 @@ public class ValueUnit {
       }
    }
 
-   public String translateUnit(String val, MetricUnit sourceUnit, MetricUnit targetUnit) throws WormholeException  {
-       if(sourceUnit == null || targetUnit == null) {
-           throw new WormholeException("sourceUnit or targetUnit is NULL!");
-       }
-       if(sourceUnit.getGroup() != targetUnit.getGroup()) {
-          throw new WormholeException("error, sourceUnit and targetUnit is not a same group!");
+   public double translateUnit(double val, MetricUnit sourceUnit, MetricUnit targetUnit) throws WormholeException {
+      if(sourceUnit == null || targetUnit == null) {
+         throw new WormholeException("sourceUnit or targetUnit is NULL!");
       }
-       switch(sourceUnit) {
-       case F:
-             if(targetUnit == MetricUnit.C) {
-               return String.valueOf((Double.parseDouble(val) - 32)*5/9);
-             }else if(targetUnit == MetricUnit.F) {
-                 return val;
-             }
-       case C:
-             if(targetUnit == MetricUnit.C) {
-                 return val;
-             }else if(targetUnit == MetricUnit.F) {
-                 return String.valueOf((Double.parseDouble(val)*9/5 +32));
-             }
-       default:
-          return String.valueOf((Double.parseDouble(val) * sourceUnit.getFactor())/targetUnit.getFactor());
-       }
+      if(!sourceUnit.getGroup().equals(targetUnit.getGroup())) {
+         throw new WormholeException("error, sourceUnit and targetUnit is not a same group!");
+      }
+      switch(sourceUnit) {
+         case F:
+            if(targetUnit == MetricUnit.C) {
+               return (val - 32) * 5 / 9;
+            }else if(targetUnit == MetricUnit.F) {
+               return val;
+            }
+         case C:
+            if(targetUnit == MetricUnit.C) {
+               return val;
+            }else if(targetUnit == MetricUnit.F) {
+               return val * 9 / 5 + 32;
+            }
+         default:
+            return (val * sourceUnit.getFactor()) / targetUnit.getFactor();
+      }
    }
+
+   public String translateUnit(String val, MetricUnit sourceUnit, MetricUnit targetUnit) throws WormholeException {
+      if (val == null || val.isEmpty()) {
+         throw new WormholeException("value is NULL!");
+      }
+      return String.valueOf(translateUnit(Double.parseDouble(val), sourceUnit, targetUnit));
+   }
+
 }

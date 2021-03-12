@@ -37,7 +37,6 @@ import com.vmware.cis.tagging.TagModel;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricName;
-import com.vmware.flowgate.common.RealtimeDataUnit;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.IntegrationStatus;
@@ -107,6 +106,8 @@ public class VCDataService implements AsyncService {
    private ServiceKeyConfig serviceKeyConfig;
 
    private ObjectMapper mapper = new ObjectMapper();
+
+   private static final double JOULETOKWHRATE = 2.7777777777777776E-7;
 
    @Override
    @Async("asyncServiceExecutor")
@@ -388,7 +389,10 @@ public class VCDataService implements AsyncService {
 
       String assetId = asset.getId();
       Map<String, String> metricsFormulas = asset.getMetricsformulars();
-      Map<String, String> metrics = asset.metricsFormulaToMap(metricsFormulas.get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
+      Map<String, String> metrics = null;
+      if (StringUtils.isNotBlank(metricsFormulas.get(FlowgateConstant.HOST_METRICS))) {
+         metrics = asset.metricsFormulaToMap(metricsFormulas.get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
+      }
       if (metrics == null || metrics.isEmpty()) {
          metrics = new HashMap<>();
          // cpu
@@ -407,8 +411,14 @@ public class VCDataService implements AsyncService {
          metrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, assetId);
          metrics.put(MetricName.SERVER_STORAGEUSAGE, assetId);
          metrics.put(MetricName.SERVER_STORAGEUSED, assetId);
-         metricsFormulas.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(metrics));
 
+         // power
+         metrics.put(MetricName.SERVER_POWER, assetId);
+         metrics.put(MetricName.SERVER_MINIMUM_USED_POWER, assetId);
+         metrics.put(MetricName.SERVER_PEAK_USED_POWER, assetId);
+         metrics.put(MetricName.SERVER_AVERAGE_USED_POWER, assetId);
+         metrics.put(MetricName.SERVER_ENERGY_CONSUMPTION, assetId);
+         metricsFormulas.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(metrics));
          restClient.saveAssets(asset);
       }
    }
@@ -429,7 +439,7 @@ public class VCDataService implements AsyncService {
                switch(nameKey) {
                   case VCConstants.HOST_METRIC_USAGE:
                   case VCConstants.HOST_METRIC_USAGEMHZ:
-                     counters.put(new Integer(counterId), groupKey.concat(nameKey));
+                     counters.put(counterId, groupKey.concat(nameKey));
                      break;
                }
                break;
@@ -441,24 +451,31 @@ public class VCDataService implements AsyncService {
                   case VCConstants.HOST_METRIC_MEM_CONSUMED:
                   case VCConstants.HOST_METRIC_MEM_SWAP:
                   case VCConstants.HOST_METRIC_MEM_BALLON:
-                     counters.put(new Integer(counterId), groupKey.concat(nameKey));
+                     counters.put(counterId, groupKey.concat(nameKey));
                      break;
                }
                break;
             case VCConstants.HOST_DISK_GROUP:
                switch(nameKey) {
                   case VCConstants.HOST_METRIC_USAGE:
-                     counters.put(new Integer(counterId), groupKey.concat(nameKey));
+                     counters.put(counterId, groupKey.concat(nameKey));
                      break;
                }
                break;
             case VCConstants.HOST_NETWORK_GROUP:
                switch(nameKey) {
                   case VCConstants.HOST_METRIC_USAGE:
-                     counters.put(new Integer(counterId), groupKey.concat(nameKey));
+                     counters.put(counterId, groupKey.concat(nameKey));
                      break;
                }
                break;
+            case VCConstants.HOST_POWER_GROUP:
+               switch(nameKey) {
+                  case VCConstants.HOST_METRIC_POWER_POWER:
+                  case VCConstants.HOST_METRIC_POWER_ENERGY:
+                     counters.put(counterId, groupKey.concat(nameKey));
+                     break;
+               }
             default:
                break;
          }
@@ -523,6 +540,7 @@ public class VCDataService implements AsyncService {
          logger.error("Asset: {} failed to get performance metricBase", assetId);
          return;
       }
+      List<ValueUnit> powerValueUnits = new ArrayList<>(15);
       for(EntityMetricBase entityMetricBase : metricBase) {
          /*
          (vim.EntityMetric) {
@@ -605,52 +623,63 @@ public class VCDataService implements AsyncService {
                      case VCConstants.HOST_CPU_GROUP + VCConstants.HOST_METRIC_USAGE:
                         valueUnit.setKey(MetricName.SERVER_CPUUSAGE);
                         valueUnit.setValueNum(value / 100.0);
-                        valueUnit.setUnit(RealtimeDataUnit.Percent.toString());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.PERCENT.name());
                         break;
                      case VCConstants.HOST_CPU_GROUP + VCConstants.HOST_METRIC_USAGEMHZ:
                         valueUnit.setKey(MetricName.SERVER_CPUUSEDINMHZ);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(RealtimeDataUnit.Mhz.toString());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.Mhz.name());
                         break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_USAGE:
                         valueUnit.setKey(MetricName.SERVER_MEMORYUSAGE);
                         valueUnit.setValueNum(value / 100.0);
-                        valueUnit.setUnit(RealtimeDataUnit.Percent.toString());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.PERCENT.name());
                         break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_ACTIVE:
                         valueUnit.setKey(MetricName.SERVER_ACTIVEMEMORY);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.KB.name());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_SHARED:
                         valueUnit.setKey(MetricName.SERVER_SHAREDMEMORY);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.KB.name());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_CONSUMED:
                         valueUnit.setKey(MetricName.SERVER_CONSUMEDMEMORY);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.KB.name());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_SWAP:
                         valueUnit.setKey(MetricName.SERVER_SWAPMEMORY);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.KB.name());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_BALLON:
                         valueUnit.setKey(MetricName.SERVER_BALLOONMEMORY);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(RealtimeDataUnit.KB.toString());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.KB.name());
                      break;
                      case VCConstants.HOST_DISK_GROUP + VCConstants.HOST_METRIC_USAGE:
                         valueUnit.setKey(MetricName.SERVER_STORAGEIORATEUSAGE);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(RealtimeDataUnit.KBps.toString());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.KBps.name());
                      break;
                      case VCConstants.HOST_NETWORK_GROUP + VCConstants.HOST_METRIC_USAGE:
                         valueUnit.setKey(MetricName.SERVER_NETWORKUTILIZATION);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(RealtimeDataUnit.KBps.toString());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.KBps.name());
+                     break;
+                     case VCConstants.HOST_POWER_GROUP + VCConstants.HOST_METRIC_POWER_POWER:
+                        valueUnit.setKey(MetricName.SERVER_POWER);
+                        valueUnit.setValueNum(valueUnit.translateUnit(value, ValueUnit.MetricUnit.W, ValueUnit.MetricUnit.KW));
+                        valueUnit.setUnit(ValueUnit.MetricUnit.KW.name());
+                        powerValueUnits.add(valueUnit);
+                     break;
+                     case VCConstants.HOST_POWER_GROUP + VCConstants.HOST_METRIC_POWER_ENERGY:
+                        valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
+                        valueUnit.setValueNum(value * JOULETOKWHRATE);
+                        valueUnit.setUnit(ValueUnit.MetricUnit.KWH.name());
                      break;
                   }
                   valueUnit.setTime(timeStamp);
@@ -664,6 +693,7 @@ public class VCDataService implements AsyncService {
          logger.error("ValueUnits of asset: {} is empty.", assetId);
          return;
       }
+      valueUnits.addAll(getMinMaxAvgValueUnit(powerValueUnits));
       realTimeData.setValues(valueUnits);
       realTimeData.setTime(valueUnits.get(0).getTime());
       realTimeDatas.add(realTimeData);
@@ -671,6 +701,67 @@ public class VCDataService implements AsyncService {
       restClient.saveRealTimeData(realTimeDatas);
    }
 
+   public List<ValueUnit> getMinMaxAvgValueUnit (List<ValueUnit> valueUnits) {
+      List<ValueUnit> statisticsValueUnit = new ArrayList<>(3);
+      if (valueUnits == null || valueUnits.isEmpty()) {
+         return statisticsValueUnit;
+      }
+      ValueUnit firstValueUnit = valueUnits.get(0);
+
+      ValueUnit minValueUnit = new ValueUnit();
+      minValueUnit.setUnit(firstValueUnit.getUnit());
+      minValueUnit.setValueNum(firstValueUnit.getValueNum());
+      minValueUnit.setTime(firstValueUnit.getTime());
+
+      ValueUnit maxValueUnit = new ValueUnit();
+      maxValueUnit.setUnit(firstValueUnit.getUnit());
+      maxValueUnit.setValueNum(firstValueUnit.getValueNum());
+      maxValueUnit.setTime(firstValueUnit.getTime());
+
+      ValueUnit averageValueUnit = new ValueUnit();
+      averageValueUnit.setUnit(firstValueUnit.getUnit());
+
+      if (MetricName.SERVER_POWER.equals(firstValueUnit.getKey())) {
+         minValueUnit.setKey(MetricName.SERVER_MINIMUM_USED_POWER);
+         maxValueUnit.setKey(MetricName.SERVER_PEAK_USED_POWER);
+         averageValueUnit.setKey(MetricName.SERVER_AVERAGE_USED_POWER);
+      } else {
+         return statisticsValueUnit;
+      }
+      double sum = 0.0d;
+      long startTime = Long.MAX_VALUE;
+      long endTime = Long.MIN_VALUE;
+      for (ValueUnit value : valueUnits) {
+         double valueNum = value.getValueNum();
+         long time = value.getTime();
+         sum += valueNum;
+         if (valueNum < minValueUnit.getValueNum()) {
+            minValueUnit.setValueNum(valueNum);
+            minValueUnit.setTime(time);
+         }
+         if (valueNum > maxValueUnit.getValueNum()) {
+            maxValueUnit.setValueNum(valueNum);
+            maxValueUnit.setTime(time);
+         }
+         startTime = Math.min(time, startTime);
+         endTime = Math.max(time, endTime);
+      }
+      // Record the since time and peak power time, for example  1612417403074_FIELDSPLIT_1612415606985
+      minValueUnit.setExtraidentifier(startTime + FlowgateConstant.SEPARATOR + minValueUnit.getTime());
+      minValueUnit.setTime(endTime);
+
+      maxValueUnit.setExtraidentifier(startTime + FlowgateConstant.SEPARATOR + maxValueUnit.getTime());
+      maxValueUnit.setTime(endTime);
+
+      averageValueUnit.setValueNum(sum / (double)valueUnits.size());
+      averageValueUnit.setExtraidentifier(String.valueOf(startTime));
+      averageValueUnit.setTime(endTime);
+
+      statisticsValueUnit.add(minValueUnit);
+      statisticsValueUnit.add(maxValueUnit);
+      statisticsValueUnit.add(averageValueUnit);
+      return statisticsValueUnit;
+   }
 
    public boolean feedClusterMetaData(Map<String, ClusterComputeResource> clusterMap,
          HostSystem host, HostInfo hostInfo, String vcInstanceUUID) {
@@ -1204,7 +1295,7 @@ public class VCDataService implements AsyncService {
       for (ServerMapping validServer : validMapping) {
          HostSystem host = hostDictionary.get(validServer.getVcMobID());
          Asset asset = assetDictionary.get(validServer.getAsset());
-         Map<String, String> hostMetricsMap = asset.metricsFormulaToMap(asset.getMetricsformulars().get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
+         String hostMetricsMap = asset.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
          if (hostMetricsMap == null || hostMetricsMap.isEmpty()) {
             feedAssetMetricsFormulars(asset);
          }
