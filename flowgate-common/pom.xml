@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vmware.flowgate</groupId>
 	<artifactId>flowgate-common</artifactId>
-	<version>1.1.2</version>
+	<version>${flowgate.version}</version>
 	<name>flowgate common data model</name>
 	<description>flowgate common data model</description>
 	<properties>
@@ -12,6 +12,7 @@
 		<java.version>1.8</java.version>
 		<jackson.version>2.10.0</jackson.version>
 		<couchbase.version>2.2.8</couchbase.version>
+		<flowgate.version>1.2.0</flowgate.version>
 	</properties>
 	<dependencies>
 		<dependency>
