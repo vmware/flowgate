@@ -16,6 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.flowgate.common.MetricName;
+import com.vmware.flowgate.common.RealtimeDataUnit;
+import com.vmware.flowgate.common.model.ValueUnit;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -692,4 +695,116 @@ public class VCDataServiceTest {
       when(client.createStub(PerformanceManager.class, mor)).thenReturn(performanceManager);
       vsphereClient.getPerformanceManager();
    }
+
+   @Test
+   public void testGetStatisticsValueUnit() {
+      List<ValueUnit> valueUnits = new ArrayList<>(15);
+      ValueUnit valueUnit1 = new ValueUnit();
+      valueUnit1.setKey(MetricName.SERVER_POWER);
+      valueUnit1.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit1.setTime(1615563920000L);
+      valueUnit1.setValueNum(0.069);
+      ValueUnit valueUnit2 = new ValueUnit();
+      valueUnit2.setKey(MetricName.SERVER_POWER);
+      valueUnit2.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit2.setTime(1615563940000L);
+      valueUnit2.setValueNum(0.068);
+      ValueUnit valueUnit3 = new ValueUnit();
+      valueUnit3.setKey(MetricName.SERVER_POWER);
+      valueUnit3.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit3.setTime(1615563960000L);
+      valueUnit3.setValueNum(0.070);
+      ValueUnit valueUnit4 = new ValueUnit();
+      valueUnit4.setKey(MetricName.SERVER_POWER);
+      valueUnit4.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit4.setTime(1615563980000L);
+      valueUnit4.setValueNum(0.071);
+      ValueUnit valueUnit5 = new ValueUnit();
+      valueUnit5.setKey(MetricName.SERVER_POWER);
+      valueUnit5.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit5.setTime(1615564000000L);
+      valueUnit5.setValueNum(0.074);
+      ValueUnit valueUnit6 = new ValueUnit();
+      valueUnit6.setKey(MetricName.SERVER_POWER);
+      valueUnit6.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit6.setTime(1615564020000L);
+      valueUnit6.setValueNum(0.069);
+      ValueUnit valueUnit7 = new ValueUnit();
+      valueUnit7.setKey(MetricName.SERVER_POWER);
+      valueUnit7.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit7.setTime(1615564040000L);
+      valueUnit7.setValueNum(0.069);
+      ValueUnit valueUnit8 = new ValueUnit();
+      valueUnit8.setKey(MetricName.SERVER_POWER);
+      valueUnit8.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit8.setTime(1615564060000L);
+      valueUnit8.setValueNum(0.075);
+      ValueUnit valueUnit9 = new ValueUnit();
+      valueUnit9.setKey(MetricName.SERVER_POWER);
+      valueUnit9.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit9.setTime(1615564080000L);
+      valueUnit9.setValueNum(0.069);
+      ValueUnit valueUnit10 = new ValueUnit();
+      valueUnit10.setKey(MetricName.SERVER_POWER);
+      valueUnit10.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit10.setTime(1615564100000L);
+      valueUnit10.setValueNum(0.069);
+      ValueUnit valueUnit11 = new ValueUnit();
+      valueUnit11.setKey(MetricName.SERVER_POWER);
+      valueUnit11.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit11.setTime(1615564120000L);
+      valueUnit11.setValueNum(0.070);
+      ValueUnit valueUnit12 = new ValueUnit();
+      valueUnit12.setKey(MetricName.SERVER_POWER);
+      valueUnit12.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit12.setTime(1615564140000L);
+      valueUnit12.setValueNum(0.069);
+      ValueUnit valueUnit13 = new ValueUnit();
+      valueUnit13.setKey(MetricName.SERVER_POWER);
+      valueUnit13.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit13.setTime(1615564160000L);
+      valueUnit13.setValueNum(0.069);
+      ValueUnit valueUnit14 = new ValueUnit();
+      valueUnit14.setKey(MetricName.SERVER_POWER);
+      valueUnit14.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit14.setTime(1615564180000L);
+      valueUnit14.setValueNum(0.069);
+      ValueUnit valueUnit15 = new ValueUnit();
+      valueUnit15.setKey(MetricName.SERVER_POWER);
+      valueUnit15.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit15.setTime(1615564200000L);
+      valueUnit15.setValueNum(0.065);
+      valueUnits.add(valueUnit1);
+      valueUnits.add(valueUnit2);
+      valueUnits.add(valueUnit3);
+      valueUnits.add(valueUnit4);
+      valueUnits.add(valueUnit5);
+      valueUnits.add(valueUnit6);
+      valueUnits.add(valueUnit7);
+      valueUnits.add(valueUnit8);
+      valueUnits.add(valueUnit9);
+      valueUnits.add(valueUnit10);
+      valueUnits.add(valueUnit11);
+      valueUnits.add(valueUnit12);
+      valueUnits.add(valueUnit13);
+      valueUnits.add(valueUnit14);
+      valueUnits.add(valueUnit15);
+      List<ValueUnit> statisticsValueUnit = service.getMinMaxAvgValueUnit(valueUnits);
+      for (ValueUnit valueUnit : statisticsValueUnit) {
+         if (MetricName.SERVER_PEAK_USED_POWER.equals(valueUnit.getKey())) {
+            TestCase.assertEquals(0.075, valueUnit.getValueNum());
+            TestCase.assertEquals(1615564200000L, valueUnit.getTime());
+            TestCase.assertEquals("1615563920000_FIELDSPLIT_1615564060000", valueUnit.getExtraidentifier());
+         } else if (MetricName.SERVER_MINIMUM_USED_POWER.equals(valueUnit.getKey())) {
+            TestCase.assertEquals(0.065, valueUnit.getValueNum());
+            TestCase.assertEquals(1615564200000L, valueUnit.getTime());
+            TestCase.assertEquals("1615563920000_FIELDSPLIT_1615564200000", valueUnit.getExtraidentifier());
+         } else if (MetricName.SERVER_AVERAGE_USED_POWER.equals(valueUnit.getKey())) {
+            TestCase.assertEquals(0.06966666666666667, valueUnit.getValueNum());
+            TestCase.assertEquals(1615564200000L, valueUnit.getTime());
+            TestCase.assertEquals("1615563920000", valueUnit.getExtraidentifier());
+         }
+      }
+   }
+
 }
