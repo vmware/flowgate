@@ -8,6 +8,7 @@ public class MetricData {
    private String metricName;
    private double valueNum;
    private String value;
+   private String unit;
    private long timeStamp;
 
    public String getMetricName() {
@@ -41,4 +42,13 @@ public class MetricData {
    public void setTimeStamp(long timeStamp) {
       this.timeStamp = timeStamp;
    }
+
+   public String getUnit() {
+      return unit;
+   }
+
+   public void setUnit(String unit) {
+      this.unit = unit;
+   }
+
 }

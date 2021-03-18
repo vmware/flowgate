@@ -39,11 +39,13 @@ import com.vmware.flowgate.common.AssetCategory;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
+import com.vmware.flowgate.common.RealtimeDataUnit;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.AssetIPMapping;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.ValueUnit;
+import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
 import com.vmware.flowgate.common.utils.IPAddressUtil;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.AssetIPMappingRepository;
@@ -59,6 +61,29 @@ public class AssetService {
    private static final int SERVER_ASSET_NAME_TIME_OUT = 7200;
    private static final int LIMIT_RESULT = 100;
    private static final String UnknownOulet = "unknownoutlet";
+   private static final int timestampArrayLength = 2;//The extraInfo of peakPower and minimumPower metric include since time and event time.
+   private static Map<String, String> databaseUnitAndOutputUnitMap = null;
+   static {
+      databaseUnitAndOutputUnitMap = new HashMap<String, String>();
+      databaseUnitAndOutputUnitMap.put(RealtimeDataUnit.Amps.toString(), MetricUnit.A.toString());
+      databaseUnitAndOutputUnitMap.put(RealtimeDataUnit.Volts.toString(), MetricUnit.V.toString());
+      databaseUnitAndOutputUnitMap.put(RealtimeDataUnit.Celsius.toString(), MetricUnit.C.toString());
+      databaseUnitAndOutputUnitMap.put(RealtimeDataUnit.Fahrenheit.toString(), MetricUnit.F.toString());
+      databaseUnitAndOutputUnitMap.put(RealtimeDataUnit.KW.toString(), MetricUnit.KW.toString());
+      databaseUnitAndOutputUnitMap.put(RealtimeDataUnit.Percent.toString(), MetricUnit.PERCENT.toString());
+      databaseUnitAndOutputUnitMap.put(RealtimeDataUnit.KBps.toString(), MetricUnit.KBps.toString());
+      databaseUnitAndOutputUnitMap.put(RealtimeDataUnit.Mhz.toString(), MetricUnit.Mhz.toString());
+      databaseUnitAndOutputUnitMap.put(RealtimeDataUnit.KB.toString(), MetricUnit.KB.toString());
+      databaseUnitAndOutputUnitMap.put(MetricUnit.A.toString(), MetricUnit.A.toString());
+      databaseUnitAndOutputUnitMap.put(MetricUnit.AMPS.toString(), MetricUnit.A.toString());
+      databaseUnitAndOutputUnitMap.put(MetricUnit.V.toString(), MetricUnit.V.toString());
+      databaseUnitAndOutputUnitMap.put(MetricUnit.C.toString(), MetricUnit.C.toString());
+      databaseUnitAndOutputUnitMap.put(MetricUnit.F.toString(), MetricUnit.F.toString());
+      databaseUnitAndOutputUnitMap.put(MetricUnit.KW.toString(), MetricUnit.KW.toString());
+      databaseUnitAndOutputUnitMap.put(MetricUnit.PERCENT.toString(), MetricUnit.PERCENT.toString());
+      databaseUnitAndOutputUnitMap.put(MetricUnit.KWH.toString(), MetricUnit.KWH.toString());
+      databaseUnitAndOutputUnitMap = Collections.unmodifiableMap(databaseUnitAndOutputUnitMap);
+   }
 
    @Autowired
    private AssetIPMappingRepository assetIPMappingRepository;
@@ -222,7 +247,11 @@ public class AssetService {
       for (Map.Entry<String, List<String>> entry : assetIdAndMetricsNameList.entrySet()) {
          realtimeDataMap.put(entry.getKey(), realtimeDataRepository.getDataByIDAndTimeRange(entry.getKey(), starttime, duration));
       }
-
+      Set<String> specialMetricNames = new HashSet<String>();
+      specialMetricNames.add(MetricName.SERVER_AVERAGE_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_PEAK_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_MINIMUM_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_ENERGY_CONSUMPTION);
       MetricData metricData;
       for (Map.Entry<String, List<RealTimeData>> realtimeDataEntry : realtimeDataMap.entrySet()) {
          List<String> metricsNameList = assetIdAndMetricsNameList.get(realtimeDataEntry.getKey());
@@ -230,10 +259,50 @@ public class AssetService {
             for (ValueUnit valueUnit : realTimeData.getValues()) {
                if (metricsNameList.contains(valueUnit.getKey())) {
                   metricData = new MetricData();
+                  long timestamp = 0l;
+                  String metricName = valueUnit.getKey();
+                  String extraInfo = valueUnit.getExtraidentifier();
+                  if(extraInfo == null && specialMetricNames.contains(metricName)) {
+                     logger.error("The value of {} is invalid", metricName);
+                     continue;
+                  }
+                  switch (metricName) {
+                  case MetricName.SERVER_AVERAGE_USED_POWER:
+                     //Time of AvgPower is since time
+                     timestamp = Long.valueOf(extraInfo);
+                     break;
+                  case MetricName.SERVER_PEAK_USED_POWER:
+                     String[] sinceTimeAndPeakTime = extraInfo.split(FlowgateConstant.SEPARATOR);
+                     if(sinceTimeAndPeakTime.length < timestampArrayLength) {
+                        logger.error("The value of {} is invalid", metricName);
+                        continue;
+                     }
+                     //Time of PeakPower is peakPower time
+                     timestamp = Long.valueOf(sinceTimeAndPeakTime[1]);
+                     break;
+                  case MetricName.SERVER_MINIMUM_USED_POWER:
+                     String[] sinceTimeAndMinimumTime = extraInfo.split(FlowgateConstant.SEPARATOR);
+                     if(sinceTimeAndMinimumTime.length < timestampArrayLength) {
+                        logger.error("The value of {} is invalid", metricName);
+                        continue;
+                     }
+                     //Time of MinimumPower is minimumPower time
+                     timestamp = Long.valueOf(sinceTimeAndMinimumTime[1]);
+                     break;
+                  case MetricName.SERVER_ENERGY_CONSUMPTION:
+                     //Time of energy consumption is since time
+                     timestamp = Long.valueOf(extraInfo);
+                     break;
+                  default:
+                     //Time of other host metric is valueUnit current time
+                     timestamp = valueUnit.getTime();
+                     break;
+                  }
                   metricData.setMetricName(valueUnit.getKey());
-                  metricData.setTimeStamp(valueUnit.getTime());
+                  metricData.setTimeStamp(timestamp);
                   metricData.setValue(valueUnit.getValue());
                   metricData.setValueNum(valueUnit.getValueNum());
+                  metricData.setUnit(databaseUnitAndOutputUnitMap.get(valueUnit.getUnit()));
                   metricDataList.add(metricData);
                }
             }
@@ -374,10 +443,12 @@ public class AssetService {
       List<MetricData> result = new ArrayList<MetricData>();
       Double serverVoltage = null;
       long serverVoltageReadTime = 0;
+
       for(ValueUnit value : valueUnits) {
          MetricData data = new MetricData();
          data.setTimeStamp(value.getTime());
          data.setValueNum(value.getValueNum());
+         data.setUnit(databaseUnitAndOutputUnitMap.get(value.getUnit()));
          switch (value.getKey()) {
          case MetricName.PDU_TOTAL_POWER:
             data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, pduAssetId));
@@ -431,6 +502,7 @@ public class AssetService {
          data.setMetricName(MetricName.SERVER_VOLTAGE);
          data.setTimeStamp(serverVoltageReadTime);
          data.setValueNum(serverVoltage);
+         data.setUnit(databaseUnitAndOutputUnitMap.get(MetricUnit.V.toString()));
          result.add(data);
       }
       return result;
@@ -445,6 +517,7 @@ public class AssetService {
          MetricData data = new MetricData();
          data.setTimeStamp(value.getTime());
          data.setValueNum(value.getValueNum());
+         data.setUnit(databaseUnitAndOutputUnitMap.get(value.getUnit()));
          switch (value.getKey()) {
          case MetricName.HUMIDITY:
             switch (metricName) {
@@ -493,6 +566,7 @@ public class AssetService {
          data.setValueNum(value.getValueNum());
          data.setValue(value.getValue());
          data.setMetricName(value.getKey());
+         data.setUnit(databaseUnitAndOutputUnitMap.get(value.getUnit()));
          result.add(data);
       }
       return result;
@@ -564,6 +638,7 @@ public class AssetService {
          metricData.setTimeStamp(valueunit.getTime());
          metricData.setValue(valueunit.getValue());
          metricData.setValueNum(valueunit.getValueNum());
+         metricData.setUnit(databaseUnitAndOutputUnitMap.get(valueunit.getUnit()));
          String extraidentifier = valueunit.getExtraidentifier();
 
          switch (valueunit.getKey()) {
