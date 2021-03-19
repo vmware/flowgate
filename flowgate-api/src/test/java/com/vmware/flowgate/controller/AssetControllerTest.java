@@ -2585,6 +2585,85 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void testGetHostSpecialMetricsExample() throws Exception {
+
+      Asset asset = createAsset();
+      List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
+      Long time = System.currentTimeMillis();
+
+      List<ValueUnit> valueUnits = new ArrayList<ValueUnit>();
+      ValueUnit valueUnit = new ValueUnit();
+
+      String sinceTime = String.valueOf(time - 900000l);
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR);
+      valueUnit.setKey(MetricName.SERVER_MINIMUM_USED_POWER);
+      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setValueNum(0.5);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR);
+      valueUnit.setKey(MetricName.SERVER_PEAK_USED_POWER);
+      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setValueNum(0.8);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setKey(MetricName.SERVER_AVERAGE_USED_POWER);
+      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setValueNum(0.6);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime);
+      valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
+      valueUnit.setUnit(MetricUnit.KWH.toString());
+      valueUnit.setValueNum(356);
+      valueUnits.add(valueUnit);
+
+      RealTimeData hostRealTimeData = new RealTimeData();
+      hostRealTimeData.setValues(valueUnits);
+      hostRealTimeData.setTime(time);
+      hostRealTimeData.setId("00027ca37b004a9890d1bf20349d5ac99");
+      hostRealTimeData.setAssetID(asset.getId());
+      realTimeDatas.add(hostRealTimeData);
+      realtimeDataRepository.saveAll(realTimeDatas);
+
+      asset = fillingMetricsformula(asset);
+      HashMap<String, String> justificationfields = new HashMap<>();
+      justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:7_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
+      asset.setJustificationfields(justificationfields);
+
+      asset = assetRepository.save(asset);
+
+      MvcResult result1 = this.mockMvc
+               .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
+                        String.valueOf(time)).param("duration", "300000"))
+               .andReturn();
+      String res = result1.getResponse().getContentAsString();
+      MetricData [] datas = mapper.readValue(res, MetricData[].class);
+      //In mock metrics data, SERVER_MINIMUM_USED_POWER/SERVER_PEAK_USED_POWER/SERVER_AVERAGE_USED_POWER is invalid
+      try {
+         for(MetricData serverdata:datas) {
+            String metricName = serverdata.getMetricName();
+          if(MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 356.00);
+            }else {
+               TestCase.fail("Unknown metric :"+ metricName);
+            }
+         }
+      }finally {
+         assetRepository.deleteById(asset.getId());
+         realtimeDataRepository.deleteById(hostRealTimeData.getId());
+      }
+   }
+
+   @Test
    public void testRealtimedataServerExample() throws Exception {
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
                fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
