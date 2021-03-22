@@ -11,7 +11,7 @@ FLOWGATEOPTDIR=/opt/vmware/flowgate
 DOCKERCOMPOSERUNFILE=$DOCKERMAVENBUILD/docker-compose.run.images.yml
 CONFTAR=$CURRENTPATH/conf.tar.gz
 
-SERVICEPROJECT=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "database" "redis" "vc-worker" "labsdb-worker")
+SERVICEPROJECT=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "database" "redis" "vc-worker" "labsdb-worker" "openmanage")
 
 if [ -d "$FLOWGATEOPTDIR" ];then
     rm $FLOWGATEOPTDIR -rf
@@ -37,7 +37,7 @@ chown -R 10000:10000 $FLOWGATEOPTDIR/data/redis
 chmod a+x $FLOWGATEOPTDIR/conf/database/init.sh
 chmod a+x $FLOWGATEOPTDIR/conf/database/initData.sh
 
-SEDPROJECT=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "vc-worker" "labsdb-worker")
+SEDPROJECT=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "vc-worker" "labsdb-worker" "openmanage")
 for j in "${SEDPROJECT[@]}"
 do
     sed -i -e 's/spring.couchbase.bootstrap-hosts=localhost/spring.couchbase.bootstrap-hosts=database/' $FLOWGATEOPTDIR/conf/$j/application.properties
@@ -53,7 +53,7 @@ sed -i -e "s/USERPASSWD_CHANGE/$USERPASSWD/" $FLOWGATEOPTDIR/conf/database/init.
 sed -i -e "s/COUCHBASEPASSWD_CHANGE/$USERPASSWD/" $FLOWGATEOPTDIR/conf/flowgate-api/application.properties
 
 REDISPASSWD=$(openssl rand 32|sha256sum|head -c 64)
-SEDREDISPASSWD=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "infoblox-worker" "aggregator" "vc-worker" "labsdb-worker")
+SEDREDISPASSWD=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "infoblox-worker" "aggregator" "vc-worker" "labsdb-worker" "openmanage")
 for i in "${SEDREDISPASSWD[@]}"
 do
     sed -i -e "s/REDISPASSWD_CHANGE/$REDISPASSWD/" $FLOWGATEOPTDIR/conf/redis/redis.conf
