@@ -131,6 +131,8 @@ public class AssetControllerTest {
    @Rule
    public ExpectedException expectedEx = ExpectedException.none();
 
+   ObjectMapper mapper = new ObjectMapper();
+
    @Before
    public void setUp() {
       this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
@@ -289,7 +291,6 @@ public class AssetControllerTest {
       HashMap<String,String> sensorAssetJustfication = new HashMap<String, String>();
       Map<String,String> sensorInfo = new HashMap<String,String>();
       sensorInfo.put(FlowgateConstant.POSITION, "INLET");
-      ObjectMapper mapper = new ObjectMapper();
       try {
          sensorAssetJustfication.put(FlowgateConstant.SENSOR, mapper.writeValueAsString(sensorInfo));
          humiditySensorAsset.setJustificationfields(sensorAssetJustfication);
@@ -1118,7 +1119,6 @@ public class AssetControllerTest {
                .andDo(document("assets-getAssetsByVroId-example", requestFields(
                     fieldWithPath("vroID").description("ID of VROps"))))
                .andReturn();
-               ObjectMapper mapper = new ObjectMapper();
                String res = result.getResponse().getContentAsString();
                Asset [] assets = mapper.readValue(res, Asset[].class);
                TestCase.assertEquals(asset.getId(), assets[0].getId());
@@ -1151,7 +1151,6 @@ public class AssetControllerTest {
                      .andDo(document("assets-getAssetsByVcId-example",
                            requestFields(fieldWithPath("vcID").description("ID of VCENER"))))
                      .andReturn();
-         ObjectMapper mapper = new ObjectMapper();
          String res = result.getResponse().getContentAsString();
          Asset[] assets = mapper.readValue(res, Asset[].class);
          TestCase.assertEquals(asset.getId(), assets[0].getId());
@@ -1979,6 +1978,7 @@ public class AssetControllerTest {
             fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
             fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
             fieldWithPath("value").description("value").type(JsonFieldType.NULL),
+            fieldWithPath("unit").description("metric unit").type(JsonFieldType.STRING),
             fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
       Asset asset = createAsset();
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
@@ -1997,59 +1997,7 @@ public class AssetControllerTest {
       HashMap<String, String> justificationfields = new HashMap<>();
       justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:7_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
       asset.setJustificationfields(justificationfields);
-      Map<String, String> formulars = new HashMap<String, String>();
-      Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
-      Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
-      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricAndIdMap.put(MetricName.SERVER_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricFormulars.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
-
-      Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
-      Map<String, String> frontTempSensor = new HashMap<String,String>();
-      frontTempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempSensor);
-      Map<String, String> backTempSensor = new HashMap<String,String>();
-      backTempSensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.SERVER_BACK_TEMPREATURE, backTempSensor);
-      Map<String, String> frontHumiditySensor = new HashMap<String,String>();
-      frontHumiditySensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumiditySensor);
-      Map<String, String> backHumiditySensor = new HashMap<String,String>();
-      backHumiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulars.put(MetricName.SERVER_BACK_HUMIDITY, backHumiditySensor);
-
-      String pduFormulaInfo = null;
-      String sensorFormulaInfo = null;
-      ObjectMapper mapper = new ObjectMapper();
-      try {
-         pduFormulaInfo = mapper.writeValueAsString(pduMetricFormulars);
-         sensorFormulaInfo = mapper.writeValueAsString(sensorMetricFormulars);
-      } catch (JsonProcessingException e) {
-         TestCase.fail(e.getMessage());
-      }
-      formulars.put(FlowgateConstant.PDU, pduFormulaInfo);
-      formulars.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
-
-      Map<String, String> hostMetrics = new HashMap<>();
-      hostMetrics.put(MetricName.SERVER_CPUUSAGE, asset.getId());
-      hostMetrics.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
-
-      hostMetrics.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
-      hostMetrics.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
-      hostMetrics.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
-      hostMetrics.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
-      hostMetrics.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
-      hostMetrics.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
-
-      hostMetrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
-      hostMetrics.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
-      hostMetrics.put(MetricName.SERVER_STORAGEUSED, asset.getId());
-      formulars.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(hostMetrics));
-
-      asset.setMetricsformulars(formulars);
+      asset = fillingMetricsformula(asset);
       asset = assetRepository.save(asset);
 
       MvcResult result1 = this.mockMvc
@@ -2391,8 +2339,18 @@ public class AssetControllerTest {
                } else if (serverdata.getTimeStamp() == currentTime + 300000) {
                   TestCase.assertEquals(serverdata.getValueNum(), 61.00);
                }
+            } else if (MetricName.SERVER_POWER.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.56);
+            } else if (MetricName.SERVER_PEAK_USED_POWER.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.80);
+            } else if (MetricName.SERVER_MINIMUM_USED_POWER.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.50);
+            } else if (MetricName.SERVER_AVERAGE_USED_POWER.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.60);
+            } else if (MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 356.00);
             } else {
-               TestCase.fail();
+               TestCase.fail("Unknown metric :"+ metricName);
             }
           }
       }finally {
@@ -2409,6 +2367,7 @@ public class AssetControllerTest {
             fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
             fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
             fieldWithPath("value").description("value").type(JsonFieldType.NULL),
+            fieldWithPath("unit").description("metric unit").type(JsonFieldType.STRING),
             fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
       Long currentTime = System.currentTimeMillis();
@@ -2434,7 +2393,6 @@ public class AssetControllerTest {
       sensorMetricFormulas.put(MetricName.PDU_HUMIDITY, humiditySensor);
 
       String sensorFormulaInfo = null;
-      ObjectMapper mapper = new ObjectMapper();
       try {
          sensorFormulaInfo = mapper.writeValueAsString(sensorMetricFormulas);
       } catch (JsonProcessingException e) {
@@ -2460,7 +2418,7 @@ public class AssetControllerTest {
             String metricName = pduMetricdata.getMetricName();
             if(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,"OUTLET:7").
                   equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 2.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.2);
             }else if(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,"OUTLET:7").
                   equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
@@ -2522,6 +2480,7 @@ public class AssetControllerTest {
                fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
                fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
                fieldWithPath("value").description("value").type(JsonFieldType.NULL),
+               fieldWithPath("unit").description("metric unit").type(JsonFieldType.STRING),
                fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
       Long currentTime = System.currentTimeMillis();
@@ -2545,9 +2504,7 @@ public class AssetControllerTest {
       Map<String, String> humiditySensor = new HashMap<String,String>();
       humiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
       sensorMetricFormulas.put(MetricName.PDU_HUMIDITY, humiditySensor);
-
       String sensorFormulaInfo = null;
-      ObjectMapper mapper = new ObjectMapper();
       try {
          sensorFormulaInfo = mapper.writeValueAsString(sensorMetricFormulas);
       } catch (JsonProcessingException e) {
@@ -2571,7 +2528,7 @@ public class AssetControllerTest {
             String metricName = pduMetricdata.getMetricName();
             if(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,"OUTLET:7").
                      equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 2.0);
+               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.2);
             }else if(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,"OUTLET:7").
                      equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
@@ -2628,11 +2585,91 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void testGetHostSpecialMetricsExample() throws Exception {
+
+      Asset asset = createAsset();
+      List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
+      Long time = System.currentTimeMillis();
+
+      List<ValueUnit> valueUnits = new ArrayList<ValueUnit>();
+      ValueUnit valueUnit = new ValueUnit();
+
+      String sinceTime = String.valueOf(time - 900000l);
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR);
+      valueUnit.setKey(MetricName.SERVER_MINIMUM_USED_POWER);
+      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setValueNum(0.5);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR);
+      valueUnit.setKey(MetricName.SERVER_PEAK_USED_POWER);
+      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setValueNum(0.8);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setKey(MetricName.SERVER_AVERAGE_USED_POWER);
+      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setValueNum(0.6);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime);
+      valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
+      valueUnit.setUnit(MetricUnit.KWH.toString());
+      valueUnit.setValueNum(356);
+      valueUnits.add(valueUnit);
+
+      RealTimeData hostRealTimeData = new RealTimeData();
+      hostRealTimeData.setValues(valueUnits);
+      hostRealTimeData.setTime(time);
+      hostRealTimeData.setId("00027ca37b004a9890d1bf20349d5ac99");
+      hostRealTimeData.setAssetID(asset.getId());
+      realTimeDatas.add(hostRealTimeData);
+      realtimeDataRepository.saveAll(realTimeDatas);
+
+      asset = fillingMetricsformula(asset);
+      HashMap<String, String> justificationfields = new HashMap<>();
+      justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:7_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
+      asset.setJustificationfields(justificationfields);
+
+      asset = assetRepository.save(asset);
+
+      MvcResult result1 = this.mockMvc
+               .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
+                        String.valueOf(time)).param("duration", "300000"))
+               .andReturn();
+      String res = result1.getResponse().getContentAsString();
+      MetricData [] datas = mapper.readValue(res, MetricData[].class);
+      //In mock metrics data, SERVER_MINIMUM_USED_POWER/SERVER_PEAK_USED_POWER/SERVER_AVERAGE_USED_POWER is invalid
+      try {
+         for(MetricData serverdata:datas) {
+            String metricName = serverdata.getMetricName();
+          if(MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 356.00);
+            }else {
+               TestCase.fail("Unknown metric :"+ metricName);
+            }
+         }
+      }finally {
+         assetRepository.deleteById(asset.getId());
+         realtimeDataRepository.deleteById(hostRealTimeData.getId());
+      }
+   }
+
+   @Test
    public void testRealtimedataServerExample() throws Exception {
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
                fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
                fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
                fieldWithPath("value").description("value").type(JsonFieldType.NULL),
+               fieldWithPath("unit").description("metric unit").type(JsonFieldType.STRING),
                fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
 
       Asset asset = createAsset();
@@ -2651,61 +2688,7 @@ public class AssetControllerTest {
       realTimeDatas.add(hostRealTimeData);
       Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
 
-      Map<String, String> formulas = new HashMap<String, String>();
-      Map<String, Map<String, String>> pduMetricFormulas = new HashMap<String, Map<String, String>>();
-      Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
-      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricAndIdMap.put(MetricName.SERVER_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
-      pduMetricFormulas.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
-
-      Map<String, String> hostMetrics = new HashMap<>();
-      hostMetrics.put(MetricName.SERVER_CPUUSAGE, asset.getId());
-      hostMetrics.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
-
-      hostMetrics.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
-      hostMetrics.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
-      hostMetrics.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
-      hostMetrics.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
-      hostMetrics.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
-      hostMetrics.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
-
-      hostMetrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
-      hostMetrics.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
-      hostMetrics.put(MetricName.SERVER_STORAGEUSED, asset.getId());
-      formulas.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(hostMetrics));
-
-      Map<String, Map<String, String>> sensorMetricFormulas = new HashMap<String, Map<String, String>>();
-      Map<String, String> frontTempSensor = new HashMap<String,String>();
-      frontTempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulas.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempSensor);
-      Map<String, String> backTempSensor = new HashMap<String,String>();
-      backTempSensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulas.put(MetricName.SERVER_BACK_TEMPREATURE, backTempSensor);
-
-      Map<String, String> frontHumiditySensor = new HashMap<String,String>();
-      frontHumiditySensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulas.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumiditySensor);
-
-      Map<String, String> backHumiditySensor = new HashMap<String,String>();
-      backHumiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulas.put(MetricName.SERVER_BACK_HUMIDITY, backHumiditySensor);
-
-      String pduFormulaInfo = null;
-      String sensorFormulaInfo = null;
-      ObjectMapper mapper = new ObjectMapper();
-      try {
-         pduFormulaInfo = mapper.writeValueAsString(pduMetricFormulas);
-         sensorFormulaInfo = mapper.writeValueAsString(sensorMetricFormulas);
-      } catch (JsonProcessingException e) {
-         TestCase.fail(e.getMessage());
-      }
-      formulas.put(FlowgateConstant.PDU, pduFormulaInfo);
-      formulas.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
-      asset.setMetricsformulars(formulas);
-
+      asset = fillingMetricsformula(asset);
       HashMap<String, String> justificationfields = new HashMap<>();
       justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:7_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
       asset.setJustificationfields(justificationfields);
@@ -3051,9 +3034,18 @@ public class AssetControllerTest {
                } else if (serverdata.getTimeStamp() == currentTime + 300000) {
                   TestCase.assertEquals(serverdata.getValueNum(), 61.00);
                }
+            }else if(MetricName.SERVER_POWER.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.56);
+            }else if(MetricName.SERVER_PEAK_USED_POWER.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.80);
+            }else if(MetricName.SERVER_MINIMUM_USED_POWER.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.50);
+            }else if(MetricName.SERVER_AVERAGE_USED_POWER.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 0.60);
+            }else if(MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 356.00);
             }else {
-               System.out.println(serverdata.getMetricName());
-               TestCase.fail();
+               TestCase.fail("Unknown metric :"+ metricName);
             }
          }
       }finally {
@@ -3070,6 +3062,7 @@ public class AssetControllerTest {
                fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
                fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
                fieldWithPath("value").description("value").type(JsonFieldType.NULL),
+               fieldWithPath("unit").description("metric unit").type(JsonFieldType.STRING),
                fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
 
       List<RealTimeData> realTimeDatas = new ArrayList<>();
@@ -3088,8 +3081,6 @@ public class AssetControllerTest {
                .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
                         String.valueOf(currentTime)).param("duration", "300000"))
                .andReturn();
-
-      ObjectMapper mapper = new ObjectMapper();
       String res = result1.getResponse().getContentAsString();
       MetricData [] datas = mapper.readValue(res, MetricData[].class);
       try {
@@ -3209,15 +3200,15 @@ public class AssetControllerTest {
 
       ValueUnit valueunitActivePower = new ValueUnit();
       valueunitActivePower.setKey(MetricName.PDU_ACTIVE_POWER);
-      valueunitActivePower.setUnit("W");
+      valueunitActivePower.setUnit(MetricUnit.KW.toString());
       valueunitActivePower.setExtraidentifier("OUTLET:7");
-      valueunitActivePower.setValueNum(2);
+      valueunitActivePower.setValueNum(0.2);
       valueunitActivePower.setTime(time);
       valueunits.add(valueunitActivePower);
 
       ValueUnit valueunitFreeCapacity = new ValueUnit();
       valueunitFreeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
-      valueunitFreeCapacity.setUnit("Amps");
+      valueunitFreeCapacity.setUnit(MetricUnit.A.toString());
       valueunitFreeCapacity.setExtraidentifier("OUTLET:7");
       valueunitFreeCapacity.setValueNum(20);
       valueunitFreeCapacity.setTime(time);
@@ -3225,7 +3216,7 @@ public class AssetControllerTest {
 
       ValueUnit valueunitL1FreeCapacity = new ValueUnit();
       valueunitL1FreeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
-      valueunitL1FreeCapacity.setUnit("Amps");
+      valueunitL1FreeCapacity.setUnit(MetricUnit.A.toString());
       valueunitL1FreeCapacity.setExtraidentifier("INLET:1"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
       valueunitL1FreeCapacity.setValueNum(34);
       valueunitL1FreeCapacity.setTime(time);
@@ -3233,7 +3224,7 @@ public class AssetControllerTest {
 
       ValueUnit valueunitL1Current = new ValueUnit();
       valueunitL1Current.setKey(MetricName.PDU_CURRENT);
-      valueunitL1Current.setUnit("Amps");
+      valueunitL1Current.setUnit(MetricUnit.A.toString());
       valueunitL1Current.setExtraidentifier("INLET:1"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
       valueunitL1Current.setValueNum(6);
       valueunitL1Current.setTime(time);
@@ -3241,7 +3232,7 @@ public class AssetControllerTest {
 
       ValueUnit valueunitL1Voltage = new ValueUnit();
       valueunitL1Voltage.setKey(MetricName.PDU_VOLTAGE);
-      valueunitL1Voltage.setUnit("Volts");
+      valueunitL1Voltage.setUnit(MetricUnit.V.toString());
       valueunitL1Voltage.setExtraidentifier("INLET:1"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
       valueunitL1Voltage.setValueNum(220);
       valueunitL1Voltage.setTime(time);
@@ -3249,7 +3240,7 @@ public class AssetControllerTest {
 
       ValueUnit valueunit1L1FreeCapacity = new ValueUnit();
       valueunit1L1FreeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
-      valueunit1L1FreeCapacity.setUnit("Amps");
+      valueunit1L1FreeCapacity.setUnit(MetricUnit.A.toString());
       valueunit1L1FreeCapacity.setExtraidentifier("INLET:2"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
       valueunit1L1FreeCapacity.setValueNum(24);
       valueunit1L1FreeCapacity.setTime(time);
@@ -3257,7 +3248,7 @@ public class AssetControllerTest {
 
       ValueUnit valueunit1L1Current = new ValueUnit();
       valueunit1L1Current.setKey(MetricName.PDU_CURRENT);
-      valueunit1L1Current.setUnit("Amps");
+      valueunit1L1Current.setUnit(MetricUnit.A.toString());
       valueunit1L1Current.setExtraidentifier("INLET:2"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
       valueunit1L1Current.setValueNum(6);
       valueunit1L1Current.setTime(time);
@@ -3265,7 +3256,7 @@ public class AssetControllerTest {
 
       ValueUnit valueunit1L1Voltage = new ValueUnit();
       valueunit1L1Voltage.setKey(MetricName.PDU_VOLTAGE);
-      valueunit1L1Voltage.setUnit("Volts");
+      valueunit1L1Voltage.setUnit(MetricUnit.V.toString());
       valueunit1L1Voltage.setExtraidentifier("INLET:2"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
       valueunit1L1Voltage.setValueNum(240);
       valueunit1L1Voltage.setTime(time);
@@ -3364,6 +3355,48 @@ public class AssetControllerTest {
          valueUnits.add(valueUnit);
       }
 
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setKey(MetricName.SERVER_POWER);
+      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setValueNum(0.56);
+      valueUnits.add(valueUnit);
+
+      String sinceTime = String.valueOf(time - 900000l);
+      valueUnit = new ValueUnit();
+      String minimumPowerTime = String.valueOf(time - 30000l);
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR + minimumPowerTime);
+      valueUnit.setKey(MetricName.SERVER_MINIMUM_USED_POWER);
+      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setValueNum(0.5);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      String peakPowerTime = String.valueOf(time - 60000l);
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR + peakPowerTime);
+      valueUnit.setKey(MetricName.SERVER_PEAK_USED_POWER);
+      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setValueNum(0.8);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime);
+      valueUnit.setKey(MetricName.SERVER_AVERAGE_USED_POWER);
+      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setValueNum(0.6);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime);
+      valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
+      valueUnit.setUnit(MetricUnit.KWH.toString());
+      valueUnit.setValueNum(356);
+      valueUnits.add(valueUnit);
+
       RealTimeData realTimeData = new RealTimeData();
       realTimeData.setId(UUID.randomUUID().toString());
       realTimeData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
@@ -3447,7 +3480,7 @@ public class AssetControllerTest {
       ValueUnit humidityValue = new ValueUnit();
       humidityValue.setValueNum(20);
       humidityValue.setTime(time);
-      humidityValue.setUnit("%");
+      humidityValue.setUnit(MetricUnit.PERCENT.toString());
       humidityValue.setKey(MetricName.HUMIDITY);
       valueunits.add(humidityValue);
 
@@ -3501,9 +3534,7 @@ public class AssetControllerTest {
       MetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
       MetricAndIdMap.put(MetricName.SERVER_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricFormulas.put("0001bdc8b25d4c2badfd045ab61aabfa", MetricAndIdMap);
-
       String pduFormulaInfo = null;
-      ObjectMapper mapper = new ObjectMapper();
       try {
          pduFormulaInfo = mapper.writeValueAsString(pduMetricFormulas);
       } catch (JsonProcessingException e) {
@@ -3521,5 +3552,65 @@ public class AssetControllerTest {
       example.setType(FacilitySoftwareConfig.SoftwareType.Nlyte);
       example.setVerifyCert(false);
       return example;
+   }
+
+   Asset fillingMetricsformula(Asset asset){
+      Map<String, String> formulars = new HashMap<String, String>();
+      Map<String, Map<String, String>> pduMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> pduMetricAndIdMap = new HashMap<String,String>();
+      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricFormulars.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
+
+      Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
+      Map<String, String> frontTempSensor = new HashMap<String,String>();
+      frontTempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempSensor);
+      Map<String, String> backTempSensor = new HashMap<String,String>();
+      backTempSensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_BACK_TEMPREATURE, backTempSensor);
+      Map<String, String> frontHumiditySensor = new HashMap<String,String>();
+      frontHumiditySensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumiditySensor);
+      Map<String, String> backHumiditySensor = new HashMap<String,String>();
+      backHumiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulars.put(MetricName.SERVER_BACK_HUMIDITY, backHumiditySensor);
+      String pduFormulaInfo = null;
+      String sensorFormulaInfo = null;
+      try {
+         pduFormulaInfo = mapper.writeValueAsString(pduMetricFormulars);
+         sensorFormulaInfo = mapper.writeValueAsString(sensorMetricFormulars);
+      } catch (JsonProcessingException e) {
+         TestCase.fail(e.getMessage());
+      }
+      formulars.put(FlowgateConstant.PDU, pduFormulaInfo);
+      formulars.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
+      asset.setMetricsformulars(formulars);
+      Map<String, String> hostMetrics = new HashMap<>();
+      hostMetrics.put(MetricName.SERVER_CPUUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_CPUUSEDINMHZ, asset.getId());
+      hostMetrics.put(MetricName.SERVER_ACTIVEMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_BALLOONMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_CONSUMEDMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_SHAREDMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_SWAPMEMORY, asset.getId());
+      hostMetrics.put(MetricName.SERVER_MEMORYUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEUSAGE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_STORAGEUSED, asset.getId());
+      hostMetrics.put(MetricName.SERVER_TEMPERATURE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_PEAK_TEMPERATURE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_AVERAGE_TEMPERATURE, asset.getId());
+      hostMetrics.put(MetricName.SERVER_ENERGY_CONSUMPTION, asset.getId());
+      hostMetrics.put(MetricName.SERVER_POWER, asset.getId());
+      hostMetrics.put(MetricName.SERVER_AVERAGE_USED_POWER, asset.getId());
+      hostMetrics.put(MetricName.SERVER_PEAK_USED_POWER, asset.getId());
+      hostMetrics.put(MetricName.SERVER_MINIMUM_USED_POWER, asset.getId());
+      formulars.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(hostMetrics));
+      asset.setMetricsformulars(formulars);
+      return asset;
    }
 }

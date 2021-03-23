@@ -443,7 +443,7 @@ public class OpenManageJobService implements AsyncService{
       metricNameAndIdMap.put(MetricName.SERVER_PEAK_TEMPERATURE, asset.getId());
       metricNameAndIdMap.put(MetricName.SERVER_AVERAGE_TEMPERATURE, asset.getId());
       metricNameAndIdMap.put(MetricName.SERVER_ENERGY_CONSUMPTION, asset.getId());
-      metricNameAndIdMap.put(MetricName.SERVER_TOTAL_POWER, asset.getId());
+      metricNameAndIdMap.put(MetricName.SERVER_POWER, asset.getId());
       metricNameAndIdMap.put(MetricName.SERVER_AVERAGE_USED_POWER, asset.getId());
       metricNameAndIdMap.put(MetricName.SERVER_PEAK_USED_POWER, asset.getId());
       metricNameAndIdMap.put(MetricName.SERVER_MINIMUM_USED_POWER, asset.getId());

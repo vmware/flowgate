@@ -62,12 +62,23 @@ public class ValueUnit {
       this.key = key;
    }
 
+   /**
+    * According to the Metric Prefix in the International System of Units,
+    * M => 1000000; m => 0.001; k => 1000
+    * Link: https://en.wikipedia.org/wiki/International_System_of_Units
+    *
+    */
    public enum MetricUnit {
-       MV("VOLTAGE",0.001), V("VOLTAGE",1), KV("VOLTAGE",1000), VOLTS("VOLTAGE",1),
-       MW("POWER",0.001), W("POWER",1), KW("POWER",1000), KWH("ENERGY",1000),
-       MA("CURRRNT",0.001), A("CURRENT",1), KA("CURRENT",1000), AMPS("CURRENT",1),
-       C("TEMPRETURE",1), F("TEMPRETURE",1), PERCENT("PERCENT",1), BTUPerHr("POWER",0.293071),
-       KB("STORAGE",1), Mhz("FREQUENCY", 1), KBps("RATE", 1);
+       //These units include KW,KA,KWH,KB,KBps,PERCENT will be deprecated in Flowgate-1.3
+       V("VOLTAGE",1), VOLTS("VOLTAGE",1), KV("VOLTAGE",1000), kV("VOLTAGE",1000),
+       A("CURRENT",1), KA("CURRENT",1000), kA("CURRENT",1000), AMPS("CURRENT",1),
+       W("POWER",1), KW("POWER",1000), kW("POWER",1000), BTUPerHr("POWER",0.293071),
+       KWH("ENERGY",1000), kWh("ENERGY",1000),
+       C("TEMPRETURE",1),F("TEMPRETURE",1),
+       PERCENT("PERCENT",1),percent("PERCENT",1),
+       KB("STORAGE",1), kB("STORAGE",1),
+       KBps("RATE", 1), kBps("RATE", 1),
+       Mhz("FREQUENCY", 1);
 
        private final String group;
        private final double factor;
