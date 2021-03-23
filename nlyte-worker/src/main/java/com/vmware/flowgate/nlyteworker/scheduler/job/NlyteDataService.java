@@ -654,7 +654,7 @@ public class NlyteDataService implements AsyncService {
       }
       if (advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT) == null
             || advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT).isEmpty()) {
-         advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, MetricUnit.PERCENT.toString());
+         advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, MetricUnit.percent.toString());
       }
       if (advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT) == null
             || advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT).isEmpty()) {
@@ -662,7 +662,7 @@ public class NlyteDataService implements AsyncService {
       }
       if (advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT) == null
             || advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT).isEmpty()) {
-         advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
+         advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.kW.toString());
       }
       if (advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT) == null
             || advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT).isEmpty()) {
@@ -796,7 +796,7 @@ public class NlyteDataService implements AsyncService {
                } else {
                   sourceUnit = MetricUnit.valueOf(power.toUpperCase());
                }
-               targetUnit = MetricUnit.KW;
+               targetUnit = MetricUnit.kW;
                break;
             case MetricName.PDU_VOLTAGE:
                if (unit != null && !unit.isEmpty()) {
@@ -811,8 +811,8 @@ public class NlyteDataService implements AsyncService {
             }
             valueunit.setUnit(targetUnit.toString());
             try {
-               valueunit.setValueNum(Double.parseDouble(valueunit
-                     .translateUnit(String.valueOf(value.getValue()), sourceUnit, targetUnit)));
+               valueunit.setValueNum(valueunit
+                     .translateUnit(value.getValue(), sourceUnit, targetUnit));
             } catch (WormholeException e) {
                logger.error("Cannot translate Unit", e);
             }

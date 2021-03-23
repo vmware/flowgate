@@ -1053,7 +1053,7 @@ public class PowerIQService implements AsyncService {
       }
       if (advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT) == null
             || advanceSettingMap.get(AdvanceSettingType.HUMIDITY_UNIT).isEmpty()) {
-         advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, MetricUnit.PERCENT.toString());
+         advanceSettingMap.put(AdvanceSettingType.HUMIDITY_UNIT, MetricUnit.percent.toString());
       }
       if (advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT) == null
             || advanceSettingMap.get(AdvanceSettingType.PDU_AMPS_UNIT).isEmpty()) {
@@ -1061,7 +1061,7 @@ public class PowerIQService implements AsyncService {
       }
       if (advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT) == null
             || advanceSettingMap.get(AdvanceSettingType.PDU_POWER_UNIT).isEmpty()) {
-         advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
+         advanceSettingMap.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.kW.toString());
       }
       if (advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT) == null
             || advanceSettingMap.get(AdvanceSettingType.PDU_VOLT_UNIT).isEmpty()) {
@@ -1206,8 +1206,8 @@ public class PowerIQService implements AsyncService {
                   voltageValue.setKey(MetricName.PDU_VOLTAGE);
                   voltageValue.setTime(valueTime);
                   voltageValue
-                        .setValueNum(Double.parseDouble(voltageValue.translateUnit(String.valueOf(voltage),
-                              MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
+                        .setValueNum(voltageValue.translateUnit(voltage,
+                              MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V));
                   voltageValue.setUnit(MetricUnit.V.toString());
                   values.add(voltageValue);
                   inletVoltage = voltageValue.getValueNum();
@@ -1220,8 +1220,8 @@ public class PowerIQService implements AsyncService {
                   currentValue.setKey(MetricName.PDU_CURRENT);
                   currentValue.setTime(valueTime);
                   currentValue
-                        .setValueNum(Double.parseDouble(currentValue.translateUnit(String.valueOf(current),
-                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+                        .setValueNum(currentValue.translateUnit(current,
+                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A));
                   currentValue.setUnit(MetricUnit.A.toString());
                   values.add(currentValue);
                   inletTotalCurrent += currentValue.getValueNum();
@@ -1233,9 +1233,9 @@ public class PowerIQService implements AsyncService {
                   activePowerValue.setExtraidentifier(extraIdentifier);
                   activePowerValue.setKey(MetricName.PDU_ACTIVE_POWER);
                   activePowerValue.setTime(valueTime);
-                  activePowerValue.setValueNum(Double.parseDouble(activePowerValue.translateUnit(String.valueOf(activePower),
-                        MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
-                  activePowerValue.setUnit(MetricUnit.KW.toString());
+                  activePowerValue.setValueNum(activePowerValue.translateUnit(activePower,
+                        MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.kW));
+                  activePowerValue.setUnit(MetricUnit.kW.toString());
                   values.add(activePowerValue);
                }
 
@@ -1245,9 +1245,9 @@ public class PowerIQService implements AsyncService {
                   apparentPowerValue.setExtraidentifier(extraIdentifier);
                   apparentPowerValue.setKey(MetricName.PDU_APPARENT_POWER);
                   apparentPowerValue.setTime(valueTime);
-                  apparentPowerValue.setValueNum(Double.parseDouble(apparentPowerValue.translateUnit(String.valueOf(apparentPower),
-                        MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
-                  apparentPowerValue.setUnit(MetricUnit.KW.toString());
+                  apparentPowerValue.setValueNum(apparentPowerValue.translateUnit(apparentPower,
+                        MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.kW));
+                  apparentPowerValue.setUnit(MetricUnit.kW.toString());
                   values.add(apparentPowerValue);
                   inlteTotalPower += apparentPowerValue.getValueNum();
                }
@@ -1259,8 +1259,8 @@ public class PowerIQService implements AsyncService {
                   freeCapacityValue.setKey(MetricName.PDU_FREE_CAPACITY);
                   freeCapacityValue.setTime(valueTime);
                   freeCapacityValue
-                        .setValueNum(Double.parseDouble(freeCapacityValue.translateUnit(String.valueOf(freeCapacity),
-                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+                        .setValueNum(freeCapacityValue.translateUnit(freeCapacity,
+                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A));
                   freeCapacityValue.setUnit(MetricUnit.A.toString());
                   values.add(freeCapacityValue);
                }
@@ -1275,7 +1275,7 @@ public class PowerIQService implements AsyncService {
             ValueUnit total_power = new ValueUnit();
             total_power.setKey(MetricName.PDU_TOTAL_POWER);
             total_power.setTime(valueTime);
-            total_power.setUnit(MetricUnit.KW.toString());
+            total_power.setUnit(MetricUnit.kW.toString());
             total_power.setValueNum(inlteTotalPower);
             values.add(total_power);
          }
@@ -1308,8 +1308,8 @@ public class PowerIQService implements AsyncService {
                   current.setKey(MetricName.PDU_CURRENT);
                   current.setTime(valueTime);
                   current
-                        .setValueNum(Double.parseDouble(current.translateUnit(String.valueOf(currentValue),
-                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+                        .setValueNum(current.translateUnit(currentValue,
+                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A));
                   current.setUnit(MetricUnit.A.toString());
                   values.add(current);
                }
@@ -1321,8 +1321,8 @@ public class PowerIQService implements AsyncService {
                   voltage.setKey(MetricName.PDU_VOLTAGE);
                   voltage.setTime(valueTime);
                   voltage
-                        .setValueNum(Double.parseDouble(voltage.translateUnit(String.valueOf(voltageValue),
-                              MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
+                        .setValueNum(voltage.translateUnit(voltageValue,
+                              MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V));
                   voltage.setUnit(MetricUnit.V.toString());
                   values.add(voltage);
                }
@@ -1334,8 +1334,8 @@ public class PowerIQService implements AsyncService {
                   freeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
                   freeCapacity.setTime(valueTime);
                   freeCapacity
-                        .setValueNum(Double.parseDouble(freeCapacity.translateUnit(String.valueOf(freeCapacityValue),
-                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+                        .setValueNum(freeCapacity.translateUnit(freeCapacityValue,
+                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A));
                   freeCapacity.setUnit(MetricUnit.A.toString());
                   values.add(freeCapacity);
                }
@@ -1371,8 +1371,8 @@ public class PowerIQService implements AsyncService {
                   voltageValue.setKey(MetricName.PDU_VOLTAGE);
                   voltageValue.setTime(valueTime);
                   voltageValue
-                        .setValueNum(Double.parseDouble(voltageValue.translateUnit(String.valueOf(voltage),
-                              MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V)));
+                        .setValueNum(voltageValue.translateUnit(voltage,
+                              MetricUnit.valueOf(PDU_VOLT_UNIT), MetricUnit.V));
                   voltageValue.setUnit(MetricUnit.V.toString());
                   values.add(voltageValue);
                }
@@ -1384,8 +1384,8 @@ public class PowerIQService implements AsyncService {
                   currentValue.setKey(MetricName.PDU_CURRENT);
                   currentValue.setTime(valueTime);
                   currentValue
-                        .setValueNum(Double.parseDouble(currentValue.translateUnit(String.valueOf(current),
-                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+                        .setValueNum(currentValue.translateUnit(current,
+                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A));
                   currentValue.setUnit(MetricUnit.A.toString());
                   values.add(currentValue);
                   totalOutletCurrentUsed += currentValue.getValueNum();
@@ -1397,9 +1397,9 @@ public class PowerIQService implements AsyncService {
                   activePowerValue.setExtraidentifier(extraIdentifier);
                   activePowerValue.setKey(MetricName.PDU_ACTIVE_POWER);
                   activePowerValue.setTime(valueTime);
-                  activePowerValue.setValueNum(Double.parseDouble(activePowerValue.translateUnit(String.valueOf(active_power),
-                        MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
-                  activePowerValue.setUnit(MetricUnit.KW.toString());
+                  activePowerValue.setValueNum(activePowerValue.translateUnit(active_power,
+                        MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.kW));
+                  activePowerValue.setUnit(MetricUnit.kW.toString());
                   values.add(activePowerValue);
                }
 
@@ -1409,9 +1409,9 @@ public class PowerIQService implements AsyncService {
                   apparentPowerValue.setExtraidentifier(extraIdentifier);
                   apparentPowerValue.setKey(MetricName.PDU_APPARENT_POWER);
                   apparentPowerValue.setTime(valueTime);
-                  apparentPowerValue.setValueNum(Double.parseDouble(apparentPowerValue.translateUnit(String.valueOf(apparent_power),
-                        MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.KW)));
-                  apparentPowerValue.setUnit(MetricUnit.KW.toString());
+                  apparentPowerValue.setValueNum(apparentPowerValue.translateUnit(apparent_power,
+                        MetricUnit.valueOf(PDU_POWER_UNIT), MetricUnit.kW));
+                  apparentPowerValue.setUnit(MetricUnit.kW.toString());
                   values.add(apparentPowerValue);
                   totalOutletPowerUsed += apparentPowerValue.getValueNum();
                }
@@ -1423,8 +1423,8 @@ public class PowerIQService implements AsyncService {
                   freeCapacityValue.setKey(MetricName.PDU_FREE_CAPACITY);
                   freeCapacityValue.setTime(valueTime);
                   freeCapacityValue
-                        .setValueNum(Double.parseDouble(freeCapacityValue.translateUnit(String.valueOf(freeCapacity),
-                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A)));
+                        .setValueNum(freeCapacityValue.translateUnit(freeCapacity,
+                              MetricUnit.valueOf(PDU_AMPS_UNIT), MetricUnit.A));
                   freeCapacityValue.setUnit(MetricUnit.A.toString());
                   values.add(freeCapacityValue);
                }
@@ -1440,7 +1440,7 @@ public class PowerIQService implements AsyncService {
                ValueUnit current_load = new ValueUnit();
                current_load.setKey(MetricName.PDU_CURRENT_LOAD);
                current_load.setTime(valueTime);
-               current_load.setUnit(MetricUnit.PERCENT.toString());
+               current_load.setUnit(MetricUnit.percent.toString());
                current_load.setValueNum(Double.parseDouble(df.format(totalOutletCurrentUsed/rate_current_value)));
                values.add(current_load);
             }
@@ -1453,7 +1453,7 @@ public class PowerIQService implements AsyncService {
                ValueUnit power_load = new ValueUnit();
                power_load.setKey(MetricName.PDU_POWER_LOAD);
                power_load.setTime(valueTime);
-               power_load.setUnit(MetricUnit.PERCENT.toString());
+               power_load.setUnit(MetricUnit.percent.toString());
                power_load.setValueNum(Double.parseDouble(df.format(totalOutletPowerUsed/rate_power_value)));
                values.add(power_load);
             }
@@ -1589,19 +1589,19 @@ public class PowerIQService implements AsyncService {
          case MetricName.HUMIDITY:
             if (unit != null && !unit.isEmpty()) {
                if (unit.equals("%")) {
-                  sourceUnit = MetricUnit.PERCENT;
+                  sourceUnit = MetricUnit.percent;
                } else {
-                  sourceUnit = MetricUnit.valueOf(unit.toUpperCase());
+                  sourceUnit = MetricUnit.valueOf(unit);
                }
             } else {
                if (humidity.equals("%")) {
-                  sourceUnit = MetricUnit.PERCENT;
+                  sourceUnit = MetricUnit.percent;
                } else {
-                  sourceUnit = MetricUnit.valueOf(humidity.toUpperCase());
+                  sourceUnit = MetricUnit.valueOf(humidity);
                }
 
             }
-            targetUnit = MetricUnit.PERCENT;
+            targetUnit = MetricUnit.percent;
             break;
          case MetricName.TEMPERATURE:
             if (unit != null && !unit.isEmpty()) {
@@ -1620,12 +1620,12 @@ public class PowerIQService implements AsyncService {
             continue;
          }
          try {
-            value.setValueNum(Double.parseDouble(
-                  value.translateUnit(String.valueOf(metricsValue), sourceUnit, targetUnit)));
+            value.setValueNum(
+                  value.translateUnit(metricsValue, sourceUnit, targetUnit));
          } catch (WormholeException e) {
             logger.error("Cannot translate Unit", e);
          }
-         if (targetUnit.toString().equals(MetricUnit.PERCENT.toString())) {
+         if (targetUnit.toString().equals(MetricUnit.percent.toString())) {
             value.setUnit("%");
          } else {
             value.setUnit(targetUnit.toString());

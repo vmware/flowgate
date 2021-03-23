@@ -100,7 +100,7 @@ public class OpenManageJobService implements AsyncService{
       powerStateMap.put(PowerState.UNKNOWN.getValue(), FlowgatePowerState.UNKNOWN.name());
       powerStateMap = Collections.unmodifiableMap(powerStateMap);
       metricUnitMap.put(OpenmanagePowerUnit, MetricUnit.W);
-      metricUnitMap.put(systemEnergyConsumptionUnit, MetricUnit.KWH);
+      metricUnitMap.put(systemEnergyConsumptionUnit, MetricUnit.kWh);
       metricUnitMap.put(temperatureUnit, MetricUnit.C);
       metricUnitMap.put(PowerSettingType.PowerUnit.name() + PowerDisplayUnit.Watt.getValue(),
             MetricUnit.W);
@@ -540,9 +540,9 @@ public class OpenManageJobService implements AsyncService{
          currentTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getInstantaneousHeadroomTimeStamp());
          instantPower.setKey(MetricName.SERVER_POWER);
          instantPower.setTime(currentTime);
-         instantPower.setUnit(MetricUnit.KW.name());
-         instantPower.setValueNum(Double.parseDouble(instantPower.translateUnit(String.valueOf(powerMetricsData.getPower()),
-                        metricUnitMap.get(powerMetricsData.getPowerUnit()), MetricUnit.KW)));
+         instantPower.setUnit(MetricUnit.kW.name());
+         instantPower.setValueNum(instantPower.translateUnit(powerMetricsData.getPower(),
+                        metricUnitMap.get(powerMetricsData.getPowerUnit()), MetricUnit.kW));
          metricNameAndValueUnitMap.put(MetricName.SERVER_POWER, instantPower);
 
          long sinceTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getSince());
@@ -551,18 +551,18 @@ public class OpenManageJobService implements AsyncService{
          systemEnergyConsumption.setTime(systemEnergyConsumptionTime);
          systemEnergyConsumption.setExtraidentifier(String.valueOf(sinceTime));
          systemEnergyConsumption.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
-         systemEnergyConsumption.setUnit(MetricUnit.KWH.name());
-         systemEnergyConsumption.setValueNum(Double.parseDouble(systemEnergyConsumption.translateUnit(String.valueOf(powerMetricsData.getSystemEnergyConsumption()),
-               metricUnitMap.get(powerMetricsData.getSystemEnergyConsumptionUnit()), MetricUnit.KWH)));
+         systemEnergyConsumption.setUnit(MetricUnit.kWh.name());
+         systemEnergyConsumption.setValueNum(systemEnergyConsumption.translateUnit(powerMetricsData.getSystemEnergyConsumption(),
+               metricUnitMap.get(powerMetricsData.getSystemEnergyConsumptionUnit()), MetricUnit.kWh));
          metricNameAndValueUnitMap.put(MetricName.SERVER_ENERGY_CONSUMPTION, systemEnergyConsumption);
 
          ValueUnit avgPower = new ValueUnit();
          avgPower.setTime(currentTime);
          avgPower.setExtraidentifier(String.valueOf(sinceTime));
          avgPower.setKey(MetricName.SERVER_AVERAGE_USED_POWER);
-         avgPower.setUnit(MetricUnit.KW.name());
-         avgPower.setValueNum(Double.parseDouble(avgPower.translateUnit(String.valueOf(powerMetricsData.getAvgPower()),
-               metricUnitMap.get(powerMetricsData.getAvgPowerUnit()), MetricUnit.KW)));
+         avgPower.setUnit(MetricUnit.kW.name());
+         avgPower.setValueNum(avgPower.translateUnit(powerMetricsData.getAvgPower(),
+               metricUnitMap.get(powerMetricsData.getAvgPowerUnit()), MetricUnit.kW));
          metricNameAndValueUnitMap.put(MetricName.SERVER_AVERAGE_USED_POWER, avgPower);
 
          ValueUnit peakPower = new ValueUnit();
@@ -572,9 +572,9 @@ public class OpenManageJobService implements AsyncService{
          //Record the since time and peak power time, for example  1612417403074_FIELDSPLIT_1612415606985
          peakPower.setExtraidentifier(sinceAndPeakTime);
          peakPower.setKey(MetricName.SERVER_PEAK_USED_POWER);
-         peakPower.setUnit(MetricUnit.KW.name());
-         peakPower.setValueNum(Double.parseDouble(peakPower.translateUnit(String.valueOf(powerMetricsData.getPeakPower()),
-               metricUnitMap.get(powerMetricsData.getPeakPowerUnit()), MetricUnit.KW)));
+         peakPower.setUnit(MetricUnit.kW.name());
+         peakPower.setValueNum(peakPower.translateUnit(powerMetricsData.getPeakPower(),
+               metricUnitMap.get(powerMetricsData.getPeakPowerUnit()), MetricUnit.kW));
          metricNameAndValueUnitMap.put(MetricName.SERVER_PEAK_USED_POWER, peakPower);
 
          ValueUnit minimumPower = new ValueUnit();
@@ -583,9 +583,9 @@ public class OpenManageJobService implements AsyncService{
          String sinceAndMinimum = String.valueOf(sinceTime) + FlowgateConstant.SEPARATOR + String.valueOf(minimumTime);
          minimumPower.setExtraidentifier(sinceAndMinimum);
          minimumPower.setKey(MetricName.SERVER_MINIMUM_USED_POWER);
-         minimumPower.setUnit(MetricUnit.KW.name());
-         minimumPower.setValueNum(Double.parseDouble(minimumPower.translateUnit(String.valueOf(powerMetricsData.getMinimumPower()),
-               metricUnitMap.get(powerMetricsData.getPeakPowerUnit()), MetricUnit.KW)));
+         minimumPower.setUnit(MetricUnit.kW.name());
+         minimumPower.setValueNum(minimumPower.translateUnit(powerMetricsData.getMinimumPower(),
+               metricUnitMap.get(powerMetricsData.getPeakPowerUnit()), MetricUnit.kW));
          metricNameAndValueUnitMap.put(MetricName.SERVER_MINIMUM_USED_POWER, minimumPower);
       }
       //Temperature metrics data from the Openmanage base API
@@ -595,8 +595,8 @@ public class OpenManageJobService implements AsyncService{
          temperature.setKey(MetricName.SERVER_TEMPERATURE);
          temperature.setTime(currentTime);
          temperature.setUnit(MetricUnit.C.name());
-         temperature.setValueNum(Double.parseDouble(temperature.translateUnit(String.valueOf(temperatureMetrics.getInstantaneousTemperature()),
-               metricUnitMap.get(temperatureMetrics.getInstantaneousTemperatureUnit()), MetricUnit.C)));
+         temperature.setValueNum(temperature.translateUnit(temperatureMetrics.getInstantaneousTemperature(),
+               metricUnitMap.get(temperatureMetrics.getInstantaneousTemperatureUnit()), MetricUnit.C));
          metricNameAndValueUnitMap.put(MetricName.SERVER_TEMPERATURE, temperature);
 
          long startTime = WormholeDateFormat.cimDateToMilliseconds(temperatureMetrics.getStartTime());
@@ -605,8 +605,8 @@ public class OpenManageJobService implements AsyncService{
          avgTemperature.setExtraidentifier(String.valueOf(startTime));
          avgTemperature.setTime(currentTime);
          avgTemperature.setUnit(MetricUnit.C.name());
-         avgTemperature.setValueNum(Double.parseDouble(avgTemperature.translateUnit(String.valueOf(temperatureMetrics.getAvgTemperature()),
-               metricUnitMap.get(temperatureMetrics.getAvgTemperatureUnit()), MetricUnit.C)));
+         avgTemperature.setValueNum(avgTemperature.translateUnit(temperatureMetrics.getAvgTemperature(),
+               metricUnitMap.get(temperatureMetrics.getAvgTemperatureUnit()), MetricUnit.C));
          metricNameAndValueUnitMap.put(MetricName.SERVER_AVERAGE_TEMPERATURE, avgTemperature);
 
          ValueUnit peakTemperature = new ValueUnit();
@@ -616,8 +616,8 @@ public class OpenManageJobService implements AsyncService{
          peakTemperature.setExtraidentifier(startAndPeakTime);
          peakTemperature.setTime(currentTime);
          peakTemperature.setUnit(MetricUnit.C.name());
-         peakTemperature.setValueNum(Double.parseDouble(peakTemperature.translateUnit(String.valueOf(temperatureMetrics.getPeakTemperature()),
-               metricUnitMap.get(temperatureMetrics.getPeakTemperatureUnit()), MetricUnit.C)));
+         peakTemperature.setValueNum(peakTemperature.translateUnit(temperatureMetrics.getPeakTemperature(),
+               metricUnitMap.get(temperatureMetrics.getPeakTemperatureUnit()), MetricUnit.C));
          metricNameAndValueUnitMap.put(MetricName.SERVER_PEAK_TEMPERATURE, peakTemperature);
       }
       //get metrics form power Manage plugin
@@ -657,15 +657,15 @@ public class OpenManageJobService implements AsyncService{
                ValueUnit instantPower = new ValueUnit();
                instantPower.setKey(MetricName.SERVER_POWER);
                instantPower.setTime(currentTime);
-               instantPower.setUnit(MetricUnit.KW.name());
+               instantPower.setUnit(MetricUnit.kW.name());
                int unitValue =
                      powerSettingTypeAndValueMap.get(PowerSettingType.PowerUnit.getValue());
                //PowerUnit1 : watt
                //PowerUnit2 : BtuPerHr
                MetricUnit powerSourceUnit =
                      metricUnitMap.get(PowerSettingType.PowerUnit.name() + unitValue);
-               instantPower.setValueNum(Double.valueOf(instantPower.translateUnit(
-                     String.valueOf(metric.getValue()), powerSourceUnit, MetricUnit.KW)));
+               instantPower.setValueNum(instantPower.translateUnit(
+                     metric.getValue(), powerSourceUnit, MetricUnit.kW));
                metricNameAndValueUnitMap.put(MetricName.SERVER_POWER, instantPower);
 
             }else if (MetricType.INSTANT_TEMP.getValue() == metric.getType()) {
@@ -677,8 +677,8 @@ public class OpenManageJobService implements AsyncService{
                      powerSettingTypeAndValueMap.get(PowerSettingType.TemperatureUnit.getValue());
                MetricUnit temperatureSourceUnit =
                      metricUnitMap.get(PowerSettingType.TemperatureUnit.name() + unitValue);
-               inletTemperature.setValueNum(Double.valueOf(inletTemperature.translateUnit(
-                     String.valueOf(metric.getValue()), temperatureSourceUnit, MetricUnit.C)));
+               inletTemperature.setValueNum(inletTemperature.translateUnit(
+                     metric.getValue(), temperatureSourceUnit, MetricUnit.C));
                metricNameAndValueUnitMap.put(MetricName.SERVER_FRONT_TEMPERATURE, inletTemperature);
             }
          }

@@ -623,7 +623,7 @@ public class VCDataService implements AsyncService {
                      case VCConstants.HOST_CPU_GROUP + VCConstants.HOST_METRIC_USAGE:
                         valueUnit.setKey(MetricName.SERVER_CPUUSAGE);
                         valueUnit.setValueNum(value / 100.0);
-                        valueUnit.setUnit(ValueUnit.MetricUnit.PERCENT.name());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.percent.name());
                         break;
                      case VCConstants.HOST_CPU_GROUP + VCConstants.HOST_METRIC_USAGEMHZ:
                         valueUnit.setKey(MetricName.SERVER_CPUUSEDINMHZ);
@@ -633,53 +633,53 @@ public class VCDataService implements AsyncService {
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_USAGE:
                         valueUnit.setKey(MetricName.SERVER_MEMORYUSAGE);
                         valueUnit.setValueNum(value / 100.0);
-                        valueUnit.setUnit(ValueUnit.MetricUnit.PERCENT.name());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.percent.name());
                         break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_ACTIVE:
                         valueUnit.setKey(MetricName.SERVER_ACTIVEMEMORY);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(ValueUnit.MetricUnit.KB.name());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.kB.name());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_SHARED:
                         valueUnit.setKey(MetricName.SERVER_SHAREDMEMORY);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(ValueUnit.MetricUnit.KB.name());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.kB.name());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_CONSUMED:
                         valueUnit.setKey(MetricName.SERVER_CONSUMEDMEMORY);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(ValueUnit.MetricUnit.KB.name());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.kB.name());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_SWAP:
                         valueUnit.setKey(MetricName.SERVER_SWAPMEMORY);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(ValueUnit.MetricUnit.KB.name());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.kB.name());
                      break;
                      case VCConstants.HOST_MEMORY_GROUP + VCConstants.HOST_METRIC_MEM_BALLON:
                         valueUnit.setKey(MetricName.SERVER_BALLOONMEMORY);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(ValueUnit.MetricUnit.KB.name());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.kB.name());
                      break;
                      case VCConstants.HOST_DISK_GROUP + VCConstants.HOST_METRIC_USAGE:
                         valueUnit.setKey(MetricName.SERVER_STORAGEIORATEUSAGE);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(ValueUnit.MetricUnit.KBps.name());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.kBps.name());
                      break;
                      case VCConstants.HOST_NETWORK_GROUP + VCConstants.HOST_METRIC_USAGE:
                         valueUnit.setKey(MetricName.SERVER_NETWORKUTILIZATION);
                         valueUnit.setValueNum(value);
-                        valueUnit.setUnit(ValueUnit.MetricUnit.KBps.name());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.kBps.name());
                      break;
                      case VCConstants.HOST_POWER_GROUP + VCConstants.HOST_METRIC_POWER_POWER:
                         valueUnit.setKey(MetricName.SERVER_POWER);
-                        valueUnit.setValueNum(valueUnit.translateUnit(value, ValueUnit.MetricUnit.W, ValueUnit.MetricUnit.KW));
-                        valueUnit.setUnit(ValueUnit.MetricUnit.KW.name());
+                        valueUnit.setValueNum(valueUnit.translateUnit(value, ValueUnit.MetricUnit.W, ValueUnit.MetricUnit.kW));
+                        valueUnit.setUnit(ValueUnit.MetricUnit.kW.name());
                         powerValueUnits.add(valueUnit);
                      break;
                      case VCConstants.HOST_POWER_GROUP + VCConstants.HOST_METRIC_POWER_ENERGY:
                         valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
                         valueUnit.setValueNum(value * JOULETOKWHRATE);
-                        valueUnit.setUnit(ValueUnit.MetricUnit.KWH.name());
+                        valueUnit.setUnit(ValueUnit.MetricUnit.kWh.name());
                      break;
                   }
                   valueUnit.setTime(timeStamp);
@@ -753,7 +753,7 @@ public class VCDataService implements AsyncService {
       maxValueUnit.setExtraidentifier(startTime + FlowgateConstant.SEPARATOR + maxValueUnit.getTime());
       maxValueUnit.setTime(endTime);
 
-      averageValueUnit.setValueNum(sum / (double)valueUnits.size());
+      averageValueUnit.setValueNum(sum / valueUnits.size());
       averageValueUnit.setExtraidentifier(String.valueOf(startTime));
       averageValueUnit.setTime(endTime);
 
