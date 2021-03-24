@@ -123,8 +123,7 @@ saveDockerImages(){
 	docker save flowgate/vro-worker:$FLOWGATE_VERSION flowgate/vc-worker:$FLOWGATE_VERSION flowgate/nlyte-worker:$FLOWGATE_VERSION \
 	flowgate/management:$FLOWGATE_VERSION flowgate/infoblox-worker:$FLOWGATE_VERSION flowgate/labsdb-worker:$FLOWGATE_VERSION \
 	flowgate/poweriq-worker:$FLOWGATE_VERSION flowgate/aggregator:$FLOWGATE_VERSION flowgate/api:$FLOWGATE_VERSION \
-	flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION >> $FLOWGATEIMAGESTAR \
-	flowgate/openmanage:$FLOWGATE_VERSION
+	flowgate/redis:$FLOWGATE_VERSION flowgate/database:$FLOWGATE_VERSION flowgate/openmanage:$FLOWGATE_VERSION >> $FLOWGATEIMAGESTAR
 	mkdir flowgate
 	mkdir -p flowgate/docker-images-output
 	mkdir -p flowgate/maven-docker-build
