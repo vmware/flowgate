@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.poweriqworker.jobtest;
 
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyLong;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -205,7 +205,7 @@ public class SyncRealTimeDataJobTest {
       Map<String,Map<String,String>> map = new HashMap<String,Map<String,String>>();
       map.put("123", pduInfoMap);
       HashMap<AdvanceSettingType,String> advanceSetting = createAdvanceSettingMap();
-      advanceSetting.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.KW.toString());
+      advanceSetting.put(AdvanceSettingType.PDU_POWER_UNIT, MetricUnit.kW.toString());
       advanceSetting.put(AdvanceSettingType.PDU_VOLT_UNIT, MetricUnit.V.toString());
       advanceSetting.put(AdvanceSettingType.PDU_AMPS_UNIT, MetricUnit.A.toString());
       List<RealTimeData> realTimeDatas = powerIQService.getRealTimeDatas(map, powerIQAPIClient, advanceSetting);

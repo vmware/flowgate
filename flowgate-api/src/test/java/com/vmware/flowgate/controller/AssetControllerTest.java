@@ -2599,7 +2599,7 @@ public class AssetControllerTest {
       valueUnit.setTime(time);
       valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR);
       valueUnit.setKey(MetricName.SERVER_MINIMUM_USED_POWER);
-      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setUnit(MetricUnit.kW.toString());
       valueUnit.setValueNum(0.5);
       valueUnits.add(valueUnit);
 
@@ -2607,14 +2607,14 @@ public class AssetControllerTest {
       valueUnit.setTime(time);
       valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR);
       valueUnit.setKey(MetricName.SERVER_PEAK_USED_POWER);
-      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setUnit(MetricUnit.kW.toString());
       valueUnit.setValueNum(0.8);
       valueUnits.add(valueUnit);
 
       valueUnit = new ValueUnit();
       valueUnit.setTime(time);
       valueUnit.setKey(MetricName.SERVER_AVERAGE_USED_POWER);
-      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setUnit(MetricUnit.kW.toString());
       valueUnit.setValueNum(0.6);
       valueUnits.add(valueUnit);
 
@@ -2622,7 +2622,7 @@ public class AssetControllerTest {
       valueUnit.setTime(time);
       valueUnit.setExtraidentifier(sinceTime);
       valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
-      valueUnit.setUnit(MetricUnit.KWH.toString());
+      valueUnit.setUnit(MetricUnit.kWh.toString());
       valueUnit.setValueNum(356);
       valueUnits.add(valueUnit);
 
@@ -3200,7 +3200,7 @@ public class AssetControllerTest {
 
       ValueUnit valueunitActivePower = new ValueUnit();
       valueunitActivePower.setKey(MetricName.PDU_ACTIVE_POWER);
-      valueunitActivePower.setUnit(MetricUnit.KW.toString());
+      valueunitActivePower.setUnit(MetricUnit.kW.toString());
       valueunitActivePower.setExtraidentifier("OUTLET:7");
       valueunitActivePower.setValueNum(0.2);
       valueunitActivePower.setTime(time);
@@ -3358,7 +3358,7 @@ public class AssetControllerTest {
       valueUnit = new ValueUnit();
       valueUnit.setTime(time);
       valueUnit.setKey(MetricName.SERVER_POWER);
-      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setUnit(MetricUnit.kW.toString());
       valueUnit.setValueNum(0.56);
       valueUnits.add(valueUnit);
 
@@ -3368,7 +3368,7 @@ public class AssetControllerTest {
       valueUnit.setTime(time);
       valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR + minimumPowerTime);
       valueUnit.setKey(MetricName.SERVER_MINIMUM_USED_POWER);
-      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setUnit(MetricUnit.kW.toString());
       valueUnit.setValueNum(0.5);
       valueUnits.add(valueUnit);
 
@@ -3377,7 +3377,7 @@ public class AssetControllerTest {
       valueUnit.setTime(time);
       valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR + peakPowerTime);
       valueUnit.setKey(MetricName.SERVER_PEAK_USED_POWER);
-      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setUnit(MetricUnit.kW.toString());
       valueUnit.setValueNum(0.8);
       valueUnits.add(valueUnit);
 
@@ -3385,7 +3385,7 @@ public class AssetControllerTest {
       valueUnit.setTime(time);
       valueUnit.setExtraidentifier(sinceTime);
       valueUnit.setKey(MetricName.SERVER_AVERAGE_USED_POWER);
-      valueUnit.setUnit(MetricUnit.KW.toString());
+      valueUnit.setUnit(MetricUnit.kW.toString());
       valueUnit.setValueNum(0.6);
       valueUnits.add(valueUnit);
 
@@ -3393,7 +3393,7 @@ public class AssetControllerTest {
       valueUnit.setTime(time);
       valueUnit.setExtraidentifier(sinceTime);
       valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
-      valueUnit.setUnit(MetricUnit.KWH.toString());
+      valueUnit.setUnit(MetricUnit.kWh.toString());
       valueUnit.setValueNum(356);
       valueUnits.add(valueUnit);
 
@@ -3411,7 +3411,7 @@ public class AssetControllerTest {
       totalPowerValueUnit.setKey(MetricName.PDU_TOTAL_POWER);
       totalPowerValueUnit.setValueNum(1.033);
       totalPowerValueUnit.setTime(time);
-      totalPowerValueUnit.setUnit(RealtimeDataUnit.KW.toString());
+      totalPowerValueUnit.setUnit(MetricUnit.kW.toString());
       valueunits.add(totalPowerValueUnit);
 
       ValueUnit totalCurrentValueUnit = new ValueUnit();
@@ -3426,7 +3426,7 @@ public class AssetControllerTest {
       apparentPowerValueUnit.setValueNum(1.033);
       apparentPowerValueUnit.setExtraidentifier("OUTLET:7");
       apparentPowerValueUnit.setTime(time);
-      apparentPowerValueUnit.setUnit(RealtimeDataUnit.KW.toString());
+      apparentPowerValueUnit.setUnit(MetricUnit.kW.toString());
       valueunits.add(apparentPowerValueUnit);
 
       ValueUnit currentValueUnit = new ValueUnit();
@@ -3480,7 +3480,7 @@ public class AssetControllerTest {
       ValueUnit humidityValue = new ValueUnit();
       humidityValue.setValueNum(20);
       humidityValue.setTime(time);
-      humidityValue.setUnit(MetricUnit.PERCENT.toString());
+      humidityValue.setUnit(MetricUnit.percent.toString());
       humidityValue.setKey(MetricName.HUMIDITY);
       valueunits.add(humidityValue);
 
