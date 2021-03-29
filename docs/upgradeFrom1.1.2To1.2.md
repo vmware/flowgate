@@ -14,13 +14,13 @@
     tar -cvf backup.tar /opt/vmware/flowgate/conf/ /opt/vmware/flowgate/data/ /opt/vmware/flowgate/docker-compose.run.images.yml
     ```
 5. Run upgrade.sh
-    ```shell
+	```shell
 	$ cd flowgate/script/1.2.0
-    $ ./upgrade.sh
-
-    .
-    .
-    .
-    Step 4/4 : Restarting flowgate
-    Flowgate started successfully
-    ```
+	$ ./upgrade.sh
+	```
+	If everything works properly, you can get the below message: 
+	``` 
+	...
+	Step 4/4 : Restarting flowgate
+	Flowgate started
+	```

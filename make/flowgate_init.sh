@@ -37,14 +37,6 @@ chown -R 10000:10000 $FLOWGATEOPTDIR/data/redis
 chmod a+x $FLOWGATEOPTDIR/conf/database/init.sh
 chmod a+x $FLOWGATEOPTDIR/conf/database/initData.sh
 
-SEDPROJECT=("flowgate-api" "vro-worker" "nlyte-worker" "poweriq-worker" "management" "infoblox-worker" "aggregator" "vc-worker" "labsdb-worker" "openmanage")
-for j in "${SEDPROJECT[@]}"
-do
-    sed -i -e 's/spring.couchbase.bootstrap-hosts=localhost/spring.couchbase.bootstrap-hosts=database/' $FLOWGATEOPTDIR/conf/$j/application.properties
-    sed -i -e 's/spring.redis.host=localhost/spring.redis.host=redis/' $FLOWGATEOPTDIR/conf/$j/application.properties
-    sed -i -e 's/apiserver.url=http:\/\/localhost/apiserver.url=http:\/\/flowgate-api/' $FLOWGATEOPTDIR/conf/$j/application.properties
-done
-
 ADMINPASSWD=$(openssl rand 32|sha256sum|head -c 24)
 sed -i -e "s/ADMINPASSWD_CHANGE/$ADMINPASSWD/g" $FLOWGATEOPTDIR/conf/database/init.sh
 

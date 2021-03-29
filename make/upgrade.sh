@@ -5,6 +5,14 @@
 #
 CURRENTPATH=`pwd`
 SOURCEDIR=$CURRENTPATH/../../
+is_root() {
+	if [ $(id -u) -ne 0 ]; 
+	then
+		echo "Please run as root user"
+		exit 1
+	fi
+}
+is_root
 echo 'Step 1/4 : Importing new docker images'
 if [ -f "$SOURCEDIR/docker-images-output/flowgate.tar" ]
 then
@@ -24,11 +32,9 @@ DOCKER_COMPOSE_YML_1_1_2="/opt/vmware/flowgate/docker-compose.run.images.yml"
 
 if [ -f "$SOURCEDIR/conf.tar.gz" ]
 then
-	tar -xvf $SOURCEDIR/conf.tar.gz -C ~/flowgate/
+	tar -xvf $SOURCEDIR/conf.tar.gz -C $SOURCEDIR
 	cp -r $SOURCEDIR/conf/openmanage /opt/vmware/flowgate/conf
 	sed -i -e "s/REDISPASSWD_CHANGE/$REDISPASSWD/" $OPENMANAGECONFIGFILE
-	sed -i -e "s/spring.redis.host=localhost/spring.redis.host=redis/" $OPENMANAGECONFIGFILE
-	sed -i -e "s/apiserver.url=http:\/\/localhost/apiserver.url=http:\/\/flowgate-api/" $OPENMANAGECONFIGFILE
 	if [ -f $DOCKER_COMPOSE_YML_1_1_2 ];then
 		CURRENT_TIMESTAMP=$(($(date +%s%N)/1000000))
 		cp $DOCKER_COMPOSE_YML_1_1_2 /opt/vmware/flowgate/docker-compose.run.images-backup-$CURRENT_TIMESTAMP.yml
@@ -47,6 +53,7 @@ DBPASSWORD=$(grep "^spring.couchbase.bucket.password" $APICONFIEFILE  | cut -d'=
 BUCKETNAME=$(grep "^spring.couchbase.bucket.name" $APICONFIEFILE  | cut -d'=' -f2 | xargs)
 
 docker-compose -f /opt/vmware/flowgate/docker-compose.run.images.yml up -d database
+sleep 10
 docker cp upgradeFrom1.1.2To1.2.sql flowgate-database-container:/tmp/
 COUNTER=0
 while [[ $COUNTER -lt 20 ]];do
@@ -65,4 +72,4 @@ done
 echo "Step 4/4 : Restarting flowgate"
 systemctl daemon-reload
 systemctl start flowgate
-echo "Flowgate started successfully"
+echo "Flowgate started"
