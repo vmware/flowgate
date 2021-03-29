@@ -244,6 +244,8 @@ public class AssetService {
       specialMetricNames.add(MetricName.SERVER_PEAK_USED_POWER);
       specialMetricNames.add(MetricName.SERVER_MINIMUM_USED_POWER);
       specialMetricNames.add(MetricName.SERVER_ENERGY_CONSUMPTION);
+      specialMetricNames.add(MetricName.SERVER_AVERAGE_TEMPERATURE);
+      specialMetricNames.add(MetricName.SERVER_PEAK_TEMPERATURE);
       MetricData metricData;
       for (Map.Entry<String, List<RealTimeData>> realtimeDataEntry : realtimeDataMap.entrySet()) {
          List<String> metricsNameList = assetIdAndMetricsNameList.get(realtimeDataEntry.getKey());
@@ -284,6 +286,20 @@ public class AssetService {
                   case MetricName.SERVER_ENERGY_CONSUMPTION:
                      //Time of energy consumption is since time
                      timestamp = Long.valueOf(extraInfo);
+                     break;
+                  case MetricName.SERVER_AVERAGE_TEMPERATURE:
+                     //Time of average temperature is since time
+                     timestamp = Long.valueOf(extraInfo);
+                     break;
+                  case MetricName.SERVER_PEAK_TEMPERATURE:
+                     //Time of energy consumption is since time
+                     String[] temperatureSinceTimeAndPeakTime = extraInfo.split(FlowgateConstant.SEPARATOR);
+                     if(temperatureSinceTimeAndPeakTime.length < TIMESTAMPARRAYLENGTH) {
+                        logger.error("The extraInfo of {} is invalid,RealtimeData Id: {}", metricName, realTimeData.getId());
+                        continue;
+                     }
+                     //Time of PeakTemperature is peak time
+                     timestamp = Long.valueOf(temperatureSinceTimeAndPeakTime[1]);
                      break;
                   default:
                      //Time of other host metric is valueUnit current time
