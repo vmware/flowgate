@@ -2349,8 +2349,12 @@ public class AssetControllerTest {
                TestCase.assertEquals(serverdata.getValueNum(), 0.60);
             } else if (MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 356.00);
+            } else if (MetricName.SERVER_AVERAGE_TEMPERATURE.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 24.00);
+            } else if (MetricName.SERVER_PEAK_TEMPERATURE.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 30.00);
             } else {
-               TestCase.fail("Unknown metric :"+ metricName);
+               TestCase.fail("Unknown metric :" + metricName);
             }
           }
       }finally {
@@ -3034,18 +3038,22 @@ public class AssetControllerTest {
                } else if (serverdata.getTimeStamp() == currentTime + 300000) {
                   TestCase.assertEquals(serverdata.getValueNum(), 61.00);
                }
-            }else if(MetricName.SERVER_POWER.equals(metricName)) {
+            } else if (MetricName.SERVER_POWER.equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 0.56);
-            }else if(MetricName.SERVER_PEAK_USED_POWER.equals(metricName)) {
+            } else if (MetricName.SERVER_PEAK_USED_POWER.equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 0.80);
-            }else if(MetricName.SERVER_MINIMUM_USED_POWER.equals(metricName)) {
+            } else if (MetricName.SERVER_MINIMUM_USED_POWER.equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 0.50);
-            }else if(MetricName.SERVER_AVERAGE_USED_POWER.equals(metricName)) {
+            } else if (MetricName.SERVER_AVERAGE_USED_POWER.equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 0.60);
-            }else if(MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
+            } else if (MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
                TestCase.assertEquals(serverdata.getValueNum(), 356.00);
-            }else {
-               TestCase.fail("Unknown metric :"+ metricName);
+            } else if (MetricName.SERVER_AVERAGE_TEMPERATURE.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 24.00);
+            } else if (MetricName.SERVER_PEAK_TEMPERATURE.equals(metricName)) {
+               TestCase.assertEquals(serverdata.getValueNum(), 30.00);
+            } else {
+               TestCase.fail("Unknown metric :" + metricName);
             }
          }
       }finally {
@@ -3395,6 +3403,22 @@ public class AssetControllerTest {
       valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
       valueUnit.setUnit(MetricUnit.kWh.toString());
       valueUnit.setValueNum(356);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime);
+      valueUnit.setKey(MetricName.SERVER_AVERAGE_TEMPERATURE);
+      valueUnit.setUnit(MetricUnit.C.toString());
+      valueUnit.setValueNum(24);
+      valueUnits.add(valueUnit);
+
+      valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setExtraidentifier(sinceTime);
+      valueUnit.setKey(MetricName.SERVER_PEAK_TEMPERATURE);
+      valueUnit.setUnit(MetricUnit.C.toString());
+      valueUnit.setValueNum(30);
       valueUnits.add(valueUnit);
 
       RealTimeData realTimeData = new RealTimeData();
