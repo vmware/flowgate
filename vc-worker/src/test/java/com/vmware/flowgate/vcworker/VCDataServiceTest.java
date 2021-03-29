@@ -608,7 +608,7 @@ public class VCDataServiceTest {
       PerformanceManager performanceManager = Mockito.mock(PerformanceManager.class);
       when(vsphereClient.getPerformanceManager()).thenReturn(performanceManager);
 
-      CounterInfo[] counterInfos = new CounterInfo[2];
+      CounterInfo[] counterInfos = new CounterInfo[3];
       counterInfos[0] = Mockito.mock(CounterInfo.class);
       when(counterInfos[0].getKey()).thenReturn(1);
       ElementDescription edGroup = Mockito.mock(ElementDescription.class);
@@ -627,15 +627,27 @@ public class VCDataServiceTest {
       when(counterInfos[1].getNameInfo()).thenReturn(edName1);
       when(edName1.getKey()).thenReturn(VCConstants.HOST_METRIC_USAGE);
 
+      counterInfos[2] = Mockito.mock(CounterInfo.class);
+      when(counterInfos[2].getKey()).thenReturn(3);
+      ElementDescription edGroup2 = Mockito.mock(ElementDescription.class);
+      when(counterInfos[2].getGroupInfo()).thenReturn(edGroup2);
+      when(edGroup2.getKey()).thenReturn(VCConstants.HOST_POWER_GROUP);
+      ElementDescription edName2 = Mockito.mock(ElementDescription.class);
+      when(counterInfos[2].getNameInfo()).thenReturn(edName2);
+      when(edName2.getKey()).thenReturn(VCConstants.HOST_METRIC_POWER_ENERGY);
+
       when(performanceManager.getPerfCounter()).thenReturn(counterInfos);
 
-      MetricId[] metrics = new MetricId[2];
+      MetricId[] metrics = new MetricId[3];
       metrics[0] = Mockito.mock(MetricId.class);
       metrics[1] = Mockito.mock(MetricId.class);
+      metrics[2] = Mockito.mock(MetricId.class);
       when(metrics[0].getCounterId()).thenReturn(1);
       when(metrics[1].getCounterId()).thenReturn(2);
+      when(metrics[2].getCounterId()).thenReturn(3);
       when(metrics[0].getInstance()).thenReturn(null);
       when(metrics[1].getInstance()).thenReturn(null);
+      when(metrics[2].getInstance()).thenReturn(null);
 
       when(performanceManager.queryAvailableMetric(host._getRef(), null, null, new Integer(20))).thenReturn(metrics);
 
@@ -643,11 +655,11 @@ public class VCDataServiceTest {
       when(summary.getRefreshRate()).thenReturn(1);
       when(performanceManager.queryProviderSummary(host._getRef())).thenReturn(summary);
 
-      EntityMetric[] metricBase = new EntityMetric[2];
+      EntityMetric[] metricBase = new EntityMetric[3];
       metricBase[0] = Mockito.mock(EntityMetric.class);
-      long[] values = {1L, 2L};
+      long[] values = {1L, 2L, 3L};
 
-      IntSeries[] metricSerieses1 = new IntSeries[2];
+      IntSeries[] metricSerieses1 = new IntSeries[3];
       metricSerieses1[0] = Mockito.mock(IntSeries.class);
       MetricId metricID = Mockito.mock(MetricId.class);
       when(metricSerieses1[0].getId()).thenReturn(metricID);
@@ -666,10 +678,19 @@ public class VCDataServiceTest {
       intSeries2 = metricSerieses1[1];
       when(intSeries2.getValue()).thenReturn(values);
 
+      MetricId metricID2 = Mockito.mock(MetricId.class);
+      metricSerieses1[2] = Mockito.mock(IntSeries.class);
+      when(metricSerieses1[2].getId()).thenReturn(metricID2);
+      when(metricID2.getCounterId()).thenReturn(3);
+
+      IntSeries intSeries3 = Mockito.mock(IntSeries.class);
+      intSeries3 = metricSerieses1[2];
+      when(intSeries3.getValue()).thenReturn(values);
+
       when(metricID.getCounterId()).thenReturn(2);
       when(metricBase[0].getValue()).thenReturn(metricSerieses1);
 
-      SampleInfo[] sampleInfos1 = new SampleInfo[2];
+      SampleInfo[] sampleInfos1 = new SampleInfo[3];
       sampleInfos1[0] = Mockito.mock(SampleInfo.class);
       Calendar time = Calendar.getInstance();
       when(sampleInfos1[0].getTimestamp()).thenReturn(time);
@@ -677,11 +698,18 @@ public class VCDataServiceTest {
       sampleInfos1[1] = Mockito.mock(SampleInfo.class);
       when(sampleInfos1[1].getTimestamp()).thenReturn(time);
 
+      sampleInfos1[2] = Mockito.mock(SampleInfo.class);
+      when(sampleInfos1[2].getTimestamp()).thenReturn(time);
+
       when(metricBase[0].getSampleInfo()).thenReturn(sampleInfos1);
 
       metricBase[1] = Mockito.mock(EntityMetric.class);
       when(metricBase[1].getValue()).thenReturn(metricSerieses1);
       when(metricBase[1].getSampleInfo()).thenReturn(sampleInfos1);
+
+      metricBase[2] = Mockito.mock(EntityMetric.class);
+      when(metricBase[2].getValue()).thenReturn(metricSerieses1);
+      when(metricBase[2].getSampleInfo()).thenReturn(sampleInfos1);
 
       when(performanceManager.queryStats(any())).thenReturn(metricBase);
 

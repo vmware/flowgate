@@ -678,6 +678,8 @@ public class VCDataService implements AsyncService {
                      break;
                      case VCConstants.HOST_POWER_GROUP + VCConstants.HOST_METRIC_POWER_ENERGY:
                         valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
+                        // This extraidentifier is the start time
+                        valueUnit.setExtraidentifier(String.valueOf(timeStamp - (perfInterval * 1000)));
                         valueUnit.setValueNum(value * JOULETOKWHRATE);
                         valueUnit.setUnit(ValueUnit.MetricUnit.kWh.name());
                      break;
