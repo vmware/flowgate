@@ -98,13 +98,18 @@ public class AssetService {
       databaseUnitAndOutputUnitMap = Collections.unmodifiableMap(databaseUnitAndOutputUnitMap);
    }
 
-   public List<MetricData> getPduMetricsDataById(String assetID, long starttime, int duration){
+   public List<MetricData> getPduMetricsDataById(String assetID, long starttime,
+         int duration, boolean isDuration){
       Optional<Asset> pduAssetOptional = assetRepository.findById(assetID);
       if(!pduAssetOptional.isPresent()) {
          return null;
       }
-      List<RealTimeData> pduMetricsRealtimeDatas =
-            realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
+      List<RealTimeData> pduMetricsRealtimeDatas = null;
+      if(isDuration) {
+         pduMetricsRealtimeDatas = realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
+      }else {
+         pduMetricsRealtimeDatas = realtimeDataRepository.getLatestDataByAssetID(assetID, starttime, duration);
+      }
       List<ValueUnit> valueunits = new ArrayList<>();
 
       List<String> metricNames = new ArrayList<String>();
@@ -136,18 +141,19 @@ public class AssetService {
          Map<String,String> humidityLocationAndIdMap = sensorFormulasMap.get(MetricName.PDU_HUMIDITY);
          if (humidityLocationAndIdMap != null && !humidityLocationAndIdMap.isEmpty()) {
             valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,duration,
-                  humidityLocationAndIdMap, MetricName.PDU_HUMIDITY));
+                  humidityLocationAndIdMap, MetricName.PDU_HUMIDITY, isDuration));
          }
          Map<String,String> temperatureLocationAndIdMap = sensorFormulasMap.get(MetricName.PDU_TEMPERATURE);
          if(temperatureLocationAndIdMap != null && !temperatureLocationAndIdMap.isEmpty()) {
             valueunits.addAll(generateSensorValueUnit(assetIdAndRealtimeDataMap, starttime,duration,
-                  temperatureLocationAndIdMap, MetricName.PDU_TEMPERATURE));
+                  temperatureLocationAndIdMap, MetricName.PDU_TEMPERATURE, isDuration));
          }
       }
       return generateMetricsDataForPDU(valueunits);
    }
 
-   public List<MetricData> getServerMetricsDataById(String assetID, long starttime, int duration){
+   public List<MetricData> getServerMetricsDataById(String assetID, long starttime,
+         int duration, boolean isDuration){
       Optional<Asset> serverAssetOptional = assetRepository.findById(assetID);
       if(!serverAssetOptional.isPresent()) {
          throw WormholeRequestException.NotFound("asset", "id", assetID);
@@ -159,7 +165,7 @@ public class AssetService {
          return result;
       }
 
-      result.addAll(getServerHostMetric(server, starttime, duration));
+      result.addAll(getServerHostMetric(server, starttime, duration, isDuration));
 
       Map<String,String> justficationfileds = server.getJustificationfields();
       String allPduPortInfo = justficationfileds.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
@@ -191,8 +197,12 @@ public class AssetService {
          metricNames.add(MetricName.PDU_POWER_LOAD);
          metricNames.add(MetricName.PDU_CURRENT_LOAD);
          for(String pduId : pduMetrics.keySet()) {
-            List<RealTimeData> realtimedatas =
-                  realtimeDataRepository.getDataByIDAndTimeRange(pduId, starttime, duration);
+            List<RealTimeData> realtimedatas = null;
+            if(isDuration) {
+               realtimedatas = realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
+            }else {
+               realtimedatas = realtimeDataRepository.getLatestDataByAssetID(assetID, starttime, duration);
+            }
             List<ValueUnit> valueUnits = getValueUnits(realtimedatas, metricNames);
             String outlet = UnknownOulet;
             if(pduAssetIdAndUsedOutletMap != null) {
@@ -212,14 +222,14 @@ public class AssetService {
             Map<String, String> locationAndIdMap = sensorFormula.getValue();
             String metricName = sensorFormula.getKey();
             List<ValueUnit> valueUnits = generateSensorValueUnit(assetIdAndRealtimeDataMap,
-                  starttime, duration, locationAndIdMap, metricName);
+                  starttime, duration, locationAndIdMap, metricName, isDuration);
             result.addAll(generateServerSensorMetricData(valueUnits, metricName));
          }
       }
       return result;
    }
 
-   private List<MetricData> getServerHostMetric(Asset server, long starttime, int duration) {
+   private List<MetricData> getServerHostMetric(Asset server, long starttime, int duration, boolean isDuration) {
       List<MetricData> metricDataList = Lists.newArrayList();
       String hostMetricsFormulaString = server.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
       if (StringUtils.isBlank(hostMetricsFormulaString)) {
@@ -237,7 +247,14 @@ public class AssetService {
 
       Map<String, List<RealTimeData>> realtimeDataMap = Maps.newHashMap();
       for (Map.Entry<String, List<String>> entry : assetIdAndMetricsNameList.entrySet()) {
-         realtimeDataMap.put(entry.getKey(), realtimeDataRepository.getDataByIDAndTimeRange(entry.getKey(), starttime, duration));
+         String assetID = entry.getKey();
+         List<RealTimeData> realtimedatas = null;
+         if(isDuration) {
+            realtimedatas = realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
+         }else {
+            realtimedatas = realtimeDataRepository.getLatestDataByAssetID(assetID, starttime, duration);
+         }
+         realtimeDataMap.put(assetID, realtimedatas);
       }
       Set<String> specialMetricNames = new HashSet<String>();
       specialMetricNames.add(MetricName.SERVER_AVERAGE_USED_POWER);
@@ -324,18 +341,26 @@ public class AssetService {
       return metricDataList;
    }
 
-   private List<MetricData> getOtherMetricsDataById(String assetID, Long starttime, Integer duration) {
+   private List<MetricData> getOtherMetricsDataById(String assetID, Long starttime,
+         Integer duration, boolean isDuration) {
       List<MetricData> metricDataList = new ArrayList<>();
-      List<RealTimeData> realTimeData = realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
-      if (realTimeData == null || realTimeData.isEmpty()) {
+      List<RealTimeData> realTimeDatas = null;
+      if(isDuration) {
+         realTimeDatas = realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
+      }else {
+         realTimeDatas = realtimeDataRepository.getLatestDataByAssetID(assetID, starttime, duration);
+      }
+      if (realTimeDatas == null || realTimeDatas.isEmpty()) {
          return metricDataList;
       }
-      RealTimeData latestData = findLatestData(realTimeData);
-      List<ValueUnit> latestDataValues = latestData.getValues();
-      if (latestDataValues == null || latestDataValues.isEmpty()) {
+      List<ValueUnit> valueUnits = new ArrayList<ValueUnit>();
+      for(RealTimeData realtimeData : realTimeDatas) {
+         valueUnits.addAll(realtimeData.getValues());
+      }
+      if (valueUnits == null || valueUnits.isEmpty()) {
          return metricDataList;
       }
-      metricDataList.addAll(generateOtherMetricData(latestDataValues));
+      metricDataList.addAll(generateOtherMetricData(valueUnits));
       return metricDataList;
    }
 
@@ -345,12 +370,31 @@ public class AssetService {
          throw WormholeRequestException.NotFound("asset", "id", assetID);
       }
       Asset asset = assetOptional.get();
+      boolean isDuration = false;
       if (asset.getCategory() == AssetCategory.PDU) {
-         return getPduMetricsDataById(assetID, starttime, duration);
+         return getPduMetricsDataById(assetID, starttime, duration, isDuration);
       } else if (asset.getCategory() == AssetCategory.Server) {
-         return getServerMetricsDataById(assetID, starttime, duration);
+         return getServerMetricsDataById(assetID, starttime, duration, isDuration);
       }
-      return getOtherMetricsDataById(assetID, starttime, duration);
+      return getOtherMetricsDataById(assetID, starttime, duration, isDuration);
+   }
+
+   public List<MetricData> getAssetDurationMetricsDataById(String assetID, Long starttime, Integer duration) {
+      Optional<Asset> assetOptional = assetRepository.findById(assetID);
+      if (!assetOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("asset", "id", assetID);
+      }
+      Asset asset = assetOptional.get();
+      //when the isDuration is true, the method will return all data in the duration
+      //when the isDuration is false, the method will return the latest data in the duration
+      boolean isDuration = true;
+      if (asset.getCategory() == AssetCategory.PDU) {
+         return getPduMetricsDataById(assetID, starttime, duration, isDuration);
+      } else if (asset.getCategory() == AssetCategory.Server) {
+         return getServerMetricsDataById(assetID, starttime, duration, isDuration);
+      }
+
+      return getOtherMetricsDataById(assetID, starttime, duration, isDuration);
    }
 
    public boolean isAssetNameValidate(String assetName) {
@@ -613,17 +657,18 @@ public class AssetService {
       if(realtimeDatas == null || realtimeDatas.isEmpty()) {
          return valueunits;
       }
-      RealTimeData realTimeData = findLatestData(realtimeDatas);
-      for(ValueUnit value : realTimeData.getValues()) {
-         if(metricsName.contains(value.getKey())) {
-            valueunits.add(value);
+      for(RealTimeData realTimeData : realtimeDatas) {
+         for(ValueUnit value : realTimeData.getValues()) {
+            if(metricsName.contains(value.getKey())) {
+               valueunits.add(value);
+            }
          }
       }
       return valueunits;
    }
 
    private List<ValueUnit> generateSensorValueUnit(Map<String,List<RealTimeData>> assetIdAndRealtimeDataMap,
-         long starttime, int duration, Map<String,String> locationAndIdMap, String metricName){
+         long starttime, int duration, Map<String,String> locationAndIdMap, String metricName, boolean isDuration){
       List<ValueUnit> valueunits = new ArrayList<>();
       for(Map.Entry<String, String> locationInfoAndId : locationAndIdMap.entrySet()) {
          String formula = locationInfoAndId.getValue();
@@ -631,9 +676,14 @@ public class AssetService {
          String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
          for(String assetId : ids) {
             List<RealTimeData> realtimeDatas = null;
+            //In the future assetID in formula maybe replicate,
+            //so we use the assetIdAndRealtimeDataMap to cache data for the same asset
             if(!assetIdAndRealtimeDataMap.containsKey(assetId)) {
-               realtimeDatas =
-                     realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, duration);
+               if(isDuration) {
+                  realtimeDatas = realtimeDataRepository.getDataByIDAndTimeRange(assetId, starttime, duration);
+               }else {
+                  realtimeDatas = realtimeDataRepository.getLatestDataByAssetID(assetId, starttime, duration);
+               }
                assetIdAndRealtimeDataMap.put(assetId, realtimeDatas);
             }
             realtimeDatas = assetIdAndRealtimeDataMap.get(assetId);

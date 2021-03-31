@@ -363,7 +363,8 @@ public class AssetController {
       if (duration == null || duration <= 0 || duration > FIVE_MINUTES * 24) {
          duration = FIVE_MINUTES;
       }
-      return assetService.getPduMetricsDataById(assetID, starttime, duration);
+      boolean isDuration = false;
+      return assetService.getPduMetricsDataById(assetID, starttime, duration, isDuration);
    }
 
    //starttime miliseconds.
@@ -377,7 +378,8 @@ public class AssetController {
       if (duration == null || duration <= 0 || duration > FIVE_MINUTES * 24) {
          duration = FIVE_MINUTES;
       }
-      return assetService.getServerMetricsDataById(assetID, starttime, duration);
+      boolean isDuration = false;
+      return assetService.getServerMetricsDataById(assetID, starttime, duration, isDuration);
    }
 
    @ResponseStatus(HttpStatus.OK)
@@ -392,6 +394,23 @@ public class AssetController {
          duration = FIVE_MINUTES;
       }
       return assetService.getAssetMetricsDataById(assetID, starttime, duration);
+   }
+
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/{id}/durationdata", method = RequestMethod.GET)
+   public List<MetricData> getAssetMetricsDataDuration(@PathVariable("id") String assetID,
+                                          @RequestParam(value = "starttime", required = false) Long starttime,
+                                          @RequestParam(value = "duration", required = false) Integer duration) {
+      if (starttime == null || starttime <= 0) {
+         starttime = System.currentTimeMillis() - FIVE_MINUTES;
+      }
+      if (duration == null || duration <= 0) {
+         duration = FIVE_MINUTES;
+      }
+      if(duration > FIVE_MINUTES * 24) {
+         duration = FIVE_MINUTES * 24;
+      }
+      return assetService.getAssetDurationMetricsDataById(assetID, starttime, duration);
    }
 
    private RealTimeData getMostClostData(List<RealTimeData> datas, long time) {
