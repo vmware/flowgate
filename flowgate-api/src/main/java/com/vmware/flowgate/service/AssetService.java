@@ -235,11 +235,16 @@ public class AssetService {
          metricsNameList.add(itemEntry.getKey());
       }
 
-      Map<String, List<RealTimeData>> realtimeDataMap = Maps.newHashMap();
+      Map<String, RealTimeData> realtimeDataMap = Maps.newHashMap();
       for (Map.Entry<String, List<String>> entry : assetIdAndMetricsNameList.entrySet()) {
-         realtimeDataMap.put(entry.getKey(), realtimeDataRepository.getDataByIDAndTimeRange(entry.getKey(), starttime, duration));
+         List<RealTimeData> realTimeData = realtimeDataRepository.getDataByIDAndTimeRange(entry.getKey(), starttime, duration);
+         if (realTimeData.isEmpty()) {
+            continue;
+         }
+         RealTimeData latestData = findLatestData(realTimeData);
+         realtimeDataMap.put(entry.getKey(), latestData);
       }
-      Set<String> specialMetricNames = new HashSet<String>();
+      Set<String> specialMetricNames = new HashSet<>();
       specialMetricNames.add(MetricName.SERVER_AVERAGE_USED_POWER);
       specialMetricNames.add(MetricName.SERVER_PEAK_USED_POWER);
       specialMetricNames.add(MetricName.SERVER_MINIMUM_USED_POWER);
@@ -247,77 +252,76 @@ public class AssetService {
       specialMetricNames.add(MetricName.SERVER_AVERAGE_TEMPERATURE);
       specialMetricNames.add(MetricName.SERVER_PEAK_TEMPERATURE);
       MetricData metricData;
-      for (Map.Entry<String, List<RealTimeData>> realtimeDataEntry : realtimeDataMap.entrySet()) {
+      for (Map.Entry<String, RealTimeData> realtimeDataEntry : realtimeDataMap.entrySet()) {
          List<String> metricsNameList = assetIdAndMetricsNameList.get(realtimeDataEntry.getKey());
-         for (RealTimeData realTimeData : realtimeDataEntry.getValue()) {
-            for (ValueUnit valueUnit : realTimeData.getValues()) {
-               if (metricsNameList.contains(valueUnit.getKey())) {
-                  metricData = new MetricData();
-                  long timestamp = 0l;
-                  String metricName = valueUnit.getKey();
-                  String extraInfo = valueUnit.getExtraidentifier();
-                  if(extraInfo == null && specialMetricNames.contains(metricName)) {
-                     logger.error("The value of {} is invalid,RealtimeData Id: {}", metricName, realTimeData.getId());
+         String realtimeDataId = realtimeDataEntry.getValue().getId();
+         for (ValueUnit valueUnit : realtimeDataEntry.getValue().getValues()) {
+            if (metricsNameList.contains(valueUnit.getKey())) {
+               metricData = new MetricData();
+               long timestamp;
+               String metricName = valueUnit.getKey();
+               String extraInfo = valueUnit.getExtraidentifier();
+               if(extraInfo == null && specialMetricNames.contains(metricName)) {
+                  logger.error("The value of {} is invalid,RealtimeData Id: {}", metricName, realtimeDataId);
+                  continue;
+               }
+               switch (metricName) {
+               case MetricName.SERVER_AVERAGE_USED_POWER:
+                  //Time of AvgPower is since time
+                  timestamp = Long.valueOf(extraInfo);
+                  break;
+               case MetricName.SERVER_PEAK_USED_POWER:
+                  String[] sinceTimeAndPeakTime = extraInfo.split(FlowgateConstant.SEPARATOR);
+                  if(sinceTimeAndPeakTime.length < TIMESTAMPARRAYLENGTH) {
+                     logger.error("The extraInfo of {} is invalid,RealtimeData Id: {}", metricName, realtimeDataId);
                      continue;
                   }
-                  switch (metricName) {
-                  case MetricName.SERVER_AVERAGE_USED_POWER:
-                     //Time of AvgPower is since time
-                     timestamp = Long.valueOf(extraInfo);
-                     break;
-                  case MetricName.SERVER_PEAK_USED_POWER:
-                     String[] sinceTimeAndPeakTime = extraInfo.split(FlowgateConstant.SEPARATOR);
-                     if(sinceTimeAndPeakTime.length < TIMESTAMPARRAYLENGTH) {
-                        logger.error("The extraInfo of {} is invalid,RealtimeData Id: {}", metricName, realTimeData.getId());
-                        continue;
-                     }
-                     //Time of PeakPower is peakPower time
-                     timestamp = Long.valueOf(sinceTimeAndPeakTime[1]);
-                     break;
-                  case MetricName.SERVER_MINIMUM_USED_POWER:
-                     String[] sinceTimeAndMinimumTime = extraInfo.split(FlowgateConstant.SEPARATOR);
-                     if(sinceTimeAndMinimumTime.length < TIMESTAMPARRAYLENGTH) {
-                        logger.error("The extraInfo of {} is invalid,RealtimeData Id: {}", metricName, realTimeData.getId());
-                        continue;
-                     }
-                     //Time of MinimumPower is minimumPower time
-                     timestamp = Long.valueOf(sinceTimeAndMinimumTime[1]);
-                     break;
-                  case MetricName.SERVER_ENERGY_CONSUMPTION:
-                     //Time of energy consumption is since time
-                     timestamp = Long.valueOf(extraInfo);
-                     break;
-                  case MetricName.SERVER_AVERAGE_TEMPERATURE:
-                     //Time of average temperature is since time
-                     timestamp = Long.valueOf(extraInfo);
-                     break;
-                  case MetricName.SERVER_PEAK_TEMPERATURE:
-                     //Time of energy consumption is since time
-                     String[] temperatureSinceTimeAndPeakTime = extraInfo.split(FlowgateConstant.SEPARATOR);
-                     if(temperatureSinceTimeAndPeakTime.length < TIMESTAMPARRAYLENGTH) {
-                        logger.error("The extraInfo of {} is invalid,RealtimeData Id: {}", metricName, realTimeData.getId());
-                        continue;
-                     }
-                     //Time of PeakTemperature is peak time
-                     timestamp = Long.valueOf(temperatureSinceTimeAndPeakTime[1]);
-                     break;
-                  default:
-                     //Time of other host metric is valueUnit current time
-                     timestamp = valueUnit.getTime();
-                     break;
+                  //Time of PeakPower is peakPower time
+                  timestamp = Long.valueOf(sinceTimeAndPeakTime[1]);
+                  break;
+               case MetricName.SERVER_MINIMUM_USED_POWER:
+                  String[] sinceTimeAndMinimumTime = extraInfo.split(FlowgateConstant.SEPARATOR);
+                  if(sinceTimeAndMinimumTime.length < TIMESTAMPARRAYLENGTH) {
+                     logger.error("The extraInfo of {} is invalid,RealtimeData Id: {}", metricName, realtimeDataId);
+                     continue;
                   }
-                  metricData.setMetricName(valueUnit.getKey());
-                  metricData.setTimeStamp(timestamp);
-                  metricData.setValue(valueUnit.getValue());
-                  metricData.setValueNum(valueUnit.getValueNum());
-                  //This kind of logic will be deprecated in next version
-                  String unit = databaseUnitAndOutputUnitMap.get(valueUnit.getUnit());
-                  if(unit == null) {
-                     unit = valueUnit.getUnit();
+                  //Time of MinimumPower is minimumPower time
+                  timestamp = Long.valueOf(sinceTimeAndMinimumTime[1]);
+                  break;
+               case MetricName.SERVER_ENERGY_CONSUMPTION:
+                  //Time of energy consumption is since time
+                  timestamp = Long.valueOf(extraInfo);
+                  break;
+               case MetricName.SERVER_AVERAGE_TEMPERATURE:
+                  //Time of average temperature is since time
+                  timestamp = Long.valueOf(extraInfo);
+                  break;
+               case MetricName.SERVER_PEAK_TEMPERATURE:
+                  //Time of energy consumption is since time
+                  String[] temperatureSinceTimeAndPeakTime = extraInfo.split(FlowgateConstant.SEPARATOR);
+                  if(temperatureSinceTimeAndPeakTime.length < TIMESTAMPARRAYLENGTH) {
+                     logger.error("The extraInfo of {} is invalid,RealtimeData Id: {}", metricName, realtimeDataId);
+                     continue;
                   }
-                  metricData.setUnit(unit);
-                  metricDataList.add(metricData);
+                  //Time of PeakTemperature is peak time
+                  timestamp = Long.valueOf(temperatureSinceTimeAndPeakTime[1]);
+                  break;
+               default:
+                  //Time of other host metric is valueUnit current time
+                  timestamp = valueUnit.getTime();
+                  break;
                }
+               metricData.setMetricName(valueUnit.getKey());
+               metricData.setTimeStamp(timestamp);
+               metricData.setValue(valueUnit.getValue());
+               metricData.setValueNum(valueUnit.getValueNum());
+               //This kind of logic will be deprecated in next version
+               String unit = databaseUnitAndOutputUnitMap.get(valueUnit.getUnit());
+               if(unit == null) {
+                  unit = valueUnit.getUnit();
+               }
+               metricData.setUnit(unit);
+               metricDataList.add(metricData);
             }
          }
       }
