@@ -28,6 +28,9 @@ for n in "${alldir[@]}"
 do
 	mkdir -p $MAKEDIR/conf/$n/
 	cp $SOURCEDIR/$n/src/main/resources/application.properties $MAKEDIR/conf/$n/
+	sed -i -e 's/spring.couchbase.bootstrap-hosts=localhost/spring.couchbase.bootstrap-hosts=database/' $MAKEDIR/conf/$n/application.properties
+	sed -i -e 's/spring.redis.host=localhost/spring.redis.host=redis/' $MAKEDIR/conf/$n/application.properties
+	sed -i -e 's/apiserver.url=http:\/\/localhost/apiserver.url=http:\/\/flowgate-api/' $MAKEDIR/conf/$n/application.properties
 done
 cp $SOURCEDIR/flowgate-api/src/main/resources/guard.jceks $MAKEDIR/conf/flowgate-api/
 for m in "${databaseangredis[@]}"
