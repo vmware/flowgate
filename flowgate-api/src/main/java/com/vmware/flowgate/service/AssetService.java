@@ -326,13 +326,17 @@ public class AssetService {
 
    private List<MetricData> getOtherMetricsDataById(String assetID, Long starttime, Integer duration) {
       List<MetricData> metricDataList = new ArrayList<>();
-      List<RealTimeData> realTimeData = realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
-      if (realTimeData == null || realTimeData.isEmpty()) {
+      List<RealTimeData> realTimeDataList = realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
+      if (realTimeDataList == null || realTimeDataList.isEmpty()) {
          return metricDataList;
       }
-      RealTimeData latestData = findLatestData(realTimeData);
-      List<ValueUnit> latestDataValues = latestData.getValues();
-      if (latestDataValues == null || latestDataValues.isEmpty()) {
+      List<ValueUnit> latestDataValues = new ArrayList<>();
+      for (RealTimeData realTimeData : realTimeDataList) {
+         if (realTimeData.getValues() != null && !realTimeData.getValues().isEmpty()) {
+            latestDataValues.addAll(realTimeData.getValues());
+         }
+      }
+      if (latestDataValues.isEmpty()) {
          return metricDataList;
       }
       metricDataList.addAll(generateOtherMetricData(latestDataValues));
@@ -351,6 +355,15 @@ public class AssetService {
          return getServerMetricsDataById(assetID, starttime, duration);
       }
       return getOtherMetricsDataById(assetID, starttime, duration);
+   }
+
+   public List<MetricData> getAssetLatestMetricDataById(String assetID, Long starttime, Integer duration) {
+      Optional<Asset> assetOptional = assetRepository.findById(assetID);
+      if (!assetOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("asset", "id", assetID);
+      }
+      List<MetricData> allMetricDataList = getAssetMetricsDataById(assetID, starttime, duration);
+      return findLatestMetricData(assetOptional.get().getCategory(), allMetricDataList);
    }
 
    public boolean isAssetNameValidate(String assetName) {
@@ -597,26 +610,17 @@ public class AssetService {
       return result;
    }
 
-   private RealTimeData findLatestData(List<RealTimeData> realtimeDatas) {
-      RealTimeData latestResult = realtimeDatas.get(0);
-      for(int i=0;i<realtimeDatas.size()-1;i++) {
-         if(latestResult.getTime() < realtimeDatas.get(i+1).getTime()) {
-            latestResult = realtimeDatas.get(i+1);
-         }
-      }
-      return latestResult;
-   }
-
    private List<ValueUnit> getValueUnits(List<RealTimeData> realtimeDatas,
          List<String> metricsName){
       List<ValueUnit> valueunits = new ArrayList<>();
       if(realtimeDatas == null || realtimeDatas.isEmpty()) {
          return valueunits;
       }
-      RealTimeData realTimeData = findLatestData(realtimeDatas);
-      for(ValueUnit value : realTimeData.getValues()) {
-         if(metricsName.contains(value.getKey())) {
-            valueunits.add(value);
+      for (RealTimeData realtimeData : realtimeDatas) {
+         for(ValueUnit value : realtimeData.getValues()) {
+            if(metricsName.contains(value.getKey())) {
+               valueunits.add(value);
+            }
          }
       }
       return valueunits;
@@ -641,14 +645,15 @@ public class AssetService {
                continue;
             }
 
-            RealTimeData realTimeData = findLatestData(realtimeDatas);
-            for(ValueUnit value : realTimeData.getValues()) {
-               if(value.getKey().equals(metricNameMap.get(metricName))) {
-                  if(location.indexOf(FlowgateConstant.SEPARATOR) > -1) {
-                     location = location.replace(FlowgateConstant.SEPARATOR, FlowgateConstant.UNDERLINE);
+            for (RealTimeData realtimeData : realtimeDatas) {
+               for(ValueUnit value : realtimeData.getValues()) {
+                  if(value.getKey().equals(metricNameMap.get(metricName))) {
+                     if(location.indexOf(FlowgateConstant.SEPARATOR) > -1) {
+                        location = location.replace(FlowgateConstant.SEPARATOR, FlowgateConstant.UNDERLINE);
+                     }
+                     value.setExtraidentifier(location);
+                     valueunits.add(value);
                   }
-                  value.setExtraidentifier(location);
-                  valueunits.add(value);
                }
             }
          }
@@ -877,4 +882,51 @@ public class AssetService {
       }
       return positionInfo.toString();
    }
+
+   private List<MetricData> findLatestMetricData(AssetCategory assetCategory, List<MetricData> metricDataList) {
+      if (metricDataList == null || metricDataList.isEmpty()) {
+         return new ArrayList<>();
+      }
+      Map<String, Long> intervalMetricNames = new HashMap<>();
+      intervalMetricNames.put(MetricName.SERVER_AVERAGE_USED_POWER, 0L);
+      intervalMetricNames.put(MetricName.SERVER_AVERAGE_TEMPERATURE, 0L);
+      intervalMetricNames.put(MetricName.SERVER_ENERGY_CONSUMPTION, 0L);
+      Set<String> peakMetricNames = new HashSet<>();
+      peakMetricNames.add(MetricName.SERVER_PEAK_USED_POWER);
+      peakMetricNames.add(MetricName.SERVER_PEAK_TEMPERATURE);
+      Set<String> minimumMetricNames = new HashSet<>();
+      minimumMetricNames.add(MetricName.SERVER_MINIMUM_USED_POWER);
+
+      Map<String, MetricData> latestMetricDataMap = new HashMap<>();
+      for (MetricData metricData : metricDataList) {
+         MetricData latestMetric = latestMetricDataMap.get(metricData.getMetricName());
+         if (latestMetric == null) {
+            latestMetricDataMap.put(metricData.getMetricName(), metricData);
+            continue;
+         }
+         if (assetCategory == AssetCategory.Server) {
+            if (intervalMetricNames.containsKey(metricData.getMetricName())) {
+               // TODO No interval
+            } else if (peakMetricNames.contains(metricData.getMetricName())) {
+               if (metricData.getValueNum() > latestMetric.getValueNum()) {
+                  latestMetricDataMap.put(metricData.getMetricName(), metricData);
+               }
+            } else if (minimumMetricNames.contains(metricData.getMetricName())) {
+               if (metricData.getValueNum() < latestMetric.getValueNum()) {
+                  latestMetricDataMap.put(metricData.getMetricName(), metricData);
+               }
+            } else {
+               if (metricData.getTimeStamp() > latestMetric.getTimeStamp()) {
+                  latestMetricDataMap.put(metricData.getMetricName(), metricData);
+               }
+            }
+         } else {
+            if (metricData.getTimeStamp() > latestMetric.getTimeStamp()) {
+               latestMetricDataMap.put(metricData.getMetricName(), metricData);
+            }
+         }
+      }
+      return new ArrayList<>(latestMetricDataMap.values());
+   }
+
 }
