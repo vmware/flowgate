@@ -877,4 +877,78 @@ public class AssetService {
       }
       return positionInfo.toString();
    }
+
+   private Map<Asset, List<ValueUnit>> findLatestMetricData(Map<Asset, List<ValueUnit>> assetValueUnitMap) {
+      Map<Asset, List<ValueUnit>> latestAssetValueUnitMap = Maps.newHashMap();
+      if (assetValueUnitMap == null || assetValueUnitMap.isEmpty()) {
+         return latestAssetValueUnitMap;
+      }
+      for (Map.Entry<Asset, List<ValueUnit>> entry : assetValueUnitMap.entrySet()) {
+         Asset asset = entry.getKey();
+         List<ValueUnit> valueUnits = entry.getValue();
+         if (asset.getCategory() == AssetCategory.Server) {
+            latestAssetValueUnitMap.put(asset, findServerLatestMetricData(valueUnits));
+         } else {
+            latestAssetValueUnitMap.put(asset, findOtherLatestMetricData(valueUnits));
+         }
+      }
+      return latestAssetValueUnitMap;
+   }
+
+   private List<ValueUnit> findServerLatestMetricData(List<ValueUnit> valueUnits) {
+      Map<String, ValueUnit> latestMetricDataMap = new HashMap<>();
+      Map<String, Long> intervalMetricNames = new HashMap<>();
+      intervalMetricNames.put(MetricName.SERVER_AVERAGE_USED_POWER, 0L);
+      intervalMetricNames.put(MetricName.SERVER_AVERAGE_TEMPERATURE, 0L);
+      intervalMetricNames.put(MetricName.SERVER_ENERGY_CONSUMPTION, 0L);
+      Set<String> peakMetricNames = new HashSet<>();
+      peakMetricNames.add(MetricName.SERVER_PEAK_USED_POWER);
+      peakMetricNames.add(MetricName.SERVER_PEAK_TEMPERATURE);
+      Set<String> minimumMetricNames = new HashSet<>();
+      minimumMetricNames.add(MetricName.SERVER_MINIMUM_USED_POWER);
+      for (ValueUnit valueUnit : valueUnits) {
+         ValueUnit latestValueUnit = latestMetricDataMap.get(valueUnit.getKey());
+         if (latestValueUnit == null) {
+            latestMetricDataMap.put(valueUnit.getKey(), valueUnit);
+            continue;
+         }
+         if (intervalMetricNames.containsKey(valueUnit.getKey())) {
+            long maxInterval = intervalMetricNames.get(valueUnit.getKey());
+            long currentInterval = valueUnit.getTime() - Long.parseLong(valueUnit.getExtraidentifier());
+            if (currentInterval > maxInterval) {
+               intervalMetricNames.put(valueUnit.getKey(), currentInterval);
+               latestMetricDataMap.put(valueUnit.getKey(), valueUnit);
+            }
+         } else if (peakMetricNames.contains(valueUnit.getKey())) {
+            if (valueUnit.getValueNum() > latestValueUnit.getValueNum()) {
+               latestMetricDataMap.put(valueUnit.getKey(), valueUnit);
+            }
+         } else if (minimumMetricNames.contains(valueUnit.getKey())) {
+            if (valueUnit.getValueNum() < latestValueUnit.getValueNum()) {
+               latestMetricDataMap.put(valueUnit.getKey(), valueUnit);
+            }
+         } else {
+            if (latestValueUnit.getTime() > valueUnit.getTime()) {
+               latestMetricDataMap.put(valueUnit.getKey(), valueUnit);
+            }
+         }
+      }
+      return new ArrayList<>(latestMetricDataMap.values());
+   }
+
+   private List<ValueUnit> findOtherLatestMetricData(List<ValueUnit> valueUnits) {
+      Map<String, ValueUnit> latestMetricDataMap = new HashMap<>();
+      for (ValueUnit valueUnit : valueUnits) {
+         ValueUnit latestValueUnit = latestMetricDataMap.get(valueUnit.getKey() + valueUnit.getExtraidentifier());
+         if (latestValueUnit == null) {
+            latestMetricDataMap.put(valueUnit.getKey() + valueUnit.getExtraidentifier(), valueUnit);
+            continue;
+         }
+         if (latestValueUnit.getTime() > valueUnit.getTime()) {
+            latestMetricDataMap.put(valueUnit.getKey() + valueUnit.getExtraidentifier(), valueUnit);
+         }
+      }
+      return new ArrayList<>(latestMetricDataMap.values());
+   }
+
 }
