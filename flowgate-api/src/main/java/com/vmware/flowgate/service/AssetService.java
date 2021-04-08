@@ -900,7 +900,7 @@ public class AssetService {
       return positionInfo.toString();
    }
 
-   private Map<Asset, List<ValueUnit>> getPduValueUnitsMap(Asset pduAsset, long starttime, int duration){
+   private Map<Asset, List<ValueUnit>> getPDURawMetrics(Asset pduAsset, long starttime, int duration){
       List<ValueUnit> pduValueunits = getValueUnitsByAssetID(pduAsset.getId(), starttime, duration);
       Map<Asset, List<ValueUnit>> assetAndValueUnitsMap = new HashMap<Asset, List<ValueUnit>>();
       if(!pduValueunits.isEmpty()) {
@@ -919,20 +919,16 @@ public class AssetService {
          assetAndValueUnitsMap.put(pduAsset, pduValueunits);
       }
       //sensor valueUnits, such as temperature or humidity
-      Map<String, String> formulars = pduAsset.getMetricsformulars();
-      String sensorFormulasInfo = formulars.get(FlowgateConstant.SENSOR);
-      Map<String, Map<String, String>> sensorFormulasMap = null;
-      if(sensorFormulasInfo != null) {
-         sensorFormulasMap =
-               pduAsset.metricsFormulaToMap(sensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
-         if(sensorFormulasMap.isEmpty()) {
-            return assetAndValueUnitsMap;
-         }
-         Set<String> assetIds = extractSensorIDfromFormula(pduAsset);
+      Set<String> assetIds = extractSensorIDfromFormula(pduAsset);
+      if(!assetIds.isEmpty()) {
+         List<String> sensorMetricNames = new ArrayList<String>();
+         sensorMetricNames.add(MetricName.PDU_TEMPERATURE);
+         sensorMetricNames.add(MetricName.PDU_HUMIDITY);
          for(String sensorId : assetIds) {
             List<ValueUnit> valueUnits = getValueUnitsByAssetID(sensorId, starttime, duration);
             if(!valueUnits.isEmpty()) {
                Asset sensor = getAssetById(sensorId);
+               filterValueUnitsByMetricNames(valueUnits, sensorMetricNames);
                assetAndValueUnitsMap.put(sensor, valueUnits);
             }
          }
@@ -940,7 +936,7 @@ public class AssetService {
       return assetAndValueUnitsMap;
    }
 
-   private Map<Asset, List<ValueUnit>> getServerValueUnitsMap(Asset server, long starttime, int duration){
+   private Map<Asset, List<ValueUnit>> getServerRawMetrics(Asset server, long starttime, int duration){
       Map<String, String> metricFormula = server.getMetricsformulars();
       Map<Asset, List<ValueUnit>> assetAndValueUnitsMap = new HashMap<Asset, List<ValueUnit>>();
       if(metricFormula == null || metricFormula.isEmpty()) {
@@ -948,7 +944,7 @@ public class AssetService {
       }
       //Host ValueUnits of Server
       assetAndValueUnitsMap =
-            getServerHostValueUnit(server, starttime, duration);
+            getServerUsageRawMetrics(server, starttime, duration);
       //PDU ValueUnits of Server
       String pduFormulasInfo = metricFormula.get(FlowgateConstant.PDU);
       if(pduFormulasInfo != null) {
@@ -972,18 +968,16 @@ public class AssetService {
          }
       }
       //Sensor ValueUnit of Server
-      String sensorFormulasInfo = metricFormula.get(FlowgateConstant.SENSOR);
-      if (sensorFormulasInfo != null) {
-         Map<String, Map<String, String>> sensorFormulars =
-               server.metricsFormulaToMap(sensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
-         if(sensorFormulars.isEmpty()) {
-            return assetAndValueUnitsMap;
-         }
-         Set<String> assetIds = extractSensorIDfromFormula(server);
+      Set<String> assetIds = extractSensorIDfromFormula(server);
+      if(!assetIds.isEmpty()) {
+         List<String> sensorMetricNames = new ArrayList<String>();
+         sensorMetricNames.add(MetricName.TEMPERATURE);
+         sensorMetricNames.add(MetricName.HUMIDITY);
          for(String sensorId : assetIds) {
             List<ValueUnit> valueUnits = getValueUnitsByAssetID(sensorId, starttime, duration);
             if(!valueUnits.isEmpty()) {
                Asset sensor = getAssetById(sensorId);
+               filterValueUnitsByMetricNames(valueUnits, sensorMetricNames);
                assetAndValueUnitsMap.put(sensor, valueUnits);
             }
          }
@@ -991,7 +985,7 @@ public class AssetService {
       return assetAndValueUnitsMap;
    }
 
-   private Map<Asset, List<ValueUnit>> getOtherValueUnitsMap(Asset asset, Long starttime, Integer duration){
+   private Map<Asset, List<ValueUnit>> getRawMetrics(Asset asset, Long starttime, Integer duration){
       List<ValueUnit> valueUnits = getValueUnitsByAssetID(asset.getId(), starttime, duration);
       Map<Asset, List<ValueUnit>> assetAndValueUnitsMap = new HashMap<Asset, List<ValueUnit>>();
       if(valueUnits.isEmpty()) {
@@ -1001,7 +995,7 @@ public class AssetService {
       return assetAndValueUnitsMap;
    }
 
-   private Map<Asset, List<ValueUnit>> getServerHostValueUnit(Asset server, long starttime, int duration) {
+   private Map<Asset, List<ValueUnit>> getServerUsageRawMetrics(Asset server, long starttime, int duration) {
       String hostMetricsFormulaString = server.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
       Map<Asset, List<ValueUnit>> assetAndValueUnitsMap = new HashMap<Asset, List<ValueUnit>>();
       if (StringUtils.isBlank(hostMetricsFormulaString)) {
@@ -1033,7 +1027,7 @@ public class AssetService {
       return assetAndValueUnitsMap;
    }
 
-   private List<MetricData> translateToMetricDataForServer(Asset server, Map<Asset, List<ValueUnit>> assetAndValueUnitsMap){
+   private List<MetricData> convertServerMetrics(Asset server, Map<Asset, List<ValueUnit>> assetAndValueUnitsMap){
       List<MetricData> metricDatas = new ArrayList<MetricData>();
       for(Map.Entry<Asset, List<ValueUnit>> entry : assetAndValueUnitsMap.entrySet()) {
          //The asset may be server or pdu or sensor, if it's a server then the valueUnits is hostMetrics
@@ -1042,7 +1036,7 @@ public class AssetService {
          List<ValueUnit> valueUnits = entry.getValue();
          switch (metricAsset.getCategory()) {
          case Server:
-            metricDatas.addAll(generateHostMetricDatasForServer(assetID, valueUnits));
+            metricDatas.addAll(convertServerUsageMetrics(assetID, valueUnits));
             break;
          case PDU:
             Map<String,String> justficationfileds = server.getJustificationfields();
@@ -1066,7 +1060,7 @@ public class AssetService {
             if(pduAssetIdAndUsedOutletMap != null) {
                outlet = pduAssetIdAndUsedOutletMap.get(metricAsset.getId());
             }
-            metricDatas.addAll(generatePduMetricDataForServer(valueUnits, assetID, outlet));
+            metricDatas.addAll(converServerPowerMetrics(valueUnits, assetID, outlet));
             break;
          case Sensors:
             Map<String, Map<String, String>> idNameLocationMaps = translateFormulaMap(server);
@@ -1076,7 +1070,7 @@ public class AssetService {
             //Translate to metric Data
             String location = idNameLocationMaps.get(IDLOCATIONMAP).get(assetID);
             String metricName = idNameLocationMaps.get(IDNAMEMAP).get(assetID);
-            metricDatas.addAll(generateSensorMetricDataForServer(valueUnits, location, metricName));
+            metricDatas.addAll(convertServerEnvrionmentMetrics(valueUnits, location, metricName));
             break;
          default:
             break;
@@ -1085,8 +1079,7 @@ public class AssetService {
       return metricDatas;
    }
 
-   private List<MetricData> translateToMetricsDataForPDU(Asset pdu,
-         Map<Asset, List<ValueUnit>> assetAndValueUnitsMap){
+   private List<MetricData> convertPDUMetrics(Asset pdu, Map<Asset, List<ValueUnit>> assetAndValueUnitsMap){
       List<MetricData> metricDatas = new ArrayList<MetricData>();
       for(Map.Entry<Asset, List<ValueUnit>> entry : assetAndValueUnitsMap.entrySet()) {
          Asset metricAsset = entry.getKey();
@@ -1094,7 +1087,7 @@ public class AssetService {
          List<ValueUnit> valueUnits = entry.getValue();
          switch (metricAsset.getCategory()) {
          case PDU:
-            metricDatas.addAll(generatePDUMetricDataForPDU(valueUnits));
+            metricDatas.addAll(convertPDUUsageMetrics(valueUnits));
             break;
          case Sensors:
             Map<String, Map<String, String>> idNameLocationMaps = translateFormulaMap(pdu);
@@ -1102,7 +1095,7 @@ public class AssetService {
                return metricDatas;
             }
             String location = idNameLocationMaps.get(IDLOCATIONMAP).get(assetID);
-            metricDatas.addAll(generateSensorsMetricDataForPDU(location, valueUnits));
+            metricDatas.addAll(convertPDUEnvrionmentMetrics(location, valueUnits));
             break;
          default:
             break;
@@ -1111,7 +1104,7 @@ public class AssetService {
       return metricDatas;
    }
 
-   private List<MetricData> translateToMetricDataForOtherAsset(List<ValueUnit> valueUnits) {
+   private List<MetricData> convertMetrics(List<ValueUnit> valueUnits) {
       List<MetricData> result = new ArrayList<>();
       if(valueUnits == null || valueUnits.isEmpty()) {
          return result;
@@ -1133,7 +1126,7 @@ public class AssetService {
       return result;
    }
 
-   private List<MetricData> generateHostMetricDatasForServer(String assetID, List<ValueUnit> valueUnits) {
+   private List<MetricData> convertServerUsageMetrics(String assetID, List<ValueUnit> valueUnits) {
       List<MetricData> metricDatas = new ArrayList<MetricData>();
       Set<String> specialMetricNames = new HashSet<String>();
       specialMetricNames.add(MetricName.SERVER_AVERAGE_USED_POWER);
@@ -1197,7 +1190,7 @@ public class AssetService {
       return metricDatas;
    }
 
-   private List<MetricData> generatePduMetricDataForServer(List<ValueUnit> valueUnits, String pduAssetId, String outLet){
+   private List<MetricData> converServerPowerMetrics(List<ValueUnit> valueUnits, String pduAssetId, String outLet){
       List<MetricData> result = new ArrayList<MetricData>();
       Double serverVoltage = null;
       long serverVoltageReadTime = 0;
@@ -1254,7 +1247,7 @@ public class AssetService {
       return result;
    }
 
-   private List<MetricData> generateSensorMetricDataForServer(List<ValueUnit> valueUnits, String location, String metricName){
+   private List<MetricData> convertServerEnvrionmentMetrics(List<ValueUnit> valueUnits, String location, String metricName){
       List<MetricData> result = new ArrayList<MetricData>();
       if(valueUnits == null || valueUnits.isEmpty()) {
          return result;
@@ -1341,7 +1334,7 @@ public class AssetService {
       return idMaps;
    }
 
-   private List<MetricData> generateSensorsMetricDataForPDU(String location, List<ValueUnit> valueUnits){
+   private List<MetricData> convertPDUEnvrionmentMetrics(String location, List<ValueUnit> valueUnits){
       List<MetricData> result = new ArrayList<MetricData>();
       if(location.indexOf(FlowgateConstant.SEPARATOR) > -1) {
          location = location.replace(FlowgateConstant.SEPARATOR, FlowgateConstant.UNDERLINE);
@@ -1371,7 +1364,7 @@ public class AssetService {
       return result;
    }
 
-   private List<MetricData> generatePDUMetricDataForPDU(List<ValueUnit> valueUnits){
+   private List<MetricData> convertPDUUsageMetrics (List<ValueUnit> valueUnits){
       List<MetricData> result = new ArrayList<MetricData>();
       for (ValueUnit valueunit : valueUnits) {
          MetricData metricData = new MetricData();
@@ -1523,15 +1516,14 @@ public class AssetService {
                   assetIds.add(id);
                }
             }
-            assetIds.addAll(Arrays.asList(ids));
          }
       }
       return assetIds;
    }
 
-   private List<ValueUnit> getOtherValueUnits(Asset asset, Long starttime, Integer duration){
+   private List<ValueUnit> getValueUnits(Asset asset, Long starttime, Integer duration){
       Map<Asset, List<ValueUnit>> assetAndValueUnitsMap =
-            getOtherValueUnitsMap(asset, starttime, duration);
+            getRawMetrics(asset, starttime, duration);
       List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
       for(Map.Entry<Asset, List<ValueUnit>> entry : assetAndValueUnitsMap.entrySet()) {
          valueunits.addAll(entry.getValue());
