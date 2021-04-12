@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -876,5 +877,83 @@ public class AssetService {
          }
       }
       return positionInfo.toString();
+   }
+
+   private Asset getAssetById(String assetID) {
+      Optional<Asset> assetOptional = assetRepository.findById(assetID);
+      if (!assetOptional.isPresent()) {
+         throw WormholeRequestException.NotFound("asset", "id", assetID);
+      }
+      return assetOptional.get();
+   }
+
+   private void filterValueUnitsByMetricNames(List<ValueUnit> valueunits, List<String> metricsName) {
+      Iterator<ValueUnit> ite = valueunits.iterator();
+      while (ite.hasNext()) {
+         ValueUnit valueUnit = ite.next();
+         if(!metricsName.contains(valueUnit.getKey())) {
+            ite.remove();
+         }
+      }
+   }
+
+   private List<ValueUnit> getValueUnitsByAssetID(String assetID, long starttime, int duration) {
+      List<RealTimeData> realtimeDatas =
+            realtimeDataRepository.getDataByIDAndTimeRange(assetID, starttime, duration);
+      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+      if(realtimeDatas.isEmpty()) {
+         return valueunits;
+      }
+      for(RealTimeData realTimeData : realtimeDatas) {
+         for(ValueUnit value : realTimeData.getValues()) {
+            valueunits.add(value);
+         }
+      }
+      return valueunits;
+   }
+
+   /**
+    * PDU'sensor formula
+    * Sensor:{
+    *    Temperature:{"rackUnit01_FIELDSPLIT_INLET", "FLowgateAssetIDs"},
+    *    Humidity:{"rackUnit01_FIELDSPLIT_INLET", "FLowgateAssetIDs"}
+    * }
+    * Note: Now the FLowgateAssetIDs only include one assetID,
+    * in the future the FLowgateAssetIDs may be a formula with multiple IDs.
+    * The sample values of sensor's position on the rack are INLET, OUTLET, EXTERNAL
+    *
+    * Server'sensor formula
+    * Sensor:{
+    *    FrontTemperature:{"INLET","FLowgateAssetIDs"},
+    *    BackTemperature:{},
+    *    FrontHumidity:{},
+    *    BackHumidity:{},
+    * }
+    *
+    * @param asset
+    * @return
+    */
+   private Set<String> extractSensorIDfromFormula(Asset asset){
+      Map<String, String> formulars = asset.getMetricsformulars();
+      Set<String> assetIds = new HashSet<String>();
+      if(formulars == null || formulars.get(FlowgateConstant.SENSOR) == null) {
+         return assetIds;
+      }
+      String sensorFormulasInfo = formulars.get(FlowgateConstant.SENSOR);
+      Map<String, Map<String, String>> sensorFormulasMap =
+               asset.metricsFormulaToMap(sensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
+      for(Map.Entry<String, Map<String, String>> metricAndFormulaEntry : sensorFormulasMap.entrySet()) {
+         Map<String, String> locationAndIdsMap = metricAndFormulaEntry.getValue();
+         for(Map.Entry<String, String> locationInfoAndId : locationAndIdsMap.entrySet()) {
+            String formula = locationInfoAndId.getValue();
+            String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
+            for(String id : ids) {
+               if(id.length() == FlowgateConstant.COUCHBASEIDLENGTH) {
+                  assetIds.add(id);
+               }
+            }
+         }
+      }
+      return assetIds;
    }
 }
