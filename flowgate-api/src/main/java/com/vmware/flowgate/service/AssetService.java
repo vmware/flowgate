@@ -1693,4 +1693,77 @@ public class AssetService {
       }
       return valueUnitName;
    }
+   /**
+    * The valueUnits is collected between start time and start time + duration
+    * @param valueUnits
+    * @param startTime
+    * @param duration
+    * @return
+    */
+   public List<ValueUnit> getServerEnergyConsumption(List<ValueUnit> valueUnits, long startTime){
+      if(valueUnits == null || valueUnits.isEmpty()) {
+         return null;
+      }
+      filterServerEnergyConsumptionBySinceTime(valueUnits, startTime);
+      Collections.sort(valueUnits, new CompareValueUnit());
+      Map<Integer, Map<Long, List<ValueUnit>>> maxValueMap = new HashMap<>();
+      Map<Long, List<ValueUnit>> maxvalue = new HashMap<>();
+      List<ValueUnit> firstMaxDurationList = new ArrayList<>();
+      firstMaxDurationList.add(valueUnits.get(0));
+      maxvalue.put(getDuration(valueUnits.get(0)), firstMaxDurationList);
+      maxValueMap.put(0, maxvalue);
+      for(int i = 1; i < valueUnits.size(); i++) {
+         Map<Long, List<ValueUnit>> currentMaxDuratioAndValueUnitsMap = new HashMap<>();
+         Map<Long, List<ValueUnit>> prevMaxDuratioAndValueUnitsMap = maxValueMap.get(i-1);
+         Long prevMax = prevMaxDuratioAndValueUnitsMap.entrySet().iterator().next().getKey();
+         Long currentDuration = getDuration(valueUnits.get(i));
+         if(prevMax > currentDuration) {
+            currentMaxDuratioAndValueUnitsMap.putAll(prevMaxDuratioAndValueUnitsMap);
+         }else {
+            List<ValueUnit> newValues = new ArrayList<>();
+            newValues.add(valueUnits.get(i));
+            currentMaxDuratioAndValueUnitsMap.put(currentDuration, newValues);
+         }
+         maxValueMap.put(i, currentMaxDuratioAndValueUnitsMap);
+         long currentStartTime = Long.parseLong(valueUnits.get(i).getExtraidentifier());
+         for(int j = i-1; j >= 0; j--) {
+            if(valueUnits.get(j).getTime() <= currentStartTime) {
+               Map<Long, List<ValueUnit>> maxValueMapAsjEnd = maxValueMap.get(j);
+               Long maxValueAsjEnd = (Long)maxValueMapAsjEnd.keySet().toArray()[0];
+               Long newMaxDuration = getDuration(valueUnits.get(i)) + maxValueAsjEnd;
+               if(newMaxDuration > prevMax) {
+                  List<ValueUnit> newValueUnits = new ArrayList<>();
+                  newValueUnits.addAll(getValueUnitFromDurationAndValueUnitsMap(maxValueMapAsjEnd));
+                  newValueUnits.add(valueUnits.get(i));
+                  Map<Long, List<ValueUnit>> maxDurationAndValueUnitsMapByIEnd = new HashMap<>();
+                  maxDurationAndValueUnitsMapByIEnd.put(newMaxDuration, newValueUnits);
+                  maxValueMap.put(i, maxDurationAndValueUnitsMapByIEnd);
+                  break;
+               }
+            }
+         }
+      }
+      return getValueUnitFromDurationAndValueUnitsMap(maxValueMap.get(valueUnits.size() - 1));
+   }
+
+   private Long getDuration(ValueUnit valueUnit) {
+      long startTime = Long.parseLong(valueUnit.getExtraidentifier());
+      return valueUnit.getTime() - startTime;
+   }
+
+   private List<ValueUnit> getValueUnitFromDurationAndValueUnitsMap(
+         Map<Long, List<ValueUnit>> durationAndValueUnitsMap) {
+      return durationAndValueUnitsMap.entrySet().iterator().next().getValue();
+   }
+
+   private void filterServerEnergyConsumptionBySinceTime(List<ValueUnit> valueUnits, long startTime) {
+      Iterator<ValueUnit> ite = valueUnits.iterator();
+      while(ite.hasNext()) {
+         ValueUnit valueUnit = ite.next();
+         long sinceTime = Long.parseLong(valueUnit.getExtraidentifier());
+          if(sinceTime < startTime) {
+             ite.remove();
+          }
+      }
+   }
 }
