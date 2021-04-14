@@ -73,7 +73,7 @@ public class AssetService {
    private StringRedisTemplate redisTemplate;
    ObjectMapper mapper = new ObjectMapper();
    //This map databaseUnitAndOutputUnitMap will be deprecated in Flowgate-1.3
-   private static Map<String, String> databaseUnitAndOutputUnitMap = null;
+   public static Map<String, String> databaseUnitAndOutputUnitMap = null;
    private static Map<String,String> metricNameMap = new HashMap<String,String>();
    static {
       metricNameMap.put(MetricName.PDU_HUMIDITY, MetricName.HUMIDITY);

@@ -46,4 +46,12 @@ public class TranslateContext {
       return this.displayName;
    }
 
+   @Override
+   public String toString() {
+      return "TranslateContext{" +
+               "valueData=" + valueData +
+               ", formula='" + formula + '\'' +
+               ", displayName='" + displayName + '\'' +
+               '}';
+   }
 }
