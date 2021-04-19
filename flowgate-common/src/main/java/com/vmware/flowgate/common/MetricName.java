@@ -31,8 +31,11 @@ public class MetricName {
    public static final String SERVER_VOLTAGE = "Voltage";
    public static final String SERVER_CONNECTED_PDU_CURRENT = "PduCurrent";
    public static final String SERVER_CONNECTED_PDU_POWER = "PduPower";
+   public static final String SERVER_CONNECTED_PDU_CURRENT_LOAD = "PduCurrentLoad";
+   public static final String SERVER_CONNECTED_PDU_POWER_LOAD = "PduPowerLoad";
    public static final String SERVER_USED_PDU_OUTLET_CURRENT = "ConnectedPDUOutletCurrent";
    public static final String SERVER_USED_PDU_OUTLET_POWER = "ConnectedPDUOutletPower";
+   public static final String SERVER_USED_PDU_OUTLET_VOLTAGE = "ConnectedPDUOutletVoltage";
    public static final String SERVER_ENERGY_CONSUMPTION = "EnergyConsumption";//(KWH)
    public static final String SERVER_AVERAGE_USED_POWER = "AveragePower";//(KW)
    public static final String SERVER_PEAK_USED_POWER = "PeakPower";//(KW)
