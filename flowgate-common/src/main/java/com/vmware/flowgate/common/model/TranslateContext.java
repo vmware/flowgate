@@ -11,14 +11,14 @@ import java.util.Map;
 public class TranslateContext {
 
    private Map<String, ValueUnit> valueData = new HashMap<String, ValueUnit>();
-   private String formulars = null;
+   private String formula = null;
    private String displayName = null;
 
-   public static TranslateContext buildByValueUnitsAndDisplayNameAndFormulars(Map<String, ValueUnit> valueUnits, String displayName, String formulars) {
+   public static TranslateContext buildByValueUnitsAndDisplayNameAndFormula(Map<String, ValueUnit> valueUnits, String displayName, String formula) {
       TranslateContext translateContext = new TranslateContext();
       translateContext.valueData = valueUnits;
       translateContext.displayName = displayName;
-      translateContext.formulars = formulars;
+      translateContext.formula = formula;
       return translateContext;
    }
 
@@ -30,12 +30,12 @@ public class TranslateContext {
       return this.valueData;
    }
 
-   public void setFormulars(String formulars) {
-      this.formulars = formulars;
+   public void setFormula(String formula) {
+      this.formula = formula;
    }
 
-   public String getFormulars() {
-      return this.formulars;
+   public String getFormula() {
+      return this.formula;
    }
 
    public void setDisplayName(String displayName) {
