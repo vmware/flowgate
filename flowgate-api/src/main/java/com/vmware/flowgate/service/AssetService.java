@@ -110,7 +110,6 @@ public class AssetService {
 
       List<String> metricNames = new ArrayList<String>();
       metricNames.add(MetricName.PDU_TOTAL_POWER);
-      metricNames.add(MetricName.PDU_TOTAL_CURRENT);
       metricNames.add(MetricName.PDU_APPARENT_POWER);
       metricNames.add(MetricName.PDU_ACTIVE_POWER);
       metricNames.add(MetricName.PDU_CURRENT);
@@ -185,7 +184,6 @@ public class AssetService {
                server.metricsFormulaToMap(pduFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
          List<String> metricNames = new ArrayList<String>();
          metricNames.add(MetricName.PDU_TOTAL_POWER);
-         metricNames.add(MetricName.PDU_TOTAL_CURRENT);
          metricNames.add(MetricName.PDU_APPARENT_POWER);
          metricNames.add(MetricName.PDU_CURRENT);
          metricNames.add(MetricName.PDU_VOLTAGE);
@@ -472,10 +470,6 @@ public class AssetService {
             data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, pduAssetId));
             result.add(data);
             break;
-         case MetricName.PDU_TOTAL_CURRENT:
-            data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, pduAssetId));
-            result.add(data);
-            break;
          case MetricName.PDU_APPARENT_POWER:
             String outlet_pdu_power_extraidentifier = value.getExtraidentifier();
             if(outLet.equals(outlet_pdu_power_extraidentifier)) {
@@ -485,7 +479,10 @@ public class AssetService {
             break;
          case MetricName.PDU_CURRENT:
             String outlet_pdu_current_extraidentifier = value.getExtraidentifier();
-            if(outLet.equals(outlet_pdu_current_extraidentifier)) {
+            if(outlet_pdu_current_extraidentifier == null) {
+               data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, pduAssetId));
+               result.add(data);
+            } else if(outLet.equals(outlet_pdu_current_extraidentifier)) {
                data.setMetricName(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, pduAssetId, value.getExtraidentifier()));
                result.add(data);
             }
@@ -695,6 +692,9 @@ public class AssetService {
                         String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, inlet, pole));
                }
                result.add(metricData);
+            }else {
+               metricData.setMetricName(MetricName.PDU_TOTAL_CURRENT);
+               result.add(metricData);
             }
             break;
          case MetricName.PDU_VOLTAGE:
@@ -733,10 +733,6 @@ public class AssetService {
             break;
          case MetricName.PDU_POWER_LOAD:
             metricData.setMetricName(MetricName.PDU_POWER_LOAD);
-            result.add(metricData);
-            break;
-         case MetricName.PDU_TOTAL_CURRENT:
-            metricData.setMetricName(MetricName.PDU_TOTAL_CURRENT);
             result.add(metricData);
             break;
          case MetricName.PDU_TOTAL_POWER:

@@ -372,6 +372,9 @@ public class AggregatorService implements AsyncService {
          metricNameAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, pduAssetId);
          metricNameAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, pduAssetId);
          metricNameAndIdMap.put(MetricName.SERVER_VOLTAGE, pduAssetId);
+         metricNameAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_VOLTAGE, pduAssetId);
+         metricNameAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER_LOAD, pduAssetId);
+         metricNameAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT_LOAD, pduAssetId);
          pduFormula.put(pduAssetId, metricNameAndIdMap);
       }
       return pduFormula;
