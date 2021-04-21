@@ -76,8 +76,9 @@ public class AssetService {
    //This map databaseUnitAndOutputUnitMap will be deprecated in Flowgate-1.3
    public static Map<String, String> databaseUnitAndOutputUnitMap = null;
    private static Map<String,String> metricNameMap = new HashMap<String,String>();
-   private static Map<String, String> formulaKeyAndMetricNameMap = new HashMap<>();
-   private static Map<String, String> formulaKeyAndMetricFormatNameMap = new HashMap<>();
+   private static Map<String, String> formulaKeyAndValueUnitNameMapForServer = new HashMap<>();
+   private static Map<String, String> formulaKeyAndMetricFormatNameMapForServer = new HashMap<>();
+   private static String DISPLAYNAMEANDFORMULANAMEMAPKEY = "DISPLAYNAMEANDFORMULANAMEMAPKEY";
    static {
       metricNameMap.put(MetricName.PDU_HUMIDITY, MetricName.HUMIDITY);
       metricNameMap.put(MetricName.PDU_TEMPERATURE, MetricName.TEMPERATURE);
@@ -101,31 +102,27 @@ public class AssetService {
       databaseUnitAndOutputUnitMap.put(MetricUnit.KWH.toString(), MetricUnit.kWh.toString());
       databaseUnitAndOutputUnitMap = Collections.unmodifiableMap(databaseUnitAndOutputUnitMap);
 
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, MetricName.PDU_TOTAL_CURRENT);
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, MetricName.PDU_TOTAL_POWER);
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, MetricName.PDU_CURRENT);
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, MetricName.PDU_APPARENT_POWER);
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_USED_PDU_OUTLET_VOLTAGE, MetricName.PDU_VOLTAGE);
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_CONNECTED_PDU_POWER_LOAD, MetricName.PDU_POWER_LOAD);
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT_LOAD, MetricName.PDU_CURRENT_LOAD);
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_FRONT_TEMPERATURE, MetricName.TEMPERATURE);
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_BACK_TEMPREATURE, MetricName.TEMPERATURE);
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_FRONT_HUMIDITY, MetricName.HUMIDITY);
-      formulaKeyAndMetricNameMap.put(MetricName.SERVER_BACK_HUMIDITY, MetricName.HUMIDITY);
-      formulaKeyAndMetricNameMap = Collections.unmodifiableMap(formulaKeyAndMetricNameMap);
+      formulaKeyAndValueUnitNameMapForServer.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, MetricName.PDU_CURRENT);
+      formulaKeyAndValueUnitNameMapForServer.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, MetricName.PDU_APPARENT_POWER);
+      formulaKeyAndValueUnitNameMapForServer.put(MetricName.SERVER_USED_PDU_OUTLET_VOLTAGE, MetricName.PDU_VOLTAGE);
+      formulaKeyAndValueUnitNameMapForServer.put(MetricName.SERVER_CONNECTED_PDU_POWER_LOAD, MetricName.PDU_POWER_LOAD);
+      formulaKeyAndValueUnitNameMapForServer.put(MetricName.SERVER_CONNECTED_PDU_CURRENT_LOAD, MetricName.PDU_CURRENT_LOAD);
+      formulaKeyAndValueUnitNameMapForServer.put(MetricName.SERVER_FRONT_TEMPERATURE, MetricName.TEMPERATURE);
+      formulaKeyAndValueUnitNameMapForServer.put(MetricName.SERVER_BACK_TEMPREATURE, MetricName.TEMPERATURE);
+      formulaKeyAndValueUnitNameMapForServer.put(MetricName.SERVER_FRONT_HUMIDITY, MetricName.HUMIDITY);
+      formulaKeyAndValueUnitNameMapForServer.put(MetricName.SERVER_BACK_HUMIDITY, MetricName.HUMIDITY);
+      formulaKeyAndValueUnitNameMapForServer = Collections.unmodifiableMap(formulaKeyAndValueUnitNameMapForServer);
 
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT);
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_CONNECTED_PDU_POWER, MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER);
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT_LOAD, MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD);
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_CONNECTED_PDU_POWER_LOAD, MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD);
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT);
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER);
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_USED_PDU_OUTLET_VOLTAGE, MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE);
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_FRONT_TEMPERATURE, MetricKeyName.SERVER_FRONT_TEMPERATURE_LOCATIONX);
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_BACK_TEMPREATURE, MetricKeyName.SERVER_BACK_TEMPREATURE_LOCATIONX);
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_FRONT_HUMIDITY, MetricKeyName.SERVER_FRONT_HUMIDITY_LOCATIONX);
-      formulaKeyAndMetricFormatNameMap.put(MetricName.SERVER_BACK_HUMIDITY, MetricKeyName.SERVER_BACK_HUMIDITY_LOCATIONX);
-      formulaKeyAndMetricFormatNameMap = Collections.unmodifiableMap(formulaKeyAndMetricFormatNameMap);
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_CONNECTED_PDU_CURRENT_LOAD, MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD);
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_CONNECTED_PDU_POWER_LOAD, MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD);
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT);
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER);
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_USED_PDU_OUTLET_VOLTAGE, MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE);
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_FRONT_TEMPERATURE, MetricKeyName.SERVER_FRONT_TEMPERATURE_LOCATIONX);
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_BACK_TEMPREATURE, MetricKeyName.SERVER_BACK_TEMPREATURE_LOCATIONX);
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_FRONT_HUMIDITY, MetricKeyName.SERVER_FRONT_HUMIDITY_LOCATIONX);
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_BACK_HUMIDITY, MetricKeyName.SERVER_BACK_HUMIDITY_LOCATIONX);
+      formulaKeyAndMetricFormatNameMapForServer = Collections.unmodifiableMap(formulaKeyAndMetricFormatNameMapForServer);
    }
 
    public List<MetricData> getPduMetricsDataById(String assetID, long starttime, int duration){
@@ -959,14 +956,14 @@ public class AssetService {
     * @return
     */
    private Set<String> extractSensorIDfromFormula(Asset asset){
-      Map<String, String> formulars = asset.getMetricsformulars();
+      Map<String, String> formulas = asset.getMetricsformulars();
       Set<String> assetIds = new HashSet<String>();
-      if(formulars == null || formulars.get(FlowgateConstant.SENSOR) == null) {
+      if(formulas == null || formulas.get(FlowgateConstant.SENSOR) == null) {
          return assetIds;
       }
-      String sensorFormulasInfo = formulars.get(FlowgateConstant.SENSOR);
+      TypeReference<Map<String, Map<String, String>>> typeReference = new TypeReference<Map<String, Map<String, String>>>() {};
       Map<String, Map<String, String>> sensorFormulasMap =
-               asset.metricsFormulaToMap(sensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
+            getFormula(asset, FlowgateConstant.SENSOR, formulas, typeReference);
       for(Map.Entry<String, Map<String, String>> metricAndFormulaEntry : sensorFormulasMap.entrySet()) {
          Map<String, String> locationAndIdsMap = metricAndFormulaEntry.getValue();
          for(Map.Entry<String, String> locationInfoAndId : locationAndIdsMap.entrySet()) {
@@ -997,7 +994,7 @@ public class AssetService {
          assetAndValueUnitsMap = getServerRawMetrics(asset, starttime, duration);
          //2. Remove or filter
          //3. Translate
-         metricDatas = translateToMetricData(assetAndValueUnitsMap, asset);
+         metricDatas = translateToMetricDataForServer(assetAndValueUnitsMap, asset);
       default:
          assetAndValueUnitsMap = getRawMetrics(asset, starttime, duration);
          //return translateToMetricDataForOtherAsset(otherValueUnits);
@@ -1005,55 +1002,58 @@ public class AssetService {
       return metricDatas;
    }
 
-   private List<MetricData> translateToMetricData(Map<String, List<ValueUnit>> assetAndValueUnitsMap,
+   private List<MetricData> translateToMetricDataForServer(Map<String, List<ValueUnit>> assetAndValueUnitsMap,
          Asset asset){
       List<MetricData> metricDatas = new ArrayList<MetricData>();
-      Map<String, Map<String, String>> toNameAndFormulasMap = getMetricDispalyNameAndFormularMapForServer(asset);
-      if(toNameAndFormulasMap.isEmpty()) {
+      Map<String, Map<String, String>> displayNameAndFormulasMap = getMetricDispalyNameAndFormularMapForServer(asset);
+      if(displayNameAndFormulasMap.isEmpty() ||
+            !displayNameAndFormulasMap.containsKey(DISPLAYNAMEANDFORMULANAMEMAPKEY)) {
          return metricDatas;
       }
-      //For Server Voltage
-      Map<String, List<ValueUnit>> idAndValuesForServerVoltage = new HashMap<>();
-      List<ValueUnit> inletVoltages = new ArrayList<>();
-      List<ValueUnit> outletVoltages = new ArrayList<>();
+      //The displayNameAndFormulaKeyMap use to find a method to translate the valueUnit to MetricData
+      Map<String, String> displayNameAndFormulaKeyMap =
+            displayNameAndFormulasMap.get(DISPLAYNAMEANDFORMULANAMEMAPKEY);
+      displayNameAndFormulasMap.remove(DISPLAYNAMEANDFORMULANAMEMAPKEY);
       CompareValueUnitByTime comparator = new CompareValueUnitByTime();
-      for(Map.Entry<String, Map<String, String>> toNameAndFormulaEntry : toNameAndFormulasMap.entrySet()) {
-         String displayName = toNameAndFormulaEntry.getKey();
+      for(Map.Entry<String, Map<String, String>> displayNameAndFormulaEntry : displayNameAndFormulasMap.entrySet()) {
+         String displayName = displayNameAndFormulaEntry.getKey();
          //Key:MetricName Value:Formula
-         Map<String, String> metricNameAndFormulaMap = toNameAndFormulaEntry.getValue();
-         for(Map.Entry<String, String> metricNameAndFormula : metricNameAndFormulaMap.entrySet()) {
-            String metricName = metricNameAndFormula.getKey();
-            String idFormula = metricNameAndFormula.getValue();
-            String ids[] = idFormula.split("\\+|-|\\*|/|\\(|\\)");
+         Map<String, String> valueUnitNameAndFormulaMap = displayNameAndFormulaEntry.getValue();
+         for(Map.Entry<String, String> valueUnitNameAndFormula : valueUnitNameAndFormulaMap.entrySet()) {
+            String valueUnitName = valueUnitNameAndFormula.getKey();
+            String formula = valueUnitNameAndFormula.getValue();
+            String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
             Map<String, List<ValueUnit>> idAndValues = new HashMap<>();
             for(String id : ids) {
+               List<ValueUnit> inletVoltages = new ArrayList<>();
+               List<ValueUnit> outletVoltages = new ArrayList<>();
                List<ValueUnit> valueUnits = new ArrayList<>();
                for(ValueUnit valueUnit : assetAndValueUnitsMap.get(id)) {
-                  if(!metricName.equals(valueUnit.getKey())) {
+                  if(!valueUnitName.equals(valueUnit.getKey())) {
                      continue;
                   }
-                  String pdu_outlet_extraidentifier = valueUnit.getExtraidentifier();
+                  String extraidentifier = valueUnit.getExtraidentifier();
                   String outlet = null;
-                  switch (metricName) {
+                  switch (valueUnitName) {
                   case MetricName.PDU_CURRENT:
                      //PDU:23551d6dacf2432c8a3edbc6bbc922cd|OUTLET:1|Current
                      if(displayName.contains(FlowgateConstant.OUTLET_NAME_PREFIX)
-                           && pdu_outlet_extraidentifier != null) {
+                           && extraidentifier != null) {
                         outlet = displayName.split("|")[1];
-                        if(outlet.equals(pdu_outlet_extraidentifier)) {
+                        if(outlet.equals(extraidentifier)) {
                            valueUnits.add(valueUnit);
                         }
                      }
                      //PDU:23551d6dacf2432c8a3edbc6bbc922cd|Current
                      if(!displayName.contains(FlowgateConstant.OUTLET_NAME_PREFIX)
-                           && pdu_outlet_extraidentifier == null ) {
+                           && !displayName.contains(FlowgateConstant.INLET_NAME_PREFIX) ) {
                         valueUnits.add(valueUnit);
                      }
                      break;
                   case MetricName.PDU_APPARENT_POWER:
                      //Sample value of toName: PDU:pduID|OUTLET:1|Power
                      outlet = displayName.split("|")[1];
-                     if(outlet.equals(pdu_outlet_extraidentifier)) {
+                     if(outlet.equals(extraidentifier)) {
                         valueUnits.add(valueUnit);
                      }
                      break;
@@ -1061,16 +1061,16 @@ public class AssetService {
                      //DisplayName: PDU:23551d6dacf2432c8a3edbc6bbc922cd|OUTLET:1|Voltage
                      outlet = displayName.split("|")[1];
                      if(displayName.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
-                        if(outlet.equals(pdu_outlet_extraidentifier)) {
+                        if(outlet.equals(extraidentifier)) {
                            valueUnits.add(valueUnit);
                         }
                      }
                      //DisplayName:Voltage
                      if(MetricName.SERVER_VOLTAGE.equals(displayName)) {
-                        if (pdu_outlet_extraidentifier
+                        if (extraidentifier
                               .indexOf(FlowgateConstant.INLET_NAME_PREFIX) > 0) {
                            inletVoltages.add(valueUnit);
-                        } else if (outlet.equals(pdu_outlet_extraidentifier)) {
+                        } else if (outlet.equals(extraidentifier)) {
                            outletVoltages.add(valueUnit);
                         }
                      }
@@ -1085,10 +1085,9 @@ public class AssetService {
                      if(inletVoltages.isEmpty()) {
                         continue;
                      }
-                     outletVoltages = inletVoltages;
+                     valueUnits = inletVoltages;
                   }
-                  Collections.sort(outletVoltages, comparator);
-                  idAndValuesForServerVoltage.put(id, outletVoltages);
+                  valueUnits = outletVoltages;
                }
                if(valueUnits.isEmpty()) {
                   continue;
@@ -1097,10 +1096,7 @@ public class AssetService {
                idAndValues.put(id, valueUnits);
             }
             if(!idAndValues.isEmpty()) {
-               metricDatas.addAll(translateToMetricDataForOneMetric(displayName, idFormula, idAndValues));
-            }
-            if(MetricName.SERVER_VOLTAGE.equals(displayName) && !idAndValuesForServerVoltage.isEmpty()) {
-               metricDatas.addAll(translateToMetricDataForOneMetric(displayName, idFormula, idAndValuesForServerVoltage));
+               metricDatas.addAll(convertValueUnitToMetricData(displayName,displayNameAndFormulaKeyMap.get(displayName), formula, idAndValues));
             }
          }
       }
@@ -1122,8 +1118,8 @@ public class AssetService {
     * @param idAndValues
     * @return
     */
-   private List<MetricData> translateToMetricDataForOneMetric(String displayName, String formula,
-         Map<String, List<ValueUnit>> idAndValues){
+   private List<MetricData> convertValueUnitToMetricData(String displayName, String formulaKey,
+         String formula, Map<String, List<ValueUnit>> idAndValues){
       List<ValueUnit> valueUnits = idAndValues.get(idAndValues.keySet().iterator().next());
       Map<String, ValueUnit> idAndValueUnitMap = null;
       //Assuming the collection length is the same
@@ -1138,7 +1134,7 @@ public class AssetService {
             idAndValueUnitMap.put(id, value);
          }
          translateContext.setDisplayName(displayName);
-         translateContext.setFormulars(formula);
+         translateContext.setFormula(formula);
          translateContext.setValueUnits(idAndValueUnitMap);
          MetricData metricData = new MetricData();
          //Add translate logic
@@ -1192,10 +1188,10 @@ public class AssetService {
       assetAndValueUnitsMap =
             getServerUsageRawMetrics(server, starttime, duration);
       //PDU ValueUnits of Server
-      String pduFormulasInfo = metricFormula.get(FlowgateConstant.PDU);
-      if(pduFormulasInfo != null) {
-         Map<String, Map<String, String>> pduMetrics =
-               server.metricsFormulaToMap(pduFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
+      TypeReference<Map<String, Map<String, String>>> typeReference = new TypeReference<Map<String, Map<String, String>>>() {};
+      Map<String, Map<String, String>> pduMetricsFormula =
+            getFormula(server, FlowgateConstant.PDU, metricFormula, typeReference);
+      if(pduMetricsFormula != null) {
          List<String> metricNames = new ArrayList<String>();
          metricNames.add(MetricName.PDU_TOTAL_POWER);
          metricNames.add(MetricName.PDU_TOTAL_CURRENT);
@@ -1204,11 +1200,10 @@ public class AssetService {
          metricNames.add(MetricName.PDU_VOLTAGE);
          metricNames.add(MetricName.PDU_POWER_LOAD);
          metricNames.add(MetricName.PDU_CURRENT_LOAD);
-         for(String pduId : pduMetrics.keySet()) {
+         for(String pduId : pduMetricsFormula.keySet()) {
             List<ValueUnit> valueUnits = getValueUnitsByAssetID(pduId, starttime, duration);
             if(!valueUnits.isEmpty()) {
                filterValueUnitsByMetricNames(valueUnits, metricNames);
-               //Asset pdu = getAssetById(pduId);
                assetAndValueUnitsMap.put(pduId, valueUnits);
             }
          }
@@ -1222,7 +1217,6 @@ public class AssetService {
          for(String sensorId : assetIds) {
             List<ValueUnit> valueUnits = getValueUnitsByAssetID(sensorId, starttime, duration);
             if(!valueUnits.isEmpty()) {
-               //Asset sensor = getAssetById(sensorId);
                filterValueUnitsByMetricNames(valueUnits, sensorMetricNames);
                assetAndValueUnitsMap.put(sensorId, valueUnits);
             }
@@ -1281,90 +1275,94 @@ public class AssetService {
     * }
     */
    private Map<String, Map<String, String>> getMetricDispalyNameAndFormularMapForServer(Asset server){
-      Map<String, Map<String, String>> toNameAndFormulasMap = new HashMap<String, Map<String, String>>();
+      Map<String, Map<String, String>> displayNameAndFormulasMap = new HashMap<String, Map<String, String>>();
       Map<String, String> formulas = server.getMetricsformulars();
       if(formulas == null || formulas.isEmpty()) {
-         return toNameAndFormulasMap;
+         return displayNameAndFormulasMap;
       }
+      Map<String, String> displayNameAndFormulaKey = new HashMap<String, String>();
       //Server Host Usage Formula
-      String hostUsageformulasInfo = formulas.get(FlowgateConstant.HOST_METRICS);
-      if (!StringUtils.isBlank(hostUsageformulasInfo)) {
-         Map<String, String> hostUsageformulas =
-               server.metricsFormulaToMap(hostUsageformulasInfo, new TypeReference<Map<String, String>>(){});
+      Map<String, String> hostUsageformulas =
+            getFormula(server, FlowgateConstant.HOST_METRICS, formulas, new TypeReference<Map<String, String>>(){});
+      if (hostUsageformulas != null) {
          for(Map.Entry<String, String> formulaKeyAndFormula : hostUsageformulas.entrySet()) {
             Map<String, String> metricNameAndFormulaMap = new HashMap<>();
-            String metricName = getMetricName(formulaKeyAndFormula.getKey());
-            String displayName = getDisplayName(formulaKeyAndFormula.getKey());
-            metricNameAndFormulaMap.put(metricName, formulaKeyAndFormula.getValue());
-            toNameAndFormulasMap.put(displayName, metricNameAndFormulaMap);
+            String valueUnitName = getValueUnitName(formulaKeyAndValueUnitNameMapForServer, formulaKeyAndFormula.getKey());
+            String displayName = getDisplayName(formulaKeyAndMetricFormatNameMapForServer, formulaKeyAndFormula.getKey());
+            metricNameAndFormulaMap.put(valueUnitName, formulaKeyAndFormula.getValue());
+            displayNameAndFormulasMap.put(displayName, metricNameAndFormulaMap);
+            displayNameAndFormulaKey.put(displayName, formulaKeyAndFormula.getKey());
          }
       }
       //Server PDU formula
-      Map<String, Map<String, String>> pduFormulas = new HashMap<String, Map<String, String>>();
-      String pduFormulasInfo = formulas.get(FlowgateConstant.PDU);
-      pduFormulas =
-            server.metricsFormulaToMap(pduFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
-      Map<String,String> justficationfileds = server.getJustificationfields();
-      String allPduPortInfo = justficationfileds.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
-      List<String> pduPorts = null;
-      Map<String, List<String>> pduAssetIdAndUsedOutletMap = null;
-      if (!StringUtils.isEmpty(allPduPortInfo)) {
-         pduPorts = Arrays.asList(allPduPortInfo.split(FlowgateConstant.SPILIT_FLAG));
-         pduAssetIdAndUsedOutletMap = new HashMap<String, List<String>>();
-         for (String pduPortInfo : pduPorts) {
-            // startport_FIELDSPLIT_endDeviceName_FIELDSPLIT_endport_FIELDSPLIT_endDeviceAssetID
-            // item[0] start port
-            // item[1] device name
-            // item[2] end port
-            // itme[3] assetid
-            String items[] = pduPortInfo.split(FlowgateConstant.SEPARATOR);
-            List<String> outlets = pduAssetIdAndUsedOutletMap.get(items[3]);
-            if(outlets == null) {
-               outlets = new ArrayList<String>();
-            }
-            outlets.add(items[2]);
-            pduAssetIdAndUsedOutletMap.put(items[3], outlets);
-         }
-      }
-      for(Map.Entry<String, Map<String, String>> pduIdAndFormula : pduFormulas.entrySet()) {
-         String pduId = pduIdAndFormula.getKey();
-         Map<String, String> formulaKeyAndFormulaMap = pduIdAndFormula.getValue();
-         List<String> outLets = pduAssetIdAndUsedOutletMap.get(pduId);
-         for(Map.Entry<String, String> formulaEntry : formulaKeyAndFormulaMap.entrySet()) {
-            Map<String, String> metricNameAndFormulaMap = new HashMap<>();
-            String metricName = getMetricName(formulaEntry.getKey());
-            String displayName = getDisplayName(formulaEntry.getKey());
-            metricNameAndFormulaMap.put(metricName, formulaEntry.getValue());
-            switch (displayName) {
-            case MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT:
-            case MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE:
-            case MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER:
-               if(outLets == null) {
-                  continue;
+      TypeReference<Map<String, Map<String, String>>> typeReference =
+            new TypeReference<Map<String, Map<String, String>>>() {};
+      Map<String, Map<String, String>> pduFormulas =
+            getFormula(server,FlowgateConstant.PDU, formulas, typeReference);
+      if(pduFormulas != null) {
+         Map<String,String> justficationfileds = server.getJustificationfields();
+         String allPduPortInfo = justficationfileds.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
+         List<String> pduPorts = null;
+         Map<String, List<String>> pduAssetIdAndUsedOutletMap = null;
+         if (!StringUtils.isEmpty(allPduPortInfo)) {
+            pduPorts = Arrays.asList(allPduPortInfo.split(FlowgateConstant.SPILIT_FLAG));
+            pduAssetIdAndUsedOutletMap = new HashMap<String, List<String>>();
+            for (String pduPortInfo : pduPorts) {
+               // startport_FIELDSPLIT_endDeviceName_FIELDSPLIT_endport_FIELDSPLIT_endDeviceAssetID
+               // item[0] start port
+               // item[1] device name
+               // item[2] end port
+               // itme[3] assetid
+               String items[] = pduPortInfo.split(FlowgateConstant.SEPARATOR);
+               List<String> outlets = pduAssetIdAndUsedOutletMap.get(items[3]);
+               if(outlets == null) {
+                  outlets = new ArrayList<String>();
                }
-               for(String outLet : outLets) {
-                  displayName = String.format(displayName, pduId, outLet);
-                  toNameAndFormulasMap.put(displayName, metricNameAndFormulaMap);
-               }
-               break;
-            case MetricName.SERVER_VOLTAGE://displayName: Voltage
-               toNameAndFormulasMap.put(displayName, metricNameAndFormulaMap);
-               break;
-            default:
-               displayName = String.format(displayName, pduId);
-               toNameAndFormulasMap.put(displayName, metricNameAndFormulaMap);
-               break;
+               outlets.add(items[2]);
+               pduAssetIdAndUsedOutletMap.put(items[3], outlets);
             }
          }
+         for(Map.Entry<String, Map<String, String>> pduIdAndFormula : pduFormulas.entrySet()) {
+            String pduId = pduIdAndFormula.getKey();
+            Map<String, String> formulaKeyAndFormulaMap = pduIdAndFormula.getValue();
+            List<String> outLets = pduAssetIdAndUsedOutletMap.get(pduId);
+            for(Map.Entry<String, String> formulaEntry : formulaKeyAndFormulaMap.entrySet()) {
+               Map<String, String> metricNameAndFormulaMap = new HashMap<>();
+               String valueUnitName = getValueUnitName(formulaKeyAndValueUnitNameMapForServer, formulaEntry.getKey());
+               String displayName = getDisplayName(formulaKeyAndMetricFormatNameMapForServer, formulaEntry.getKey());
+               metricNameAndFormulaMap.put(valueUnitName, formulaEntry.getValue());
+               switch (displayName) {
+               case MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT:
+               case MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE:
+               case MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER:
+                  if(outLets == null) {
+                     continue;
+                  }
+                  for(String outLet : outLets) {
+                     displayName = String.format(displayName, pduId, outLet);
+                     displayNameAndFormulasMap.put(displayName, metricNameAndFormulaMap);
+                  }
+                  break;
+               case MetricName.SERVER_VOLTAGE://displayName: Voltage
+                  displayNameAndFormulasMap.put(displayName, metricNameAndFormulaMap);
+                  break;
+               default:
+                  displayName = String.format(displayName, pduId);
+                  displayNameAndFormulasMap.put(displayName, metricNameAndFormulaMap);
+                  break;
+               }
+               displayNameAndFormulaKey.put(displayName, formulaEntry.getKey());
+            }
+         }
       }
+
       //Server Sensor Formula
-      String sensorFormulasInfo = formulas.get(FlowgateConstant.SENSOR);
-      if (!StringUtils.isBlank(sensorFormulasInfo)) {
-         Map<String, Map<String, String>> sensorFormulaMap =
-               server.metricsFormulaToMap(sensorFormulasInfo, new TypeReference<Map<String, Map<String, String>>>() {});
+      Map<String, Map<String, String>> sensorFormulaMap =
+            getFormula(server, FlowgateConstant.SENSOR, formulas, typeReference);
+      if (sensorFormulaMap != null) {
          for(Map.Entry<String, Map<String, String>> entry : sensorFormulaMap.entrySet()) {
-            String metricName = getMetricName(entry.getKey());
-            String displayName = getDisplayName(entry.getKey());
+            String valueUnitName = getValueUnitName(formulaKeyAndValueUnitNameMapForServer, entry.getKey());
+            String displayName = getDisplayName(formulaKeyAndMetricFormatNameMapForServer, entry.getKey());
             Map<String, String> metricNameAndFormula = new HashMap<>();
             Map<String, String> locationAndFormulaMap = entry.getValue();
             for(Map.Entry<String, String> locationAndFormula : locationAndFormulaMap.entrySet()) {
@@ -1372,28 +1370,40 @@ public class AssetService {
                String formula = locationAndFormula.getValue();
                location = location.replace(FlowgateConstant.SEPARATOR, FlowgateConstant.UNDERLINE);
                displayName = String.format(displayName, location);
-               metricNameAndFormula.put(metricName, formula);
+               metricNameAndFormula.put(valueUnitName, formula);
             }
-            toNameAndFormulasMap.put(displayName, metricNameAndFormula);
+            displayNameAndFormulasMap.put(displayName, metricNameAndFormula);
+            displayNameAndFormulaKey.put(displayName, entry.getKey());
          }
       }
-      return toNameAndFormulasMap;
+      if(!displayNameAndFormulaKey.isEmpty()) {
+         displayNameAndFormulasMap.put(DISPLAYNAMEANDFORMULANAMEMAPKEY, displayNameAndFormulaKey);
+      }
+      return displayNameAndFormulasMap;
    }
 
-   private String getDisplayName(String formulaKey) {
-      String displayName = formulaKeyAndMetricFormatNameMap.get(formulaKey);
+   private <T> T getFormula(Asset asset, String formulaType,
+         Map<String, String> formulas, TypeReference<T> type){
+      String formulasInfo = formulas.get(formulaType);
+      if (StringUtils.isBlank(formulasInfo)) {
+         return null;
+      }
+      return asset.metricsFormulaToMap(formulasInfo, type);
+   }
+
+   private String getDisplayName(Map<String, String> formulaKeyAndMetricFormatNameMap,String formulaKey) {
+      String displayName = formulaKeyAndMetricFormatNameMapForServer.get(formulaKey);
       if(StringUtils.isEmpty(displayName)) {
          displayName = formulaKey;
       }
       return displayName;
    }
 
-   private String getMetricName(String formulaKey) {
-      String metricName = formulaKeyAndMetricNameMap.get(formulaKey);
-      if(StringUtils.isEmpty(metricName)) {
-         metricName = formulaKey;
+   private String getValueUnitName(Map<String, String> formulaKeyAndValueUnitNameMap, String formulaKey) {
+      String valueUnitName = formulaKeyAndValueUnitNameMapForServer.get(formulaKey);
+      if(StringUtils.isEmpty(valueUnitName)) {
+         valueUnitName = formulaKey;
       }
-      return metricName;
+      return valueUnitName;
    }
-
 }
