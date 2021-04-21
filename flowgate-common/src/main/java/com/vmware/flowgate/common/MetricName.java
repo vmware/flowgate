@@ -22,6 +22,16 @@ public class MetricName {
    public static final String PDU_TEMPERATURE = "Temperature";
    public static final String PDU_HUMIDITY = "Humidity";
 
+   //Formula key for pdu asset
+   public static final String PDU_XLET_ACTIVE_POWER = "%s|ActivePower";
+   public static final String PDU_XLET_APPARENT_POWER = "%s|ApparentPower";
+   public static final String PDU_XLET_FREE_CAPACITY = "%s|FreeCapacity";
+   public static final String PDU_XLET_CURRENT = "%s|Current";
+   public static final String PDU_XLET_VOLTAGE = "%s|Voltage";
+   public static final String PDU_INLET_XPOLE_CURRENT = "%s|%s|Current";
+   public static final String PDU_INLET_XPOLE_FREE_CAPACITY = "%s|%s|FreeCapacity";
+   public static final String PDU_INLET_XPOLE_VOLTAGE = "%s|%s|Voltage";
+
    public static final String SERVER_FRONT_TEMPERATURE = "FrontTemperature";
    public static final String SERVER_BACK_TEMPREATURE = "BackTemperature";
    public static final String SERVER_FRONT_HUMIDITY = "FrontHumidity";
