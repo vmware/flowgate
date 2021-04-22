@@ -131,13 +131,13 @@ public class TranslateFunctionServiceTest {
       long currentTimeMillis = System.currentTimeMillis();
 
       ValueUnit humidityValue1 = new ValueUnit();
-      humidityValue1.setValueNum(20);
+      humidityValue1.setValueNum(20.167);
       humidityValue1.setTime(currentTimeMillis);
       humidityValue1.setUnit(RealtimeDataUnit.Percent.toString());
       humidityValue1.setKey(MetricName.HUMIDITY);
 
       ValueUnit humidityValue2 = new ValueUnit();
-      humidityValue2.setValueNum(19);
+      humidityValue2.setValueNum(19.981);
       humidityValue2.setTime(currentTimeMillis);
       humidityValue2.setUnit(RealtimeDataUnit.Percent.toString());
       humidityValue2.setKey(MetricName.HUMIDITY);
@@ -152,7 +152,32 @@ public class TranslateFunctionServiceTest {
       MetricData metricData = function.apply(translateContext);
       TestCase.assertEquals(backToName, metricData.getMetricName());
       TestCase.assertEquals(currentTimeMillis, metricData.getTimeStamp());
-      TestCase.assertEquals(19.5, metricData.getValueNum());
+      TestCase.assertEquals(20.074, metricData.getValueNum());
+      TestCase.assertEquals(ValueUnit.MetricUnit.percent.toString(), metricData.getUnit());
+   }
+
+   @Test
+   public void testCalculationFormulaConvert1() {
+      String assetId = "752c0c7637104a39a4242031cd48785e";
+      String formula = "752c0c7637104a39a4242031cd48785e*0.8";
+      long currentTimeMillis = System.currentTimeMillis();
+
+      ValueUnit humidityValue = new ValueUnit();
+      humidityValue.setValueNum(20.167);
+      humidityValue.setTime(currentTimeMillis);
+      humidityValue.setUnit(RealtimeDataUnit.Percent.toString());
+      humidityValue.setKey(MetricName.HUMIDITY);
+
+      String displayName = MetricKeyName.SERVER_BACK_HUMIDITY_LOCATIONX;
+      String backToName = String.format(displayName, "BACK");
+      Function<TranslateContext, MetricData> function = TranslateFunctionService.convert;
+      Map<String, ValueUnit> valueUnitMap = new HashMap<>();
+      valueUnitMap.put(assetId, humidityValue);
+      TranslateContext translateContext = TranslateContext.buildByValueUnitsAndDisplayNameAndFormula(valueUnitMap, backToName, formula);
+      MetricData metricData = function.apply(translateContext);
+      TestCase.assertEquals(backToName, metricData.getMetricName());
+      TestCase.assertEquals(currentTimeMillis, metricData.getTimeStamp());
+      TestCase.assertEquals(16.1336, metricData.getValueNum());
       TestCase.assertEquals(ValueUnit.MetricUnit.percent.toString(), metricData.getUnit());
    }
 

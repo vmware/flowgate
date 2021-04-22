@@ -8,10 +8,8 @@ import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.MetricData;
-import com.vmware.flowgate.common.model.RealTimeData;
 import com.vmware.flowgate.common.model.TranslateContext;
 import com.vmware.flowgate.common.model.ValueUnit;
-import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
@@ -20,12 +18,9 @@ import org.apache.commons.jexl3.MapContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 
 public class TranslateFunctionService {
@@ -43,19 +38,27 @@ public class TranslateFunctionService {
          return null;
       }
       ValueUnit valueUnit = valueUnitMap.entrySet().iterator().next().getValue();
-      String formula = translateContext.getFormula();
-      for (Map.Entry<String, ValueUnit> valueUnitEntry : valueUnitMap.entrySet()) {
-         formula = formula.replaceAll(valueUnitEntry.getKey(), String.valueOf(valueUnitEntry.getValue().getValueNum()));
+      double valueNum;
+      String[] ids = translateContext.getFormula().split("\\+|-|\\*|/|\\(|\\)");
+      if (ids.length > 1) {
+         String formula = translateContext.getFormula();
+         for (Map.Entry<String, ValueUnit> valueUnitEntry : valueUnitMap.entrySet()) {
+            formula = formula.replaceAll(valueUnitEntry.getKey(), String.valueOf(valueUnitEntry.getValue().getValueNum()));
+         }
+
+         JexlExpression jexlExpression = jexl.createExpression(formula);
+         JexlContext jexlContext = new MapContext();
+         valueNum = (Double) jexlExpression.evaluate(jexlContext);
+      } else {
+         valueNum = valueUnit.getValueNum();
       }
-      JexlExpression jexlExpression = jexl.createExpression(formula);
-      JexlContext jexlContext = new MapContext();
       String unit = AssetService.databaseUnitAndOutputUnitMap.get(valueUnit.getUnit());
       MetricData metricData = new MetricData();
       metricData.setMetricName(translateContext.getDisplayName());
       metricData.setUnit(unit == null ? valueUnit.getUnit() : unit);
       metricData.setTimeStamp(valueUnit.getTime());
       metricData.setValue(valueUnit.getValue());
-      metricData.setValueNum((Double) jexlExpression.evaluate(jexlContext));
+      metricData.setValueNum(valueNum);
       return metricData;
    };
 
