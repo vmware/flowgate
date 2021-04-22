@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -1096,7 +1097,12 @@ public class AssetService {
                idAndValues.put(id, valueUnits);
             }
             if(!idAndValues.isEmpty()) {
-               metricDatas.addAll(convertValueUnitToMetricData(displayName,displayNameAndFormulaKeyMap.get(displayName), formula, idAndValues));
+               Function<TranslateContext, MetricData> function = TranslateFunctionService.convert;
+               String formulaKey = displayNameAndFormulaKeyMap.get(displayName);
+               if(TranslateFunctionService.serverFormulaKeyAndFunction.containsKey(formulaKey)) {
+                  function = TranslateFunctionService.serverFormulaKeyAndFunction.get(formulaKey);
+               }
+               metricDatas.addAll(convertValueUnitToMetricData(displayName,function, formula, idAndValues));
             }
          }
       }
@@ -1118,7 +1124,7 @@ public class AssetService {
     * @param idAndValues
     * @return
     */
-   private List<MetricData> convertValueUnitToMetricData(String displayName, String formulaKey,
+   private List<MetricData> convertValueUnitToMetricData(String displayName,Function<TranslateContext, MetricData> function,
          String formula, Map<String, List<ValueUnit>> idAndValues){
       List<ValueUnit> valueUnits = idAndValues.get(idAndValues.keySet().iterator().next());
       Map<String, ValueUnit> idAndValueUnitMap = null;
@@ -1136,8 +1142,7 @@ public class AssetService {
          translateContext.setDisplayName(displayName);
          translateContext.setFormula(formula);
          translateContext.setValueUnits(idAndValueUnitMap);
-         MetricData metricData = new MetricData();
-         //Add translate logic
+         MetricData metricData = function.apply(translateContext);
          metricDatas.add(metricData);
       }
       return metricDatas;
@@ -1236,13 +1241,9 @@ public class AssetService {
    }
 
    private Map<String, List<ValueUnit>> getServerUsageRawMetrics(Asset server, long starttime, int duration) {
-      String hostMetricsFormulaString = server.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
       Map<String, List<ValueUnit>> assetAndValueUnitsMap = new HashMap<String, List<ValueUnit>>();
-      if (StringUtils.isBlank(hostMetricsFormulaString)) {
-         return assetAndValueUnitsMap;
-      }
       Map<String, String> hostMetricsFormula =
-            server.metricsFormulaToMap(hostMetricsFormulaString, new TypeReference<Map<String, String>>() {});
+            getFormula(server, FlowgateConstant.HOST_METRICS, server.getMetricsformulars(), new TypeReference<Map<String, String>>() {});
       Map<String, List<String>> assetIdAndMetricsNameList = Maps.newHashMap();
       for (Map.Entry<String, String> itemEntry : hostMetricsFormula.entrySet()) {
          List<String> metricsNameList = assetIdAndMetricsNameList.computeIfAbsent(itemEntry.getValue(), k -> Lists.newArrayList());
