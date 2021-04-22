@@ -127,4 +127,16 @@ public class ValueUnit {
       return String.valueOf(translateUnit(Double.parseDouble(val), sourceUnit, targetUnit));
    }
 
+   @Override
+   public String toString() {
+      return "ValueUnit{" +
+               "extraidentifier='" + extraidentifier + '\'' +
+               ", key='" + key + '\'' +
+               ", value='" + value + '\'' +
+               ", valueNum=" + valueNum +
+               ", unit='" + unit + '\'' +
+               ", time=" + time +
+               '}';
+   }
+
 }
