@@ -200,20 +200,20 @@ public class AggregatorService implements AsyncService {
        * and the other part comes from PowerIQ and other DCIMs(integrated pdus)
        * We need NON-PowerIQ's pdus(Not integrated pdus)
        */
-      for(Asset pdu : pdus) {
-         if(pdu.getAssetName() == null || pdu.getAssetName().isEmpty()) {
+      for(Asset targetPdu : pdus) {
+         if(targetPdu.getAssetName() == null || targetPdu.getAssetName().isEmpty()) {
             continue;
          }
-         String pduName = pdu.getAssetName().toLowerCase();
-         String source = pdu.getAssetSource();
+         String targetPduName = targetPdu.getAssetName().toLowerCase();
+         String targetSource = targetPdu.getAssetSource();
          boolean isSkip = false;
          //pdus from multiple DCIM system
-         if(source.indexOf(FlowgateConstant.SPILIT_FLAG) > -1) {
-            String[] sources = source.split(FlowgateConstant.SPILIT_FLAG);
+         if(targetSource.indexOf(FlowgateConstant.SPILIT_FLAG) > -1) {
+            String[] sources = targetSource.split(FlowgateConstant.SPILIT_FLAG);
             for(String assetSource : sources) {
                if(powerIQIDs.containsKey(assetSource)) {
                   //Remove integrated pdu
-                  pdusOnlyFromPowerIQ.remove(pduName);
+                  pdusOnlyFromPowerIQ.remove(targetPduName);
                   isSkip = true;
                   break;
                }
@@ -226,68 +226,121 @@ public class AggregatorService implements AsyncService {
             continue;
          }
          //We need to integrate the PowerIQ PDU and Other DCIM PDU
-         Asset pduFromPowerIQ = pdusOnlyFromPowerIQ.get(pduName);
-         if(pduFromPowerIQ != null) {
-            HashMap<String,String> pduFromPowerIQExtraInfo = pduFromPowerIQ.getJustificationfields();
-            HashMap<String,String> pduExtraInfo = pdu.getJustificationfields();
+         Asset sourcePdu = pdusOnlyFromPowerIQ.get(targetPduName);
+         if(sourcePdu != null) {
+            HashMap<String,String> sourcePduExtraInfo = sourcePdu.getJustificationfields();
+            HashMap<String,String> targetPduExtraInfo = targetPdu.getJustificationfields();
 
-            if(source.indexOf(pduFromPowerIQ.getAssetSource()) == -1) {
-               pdu.setAssetSource(source + FlowgateConstant.SPILIT_FLAG + pduFromPowerIQ.getAssetSource());
+            if(targetSource.indexOf(sourcePdu.getAssetSource()) == -1) {
+               targetPdu.setAssetSource(targetSource + FlowgateConstant.SPILIT_FLAG + sourcePdu.getAssetSource());
             }
-            Map<String, String> metricsformulas = pduFromPowerIQ.getMetricsformulars();
-            if(!metricsformulas.isEmpty()) {
-               pdu.setMetricsformulars(metricsformulas);
+            Map<String, String> sourcePduMetricsFormulas = sourcePdu.getMetricsformulars();
+            Map<String, String> targetPduMetricsFormulas = targetPdu.getMetricsformulars();
+
+            Map<String, String> sourcePduUsageFormulasMap = new HashMap<>();
+            Map<String, String> targetPduUsageFormulasMap = new HashMap<>();
+
+            if (sourcePduMetricsFormulas.get(FlowgateConstant.PDU) != null) {
+               Map<String, String> tempSourcePduUsageMetricsFormulaMap = targetPdu.metricsFormulaToMap(sourcePduMetricsFormulas.get(FlowgateConstant.PDU), new TypeReference<Map<String, String>>() {});
+               if (tempSourcePduUsageMetricsFormulaMap != null) {
+                  sourcePduUsageFormulasMap = tempSourcePduUsageMetricsFormulaMap;
+               }
             }
-            if(pduExtraInfo == null || pduExtraInfo.isEmpty()) {
-               pdu.setJustificationfields(pduFromPowerIQExtraInfo);
-               restClient.saveAssets(pdu);
-               pduAssetIds.add(pduFromPowerIQ.getId());
+            if (targetPduMetricsFormulas.get(FlowgateConstant.PDU) != null) {
+               Map<String, String> tempTargetPduUsageMetricsFormulaMap = targetPdu.metricsFormulaToMap(targetPduMetricsFormulas.get(FlowgateConstant.PDU), new TypeReference<Map<String, String>>() {});
+               if (tempTargetPduUsageMetricsFormulaMap != null) {
+                  targetPduUsageFormulasMap = tempTargetPduUsageMetricsFormulaMap;
+               }
+            }
+            for (String metricName : sourcePduUsageFormulasMap.keySet()) {
+               if (!targetPduUsageFormulasMap.containsKey(metricName)) {
+                  targetPduUsageFormulasMap.put(metricName, targetPdu.getId());
+               }
+            }
+            targetPduMetricsFormulas.put(FlowgateConstant.PDU, targetPdu.metricsFormulaToString(targetPduUsageFormulasMap));
+
+            Map<String, Map<String, String>> sourceSensorFormulasMap = new HashMap<>();
+            Map<String, Map<String, String>> targetSensorFormulasMap = new HashMap<>();
+            if (sourcePduMetricsFormulas.get(FlowgateConstant.SENSOR) != null) {
+               Map<String, Map<String, String>> tempSourcePduSensorMetricsFormulaMap = targetPdu.metricsFormulaToMap(sourcePduMetricsFormulas.get(FlowgateConstant.SENSOR), new TypeReference<Map<String, Map<String, String>>>() {});
+               if (tempSourcePduSensorMetricsFormulaMap != null) {
+                  sourceSensorFormulasMap = tempSourcePduSensorMetricsFormulaMap;
+               }
+            }
+            if (targetPduMetricsFormulas.get(FlowgateConstant.SENSOR) != null) {
+               Map<String, Map<String, String>> tempTargetPduSensorMetricsFormulaMap = targetPdu.metricsFormulaToMap(targetPduMetricsFormulas.get(FlowgateConstant.SENSOR), new TypeReference<Map<String, Map<String, String>>>() {});
+               if (tempTargetPduSensorMetricsFormulaMap != null) {
+                  targetSensorFormulasMap = tempTargetPduSensorMetricsFormulaMap;
+               }
+            }
+            for (Map.Entry<String, Map<String, String>> sourceMetricEntry : sourceSensorFormulasMap.entrySet()) {
+               String metricName = sourceMetricEntry.getKey();
+               Map<String, String> sourceSensorLocationFormulas = sourceMetricEntry.getValue();
+               Map<String, String> targetSensorLocationFormulas = targetSensorFormulasMap.get(metricName);
+               if (targetSensorLocationFormulas == null || targetSensorLocationFormulas.isEmpty()) {
+                  targetSensorFormulasMap.put(metricName, sourceSensorLocationFormulas);
+               } else {
+                  for (Map.Entry<String, String> sourceLocationEntry : sourceSensorLocationFormulas.entrySet()) {
+                     if (!targetSensorLocationFormulas.containsKey(sourceLocationEntry.getKey())) {
+                        targetSensorLocationFormulas.put(sourceLocationEntry.getKey(), sourceLocationEntry.getValue());
+                     }
+                  }
+                  targetSensorFormulasMap.put(metricName, targetSensorLocationFormulas);
+               }
+            }
+            targetPduMetricsFormulas.put(FlowgateConstant.SENSOR, targetPdu.metricsFormulaToString(targetSensorFormulasMap));
+
+            targetPdu.setMetricsformulars(targetPduMetricsFormulas);
+            if(targetPduExtraInfo == null || targetPduExtraInfo.isEmpty()) {
+               targetPdu.setJustificationfields(sourcePduExtraInfo);
+               restClient.saveAssets(targetPdu);
+               pduAssetIds.add(sourcePdu.getId());
                //If there are more than one pdus with the same name from Nlyte system,only one from these pdus can be merged.
-               pdusOnlyFromPowerIQ.remove(pduName);
-               restClient.removeAssetByID(pduFromPowerIQ.getId());
+               pdusOnlyFromPowerIQ.remove(targetPduName);
+               restClient.removeAssetByID(sourcePdu.getId());
                continue;
             }
-            String pduInfo = pduFromPowerIQExtraInfo.get(FlowgateConstant.PDU);
-            if(pduInfo == null) {
+            String sourcePduInfo = sourcePduExtraInfo.get(FlowgateConstant.PDU);
+            if(sourcePduInfo == null) {
                continue;
             }
-            String oldPduInfo = pduExtraInfo.get(FlowgateConstant.PDU);
-            if(oldPduInfo == null) {
-               pduExtraInfo.put(FlowgateConstant.PDU, pduInfo);
-               restClient.saveAssets(pdu);
-               pduAssetIds.add(pduFromPowerIQ.getId());
-               pdusOnlyFromPowerIQ.remove(pduName);
-               restClient.removeAssetByID(pduFromPowerIQ.getId());
+            String targetPduInfo = targetPduExtraInfo.get(FlowgateConstant.PDU);
+            if(targetPduInfo == null) {
+               targetPduExtraInfo.put(FlowgateConstant.PDU, sourcePduInfo);
+               restClient.saveAssets(targetPdu);
+               pduAssetIds.add(sourcePdu.getId());
+               pdusOnlyFromPowerIQ.remove(targetPduName);
+               restClient.removeAssetByID(sourcePdu.getId());
                continue;
             }
-            Map<String,String> pduInfoMap = null;
-            Map<String,String> oldPduInfoMap = null;
+            Map<String,String> sourcePduInfoMap = null;
+            Map<String,String> targetPduInfoMap = null;
             try {
-               pduInfoMap = mapper.readValue(pduInfo, new TypeReference<Map<String,String>>() {});
-               oldPduInfoMap = mapper.readValue(oldPduInfo, new TypeReference<Map<String,String>>() {});
+               sourcePduInfoMap = mapper.readValue(sourcePduInfo, new TypeReference<Map<String,String>>() {});
+               targetPduInfoMap = mapper.readValue(targetPduInfo, new TypeReference<Map<String,String>>() {});
             } catch (IOException e) {
                logger.error("Format pdu justficationfields error");
                continue;
             }
-            oldPduInfoMap.put(FlowgateConstant.PDU_RATE_AMPS, pduInfoMap.get(FlowgateConstant.PDU_RATE_AMPS));
-            oldPduInfoMap.put(FlowgateConstant.PDU_MIN_RATE_POWER, pduInfoMap.get(FlowgateConstant.PDU_MIN_RATE_POWER));
-            oldPduInfoMap.put(FlowgateConstant.PDU_MAX_RATE_POWER, pduInfoMap.get(FlowgateConstant.PDU_MAX_RATE_POWER));
-            oldPduInfoMap.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, pduInfoMap.get(FlowgateConstant.PDU_MIN_RATE_VOLTS));
-            oldPduInfoMap.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, pduInfoMap.get(FlowgateConstant.PDU_MAX_RATE_VOLTS));
-            oldPduInfoMap.put(FlowgateConstant.PDU_OUTLETS_FROM_POWERIQ, pduInfoMap.get(FlowgateConstant.PDU_OUTLETS_FROM_POWERIQ));
-            oldPduInfoMap.put(FlowgateConstant.PDU_INLETS_FROM_POWERIQ, pduInfoMap.get(FlowgateConstant.PDU_INLETS_FROM_POWERIQ));
-            oldPduInfoMap.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, pduInfoMap.get(FlowgateConstant.PDU_ID_FROM_POWERIQ));
+            targetPduInfoMap.put(FlowgateConstant.PDU_RATE_AMPS, sourcePduInfoMap.get(FlowgateConstant.PDU_RATE_AMPS));
+            targetPduInfoMap.put(FlowgateConstant.PDU_MIN_RATE_POWER, sourcePduInfoMap.get(FlowgateConstant.PDU_MIN_RATE_POWER));
+            targetPduInfoMap.put(FlowgateConstant.PDU_MAX_RATE_POWER, sourcePduInfoMap.get(FlowgateConstant.PDU_MAX_RATE_POWER));
+            targetPduInfoMap.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, sourcePduInfoMap.get(FlowgateConstant.PDU_MIN_RATE_VOLTS));
+            targetPduInfoMap.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, sourcePduInfoMap.get(FlowgateConstant.PDU_MAX_RATE_VOLTS));
+            targetPduInfoMap.put(FlowgateConstant.PDU_OUTLETS_FROM_POWERIQ, sourcePduInfoMap.get(FlowgateConstant.PDU_OUTLETS_FROM_POWERIQ));
+            targetPduInfoMap.put(FlowgateConstant.PDU_INLETS_FROM_POWERIQ, sourcePduInfoMap.get(FlowgateConstant.PDU_INLETS_FROM_POWERIQ));
+            targetPduInfoMap.put(FlowgateConstant.PDU_ID_FROM_POWERIQ, sourcePduInfoMap.get(FlowgateConstant.PDU_ID_FROM_POWERIQ));
             try {
-               String newPduInfo = mapper.writeValueAsString(oldPduInfoMap);
-               pduExtraInfo.put(FlowgateConstant.PDU, newPduInfo);
-               pdu.setJustificationfields(pduExtraInfo);
+               String newPduInfo = mapper.writeValueAsString(targetPduInfoMap);
+               targetPduExtraInfo.put(FlowgateConstant.PDU, newPduInfo);
+               targetPdu.setJustificationfields(targetPduExtraInfo);
             } catch (JsonProcessingException e) {
                logger.error("Format pdu extra info error",e.getCause());
             }
-            restClient.saveAssets(pdu);
-            pduAssetIds.add(pduFromPowerIQ.getId());
-            pdusOnlyFromPowerIQ.remove(pduName);
-            restClient.removeAssetByID(pduFromPowerIQ.getId());
+            restClient.saveAssets(targetPdu);
+            pduAssetIds.add(sourcePdu.getId());
+            pdusOnlyFromPowerIQ.remove(targetPduName);
+            restClient.removeAssetByID(sourcePdu.getId());
          }
       }
       logger.info("Finished aggregate pdu from PowerIQ to other systems");
