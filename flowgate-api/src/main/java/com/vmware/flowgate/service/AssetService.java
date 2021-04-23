@@ -698,11 +698,11 @@ public class AssetService {
          switch (valueunit.getKey()) {
          case MetricName.PDU_ACTIVE_POWER:
             //PDU|INLET:1|ActivePower
-            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER, extraidentifier));
+            metricData.setMetricName(String.format(MetricName.PDU_XLET_ACTIVE_POWER, extraidentifier));
             result.add(metricData);
             break;
          case MetricName.PDU_APPARENT_POWER:
-            metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,
+            metricData.setMetricName(String.format(MetricName.PDU_XLET_APPARENT_POWER,
                   extraidentifier));
             result.add(metricData);
             break;
@@ -711,12 +711,12 @@ public class AssetService {
                String extraidentifierList[] = extraidentifier.split("\\|");
                if(extraidentifierList.length == 1) {
                   metricData.setMetricName(
-                        String.format(MetricKeyName.PDU_XLET_CURRENT, extraidentifier));
+                        String.format(MetricName.PDU_XLET_CURRENT, extraidentifier));
                }else if(extraidentifierList.length == 2) {
                   String inlet = extraidentifierList[0];
                   String pole = extraidentifierList[1];
                   metricData.setMetricName(
-                        String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, inlet, pole));
+                        String.format(MetricName.PDU_INLET_XPOLE_CURRENT, inlet, pole));
                }
                result.add(metricData);
             }else {
@@ -729,12 +729,12 @@ public class AssetService {
                String extraidentifierList[] = extraidentifier.split("\\|");
                if(extraidentifierList.length == 1) {
                   metricData.setMetricName(
-                        String.format(MetricKeyName.PDU_XLET_VOLTAGE, extraidentifier));
+                        String.format(MetricName.PDU_XLET_VOLTAGE, extraidentifier));
                }else if(extraidentifierList.length == 2) {
                   String inlet = extraidentifierList[0];
                   String pole = extraidentifierList[1];
                   metricData.setMetricName(
-                        String.format(MetricKeyName.PDU_INLET_POLE_VOLTAGE, inlet, pole));
+                        String.format(MetricName.PDU_INLET_XPOLE_VOLTAGE, inlet, pole));
                }
                result.add(metricData);
             }
@@ -743,13 +743,13 @@ public class AssetService {
             if(extraidentifier != null) {
                String extraidentifierList[] = extraidentifier.split("\\|");
                if(extraidentifierList.length == 1) {
-                  metricData.setMetricName(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY,
+                  metricData.setMetricName(String.format(MetricName.PDU_XLET_FREE_CAPACITY,
                         extraidentifier));
                }else if(extraidentifierList.length == 2) {
                   String inlet = extraidentifierList[0];
                   String pole = extraidentifierList[1];
                   metricData.setMetricName(
-                        String.format(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, inlet, pole));
+                        String.format(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, inlet, pole));
                }
                result.add(metricData);
             }

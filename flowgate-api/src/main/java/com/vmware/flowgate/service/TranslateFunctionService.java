@@ -4,14 +4,11 @@
  */
 package com.vmware.flowgate.service;
 
-import com.vmware.flowgate.common.FlowgateConstant;
-import com.vmware.flowgate.common.MetricKeyName;
-import com.vmware.flowgate.common.MetricName;
-import com.vmware.flowgate.common.model.MetricData;
-import com.vmware.flowgate.common.model.RealTimeData;
-import com.vmware.flowgate.common.model.TranslateContext;
-import com.vmware.flowgate.common.model.ValueUnit;
-import com.vmware.flowgate.common.model.ValueUnit.MetricUnit;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
@@ -20,13 +17,11 @@ import org.apache.commons.jexl3.MapContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
+import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
+import com.vmware.flowgate.common.model.MetricData;
+import com.vmware.flowgate.common.model.TranslateContext;
+import com.vmware.flowgate.common.model.ValueUnit;
 
 public class TranslateFunctionService {
 
@@ -130,14 +125,14 @@ public class TranslateFunctionService {
       serverFormulaKeyAndFunction.put(MetricName.SERVER_PEAK_TEMPERATURE, convertServerPeakUsedPowerMinimumUsedPowerPeakTemperature);
       serverFormulaKeyAndFunction = Collections.unmodifiableMap(serverFormulaKeyAndFunction);
       // PDU
-      pduFormulaKeyAndFunction.put(MetricKeyName.PDU_XLET_ACTIVE_POWER, convertMetricNameByDisplayNameAndExtraIdentifier);
-      pduFormulaKeyAndFunction.put(MetricKeyName.PDU_XLET_APPARENT_POWER, convertMetricNameByDisplayNameAndExtraIdentifier);
-      pduFormulaKeyAndFunction.put(MetricKeyName.PDU_XLET_FREE_CAPACITY, convertMetricNameByDisplayNameAndExtraIdentifier);
-      pduFormulaKeyAndFunction.put(MetricKeyName.PDU_XLET_CURRENT, convertMetricNameByDisplayNameAndExtraIdentifier);
-      pduFormulaKeyAndFunction.put(MetricKeyName.PDU_XLET_VOLTAGE, convertMetricNameByDisplayNameAndExtraIdentifier);
-      pduFormulaKeyAndFunction.put(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, convertPduInletCurrentVoltageFreeCapacityByExtraIdentifier);
-      pduFormulaKeyAndFunction.put(MetricKeyName.PDU_INLET_POLE_CURRENT, convertPduInletCurrentVoltageFreeCapacityByExtraIdentifier);
-      pduFormulaKeyAndFunction.put(MetricKeyName.PDU_INLET_POLE_VOLTAGE, convertPduInletCurrentVoltageFreeCapacityByExtraIdentifier);
+      pduFormulaKeyAndFunction.put(MetricName.PDU_XLET_ACTIVE_POWER, convertMetricNameByDisplayNameAndExtraIdentifier);
+      pduFormulaKeyAndFunction.put(MetricName.PDU_XLET_APPARENT_POWER, convertMetricNameByDisplayNameAndExtraIdentifier);
+      pduFormulaKeyAndFunction.put(MetricName.PDU_XLET_FREE_CAPACITY, convertMetricNameByDisplayNameAndExtraIdentifier);
+      pduFormulaKeyAndFunction.put(MetricName.PDU_XLET_CURRENT, convertMetricNameByDisplayNameAndExtraIdentifier);
+      pduFormulaKeyAndFunction.put(MetricName.PDU_XLET_VOLTAGE, convertMetricNameByDisplayNameAndExtraIdentifier);
+      pduFormulaKeyAndFunction.put(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, convertPduInletCurrentVoltageFreeCapacityByExtraIdentifier);
+      pduFormulaKeyAndFunction.put(MetricName.PDU_INLET_XPOLE_CURRENT, convertPduInletCurrentVoltageFreeCapacityByExtraIdentifier);
+      pduFormulaKeyAndFunction.put(MetricName.PDU_INLET_XPOLE_VOLTAGE, convertPduInletCurrentVoltageFreeCapacityByExtraIdentifier);
       pduFormulaKeyAndFunction = Collections.unmodifiableMap(pduFormulaKeyAndFunction);
    }
 
