@@ -4,6 +4,15 @@
  */
 package com.vmware.flowgate.service;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricKeyName;
 import com.vmware.flowgate.common.MetricName;
@@ -11,15 +20,8 @@ import com.vmware.flowgate.common.RealtimeDataUnit;
 import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.TranslateContext;
 import com.vmware.flowgate.common.model.ValueUnit;
-import junit.framework.TestCase;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import junit.framework.TestCase;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
@@ -215,8 +217,8 @@ public class TranslateFunctionServiceTest {
       valueUnit.setValueNum(0.2);
       valueUnit.setTime(currentTimeMillis);
 
-      String displayName = MetricKeyName.PDU_XLET_ACTIVE_POWER;
-      Function<TranslateContext, MetricData> function = TranslateFunctionService.pduFormulaKeyAndFunction.get(MetricKeyName.PDU_XLET_ACTIVE_POWER);
+      String displayName = MetricName.PDU_XLET_ACTIVE_POWER;
+      Function<TranslateContext, MetricData> function = TranslateFunctionService.pduFormulaKeyAndFunction.get(MetricName.PDU_XLET_ACTIVE_POWER);
       Map<String, ValueUnit> valueUnitMap = new HashMap<>();
       valueUnitMap.put(assetId, valueUnit);
       TranslateContext translateContext = TranslateContext.buildByValueUnitsAndDisplayNameAndFormula(valueUnitMap, displayName, assetId);
@@ -239,8 +241,8 @@ public class TranslateFunctionServiceTest {
       valueUnit.setValueNum(6);
       valueUnit.setTime(currentTimeMillis);
 
-      String displayName = MetricKeyName.PDU_INLET_POLE_CURRENT;
-      Function<TranslateContext, MetricData> function = TranslateFunctionService.pduFormulaKeyAndFunction.get(MetricKeyName.PDU_INLET_POLE_CURRENT);
+      String displayName = MetricName.PDU_INLET_XPOLE_CURRENT;
+      Function<TranslateContext, MetricData> function = TranslateFunctionService.pduFormulaKeyAndFunction.get(MetricName.PDU_INLET_XPOLE_CURRENT);
       Map<String, ValueUnit> valueUnitMap = new HashMap<>();
       valueUnitMap.put(assetId, valueUnit);
       TranslateContext translateContext = TranslateContext.buildByValueUnitsAndDisplayNameAndFormula(valueUnitMap, displayName, assetId);

@@ -2497,19 +2497,19 @@ public class AssetControllerTest {
       try {
          for(MetricData pduMetricdata:datas) {
             String metricName = pduMetricdata.getMetricName();
-            if(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,"OUTLET:7").
+            if(String.format(MetricName.PDU_XLET_ACTIVE_POWER,"OUTLET:7").
                   equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 0.2);
-            }else if(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,"OUTLET:7").
+            }else if(String.format(MetricName.PDU_XLET_APPARENT_POWER,"OUTLET:7").
                   equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
-            }else if(String.format(MetricKeyName.PDU_XLET_CURRENT,"OUTLET:7").
+            }else if(String.format(MetricName.PDU_XLET_CURRENT,"OUTLET:7").
                   equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 0.633);
-            }else if(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY, "OUTLET:7").
+            }else if(String.format(MetricName.PDU_XLET_FREE_CAPACITY, "OUTLET:7").
                   equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
-            }else if(String.format(MetricKeyName.PDU_XLET_VOLTAGE, "OUTLET:7").
+            }else if(String.format(MetricName.PDU_XLET_VOLTAGE, "OUTLET:7").
                   equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 226.0);
             }else if(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX, "OUTLET").
@@ -2526,22 +2526,22 @@ public class AssetControllerTest {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 4.566);
             }else if(MetricName.PDU_TOTAL_POWER.equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, "INLET:1","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_CURRENT, "INLET:1","L1").
                   equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, "INLET:1","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, "INLET:1","L1").
                   equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 34.0);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_VOLTAGE, "INLET:1","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_VOLTAGE, "INLET:1","L1").
                   equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 220.0);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, "INLET:2","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_CURRENT, "INLET:2","L1").
                   equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, "INLET:2","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, "INLET:2","L1").
                   equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 24.0);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_VOLTAGE, "INLET:2","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_VOLTAGE, "INLET:2","L1").
                   equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 240.0);
             }else {
@@ -2607,19 +2607,19 @@ public class AssetControllerTest {
       try {
          for(MetricData pduMetricdata:datas) {
             String metricName = pduMetricdata.getMetricName();
-            if(String.format(MetricKeyName.PDU_XLET_ACTIVE_POWER,"OUTLET:7").
+            if(String.format(MetricName.PDU_XLET_ACTIVE_POWER,"OUTLET:7").
                      equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 0.2);
-            }else if(String.format(MetricKeyName.PDU_XLET_APPARENT_POWER,"OUTLET:7").
+            }else if(String.format(MetricName.PDU_XLET_APPARENT_POWER,"OUTLET:7").
                      equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
-            }else if(String.format(MetricKeyName.PDU_XLET_CURRENT,"OUTLET:7").
+            }else if(String.format(MetricName.PDU_XLET_CURRENT,"OUTLET:7").
                      equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 0.633);
-            }else if(String.format(MetricKeyName.PDU_XLET_FREE_CAPACITY, "OUTLET:7").
+            }else if(String.format(MetricName.PDU_XLET_FREE_CAPACITY, "OUTLET:7").
                      equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
-            }else if(String.format(MetricKeyName.PDU_XLET_VOLTAGE, "OUTLET:7").
+            }else if(String.format(MetricName.PDU_XLET_VOLTAGE, "OUTLET:7").
                      equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 226.0);
             }else if(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX, "OUTLET").
@@ -2636,22 +2636,22 @@ public class AssetControllerTest {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 4.566);
             }else if(MetricName.PDU_TOTAL_POWER.equals(metricName)) {
                TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, "INLET:1","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_CURRENT, "INLET:1","L1").
                      equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, "INLET:1","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, "INLET:1","L1").
                      equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 34.0);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_VOLTAGE, "INLET:1","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_VOLTAGE, "INLET:1","L1").
                      equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 220.0);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_CURRENT, "INLET:2","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_CURRENT, "INLET:2","L1").
                      equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_FREE_CAPACITY, "INLET:2","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, "INLET:2","L1").
                      equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 24.0);
-            }else if(String.format(MetricKeyName.PDU_INLET_POLE_VOLTAGE, "INLET:2","L1").
+            }else if(String.format(MetricName.PDU_INLET_XPOLE_VOLTAGE, "INLET:2","L1").
                      equals(metricName)){
                TestCase.assertEquals(pduMetricdata.getValueNum(), 240.0);
             }else {
