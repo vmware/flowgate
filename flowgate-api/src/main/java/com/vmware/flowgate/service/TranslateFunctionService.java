@@ -38,19 +38,27 @@ public class TranslateFunctionService {
          return null;
       }
       ValueUnit valueUnit = valueUnitMap.entrySet().iterator().next().getValue();
-      String formula = translateContext.getFormula();
-      for (Map.Entry<String, ValueUnit> valueUnitEntry : valueUnitMap.entrySet()) {
-         formula = formula.replaceAll(valueUnitEntry.getKey(), String.valueOf(valueUnitEntry.getValue().getValueNum()));
+      double valueNum;
+      String[] ids = translateContext.getFormula().split("\\+|-|\\*|/|\\(|\\)");
+      if (ids.length > 1) {
+         String formula = translateContext.getFormula();
+         for (Map.Entry<String, ValueUnit> valueUnitEntry : valueUnitMap.entrySet()) {
+            formula = formula.replaceAll(valueUnitEntry.getKey(), String.valueOf(valueUnitEntry.getValue().getValueNum()));
+         }
+
+         JexlExpression jexlExpression = jexl.createExpression(formula);
+         JexlContext jexlContext = new MapContext();
+         valueNum = (Double) jexlExpression.evaluate(jexlContext);
+      } else {
+         valueNum = valueUnit.getValueNum();
       }
-      JexlExpression jexlExpression = jexl.createExpression(formula);
-      JexlContext jexlContext = new MapContext();
       String unit = AssetService.databaseUnitAndOutputUnitMap.get(valueUnit.getUnit());
       MetricData metricData = new MetricData();
       metricData.setMetricName(translateContext.getDisplayName());
       metricData.setUnit(unit == null ? valueUnit.getUnit() : unit);
       metricData.setTimeStamp(valueUnit.getTime());
       metricData.setValue(valueUnit.getValue());
-      metricData.setValueNum((Double) jexlExpression.evaluate(jexlContext));
+      metricData.setValueNum(valueNum);
       return metricData;
    };
 
