@@ -40,6 +40,8 @@ public class WormholeAPIClient extends RestClientBase {
 
    private static final String fetchSensorDataURL =
          "/v1/assets/server/%s/realtimedata?starttime=%d&duration=%d";
+   private static final String fetchServerDataURL =
+	         "/v1/assets/%s/realtimedata?starttime=%d&duration=%d";
 
    private static final String GetJobsURL = "/v1/jobs/type/%s";
    private static final String GetSummaryDataURL = "/v1/summary/systemsummary?usecache=%s";
@@ -356,6 +358,14 @@ public class WormholeAPIClient extends RestClientBase {
                   + String.format(fetchSensorDataURL, assetID, startTime, duration),
             HttpMethod.GET, getDefaultEntity(), MetricData[].class);
    }
+   
+   public ResponseEntity<MetricData[]> getServerRealtimeDataByServerID(String assetID,
+	         long startTime, long duration) {
+	      return this.restTemplate.exchange(
+	            getAPIServiceEndpoint()
+	                  + String.format(fetchServerDataURL, assetID, startTime, duration),
+	            HttpMethod.GET, getDefaultEntity(), MetricData[].class);
+	   }
 
    public ResponseEntity<Void> mergMapping(String id1, String id2) {
       return this.restTemplate.exchange(

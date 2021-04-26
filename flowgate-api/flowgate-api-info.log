@@ -1,0 +1,468 @@
+<<<<<<< HEAD
+2021-04-30 07:53:33,552 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 07:53:56,114 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":37188368,"committed":396886016,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":597,"gc.ps scavenge.collectionCount":32,"thread.count":72,"offHeap.used":{"init":2555904,"used":99970656,"committed":104398848,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":81}
+2021-04-30 07:59:35,551 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:01:26,237 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:02:56,763 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:09:59,303 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:12:30,173 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:14:31,013 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:17:32,319 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:27:56,723 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:29:27,341 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:33:29,042 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:39:31,368 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:41:32,116 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:42:02,336 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:52:26,781 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:52:56,973 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:53:56,021 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":77321536,"committed":391118848,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":608,"gc.ps scavenge.collectionCount":34,"thread.count":73,"offHeap.used":{"init":2555904,"used":100205888,"committed":104660992,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":84}
+2021-04-30 08:54:27,514 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:54:57,698 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 08:59:29,544 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 09:04:31,659 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 09:09:33,720 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 09:12:34,941 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 09:18:27,499 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 09:29:02,067 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 09:37:34,458 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 09:39:04,982 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 09:45:57,736 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 09:53:56,025 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":128671808,"committed":385875968,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":619,"gc.ps scavenge.collectionCount":36,"thread.count":73,"offHeap.used":{"init":2555904,"used":100408632,"committed":104857600,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":84}
+2021-04-30 10:12:28,499 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 10:20:31,673 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 10:32:56,555 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 10:34:27,170 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 10:36:58,078 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 10:37:58,446 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 10:41:29,480 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 10:41:59,602 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 10:46:30,514 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 10:53:56,025 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":61690176,"committed":370671616,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":664,"gc.ps scavenge.collectionCount":39,"thread.count":73,"offHeap.used":{"init":2555904,"used":100465912,"committed":104923136,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":84}
+2021-04-30 11:05:56,930 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 11:08:57,263 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 11:14:57,938 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 11:18:28,298 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 11:25:29,279 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 11:25:59,325 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 11:35:30,728 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 11:42:31,531 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 11:53:56,018 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":132611648,"committed":366477312,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":672,"gc.ps scavenge.collectionCount":41,"thread.count":73,"offHeap.used":{"init":2555904,"used":100609184,"committed":105316352,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":84}
+2021-04-30 11:56:33,173 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 11:58:33,494 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 12:00:33,879 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 12:02:34,234 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 12:03:04,448 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 12:05:34,790 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 12:06:34,855 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 12:11:55,778 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 12:23:58,007 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 12:32:30,537 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 12:45:56,078 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 12:53:56,022 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":94595360,"committed":367525888,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":717,"gc.ps scavenge.collectionCount":44,"thread.count":73,"offHeap.used":{"init":2555904,"used":100619872,"committed":105316352,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":84}
+2021-04-30 13:02:02,236 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:19:29,366 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:27:02,125 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:33:34,627 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:34:35,006 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:36:25,729 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:38:56,673 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:42:28,047 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:42:58,236 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:48:30,531 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:53:56,016 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":73816264,"committed":356515840,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":726,"gc.ps scavenge.collectionCount":47,"thread.count":73,"offHeap.used":{"init":2555904,"used":100754072,"committed":105447424,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":84}
+2021-04-30 13:55:32,066 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 13:56:02,140 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 14:05:34,491 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 14:09:04,939 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 14:27:58,412 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 14:33:29,346 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 14:34:59,600 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-30 14:53:56,019 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":64100432,"committed":354942976,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":800,"gc.ps scavenge.collectionCount":50,"thread.count":73,"offHeap.used":{"init":2555904,"used":100787608,"committed":105447424,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":84}
+=======
+2021-04-29 10:26:34,311 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":47164080,"committed":440926208,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":333,"gc.ps scavenge.collectionCount":17,"thread.count":68,"offHeap.used":{"init":2555904,"used":97646008,"committed":102105088,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":70,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":74}
+2021-04-29 10:30:43,344 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 10:35:27,410 [main] INFO  c.v.flowgate.FlowgateApiApplication 55 - Starting FlowgateApiApplication on loul-a01.vmware.com with PID 23920 (/Users/loul/Program/flowgate/flowgate/flowgate-api/target/classes started by loul in /Users/loul/Program/flowgate/flowgate/flowgate-api)
+2021-04-29 10:35:27,414 [main] INFO  c.v.flowgate.FlowgateApiApplication 655 - The following profiles are active: prod
+2021-04-29 10:35:28,164 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate 249 - Multiple Spring Data modules found, entering strict repository configuration mode!
+2021-04-29 10:35:28,169 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate 127 - Bootstrapping Spring Data Couchbase repositories in DEFAULT mode.
+2021-04-29 10:35:28,226 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.AssetIPMappingRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,229 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.AssetRealtimeDataRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,231 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.AssetRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,233 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.FacilityAdapterRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,235 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.FacilitySoftwareConfigRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,237 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.JobsRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,239 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.PrivilegeResourcesMappingReposity. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,241 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.RoleRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,243 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.SDDCSoftwareRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,244 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.SensorSettingRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,246 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.ServerMappingRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,248 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.SystemSummaryRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,250 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport 348 - Spring Data Couchbase - Could not safely identify store assignment for repository candidate interface com.vmware.flowgate.repository.UserRepository. If you want this repository to be a Couchbase repository, consider annotating your entities with one of these annotations: org.springframework.data.couchbase.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.couchbase.repository.ReactiveCouchbaseRepository.
+2021-04-29 10:35:28,251 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate 187 - Finished Spring Data repository scanning in 76ms. Found 0 Couchbase repository interfaces.
+2021-04-29 10:35:28,256 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate 249 - Multiple Spring Data modules found, entering strict repository configuration mode!
+2021-04-29 10:35:28,257 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate 127 - Bootstrapping Spring Data Couchbase repositories in DEFAULT mode.
+2021-04-29 10:35:28,479 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate 187 - Finished Spring Data repository scanning in 221ms. Found 13 Couchbase repository interfaces.
+2021-04-29 10:35:29,124 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer 91 - Tomcat initialized with port(s): 49610 (http)
+2021-04-29 10:35:29,135 [main] INFO  o.a.catalina.core.StandardService 173 - Starting service [Tomcat]
+2021-04-29 10:35:29,136 [main] INFO  o.a.catalina.core.StandardEngine 173 - Starting Servlet engine: [Apache Tomcat/9.0.37]
+2021-04-29 10:35:29,221 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] 173 - Initializing Spring embedded WebApplicationContext
+2021-04-29 10:35:29,222 [main] INFO  o.s.web.context.ContextLoader 284 - Root WebApplicationContext: initialization completed in 1718 ms
+2021-04-29 10:35:29,414 [main] INFO  c.c.client.core.CouchbaseCore 115 - CouchbaseEnvironment: {sslEnabled=false, sslKeystoreFile='null', sslTruststoreFile='null', sslKeystorePassword=false, sslTruststorePassword=false, sslKeystore=null, sslTruststore=null, sslHostnameVerificationEnabled=false, bootstrapHttpEnabled=true, bootstrapCarrierEnabled=true, bootstrapHttpDirectPort=8091, bootstrapHttpSslPort=18091, bootstrapCarrierDirectPort=11210, bootstrapCarrierSslPort=11207, ioPoolSize=8, computationPoolSize=8, responseBufferSize=16384, requestBufferSize=16384, kvServiceEndpoints=1, viewServiceEndpoints=12, queryServiceEndpoints=12, searchServiceEndpoints=12, configPollInterval=2500, configPollFloorInterval=50, networkResolution=NetworkResolution{name='auto'}, ioPool=NioEventLoopGroup, kvIoPool=null, viewIoPool=null, searchIoPool=null, queryIoPool=null, analyticsIoPool=null, coreScheduler=CoreScheduler, memcachedHashingStrategy=DefaultMemcachedHashingStrategy, eventBus=DefaultEventBus, packageNameAndVersion=couchbase-java-client/2.7.14 (git: 2.7.14, core: 1.7.14), retryStrategy=BestEffort, maxRequestLifetime=75000, retryDelay=ExponentialDelay{growBy 1.0 MICROSECONDS, powers of 2; lower=100, upper=100000}, reconnectDelay=ExponentialDelay{growBy 1.0 MILLISECONDS, powers of 2; lower=32, upper=4096}, observeIntervalDelay=ExponentialDelay{growBy 1.0 MICROSECONDS, powers of 2; lower=10, upper=100000}, keepAliveInterval=30000, continuousKeepAliveEnabled=true, keepAliveErrorThreshold=4, keepAliveTimeout=2500, autoreleaseAfter=2000, bufferPoolingEnabled=true, tcpNodelayEnabled=true, mutationTokensEnabled=false, socketConnectTimeout=1000, callbacksOnIoPool=false, disconnectTimeout=25000, requestBufferWaitStrategy=com.couchbase.client.core.env.DefaultCoreEnvironment$4@2127e66e, certAuthEnabled=false, coreSendHook=null, forceSaslPlain=false, compressionMinRatio=0.83, compressionMinSize=32, compressionEnabled=true, operationTracingEnabled=true, operationTracingServerDurationEnabled=true, tracer=ThresholdLogTracer, orphanResponseReportingEnabled=true, orphanResponseReporter=DefaultOrphanResponseReporter, keyValueServiceConfig=KeyValueServiceConfig{minEndpoints=1, maxEndpoints=1, pipelined=true, idleTime=0}, queryServiceConfig=QueryServiceConfig{minEndpoints=1, maxEndpoints=1, pipelined=false, idleTime=300}, searchServiceConfig=SearchServiceConfig{minEndpoints=0, maxEndpoints=12, pipelined=false, idleTime=300}, viewServiceConfig=ViewServiceConfig{minEndpoints=1, maxEndpoints=1, pipelined=false, idleTime=300}, analyticsServiceConfig=AnalyticsServiceConfig{minEndpoints=0, maxEndpoints=12, pipelined=false, idleTime=300}, queryTimeout=30000, viewTimeout=7500, searchTimeout=75000, analyticsTimeout=75000, kvTimeout=2500, connectTimeout=10000, dnsSrvEnabled=false, propagateParentSpan=true}
+2021-04-29 10:35:30,169 [cb-io-1-1] INFO  com.couchbase.client.core.node.Node 120 - Connected to Node localhost
+2021-04-29 10:35:30,233 [cb-computations-4] INFO  c.c.c.c.config.ConfigurationProvider 120 - Selected network configuration: default
+2021-04-29 10:35:30,247 [cb-computations-4] INFO  c.c.c.c.config.ConfigurationProvider 120 - Opened bucket flowgate
+2021-04-29 10:35:30,651 [main] INFO  c.v.f.s.s.PrepareSecurityMetadataSourceService 64 - Initialization security resource.
+2021-04-29 10:35:31,072 [main] WARN  c.v.f.s.f.AccessSecurityMetadataInterceptor 159 - Could not validate configuration attributes as the SecurityMetadataSource did not return any attributes from getAllConfigAttributes()
+2021-04-29 10:35:32,087 [main] INFO  o.s.s.web.DefaultSecurityFilterChain 43 - Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@1a14fdf0, org.springframework.security.web.context.SecurityContextPersistenceFilter@46394f65, org.springframework.security.web.header.HeaderWriterFilter@357f6391, org.springframework.web.filter.CorsFilter@2abbd0d9, org.springframework.security.web.authentication.logout.LogoutFilter@3af2f846, com.vmware.flowgate.security.filter.AuthenticationTokenFilter@7b53b1ad, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@26be9a6, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4b9dbf07, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@284bdeed, org.springframework.security.web.session.SessionManagementFilter@2fd39436, org.springframework.security.web.access.ExceptionTranslationFilter@3b11620a]
+2021-04-29 10:35:32,206 [main] INFO  o.s.s.c.ThreadPoolTaskExecutor 181 - Initializing ExecutorService 'applicationTaskExecutor'
+2021-04-29 10:35:32,461 [main] INFO  o.a.catalina.core.StandardService 173 - Stopping service [Tomcat]
+2021-04-29 10:35:32,467 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-tracing-1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.lang.Thread.sleep(Native Method)
+ com.couchbase.client.core.tracing.ThresholdLogReporter$Worker.run(ThresholdLogReporter.java:361)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,467 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-orphan-1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.lang.Thread.sleep(Native Method)
+ com.couchbase.client.core.tracing.DefaultOrphanResponseReporter$Worker.run(DefaultOrphanResponseReporter.java:239)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,468 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-computations-1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,469 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [Thread-5] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+ java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)
+ com.couchbase.client.deps.org.LatencyUtils.PauseDetector$PauseDetectorThread.run(PauseDetector.java:85)
+2021-04-29 10:35:32,469 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [SimplePauseDetectorThread_0] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.lang.Thread.sleep(Native Method)
+ java.lang.Thread.sleep(Thread.java:340)
+ java.util.concurrent.TimeUnit.sleep(TimeUnit.java:386)
+ com.couchbase.client.deps.org.LatencyUtils.TimeServices.sleepNanos(TimeServices.java:62)
+ com.couchbase.client.deps.org.LatencyUtils.SimplePauseDetector$SimplePauseDetectorThread.run(SimplePauseDetector.java:116)
+2021-04-29 10:35:32,470 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [SimplePauseDetectorThread_1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.lang.Thread.sleep(Native Method)
+ java.lang.Thread.sleep(Thread.java:340)
+ java.util.concurrent.TimeUnit.sleep(TimeUnit.java:386)
+ com.couchbase.client.deps.org.LatencyUtils.TimeServices.sleepNanos(TimeServices.java:62)
+ com.couchbase.client.deps.org.LatencyUtils.SimplePauseDetector$SimplePauseDetectorThread.run(SimplePauseDetector.java:116)
+2021-04-29 10:35:32,470 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [SimplePauseDetectorThread_2] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ java.lang.Thread.sleep(Native Method)
+ java.lang.Thread.sleep(Thread.java:340)
+ java.util.concurrent.TimeUnit.sleep(TimeUnit.java:386)
+ com.couchbase.client.deps.org.LatencyUtils.TimeServices.sleepNanos(TimeServices.java:62)
+ com.couchbase.client.deps.org.LatencyUtils.SimplePauseDetector$SimplePauseDetectorThread.run(SimplePauseDetector.java:116)
+2021-04-29 10:35:32,471 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-computations-2] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,472 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-computations-3] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,472 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-core-3-1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+ com.couchbase.client.deps.com.lmax.disruptor.BlockingWaitStrategy.waitFor(BlockingWaitStrategy.java:47)
+ com.couchbase.client.deps.com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:56)
+ com.couchbase.client.deps.com.lmax.disruptor.BatchEventProcessor.processEvents(BatchEventProcessor.java:159)
+ com.couchbase.client.deps.com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:125)
+ com.couchbase.client.deps.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,473 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-core-3-2] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
+ com.couchbase.client.deps.com.lmax.disruptor.BlockingWaitStrategy.waitFor(BlockingWaitStrategy.java:47)
+ com.couchbase.client.deps.com.lmax.disruptor.ProcessingSequenceBarrier.waitFor(ProcessingSequenceBarrier.java:56)
+ com.couchbase.client.deps.com.lmax.disruptor.BatchEventProcessor.processEvents(BatchEventProcessor.java:159)
+ com.couchbase.client.deps.com.lmax.disruptor.BatchEventProcessor.run(BatchEventProcessor.java:125)
+ com.couchbase.client.deps.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,474 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-computations-4] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,474 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-computations-5] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,475 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-computations-6] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,475 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-computations-7] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,476 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-computations-8] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,476 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [RxIoScheduler-1 (Evictor)] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,477 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [RxComputationScheduler-1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,477 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-io-1-1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+ sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:198)
+ sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:117)
+ sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:86)
+ sun.nio.ch.SelectorImpl.select(SelectorImpl.java:97)
+ com.couchbase.client.deps.io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:62)
+ com.couchbase.client.deps.io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:807)
+ com.couchbase.client.deps.io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:457)
+ com.couchbase.client.deps.io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+ com.couchbase.client.deps.io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ com.couchbase.client.deps.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,478 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [RxComputationScheduler-2] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,478 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-io-1-2] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+ sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:198)
+ sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:117)
+ sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:86)
+ sun.nio.ch.SelectorImpl.select(SelectorImpl.java:97)
+ com.couchbase.client.deps.io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:62)
+ com.couchbase.client.deps.io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:807)
+ com.couchbase.client.deps.io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:457)
+ com.couchbase.client.deps.io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+ com.couchbase.client.deps.io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ com.couchbase.client.deps.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,479 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [RxComputationScheduler-3] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,479 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-io-1-3] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+ sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:198)
+ sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:117)
+ sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:86)
+ sun.nio.ch.SelectorImpl.select(SelectorImpl.java:97)
+ com.couchbase.client.deps.io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:62)
+ com.couchbase.client.deps.io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:807)
+ com.couchbase.client.deps.io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:457)
+ com.couchbase.client.deps.io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+ com.couchbase.client.deps.io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ com.couchbase.client.deps.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,480 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [RxComputationScheduler-4] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.misc.Unsafe.park(Native Method)
+ java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)
+ java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2078)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1093)
+ java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
+ java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
+ java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
+ java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,480 [main] WARN  o.a.c.loader.WebappClassLoaderBase 173 - The web application [ROOT] appears to have started a thread named [cb-io-1-4] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
+ sun.nio.ch.KQueueArrayWrapper.kevent0(Native Method)
+ sun.nio.ch.KQueueArrayWrapper.poll(KQueueArrayWrapper.java:198)
+ sun.nio.ch.KQueueSelectorImpl.doSelect(KQueueSelectorImpl.java:117)
+ sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:86)
+ sun.nio.ch.SelectorImpl.select(SelectorImpl.java:97)
+ sun.nio.ch.SelectorImpl.select(SelectorImpl.java:101)
+ com.couchbase.client.deps.io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:68)
+ com.couchbase.client.deps.io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:803)
+ com.couchbase.client.deps.io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:457)
+ com.couchbase.client.deps.io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+ com.couchbase.client.deps.io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+ com.couchbase.client.deps.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+ java.lang.Thread.run(Thread.java:748)
+2021-04-29 10:35:32,484 [main] INFO  o.s.b.a.l.ConditionEvaluationReportLoggingListener 136 - 
+
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+2021-04-29 10:35:32,485 [main] ERROR o.s.b.d.LoggingFailureAnalysisReporter 40 - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 49610 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 49610 or configure this application to listen on another port.
+
+2021-04-29 10:35:32,489 [main] INFO  o.s.s.c.ThreadPoolTaskExecutor 218 - Shutting down ExecutorService 'applicationTaskExecutor'
+2021-04-29 10:35:32,510 [cb-io-1-1] INFO  com.couchbase.client.core.node.Node 120 - Disconnected from Node localhost
+2021-04-29 10:35:32,510 [main] INFO  c.c.c.c.config.ConfigurationProvider 120 - Closed bucket flowgate
+2021-04-29 10:35:32,523 [globalEventExecutor-2-1] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown IoPool: success 
+2021-04-29 10:35:32,523 [main] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown kvIoPool: success 
+2021-04-29 10:35:32,524 [main] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown viewIoPool: success 
+2021-04-29 10:35:32,525 [main] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown queryIoPool: success 
+2021-04-29 10:35:32,525 [Thread-9] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown Netty: success 
+2021-04-29 10:35:32,525 [main] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown searchIoPool: success 
+2021-04-29 10:35:32,526 [main] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown Core Scheduler: success 
+2021-04-29 10:35:32,526 [main] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown Runtime Metrics Collector: success 
+2021-04-29 10:35:32,526 [main] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown Latency Metrics Collector: success 
+2021-04-29 10:35:32,527 [main] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown analyticsIoPool: success 
+2021-04-29 10:35:32,527 [main] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown Tracer: success 
+2021-04-29 10:35:32,527 [main] INFO  c.c.client.core.env.CoreEnvironment 115 - Shutdown OrphanReporter: success 
+2021-04-29 10:37:44,593 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 11:01:40,370 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 11:04:40,931 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 11:26:34,216 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":182179040,"committed":438829056,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":383,"gc.ps scavenge.collectionCount":18,"thread.count":73,"offHeap.used":{"init":2555904,"used":98767744,"committed":103350272,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":80}
+2021-04-29 11:34:38,719 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 11:37:39,566 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 11:39:09,907 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 11:43:10,992 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 11:58:14,808 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 12:01:05,813 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 12:02:06,206 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 12:05:07,415 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 12:09:08,554 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 12:10:08,890 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 12:14:10,142 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 12:26:34,217 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":112569824,"committed":432537600,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":443,"gc.ps scavenge.collectionCount":20,"thread.count":73,"offHeap.used":{"init":2555904,"used":98861952,"committed":103481344,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":80}
+2021-04-29 12:28:13,620 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 12:28:43,764 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 12:30:14,114 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 12:45:39,069 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:14:08,254 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:14:38,459 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:19:10,262 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:21:11,020 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:22:11,310 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:26:34,226 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":58413520,"committed":425197568,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":467,"gc.ps scavenge.collectionCount":22,"thread.count":73,"offHeap.used":{"init":2555904,"used":98957760,"committed":103546880,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":80}
+2021-04-29 13:29:13,762 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:30:14,210 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:32:34,948 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:36:06,098 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:40:07,569 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:42:38,319 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:45:39,134 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:46:39,387 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:47:39,631 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:54:11,250 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:55:41,631 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 13:58:12,304 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 14:00:12,928 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 14:02:13,471 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 14:15:07,353 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 14:21:39,063 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 14:24:39,808 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 14:26:34,218 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":181480112,"committed":418381824,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":473,"gc.ps scavenge.collectionCount":23,"thread.count":73,"offHeap.used":{"init":2555904,"used":99079608,"committed":103612416,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":80}
+2021-04-29 14:26:40,329 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 14:31:11,524 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 14:31:41,615 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 14:33:42,112 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 14:51:06,308 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 15:01:39,345 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 15:03:39,916 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 15:06:41,149 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 15:07:41,497 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 15:13:43,784 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 15:23:06,338 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 15:26:34,219 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":148499064,"committed":405798912,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":488,"gc.ps scavenge.collectionCount":25,"thread.count":73,"offHeap.used":{"init":2555904,"used":99119992,"committed":103677952,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":80}
+2021-04-29 15:27:37,689 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 15:36:40,145 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 15:37:10,347 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 15:45:42,671 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:00:06,366 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:09:39,426 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:12:40,350 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:13:10,490 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:15:11,060 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:17:11,755 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:22:43,927 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:25:42,778 [http-nio-49610-exec-4] INFO  o.a.tomcat.util.http.parser.Cookie 173 - A cookie header was received [ 29-Apr-2021 10:25:42 GMT; Domain=localhost; Path=/; HttpOnly] that contained an invalid cookie. That cookie will be ignored.
+ Note: further occurrences of this error will be logged at DEBUG level.
+2021-04-29 16:26:34,218 [cb-computations-2] INFO  c.c.c.c.e.consumers.LoggingConsumer 115 - {"heap.used":{"init":268435456,"used":127816936,"committed":398983168,"max":3817865216},"gc.ps marksweep.collectionTime":262,"gc.ps scavenge.collectionTime":510,"gc.ps scavenge.collectionCount":27,"thread.count":73,"offHeap.used":{"init":2555904,"used":99218144,"committed":103743488,"max":-1},"gc.ps marksweep.collectionCount":3,"heap.pendingFinalize":0,"thread.peakCount":74,"event":{"name":"RuntimeMetrics","type":"METRIC"},"thread.startedCount":80}
+2021-04-29 16:26:34,913 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:30:36,157 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:36:38,140 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:37:38,443 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:41:09,399 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:44:40,440 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:49:12,217 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:52:12,939 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:56:14,272 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 16:59:05,419 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+2021-04-29 17:03:06,745 [cb-orphan-1] WARN  c.c.c.c.t.DefaultOrphanResponseReporter 150 - Orphan responses observed: [{"top":[{"r":"127.0.0.1:8092","s":"view","c":"123F54DCE88F4F2C/FFFFFFFFEA7A30B8","l":"127.0.0.1:55565"}],"service":"view","count":1}]
+>>>>>>> f085412... add test & fix bugs

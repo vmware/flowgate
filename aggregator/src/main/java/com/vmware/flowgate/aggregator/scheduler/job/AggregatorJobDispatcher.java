@@ -36,6 +36,7 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
       }
       long execount = Long.valueOf(execountString);
       //will execute weekly?
+
       if (execount++ % 168 == 0) {
          try {
             EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
@@ -76,7 +77,18 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
          }catch(IOException e) {
             logger.error("Failed to Send sync summary data command", e);
          }
-      }else {
+      }else if(execount % 1 == 0){
+          try {
+              EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
+                    EventMessageUtil.SYNC_FITTING, "");
+              String jobmessage = EventMessageUtil.convertEventMessageAsString(eventMessage);
+              publisher.publish(EventMessageUtil.AggregatorTopic, jobmessage);
+              logger.info("Send sync fitting command");
+              // System.out.println("Send sync fitting command");
+           }catch(IOException e) {
+              logger.error("Failed to Send sync fitting command", e);
+           }
+        }else {
          //will execute hourly?
          try {
             EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,

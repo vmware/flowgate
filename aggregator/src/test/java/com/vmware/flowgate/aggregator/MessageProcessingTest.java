@@ -131,6 +131,8 @@ public class MessageProcessingTest {
       System.out.println(mapper.writeValueAsString(message));
    }
 
+  
+   
    @Test
    public void testGetPositionInfo() {
       Asset asset1 = new Asset();
@@ -494,26 +496,6 @@ public class MessageProcessingTest {
       openmanageJob.execute(null);
    }
 
-   /**
-    * SERVER_VOLTAGE = "Voltage";
-     SERVER_CONNECTED_PDU_CURRENT = "Current";
-     SERVER_CONNECTED_PDU_POWER = "Power";
-     SERVER_CONNECTED_PDU_CURRENT_LOAD = "CurrentLoad";
-     SERVER_CONNECTED_PDU_POWER_LOAD = "PowerLoad";
-     SERVER_USED_PDU_OUTLET_CURRENT = "%s|Current";
-     SERVER_USED_PDU_OUTLET_POWER = "%s|Power";
-     SERVER_USED_PDU_OUTLET_VOLTAGE = "%s|Voltage";
-    */
-   @Test
-   public void testGeneratePduformulaForServer() {
-      List<String> pduIds = new ArrayList<String>();
-      pduIds.add("12pimppoqwemasdqweggrwq");
-      pduIds.add("123456");
-      Map<String,Map<String,String>> pduFormula = aggregatorService.generatePduformulaForServer(pduIds);
-      TestCase.assertEquals(pduIds.size(), pduFormula.size());
-      TestCase.assertEquals(8, pduFormula.get(pduIds.get(0)).size());
-   }
-
    FacilitySoftwareConfig createFacilitySoftware() {
       FacilitySoftwareConfig example = new FacilitySoftwareConfig();
       example.setId(UUID.randomUUID().toString());
@@ -534,7 +516,36 @@ public class MessageProcessingTest {
       example.setIntegrationStatus(integrationStatus);
       return example;
    }
-
+   @Test
+   public void testSyncFitting() {
+	  try { 
+		  List<List<Double>> results = aggregatorService.syncFitting(true);
+         for (int i = 0; i < results.size(); i++)
+         {	        	 
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+	         Asset asset = new Asset();
+		      asset.setFittingResults(results.get(i)); 
+		      restClient.saveAssets(asset);
+>>>>>>> f085412... add test & fix bugs
+=======
+>>>>>>> e8c71c7... delete useless logs
+			  double [] arr_result = new double[results.get(i).size()];
+			  for (int j = 0; j < results.get(i).size(); j++) {
+				  arr_result[j] = results.get(i).get(j);
+				  //System.out.println(result.get(i));
+			  }  
+			  double[] testAnswer = {67.61123636351215, 2.0250676734875026, -0.04034063855153128, 3.8173496754197417E-4, -1.2569420548906328E-6};
+			  Assert.assertArrayEquals(arr_result, testAnswer, 0.5);
+         } 	
+		 
+		  
+	 } catch(Exception e) {
+		  Assert.fail();
+	  }
+	  
+   }
    public ResponseEntity<FacilitySoftwareConfig[]> getFacilitySoftwareByType(FacilitySoftwareConfig intergration) {
       FacilitySoftwareConfig[] configs = new FacilitySoftwareConfig[1];
       configs[0] = intergration;

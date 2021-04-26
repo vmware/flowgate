@@ -52,6 +52,7 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
       //every 12 hour we will trigger a sync host metadata job.
       //every 1 day we will trigger a sync CustomerAttrsData job.
       //every 10 days we will trigger a sync CustomAttributes job.
+      //every 1 day we will trigger a fitting job.
 
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       SDDCSoftwareConfig[] vcServers = restClient.getVCServers().getBody();
@@ -110,7 +111,7 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
                   generateSDDCMessageListByType(EventMessageUtil.VCENTER_SyncCustomerAttrs,
                         vcServersActiveArray));
          }
-
+         
          publisher.publish(EventMessageUtil.VCTopic,
                EventMessageUtil.generateSDDCNotifyMessage(EventType.VCenter));
       } catch (IOException e) {

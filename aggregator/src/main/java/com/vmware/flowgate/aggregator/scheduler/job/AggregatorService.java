@@ -4,9 +4,14 @@
 */
 package com.vmware.flowgate.aggregator.scheduler.job;
 
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import com.csvreader.CsvReader;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,7 +26,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import org.apache.commons.math3.fitting.PolynomialCurveFitter;
+import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.apache.commons.math3.util.Pair;
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.aggregator.config.ServiceKeyConfig;
@@ -31,6 +40,7 @@ import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
@@ -39,6 +49,9 @@ import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.EventUser;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
+
+import io.netty.handler.codec.string.StringDecoder;
+
 
 @Service
 public class AggregatorService implements AsyncService {
@@ -65,10 +78,10 @@ public class AggregatorService implements AsyncService {
          logger.warn("Drop none aggregator message " + message.getType());
          return;
       }
-      logger.info(message.getContent());
+      //logger.info("message: " + message.getContent());
       Set<EventUser> users = message.getTarget().getUsers();
       for (EventUser command : users) {
-         logger.info(command.getId());
+         //logger.info(command.getId());
          switch (command.getId()) {
          case EventMessageUtil.FullMappingCommand:
             mergeServerMapping();
@@ -92,6 +105,19 @@ public class AggregatorService implements AsyncService {
          case EventMessageUtil.CleanRealtimeData:
             cleanRealtimeData();
             break;
+         case EventMessageUtil.SYNC_FITTING:
+        	List<List<Double>> results = syncFitting(true);
+	         for (int i = 0; i < results.size(); i++)
+	         {	        	 
+	         	String res = "Syncfitting results-" + String.valueOf(i) + " :";
+	        	 for (Double param : (List<Double>)results.get(i))
+	        	 {
+	        		 res += " ";
+	        		 res += String.valueOf(param);
+	        	 }
+		         logger.info(res);
+	         } 	
+            break;
          case EventMessageUtil.AggregateAndCleanPowerIQPDU:
             aggregateAndCleanPDUFromPowerIQ();
             break;
@@ -103,7 +129,248 @@ public class AggregatorService implements AsyncService {
          }
       }
    }
+   
+   public List<Double> doubleToList(double[] arr_double) {
+	    List<Double> list = new ArrayList<Double>();
+	    int num = arr_double.length;
+	    Double [] arr_Double = new Double[num];
+	    for(int i = 0; i < num; i++) {
+	        arr_Double[i] = arr_double[i];
+	    }
+	    list = Arrays.asList(arr_Double);
+	    return list; 
+	}
+   
 
+
+   public List<Pair<Double, Double>> MAD(List<Pair<Double, Double>> dataset, double n) {
+      List<Pair<Double, Double>> new_data = new ArrayList<>();
+      List<Double> CPU = new ArrayList<>();
+      for (int i = 0; i < dataset.size(); i++) {
+          CPU.add(dataset.get(i).getFirst());
+      }
+      double median = median(CPU);
+      List<Double> deviations = new ArrayList<>();
+      for (int i = 0; i < dataset.size(); i++) {
+          deviations.add(i,  Math.abs(dataset.get(i).getFirst() - median));
+      }
+      double mad = median(deviations);
+      for (int i = 0; i < dataset.size(); i++)
+      {
+          if (Math.abs(dataset.get(i).getFirst() - median) <= n * mad)
+          {
+              new_data.add(dataset.get(i));
+          }
+      }
+      return new_data;
+  }
+   public static int partition(List<Double> nums, int start, int end){
+      int left = start;
+      int right = end;
+      double pivot = nums.get(left);
+      while (left < right){
+          while (left < right && nums.get(right) >= pivot) {
+              right--;
+          }
+          if (left < right) {
+              nums.set(left, nums.get(right));
+              left++;
+          }
+          while (left < right && nums.get(left) <= pivot){
+              left++;
+          }
+          if (left < right) {
+              nums.set(right, nums.get(left));
+              right--;
+          }
+      }
+      nums.set(left, pivot);
+      return left;
+  }
+
+
+   public static double median(List<Double> nums){
+      if (nums.size() == 0)
+          return 0;
+      int start = 0;
+      int end = nums.size() - 1;
+      int index = partition(nums, start, end);
+      if (nums.size() % 2 == 0){
+          while (index != nums.size() / 2 - 1){
+              if (index > nums.size() / 2 - 1){
+                  index = partition(nums, start, index - 1);
+              } else {
+                  index=partition(nums, index+1, end);
+              }
+          }
+      } else {
+          while (index != nums.size() / 2) {
+              if (index > nums.size() / 2) {
+                  index = partition(nums, start, index - 1);
+              } else {
+                  index = partition(nums, index + 1, end);
+              }
+          }
+      }
+      return nums.get(index);
+   }
+   
+
+   public List<Double> doFitting(List<MetricData> MetricDatas) {
+	   
+	   List<Double> CPU = new ArrayList<>();
+	      List<Double> power = new ArrayList<>();
+	      List<Pair<Long, Double>> raw_CPU_list = new ArrayList<>();
+	      List<Pair<Long, Double>> raw_power_list = new ArrayList<>();
+	      
+		  for (int i = 0; i < MetricDatas.size(); i++) {
+			  if (MetricDatas.get(i).getMetricName() == "CpuUsage") {
+				  raw_CPU_list.add(new Pair<Long, Double> (MetricDatas.get(i).getTimeStamp(), MetricDatas.get(i).getValueNum()));
+			  }
+			  else if (MetricDatas.get(i).getMetricName() == "Power") {
+				  raw_power_list.add(new Pair<Long, Double> (MetricDatas.get(i).getTimeStamp(), MetricDatas.get(i).getValueNum()));
+			  }
+		  }
+	      Pair<Long, Double>[] raw_CPU = new Pair[raw_CPU_list.size()];
+	      Pair<Long, Double>[] raw_power =  new Pair[raw_power_list.size()];
+	      for (int i = 0; i < raw_CPU_list.size(); i++) {
+	    	  raw_CPU[i] = raw_CPU_list.get(i);
+	      }
+	      for (int i = 0; i < raw_power_list.size(); i++) {
+	    	  raw_power[i] = raw_power_list.get(i);
+	      }
+
+	      //Sort the pair list according the time in reverse order.
+		  Arrays.sort(raw_CPU, new Comparator<Pair<Long, Double>>()  {
+	    	  @Override
+	          public int compare(Pair<Long, Double> o1, Pair<Long, Double> o2) {
+	              if(o1.getFirst()==o2.getFirst()){
+	                  return 0;
+	              }else if (o1.getFirst() > o2.getFirst()){
+	                  return -1;
+	              }
+	              else return 1;
+	          }
+	      });
+	      Arrays.sort(raw_power, new Comparator<Pair<Long, Double>>()  {
+	    	  @Override
+	          public int compare(Pair<Long, Double> o1, Pair<Long, Double> o2) {
+	              if(o1.getFirst()==o2.getFirst()){
+	                  return 0;
+	              }else if (o1.getFirst() > o2.getFirst()){
+	                  return -1;
+	              }
+	              else return 1;
+	          }
+	      });
+	      
+		  int idx_CPU = 0, idx_power = 0;
+	      List<Pair<Double, Double>> raw_data = new ArrayList<>();
+		  while (idx_CPU < raw_CPU.length && idx_power < raw_power.length) {
+			  if (raw_CPU[idx_CPU].getFirst().compareTo(raw_power[idx_power].getFirst()) == 0) {
+			      raw_data.add(new Pair<Double, Double>(raw_CPU[idx_CPU].getSecond(), raw_power[idx_power].getSecond()));
+				  idx_CPU +=1;
+				  idx_power +=1;
+			  }  
+			  else if (raw_CPU[idx_CPU].getFirst().compareTo(raw_power[idx_power].getFirst()) == 1) {
+				  idx_CPU += 1;
+			  }
+			  else if (raw_CPU[idx_CPU].getFirst().compareTo(raw_power[idx_power].getFirst()) == -1) {
+				  idx_power += 1;
+			  }
+		  }
+
+
+	      List<Pair<Double, Double>> new_data = new ArrayList<>();
+	      WeightedObservedPoints points = new WeightedObservedPoints();
+	      while (raw_data.size() != 0) {
+	         int count = 0;
+	         for (int i = 1; i < raw_data.size(); i++) {
+
+	            if (raw_data.get(i).getSecond() >= raw_data.get(i-1).getSecond() + 1)
+	               break;
+	            count += 1;
+	            if (count > 0) {
+	               List<Pair<Double, Double>> tmp = raw_data.subList(0, count + 1);
+	               new_data.addAll(MAD(tmp, 1.5));
+	            }
+	           raw_data = raw_data.subList(count + 1, raw_data.size());
+	         }
+	      }
+	      for(int i = 0; i < new_data.size(); i++)
+	      {
+	    	  points.add(new_data.get(i).getFirst(), new_data.get(i).getSecond());
+	      }
+	      //logger.info(String.valueOf(raw_CPU_list.size()) + " " + String.valueOf(raw_power_list.size()) + " " + String.valueOf(CPU.size()) + " " + String.valueOf(power.size()));
+	      int degree = 4;
+	      PolynomialCurveFitter fitter = PolynomialCurveFitter.create(degree); 
+	      double[] result = fitter.fit(points.toList());
+	      List<Double> fitting_result = doubleToList(result);
+	      
+	      
+	     
+	      return fitting_result;
+   }
+   
+   public List<List<Double>> syncFitting(boolean ifTest)  {
+	  
+	  //
+	  List<MetricData> MetricDatas;
+	  List<List<Double>> results = new ArrayList<>();
+	  if (ifTest) {
+		  try {
+			  	 MetricDatas = new ArrayList<>();
+	
+		         CsvReader csvReader = new CsvReader("testData.csv");
+		         boolean re = csvReader.readHeaders();
+		         int n = 0;
+		         while (csvReader.readRecord()) {
+		             String rawRecord = csvReader.getRawRecord();
+		             String[] line = rawRecord.split(",");
+		             MetricData cpu = new MetricData();
+		       	     cpu.setMetricName("CpuUsage");
+		       	     cpu.setValueNum(Double.valueOf(line[0]));
+		       	     cpu.setTimeStamp(n);
+		       	     MetricDatas.add(cpu);
+		             MetricData power = new MetricData();
+		             power.setMetricName("Power");
+		             power.setValueNum(Double.valueOf(line[1]));
+		             power.setTimeStamp(n);
+		             MetricDatas.add(power);
+		             n+=1;
+		         }
+		         List<Double> fitting_result = doFitting(MetricDatas);
+		         
+		         results.add(fitting_result);
+		         
+		      }  catch (FileNotFoundException e) {
+		         throw new RuntimeException("file not found");
+		      }  catch (IOException e) {
+		         throw new RuntimeException(e.getMessage());
+		      }
+	  }
+	  else {
+		  long One_day = 86405000;
+	      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+		  MetricData[] raw_MetricDatas = null;
+		  Asset[] servers = restClient.getMappedAsset(AssetCategory.Server).getBody();
+		  for (int i = 0; i < servers.length; i++)
+		  {
+			  String assetId = servers[i].getId();
+			  raw_MetricDatas = restClient.getServerRealtimeDataByServerID(assetId, System.currentTimeMillis(), One_day).getBody();
+			  MetricDatas = Arrays.asList(raw_MetricDatas);
+			  List<Double> fitting_result = doFitting(MetricDatas);
+		      results.add(fitting_result);
+			  Asset asset = new Asset();
+		      asset.setFittingResults(fitting_result);
+		      restClient.saveAssets(asset);
+		      
+		  }
+		   
+	  }
+	  return results;
+   }
+   
    public void syncSummaryData() {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       restClient.getSystemSummary(false);
@@ -372,9 +639,6 @@ public class AggregatorService implements AsyncService {
          metricNameAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, pduAssetId);
          metricNameAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, pduAssetId);
          metricNameAndIdMap.put(MetricName.SERVER_VOLTAGE, pduAssetId);
-         metricNameAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_VOLTAGE, pduAssetId);
-         metricNameAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER_LOAD, pduAssetId);
-         metricNameAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT_LOAD, pduAssetId);
          pduFormula.put(pduAssetId, metricNameAndIdMap);
       }
       return pduFormula;

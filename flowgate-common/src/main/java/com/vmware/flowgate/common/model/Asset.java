@@ -93,7 +93,10 @@ public class Asset implements Serializable, BaseDocument {
     * The location city of the asset
     */
    private String city;
-
+   /**
+    * Fitting results
+    */
+    private List<Double> fitting_results;
    /**
     * The location building of the asset
     */
@@ -250,6 +253,14 @@ public class Asset implements Serializable, BaseDocument {
 
    public void setTag(String tag) {
       this.tag = tag;
+   }
+
+   public List<Double> getFittingResults() {
+      return this.fitting_results;
+   }
+
+   public void setFittingResults(List<Double> fitting_results) {
+      this.fitting_results = fitting_results;
    }
 
    public AssetAddress getAssetAddress() {

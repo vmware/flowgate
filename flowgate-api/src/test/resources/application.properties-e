@@ -1,0 +1,22 @@
+#Copyright 2019 VMware, Inc.
+#SPDX-License-Identifier: BSD-2-Clause
+#######service port###########
+server.port=49610
+
+########couchbase config######
+spring.couchbase.env.timeouts.query=30000
+spring.couchbase.bootstrap-hosts=database-build
+spring.couchbase.bucket.name=flowgatetest
+spring.couchbase.bucket.password=COUCHBASEPASSWD_CHANGE
+spring.data.couchbase.auto-index=true
+#######Default query limitation######
+#######By default only allow query realtime data for 30 minutes
+asset.realtimedata.limit.duration=30
+api.cross.allowedOrigin = *
+api.cross.allowedMethod = GET,POST,PUT,DELETE
+api.cross.allowedHeader = Content-Type,Authorization
+spring.data.redis.repositories.enabled=false
+##########guard store#############
+api.guardstore.path=classpath:guard.jceks
+api.guardstore.alias=flowgateEncrypt
+api.guardstore.pass=c010d0ac205c46e6a0ff7144e05773ed
