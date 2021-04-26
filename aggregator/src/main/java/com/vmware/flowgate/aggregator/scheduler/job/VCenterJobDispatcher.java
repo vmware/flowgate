@@ -52,6 +52,7 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
       //every 12 hour we will trigger a sync host metadata job.
       //every 1 day we will trigger a sync CustomerAttrsData job.
       //every 10 days we will trigger a sync CustomAttributes job.
+      //every 1 day we will trigger a fitting job.
 
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
       SDDCSoftwareConfig[] vcServers = restClient.getVCServers().getBody();
@@ -76,6 +77,7 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
          execountString = "0";
       }
       long execount = Long.valueOf(execountString);
+      boolean syncFitting = execount % 288 == 0;
       boolean queryHostMetadata = execount % 144 == 0;
       boolean syncCustomerAttrsData = execount % 288 == 0;
       boolean syncCustomAttributes = execount % 2880 == 0;
@@ -109,6 +111,13 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
             template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
                   generateSDDCMessageListByType(EventMessageUtil.VCENTER_SyncCustomerAttrs,
                         vcServersActiveArray));
+         }
+         if (syncFitting) {
+            logger.info("Get fitting");
+            template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
+               generateSDDCMessageListByType(EventMessageUtil.VCENTER_SyncFitting,
+                     vcServersActiveArray));
+
          }
 
          publisher.publish(EventMessageUtil.VCTopic,

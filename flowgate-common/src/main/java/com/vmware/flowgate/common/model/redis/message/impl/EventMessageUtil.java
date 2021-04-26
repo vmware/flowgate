@@ -45,6 +45,7 @@ public class EventMessageUtil {
    public static final String OpenManageJobList = "openmanagejoblist";
    public static final String HostNameIPMappingCommand = "hostnameipmapping";
    public static final String FullMappingCommand = "fullservermapping";
+   public static final String SYNC_FITTING = "syncfitting";
    public static final String PDUServerMappingCommand = "pduservermapping";
    public static final String SyncTemperatureAndHumiditySensors = "tempandhumiditymapping";
    public static final String FullSyncTemperatureAndHumiditySensors = "fullsynctempandhumiditymapping";
@@ -58,6 +59,7 @@ public class EventMessageUtil {
    public static final String VCENTER_SyncCustomerAttrsData = "vcenter.synccustomerattrsdata";
    public static final String VCENTER_SyncData = "vcenter.syncdata";
    public static final String VCENTER_EXECOUNT = "vcenter.execount";
+   public static final String VCENTER_SyncFitting = "vcenter.syncfitting";
 
    public static final String VCENTER_QueryHostMetaData = "vcenter.queryhostmetadata";
    public static final String VCENTER_QueryHostUsageData = "vcenter.queryhostusagedata";

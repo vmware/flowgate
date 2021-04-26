@@ -18,6 +18,9 @@ public class ServiceKeyConfig {
    }
 
    public String getServiceKey() {
-      return serviceKey;
+	  //String test = FlowgateConstant.serviceKey;
+      //this.serviceKey = System.getenv(FlowgateConstant.serviceKey);
+      return "loul";
+      //return serviceKey;
    }
 }
