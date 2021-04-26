@@ -384,18 +384,81 @@ public class AssetService {
       return metricDataList;
    }
 
-   public List<MetricData> getAssetMetricsDataById(String assetID, Long starttime, Integer duration) {
-      Optional<Asset> assetOptional = assetRepository.findById(assetID);
-      if (!assetOptional.isPresent()) {
-         throw WormholeRequestException.NotFound("asset", "id", assetID);
-      }
-      Asset asset = assetOptional.get();
+   public List<MetricData> getLatestAssetMetricsDataById(String assetID, Long starttime, Integer duration) {
+      Asset asset = getAssetById(assetID);
+      Map<String, List<ValueUnit>> assetAndValueUnitsMap;
       if (asset.getCategory() == AssetCategory.PDU) {
          return getPduMetricsDataById(assetID, starttime, duration);
       } else if (asset.getCategory() == AssetCategory.Server) {
-         return getServerMetricsDataById(assetID, starttime, duration);
+         //1. Get all metric Data
+         assetAndValueUnitsMap = getServerRawMetrics(asset, starttime, duration);
+         if (assetAndValueUnitsMap.isEmpty()) {
+            return new ArrayList<>();
+         }
+         //2. Remove or filter
+         assetAndValueUnitsMap = findLatestMetricDataByAssetValueUnitMap(assetAndValueUnitsMap);
+         //3. Translate
+         return translateToMetricDataForServer(assetAndValueUnitsMap, asset);
       }
       return getOtherMetricsDataById(assetID, starttime, duration);
+   }
+
+   private Map<String, List<ValueUnit>> findLatestMetricDataByAssetValueUnitMap(Map<String, List<ValueUnit>> assetValueUnitMap) {
+      Map<String, List<ValueUnit>> latestAssetValueUnitsMap = new HashMap<>();
+      if (assetValueUnitMap == null || assetValueUnitMap.isEmpty()) {
+         return latestAssetValueUnitsMap;
+      }
+      Map<String, Long> intervalMetricNames = new HashMap<>();
+      intervalMetricNames.put(MetricName.SERVER_AVERAGE_USED_POWER, 0L);
+      intervalMetricNames.put(MetricName.SERVER_AVERAGE_TEMPERATURE, 0L);
+      intervalMetricNames.put(MetricName.SERVER_ENERGY_CONSUMPTION, 0L);
+      Set<String> peakMetricNames = new HashSet<>();
+      peakMetricNames.add(MetricName.SERVER_PEAK_USED_POWER);
+      peakMetricNames.add(MetricName.SERVER_PEAK_TEMPERATURE);
+      Set<String> minimumMetricNames = new HashSet<>();
+      minimumMetricNames.add(MetricName.SERVER_MINIMUM_USED_POWER);
+      for (Map.Entry<String, List<ValueUnit>> entry : assetValueUnitMap.entrySet()) {
+         Map<String, ValueUnit> latestValueUnitMap = new HashMap<>();
+         for (ValueUnit valueUnit : entry.getValue()) {
+            ValueUnit latestValueUnit;
+            if (intervalMetricNames.containsKey(valueUnit.getKey()) || peakMetricNames.contains(valueUnit.getKey()) || minimumMetricNames.contains(valueUnit.getKey())) {
+               latestValueUnit = latestValueUnitMap.get(valueUnit.getKey());
+               if (latestValueUnit == null) {
+                  latestValueUnitMap.put(valueUnit.getKey(), valueUnit);
+                  continue;
+               }
+               if (intervalMetricNames.containsKey(valueUnit.getKey())) {
+                  long maxInterval = intervalMetricNames.get(valueUnit.getKey());
+                  long currentInterval = valueUnit.getTime() - Long.parseLong(valueUnit.getExtraidentifier());
+                  if (currentInterval > maxInterval) {
+                     intervalMetricNames.put(valueUnit.getKey(), currentInterval);
+                     latestValueUnitMap.put(valueUnit.getKey(), valueUnit);
+                  }
+               } else if (peakMetricNames.contains(valueUnit.getKey())) {
+                  if (valueUnit.getValueNum() > latestValueUnit.getValueNum()) {
+                     latestValueUnitMap.put(valueUnit.getKey(), valueUnit);
+                  }
+               } else if (minimumMetricNames.contains(valueUnit.getKey())) {
+                  if (valueUnit.getValueNum() < latestValueUnit.getValueNum()) {
+                     latestValueUnitMap.put(valueUnit.getKey(), valueUnit);
+                  }
+               }
+            } else {
+               String key = valueUnit.getKey();
+               String extraIdentifier = valueUnit.getExtraidentifier();
+               latestValueUnit = latestValueUnitMap.get(key + extraIdentifier);
+               if (latestValueUnit == null) {
+                  latestValueUnitMap.put(key + extraIdentifier, valueUnit);
+                  continue;
+               }
+               if (valueUnit.getTime() > latestValueUnit.getTime()) {
+                  latestValueUnitMap.put(key + extraIdentifier, valueUnit);
+               }
+            }
+         }
+         latestAssetValueUnitsMap.put(entry.getKey(), new ArrayList<>(latestValueUnitMap.values()));
+      }
+      return latestAssetValueUnitsMap;
    }
 
    public boolean isAssetNameValidate(String assetName) {
