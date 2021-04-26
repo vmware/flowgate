@@ -1,0 +1,219 @@
+2021-04-26 16:44:08,832 [main] INFO  c.v.f.a.AggregatorApplication 55 - Starting AggregatorApplication on loul-a01.vmware.com with PID 56469 (/Users/loul/Program/flowgate/flowgate/aggregator/target/classes started by loul in /Users/loul/Program/flowgate/flowgate/aggregator)
+2021-04-26 16:44:08,835 [main] INFO  c.v.f.a.AggregatorApplication 655 - The following profiles are active: prod
+2021-04-26 16:44:10,288 [main] INFO  org.quartz.impl.StdSchedulerFactory 1220 - Using default implementation for ThreadExecutor
+2021-04-26 16:44:10,303 [main] INFO  o.quartz.core.SchedulerSignalerImpl 61 - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2021-04-26 16:44:10,303 [main] INFO  org.quartz.core.QuartzScheduler 229 - Quartz Scheduler v.2.3.2 created.
+2021-04-26 16:44:10,304 [main] INFO  org.quartz.simpl.RAMJobStore 155 - RAMJobStore initialized.
+2021-04-26 16:44:10,305 [main] INFO  org.quartz.core.QuartzScheduler 294 - Scheduler meta-data: Quartz Scheduler (v2.3.2) 'QuartzScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2021-04-26 16:44:10,306 [main] INFO  org.quartz.impl.StdSchedulerFactory 1374 - Quartz scheduler 'QuartzScheduler' initialized from an externally provided properties instance.
+2021-04-26 16:44:10,307 [main] INFO  org.quartz.impl.StdSchedulerFactory 1378 - Quartz scheduler version: 2.3.2
+2021-04-26 16:44:10,307 [main] INFO  org.quartz.core.QuartzScheduler 2293 - JobFactory set to: com.vmware.flowgate.scheduler.QuartzConfig$QuartzJobFactory@3bb8aabc
+2021-04-26 16:44:10,308 [main] INFO  org.quartz.core.QuartzScheduler 547 - Scheduler QuartzScheduler_$_NON_CLUSTERED started.
+2021-04-26 16:44:10,324 [main] INFO  c.v.f.a.s.job.MessageExecutorConfig 35 - Start aggregator asyncServiceExecutor.
+2021-04-26 16:44:10,326 [main] INFO  o.s.s.c.ThreadPoolTaskExecutor 181 - Initializing ExecutorService
+2021-04-26 16:44:10,327 [main] INFO  o.s.s.c.ThreadPoolTaskExecutor 181 - Initializing ExecutorService 'asyncServiceExecutor'
+2021-04-26 16:44:10,460 [main] INFO  org.quartz.impl.StdSchedulerFactory 1220 - Using default implementation for ThreadExecutor
+2021-04-26 16:44:10,461 [main] INFO  o.quartz.core.SchedulerSignalerImpl 61 - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2021-04-26 16:44:10,461 [main] INFO  org.quartz.core.QuartzScheduler 229 - Quartz Scheduler v.2.3.2 created.
+2021-04-26 16:44:10,462 [main] INFO  org.quartz.simpl.RAMJobStore 155 - RAMJobStore initialized.
+2021-04-26 16:44:10,462 [main] INFO  org.quartz.core.QuartzScheduler 294 - Scheduler meta-data: Quartz Scheduler (v2.3.2) 'quartzScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2021-04-26 16:44:10,462 [main] INFO  org.quartz.impl.StdSchedulerFactory 1374 - Quartz scheduler 'quartzScheduler' initialized from an externally provided properties instance.
+2021-04-26 16:44:10,462 [main] INFO  org.quartz.impl.StdSchedulerFactory 1378 - Quartz scheduler version: 2.3.2
+2021-04-26 16:44:10,462 [main] INFO  org.quartz.core.QuartzScheduler 2293 - JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@4f824872
+2021-04-26 16:44:10,635 [container-1] INFO  io.lettuce.core.EpollProvider 68 - Starting without optional epoll library
+2021-04-26 16:44:10,637 [container-1] INFO  io.lettuce.core.KqueueProvider 70 - Starting without optional kqueue library
+2021-04-26 16:44:10,845 [main] INFO  o.s.s.quartz.SchedulerFactoryBean 727 - Starting Quartz Scheduler now
+2021-04-26 16:44:10,846 [main] INFO  org.quartz.core.QuartzScheduler 547 - Scheduler quartzScheduler_$_NON_CLUSTERED started.
+2021-04-26 16:44:10,855 [main] INFO  c.v.f.a.AggregatorApplication 61 - Started AggregatorApplication in 2.469 seconds (JVM running for 3.021)
+2021-04-26 16:44:11,421 [main] WARN  c.v.f.a.s.job.AggregatorJobLoader 68 - Failed to connect to wormhole API
+org.springframework.web.client.HttpClientErrorException$Unauthorized: 401 : [{"status":"UNAUTHORIZED","message":"Invalid username or password","errors":["Internal error"]}]
+	at org.springframework.web.client.HttpClientErrorException.create(HttpClientErrorException.java:105)
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:170)
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:112)
+	at org.springframework.web.client.ResponseErrorHandler.handleError(ResponseErrorHandler.java:63)
+	at org.springframework.web.client.RestTemplate.handleResponse(RestTemplate.java:782)
+	at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:740)
+	at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:674)
+	at org.springframework.web.client.RestTemplate.exchange(RestTemplate.java:583)
+	at com.vmware.flowgate.client.WormholeAPIClient.getToken(WormholeAPIClient.java:176)
+	at com.vmware.flowgate.client.WormholeAPIClient.initAuthenticationWebToken(WormholeAPIClient.java:140)
+	at com.vmware.flowgate.client.WormholeAPIClient.buildHeaders(WormholeAPIClient.java:155)
+	at com.vmware.flowgate.client.WormholeAPIClient.getDefaultEntity(WormholeAPIClient.java:163)
+	at com.vmware.flowgate.client.WormholeAPIClient.getJobs(WormholeAPIClient.java:185)
+	at com.vmware.flowgate.aggregator.scheduler.job.AggregatorJobLoader.loadAllJobs(AggregatorJobLoader.java:65)
+	at com.vmware.flowgate.aggregator.scheduler.job.AggregatorJobLoader.run(AggregatorJobLoader.java:55)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:784)
+	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:768)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:322)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1226)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1215)
+	at com.vmware.flowgate.aggregator.AggregatorApplication.main(AggregatorApplication.java:14)
+2021-04-26 16:44:17,191 [RMI TCP Connection(2)-127.0.0.1] INFO  o.s.b.a.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin 159 - Application shutdown requested.
+2021-04-26 16:44:17,201 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 585 - Scheduler quartzScheduler_$_NON_CLUSTERED paused.
+2021-04-26 16:44:17,201 [RMI TCP Connection(2)-127.0.0.1] INFO  o.s.s.quartz.SchedulerFactoryBean 845 - Shutting down Quartz Scheduler
+2021-04-26 16:44:17,202 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 666 - Scheduler quartzScheduler_$_NON_CLUSTERED shutting down.
+2021-04-26 16:44:17,202 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 585 - Scheduler quartzScheduler_$_NON_CLUSTERED paused.
+2021-04-26 16:44:17,203 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 740 - Scheduler quartzScheduler_$_NON_CLUSTERED shutdown complete.
+2021-04-26 16:44:17,204 [RMI TCP Connection(2)-127.0.0.1] INFO  o.s.s.c.ThreadPoolTaskExecutor 218 - Shutting down ExecutorService 'asyncServiceExecutor'
+2021-04-26 16:44:17,205 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 666 - Scheduler QuartzScheduler_$_NON_CLUSTERED shutting down.
+2021-04-26 16:44:17,205 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 585 - Scheduler QuartzScheduler_$_NON_CLUSTERED paused.
+2021-04-26 16:44:17,206 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 740 - Scheduler QuartzScheduler_$_NON_CLUSTERED shutdown complete.
+2021-04-26 16:44:31,427 [main] WARN  c.v.f.a.s.job.AggregatorJobLoader 68 - Failed to connect to wormhole API
+java.lang.IllegalStateException: Connection pool shut down
+	at org.apache.http.util.Asserts.check(Asserts.java:34)
+	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.requestConnection(PoolingHttpClientConnectionManager.java:269)
+	at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:176)
+	at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
+	at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:89)
+	at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)
+	at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:83)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:56)
+	at org.springframework.http.client.HttpComponentsClientHttpRequest.executeInternal(HttpComponentsClientHttpRequest.java:87)
+	at org.springframework.http.client.AbstractBufferingClientHttpRequest.executeInternal(AbstractBufferingClientHttpRequest.java:48)
+	at org.springframework.http.client.AbstractClientHttpRequest.execute(AbstractClientHttpRequest.java:53)
+	at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:739)
+	at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:674)
+	at org.springframework.web.client.RestTemplate.exchange(RestTemplate.java:583)
+	at com.vmware.flowgate.client.WormholeAPIClient.getToken(WormholeAPIClient.java:176)
+	at com.vmware.flowgate.client.WormholeAPIClient.initAuthenticationWebToken(WormholeAPIClient.java:140)
+	at com.vmware.flowgate.client.WormholeAPIClient.buildHeaders(WormholeAPIClient.java:155)
+	at com.vmware.flowgate.client.WormholeAPIClient.getDefaultEntity(WormholeAPIClient.java:163)
+	at com.vmware.flowgate.client.WormholeAPIClient.getJobs(WormholeAPIClient.java:185)
+	at com.vmware.flowgate.aggregator.scheduler.job.AggregatorJobLoader.loadAllJobs(AggregatorJobLoader.java:65)
+	at com.vmware.flowgate.aggregator.scheduler.job.AggregatorJobLoader.run(AggregatorJobLoader.java:55)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:784)
+	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:768)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:322)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1226)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1215)
+	at com.vmware.flowgate.aggregator.AggregatorApplication.main(AggregatorApplication.java:14)
+2021-04-26 16:45:24,565 [main] INFO  c.v.f.a.AggregatorApplication 55 - Starting AggregatorApplication on loul-a01.vmware.com with PID 56504 (/Users/loul/Program/flowgate/flowgate/aggregator/target/classes started by loul in /Users/loul/Program/flowgate/flowgate/aggregator)
+2021-04-26 16:45:24,568 [main] INFO  c.v.f.a.AggregatorApplication 655 - The following profiles are active: prod
+2021-04-26 16:45:25,925 [main] INFO  org.quartz.impl.StdSchedulerFactory 1220 - Using default implementation for ThreadExecutor
+2021-04-26 16:45:25,942 [main] INFO  o.quartz.core.SchedulerSignalerImpl 61 - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2021-04-26 16:45:25,943 [main] INFO  org.quartz.core.QuartzScheduler 229 - Quartz Scheduler v.2.3.2 created.
+2021-04-26 16:45:25,944 [main] INFO  org.quartz.simpl.RAMJobStore 155 - RAMJobStore initialized.
+2021-04-26 16:45:25,945 [main] INFO  org.quartz.core.QuartzScheduler 294 - Scheduler meta-data: Quartz Scheduler (v2.3.2) 'QuartzScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2021-04-26 16:45:25,945 [main] INFO  org.quartz.impl.StdSchedulerFactory 1374 - Quartz scheduler 'QuartzScheduler' initialized from an externally provided properties instance.
+2021-04-26 16:45:25,945 [main] INFO  org.quartz.impl.StdSchedulerFactory 1378 - Quartz scheduler version: 2.3.2
+2021-04-26 16:45:25,946 [main] INFO  org.quartz.core.QuartzScheduler 2293 - JobFactory set to: com.vmware.flowgate.scheduler.QuartzConfig$QuartzJobFactory@4930539b
+2021-04-26 16:45:25,946 [main] INFO  org.quartz.core.QuartzScheduler 547 - Scheduler QuartzScheduler_$_NON_CLUSTERED started.
+2021-04-26 16:45:25,962 [main] INFO  c.v.f.a.s.job.MessageExecutorConfig 35 - Start aggregator asyncServiceExecutor.
+2021-04-26 16:45:25,963 [main] INFO  o.s.s.c.ThreadPoolTaskExecutor 181 - Initializing ExecutorService
+2021-04-26 16:45:25,964 [main] INFO  o.s.s.c.ThreadPoolTaskExecutor 181 - Initializing ExecutorService 'asyncServiceExecutor'
+2021-04-26 16:45:26,095 [main] INFO  org.quartz.impl.StdSchedulerFactory 1220 - Using default implementation for ThreadExecutor
+2021-04-26 16:45:26,096 [main] INFO  o.quartz.core.SchedulerSignalerImpl 61 - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2021-04-26 16:45:26,096 [main] INFO  org.quartz.core.QuartzScheduler 229 - Quartz Scheduler v.2.3.2 created.
+2021-04-26 16:45:26,097 [main] INFO  org.quartz.simpl.RAMJobStore 155 - RAMJobStore initialized.
+2021-04-26 16:45:26,097 [main] INFO  org.quartz.core.QuartzScheduler 294 - Scheduler meta-data: Quartz Scheduler (v2.3.2) 'quartzScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2021-04-26 16:45:26,097 [main] INFO  org.quartz.impl.StdSchedulerFactory 1374 - Quartz scheduler 'quartzScheduler' initialized from an externally provided properties instance.
+2021-04-26 16:45:26,097 [main] INFO  org.quartz.impl.StdSchedulerFactory 1378 - Quartz scheduler version: 2.3.2
+2021-04-26 16:45:26,097 [main] INFO  org.quartz.core.QuartzScheduler 2293 - JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@26f7cdf8
+2021-04-26 16:45:26,265 [container-1] INFO  io.lettuce.core.EpollProvider 68 - Starting without optional epoll library
+2021-04-26 16:45:26,267 [container-1] INFO  io.lettuce.core.KqueueProvider 70 - Starting without optional kqueue library
+2021-04-26 16:45:26,461 [main] INFO  o.s.s.quartz.SchedulerFactoryBean 727 - Starting Quartz Scheduler now
+2021-04-26 16:45:26,461 [main] INFO  org.quartz.core.QuartzScheduler 547 - Scheduler quartzScheduler_$_NON_CLUSTERED started.
+2021-04-26 16:45:26,469 [main] INFO  c.v.f.a.AggregatorApplication 61 - Started AggregatorApplication in 2.338 seconds (JVM running for 2.876)
+2021-04-26 16:45:26,621 [main] WARN  c.v.f.a.s.job.AggregatorJobLoader 68 - Failed to connect to wormhole API
+org.springframework.web.client.HttpClientErrorException$Unauthorized: 401 : [{"status":"UNAUTHORIZED","message":"Invalid username or password","errors":["Internal error"]}]
+	at org.springframework.web.client.HttpClientErrorException.create(HttpClientErrorException.java:105)
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:170)
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:112)
+	at org.springframework.web.client.ResponseErrorHandler.handleError(ResponseErrorHandler.java:63)
+	at org.springframework.web.client.RestTemplate.handleResponse(RestTemplate.java:782)
+	at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:740)
+	at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:674)
+	at org.springframework.web.client.RestTemplate.exchange(RestTemplate.java:583)
+	at com.vmware.flowgate.client.WormholeAPIClient.getToken(WormholeAPIClient.java:176)
+	at com.vmware.flowgate.client.WormholeAPIClient.initAuthenticationWebToken(WormholeAPIClient.java:140)
+	at com.vmware.flowgate.client.WormholeAPIClient.buildHeaders(WormholeAPIClient.java:155)
+	at com.vmware.flowgate.client.WormholeAPIClient.getDefaultEntity(WormholeAPIClient.java:163)
+	at com.vmware.flowgate.client.WormholeAPIClient.getJobs(WormholeAPIClient.java:185)
+	at com.vmware.flowgate.aggregator.scheduler.job.AggregatorJobLoader.loadAllJobs(AggregatorJobLoader.java:65)
+	at com.vmware.flowgate.aggregator.scheduler.job.AggregatorJobLoader.run(AggregatorJobLoader.java:55)
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:784)
+	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:768)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:322)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1226)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1215)
+	at com.vmware.flowgate.aggregator.AggregatorApplication.main(AggregatorApplication.java:14)
+2021-04-26 16:45:30,664 [RMI TCP Connection(2)-127.0.0.1] INFO  o.s.b.a.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin 159 - Application shutdown requested.
+2021-04-26 16:45:30,672 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 585 - Scheduler quartzScheduler_$_NON_CLUSTERED paused.
+2021-04-26 16:45:30,673 [RMI TCP Connection(2)-127.0.0.1] INFO  o.s.s.quartz.SchedulerFactoryBean 845 - Shutting down Quartz Scheduler
+2021-04-26 16:45:30,674 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 666 - Scheduler quartzScheduler_$_NON_CLUSTERED shutting down.
+2021-04-26 16:45:30,674 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 585 - Scheduler quartzScheduler_$_NON_CLUSTERED paused.
+2021-04-26 16:45:30,675 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 740 - Scheduler quartzScheduler_$_NON_CLUSTERED shutdown complete.
+2021-04-26 16:45:30,676 [RMI TCP Connection(2)-127.0.0.1] INFO  o.s.s.c.ThreadPoolTaskExecutor 218 - Shutting down ExecutorService 'asyncServiceExecutor'
+2021-04-26 16:45:30,677 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 666 - Scheduler QuartzScheduler_$_NON_CLUSTERED shutting down.
+2021-04-26 16:45:30,677 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 585 - Scheduler QuartzScheduler_$_NON_CLUSTERED paused.
+2021-04-26 16:45:30,678 [RMI TCP Connection(2)-127.0.0.1] INFO  org.quartz.core.QuartzScheduler 740 - Scheduler QuartzScheduler_$_NON_CLUSTERED shutdown complete.
+2021-04-26 16:46:21,169 [main] INFO  c.v.f.a.AggregatorApplication 55 - Starting AggregatorApplication on loul-a01.vmware.com with PID 56524 (/Users/loul/Program/flowgate/flowgate/aggregator/target/classes started by loul in /Users/loul/Program/flowgate/flowgate/aggregator)
+2021-04-26 16:46:21,172 [main] INFO  c.v.f.a.AggregatorApplication 655 - The following profiles are active: prod
+2021-04-26 16:46:22,589 [main] INFO  org.quartz.impl.StdSchedulerFactory 1220 - Using default implementation for ThreadExecutor
+2021-04-26 16:46:22,603 [main] INFO  o.quartz.core.SchedulerSignalerImpl 61 - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2021-04-26 16:46:22,604 [main] INFO  org.quartz.core.QuartzScheduler 229 - Quartz Scheduler v.2.3.2 created.
+2021-04-26 16:46:22,605 [main] INFO  org.quartz.simpl.RAMJobStore 155 - RAMJobStore initialized.
+2021-04-26 16:46:22,606 [main] INFO  org.quartz.core.QuartzScheduler 294 - Scheduler meta-data: Quartz Scheduler (v2.3.2) 'QuartzScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2021-04-26 16:46:22,607 [main] INFO  org.quartz.impl.StdSchedulerFactory 1374 - Quartz scheduler 'QuartzScheduler' initialized from an externally provided properties instance.
+2021-04-26 16:46:22,608 [main] INFO  org.quartz.impl.StdSchedulerFactory 1378 - Quartz scheduler version: 2.3.2
+2021-04-26 16:46:22,609 [main] INFO  org.quartz.core.QuartzScheduler 2293 - JobFactory set to: com.vmware.flowgate.scheduler.QuartzConfig$QuartzJobFactory@35835fa
+2021-04-26 16:46:22,609 [main] INFO  org.quartz.core.QuartzScheduler 547 - Scheduler QuartzScheduler_$_NON_CLUSTERED started.
+2021-04-26 16:46:22,626 [main] INFO  c.v.f.a.s.job.MessageExecutorConfig 35 - Start aggregator asyncServiceExecutor.
+2021-04-26 16:46:22,627 [main] INFO  o.s.s.c.ThreadPoolTaskExecutor 181 - Initializing ExecutorService
+2021-04-26 16:46:22,629 [main] INFO  o.s.s.c.ThreadPoolTaskExecutor 181 - Initializing ExecutorService 'asyncServiceExecutor'
+2021-04-26 16:46:22,788 [main] INFO  org.quartz.impl.StdSchedulerFactory 1220 - Using default implementation for ThreadExecutor
+2021-04-26 16:46:22,789 [main] INFO  o.quartz.core.SchedulerSignalerImpl 61 - Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+2021-04-26 16:46:22,790 [main] INFO  org.quartz.core.QuartzScheduler 229 - Quartz Scheduler v.2.3.2 created.
+2021-04-26 16:46:22,790 [main] INFO  org.quartz.simpl.RAMJobStore 155 - RAMJobStore initialized.
+2021-04-26 16:46:22,791 [main] INFO  org.quartz.core.QuartzScheduler 294 - Scheduler meta-data: Quartz Scheduler (v2.3.2) 'quartzScheduler' with instanceId 'NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+2021-04-26 16:46:22,791 [main] INFO  org.quartz.impl.StdSchedulerFactory 1374 - Quartz scheduler 'quartzScheduler' initialized from an externally provided properties instance.
+2021-04-26 16:46:22,791 [main] INFO  org.quartz.impl.StdSchedulerFactory 1378 - Quartz scheduler version: 2.3.2
+2021-04-26 16:46:22,792 [main] INFO  org.quartz.core.QuartzScheduler 2293 - JobFactory set to: org.springframework.scheduling.quartz.SpringBeanJobFactory@24361cfc
+2021-04-26 16:46:22,972 [container-1] INFO  io.lettuce.core.EpollProvider 68 - Starting without optional epoll library
+2021-04-26 16:46:22,974 [container-1] INFO  io.lettuce.core.KqueueProvider 70 - Starting without optional kqueue library
+2021-04-26 16:46:23,188 [main] INFO  o.s.s.quartz.SchedulerFactoryBean 727 - Starting Quartz Scheduler now
+2021-04-26 16:46:23,189 [main] INFO  org.quartz.core.QuartzScheduler 547 - Scheduler quartzScheduler_$_NON_CLUSTERED started.
+2021-04-26 16:46:23,199 [main] INFO  c.v.f.a.AggregatorApplication 61 - Started AggregatorApplication in 2.466 seconds (JVM running for 3.052)

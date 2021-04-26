@@ -77,7 +77,6 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
          execountString = "0";
       }
       long execount = Long.valueOf(execountString);
-      boolean syncFitting = execount % 288 == 0;
       boolean queryHostMetadata = execount % 144 == 0;
       boolean syncCustomerAttrsData = execount % 288 == 0;
       boolean syncCustomAttributes = execount % 2880 == 0;
@@ -112,14 +111,7 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
                   generateSDDCMessageListByType(EventMessageUtil.VCENTER_SyncCustomerAttrs,
                         vcServersActiveArray));
          }
-         if (syncFitting) {
-            logger.info("Get fitting");
-            template.opsForList().leftPushAll(EventMessageUtil.vcJobList,
-               generateSDDCMessageListByType(EventMessageUtil.VCENTER_SyncFitting,
-                     vcServersActiveArray));
-
-         }
-
+         
          publisher.publish(EventMessageUtil.VCTopic,
                EventMessageUtil.generateSDDCNotifyMessage(EventType.VCenter));
       } catch (IOException e) {
