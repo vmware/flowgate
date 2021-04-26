@@ -28,7 +28,7 @@
 		<vrops.version>1.6</vrops.version>
 		<vlsi-core.version>6.5.0-4258493</vlsi-core.version>
 		<jwt.version>3.3.0</jwt.version>
-		<commons-io.version>2.4</commons-io.version>
+		<commons-io.version>2.7</commons-io.version>
 		<jackson.version>2.10.0</jackson.version>
 		<tomcat.version>9.0.41</tomcat.version>
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
