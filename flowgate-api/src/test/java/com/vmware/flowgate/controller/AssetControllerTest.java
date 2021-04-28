@@ -124,6 +124,9 @@ public class AssetControllerTest {
    @Autowired
    AssetIPMappingRepository assetIPMappingRepository;
 
+   @Autowired
+   AssetService assetService;
+
    @MockBean
    private StringRedisTemplate template;
 
@@ -3380,6 +3383,250 @@ public class AssetControllerTest {
       assetRepository.deleteById(asset.getId());
    }
 
+   @Test
+   public void testGetPDUMetricsByID() {
+      Asset pduAsset = createPDU();
+      pduAsset = assetRepository.save(pduAsset);
+      List<RealTimeData> datas = new ArrayList<>();
+      long time = System.currentTimeMillis();
+      int duration = 30*60*1000;
+      long startTime = time - duration;
+      RealTimeData pduUsageMetricData = createPduAllRealTimeData(startTime);
+      pduUsageMetricData.setAssetID(pduAsset.getId());
+      RealTimeData tempRealTimeData =
+            createTemperatureSensorRealtimeData(startTime, "00027ca37b004a9890d1bf20349d5ac1");
+      RealTimeData humdityRealTimeData =
+            createHumiditySensorRealtimeData(startTime, "34527ca37b004a9890d1bf20349d5ac1");
+      datas.add(humdityRealTimeData);
+      datas.add(tempRealTimeData);
+      datas.add(pduUsageMetricData);
+      realtimeDataRepository.saveAll(datas);
+      List<MetricData> metricDatas =
+            assetService.getMetricsByID(pduAsset.getId(), startTime, duration);
+      int metricResultSize = pduUsageMetricData.getValues().size() +
+            tempRealTimeData.getValues().size() + humdityRealTimeData.getValues().size();
+      TestCase.assertEquals(metricResultSize, metricDatas.size());
+      for(MetricData pduMetricdata : metricDatas) {
+         String metricName = pduMetricdata.getMetricName();
+         if(String.format(MetricName.PDU_XLET_ACTIVE_POWER,"OUTLET:1").
+               equals(metricName)) {
+            TestCase.assertEquals(0.054, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_XLET_APPARENT_POWER,"OUTLET:1").
+               equals(metricName)) {
+            TestCase.assertEquals(0.081, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_XLET_CURRENT,"OUTLET:1").
+               equals(metricName)) {
+            TestCase.assertEquals(0.365, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_XLET_FREE_CAPACITY, "OUTLET:1").
+               equals(metricName)) {
+            TestCase.assertEquals(9.635, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_XLET_VOLTAGE, "OUTLET:1").
+               equals(metricName)) {
+            TestCase.assertEquals(221.0, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_XLET_ACTIVE_POWER,"OUTLET:2").
+               equals(metricName)) {
+            TestCase.assertEquals(0.2, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_XLET_APPARENT_POWER,"OUTLET:2").
+               equals(metricName)) {
+            TestCase.assertEquals(0.241, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_XLET_CURRENT,"OUTLET:2").
+               equals(metricName)) {
+            TestCase.assertEquals(1.09, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_XLET_FREE_CAPACITY, "OUTLET:2").
+               equals(metricName)) {
+            TestCase.assertEquals(8.91, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_XLET_VOLTAGE, "OUTLET:2").
+               equals(metricName)) {
+            TestCase.assertEquals(221.0, pduMetricdata.getValueNum());
+         }
+         else if(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX, "OUTLET").
+               equals(metricName)) {
+            TestCase.assertEquals(20.0, pduMetricdata.getValueNum());
+         }else if(String.format(MetricKeyName.PDU_TEMPERATURE_LOCATIONX, "INLET").
+               equals(metricName)) {
+            TestCase.assertEquals(32.0, pduMetricdata.getValueNum());
+         }else if(MetricName.PDU_CURRENT_LOAD.equals(metricName)) {
+            TestCase.assertEquals(0.05, pduMetricdata.getValueNum());
+         }else if(MetricName.PDU_POWER_LOAD.equals(metricName)) {
+            TestCase.assertEquals(0.05, pduMetricdata.getValueNum());
+         }else if(MetricName.PDU_TOTAL_CURRENT.equals(metricName)) {
+            TestCase.assertEquals(1.455, pduMetricdata.getValueNum());
+         }else if(MetricName.PDU_TOTAL_POWER.equals(metricName)) {
+            TestCase.assertEquals(0.322, pduMetricdata.getValueNum());
+         }else if(MetricName.PDU_VOLTAGE.equals(metricName)) {
+            TestCase.assertEquals(221.0, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_INLET_XPOLE_CURRENT, "INLET:1","L1").
+               equals(metricName)){
+            TestCase.assertEquals(1.455, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, "INLET:1","L1").
+               equals(metricName)){
+            TestCase.assertEquals(30.545, pduMetricdata.getValueNum());
+         }else if(String.format(MetricName.PDU_INLET_XPOLE_VOLTAGE, "INLET:1","L1").
+               equals(metricName)){
+            TestCase.assertEquals(221.0, pduMetricdata.getValueNum());
+         }else {
+            TestCase.fail("Unkown metric");
+         }
+      }
+      assetRepository.deleteById(pduAsset.getId());
+      realtimeDataRepository.deleteById(pduUsageMetricData.getId());
+      realtimeDataRepository.deleteById(tempRealTimeData.getId());
+      realtimeDataRepository.deleteById(humdityRealTimeData.getId());
+   }
+
+   @Test
+   public void testGetServerMetricsByID() {
+      Asset asset = createAsset();
+      List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
+      long time = System.currentTimeMillis();
+      int duration = 30*60*1000;
+      long startTime = time - duration;
+      RealTimeData pduUsageMetricData = createPduAllRealTimeData(startTime);
+      pduUsageMetricData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
+      RealTimeData tempRealTimeData =
+            createTemperatureSensorRealtimeData(startTime, "00027ca37b004a9890d1bf20349d5ac1");
+      RealTimeData humdityRealTimeData =
+            createHumiditySensorRealtimeData(startTime, "34527ca37b004a9890d1bf20349d5ac1");
+      RealTimeData backTemperature =
+            createBackTemperatureSensorRealtimeData(startTime, "968765a37b004a9890d1bf20349d5ac1");
+      RealTimeData backHumidity =
+            createBackHumiditySensorRealtimeData(startTime, "486970a37b004a9890d1bf20349d5ac1");
+      RealTimeData hostRealTimeData = createServerHostRealTimeData(startTime);
+      hostRealTimeData.setAssetID(asset.getId());
+      realTimeDatas.add(hostRealTimeData);
+      realTimeDatas.add(humdityRealTimeData);
+      realTimeDatas.add(tempRealTimeData);
+      realTimeDatas.add(backHumidity);
+      realTimeDatas.add(backTemperature);
+      realTimeDatas.add(pduUsageMetricData);
+      realtimeDataRepository.saveAll(realTimeDatas);
+
+      asset = fillingMetricsformula(asset);
+      HashMap<String, String> justificationfields = new HashMap<>();
+      justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:1_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
+      asset.setJustificationfields(justificationfields);
+      asset = assetRepository.save(asset);
+
+      List<MetricData> metricDatas =
+            assetService.getMetricsByID(asset.getId(), startTime, duration);
+      for(MetricData serverdata : metricDatas) {
+         String metricName = serverdata.getMetricName();
+         if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.365, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.081,serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                  equals(metricName)) {
+            TestCase.assertEquals(221.0, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.05, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.05, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(1.455, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.322, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_BACK_HUMIDITY_LOCATIONX, "OUTLET").
+                  equals(metricName)) {
+            TestCase.assertEquals(19.0, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_BACK_TEMPREATURE_LOCATIONX, "OUTLET").
+                  equals(metricName)) {
+            TestCase.assertEquals(25.0, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_FRONT_HUMIDITY_LOCATIONX, "INLET").
+                  equals(metricName)) {
+            TestCase.assertEquals(serverdata.getValueNum(), 20.0);
+         }else if(String.format(MetricKeyName.SERVER_FRONT_TEMPERATURE_LOCATIONX, "INLET").
+                  equals(metricName)) {
+            TestCase.assertEquals(serverdata.getValueNum(), 32.0);
+         }else if(MetricName.SERVER_VOLTAGE.equals(metricName)) {
+            TestCase.assertEquals(221.0, serverdata.getValueNum());
+         }else if(MetricName.SERVER_STORAGEUSAGE.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 240000) {
+               TestCase.assertEquals(65.0, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_MEMORYUSAGE.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(87.22, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_CPUUSEDINMHZ.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(746.00, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_CPUUSAGE.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(4.67, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_ACTIVEMEMORY.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(1561416.00, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_SHAREDMEMORY.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(8.00, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_CONSUMEDMEMORY.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(18291220.00, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_SWAPMEMORY.equals(metricName)) {
+            TestCase.assertEquals(0.00, serverdata.getValueNum());
+         }else if(MetricName.SERVER_BALLOONMEMORY.equals(metricName)) {
+            TestCase.assertEquals(0.0, serverdata.getValueNum());
+         }else if(MetricName.SERVER_NETWORKUTILIZATION.equals(metricName)){
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(146.00, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_STORAGEIORATEUSAGE.equals(metricName)){
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(330.00, serverdata.getValueNum());
+            }
+         } else if (MetricName.SERVER_POWER.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(0.069, serverdata.getValueNum());
+            }
+         } else if (MetricName.SERVER_PEAK_USED_POWER.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 100000) {
+               TestCase.assertEquals(0.070, serverdata.getValueNum());
+            } else {
+               TestCase.assertEquals(0.80, serverdata.getValueNum());
+            }
+         } else if (MetricName.SERVER_MINIMUM_USED_POWER.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(0.069, serverdata.getValueNum());
+            } else {
+               TestCase.assertEquals(0.50, serverdata.getValueNum());
+            }
+         } else if (MetricName.SERVER_AVERAGE_USED_POWER.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(0.06906666666666665, serverdata.getValueNum());
+            } else {
+               TestCase.assertEquals(0.60, serverdata.getValueNum());
+            }
+         } else if (MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime) {
+               TestCase.assertEquals(0.00038805555555555555, serverdata.getValueNum());
+            }
+         } else if (MetricName.SERVER_AVERAGE_TEMPERATURE.equals(metricName)) {
+            TestCase.assertEquals(24.00, serverdata.getValueNum());
+         } else if (MetricName.SERVER_PEAK_TEMPERATURE.equals(metricName)) {
+            TestCase.assertEquals(30.00, serverdata.getValueNum());
+         }
+      }
+      assetRepository.deleteById(asset.getId());
+      realtimeDataRepository.deleteById(pduUsageMetricData.getId());
+      realtimeDataRepository.deleteById(tempRealTimeData.getId());
+      realtimeDataRepository.deleteById(humdityRealTimeData.getId());
+      realtimeDataRepository.deleteById(backHumidity.getId());
+      realtimeDataRepository.deleteById(backTemperature.getId());
+      realtimeDataRepository.deleteById(hostRealTimeData.getId());
+   }
+
    RealTimeData createPduRealTimeData(Long time) {
       RealTimeData realTimeData = createServerPDURealTimeData(time);
       List<ValueUnit> valueunits = realTimeData.getValues();
@@ -3447,6 +3694,173 @@ public class AssetControllerTest {
       valueunit1L1Voltage.setValueNum(240);
       valueunit1L1Voltage.setTime(time);
       valueunits.add(valueunit1L1Voltage);
+
+      realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setValues(valueunits);
+      realTimeData.setTime(time);
+      return realTimeData;
+   }
+
+   RealTimeData createPduAllRealTimeData(Long time) {
+      RealTimeData realTimeData = new RealTimeData();
+      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+
+      //PDU current 1.455 = sum(OutLet-Current)
+      ValueUnit pduCurrentValueUnit = new ValueUnit();
+      pduCurrentValueUnit.setKey(MetricName.PDU_TOTAL_CURRENT);
+      pduCurrentValueUnit.setValueNum(1.455);
+      pduCurrentValueUnit.setTime(time);
+      pduCurrentValueUnit.setUnit(MetricUnit.A.toString());
+      valueunits.add(pduCurrentValueUnit);
+
+      //PDU voltage 221
+      ValueUnit pduVoltageValueUnit = new ValueUnit();
+      pduVoltageValueUnit.setKey(MetricName.PDU_VOLTAGE);
+      pduVoltageValueUnit.setValueNum(221);
+      pduVoltageValueUnit.setTime(time);
+      pduVoltageValueUnit.setUnit(MetricUnit.V.toString());
+      valueunits.add(pduVoltageValueUnit);
+
+      //PDU power 0.322 sum(OutLet-Power)
+      ValueUnit pduPowerValueUnit = new ValueUnit();
+      pduPowerValueUnit.setKey(MetricName.PDU_TOTAL_POWER);
+      pduPowerValueUnit.setValueNum(0.322);
+      pduPowerValueUnit.setTime(time);
+      pduPowerValueUnit.setUnit(MetricUnit.kW.toString());
+      valueunits.add(pduPowerValueUnit);
+
+      //PDU powerLoad 0.05
+      ValueUnit powerLoadValueUnit = new ValueUnit();
+      powerLoadValueUnit.setKey(MetricName.PDU_POWER_LOAD);
+      powerLoadValueUnit.setValueNum(0.05);
+      powerLoadValueUnit.setTime(time);
+      powerLoadValueUnit.setUnit(MetricUnit.percent.toString());
+      valueunits.add(powerLoadValueUnit);
+
+      //PDU currentLoad 0.05
+      ValueUnit currentLoadValueUnit = new ValueUnit();
+      currentLoadValueUnit.setKey(MetricName.PDU_CURRENT_LOAD);
+      currentLoadValueUnit.setValueNum(0.05);
+      currentLoadValueUnit.setTime(time);
+      currentLoadValueUnit.setUnit(MetricUnit.percent.toString());
+      valueunits.add(currentLoadValueUnit);
+
+      //Outlet:1 apparent power 0.081
+      ValueUnit outLetApparentPowerValueUnit = new ValueUnit();
+      outLetApparentPowerValueUnit.setKey(MetricName.PDU_APPARENT_POWER);
+      outLetApparentPowerValueUnit.setValueNum(0.081);
+      outLetApparentPowerValueUnit.setExtraidentifier("OUTLET:1");
+      outLetApparentPowerValueUnit.setTime(time);
+      outLetApparentPowerValueUnit.setUnit(MetricUnit.kW.toString());
+      valueunits.add(outLetApparentPowerValueUnit);
+
+      //Outlet:1 active power 0.054
+      ValueUnit valueunitActivePower = new ValueUnit();
+      valueunitActivePower.setKey(MetricName.PDU_ACTIVE_POWER);
+      valueunitActivePower.setUnit(MetricUnit.kW.toString());
+      valueunitActivePower.setExtraidentifier("OUTLET:1");
+      valueunitActivePower.setValueNum(0.054);
+      valueunitActivePower.setTime(time);
+      valueunits.add(valueunitActivePower);
+
+      //Outlet:1 current 0.365
+      ValueUnit currentValueUnit = new ValueUnit();
+      currentValueUnit.setKey(MetricName.PDU_CURRENT);
+      currentValueUnit.setValueNum(0.365);
+      currentValueUnit.setExtraidentifier("OUTLET:1");
+      currentValueUnit.setTime(time);
+      currentValueUnit.setUnit(MetricUnit.A.toString());
+      valueunits.add(currentValueUnit);
+
+      //Outlet:1 voltage 221
+      ValueUnit voltageValueUnit = new ValueUnit();
+      voltageValueUnit.setKey(MetricName.PDU_VOLTAGE);
+      voltageValueUnit.setValueNum(221);
+      voltageValueUnit.setExtraidentifier("OUTLET:1");
+      voltageValueUnit.setTime(time);
+      voltageValueUnit.setUnit(MetricUnit.V.toString());
+      valueunits.add(voltageValueUnit);
+
+      //Outlet:1 freeCapacity 9.635
+      ValueUnit valueunitFreeCapacity = new ValueUnit();
+      valueunitFreeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
+      valueunitFreeCapacity.setUnit(MetricUnit.A.toString());
+      valueunitFreeCapacity.setExtraidentifier("OUTLET:1");
+      valueunitFreeCapacity.setValueNum(9.635);
+      valueunitFreeCapacity.setTime(time);
+      valueunits.add(valueunitFreeCapacity);
+
+      //Outlet:2 apparent power 0.241
+      ValueUnit outLet2ApparentPowerValueUnit = new ValueUnit();
+      outLet2ApparentPowerValueUnit.setKey(MetricName.PDU_APPARENT_POWER);
+      outLet2ApparentPowerValueUnit.setValueNum(0.241);
+      outLet2ApparentPowerValueUnit.setExtraidentifier("OUTLET:2");
+      outLet2ApparentPowerValueUnit.setTime(time);
+      outLet2ApparentPowerValueUnit.setUnit(MetricUnit.kW.toString());
+      valueunits.add(outLet2ApparentPowerValueUnit);
+
+      //Outlet:2 active power 0.2
+      ValueUnit outLet2valueunitActivePower = new ValueUnit();
+      outLet2valueunitActivePower.setKey(MetricName.PDU_ACTIVE_POWER);
+      outLet2valueunitActivePower.setUnit(MetricUnit.kW.toString());
+      outLet2valueunitActivePower.setExtraidentifier("OUTLET:2");
+      outLet2valueunitActivePower.setValueNum(0.2);
+      outLet2valueunitActivePower.setTime(time);
+      valueunits.add(outLet2valueunitActivePower);
+
+      //Outlet:2 current 1.09
+      ValueUnit outLet2currentValueUnit = new ValueUnit();
+      outLet2currentValueUnit.setKey(MetricName.PDU_CURRENT);
+      outLet2currentValueUnit.setValueNum(1.09);
+      outLet2currentValueUnit.setExtraidentifier("OUTLET:2");
+      outLet2currentValueUnit.setTime(time);
+      outLet2currentValueUnit.setUnit(MetricUnit.A.toString());
+      valueunits.add(outLet2currentValueUnit);
+
+      //Outlet:2 voltage 221
+      ValueUnit outLet2voltageValueUnit = new ValueUnit();
+      outLet2voltageValueUnit.setKey(MetricName.PDU_VOLTAGE);
+      outLet2voltageValueUnit.setValueNum(221);
+      outLet2voltageValueUnit.setExtraidentifier("OUTLET:2");
+      outLet2voltageValueUnit.setTime(time);
+      outLet2voltageValueUnit.setUnit(MetricUnit.V.toString());
+      valueunits.add(outLet2voltageValueUnit);
+
+      //Outlet:2 freeCapacity 8.91
+      ValueUnit outLet2valueunitFreeCapacity = new ValueUnit();
+      outLet2valueunitFreeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
+      outLet2valueunitFreeCapacity.setUnit(MetricUnit.A.toString());
+      outLet2valueunitFreeCapacity.setExtraidentifier("OUTLET:2");
+      outLet2valueunitFreeCapacity.setValueNum(8.91);
+      outLet2valueunitFreeCapacity.setTime(time);
+      valueunits.add(outLet2valueunitFreeCapacity);
+
+      //Inlet Pole metrics 30.545
+      ValueUnit valueunitL1FreeCapacity = new ValueUnit();
+      valueunitL1FreeCapacity.setKey(MetricName.PDU_FREE_CAPACITY);
+      valueunitL1FreeCapacity.setUnit(MetricUnit.A.toString());
+      valueunitL1FreeCapacity.setExtraidentifier("INLET:1"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
+      valueunitL1FreeCapacity.setValueNum(30.545);
+      valueunitL1FreeCapacity.setTime(time);
+      valueunits.add(valueunitL1FreeCapacity);
+
+      //1.455
+      ValueUnit valueunitL1Current = new ValueUnit();
+      valueunitL1Current.setKey(MetricName.PDU_CURRENT);
+      valueunitL1Current.setUnit(MetricUnit.A.toString());
+      valueunitL1Current.setExtraidentifier("INLET:1"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
+      valueunitL1Current.setValueNum(1.455);
+      valueunitL1Current.setTime(time);
+      valueunits.add(valueunitL1Current);
+
+      //221
+      ValueUnit valueunitL1Voltage = new ValueUnit();
+      valueunitL1Voltage.setKey(MetricName.PDU_VOLTAGE);
+      valueunitL1Voltage.setUnit(MetricUnit.V.toString());
+      valueunitL1Voltage.setExtraidentifier("INLET:1"+FlowgateConstant.INLET_POLE_NAME_PREFIX+1);
+      valueunitL1Voltage.setValueNum(221);
+      valueunitL1Voltage.setTime(time);
+      valueunits.add(valueunitL1Voltage);
 
       realTimeData.setId(UUID.randomUUID().toString());
       realTimeData.setValues(valueunits);
@@ -3649,7 +4063,8 @@ public class AssetControllerTest {
 
       valueUnit = new ValueUnit();
       valueUnit.setTime(time);
-      valueUnit.setExtraidentifier(sinceTime);
+      String peakTemperatureTime = String.valueOf(time - 60000l);
+      valueUnit.setExtraidentifier(sinceTime + FlowgateConstant.SEPARATOR + peakTemperatureTime);
       valueUnit.setKey(MetricName.SERVER_PEAK_TEMPERATURE);
       valueUnit.setUnit(MetricUnit.C.toString());
       valueUnit.setValueNum(30);
@@ -3750,6 +4165,75 @@ public class AssetControllerTest {
       return realTimeData;
    }
 
+   RealTimeData createTemperatureSensorRealtimeData(long time, String sensorAssetId) {
+      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+
+      ValueUnit tempValue = new ValueUnit();
+      tempValue.setValueNum(32);
+      tempValue.setTime(time);
+      tempValue.setUnit(MetricUnit.C.toString());
+      tempValue.setKey(MetricName.TEMPERATURE);
+      valueunits.add(tempValue);
+
+      RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setAssetID(sensorAssetId);
+      realTimeData.setValues(valueunits);
+      realTimeData.setTime(time);
+      return realTimeData;
+   }
+
+   RealTimeData createHumiditySensorRealtimeData(long time, String sensorAssetId) {
+      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+      ValueUnit humidityValue = new ValueUnit();
+      humidityValue.setValueNum(20);
+      humidityValue.setTime(time);
+      humidityValue.setUnit(MetricUnit.percent.toString());
+      humidityValue.setKey(MetricName.HUMIDITY);
+      valueunits.add(humidityValue);
+
+      RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setAssetID(sensorAssetId);
+      realTimeData.setValues(valueunits);
+      realTimeData.setTime(time);
+      return realTimeData;
+   }
+   RealTimeData createBackTemperatureSensorRealtimeData(long time, String sensorAssetId) {
+      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+
+      ValueUnit tempValue = new ValueUnit();
+      tempValue.setValueNum(25);
+      tempValue.setTime(time);
+      tempValue.setUnit(MetricUnit.C.toString());
+      tempValue.setKey(MetricName.TEMPERATURE);
+      valueunits.add(tempValue);
+
+      RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setAssetID(sensorAssetId);
+      realTimeData.setValues(valueunits);
+      realTimeData.setTime(time);
+      return realTimeData;
+   }
+
+   RealTimeData createBackHumiditySensorRealtimeData(long time, String sensorAssetId) {
+      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+      ValueUnit humidityValue = new ValueUnit();
+      humidityValue.setValueNum(19);
+      humidityValue.setTime(time);
+      humidityValue.setUnit(MetricUnit.percent.toString());
+      humidityValue.setKey(MetricName.HUMIDITY);
+      valueunits.add(humidityValue);
+
+      RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setAssetID(sensorAssetId);
+      realTimeData.setValues(valueunits);
+      realTimeData.setTime(time);
+      return realTimeData;
+   }
+
    AssetIPMapping createAssetIPMapping() {
       AssetIPMapping assetipmapping = new AssetIPMapping();
       assetipmapping.setId(UUID.randomUUID().toString());
@@ -3803,6 +4287,54 @@ public class AssetControllerTest {
       return asset;
    }
 
+   Asset createPDU() {
+      Asset asset = new Asset();
+      BaseDocumentUtil.generateID(asset);
+      asset.setAssetName("pdu-02");
+      asset.setAssetNumber(12345);
+      asset.setAssetSource("5b7d208d55368540fcba1692");
+      asset.setCategory(AssetCategory.PDU);
+      asset.setSerialnumber("Serialnumber");
+      asset.setRegion("Region");
+      asset.setCountry("china");
+      asset.setCity("beijing");
+      asset.setBuilding("Raycom");
+      asset.setFloor("9F");
+      asset.setRoom("901");
+      asset.setRow("9");
+      asset.setCol("9");
+      String pduAssetId = asset.getId();
+      Map<String, String> formulas = new HashMap<String, String>();
+      Map<String, String> pduFormulaMap = new HashMap<>();
+      pduFormulaMap.put(MetricName.PDU_VOLTAGE, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_CURRENT, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_TOTAL_POWER, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_CURRENT_LOAD, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_POWER_LOAD, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_XLET_ACTIVE_POWER, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_XLET_APPARENT_POWER, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_XLET_FREE_CAPACITY, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_XLET_CURRENT, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_XLET_VOLTAGE, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_INLET_XPOLE_CURRENT, pduAssetId);
+      pduFormulaMap.put(MetricName.PDU_INLET_XPOLE_VOLTAGE, pduAssetId);
+
+      Map<String, Map<String, String>> sensorMetricFormulas =
+            new HashMap<String, Map<String, String>>();
+      Map<String, String> tempSensor = new HashMap<String,String>();
+      tempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulas.put(MetricName.PDU_TEMPERATURE, tempSensor);
+      Map<String, String> humiditySensor = new HashMap<String,String>();
+      humiditySensor.put("OUTLET", "34527ca37b004a9890d1bf20349d5ac1");
+      sensorMetricFormulas.put(MetricName.PDU_HUMIDITY, humiditySensor);
+
+      formulas.put(FlowgateConstant.PDU, asset.metricsFormulaToString(pduFormulaMap));
+      formulas.put(FlowgateConstant.SENSOR, asset.metricsFormulaToString(sensorMetricFormulas));
+      asset.setMetricsformulars(formulas);
+      return asset;
+   }
+
    FacilitySoftwareConfig createFacilitySoftware() {
       FacilitySoftwareConfig example = new FacilitySoftwareConfig();
       example.setId("5b7d208d55368540fcba1692");
@@ -3821,6 +4353,10 @@ public class AssetControllerTest {
       pduMetricAndIdMap.put(MetricName.SERVER_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa");
       pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_POWER, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_USED_PDU_OUTLET_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_POWER_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa");
+      pduMetricAndIdMap.put(MetricName.SERVER_CONNECTED_PDU_CURRENT_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa");
+
       pduMetricFormulars.put("0001bdc8b25d4c2badfd045ab61aabfa", pduMetricAndIdMap);
 
       Map<String, Map<String, String>> sensorMetricFormulars = new HashMap<String, Map<String, String>>();
@@ -3828,13 +4364,13 @@ public class AssetControllerTest {
       frontTempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
       sensorMetricFormulars.put(MetricName.SERVER_FRONT_TEMPERATURE, frontTempSensor);
       Map<String, String> backTempSensor = new HashMap<String,String>();
-      backTempSensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
+      backTempSensor.put("OUTLET", "968765a37b004a9890d1bf20349d5ac1");
       sensorMetricFormulars.put(MetricName.SERVER_BACK_TEMPREATURE, backTempSensor);
       Map<String, String> frontHumiditySensor = new HashMap<String,String>();
-      frontHumiditySensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
+      frontHumiditySensor.put("INLET", "34527ca37b004a9890d1bf20349d5ac1");
       sensorMetricFormulars.put(MetricName.SERVER_FRONT_HUMIDITY, frontHumiditySensor);
       Map<String, String> backHumiditySensor = new HashMap<String,String>();
-      backHumiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
+      backHumiditySensor.put("OUTLET", "486970a37b004a9890d1bf20349d5ac1");
       sensorMetricFormulars.put(MetricName.SERVER_BACK_HUMIDITY, backHumiditySensor);
       String pduFormulaInfo = null;
       String sensorFormulaInfo = null;

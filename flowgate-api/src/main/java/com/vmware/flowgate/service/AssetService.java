@@ -116,6 +116,8 @@ public class AssetService {
       formulaKeyAndValueUnitNameMapForServer.put(MetricName.SERVER_BACK_HUMIDITY, MetricName.HUMIDITY);
       formulaKeyAndValueUnitNameMapForServer = Collections.unmodifiableMap(formulaKeyAndValueUnitNameMapForServer);
 
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_CONNECTED_PDU_CURRENT, MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT);
+      formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_CONNECTED_PDU_POWER, MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER);
       formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_CONNECTED_PDU_CURRENT_LOAD, MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD);
       formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_CONNECTED_PDU_POWER_LOAD, MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD);
       formulaKeyAndMetricFormatNameMapForServer.put(MetricName.SERVER_USED_PDU_OUTLET_CURRENT, MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT);
@@ -1026,7 +1028,7 @@ public class AssetService {
    private List<MetricData> translateToMetricDataForServer(Map<String, List<ValueUnit>> assetAndValueUnitsMap,
          Asset asset){
       List<MetricData> metricDatas = new ArrayList<MetricData>();
-      Map<String, Map<String, String>> displayNameAndFormulasMap = getMetricDispalyNameAndFormularMapForServer(asset);
+      Map<String, Map<String, String>> displayNameAndFormulasMap = getMetricDispalyNameAndFormulaMapForServer(asset);
       if(displayNameAndFormulasMap.isEmpty() ||
             !displayNameAndFormulasMap.containsKey(DISPLAYNAMEANDFORMULANAMEMAPKEY)) {
          return metricDatas;
@@ -1036,19 +1038,38 @@ public class AssetService {
             displayNameAndFormulasMap.get(DISPLAYNAMEANDFORMULANAMEMAPKEY);
       displayNameAndFormulasMap.remove(DISPLAYNAMEANDFORMULANAMEMAPKEY);
       CompareValueUnitByTime comparator = new CompareValueUnitByTime();
+
+      //For server-voltage, the server voltage is the server-connected-pdu-outlet voltage
+      //If the Outlet voltage is null, use the inlet voltage
+      //If the server asset has multiple pdus, only use one of these pdus
+      Map<String, List<ValueUnit>> serverVoltageIdAndValues = new HashMap<String, List<ValueUnit>>();
+      List<ValueUnit> serverVoltages = null;
+      String serverVoltageFormula = null;
       for(Map.Entry<String, Map<String, String>> displayNameAndFormulaEntry : displayNameAndFormulasMap.entrySet()) {
          String displayName = displayNameAndFormulaEntry.getKey();
-         //Key:MetricName Value:Formula
          Map<String, String> valueUnitNameAndFormulaMap = displayNameAndFormulaEntry.getValue();
+         //Key:MetricName Value:Formula
+         if(displayName.equals(MetricName.SERVER_VOLTAGE)) {
+            serverVoltageFormula = new ArrayList<String>(valueUnitNameAndFormulaMap.values()).get(0);
+            continue;
+         }
          for(Map.Entry<String, String> valueUnitNameAndFormula : valueUnitNameAndFormulaMap.entrySet()) {
             String valueUnitName = valueUnitNameAndFormula.getKey();
             String formula = valueUnitNameAndFormula.getValue();
             String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
             Map<String, List<ValueUnit>> idAndValues = new HashMap<>();
             for(String id : ids) {
-               List<ValueUnit> inletVoltages = new ArrayList<>();
-               List<ValueUnit> outletVoltages = new ArrayList<>();
-               List<ValueUnit> valueUnits = new ArrayList<>();
+               List<ValueUnit> inletVoltages = null;
+               List<ValueUnit> outletVoltages = null;
+               if(displayName.contains(FlowgateConstant.OUTLET_NAME_PREFIX) &&
+                     MetricName.PDU_VOLTAGE.equals(valueUnitName)) {
+                  inletVoltages = new ArrayList<ValueUnit>();
+                  outletVoltages = new ArrayList<ValueUnit>();
+               }
+               List<ValueUnit> valueUnits = new ArrayList<ValueUnit>();
+               if(!assetAndValueUnitsMap.containsKey(id)) {
+                  continue;
+               }
                for(ValueUnit valueUnit : assetAndValueUnitsMap.get(id)) {
                   if(!valueUnitName.equals(valueUnit.getKey())) {
                      continue;
@@ -1060,55 +1081,71 @@ public class AssetService {
                      //PDU:23551d6dacf2432c8a3edbc6bbc922cd|OUTLET:1|Current
                      if(displayName.contains(FlowgateConstant.OUTLET_NAME_PREFIX)
                            && extraidentifier != null) {
-                        outlet = displayName.split("|")[1];
+                        outlet = displayName.split("\\|")[1];
                         if(outlet.equals(extraidentifier)) {
                            valueUnits.add(valueUnit);
                         }
                      }
                      //PDU:23551d6dacf2432c8a3edbc6bbc922cd|Current
-                     if(!displayName.contains(FlowgateConstant.OUTLET_NAME_PREFIX)
-                           && !displayName.contains(FlowgateConstant.INLET_NAME_PREFIX) ) {
-                        valueUnits.add(valueUnit);
+                     if(!displayName.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
+                        if(extraidentifier == null) {//PDU current
+                           valueUnits.add(valueUnit);
+                        }
                      }
                      break;
                   case MetricName.PDU_APPARENT_POWER:
-                     //Sample value of toName: PDU:pduID|OUTLET:1|Power
-                     outlet = displayName.split("|")[1];
+                     //Sample value of displayName: PDU:23551d6dacf2432c8a3edbc6bbc922cd|OUTLET:1|Power
+                     outlet = displayName.split("\\|")[1];
                      if(outlet.equals(extraidentifier)) {
                         valueUnits.add(valueUnit);
                      }
                      break;
-                  case MetricName.PDU_VOLTAGE:
+                  case MetricName.PDU_VOLTAGE: //valueunitName
                      //DisplayName: PDU:23551d6dacf2432c8a3edbc6bbc922cd|OUTLET:1|Voltage
-                     outlet = displayName.split("|")[1];
-                     if(displayName.contains(FlowgateConstant.OUTLET_NAME_PREFIX)) {
+                     if(extraidentifier == null) {
+                        continue;
+                     }else {
+                        outlet = displayName.split("\\|")[1];
                         if(outlet.equals(extraidentifier)) {
-                           valueUnits.add(valueUnit);
-                        }
-                     }
-                     //DisplayName:Voltage
-                     if(MetricName.SERVER_VOLTAGE.equals(displayName)) {
-                        if (extraidentifier
-                              .indexOf(FlowgateConstant.INLET_NAME_PREFIX) > 0) {
-                           inletVoltages.add(valueUnit);
-                        } else if (outlet.equals(extraidentifier)) {
                            outletVoltages.add(valueUnit);
+                        }else if (extraidentifier.indexOf(FlowgateConstant.INLET_NAME_PREFIX) > 0) {
+                           inletVoltages.add(valueUnit);
                         }
                      }
                      break;
+                  case MetricName.SERVER_POWER://Power
+                     if(MetricName.SERVER_POWER.equals(displayName)) {
+                        //Sample value of displayName: Power
+                        if(MetricName.SERVER_POWER.equals(extraidentifier)) {
+                           valueUnits.add(valueUnit);
+                        }
+                     } else {
+                        //Sample value of displayName: PDU:23551d6dacf2432c8a3edbc6bbc922cd|Power
+                        if(extraidentifier == null) {
+                           valueUnits.add(valueUnit);
+                        }
+                     }
                   default:
                      valueUnits.add(valueUnit);
                      break;
                   }
                }
-               if(MetricName.SERVER_VOLTAGE.equals(displayName)) {
-                  if(outletVoltages.isEmpty()) {
-                     if(inletVoltages.isEmpty()) {
-                        continue;
-                     }
-                     valueUnits = inletVoltages;
-                  }
+               if(displayName.contains(FlowgateConstant.OUTLET_NAME_PREFIX) &&
+                     MetricName.PDU_VOLTAGE.equals(valueUnitName)) {
                   valueUnits = outletVoltages;
+                  if(serverVoltages == null || serverVoltages.isEmpty()) {
+                     if(outletVoltages.isEmpty()) {
+                        if(inletVoltages.isEmpty()) {
+                           continue;
+                        }
+                        outletVoltages = inletVoltages;
+                     }
+                     serverVoltages = outletVoltages;
+                     if(serverVoltages.isEmpty()) {
+                       continue;
+                     }
+                     serverVoltageIdAndValues.put(id, serverVoltages);
+                  }
                }
                if(valueUnits.isEmpty()) {
                   continue;
@@ -1116,7 +1153,7 @@ public class AssetService {
                Collections.sort(valueUnits, comparator);
                idAndValues.put(id, valueUnits);
             }
-            if(!idAndValues.isEmpty()) {
+            if(!idAndValues.isEmpty()) { //<id,valueUnits>
                Function<TranslateContext, MetricData> function = TranslateFunctionService.convert;
                String formulaKey = displayNameAndFormulaKeyMap.get(displayName);
                if(TranslateFunctionService.serverFormulaKeyAndFunction.containsKey(formulaKey)) {
@@ -1126,13 +1163,20 @@ public class AssetService {
             }
          }
       }
+      if(!serverVoltageIdAndValues.isEmpty()) {
+         Function<TranslateContext, MetricData> function = TranslateFunctionService.convert;
+         String formulaKey = displayNameAndFormulaKeyMap.get(MetricName.SERVER_VOLTAGE);
+         if(TranslateFunctionService.serverFormulaKeyAndFunction.containsKey(formulaKey)) {
+            function = TranslateFunctionService.serverFormulaKeyAndFunction.get(formulaKey);
+         }
+         metricDatas.addAll(convertValueUnitToMetricData(MetricName.SERVER_VOLTAGE,function, serverVoltageFormula, serverVoltageIdAndValues));
+      }
       return metricDatas;
    }
 
    private List<MetricData> translateToMetricDataForPDU(Map<String, List<ValueUnit>> assetAndValueUnitsMap, Asset pdu){
       List<MetricData> metricDatas = new ArrayList<MetricData>();
-      //%s|Current
-      Map<String, Map<String, String>> displayNameAndFormulasMap = getMetricDispalyNameAndFormularMapForPDU(pdu);
+      Map<String, Map<String, String>> displayNameAndFormulasMap = getMetricDispalyNameAndFormulaMapForPDU(pdu);
       if(displayNameAndFormulasMap.isEmpty() ||
             !displayNameAndFormulasMap.containsKey(DISPLAYNAMEANDFORMULANAMEMAPKEY)) {
          return metricDatas;
@@ -1160,7 +1204,7 @@ public class AssetService {
                   String extraidentifier = valueUnit.getExtraidentifier();
                   String extraInfo[] = null;
                   if(extraidentifier != null) {
-                     extraInfo = extraidentifier.split(FlowgateConstant.INLET_POLE_NAME_PREFIX);
+                     extraInfo = extraidentifier.split("\\"+FlowgateConstant.INLET_POLE_NAME_PREFIX);
                   }
                   switch (displayName) {
                   case MetricName.PDU_CURRENT://Current
@@ -1175,16 +1219,21 @@ public class AssetService {
                      if(extraInfo != null && extraInfo.length == 2) {
                         valueUnits.add(valueUnit);
                      }
+                     break;
                   case MetricName.PDU_XLET_CURRENT://%s|Current
                   case MetricName.PDU_XLET_VOLTAGE:
                   case MetricName.PDU_XLET_FREE_CAPACITY:
                      if(extraInfo != null && extraInfo.length == 1) {
                         valueUnits.add(valueUnit);
                      }
+                     break;
                   default:
                      valueUnits.add(valueUnit);
                      break;
                   }
+               }
+               if(valueUnits.isEmpty()) {
+                  continue;
                }
                Collections.sort(valueUnits, comparator);
                idAndValues.put(id, valueUnits);
@@ -1237,7 +1286,9 @@ public class AssetService {
          translateContext.setFormula(formula);
          translateContext.setValueUnits(idAndValueUnitMap);
          MetricData metricData = function.apply(translateContext);
-         metricDatas.add(metricData);
+         if(metricData != null) {
+            metricDatas.add(metricData);
+         }
       }
       return metricDatas;
    }
@@ -1249,7 +1300,6 @@ public class AssetService {
          //Filter pdu metric by metric name
          List<String> metricNames = new ArrayList<String>();
          metricNames.add(MetricName.PDU_TOTAL_POWER);
-         metricNames.add(MetricName.PDU_TOTAL_CURRENT);
          metricNames.add(MetricName.PDU_APPARENT_POWER);
          metricNames.add(MetricName.PDU_ACTIVE_POWER);
          metricNames.add(MetricName.PDU_CURRENT);
@@ -1257,6 +1307,7 @@ public class AssetService {
          metricNames.add(MetricName.PDU_FREE_CAPACITY);
          metricNames.add(MetricName.PDU_POWER_LOAD);
          metricNames.add(MetricName.PDU_CURRENT_LOAD);
+         pduAsset.getMetricsformulars();
          filterValueUnitsByMetricNames(pduValueunits, metricNames);
          assetAndValueUnitsMap.put(pduAsset.getId(), pduValueunits);
       }
@@ -1369,7 +1420,7 @@ public class AssetService {
     *    PDU:23551d6dacf2432c8a3edbc6bbc922cd|Current:{Current,23551d6dacf2432c8a3edbc6bbc922cd}
     * }
     */
-   private Map<String, Map<String, String>> getMetricDispalyNameAndFormularMapForServer(Asset server){
+   private Map<String, Map<String, String>> getMetricDispalyNameAndFormulaMapForServer(Asset server){
       Map<String, Map<String, String>> displayNameAndFormulasMap = new HashMap<String, Map<String, String>>();
       Map<String, String> formulas = server.getMetricsformulars();
       if(formulas == null || formulas.isEmpty()) {
@@ -1384,6 +1435,9 @@ public class AssetService {
             Map<String, String> metricNameAndFormulaMap = new HashMap<>();
             String valueUnitName = getValueUnitName(formulaKeyAndValueUnitNameMapForServer, formulaKeyAndFormula.getKey());
             String displayName = getDisplayName(formulaKeyAndMetricFormatNameMapForServer, formulaKeyAndFormula.getKey());
+            if(MetricName.SERVER_POWER.equals(formulaKeyAndFormula.getKey())) {
+               displayName = formulaKeyAndFormula.getKey();
+            }
             metricNameAndFormulaMap.put(valueUnitName, formulaKeyAndFormula.getValue());
             displayNameAndFormulasMap.put(displayName, metricNameAndFormulaMap);
             displayNameAndFormulaKey.put(displayName, formulaKeyAndFormula.getKey());
@@ -1453,7 +1507,7 @@ public class AssetService {
       Map<String, Map<String, String>> sensorFormulaMap =
             getFormula(server, FlowgateConstant.SENSOR, formulas, typeReference);
       Map<String, Map<String, String>> sensorMetricDisplayNameAndFormulasMap = convertSensorFormulaToMetricDispalyNameAndFormularMap(
-            sensorFormulaMap, formulaKeyAndValueUnitNameMapForPDU, formulaKeyAndMetricFormatNameMapForPDU);
+            sensorFormulaMap, formulaKeyAndValueUnitNameMapForServer, formulaKeyAndMetricFormatNameMapForServer);
       if(displayNameAndFormulasMap.isEmpty()) {
          return sensorMetricDisplayNameAndFormulasMap;
       }else {
@@ -1481,7 +1535,7 @@ public class AssetService {
     * The PDU_XLET_CURRENT may be OUTLET or INLET such as INLET:1|Current or OUTLET:1|Current
     * The Sample value of PDU_INLET_POLE_CURRENT: INLET:1|L1|Current or INLET:1|L2|Current or INLET:1|L3|Current
     */
-   private Map<String, Map<String, String>> getMetricDispalyNameAndFormularMapForPDU(Asset pdu){
+   private Map<String, Map<String, String>> getMetricDispalyNameAndFormulaMapForPDU(Asset pdu){
       Map<String, Map<String, String>> displayNameAndFormulasMap = new HashMap<String, Map<String, String>>();
       Map<String, String> formulas = pdu.getMetricsformulars();
       if(formulas == null || formulas.isEmpty()) {
@@ -1559,7 +1613,7 @@ public class AssetService {
    }
 
    private String getDisplayName(Map<String, String> formulaKeyAndMetricFormatNameMap,String formulaKey) {
-      String displayName = formulaKeyAndMetricFormatNameMapForServer.get(formulaKey);
+      String displayName = formulaKeyAndMetricFormatNameMap.get(formulaKey);
       if(StringUtils.isEmpty(displayName)) {
          displayName = formulaKey;
       }
@@ -1567,7 +1621,7 @@ public class AssetService {
    }
 
    private String getValueUnitName(Map<String, String> formulaKeyAndValueUnitNameMap, String formulaKey) {
-      String valueUnitName = formulaKeyAndValueUnitNameMapForServer.get(formulaKey);
+      String valueUnitName = formulaKeyAndValueUnitNameMap.get(formulaKey);
       if(StringUtils.isEmpty(valueUnitName)) {
          valueUnitName = formulaKey;
       }
