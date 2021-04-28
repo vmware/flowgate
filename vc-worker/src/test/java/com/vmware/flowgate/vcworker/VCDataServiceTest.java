@@ -16,9 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vmware.flowgate.common.MetricName;
-import com.vmware.flowgate.common.RealtimeDataUnit;
-import com.vmware.flowgate.common.model.ValueUnit;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,10 +30,12 @@ import org.springframework.http.ResponseEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
+import com.vmware.flowgate.common.MetricName;
 import com.vmware.flowgate.common.model.Asset;
 import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.ServerMapping;
+import com.vmware.flowgate.common.model.ValueUnit;
 import com.vmware.flowgate.vcworker.client.VsphereClient;
 import com.vmware.flowgate.vcworker.config.ServiceKeyConfig;
 import com.vmware.flowgate.vcworker.model.EsxiMetadata;
@@ -608,7 +607,7 @@ public class VCDataServiceTest {
       PerformanceManager performanceManager = Mockito.mock(PerformanceManager.class);
       when(vsphereClient.getPerformanceManager()).thenReturn(performanceManager);
 
-      CounterInfo[] counterInfos = new CounterInfo[3];
+      CounterInfo[] counterInfos = new CounterInfo[4];
       counterInfos[0] = Mockito.mock(CounterInfo.class);
       when(counterInfos[0].getKey()).thenReturn(1);
       ElementDescription edGroup = Mockito.mock(ElementDescription.class);
@@ -636,18 +635,30 @@ public class VCDataServiceTest {
       when(counterInfos[2].getNameInfo()).thenReturn(edName2);
       when(edName2.getKey()).thenReturn(VCConstants.HOST_METRIC_POWER_ENERGY);
 
+      counterInfos[3] = Mockito.mock(CounterInfo.class);
+      when(counterInfos[3].getKey()).thenReturn(4);
+      ElementDescription edGroup3 = Mockito.mock(ElementDescription.class);
+      when(counterInfos[3].getGroupInfo()).thenReturn(edGroup3);
+      when(edGroup3.getKey()).thenReturn(VCConstants.HOST_POWER_GROUP);
+      ElementDescription edName3 = Mockito.mock(ElementDescription.class);
+      when(counterInfos[3].getNameInfo()).thenReturn(edName3);
+      when(edName3.getKey()).thenReturn(VCConstants.HOST_METRIC_POWER_POWER);
+
       when(performanceManager.getPerfCounter()).thenReturn(counterInfos);
 
-      MetricId[] metrics = new MetricId[3];
+      MetricId[] metrics = new MetricId[4];
       metrics[0] = Mockito.mock(MetricId.class);
       metrics[1] = Mockito.mock(MetricId.class);
       metrics[2] = Mockito.mock(MetricId.class);
+      metrics[3] = Mockito.mock(MetricId.class);
       when(metrics[0].getCounterId()).thenReturn(1);
       when(metrics[1].getCounterId()).thenReturn(2);
       when(metrics[2].getCounterId()).thenReturn(3);
+      when(metrics[3].getCounterId()).thenReturn(4);
       when(metrics[0].getInstance()).thenReturn(null);
       when(metrics[1].getInstance()).thenReturn(null);
       when(metrics[2].getInstance()).thenReturn(null);
+      when(metrics[3].getInstance()).thenReturn(null);
 
       when(performanceManager.queryAvailableMetric(host._getRef(), null, null, new Integer(20))).thenReturn(metrics);
 
@@ -655,11 +666,11 @@ public class VCDataServiceTest {
       when(summary.getRefreshRate()).thenReturn(1);
       when(performanceManager.queryProviderSummary(host._getRef())).thenReturn(summary);
 
-      EntityMetric[] metricBase = new EntityMetric[3];
+      EntityMetric[] metricBase = new EntityMetric[4];
       metricBase[0] = Mockito.mock(EntityMetric.class);
-      long[] values = {1L, 2L, 3L};
+      long[] values = {1L, 2L, 3L, 4L};
 
-      IntSeries[] metricSerieses1 = new IntSeries[3];
+      IntSeries[] metricSerieses1 = new IntSeries[4];
       metricSerieses1[0] = Mockito.mock(IntSeries.class);
       MetricId metricID = Mockito.mock(MetricId.class);
       when(metricSerieses1[0].getId()).thenReturn(metricID);
@@ -668,8 +679,8 @@ public class VCDataServiceTest {
       IntSeries intSeries1 = Mockito.mock(IntSeries.class);
       intSeries1 = metricSerieses1[0];
       when((intSeries1.getValue())).thenReturn(values);
-
       when(metricID.getCounterId()).thenReturn(1);
+
       metricSerieses1[1] = Mockito.mock(IntSeries.class);
       when(metricSerieses1[1].getId()).thenReturn(metricID);
       when(metricID.getCounterId()).thenReturn(1);
@@ -687,10 +698,17 @@ public class VCDataServiceTest {
       intSeries3 = metricSerieses1[2];
       when(intSeries3.getValue()).thenReturn(values);
 
-      when(metricID.getCounterId()).thenReturn(2);
+
+      MetricId metricID3 = Mockito.mock(MetricId.class);
+      metricSerieses1[3] = Mockito.mock(IntSeries.class);
+      when(metricSerieses1[3].getId()).thenReturn(metricID3);
+      when(metricID3.getCounterId()).thenReturn(4);
+      IntSeries intSeries4 = Mockito.mock(IntSeries.class);
+      intSeries4 = metricSerieses1[3];
+      when(intSeries4.getValue()).thenReturn(values);
       when(metricBase[0].getValue()).thenReturn(metricSerieses1);
 
-      SampleInfo[] sampleInfos1 = new SampleInfo[3];
+      SampleInfo[] sampleInfos1 = new SampleInfo[4];
       sampleInfos1[0] = Mockito.mock(SampleInfo.class);
       Calendar time = Calendar.getInstance();
       when(sampleInfos1[0].getTimestamp()).thenReturn(time);
@@ -701,6 +719,9 @@ public class VCDataServiceTest {
       sampleInfos1[2] = Mockito.mock(SampleInfo.class);
       when(sampleInfos1[2].getTimestamp()).thenReturn(time);
 
+      sampleInfos1[3] = Mockito.mock(SampleInfo.class);
+      when(sampleInfos1[3].getTimestamp()).thenReturn(time);
+
       when(metricBase[0].getSampleInfo()).thenReturn(sampleInfos1);
 
       metricBase[1] = Mockito.mock(EntityMetric.class);
@@ -710,6 +731,10 @@ public class VCDataServiceTest {
       metricBase[2] = Mockito.mock(EntityMetric.class);
       when(metricBase[2].getValue()).thenReturn(metricSerieses1);
       when(metricBase[2].getSampleInfo()).thenReturn(sampleInfos1);
+
+      metricBase[3] = Mockito.mock(EntityMetric.class);
+      when(metricBase[3].getValue()).thenReturn(metricSerieses1);
+      when(metricBase[3].getSampleInfo()).thenReturn(sampleInfos1);
 
       when(performanceManager.queryStats(any())).thenReturn(metricBase);
 
@@ -729,77 +754,77 @@ public class VCDataServiceTest {
       List<ValueUnit> valueUnits = new ArrayList<>(15);
       ValueUnit valueUnit1 = new ValueUnit();
       valueUnit1.setKey(MetricName.SERVER_POWER);
-      valueUnit1.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit1.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit1.setTime(1615563920000L);
       valueUnit1.setValueNum(0.069);
       ValueUnit valueUnit2 = new ValueUnit();
       valueUnit2.setKey(MetricName.SERVER_POWER);
-      valueUnit2.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit2.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit2.setTime(1615563940000L);
       valueUnit2.setValueNum(0.068);
       ValueUnit valueUnit3 = new ValueUnit();
       valueUnit3.setKey(MetricName.SERVER_POWER);
-      valueUnit3.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit3.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit3.setTime(1615563960000L);
       valueUnit3.setValueNum(0.070);
       ValueUnit valueUnit4 = new ValueUnit();
       valueUnit4.setKey(MetricName.SERVER_POWER);
-      valueUnit4.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit4.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit4.setTime(1615563980000L);
       valueUnit4.setValueNum(0.071);
       ValueUnit valueUnit5 = new ValueUnit();
       valueUnit5.setKey(MetricName.SERVER_POWER);
-      valueUnit5.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit5.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit5.setTime(1615564000000L);
       valueUnit5.setValueNum(0.074);
       ValueUnit valueUnit6 = new ValueUnit();
       valueUnit6.setKey(MetricName.SERVER_POWER);
-      valueUnit6.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit6.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit6.setTime(1615564020000L);
       valueUnit6.setValueNum(0.069);
       ValueUnit valueUnit7 = new ValueUnit();
       valueUnit7.setKey(MetricName.SERVER_POWER);
-      valueUnit7.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit7.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit7.setTime(1615564040000L);
       valueUnit7.setValueNum(0.069);
       ValueUnit valueUnit8 = new ValueUnit();
       valueUnit8.setKey(MetricName.SERVER_POWER);
-      valueUnit8.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit8.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit8.setTime(1615564060000L);
       valueUnit8.setValueNum(0.075);
       ValueUnit valueUnit9 = new ValueUnit();
       valueUnit9.setKey(MetricName.SERVER_POWER);
-      valueUnit9.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit9.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit9.setTime(1615564080000L);
       valueUnit9.setValueNum(0.069);
       ValueUnit valueUnit10 = new ValueUnit();
       valueUnit10.setKey(MetricName.SERVER_POWER);
-      valueUnit10.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit10.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit10.setTime(1615564100000L);
       valueUnit10.setValueNum(0.069);
       ValueUnit valueUnit11 = new ValueUnit();
       valueUnit11.setKey(MetricName.SERVER_POWER);
-      valueUnit11.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit11.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit11.setTime(1615564120000L);
       valueUnit11.setValueNum(0.070);
       ValueUnit valueUnit12 = new ValueUnit();
       valueUnit12.setKey(MetricName.SERVER_POWER);
-      valueUnit12.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit12.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit12.setTime(1615564140000L);
       valueUnit12.setValueNum(0.069);
       ValueUnit valueUnit13 = new ValueUnit();
       valueUnit13.setKey(MetricName.SERVER_POWER);
-      valueUnit13.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit13.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit13.setTime(1615564160000L);
       valueUnit13.setValueNum(0.069);
       ValueUnit valueUnit14 = new ValueUnit();
       valueUnit14.setKey(MetricName.SERVER_POWER);
-      valueUnit14.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit14.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit14.setTime(1615564180000L);
       valueUnit14.setValueNum(0.069);
       ValueUnit valueUnit15 = new ValueUnit();
       valueUnit15.setKey(MetricName.SERVER_POWER);
-      valueUnit15.setUnit(RealtimeDataUnit.KW.toString());
+      valueUnit15.setUnit(ValueUnit.MetricUnit.kW.name());
       valueUnit15.setTime(1615564200000L);
       valueUnit15.setValueNum(0.065);
       valueUnits.add(valueUnit1);
