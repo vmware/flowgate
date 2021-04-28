@@ -672,6 +672,7 @@ public class VCDataService implements AsyncService {
                      break;
                      case VCConstants.HOST_POWER_GROUP + VCConstants.HOST_METRIC_POWER_POWER:
                         valueUnit.setKey(MetricName.SERVER_POWER);
+                        valueUnit.setExtraidentifier(MetricName.SERVER_POWER);
                         valueUnit.setValueNum(valueUnit.translateUnit(value, ValueUnit.MetricUnit.W, ValueUnit.MetricUnit.kW));
                         valueUnit.setUnit(ValueUnit.MetricUnit.kW.name());
                         powerValueUnits.add(valueUnit);

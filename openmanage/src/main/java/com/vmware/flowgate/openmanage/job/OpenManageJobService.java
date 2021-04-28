@@ -539,6 +539,7 @@ public class OpenManageJobService implements AsyncService{
          ValueUnit instantPower = new ValueUnit();
          currentTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getInstantaneousHeadroomTimeStamp());
          instantPower.setKey(MetricName.SERVER_POWER);
+         instantPower.setExtraidentifier(MetricName.SERVER_POWER);
          instantPower.setTime(currentTime);
          instantPower.setUnit(MetricUnit.kW.name());
          instantPower.setValueNum(instantPower.translateUnit(powerMetricsData.getPower(),
