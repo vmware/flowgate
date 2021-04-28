@@ -124,4 +124,5 @@ public class FlowgateConstant {
 
    public static String ASSETNUMBER = "assetNumber";//used in asset's justficationfield for non-Nlyte system.
 
+   public static String GROUPNAMEFORSERVERPDURUNTIMEFORMULAKEY = "PDU|";// group name for server pdu runtime formula key
 }
