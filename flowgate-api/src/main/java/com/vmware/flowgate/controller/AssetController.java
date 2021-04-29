@@ -396,6 +396,47 @@ public class AssetController {
       return assetService.getLatestAssetMetricsDataById(assetID, starttime, duration);
    }
 
+   /**
+    * Return all metric data of the duration
+    * @param assetID
+    * @param starttime
+    * @param duration
+    * @return
+    */
+   @ResponseStatus(HttpStatus.OK)
+   @RequestMapping(value = "/{id}/metrics", method = RequestMethod.GET)
+   public List<MetricData> getMetrics(@PathVariable("id") String assetID,
+         @RequestParam(value = "starttime", required = false) Long starttime,
+         @RequestParam(value = "duration", required = false) Integer duration) {
+      if (starttime == null || starttime <= 0) {
+         starttime = System.currentTimeMillis() - FIVE_MINUTES;
+      }
+      if (duration == null || duration <= 0) {
+         duration = FIVE_MINUTES;
+      }
+      if (duration > FIVE_MINUTES * 12) {
+         duration = FIVE_MINUTES * 12;
+      }
+      return assetService.getMetricsByID(assetID, starttime, duration);
+   }
+
+   private RealTimeData getMostClostData(List<RealTimeData> datas, long time) {
+      RealTimeData lastData = datas.get(0);
+      for (RealTimeData data : datas) {
+         if (data.getTime() < time) {
+            lastData = data;
+            continue;
+         } else if (data.getTime() > time) {
+            if ((data.getTime() - time) < (time - lastData.getTime())) {
+               return data;
+            }
+            return lastData;
+         }
+         return data;
+      }
+      return lastData;
+   }
+
    @ResponseStatus(HttpStatus.CREATED)
    @RequestMapping(value = "/mapping", method = RequestMethod.POST)
    public void saveServerMapping(@RequestBody ServerMapping serverMapping) {

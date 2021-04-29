@@ -1092,7 +1092,8 @@ public class AssetService {
          //1. Get all metric Data
          assetAndValueUnitsMap = getServerRawMetrics(asset, starttime, duration);
          //2. Remove or filter
-
+         List<ValueUnit> serverHostUsageValueUnits = assetAndValueUnitsMap.get(assetID);
+         removeServerUnusedMetrics(serverHostUsageValueUnits);
          //3. Translate
          return translateToMetricDataForServer(assetAndValueUnitsMap, asset);
       default:
@@ -1792,6 +1793,7 @@ public class AssetService {
       }
       return valueUnitName;
    }
+
    /**
     * The valueUnits is collected between start time and start time + duration
     * @param valueUnits
@@ -1863,6 +1865,22 @@ public class AssetService {
           if(sinceTime < startTime) {
              ite.remove();
           }
+      }
+   }
+
+   private void removeServerUnusedMetrics(List<ValueUnit> valueUnits) {
+      Set<String> specialMetricNames = new HashSet<String>();
+      specialMetricNames.add(MetricName.SERVER_AVERAGE_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_PEAK_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_MINIMUM_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_AVERAGE_TEMPERATURE);
+      specialMetricNames.add(MetricName.SERVER_PEAK_TEMPERATURE);
+      Iterator<ValueUnit> ite = valueUnits.iterator();
+      while (ite.hasNext()) {
+         ValueUnit valueUnit = ite.next();
+         if (specialMetricNames.contains(valueUnit.getKey())) {
+            ite.remove();
+         }
       }
    }
 }

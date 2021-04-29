@@ -28,8 +28,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -3186,6 +3188,14 @@ public class AssetControllerTest {
 
       List<MetricData> metricDatas =
             assetService.getMetricsByID(asset.getId(), startTime, duration);
+
+      Set<String> specialMetricNames = new HashSet<String>();
+      specialMetricNames.add(MetricName.SERVER_AVERAGE_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_PEAK_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_MINIMUM_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_AVERAGE_TEMPERATURE);
+      specialMetricNames.add(MetricName.SERVER_PEAK_TEMPERATURE);
+
       for(MetricData serverdata : metricDatas) {
          String metricName = serverdata.getMetricName();
          if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
@@ -3267,32 +3277,167 @@ public class AssetControllerTest {
             if (serverdata.getTimeStamp() == startTime + 20000) {
                TestCase.assertEquals(0.069, serverdata.getValueNum());
             }
-         } else if (MetricName.SERVER_PEAK_USED_POWER.equals(metricName)) {
-            if (serverdata.getTimeStamp() == startTime + 100000) {
-               TestCase.assertEquals(0.070, serverdata.getValueNum());
-            } else {
-               TestCase.assertEquals(0.80, serverdata.getValueNum());
-            }
-         } else if (MetricName.SERVER_MINIMUM_USED_POWER.equals(metricName)) {
-            if (serverdata.getTimeStamp() == startTime + 20000) {
-               TestCase.assertEquals(0.069, serverdata.getValueNum());
-            } else {
-               TestCase.assertEquals(0.50, serverdata.getValueNum());
-            }
-         } else if (MetricName.SERVER_AVERAGE_USED_POWER.equals(metricName)) {
-            if (serverdata.getTimeStamp() == startTime + 20000) {
-               TestCase.assertEquals(0.06906666666666665, serverdata.getValueNum());
-            } else {
-               TestCase.assertEquals(0.60, serverdata.getValueNum());
-            }
-         } else if (MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
+         }else if (MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
             if (serverdata.getTimeStamp() == startTime) {
                TestCase.assertEquals(0.00038805555555555555, serverdata.getValueNum());
             }
-         } else if (MetricName.SERVER_AVERAGE_TEMPERATURE.equals(metricName)) {
-            TestCase.assertEquals(24.00, serverdata.getValueNum());
-         } else if (MetricName.SERVER_PEAK_TEMPERATURE.equals(metricName)) {
-            TestCase.assertEquals(30.00, serverdata.getValueNum());
+         } else if (specialMetricNames.contains(metricName)) {
+            TestCase.fail("Duration API not support this metric "+ metricName);
+         }
+      }
+      assetRepository.deleteById(asset.getId());
+      realtimeDataRepository.deleteById(pduUsageMetricData.getId());
+      realtimeDataRepository.deleteById(tempRealTimeData.getId());
+      realtimeDataRepository.deleteById(humdityRealTimeData.getId());
+      realtimeDataRepository.deleteById(backHumidity.getId());
+      realtimeDataRepository.deleteById(backTemperature.getId());
+      realtimeDataRepository.deleteById(hostRealTimeData.getId());
+   }
+
+   @Test
+   public void testGetMetricsDurationAPI() throws Exception {
+      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
+            fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
+            fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
+            fieldWithPath("value").description("value").type(JsonFieldType.NULL),
+            fieldWithPath("unit").description("metric unit").type(JsonFieldType.STRING),
+            fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
+
+      Asset asset = createAsset();
+      List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
+      long time = System.currentTimeMillis();
+      int duration = 30*60*1000;
+      long startTime = time - duration;
+      RealTimeData pduUsageMetricData = createPduAllRealTimeData(startTime);
+      pduUsageMetricData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
+      RealTimeData tempRealTimeData =
+            createTemperatureSensorRealtimeData(startTime, "00027ca37b004a9890d1bf20349d5ac1");
+      RealTimeData humdityRealTimeData =
+            createHumiditySensorRealtimeData(startTime, "34527ca37b004a9890d1bf20349d5ac1");
+      RealTimeData backTemperature =
+            createBackTemperatureSensorRealtimeData(startTime, "968765a37b004a9890d1bf20349d5ac1");
+      RealTimeData backHumidity =
+            createBackHumiditySensorRealtimeData(startTime, "486970a37b004a9890d1bf20349d5ac1");
+      RealTimeData hostRealTimeData = createServerHostRealTimeData(startTime);
+      hostRealTimeData.setAssetID(asset.getId());
+      realTimeDatas.add(hostRealTimeData);
+      realTimeDatas.add(humdityRealTimeData);
+      realTimeDatas.add(tempRealTimeData);
+      realTimeDatas.add(backHumidity);
+      realTimeDatas.add(backTemperature);
+      realTimeDatas.add(pduUsageMetricData);
+      realtimeDataRepository.saveAll(realTimeDatas);
+
+      asset = fillingMetricsformula(asset);
+      HashMap<String, String> justificationfields = new HashMap<>();
+      justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:1_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
+      asset.setJustificationfields(justificationfields);
+      asset = assetRepository.save(asset);
+
+      MvcResult result = this.mockMvc
+            .perform(get("/v1/assets/" + asset.getId() + "/metrics").param("starttime",
+                     String.valueOf(startTime)).param("duration", String.valueOf(duration)))
+            .andDo(document("assets-getAllMetricsDataInDuration-Server-example",
+                     responseFields(fieldWithPath("[]").description("An array of metricDatas"))
+                              .andWithPrefix("[].", fieldpath)))
+            .andReturn();
+      String res = result.getResponse().getContentAsString();
+      MetricData [] metricDatas = mapper.readValue(res, MetricData[].class);
+
+      Set<String> specialMetricNames = new HashSet<String>();
+      specialMetricNames.add(MetricName.SERVER_AVERAGE_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_PEAK_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_MINIMUM_USED_POWER);
+      specialMetricNames.add(MetricName.SERVER_AVERAGE_TEMPERATURE);
+      specialMetricNames.add(MetricName.SERVER_PEAK_TEMPERATURE);
+
+      for(MetricData serverdata : metricDatas) {
+         String metricName = serverdata.getMetricName();
+         if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.365, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_POWER, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.081,serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_OUTLETX_VOLTAGE, "0001bdc8b25d4c2badfd045ab61aabfa","OUTLET:1").
+                  equals(metricName)) {
+            TestCase.assertEquals(221.0, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.05, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.05, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(1.455, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.322, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_BACK_HUMIDITY_LOCATIONX, "OUTLET").
+                  equals(metricName)) {
+            TestCase.assertEquals(19.0, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_BACK_TEMPREATURE_LOCATIONX, "OUTLET").
+                  equals(metricName)) {
+            TestCase.assertEquals(25.0, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_FRONT_HUMIDITY_LOCATIONX, "INLET").
+                  equals(metricName)) {
+            TestCase.assertEquals(serverdata.getValueNum(), 20.0);
+         }else if(String.format(MetricKeyName.SERVER_FRONT_TEMPERATURE_LOCATIONX, "INLET").
+                  equals(metricName)) {
+            TestCase.assertEquals(serverdata.getValueNum(), 32.0);
+         }else if(MetricName.SERVER_VOLTAGE.equals(metricName)) {
+            TestCase.assertEquals(221.0, serverdata.getValueNum());
+         }else if(MetricName.SERVER_STORAGEUSAGE.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 240000) {
+               TestCase.assertEquals(65.0, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_MEMORYUSAGE.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(87.22, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_CPUUSEDINMHZ.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(746.00, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_CPUUSAGE.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(4.67, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_ACTIVEMEMORY.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(1561416.00, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_SHAREDMEMORY.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(8.00, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_CONSUMEDMEMORY.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(18291220.00, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_SWAPMEMORY.equals(metricName)) {
+            TestCase.assertEquals(0.00, serverdata.getValueNum());
+         }else if(MetricName.SERVER_BALLOONMEMORY.equals(metricName)) {
+            TestCase.assertEquals(0.0, serverdata.getValueNum());
+         }else if(MetricName.SERVER_NETWORKUTILIZATION.equals(metricName)){
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(146.00, serverdata.getValueNum());
+            }
+         }else if(MetricName.SERVER_STORAGEIORATEUSAGE.equals(metricName)){
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(330.00, serverdata.getValueNum());
+            }
+         } else if (MetricName.SERVER_POWER.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime + 20000) {
+               TestCase.assertEquals(0.069, serverdata.getValueNum());
+            }
+         }else if (MetricName.SERVER_ENERGY_CONSUMPTION.equals(metricName)) {
+            if (serverdata.getTimeStamp() == startTime) {
+               TestCase.assertEquals(0.00038805555555555555, serverdata.getValueNum());
+            }
+         } else if (specialMetricNames.contains(metricName)) {
+            TestCase.fail("Duration API not support this metric "+ metricName);
          }
       }
       assetRepository.deleteById(asset.getId());
