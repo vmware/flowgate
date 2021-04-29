@@ -522,9 +522,6 @@ public class MessageProcessingTest {
 		  List<List<Double>> results = aggregatorService.syncFitting(true);
          for (int i = 0; i < results.size(); i++)
          {	        	 
-	         Asset asset = new Asset();
-		      asset.setFittingResults(results.get(i)); 
-		      restClient.saveAssets(asset);
 			  double [] arr_result = new double[results.get(i).size()];
 			  for (int j = 0; j < results.get(i).size(); j++) {
 				  arr_result[j] = results.get(i).get(j);

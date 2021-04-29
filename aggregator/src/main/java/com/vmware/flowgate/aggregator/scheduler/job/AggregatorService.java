@@ -77,10 +77,10 @@ public class AggregatorService implements AsyncService {
          logger.warn("Drop none aggregator message " + message.getType());
          return;
       }
-      logger.info("message: " + message.getContent());
+      //logger.info("message: " + message.getContent());
       Set<EventUser> users = message.getTarget().getUsers();
       for (EventUser command : users) {
-         logger.info(command.getId());
+         //logger.info(command.getId());
          switch (command.getId()) {
          case EventMessageUtil.FullMappingCommand:
             mergeServerMapping();
