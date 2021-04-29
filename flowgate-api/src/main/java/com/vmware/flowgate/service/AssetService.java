@@ -1020,7 +1020,7 @@ public class AssetService {
          return translateToMetricDataForServer(assetAndValueUnitsMap, asset);
       default:
          assetAndValueUnitsMap = getRawMetrics(asset, starttime, duration);
-         return translateToMetricDataForOther(assetAndValueUnitsMap, asset);
+         return translateToMetricDataForOtherAsset(assetAndValueUnitsMap, asset);
       }
    }
 
@@ -1250,7 +1250,7 @@ public class AssetService {
       return metricDatas;
    }
 
-   private List<MetricData> translateToMetricDataForOther(Map<String, List<ValueUnit>> assetAndValueUnitsMap, Asset asset){
+   private List<MetricData> translateToMetricDataForOtherAsset(Map<String, List<ValueUnit>> assetAndValueUnitsMap, Asset asset){
       List<MetricData> metricDatas = new ArrayList<MetricData>();
       Map<String, Map<String, String>> displayNameAndFormulasMap =
             getMetricDispalyNameAndFormulaMap(asset);
@@ -1290,8 +1290,8 @@ public class AssetService {
             }
             Function<TranslateContext, MetricData> function = TranslateFunctionService.convert;
             String formulaKey = displayNameAndFormulaKeyMap.get(displayName);
-            if(TranslateFunctionService.pduFormulaKeyAndFunction.containsKey(formulaKey)) {
-               function = TranslateFunctionService.pduFormulaKeyAndFunction.get(formulaKey);
+            if(TranslateFunctionService.defaultFormulaKeyAndFunction.containsKey(formulaKey)) {
+               function = TranslateFunctionService.defaultFormulaKeyAndFunction.get(formulaKey);
             }
             metricDatas.addAll(convertValueUnitToMetricData(displayName,function, formula, idAndValues));
          }

@@ -30,7 +30,7 @@ public class TranslateFunctionService {
 
    public static Map<String, Function<TranslateContext, MetricData>> serverFormulaKeyAndFunction = new HashMap<>();
    public static Map<String, Function<TranslateContext, MetricData>> pduFormulaKeyAndFunction = new HashMap<>();
-
+   public static Map<String, Function<TranslateContext, MetricData>> defaultFormulaKeyAndFunction = new HashMap<>();
    private static final Function<TranslateContext, MetricData> basisConvert = translateContext -> {
       Map<String, ValueUnit> valueUnitMap = translateContext.getValueUnits();
       if (valueUnitMap == null || valueUnitMap.isEmpty() || translateContext.getFormula() == null || translateContext.getDisplayName() == null) {
