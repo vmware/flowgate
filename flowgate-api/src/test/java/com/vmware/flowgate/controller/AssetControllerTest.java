@@ -2560,111 +2560,102 @@ public class AssetControllerTest {
 
    @Test
    public void testRealtimedataPDUExample() throws Exception {
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-               fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
-               fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
-               fieldWithPath("value").description("value").type(JsonFieldType.NULL),
-               fieldWithPath("unit").description("metric unit").type(JsonFieldType.STRING),
-               fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
-      List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
-      Long currentTime = System.currentTimeMillis();
-      RealTimeData pduRealTimeData = createPduRealTimeData(currentTime);
-      pduRealTimeData.setAssetID("00040717c4154b5b924ced78eafcea7a");
-
-      RealTimeData sensorRealTimeData = createSensorRealtimeData(currentTime);
-      sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
-      realTimeDatas.add(pduRealTimeData);
-      realTimeDatas.add(sensorRealTimeData);
-      Iterable<RealTimeData> result = realtimeDataRepository.saveAll(realTimeDatas);
-
-      Asset asset = createAsset();
-      Map<String, String> formulas = new HashMap<String, String>();
-
-      Map<String, Map<String, String>> sensorMetricFormulas = new HashMap<String, Map<String, String>>();
-      Map<String, String> tempSensor = new HashMap<String,String>();
-      tempSensor.put("INLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulas.put(MetricName.PDU_TEMPERATURE, tempSensor);
-
-      Map<String, String> humiditySensor = new HashMap<String,String>();
-      humiditySensor.put("OUTLET", "00027ca37b004a9890d1bf20349d5ac1");
-      sensorMetricFormulas.put(MetricName.PDU_HUMIDITY, humiditySensor);
-      String sensorFormulaInfo = null;
-      try {
-         sensorFormulaInfo = mapper.writeValueAsString(sensorMetricFormulas);
-      } catch (JsonProcessingException e) {
-         TestCase.fail(e.getMessage());
-      }
-
-      formulas.put(FlowgateConstant.SENSOR, sensorFormulaInfo);
-      asset.setCategory(AssetCategory.PDU);
-      asset.setMetricsformulars(formulas);
-      asset.setId("00040717c4154b5b924ced78eafcea7a");
-      asset = assetRepository.save(asset);
+      Asset pduAsset = createPDU();
+      pduAsset = assetRepository.save(pduAsset);
+      List<RealTimeData> datas = new ArrayList<>();
+      long time = System.currentTimeMillis();
+      int duration = 30*60*1000;
+      long startTime = time - duration;
+      RealTimeData pduUsageMetricData = createPduAllRealTimeData(startTime);
+      pduUsageMetricData.setAssetID(pduAsset.getId());
+      RealTimeData tempRealTimeData =
+               createTemperatureSensorRealtimeData(startTime, "00027ca37b004a9890d1bf20349d5ac1");
+      RealTimeData humdityRealTimeData =
+               createHumiditySensorRealtimeData(startTime, "34527ca37b004a9890d1bf20349d5ac1");
+      datas.add(humdityRealTimeData);
+      datas.add(tempRealTimeData);
+      datas.add(pduUsageMetricData);
+      realtimeDataRepository.saveAll(datas);
 
       MvcResult result1 = this.mockMvc
-               .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
-                        String.valueOf(currentTime)).param("duration", "300000"))
+               .perform(get("/v1/assets/" + pduAsset.getId() + "/realtimedata").param("starttime",
+                        String.valueOf(startTime)).param("duration", String.valueOf(duration)))
                .andReturn();
       String res = result1.getResponse().getContentAsString();
-      MetricData [] datas = mapper.readValue(res, MetricData[].class);
+      MetricData[] metricDatas = mapper.readValue(res, MetricData[].class);
+
+
+      int metricResultSize = pduUsageMetricData.getValues().size() + tempRealTimeData.getValues().size() + humdityRealTimeData.getValues().size();
+      TestCase.assertEquals(metricResultSize, metricDatas.length);
+
       try {
-         for(MetricData pduMetricdata:datas) {
+         for(MetricData pduMetricdata : metricDatas) {
             String metricName = pduMetricdata.getMetricName();
-            if(String.format(MetricName.PDU_XLET_ACTIVE_POWER,"OUTLET:7").
+            if(String.format(MetricName.PDU_XLET_ACTIVE_POWER,"OUTLET:1").
                      equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.2);
-            }else if(String.format(MetricName.PDU_XLET_APPARENT_POWER,"OUTLET:7").
+               TestCase.assertEquals(0.054, pduMetricdata.getValueNum());
+            }else if(String.format(MetricName.PDU_XLET_APPARENT_POWER,"OUTLET:1").
                      equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
-            }else if(String.format(MetricName.PDU_XLET_CURRENT,"OUTLET:7").
+               TestCase.assertEquals(0.081, pduMetricdata.getValueNum());
+            }else if(String.format(MetricName.PDU_XLET_CURRENT,"OUTLET:1").
                      equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.633);
-            }else if(String.format(MetricName.PDU_XLET_FREE_CAPACITY, "OUTLET:7").
+               TestCase.assertEquals(0.365, pduMetricdata.getValueNum());
+            }else if(String.format(MetricName.PDU_XLET_FREE_CAPACITY, "OUTLET:1").
                      equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
-            }else if(String.format(MetricName.PDU_XLET_VOLTAGE, "OUTLET:7").
+               TestCase.assertEquals(9.635, pduMetricdata.getValueNum());
+            }else if(String.format(MetricName.PDU_XLET_VOLTAGE, "OUTLET:1").
                      equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 226.0);
-            }else if(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX, "OUTLET").
+               TestCase.assertEquals(221.0, pduMetricdata.getValueNum());
+            }else if(String.format(MetricName.PDU_XLET_ACTIVE_POWER,"OUTLET:2").
                      equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 20.0);
+               TestCase.assertEquals(0.2, pduMetricdata.getValueNum());
+            }else if(String.format(MetricName.PDU_XLET_APPARENT_POWER,"OUTLET:2").
+                     equals(metricName)) {
+               TestCase.assertEquals(0.241, pduMetricdata.getValueNum());
+            }else if(String.format(MetricName.PDU_XLET_CURRENT,"OUTLET:2").
+                     equals(metricName)) {
+               TestCase.assertEquals(1.09, pduMetricdata.getValueNum());
+            }else if(String.format(MetricName.PDU_XLET_FREE_CAPACITY, "OUTLET:2").
+                     equals(metricName)) {
+               TestCase.assertEquals(8.91, pduMetricdata.getValueNum());
+            }else if(String.format(MetricName.PDU_XLET_VOLTAGE, "OUTLET:2").
+                     equals(metricName)) {
+               TestCase.assertEquals(221.0, pduMetricdata.getValueNum());
+            }
+            else if(String.format(MetricKeyName.PDU_HUMIDITY_LOCATIONX, "OUTLET").
+                     equals(metricName)) {
+               TestCase.assertEquals(20.0, pduMetricdata.getValueNum());
             }else if(String.format(MetricKeyName.PDU_TEMPERATURE_LOCATIONX, "INLET").
                      equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 32.0);
+               TestCase.assertEquals(32.0, pduMetricdata.getValueNum());
             }else if(MetricName.PDU_CURRENT_LOAD.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.1427);
+               TestCase.assertEquals(0.05, pduMetricdata.getValueNum());
             }else if(MetricName.PDU_POWER_LOAD.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 0.134);
+               TestCase.assertEquals(0.05, pduMetricdata.getValueNum());
             }else if(MetricName.PDU_TOTAL_CURRENT.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 4.566);
+               TestCase.assertEquals(1.455, pduMetricdata.getValueNum());
             }else if(MetricName.PDU_TOTAL_POWER.equals(metricName)) {
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 1.033);
+               TestCase.assertEquals(0.322, pduMetricdata.getValueNum());
+            }else if(MetricName.PDU_VOLTAGE.equals(metricName)) {
+               TestCase.assertEquals(221.0, pduMetricdata.getValueNum());
             }else if(String.format(MetricName.PDU_INLET_XPOLE_CURRENT, "INLET:1","L1").
                      equals(metricName)){
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
+               TestCase.assertEquals(1.455, pduMetricdata.getValueNum());
             }else if(String.format(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, "INLET:1","L1").
                      equals(metricName)){
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 34.0);
+               TestCase.assertEquals(30.545, pduMetricdata.getValueNum());
             }else if(String.format(MetricName.PDU_INLET_XPOLE_VOLTAGE, "INLET:1","L1").
                      equals(metricName)){
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 220.0);
-            }else if(String.format(MetricName.PDU_INLET_XPOLE_CURRENT, "INLET:2","L1").
-                     equals(metricName)){
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 6.0);
-            }else if(String.format(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, "INLET:2","L1").
-                     equals(metricName)){
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 24.0);
-            }else if(String.format(MetricName.PDU_INLET_XPOLE_VOLTAGE, "INLET:2","L1").
-                     equals(metricName)){
-               TestCase.assertEquals(pduMetricdata.getValueNum(), 240.0);
+               TestCase.assertEquals(221.0, pduMetricdata.getValueNum());
             }else {
                TestCase.fail("Unkown metric");
             }
          }
       }finally {
-         assetRepository.deleteById(asset.getId());
-         realtimeDataRepository.deleteById(pduRealTimeData.getId());
-         realtimeDataRepository.deleteById(sensorRealTimeData.getId());
+         assetRepository.deleteById(pduAsset.getId());
+         realtimeDataRepository.deleteById(pduUsageMetricData.getId());
+         realtimeDataRepository.deleteById(tempRealTimeData.getId());
+         realtimeDataRepository.deleteById(humdityRealTimeData.getId());
       }
    }
 

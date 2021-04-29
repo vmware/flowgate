@@ -388,7 +388,15 @@ public class AssetService {
       Asset asset = getAssetById(assetID);
       Map<String, List<ValueUnit>> assetAndValueUnitsMap;
       if (asset.getCategory() == AssetCategory.PDU) {
-         return getPduMetricsDataById(assetID, starttime, duration);
+         //1. Get all metric Data
+         assetAndValueUnitsMap = getPDURawMetrics(asset, starttime, duration);
+         if (assetAndValueUnitsMap.isEmpty()) {
+            return new ArrayList<>();
+         }
+         //2. Remove or filter
+         assetAndValueUnitsMap = findLatestMetricDataByAssetValueUnitMap(assetAndValueUnitsMap);
+         //3. Translate
+         return translateToMetricDataForPDU(assetAndValueUnitsMap, asset);
       } else if (asset.getCategory() == AssetCategory.Server) {
          //1. Get all metric Data
          assetAndValueUnitsMap = getServerRawMetrics(asset, starttime, duration);
