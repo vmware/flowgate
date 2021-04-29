@@ -626,6 +626,24 @@ public class PowerIQService implements AsyncService {
                   String assetId = getAssetIdByResponseEntity(res);
                   asset.setId(assetId);
                   sensorAlreadySaved.add(asset);
+                  if (AssetSubCategory.Humidity.equals(asset.getSubCategory()) || AssetSubCategory.Temperature.equals(asset.getSubCategory())) {
+                     Map<String, String> metricsFormulas = new HashMap<>(1);
+                     Map<String, String> sensorFormulas = new HashMap<>(1);
+                     sensorFormulas.put(asset.getSubCategory().toString(), asset.getId());
+                     metricsFormulas.put(FlowgateConstant.SENSOR, asset.metricsFormulaToString(sensorFormulas));
+                     asset.setMetricsformulars(metricsFormulas);
+                     // save sensor formula
+                     restClient.saveAssets(asset);
+                  } else if (asset.getSubCategory() == null) {
+                     Map<String, String> metricsFormulas = new HashMap<>(1);
+                     Map<String, String> sensorFormulas = new HashMap<>(2);
+                     sensorFormulas.put(MetricName.HUMIDITY, asset.getId());
+                     sensorFormulas.put(MetricName.TEMPERATURE, asset.getId());
+                     metricsFormulas.put(FlowgateConstant.SENSOR, asset.metricsFormulaToString(sensorFormulas));
+                     asset.setMetricsformulars(metricsFormulas);
+                     // save sensor formula
+                     restClient.saveAssets(asset);
+                  }
                }
             }
             Set<Asset> pduAssetNeedToUpdate = updatePduMetricformular(sensorAlreadySaved,pduAssetMap);
