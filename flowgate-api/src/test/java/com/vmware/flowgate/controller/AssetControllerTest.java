@@ -3627,6 +3627,53 @@ public class AssetControllerTest {
       realtimeDataRepository.deleteById(hostRealTimeData.getId());
    }
 
+   @Test
+   public void testGetMetricDataForOther() {
+      Asset sensor = createSensor();
+      assetRepository.save(sensor);
+      String sensorId = sensor.getId();
+      long time = System.currentTimeMillis();
+      int duration = 30*60*1000;
+      long startTime = time - duration;
+      List<RealTimeData> realTimeDatas = new ArrayList<>();
+      RealTimeData tempRealTimeData =
+            createTemperatureSensorRealtimeData(startTime, sensorId);
+      realTimeDatas.add(tempRealTimeData);
+
+      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+      ValueUnit tempValue = new ValueUnit();
+      tempValue.setValueNum(25);
+      tempValue.setTime(startTime + 5*60*1000);
+      tempValue.setUnit(MetricUnit.C.toString());
+      tempValue.setKey(MetricName.TEMPERATURE);
+      valueunits.add(tempValue);
+
+      RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setAssetID(sensorId);
+      realTimeData.setValues(valueunits);
+      realTimeData.setTime(startTime + 5*60*1000);
+      realTimeDatas.add(realTimeData);
+
+      realtimeDataRepository.saveAll(realTimeDatas);
+      List<MetricData> metricDatas =
+            assetService.getMetricsByID(sensorId, startTime, duration);
+      TestCase.assertEquals(2, metricDatas.size());
+      for(MetricData sensordata : metricDatas) {
+         long metricTime = sensordata.getTimeStamp();
+         if(metricTime == startTime) {
+            TestCase.assertEquals(32.0, sensordata.getValueNum());
+         }else if(metricTime == startTime + 5*60*1000) {
+            TestCase.assertEquals(25.0, sensordata.getValueNum());
+         }else {
+            TestCase.fail();
+         }
+      }
+      assetRepository.deleteById(sensorId);
+      realtimeDataRepository.deleteById(tempRealTimeData.getId());
+      realtimeDataRepository.deleteById(realTimeData.getId());
+   }
+
    RealTimeData createPduRealTimeData(Long time) {
       RealTimeData realTimeData = createServerPDURealTimeData(time);
       List<ValueUnit> valueunits = realTimeData.getValues();
@@ -4283,6 +4330,21 @@ public class AssetControllerTest {
          TestCase.fail(e.getMessage());
       }
       formulas.put(FlowgateConstant.PDU, pduFormulaInfo);
+      asset.setMetricsformulars(formulas);
+      return asset;
+   }
+
+   Asset createSensor() {
+      Asset asset = new Asset();
+      BaseDocumentUtil.generateID(asset);
+      asset.setAssetName("Temperature-02");
+      asset.setAssetNumber(12345);
+      asset.setAssetSource("5b7d208d55368540fcba1692");
+      asset.setCategory(AssetCategory.Sensors);
+      Map<String, String> formulas = new HashMap<String, String>();
+      Map<String, String> sensorFormulaMap = new HashMap<>();
+      sensorFormulaMap.put(MetricName.TEMPERATURE, asset.getId());
+      formulas.put(FlowgateConstant.SENSOR, asset.metricsFormulaToString(sensorFormulaMap));
       asset.setMetricsformulars(formulas);
       return asset;
    }
