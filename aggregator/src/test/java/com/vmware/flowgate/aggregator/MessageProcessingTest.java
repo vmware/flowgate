@@ -131,6 +131,8 @@ public class MessageProcessingTest {
       System.out.println(mapper.writeValueAsString(message));
    }
 
+  
+   
    @Test
    public void testGetPositionInfo() {
       Asset asset1 = new Asset();
@@ -514,7 +516,30 @@ public class MessageProcessingTest {
       example.setIntegrationStatus(integrationStatus);
       return example;
    }
-
+   @Test
+   public void testSyncFitting() {
+	  try { 
+		  List<List<Double>> results = aggregatorService.syncFitting(true);
+         for (int i = 0; i < results.size(); i++)
+         {	        	 
+	         Asset asset = new Asset();
+		      asset.setFittingResults(results.get(i)); 
+		      restClient.saveAssets(asset);
+			  double [] arr_result = new double[results.get(i).size()];
+			  for (int j = 0; j < results.get(i).size(); j++) {
+				  arr_result[j] = results.get(i).get(j);
+				  //System.out.println(result.get(i));
+			  }  
+			  double[] testAnswer = {67.61123636351215, 2.0250676734875026, -0.04034063855153128, 3.8173496754197417E-4, -1.2569420548906328E-6};
+			  Assert.assertArrayEquals(arr_result, testAnswer, 0.5);
+         } 	
+		 
+		  
+	 } catch(Exception e) {
+		  Assert.fail();
+	  }
+	  
+   }
    public ResponseEntity<FacilitySoftwareConfig[]> getFacilitySoftwareByType(FacilitySoftwareConfig intergration) {
       FacilitySoftwareConfig[] configs = new FacilitySoftwareConfig[1];
       configs[0] = intergration;
