@@ -1075,7 +1075,6 @@ public class AssetService {
       Asset asset = getAssetById(assetID);
       //Get ValueUnits
       Map<String, List<ValueUnit>> assetAndValueUnitsMap = new HashMap<String, List<ValueUnit>>();
-      List<MetricData> metricDatas = null;
       switch (asset.getCategory()) {
       case PDU:
          //1. Get all metric Data
@@ -1092,9 +1091,8 @@ public class AssetService {
          return translateToMetricDataForServer(assetAndValueUnitsMap, asset);
       default:
          assetAndValueUnitsMap = getRawMetrics(asset, starttime, duration);
-         //return translateToMetricDataForOtherAsset(otherValueUnits);
+         return translateToMetricDataForOtherAsset(assetAndValueUnitsMap, asset);
       }
-      return metricDatas;
    }
 
    private List<MetricData> translateToMetricDataForServer(Map<String, List<ValueUnit>> assetAndValueUnitsMap,
@@ -1318,6 +1316,55 @@ public class AssetService {
                metricDatas.addAll(convertValueUnitToMetricData(displayName,function, formula, idAndValues));
             }
 
+         }
+      }
+      return metricDatas;
+   }
+
+   private List<MetricData> translateToMetricDataForOtherAsset(Map<String, List<ValueUnit>> assetAndValueUnitsMap, Asset asset){
+      List<MetricData> metricDatas = new ArrayList<MetricData>();
+      Map<String, Map<String, String>> displayNameAndFormulasMap =
+            getMetricDispalyNameAndFormulaMap(asset);
+      if(displayNameAndFormulasMap.isEmpty() ||
+            !displayNameAndFormulasMap.containsKey(DISPLAYNAMEANDFORMULANAMEMAPKEY)) {
+         return metricDatas;
+      }
+      //The displayNameAndFormulaKeyMap use to find a method to translate the valueUnit to MetricData
+      Map<String, String> displayNameAndFormulaKeyMap =
+            displayNameAndFormulasMap.get(DISPLAYNAMEANDFORMULANAMEMAPKEY);
+      displayNameAndFormulasMap.remove(DISPLAYNAMEANDFORMULANAMEMAPKEY);
+      CompareValueUnitByTime comparator = new CompareValueUnitByTime();
+      for(Map.Entry<String, Map<String, String>> entry : displayNameAndFormulasMap.entrySet()) {
+         String displayName = entry.getKey();
+         Map<String, String> formulaMap = entry.getValue();
+         for(Map.Entry<String, String> formulaEntry : formulaMap.entrySet()) {
+            String valueUnitName = formulaEntry.getKey();
+            String formula = formulaEntry.getValue();
+            String ids[] = formula.split("\\+|-|\\*|/|\\(|\\)");
+            Map<String, List<ValueUnit>> idAndValues = new HashMap<>();
+            for(String id : ids) {
+               List<ValueUnit> valueUnits = new ArrayList<ValueUnit>();
+               for(ValueUnit valueUnit : assetAndValueUnitsMap.get(id)) {
+                  if(!valueUnitName.equals(valueUnit.getKey())) {
+                     continue;
+                  }
+                  valueUnits.add(valueUnit);
+               }
+               if(valueUnits.isEmpty()) {
+                  continue;
+               }
+               Collections.sort(valueUnits, comparator);
+               idAndValues.put(id, valueUnits);
+            }
+            if(idAndValues.isEmpty()) {
+               continue;
+            }
+            Function<TranslateContext, MetricData> function = TranslateFunctionService.convert;
+            String formulaKey = displayNameAndFormulaKeyMap.get(displayName);
+            if(TranslateFunctionService.defaultFormulaKeyAndFunction.containsKey(formulaKey)) {
+               function = TranslateFunctionService.defaultFormulaKeyAndFunction.get(formulaKey);
+            }
+            metricDatas.addAll(convertValueUnitToMetricData(displayName,function, formula, idAndValues));
          }
       }
       return metricDatas;
@@ -1676,6 +1723,44 @@ public class AssetService {
       return displayNameAndFormulasMap;
    }
 
+   /**
+    * So far the method only could handle the sensor asset,
+    * if the asset'category is not 'Sensors',this method should be refactor
+    * The sample of sensor metric formula:
+    * "SENSOR" : {
+        "Temperature": "3b1f65d2adfe43999c7fe3466b2b8021",
+        "Humidity": "ab2b5fb7cc184246a3525d9748775157"
+      }
+    * @param asset
+    * @return
+    */
+   private Map<String, Map<String, String>> getMetricDispalyNameAndFormulaMap(Asset asset){
+      Map<String, Map<String, String>> displayNameAndFormulasMap = new HashMap<String, Map<String, String>>();
+      Map<String, String> formulas = asset.getMetricsformulars();
+      if(formulas == null || formulas.isEmpty()) {
+         return displayNameAndFormulasMap;
+      }
+      Map<String, String> displayNameAndFormulaKey = new HashMap<String, String>();
+      String formulaStringInfo = formulas.get(FlowgateConstant.SENSOR);
+      if(formulaStringInfo == null) {
+         return displayNameAndFormulasMap;
+      }
+      Map<String, String> formulaMap = asset.metricsFormulaToMap(formulaStringInfo, new TypeReference<Map<String, String>>(){});
+      //For sensor asset the formula key is the same as valueUnitName and displayName
+      //To keep the same logic of getValueUnitName and getDisplayName, we need define these two Map
+      Map<String, String> formulaKeyAndValueUnitNameMap = new HashMap<String, String>();
+      Map<String, String> formulaKeyAndMetricFormatNameMap = new HashMap<String, String>();
+      for(Map.Entry<String, String> entry : formulaMap.entrySet()) {
+         Map<String, String> valueUnitNameAndFormulaMap = new HashMap<>();
+         String valueUnitName = getValueUnitName(formulaKeyAndValueUnitNameMap, entry.getKey(), entry.getKey());
+         String displayName = getDisplayName(formulaKeyAndMetricFormatNameMap, entry.getKey(), entry.getKey());
+         valueUnitNameAndFormulaMap.put(valueUnitName, entry.getValue());
+         displayNameAndFormulaKey.put(displayName, entry.getKey());
+         displayNameAndFormulasMap.put(displayName, valueUnitNameAndFormulaMap);
+      }
+      displayNameAndFormulasMap.put(DISPLAYNAMEANDFORMULANAMEMAPKEY, displayNameAndFormulaKey);
+      return displayNameAndFormulasMap;
+   }
 
    private <T> T getFormula(Asset asset, String formulaType,
          Map<String, String> formulas, TypeReference<T> type){
