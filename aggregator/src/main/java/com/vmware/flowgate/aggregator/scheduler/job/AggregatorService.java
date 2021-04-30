@@ -4,7 +4,6 @@
 */
 package com.vmware.flowgate.aggregator.scheduler.job;
 
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import com.csvreader.CsvReader;
