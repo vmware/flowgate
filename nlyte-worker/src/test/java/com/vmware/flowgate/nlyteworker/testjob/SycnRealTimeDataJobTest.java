@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1001,6 +1002,20 @@ public class SycnRealTimeDataJobTest {
    }
 
    @Test
+   public void testHandleAssetsNew() {
+      List<Asset> toUpdateAssets = new ArrayList<Asset>();
+      Map<Long,Asset> exsitingaAssetMap = new HashMap<Long,Asset>();
+      Asset asset = createAsset();
+      asset.setAssetNumber(127);
+      asset.setTag("tag1");
+      asset.setCapacity(8);
+      asset.setFreeCapacity(2);
+      toUpdateAssets.add(asset);
+      HandleAssetUtil util = new HandleAssetUtil();
+      List<Asset> assets = util.handleAssets(toUpdateAssets, exsitingaAssetMap);
+   }
+
+   @Test
    public void testGenerateMountedAssetNumberAndChassisAssetIdMap() {
       List<Asset> assets = new ArrayList<Asset>();
       Asset chassisAsset = createAsset();
@@ -1031,6 +1046,42 @@ public class SycnRealTimeDataJobTest {
       TestCase.assertEquals(chassisAsset.getId(), map.get(slot.getMountedAssetNumber().longValue()));
    }
 
+   @Test
+   public void testGetAssetsFromNlytePdu() {
+      String nlyteSource = "3cf0f5daff8e448da449ac88d5aa9428";
+      List<NlyteAsset> nlyteAssets = getNlyteAsset();
+      HashMap<Integer,LocationGroup> locationMap = getLocationMap();
+      HashMap<Integer,Material> materialMap = getMaterialMap();
+      Material material = new Material();
+      material.setMaterialID(6251);
+      material.setManufacturerID(14);
+      material.setMaterialName("Cisco 1721 Modular Access Router");
+      material.setMaterialType(AssetCategory.Server);
+      materialMap.put(6251, material);
+      HashMap<Integer,Manufacturer> manufacturerMap = getManufacturerMap();
+      Manufacturer manufacturer = new Manufacturer();
+      manufacturer.setManufacturerID(14);
+      manufacturer.setDetail("Cisco");
+      manufacturerMap.put(14, manufacturer);
+      HashMap<Long,String> chassisMountedAssetNumberAndChassisIdMap = null;
+      HandleAssetUtil util = new HandleAssetUtil();
+      List<Asset> assets = util.getAssetsFromNlyte(nlyteSource, nlyteAssets, locationMap, materialMap, manufacturerMap, chassisMountedAssetNumberAndChassisIdMap);
+   }
+
+   @Test
+   public void testSavePduAssetAndUpdatePduUsageFormula() {
+      List<Asset> assets = new ArrayList<>();
+      Asset asset = createAsset();
+      asset.setCategory(AssetCategory.PDU);
+      asset.setId(null);
+      assets.add(asset);
+
+      Mockito.doReturn(new ResponseEntity<Void>(HttpStatus.OK)).when(wormholeAPIClient).saveAssets(Mockito.any(Asset.class));
+      Mockito.doReturn("23551d6dacf2432c8a3edbc6bbc922cd").when(nlyteDataService).getAssetIdByResponseEntity(Mockito.any(ResponseEntity.class));
+
+      nlyteDataService.savePduAssetAndUpdatePduUsageFormula(assets);
+   }
+   
    public FlowgateChassisSlot createFlowgateChassisSlot() {
       FlowgateChassisSlot slot = new FlowgateChassisSlot();
       slot.setMountingSide("Back");

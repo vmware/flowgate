@@ -3,11 +3,19 @@ package com.vmware.flowgate.poweriqworker.jobtest;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.flowgate.poweriqworker.model.Inlet;
+import com.vmware.flowgate.poweriqworker.model.InletPoleReading;
+import com.vmware.flowgate.poweriqworker.model.InletReading;
+import com.vmware.flowgate.poweriqworker.model.LocationInfo;
+import com.vmware.flowgate.poweriqworker.model.Outlet;
+import com.vmware.flowgate.poweriqworker.model.OutletReading;
+import com.vmware.flowgate.poweriqworker.model.Reading;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +25,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -248,6 +258,125 @@ public class SyncPduAssetJobTest {
       justficationfields.put(FlowgateConstant.PDU, pduInfoString);
       asset.setJustificationfields(justficationfields);
       return asset;
+   }
+
+   @Test
+   public void testSavePduAssetsToFlowgate() {
+      Map<String, Asset> existedPduAssets = new HashMap<>();
+      Asset asset1 = createAsset();
+      asset1.setId("126134615724572");
+      Asset asset2 = createAsset();
+      asset2.setId("BOQBNBHQOQJAOJQY");
+      existedPduAssets.put(asset1.getId(), asset1);
+      existedPduAssets.put(asset2.getId(), asset2);
+      String assetSource = "UGVINQVNQIGQGQIDNKD";
+      LocationInfo location = null;
+
+      Pdu pdu1 = createPdu();
+      pdu1.setId(126134615724572L);
+      pdu1.setName("pek-wor-pdu-01");
+      Pdu pdu2 = createPdu();
+      pdu2.setId(226134615724572L);
+      pdu2.setName("pek-wor-pdu-02");
+
+      Mockito.doReturn(new ArrayList<>(Arrays.asList(pdu1, pdu2))).when(powerIQAPIClient).getPdus(100,0);
+      Mockito.doReturn(null).when(powerIQAPIClient).getPdus(100,100);
+      Mockito.doReturn(getOutlets()).when(powerIQAPIClient).getOutlets(Mockito.anyLong());
+      Mockito.doReturn(getInlets()).when(powerIQAPIClient).getInlets(Mockito.anyLong());
+      Mockito.doReturn(new ResponseEntity<Void>(HttpStatus.OK)).when(wormholeAPIClient).saveAssets(Mockito.any(Asset.class));
+      Mockito.doReturn("23551d6dacf2432c8a3edbc6bbc922cd").when(powerIQService).getAssetIdByResponseEntity(Mockito.any(ResponseEntity.class));
+
+      boolean triggerPDUAggregation = powerIQService.savePduAssetsToFlowgate(existedPduAssets, assetSource, powerIQAPIClient, location);
+      TestCase.assertTrue(triggerPDUAggregation);
+   }
+
+   Pdu createPdu() {
+      Pdu pdu = new Pdu();
+      pdu.setName("pek-wor-pdu-02");
+      pdu.setPhase("THREE_PHASE");
+      InletReading inletReading = new InletReading();
+      inletReading.setCurrent(1.2);
+      inletReading.setApparentPower(20.0);
+      inletReading.setVoltage(200.0);
+      inletReading.setReadingTime("2018/10/18 05:57:26 +0300");
+      inletReading.setActivePower(26.6);
+      inletReading.setUnutilizedCapacity(15.2);
+      inletReading.setInletId(127);
+      inletReading.setInletOrdinal(1);
+      List<InletReading> inletReadings = new ArrayList<InletReading>();
+      inletReadings.add(inletReading);
+      Reading pduReading = new Reading();
+      pduReading.setInletReadings(inletReadings);
+
+      List<InletPoleReading> inletPoleReadings = new ArrayList<InletPoleReading>();
+      InletPoleReading poleReadingL1 = new InletPoleReading();
+      poleReadingL1.setCurrent(1.62);
+      poleReadingL1.setInletPoleOrdinal(1);
+      poleReadingL1.setInletOrdinal(1);
+      poleReadingL1.setReadingTime("2018/10/18 05:57:26 +0300");
+      poleReadingL1.setUnutilizedCapacity(7.38);
+      poleReadingL1.setVoltage(122.1);
+      InletPoleReading poleReadingL2 = new InletPoleReading();
+      poleReadingL2.setCurrent(3.62);
+      poleReadingL2.setInletPoleOrdinal(2);
+      poleReadingL2.setInletOrdinal(1);
+      poleReadingL2.setReadingTime("2018/10/18 05:57:26 +0300");
+      poleReadingL2.setUnutilizedCapacity(5.38);
+      poleReadingL2.setVoltage(112.1);
+      InletPoleReading poleReadingL3 = new InletPoleReading();
+      poleReadingL3.setCurrent(0.62);
+      poleReadingL3.setInletPoleOrdinal(3);
+      poleReadingL3.setInletOrdinal(1);
+      poleReadingL3.setReadingTime("2018/10/18 05:57:26 +0300");
+      poleReadingL3.setUnutilizedCapacity(8.38);
+      poleReadingL3.setVoltage(102.1);
+      inletPoleReadings.add(poleReadingL1);
+      inletPoleReadings.add(poleReadingL2);
+      inletPoleReadings.add(poleReadingL3);
+      pduReading.setInletPoleReadings(inletPoleReadings);
+      pdu.setReading(pduReading);
+      return pdu;
+   }
+
+   List<Outlet> getOutlets() {
+      Outlet outlet = new Outlet();
+      List<Outlet> outlets = new ArrayList<Outlet>();
+      outlet.setId(12L);
+      outlet.setName("Outlet1");
+      outlet.setOrdinal(1L);
+      outlet.setPduId(128L);
+      outlet.setRatedAmps(10.2);
+      OutletReading reading = new OutletReading();
+      reading.setCurrent(24.2);
+      reading.setApparentPower(29.0);
+      reading.setVoltage(200.0);
+      reading.setReadingTime("2018/10/18 05:57:26 +0300");
+      reading.setActivePower(27.6);
+      reading.setUnutilizedCapacity(15.2);
+      outlet.setReading(reading);
+      outlets.add(outlet);
+      return outlets;
+   }
+
+   List<Inlet> getInlets() {
+      Inlet inlet = new Inlet();
+      List<Inlet> inlets = new ArrayList<Inlet>();
+      inlet.setId(23L);
+      inlet.setOrdinal(1);
+      inlet.setPduId(128L);
+      inlet.setPueIt(true);
+      inlet.setPueTotal(true);
+      inlet.setSource(true);
+      InletReading inletReading = new InletReading();
+      inletReading.setCurrent(1.2);
+      inletReading.setApparentPower(20.0);
+      inletReading.setVoltage(200.0);
+      inletReading.setReadingTime("2018/10/18 05:57:26 +0300");
+      inletReading.setActivePower(26.6);
+      inletReading.setUnutilizedCapacity(15.2);
+      inlet.setReading(inletReading);
+      inlets.add(inlet);
+      return inlets;
    }
 
 }

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -497,7 +498,7 @@ public class NlyteDataService implements AsyncService {
       if(pDUsNeedToSaveOrUpdate.isEmpty()) {
          logger.info("No pdu asset need to save");
       }else {
-         restClient.saveAssets(pDUsNeedToSaveOrUpdate);
+         savePduAssetAndUpdatePduUsageFormula(pDUsNeedToSaveOrUpdate);
          logger.info("Finish sync the pdus data for: " + nlyte.getName()+", size: "+pDUsNeedToSaveOrUpdate.size());
       }
 
@@ -519,6 +520,33 @@ public class NlyteDataService implements AsyncService {
          logger.info("Finish sync the networks data for: " + nlyte.getName()+", size: "+networkersNeedToSaveOrUpdate.size());
       }
 
+   }
+
+   public void savePduAssetAndUpdatePduUsageFormula(List<Asset> pduList) {
+      for (Asset pdu : pduList) {
+         // save asset
+         ResponseEntity<Void> responseEntity = restClient.saveAssets(pdu);
+         if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            String pduId = getAssetIdByResponseEntity(responseEntity);
+            pdu.setId(pduId);
+            if (pdu.getMetricsformulars().get(FlowgateConstant.PDU) == null) {
+               Map<String, String> pduMetricsFormulas = new HashMap<>(1);
+               Map<String, String> pduUsageMetricsFormulas = new HashMap<>(3);
+               pduUsageMetricsFormulas.put(MetricName.PDU_CURRENT, pduId);
+               pduUsageMetricsFormulas.put(MetricName.PDU_TOTAL_POWER, pduId);
+               pduUsageMetricsFormulas.put(MetricName.PDU_VOLTAGE, pduId);
+               pduMetricsFormulas.put(FlowgateConstant.PDU, pdu.metricsFormulaToString(pduUsageMetricsFormulas));
+               pdu.setMetricsformulars(pduMetricsFormulas);
+               // save asset formula
+               restClient.saveAssets(pdu);
+            }
+         }
+      }
+   }
+
+   public String getAssetIdByResponseEntity(ResponseEntity<Void> ResponseEntity) {
+      String uriPath = ResponseEntity.getHeaders().getLocation().getPath();
+      return uriPath.substring(uriPath.lastIndexOf("/") + 1);
    }
 
    public HashMap<Long,String> generateMountedAssetNumberAndChassisAssetIdMap(List<Asset> chassisFromFlowgate){

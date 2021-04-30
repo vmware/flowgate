@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -622,9 +623,8 @@ public class PowerIQService implements AsyncService {
             for(Asset asset : newAssetsNeedToSave) {
                ResponseEntity<Void> res = restClient.saveAssets(asset);
                if(res.getStatusCode().is2xxSuccessful()) {
-                  String uriPath = res.getHeaders().getLocation().getPath();
-                  String id = uriPath.substring(uriPath.lastIndexOf("/") + 1);
-                  asset.setId(id);
+                  String assetId = getAssetIdByResponseEntity(res);
+                  asset.setId(assetId);
                   sensorAlreadySaved.add(asset);
                }
             }
@@ -633,6 +633,11 @@ public class PowerIQService implements AsyncService {
          }
          offset += limit;
       }
+   }
+
+   public String getAssetIdByResponseEntity(ResponseEntity<Void> ResponseEntity) {
+      String uriPath = ResponseEntity.getHeaders().getLocation().getPath();
+      return uriPath.substring(uriPath.lastIndexOf("/") + 1);
    }
 
    public Set<Asset> updatePduMetricformular(List<Asset> sensorAssets, Map<String,Asset> pduIdAndAssetMap) {
@@ -1811,9 +1816,19 @@ public class PowerIQService implements AsyncService {
             Map<String,String> pduInfo = generatePduRateInfoMap(pdu);
             Asset existedPduAsset = existedPduAssets.get(String.valueOf(pdu.getId()));
             if(existedPduAsset != null) {
-               existedPduAsset.setAssetName(pdu.getName());
+               boolean isAddAssetsNeedToSave = false;
+
                existedPduAsset.setLastupdate(System.currentTimeMillis());
-               existedPduAsset.setSerialnumber(pdu.getSerialNumber());
+               if (!StringUtils.equals(existedPduAsset.getAssetName(), pdu.getName())) {
+                  existedPduAsset.setAssetName(pdu.getName());
+                  isAddAssetsNeedToSave = true;
+               }
+
+               if (StringUtils.isBlank(existedPduAsset.getSerialnumber())) {
+                  existedPduAsset.setSerialnumber(pdu.getSerialNumber());
+                  isAddAssetsNeedToSave = true;
+               }
+
                HashMap<String,String> oldJustficationfields = existedPduAsset.getJustificationfields();
                String oldPduInfo = oldJustficationfields.get(FlowgateConstant.PDU);
                Map<String,String> oldPduMap = null;
@@ -1823,18 +1838,40 @@ public class PowerIQService implements AsyncService {
                   logger.error("Sync pdu metadata error",e.getCause());
                   continue;
                }
-               if(outletString != null) {
+               if(outletString != null && !StringUtils.equals(oldPduMap.get(FlowgateConstant.PDU_OUTLETS_FROM_POWERIQ), outletString)) {
                   oldPduMap.put(FlowgateConstant.PDU_OUTLETS_FROM_POWERIQ, outletString);
+                  isAddAssetsNeedToSave = true;
                }
-               if(inlets != null) {
+               if(inlets != null && !StringUtils.equals(oldPduMap.get(FlowgateConstant.PDU_INLETS_FROM_POWERIQ), inletString)) {
                   oldPduMap.put(FlowgateConstant.PDU_INLETS_FROM_POWERIQ, inletString);
+                  isAddAssetsNeedToSave = true;
                }
-               oldPduMap.put(FlowgateConstant.PDU_RATE_AMPS, pduInfo.get(FlowgateConstant.PDU_RATE_AMPS));
-               oldPduMap.put(FlowgateConstant.PDU_MIN_RATE_POWER, pduInfo.get(FlowgateConstant.PDU_MIN_RATE_POWER));
-               oldPduMap.put(FlowgateConstant.PDU_MAX_RATE_POWER, pduInfo.get(FlowgateConstant.PDU_MAX_RATE_POWER));
-               oldPduMap.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, pduInfo.get(FlowgateConstant.PDU_MIN_RATE_VOLTS));
-               oldPduMap.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, pduInfo.get(FlowgateConstant.PDU_MAX_RATE_VOLTS));
-               oldPduMap.put(FlowgateConstant.PDU_PHASE, pduInfo.get(FlowgateConstant.PDU_PHASE));
+
+               if (StringUtils.isBlank(oldPduMap.get(FlowgateConstant.PDU_RATE_AMPS))) {
+                  oldPduMap.put(FlowgateConstant.PDU_RATE_AMPS, pduInfo.get(FlowgateConstant.PDU_RATE_AMPS));
+                  isAddAssetsNeedToSave = true;
+               }
+               if (StringUtils.isBlank(oldPduMap.get(FlowgateConstant.PDU_MIN_RATE_POWER))) {
+                  oldPduMap.put(FlowgateConstant.PDU_MIN_RATE_POWER, pduInfo.get(FlowgateConstant.PDU_MIN_RATE_POWER));
+                  isAddAssetsNeedToSave = true;
+               }
+               if (StringUtils.isBlank(oldPduMap.get(FlowgateConstant.PDU_MAX_RATE_POWER))) {
+                  oldPduMap.put(FlowgateConstant.PDU_MAX_RATE_POWER, pduInfo.get(FlowgateConstant.PDU_MAX_RATE_POWER));
+                  isAddAssetsNeedToSave = true;
+               }
+               if (StringUtils.isBlank(oldPduMap.get(FlowgateConstant.PDU_MIN_RATE_VOLTS))) {
+                  oldPduMap.put(FlowgateConstant.PDU_MIN_RATE_VOLTS, pduInfo.get(FlowgateConstant.PDU_MIN_RATE_VOLTS));
+                  isAddAssetsNeedToSave = true;
+               }
+               if (StringUtils.isBlank(oldPduMap.get(FlowgateConstant.PDU_MAX_RATE_VOLTS))) {
+                  oldPduMap.put(FlowgateConstant.PDU_MAX_RATE_VOLTS, pduInfo.get(FlowgateConstant.PDU_MAX_RATE_VOLTS));
+                  isAddAssetsNeedToSave = true;
+               }
+               if (StringUtils.isBlank(oldPduMap.get(FlowgateConstant.PDU_PHASE))) {
+                  oldPduMap.put(FlowgateConstant.PDU_PHASE, pduInfo.get(FlowgateConstant.PDU_PHASE));
+                  isAddAssetsNeedToSave = true;
+               }
+
                try {
                   String newPduInfo = mapper.writeValueAsString(oldPduMap);
                   oldJustficationfields.put(FlowgateConstant.PDU, newPduInfo);
@@ -1844,15 +1881,25 @@ public class PowerIQService implements AsyncService {
                }
                String assetSources[] = existedPduAsset.getAssetSource().split(FlowgateConstant.SPILIT_FLAG);
                if(assetSources.length == 1) { //So far this asset source is only have powerIQ
-                  existedPduAsset.setRow(asset.getRow());
-                  existedPduAsset.setRoom(asset.getRoom());
-                  existedPduAsset.setFloor(asset.getFloor());
-                  existedPduAsset.setCity(asset.getCity());
-                  existedPduAsset.setCountry(asset.getCountry());
-                  existedPduAsset.setExtraLocation(asset.getExtraLocation());
+                  if (!StringUtils.equals(existedPduAsset.getRow(), asset.getRow()) ||
+                           !StringUtils.equals(existedPduAsset.getRoom(), asset.getRoom()) ||
+                           !StringUtils.equals(existedPduAsset.getFloor(), asset.getFloor()) ||
+                           !StringUtils.equals(existedPduAsset.getCity(), asset.getCity()) ||
+                           !StringUtils.equals(existedPduAsset.getCountry(), asset.getCountry()) ||
+                           !StringUtils.equals(existedPduAsset.getExtraLocation(), asset.getExtraLocation())) {
+                     existedPduAsset.setRow(asset.getRow());
+                     existedPduAsset.setRoom(asset.getRoom());
+                     existedPduAsset.setFloor(asset.getFloor());
+                     existedPduAsset.setCity(asset.getCity());
+                     existedPduAsset.setCountry(asset.getCountry());
+                     existedPduAsset.setExtraLocation(asset.getExtraLocation());
+                     isAddAssetsNeedToSave = true;
+                  }
                }
                //save
-               assetsNeedToSave.add(existedPduAsset);
+               if (isAddAssetsNeedToSave) {
+                  assetsNeedToSave.add(existedPduAsset);
+               }
             }else {
                asset.setAssetName(pdu.getName());
                asset.setSerialnumber(pdu.getSerialNumber());
@@ -1877,15 +1924,43 @@ public class PowerIQService implements AsyncService {
                   justfacationfields.put(FlowgateConstant.PDU, pduInfoString);
                   asset.setJustificationfields(justfacationfields);
                }
-               //save
-               assetsNeedToSave.add(asset);
+               // save asset
+               ResponseEntity<Void> responseEntity = restClient.saveAssets(asset);
+               if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                  String assetId = getAssetIdByResponseEntity(responseEntity);
+                  asset.setId(assetId);
+                  Map<String, String> metricsFormulas = new HashMap<>(1);
+                  metricsFormulas.put(FlowgateConstant.PDU, asset.metricsFormulaToString(generatePredefinedMetricFormulas(assetId)));
+                  asset.setMetricsformulars(metricsFormulas);
+                  // save asset formulas
+                  restClient.saveAssets(asset);
+               }
                triggerPDUAggregation = true;
             }
          }
-         restClient.saveAssets(assetsNeedToSave);
+         if (assetsNeedToSave.size() > 0) {
+            restClient.saveAssets(assetsNeedToSave);
+         }
          offset += limit;
       }
       return triggerPDUAggregation;
+   }
+
+   private Map<String,String> generatePredefinedMetricFormulas(String pduId) {
+      Map<String, String> pduFormulaMap = new HashMap<>();
+      pduFormulaMap.put(MetricName.PDU_CURRENT, pduId);
+      pduFormulaMap.put(MetricName.PDU_TOTAL_POWER, pduId);
+      pduFormulaMap.put(MetricName.PDU_CURRENT_LOAD, pduId);
+      pduFormulaMap.put(MetricName.PDU_POWER_LOAD, pduId);
+      pduFormulaMap.put(MetricName.PDU_XLET_ACTIVE_POWER, pduId);
+      pduFormulaMap.put(MetricName.PDU_XLET_APPARENT_POWER, pduId);
+      pduFormulaMap.put(MetricName.PDU_XLET_FREE_CAPACITY, pduId);
+      pduFormulaMap.put(MetricName.PDU_XLET_CURRENT, pduId);
+      pduFormulaMap.put(MetricName.PDU_XLET_VOLTAGE, pduId);
+      pduFormulaMap.put(MetricName.PDU_INLET_XPOLE_FREE_CAPACITY, pduId);
+      pduFormulaMap.put(MetricName.PDU_INLET_XPOLE_CURRENT, pduId);
+      pduFormulaMap.put(MetricName.PDU_INLET_XPOLE_VOLTAGE, pduId);
+      return pduFormulaMap;
    }
 
    public Map<String,String> getInfoMap(String info) throws IOException{
