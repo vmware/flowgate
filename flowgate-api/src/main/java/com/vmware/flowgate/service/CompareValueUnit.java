@@ -16,6 +16,10 @@ public class CompareValueUnit implements Comparator<ValueUnit>{
          long valueUnit2StartTime = Long.parseLong(v2.getExtraidentifier());
          if(valueUnit1StartTime < valueUnit2StartTime) {
             return 1;
+         }else if(valueUnit1StartTime > valueUnit2StartTime){
+            return -1;
+         }else {
+            return 0;
          }
       }
       return -1;

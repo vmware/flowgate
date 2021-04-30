@@ -554,6 +554,32 @@ include::{snippets}/assets-getAssetMetricsData-Server-example/curl-request.adoc[
 
 include::{snippets}/assets-getAssetMetricsData-Server-example/response-fields.adoc[]
 
+[[resources-assets-getAllMetricsDataInDuration]]
+=== getAssetMetricsData
+
+A `GET` request is used to get asset metrics Data By AssetId.
+
+The API will return all metric datas which are created in this time period about this asset.
+Currently we only support obtaining data within one hour.
+For example startTime is 1302663085000l, duration is 300000, you will get all metrics data 
+which are created between 1302663085000l and 1302663085000l+300000.
+
+==== Request structure
+
+include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/http-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/http-response.adoc[]
+
+==== CURL request
+
+include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/curl-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/response-fields.adoc[]
+
 [[resources-assets-removeRealTimeData]]
 === removeRealTimeData
 
