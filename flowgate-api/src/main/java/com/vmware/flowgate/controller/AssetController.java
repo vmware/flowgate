@@ -352,6 +352,7 @@ public class AssetController {
       realtimeDataRepository.save(data);
    }
 
+   @Deprecated
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/pdu/{id}/realtimedata", method = RequestMethod.GET)
    public List<MetricData> getPduMetricsData(@PathVariable("id") String assetID,
@@ -367,6 +368,7 @@ public class AssetController {
    }
 
    //starttime miliseconds.
+   @Deprecated
    @RequestMapping(value = "/server/{id}/realtimedata", method = RequestMethod.GET)
    public List<MetricData> getServerMetricsData(@PathVariable("id") String assetID,
          @RequestParam(value = "starttime", required = false) Long starttime,
@@ -392,23 +394,6 @@ public class AssetController {
          duration = FIVE_MINUTES;
       }
       return assetService.getAssetMetricsDataById(assetID, starttime, duration);
-   }
-
-   private RealTimeData getMostClostData(List<RealTimeData> datas, long time) {
-      RealTimeData lastData = datas.get(0);
-      for (RealTimeData data : datas) {
-         if (data.getTime() < time) {
-            lastData = data;
-            continue;
-         } else if (data.getTime() > time) {
-            if ((data.getTime() - time) < (time - lastData.getTime())) {
-               return data;
-            }
-            return lastData;
-         }
-         return data;
-      }
-      return lastData;
    }
 
    @ResponseStatus(HttpStatus.CREATED)
