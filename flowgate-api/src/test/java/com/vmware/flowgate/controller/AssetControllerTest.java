@@ -2777,13 +2777,19 @@ public class AssetControllerTest {
       asset.setJustificationfields(justificationfields);
       asset = assetRepository.save(asset);
 
-
       MvcResult result1 = this.mockMvc
                .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
-                        String.valueOf(startTime)).param("duration", String.valueOf(duration)))
-               .andDo(document("assets-getAssetMetricsData-Server-example",
+                        String.valueOf(startTime)).param("duration", String.valueOf(duration))
+                        .content("{\"startTime\":"+startTime+",\"duration\":"+duration+"}"))
+               .andDo(document("assets-getLatestAssetMetricsData-Server-example",
                         responseFields(fieldWithPath("[]").description("An array of realTimeDatas"))
-                                 .andWithPrefix("[].", fieldpath)))
+                                 .andWithPrefix("[].", fieldpath),
+                        requestFields(
+                                 fieldWithPath("startTime").type(Long.class)
+                                          .description("Start time.Default value: the system current time in Millis").optional(),
+                                 fieldWithPath("duration").type(Integer.class)
+                                          .description("This parameter indicates how long the latest data can be obtained. Default value: 305000. Max value: 7320000").optional())
+               ))
                .andReturn();
       String res = result1.getResponse().getContentAsString();
       MetricData [] datas = mapper.readValue(res, MetricData[].class);

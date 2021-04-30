@@ -533,26 +533,26 @@ include::{snippets}/assets-getPduMetricsData-example/curl-request.adoc[]
 
 include::{snippets}/assets-getPduMetricsData-example/response-fields.adoc[]
 
-[[resources-assets-getAssetMetricsData]]
-=== getAssetMetricsData
+[[resources-assets-getLatestAssetMetricsData]]
+=== getLatestAssetMetricsData
 
-A `GET` request is used to get asset metrics Data By AssetId.
+A `GET` request is used to obtain the latest indicator data within the current time through AssetId.
 
 ==== Request structure
 
-include::{snippets}/assets-getAssetMetricsData-Server-example/http-request.adoc[]
+include::{snippets}/assets-getLatestAssetMetricsData-Server-example/http-request.adoc[]
 
 ==== Example response
 
-include::{snippets}/assets-getAssetMetricsData-Server-example/http-response.adoc[]
+include::{snippets}/assets-getLatestAssetMetricsData-Server-example/http-response.adoc[]
 
 ==== CURL request
 
-include::{snippets}/assets-getAssetMetricsData-Server-example/curl-request.adoc[]
+include::{snippets}/assets-getLatestAssetMetricsData-Server-example/curl-request.adoc[]
 
 ==== Response Fields
 
-include::{snippets}/assets-getAssetMetricsData-Server-example/response-fields.adoc[]
+include::{snippets}/assets-getLatestAssetMetricsData-Server-example/response-fields.adoc[]
 
 [[resources-assets-getAllMetricsDataInDuration]]
 === getAssetMetricsData

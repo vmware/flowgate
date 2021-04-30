@@ -384,7 +384,7 @@ public class AssetController {
 
    @ResponseStatus(HttpStatus.OK)
    @RequestMapping(value = "/{id}/realtimedata", method = RequestMethod.GET)
-   public List<MetricData> getAssetMetricsData(@PathVariable("id") String assetID,
+   public List<MetricData> getLatestAssetMetricsData(@PathVariable("id") String assetID,
                                           @RequestParam(value = "starttime", required = false) Long starttime,
                                           @RequestParam(value = "duration", required = false) Integer duration) {
       if (starttime == null || starttime <= 0) {
