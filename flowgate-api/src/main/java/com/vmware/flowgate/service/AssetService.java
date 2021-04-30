@@ -1094,6 +1094,7 @@ public class AssetService {
          //2. Remove or filter
          List<ValueUnit> serverHostUsageValueUnits = assetAndValueUnitsMap.get(assetID);
          removeServerUnusedMetrics(serverHostUsageValueUnits);
+         filterServerEneryConsumptionMetrics(serverHostUsageValueUnits, starttime);
          //3. Translate
          return translateToMetricDataForServer(assetAndValueUnitsMap, asset);
       default:
@@ -1801,7 +1802,7 @@ public class AssetService {
     * @param duration
     * @return
     */
-   public List<ValueUnit> getServerEnergyConsumption(List<ValueUnit> valueUnits, long startTime){
+   public List<ValueUnit> filterServerEnergyConsumption(List<ValueUnit> valueUnits, long startTime){
       if(valueUnits == null || valueUnits.isEmpty()) {
          return null;
       }
@@ -1882,5 +1883,23 @@ public class AssetService {
             ite.remove();
          }
       }
+
+   }
+
+   private void filterServerEneryConsumptionMetrics(List<ValueUnit> valueUnits, long startTime) {
+      Iterator<ValueUnit> ite = valueUnits.iterator();
+      List<ValueUnit> eneryConsumptions = new ArrayList<ValueUnit>();
+      while (ite.hasNext()) {
+         ValueUnit valueUnit = ite.next();
+         if(MetricName.SERVER_ENERGY_CONSUMPTION.equals(valueUnit.getKey())) {
+            eneryConsumptions.add(valueUnit);
+            ite.remove();
+         }
+      }
+      if(eneryConsumptions.isEmpty()) {
+         return;
+      }
+      eneryConsumptions = filterServerEnergyConsumption(eneryConsumptions, startTime);
+      valueUnits.addAll(eneryConsumptions);
    }
 }

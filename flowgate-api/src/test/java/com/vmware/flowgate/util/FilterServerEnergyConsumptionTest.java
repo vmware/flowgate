@@ -40,7 +40,7 @@ public class FilterServerEnergyConsumptionTest {
       valueUnit.setUnit(MetricUnit.kWh.name());
       valueUnit.setValueNum(65633);
       valueUnits.add(valueUnit);
-      List<ValueUnit> results =  assetService.getServerEnergyConsumption(valueUnits, time);
+      List<ValueUnit> results =  assetService.filterServerEnergyConsumption(valueUnits, time);
       TestCase.assertEquals(15, results.size());
       DecimalFormat df = new DecimalFormat("#.0000");
       for(ValueUnit valueunit : results) {
@@ -81,16 +81,19 @@ public class FilterServerEnergyConsumptionTest {
       }
    }
 
+   /**
+    * We want to cover the combination with the longest time in a specified time period.
+    * If the coverage time is the same, take the combination with the least number of combinations
+    */
    @Test
    public void testFilterServerEnergyConsumption1() {
       long time = System.currentTimeMillis();
       int duration = 30*60*1000;
       int vcduration = 30*60*1000;
-      //The vc-worker miss 10 min datas
       List<ValueUnit> valueUnits = getValueUnitsFromVC(time, vcduration);
       valueUnits.addAll(getValueUnitsFromOpenmanage(time, duration));
       //Sample value of Openmanage SERVER_ENERGY_CONSUMPTION metric
-      List<ValueUnit> results =  assetService.getServerEnergyConsumption(valueUnits, 1618204305000l);
+      List<ValueUnit> results =  assetService.filterServerEnergyConsumption(valueUnits, 1618204305000l);
       TestCase.assertEquals(1, results.size());
       for(ValueUnit value : results) {
          TestCase.assertEquals(60.0 ,value.getValueNum());
@@ -105,11 +108,29 @@ public class FilterServerEnergyConsumptionTest {
       //The vc-worker miss 10 min datas
       List<ValueUnit> valueUnits = getValueUnitsFromVC(time, vcduration);
       valueUnits.addAll(getValueUnitsFromOpenmanage(time, duration));
-      List<ValueUnit> results =  assetService.getServerEnergyConsumption(valueUnits, 1618204305000l);
+      List<ValueUnit> results =  assetService.filterServerEnergyConsumption(valueUnits, 1618204305000l);
       TestCase.assertEquals(1, results.size());
       for(ValueUnit value : results) {
          TestCase.assertEquals(60.0 ,value.getValueNum());
       }
+   }
+
+   @Test
+   public void testFilterServerEnergyConsumption3() {
+      long time = System.currentTimeMillis();
+      //The openmanage-worker miss 10 min datas
+      int openmanageDuration = 20*60*1000;//only have 4 value in the duration
+      int vcduration = 30*60*1000;//hava 90 values in the duration
+      //The max coverage time is vcduration, so the all vc datas(90 values) meet it
+      //but we have another combination, it's coverage time is also vcduration,
+      //the combination size is 31,the combination include one openmanage data and 30 vc datas
+      //Because the fourth data'coverage time of openmanage is same with the the sum of the vc first sixty data
+      //Finally, we use the least number of combinations
+      List<ValueUnit> valueUnits = getValueUnitsFromVC(time, vcduration);
+      valueUnits.addAll(getValueUnitsFromOpenmanage(time, openmanageDuration));
+      List<ValueUnit> results =  assetService.filterServerEnergyConsumption(valueUnits, 1618204305000l);
+      TestCase.assertEquals(31, results.size());
+      TestCase.assertEquals(40.0 ,results.get(0).getValueNum());
    }
 
    List<ValueUnit> getValueUnitsFromVC(long time, int duration){
@@ -134,22 +155,29 @@ public class FilterServerEnergyConsumptionTest {
       return valueUnits;
    }
 
-   List<ValueUnit> getValueUnitsFromOpenmanage(long time, int duration){
+   /**
+    *
+    * @param time
+    * @param duration
+    * @return
+    */
+   List<ValueUnit> getValueUnitsFromOpenmanage(long startTime, int duration){
       //Sample values of Openmanage SERVER_ENERGY_CONSUMPTION metric
       List<ValueUnit> valueUnits = new ArrayList<>();
       ValueUnit valueUnit;
-      int oneValuePerTime = 1000*5*60;
+      int oneValuePerTime = 1000*5*60;//Every 5 min create a SERVER_ENERGY_CONSUMPTION
       int interval = duration/oneValuePerTime;
       double[] energyValues = new double[interval];
       for(int i = 0; i< interval; i++) {
          energyValues[i] = 10*(i+1);
       }
       for (int i = 0; i < interval; i++) {
-         long tempTime = time + ((i + 1) * oneValuePerTime);
+         long tempTime = startTime + ((i + 1) * oneValuePerTime);
          valueUnit = new ValueUnit();
          valueUnit.setTime(tempTime);
          valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
-         valueUnit.setExtraidentifier(String.valueOf(time));
+         //The startTime of SERVER_ENERGY_CONSUMPTION value from Openmanage is not change
+         valueUnit.setExtraidentifier(String.valueOf(startTime));
          valueUnit.setUnit(MetricUnit.kWh.name());
          valueUnit.setValueNum(energyValues[i]);
          valueUnits.add(valueUnit);
