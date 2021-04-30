@@ -7,12 +7,14 @@ package com.vmware.flowgate.poweriqworker.jobtest;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.flowgate.poweriqworker.model.LocationInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -399,6 +401,44 @@ public class SyncSensorMetaDataJobTest {
       }
 
       TestCase.assertEquals(FlowgateConstant.DEFAULT_CABINET_UNIT_POSITION,powerIQService.getSensorPositionInfo(asset6));
+   }
+
+   @Test
+   public void testSaveSensorAssetsToFlowgate() {
+      Map<String, Asset> exsitingSensorAssets = new HashMap<>();
+      Asset asset1 = createAsset();
+      asset1.setId("18672301765107L");
+      Asset asset2 = createAsset();
+      asset2.setId("BOQBNBHQOQJAOJQY");
+      exsitingSensorAssets.put(asset1.getId(), asset1);
+      exsitingSensorAssets.put(asset2.getId(), asset2);
+
+      String assetSource = "UGVINQVNQIGQGQIDNKD";
+      LocationInfo location = new LocationInfo();
+
+      Sensor sensor1 = createSensor();
+      sensor1.setId(18672301765107L);
+      sensor1.setName("sensor-1");
+      sensor1.setType("TemperatureSensor");
+      Sensor sensor2 = createSensor();
+      sensor2.setId(81675117203607L);
+      sensor2.setName("sensor-2");
+      sensor2.setType("HumiditySensor");
+      Sensor sensor3 = createSensor();
+      sensor3.setId(61675386203607L);
+      sensor3.setName("sensor-3");
+      sensor3.setType("TemperatureSensor");
+      Sensor sensor4 = createSensor();
+      sensor4.setId(38661675203607L);
+      sensor4.setName("sensor-4");
+      sensor4.setType("AirFlowSensor");
+
+      Mockito.doReturn(new ArrayList<>()).when(wormholeAPIClient).getAllAssetsBySourceAndType(Mockito.anyString(), Mockito.any());
+      Mockito.doReturn(new ArrayList<>(Arrays.asList(sensor1, sensor2, sensor3, sensor4))).when(powerIQAPIClient).getSensors(100, 0);
+      Mockito.doReturn(null).when(powerIQAPIClient).getSensors(100, 1);
+      Mockito.doReturn(new ResponseEntity<Void>(HttpStatus.OK)).when(wormholeAPIClient).saveAssets(Mockito.any(Asset.class));
+      Mockito.doReturn("32c1d6dacf248a23553edbc6bbc922cd").when(powerIQService).getAssetIdByResponseEntity(Mockito.any(ResponseEntity.class));
+      powerIQService.saveSensorAssetsToFlowgate(exsitingSensorAssets, powerIQAPIClient, assetSource, location);
    }
 
    HashMap<AdvanceSettingType, String> createAdvanceSettingMap() {
