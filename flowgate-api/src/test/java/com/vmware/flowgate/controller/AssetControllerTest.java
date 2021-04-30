@@ -3333,13 +3333,18 @@ public class AssetControllerTest {
       justificationfields.put(FlowgateConstant.PDU_PORT_FOR_SERVER, "power-2_FIELDSPLIT_CAN1-MDF-R01-PDU-BUILDING_FIELDSPLIT_OUTLET:1_FIELDSPLIT_0001bdc8b25d4c2badfd045ab61aabfa");
       asset.setJustificationfields(justificationfields);
       asset = assetRepository.save(asset);
-
       MvcResult result = this.mockMvc
             .perform(get("/v1/assets/" + asset.getId() + "/metrics").param("starttime",
-                     String.valueOf(startTime)).param("duration", String.valueOf(duration)))
+                     String.valueOf(startTime)).param("duration", String.valueOf(duration))
+                  .content("{\"startTime\":"+startTime+",\"duration\":"+duration+"}"))
             .andDo(document("assets-getAllMetricsDataInDuration-Server-example",
-                     responseFields(fieldWithPath("[]").description("An array of metricDatas"))
-                              .andWithPrefix("[].", fieldpath)))
+                   responseFields(fieldWithPath("[]").description("An array of metricDatas"))
+                              .andWithPrefix("[].", fieldpath),
+                   requestFields(
+                     fieldWithPath("startTime").type(Long.class)
+                     .description("Start time.Default value: the system current time in Millis").optional(),
+                     fieldWithPath("duration").type(Integer.class)
+                     .description("This parameter indicates how long data can be obtained.Default value: 305000").optional())))
             .andReturn();
       String res = result.getResponse().getContentAsString();
       MetricData [] metricDatas = mapper.readValue(res, MetricData[].class);
