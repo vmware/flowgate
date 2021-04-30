@@ -2886,45 +2886,53 @@ public class AssetControllerTest {
 
    @Test
    public void testRealtimedataOtherExample() throws Exception {
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-               fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
-               fieldWithPath("valueNum").description("valueNum.").type(JsonFieldType.NUMBER),
-               fieldWithPath("value").description("value").type(JsonFieldType.NULL),
-               fieldWithPath("unit").description("metric unit").type(JsonFieldType.STRING),
-               fieldWithPath("timeStamp").description("timeStamp").type(JsonFieldType.NUMBER) };
-
+      Asset sensor = createSensor();
+      assetRepository.save(sensor);
+      String sensorId = sensor.getId();
+      long time = System.currentTimeMillis();
+      int duration = 30*60*1000;
+      long startTime = time - duration;
       List<RealTimeData> realTimeDatas = new ArrayList<>();
-      long currentTime = System.currentTimeMillis();
-      RealTimeData sensorRealTimeData = createSensorRealtimeData(currentTime);
-      sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
-      realTimeDatas.add(sensorRealTimeData);
+      RealTimeData tempRealTimeData = createTemperatureSensorRealtimeData(startTime, sensorId);
+      realTimeDatas.add(tempRealTimeData);
+
+      List<ValueUnit> valueunits = new ArrayList<ValueUnit>();
+      ValueUnit tempValue = new ValueUnit();
+      tempValue.setValueNum(25);
+      tempValue.setTime(startTime + 5*60*1000);
+      tempValue.setUnit(MetricUnit.C.toString());
+      tempValue.setKey(MetricName.TEMPERATURE);
+      valueunits.add(tempValue);
+
+      RealTimeData realTimeData = new RealTimeData();
+      realTimeData.setId(UUID.randomUUID().toString());
+      realTimeData.setAssetID(sensorId);
+      realTimeData.setValues(valueunits);
+      realTimeData.setTime(startTime + 5*60*1000);
+      realTimeDatas.add(realTimeData);
+
       realtimeDataRepository.saveAll(realTimeDatas);
 
-      Asset asset = createAsset();
-      asset.setId("00027ca37b004a9890d1bf20349d5ac1");
-      asset.setCategory(AssetCategory.Sensors);
-      asset = assetRepository.save(asset);
-
       MvcResult result1 = this.mockMvc
-               .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime",
-                        String.valueOf(currentTime)).param("duration", "300000"))
+               .perform(get("/v1/assets/" + sensor.getId() + "/realtimedata").param("starttime",
+                        String.valueOf(startTime)).param("duration", String.valueOf(duration)))
                .andReturn();
       String res = result1.getResponse().getContentAsString();
-      MetricData [] datas = mapper.readValue(res, MetricData[].class);
+      MetricData [] metricDatas = mapper.readValue(res, MetricData[].class);
+      TestCase.assertEquals(1, metricDatas.length);
       try {
-         for(MetricData metricData : datas) {
-            String metricName = metricData.getMetricName();
-            if (metricName.equals(MetricName.TEMPERATURE)) {
-               TestCase.assertEquals(32.0, metricData.getValueNum());
-            } else if(metricName.equals(MetricName.HUMIDITY)) {
-               TestCase.assertEquals(20.0, metricData.getValueNum());
+         for(MetricData sensordata : metricDatas) {
+            long metricTime = sensordata.getTimeStamp();
+            if(metricTime == startTime + 5*60*1000) {
+               TestCase.assertEquals(25.0, sensordata.getValueNum());
             } else {
                TestCase.fail();
             }
          }
       } finally {
-         assetRepository.deleteById(asset.getId());
-         realtimeDataRepository.deleteById(sensorRealTimeData.getId());
+         assetRepository.deleteById(sensorId);
+         realtimeDataRepository.deleteById(tempRealTimeData.getId());
+         realtimeDataRepository.deleteById(realTimeData.getId());
       }
    }
 
@@ -2940,7 +2948,7 @@ public class AssetControllerTest {
       long currentTime = System.currentTimeMillis();
       RealTimeData sensorRealTimeData = createSensorRealtimeData(currentTime);
       sensorRealTimeData.setAssetID("00027ca37b004a9890d1bf20349d5ac1");
-      sensorRealTimeData.setValues(null);
+      sensorRealTimeData.setValues(new ArrayList<>());
       realTimeDatas.add(sensorRealTimeData);
       realtimeDataRepository.saveAll(realTimeDatas);
 
@@ -2968,6 +2976,12 @@ public class AssetControllerTest {
          asset.setCategory(AssetCategory.Server);
          asset = assetRepository.save(asset);
          MvcResult result3 = this.mockMvc
+                  .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime", String.valueOf(currentTime + 30000000)).param("duration", "1"))
+                  .andExpect(status().isOk())
+                  .andReturn();
+         asset.setCategory(AssetCategory.PDU);
+         asset = assetRepository.save(asset);
+         MvcResult result4 = this.mockMvc
                   .perform(get("/v1/assets/" + asset.getId() + "/realtimedata").param("starttime", String.valueOf(currentTime + 30000000)).param("duration", "1"))
                   .andExpect(status().isOk())
                   .andReturn();

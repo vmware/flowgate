@@ -407,8 +407,14 @@ public class AssetService {
          assetAndValueUnitsMap = findLatestMetricDataByAssetValueUnitMap(assetAndValueUnitsMap);
          //3. Translate
          return translateToMetricDataForServer(assetAndValueUnitsMap, asset);
+      } else {
+         assetAndValueUnitsMap = getRawMetrics(asset, starttime, duration);
+         if (assetAndValueUnitsMap.isEmpty()) {
+            return new ArrayList<>();
+         }
+         assetAndValueUnitsMap = findLatestMetricDataByAssetValueUnitMap(assetAndValueUnitsMap);
+         return translateToMetricDataForOtherAsset(assetAndValueUnitsMap, asset);
       }
-      return getOtherMetricsDataById(assetID, starttime, duration);
    }
 
    private Map<String, List<ValueUnit>> findLatestMetricDataByAssetValueUnitMap(Map<String, List<ValueUnit>> assetValueUnitMap) {
