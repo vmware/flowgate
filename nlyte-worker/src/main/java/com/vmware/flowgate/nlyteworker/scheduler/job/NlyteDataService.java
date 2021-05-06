@@ -524,24 +524,43 @@ public class NlyteDataService implements AsyncService {
 
    public void savePduAssetAndUpdatePduUsageFormula(List<Asset> pduList) {
       for (Asset pdu : pduList) {
-         // save asset
-         ResponseEntity<Void> responseEntity = restClient.saveAssets(pdu);
-         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            String pduId = getAssetIdByResponseEntity(responseEntity);
-            pdu.setId(pduId);
-            if (pdu.getMetricsformulars().get(FlowgateConstant.PDU) == null) {
-               Map<String, String> pduMetricsFormulas = new HashMap<>(1);
-               Map<String, String> pduUsageMetricsFormulas = new HashMap<>(3);
-               pduUsageMetricsFormulas.put(MetricName.PDU_CURRENT, pduId);
-               pduUsageMetricsFormulas.put(MetricName.PDU_TOTAL_POWER, pduId);
-               pduUsageMetricsFormulas.put(MetricName.PDU_VOLTAGE, pduId);
-               pduMetricsFormulas.put(FlowgateConstant.PDU, pdu.metricsFormulaToString(pduUsageMetricsFormulas));
-               pdu.setMetricsformulars(pduMetricsFormulas);
-               // save asset formula
+         if (pdu.getId() != null) {
+            Map<String, String> metricsFormulas = pdu.getMetricsformulars();
+            Map<String, String> targetPduUsageFormula = new HashMap<>();
+            Map<String, String> tempTargetPduUsageFormula = pdu.metricsFormulaToMap(metricsFormulas.get(FlowgateConstant.PDU), new TypeReference<Map<String, String>>() {});
+            if (tempTargetPduUsageFormula != null) {
+               targetPduUsageFormula = tempTargetPduUsageFormula;
+            }
+            Map<String, String> sourcePduUsageFormula = generatePduUsagePredefinedMetricFormulas(pdu.getId());
+            for (String sourceFormulaKey : sourcePduUsageFormula.keySet()) {
+               if (!targetPduUsageFormula.containsKey(sourceFormulaKey)) {
+                  targetPduUsageFormula.put(sourceFormulaKey, pdu.getId());
+               }
+            }
+            metricsFormulas.put(FlowgateConstant.PDU, pdu.metricsFormulaToString(targetPduUsageFormula));
+            pdu.setMetricsformulars(metricsFormulas);
+            restClient.saveAssets(pdu);
+         } else {
+            // save asset
+            ResponseEntity<Void> responseEntity = restClient.saveAssets(pdu);
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+               String pduId = getAssetIdByResponseEntity(responseEntity);
+               pdu.setId(pduId);
+               Map<String, String> metricsFormulas = new HashMap<>(1);
+               metricsFormulas.put(FlowgateConstant.PDU, pdu.metricsFormulaToString(generatePduUsagePredefinedMetricFormulas(pduId)));
+               pdu.setMetricsformulars(metricsFormulas);
                restClient.saveAssets(pdu);
             }
          }
       }
+   }
+
+   private Map<String, String> generatePduUsagePredefinedMetricFormulas(String pduId) {
+      Map<String, String> pduUsageMetricsFormulas = new HashMap<>(3);
+      pduUsageMetricsFormulas.put(MetricName.PDU_CURRENT, pduId);
+      pduUsageMetricsFormulas.put(MetricName.PDU_TOTAL_POWER, pduId);
+      pduUsageMetricsFormulas.put(MetricName.PDU_VOLTAGE, pduId);
+      return pduUsageMetricsFormulas;
    }
 
    public String getAssetIdByResponseEntity(ResponseEntity<Void> ResponseEntity) {

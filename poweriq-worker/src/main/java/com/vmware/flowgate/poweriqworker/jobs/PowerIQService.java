@@ -593,6 +593,16 @@ public class PowerIQService implements AsyncService {
                assetToUpdate.setJustificationfields(oldjustificationfields);
                assetToUpdate.setLastupdate(System.currentTimeMillis());
                assetToUpdate.setMountingSide(sensorMountingSide.get(sensor.getPosition().toUpperCase()));
+               Map<String, String> targetMetricsFormulas = asset.getMetricsformulars();
+               Map<String, String> targetSensorFormulaMap = new HashMap<>();
+               Map<String, String> tempSensorFormulaMap = assetToUpdate.metricsFormulaToMap(targetMetricsFormulas.get(FlowgateConstant.SENSOR), new TypeReference<Map<String, String>>() {});
+               if (tempSensorFormulaMap != null) {
+                  targetSensorFormulaMap = tempSensorFormulaMap;
+               }
+               Map<String, String> sourceSensorFormula = generateSensorPredefinedMetricFormulas(assetToUpdate.getId(), assetToUpdate.getSubCategory());
+               mergeFormula(sourceSensorFormula, targetSensorFormulaMap, assetToUpdate.getId());
+               targetMetricsFormulas.put(FlowgateConstant.SENSOR, assetToUpdate.metricsFormulaToString(targetSensorFormulaMap));
+               assetToUpdate.setMetricsformulars(targetMetricsFormulas);
                //save
                oldAssetsNeedToupdate.add(assetToUpdate);
             } else {
@@ -626,20 +636,10 @@ public class PowerIQService implements AsyncService {
                   String assetId = getAssetIdByResponseEntity(res);
                   asset.setId(assetId);
                   sensorAlreadySaved.add(asset);
-                  if (AssetSubCategory.Humidity.equals(asset.getSubCategory()) || AssetSubCategory.Temperature.equals(asset.getSubCategory())) {
-                     Map<String, String> metricsFormulas = new HashMap<>(1);
-                     Map<String, String> sensorFormulas = new HashMap<>(1);
-                     sensorFormulas.put(asset.getSubCategory().toString(), asset.getId());
-                     metricsFormulas.put(FlowgateConstant.SENSOR, asset.metricsFormulaToString(sensorFormulas));
-                     asset.setMetricsformulars(metricsFormulas);
-                     // save sensor formula
-                     restClient.saveAssets(asset);
-                  } else if (asset.getSubCategory() == null) {
-                     Map<String, String> metricsFormulas = new HashMap<>(1);
-                     Map<String, String> sensorFormulas = new HashMap<>(2);
-                     sensorFormulas.put(MetricName.HUMIDITY, asset.getId());
-                     sensorFormulas.put(MetricName.TEMPERATURE, asset.getId());
-                     metricsFormulas.put(FlowgateConstant.SENSOR, asset.metricsFormulaToString(sensorFormulas));
+                  Map<String, String> sensorFormula = generateSensorPredefinedMetricFormulas(assetId, asset.getSubCategory());
+                  if (!sensorFormula.isEmpty()) {
+                     Map<String, String> metricsFormulas = new HashMap<>();
+                     metricsFormulas.put(FlowgateConstant.SENSOR, asset.metricsFormulaToString(sensorFormula));
                      asset.setMetricsformulars(metricsFormulas);
                      // save sensor formula
                      restClient.saveAssets(asset);
@@ -651,6 +651,17 @@ public class PowerIQService implements AsyncService {
          }
          offset += limit;
       }
+   }
+
+   private boolean mergeFormula(Map<String, String> sourceFormula, Map<String, String> targetFormula, String assetId) {
+      boolean isUpdate = false;
+      for (String sourceFormulaKey : sourceFormula.keySet()) {
+         if (!targetFormula.containsKey(sourceFormulaKey)) {
+            targetFormula.put(sourceFormulaKey, assetId);
+            isUpdate = true;
+         }
+      }
+      return isUpdate;
    }
 
    public String getAssetIdByResponseEntity(ResponseEntity<Void> ResponseEntity) {
@@ -1914,6 +1925,21 @@ public class PowerIQService implements AsyncService {
                      isAddAssetsNeedToSave = true;
                   }
                }
+
+               Map<String, String> metricsFormulas = existedPduAsset.getMetricsformulars();
+               Map<String, String> targetPduUsageFormula = new HashMap<>();
+               Map<String, String> tempPduUsageMetricsFormulaMap = existedPduAsset.metricsFormulaToMap(metricsFormulas.get(FlowgateConstant.PDU), new TypeReference<Map<String, String>>() {});
+               if (tempPduUsageMetricsFormulaMap != null) {
+                  targetPduUsageFormula = tempPduUsageMetricsFormulaMap;
+               }
+
+               Map<String, String> sourcePduUsageFormula = generatePduUsagePredefinedMetricFormulas(existedPduAsset.getId());
+               if (mergeFormula(sourcePduUsageFormula, targetPduUsageFormula, existedPduAsset.getId())) {
+                  metricsFormulas.put(FlowgateConstant.PDU, existedPduAsset.metricsFormulaToString(targetPduUsageFormula));
+                  existedPduAsset.setMetricsformulars(metricsFormulas);
+                  isAddAssetsNeedToSave = true;
+               }
+
                //save
                if (isAddAssetsNeedToSave) {
                   assetsNeedToSave.add(existedPduAsset);
@@ -1948,7 +1974,7 @@ public class PowerIQService implements AsyncService {
                   String assetId = getAssetIdByResponseEntity(responseEntity);
                   asset.setId(assetId);
                   Map<String, String> metricsFormulas = new HashMap<>(1);
-                  metricsFormulas.put(FlowgateConstant.PDU, asset.metricsFormulaToString(generatePredefinedMetricFormulas(assetId)));
+                  metricsFormulas.put(FlowgateConstant.PDU, asset.metricsFormulaToString(generatePduUsagePredefinedMetricFormulas(assetId)));
                   asset.setMetricsformulars(metricsFormulas);
                   // save asset formulas
                   restClient.saveAssets(asset);
@@ -1964,7 +1990,7 @@ public class PowerIQService implements AsyncService {
       return triggerPDUAggregation;
    }
 
-   private Map<String,String> generatePredefinedMetricFormulas(String pduId) {
+   private Map<String,String> generatePduUsagePredefinedMetricFormulas(String pduId) {
       Map<String, String> pduFormulaMap = new HashMap<>();
       pduFormulaMap.put(MetricName.PDU_CURRENT, pduId);
       pduFormulaMap.put(MetricName.PDU_TOTAL_POWER, pduId);
@@ -1979,6 +2005,17 @@ public class PowerIQService implements AsyncService {
       pduFormulaMap.put(MetricName.PDU_INLET_XPOLE_CURRENT, pduId);
       pduFormulaMap.put(MetricName.PDU_INLET_XPOLE_VOLTAGE, pduId);
       return pduFormulaMap;
+   }
+
+   private Map<String,String> generateSensorPredefinedMetricFormulas(String sensorId, AssetSubCategory assetSubCategory) {
+      Map<String, String> sensorFormulas = new HashMap<>();
+      if (AssetSubCategory.Humidity.equals(assetSubCategory) || AssetSubCategory.Temperature.equals(assetSubCategory)) {
+         sensorFormulas.put(assetSubCategory.toString(), sensorId);
+      } else if (assetSubCategory == null) {
+         sensorFormulas.put(MetricName.HUMIDITY, sensorId);
+         sensorFormulas.put(MetricName.TEMPERATURE, sensorId);
+      }
+      return sensorFormulas;
    }
 
    public Map<String,String> getInfoMap(String info) throws IOException{

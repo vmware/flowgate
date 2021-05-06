@@ -407,7 +407,7 @@ public class SyncSensorMetaDataJobTest {
    public void testSaveSensorAssetsToFlowgate() {
       Map<String, Asset> exsitingSensorAssets = new HashMap<>();
       Asset asset1 = createAsset();
-      asset1.setId("18672301765107L");
+      asset1.setId("18672301765107");
       Asset asset2 = createAsset();
       asset2.setId("BOQBNBHQOQJAOJQY");
       exsitingSensorAssets.put(asset1.getId(), asset1);
@@ -420,6 +420,7 @@ public class SyncSensorMetaDataJobTest {
       sensor1.setId(18672301765107L);
       sensor1.setName("sensor-1");
       sensor1.setType("TemperatureSensor");
+      sensor1.setPosition("Beijing");
       Sensor sensor2 = createSensor();
       sensor2.setId(81675117203607L);
       sensor2.setName("sensor-2");

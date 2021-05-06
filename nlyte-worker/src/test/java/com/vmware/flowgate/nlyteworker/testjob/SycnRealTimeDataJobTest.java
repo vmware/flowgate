@@ -1071,10 +1071,20 @@ public class SycnRealTimeDataJobTest {
    @Test
    public void testSavePduAssetAndUpdatePduUsageFormula() {
       List<Asset> assets = new ArrayList<>();
-      Asset asset = createAsset();
-      asset.setCategory(AssetCategory.PDU);
-      asset.setId(null);
-      assets.add(asset);
+      Asset asset1 = createAsset();
+      asset1.setCategory(AssetCategory.PDU);
+      asset1.setId(null);
+      Asset asset2 = createAsset();
+      asset2.setCategory(AssetCategory.PDU);
+      asset2.setId("32c8a3ed6dacf24bc6bb23551dc922cd");
+
+      Map<String, String> metricsFormulas = new HashMap<>();
+      Map<String, String> pduUsageFormulas = new HashMap<>();
+      pduUsageFormulas.put(MetricName.PDU_CURRENT, asset2.getId());
+      metricsFormulas.put(FlowgateConstant.PDU, asset2.metricsFormulaToString(pduUsageFormulas));
+      asset2.setMetricsformulars(metricsFormulas);
+      assets.add(asset1);
+      assets.add(asset2);
 
       Mockito.doReturn(new ResponseEntity<Void>(HttpStatus.OK)).when(wormholeAPIClient).saveAssets(Mockito.any(Asset.class));
       Mockito.doReturn("23551d6dacf2432c8a3edbc6bbc922cd").when(nlyteDataService).getAssetIdByResponseEntity(Mockito.any(ResponseEntity.class));
