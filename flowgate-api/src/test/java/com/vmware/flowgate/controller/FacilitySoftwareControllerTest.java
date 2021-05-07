@@ -8,12 +8,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -430,17 +433,14 @@ public class FacilitySoftwareControllerTest {
       int pageSize = 5;
       try {
          this.mockMvc
-         .perform(
-               get("/v1/facilitysoftware/page/" + pageNumber + "/pagesize/"
-                     + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
+         .perform(get("/v1/facilitysoftware/page/{pageNumber}/pagesize/{pageSize}",pageNumber, pageSize))
          .andExpect(status().isOk())
          .andExpect(jsonPath("$..content[0].name").value(facilitySoftware.getName()))
          .andExpect(jsonPath("$..content[0].userId").value(facilitySoftware.getUserId()))
-         .andDo(document("facilitySoftware-query-example",
-               requestFields(
-                     fieldWithPath("pageNumber").description("get datas for this page number."),
-                     fieldWithPath("pageSize")
-                           .description("The number of data displayed per page."))));
+         .andDo(document("facilitySoftware-queryByPage-example",
+               pathParameters(
+                     parameterWithName("pageNumber").description("Get datas for this page number."),
+                     parameterWithName("pageSize").description("The number of facilitysoftwares you want to get by every request.Default value: 20"))));
 
       }finally {
          facilitySoftwareRepository.deleteById(facilitySoftware.getId());
@@ -469,17 +469,18 @@ public class FacilitySoftwareControllerTest {
       try {
          this.mockMvc
          .perform(
-               get("/v1/facilitysoftware/page/" + pageNumber + "/pagesize/"
-                     + pageSize + "?softwaretypes=Nlyte").content("{\"pageNumber\":1,\"pageSize\":5}"))
+               get("/v1/facilitysoftware/page/{pageNumber}/pagesize/{pageSize}",pageNumber, pageSize)
+               .param("softwaretypes", "Nlyte"))
          .andExpect(status().isOk())
          .andExpect(jsonPath("$..content[0].name").value(facilitySoftware.getName()))
          .andExpect(jsonPath("$..content[0].userId").value(facilitySoftware.getUserId()))
          .andExpect(jsonPath("$..content[0].type").value(facilitySoftware.getType().name()))
-         .andDo(document("facilitySoftware-query-example",
-               requestFields(
-                     fieldWithPath("pageNumber").description("get datas for this page number."),
-                     fieldWithPath("pageSize")
-                           .description("The number of data displayed per page."))));
+         .andDo(document("facilitySoftware-queryByTypeAndPage-example",
+               pathParameters(
+                     parameterWithName("pageNumber").description("Get datas for this page number."),
+                     parameterWithName("pageSize").description("The number of facilitysoftwares you want to get by every request.Default value: 20")),
+               requestParameters(
+                     parameterWithName("softwaretypes").description("A list of software, maybe contain Nlyte/PowerIQ/InfoBlox/OpenManage/Labsdb"))));
 
       }finally {
          facilitySoftwareRepository.deleteById(facilitySoftware.getId());
@@ -509,16 +510,10 @@ public class FacilitySoftwareControllerTest {
       try {
          this.mockMvc
          .perform(
-               get("/v1/facilitysoftware/page/" + pageNumber + "/pagesize/"
-                     + pageSize + "").content("{\"pageNumber\":1,\"pageSize\":5}"))
+               get("/v1/facilitysoftware/page/{pageNumber}/pagesize/{pageSize}",pageNumber, pageSize))
          .andExpect(status().isOk())
          .andExpect(jsonPath("$..content[0].name").value(facilitySoftware.getName()))
-         .andExpect(jsonPath("$..content[0].userId").value(facilitySoftware.getUserId()))
-         .andDo(document("facilitySoftware-query-example",
-               requestFields(
-                     fieldWithPath("pageNumber").description("get datas for this page number."),
-                     fieldWithPath("pageSize")
-                           .description("The number of data displayed per page."))));
+         .andExpect(jsonPath("$..content[0].userId").value(facilitySoftware.getUserId()));
 
       }finally {
          facilitySoftwareRepository.deleteById(facilitySoftware.getId());
@@ -561,9 +556,11 @@ public class FacilitySoftwareControllerTest {
               };
       try {
          this.mockMvc
-         .perform(get("/v1/facilitysoftware/type/" + facilitySoftware1.getType() + ""))
+         .perform(get("/v1/facilitysoftware/type/{type}",facilitySoftware1.getType()))
                 .andExpect(status().isOk())
-                .andDo(document("facilitySoftware-getFacilitySoftwareConfigByType-example",responseFields(
+                .andDo(document("facilitySoftware-getFacilitySoftwareConfigByType-example",pathParameters(
+                      parameterWithName("type").description("The type of FacilitySoftwareConfig. Sample value: Nlyte/PowerIQ/InfoBlox/OpenManage/Labsdb, you can use anyone of these options")),
+                      responseFields(
                         fieldWithPath("[]").description("An array of facility software configs"))
                         .andWithPrefix("[].", fieldpath)));
       }finally {
@@ -584,34 +581,10 @@ public class FacilitySoftwareControllerTest {
       facilitySoftware2.setPassword(EncryptionGuard.encode(facilitySoftware2.getPassword()));
       facilitySoftwareRepository.save(facilitySoftware2);
 
-      FieldDescriptor[] fieldpath = new FieldDescriptor[] {
-               fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
-               fieldWithPath("name").description("The facilitySoftware name."),
-               fieldWithPath("description").description("The facilitySoftware description."),
-               fieldWithPath("userName").description(
-                        "An username used to obtain authorization"),
-               fieldWithPath("password").description(
-                        " A password used to obtain authorization."),
-               fieldWithPath("serverURL").description(
-                        "The server's address, it can be an IP or FQDN."),
-               fieldWithPath("type").description(
-                        "A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
-               fieldWithPath("userId").description(
-                        "userId"),
-               fieldWithPath("subCategory").description(
-                        "subCategory"),
-               fieldWithPath("verifyCert").description(
-                        "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
-               subsectionWithPath("integrationStatus").description("The status of integration."),
-               fieldWithPath("advanceSetting").description("Advance setting.").type(JsonFieldType.OBJECT)
-      };
       try {
          this.mockMvc
                   .perform(get("/v1/facilitysoftware/internal/type/" + facilitySoftware1.getType() + ""))
-                  .andExpect(status().isOk())
-                  .andDo(document("facilitySoftware-getInternalFacilitySoftwareConfigByType-example",responseFields(
-                           fieldWithPath("[]").description("An array of facility software configs"))
-                           .andWithPrefix("[].", fieldpath)));
+                  .andExpect(status().isOk());
       }finally {
          facilitySoftwareRepository.deleteById(facilitySoftware1.getId());
          facilitySoftwareRepository.deleteById(facilitySoftware2.getId());
@@ -628,21 +601,7 @@ public class FacilitySoftwareControllerTest {
       try {
          this.mockMvc
                   .perform(get("/v1/facilitysoftware/internal/" + facilitySoftware1.getId()))
-                  .andExpect(status().isOk())
-                  .andDo(document("getInternalFacilitySoftwareConfigByIDExample", responseFields(
-                           fieldWithPath("id").description("ID of FacilitySoftwareConfig, created by flowgate"),
-                           fieldWithPath("name").description("The facilitySoftware name."),
-                           fieldWithPath("description").description("The facilitySoftware description."),
-                           fieldWithPath("userName").description("An username used to obtain authorization"),
-                           fieldWithPath("password").description("A password used to obtain authorization."),
-                           fieldWithPath("serverURL").description("The server's address, it can be an IP or FQDN."),
-                           fieldWithPath("type").description("A type for facilitySoftware,forExample Nlyte,PowerIQ,Device42,OtherDCIM or OtherCMDB").type(SoftwareType.class).optional(),
-                           fieldWithPath("userId").description("userId"),
-                           fieldWithPath("subCategory").description("subCategory"),
-                           fieldWithPath("verifyCert").description("Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
-                           subsectionWithPath("integrationStatus").description("The status of integration."),
-                           fieldWithPath("advanceSetting").description("Advance setting.").type(JsonFieldType.OBJECT)
-                  )));
+                  .andExpect(status().isOk());
       }finally {
          facilitySoftwareRepository.deleteById(facilitySoftware1.getId());
       }
@@ -653,11 +612,10 @@ public class FacilitySoftwareControllerTest {
       FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
       facilitySoftware = facilitySoftwareRepository.save(facilitySoftware);
       this.mockMvc
-            .perform(delete("/v1/facilitysoftware/" + facilitySoftware.getId())
-                  .content("{\"id\":\"" + facilitySoftware.getId() + "\"}"))
+            .perform(delete("/v1/facilitysoftware/{Id}",facilitySoftware.getId()))
             .andExpect(status().isOk())
-            .andDo(document("facilitySoftware-delete-example", requestFields(
-                  fieldWithPath("id").description("The primary key for facility software."))));
+            .andDo(document("facilitySoftware-delete-example", pathParameters(
+                  parameterWithName("Id").description("The id of facilitysoftwareConfig, generated by flowgate."))));
    }
 
 
