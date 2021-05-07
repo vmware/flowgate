@@ -477,7 +477,7 @@ public class AssetController {
    }
 
    @ResponseStatus(HttpStatus.OK)
-   @RequestMapping(value = "/mapping/merge/{firstid}/{secondid}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+   @RequestMapping(value = "/mapping/merge/{firstid}/{secondid}", method = RequestMethod.PUT)
    public void mergeServerMapping(@PathVariable("firstid") String id1,
          @PathVariable("secondid") String id2) {
       if (id1 == id2) {

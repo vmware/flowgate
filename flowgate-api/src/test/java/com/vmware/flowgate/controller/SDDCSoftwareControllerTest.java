@@ -8,18 +8,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,8 +53,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vmware.flowgate.auth.AuthVcUser;
 import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
-import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
+import com.vmware.flowgate.common.model.ServerMapping;
 import com.vmware.flowgate.common.model.redis.message.MessagePublisher;
 import com.vmware.flowgate.exception.WormholeRequestException;
 import com.vmware.flowgate.repository.SDDCSoftwareRepository;
@@ -85,7 +85,7 @@ public class SDDCSoftwareControllerTest {
 
    @Autowired
    private WebApplicationContext context;
-   
+
    @Autowired
    ServerMappingRepository serverMappingRepository;
 
@@ -296,11 +296,14 @@ public class SDDCSoftwareControllerTest {
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       int pageNumber = 1;
       int pageSize = 5;
-      this.mockMvc.perform(get("/v1/sddc/page/" + pageNumber + "/pagesize/" + pageSize + ""))
+      this.mockMvc.perform(get("/v1/sddc/page/{pageNumber}/pagesize/{pageSize}", pageNumber, pageSize))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$..content[0].name").value(sddc.getName()))
             .andExpect(jsonPath("$..content[0].userId").value(sddc.getUserId()))
-            .andDo(document("SDDCSoftware-query-example", responseFields(
+            .andDo(document("SDDCSoftware-query-example", pathParameters(
+                  parameterWithName("pageNumber").description("The page you want to get"),
+                  parameterWithName("pageSize").description("The number of SDDCSoftwares you want to get by every request.Default value: 20")),
+                  responseFields(
                   subsectionWithPath("content").type(JsonFieldType.ARRAY)
                         .description("SDDCSoftwareConfig's array."),
                   fieldWithPath("totalPages").description("content's total pages."),
@@ -346,9 +349,10 @@ public class SDDCSoftwareControllerTest {
                       "Whether to verify the certificate when accessing the serverURL.").type(JsonFieldType.BOOLEAN),
               subsectionWithPath("integrationStatus").description("The status of integration.").optional(),
       };
-      MvcResult result = this.mockMvc.perform(get("/v1/sddc/type/" + SoftwareType.VCENTER + ""))
+      MvcResult result = this.mockMvc.perform(get("/v1/sddc/type/{type}", SoftwareType.VCENTER))
             .andExpect(status().isOk())
-            .andDo(document("SDDCSoftware-queryByType-example",
+            .andDo(document("SDDCSoftware-queryByType-example",pathParameters(
+                  parameterWithName("type").description("The type of SDDCSoftwareConfig, Sample value: VRO/VCENTER")),
                     responseFields(
                     fieldWithPath("[]").description("An array of SDDCSoftwareConfig.")
                     ).andWithPrefix("[].", fieldpath)))
@@ -525,8 +529,9 @@ public class SDDCSoftwareControllerTest {
       serverMappingRepository.save(serverMapping2);
       this.mockMvc
             .perform(
-                  delete("/v1/sddc/" + sddc.getId()))
-            .andExpect(status().isOk()).andDo(document("SDDCSoftware-delete-example"));
+                  delete("/v1/sddc/{Id}", sddc.getId()))
+            .andExpect(status().isOk()).andDo(document("SDDCSoftware-delete-example", pathParameters(
+                  parameterWithName("Id").description("The id of SDDCSoftwareConfig, generated by flowgate."))));
 
       Optional<ServerMapping> serverMappingOptional1 = serverMappingRepository.findById(serverMapping1.getId());
       TestCase.assertEquals(false, serverMappingOptional1.isPresent());
@@ -534,9 +539,9 @@ public class SDDCSoftwareControllerTest {
       TestCase.assertEquals(false, serverMappingOptional2.isPresent());
       Optional<SDDCSoftwareConfig> sddcOptional = sddcRepository.findById(sddc.getId());
       TestCase.assertEquals(false, sddcOptional.isPresent());
-      
+
    }
-   
+
    @Test
    public void sDDCSoftwareDeleteVroAndVropsMpExample() throws Exception {
       SDDCSoftwareConfig sddc = createSDDCSoftwareConfig(SoftwareType.VRO);
@@ -549,7 +554,7 @@ public class SDDCSoftwareControllerTest {
             .perform(
                   delete("/v1/sddc/" + sddc.getId()))
             .andExpect(status().isOk());
-      
+
       Optional<ServerMapping> serverMappingOptional1 = serverMappingRepository.findById(serverMapping1.getId());
       TestCase.assertEquals(false, serverMappingOptional1.isPresent());
       Optional<ServerMapping> serverMappingOptional2 = serverMappingRepository.findById(serverMapping2.getId());
@@ -557,7 +562,7 @@ public class SDDCSoftwareControllerTest {
       Optional<SDDCSoftwareConfig> sddcOptional = sddcRepository.findById(sddc.getId());
       TestCase.assertEquals(false, sddcOptional.isPresent());
    }
-   
+
    @Test
    public void sDDCSoftwareDeleteOtherExample() throws Exception {
       SDDCSoftwareConfig sddc = createSDDCSoftwareConfig(SoftwareType.OTHERS);
@@ -566,11 +571,11 @@ public class SDDCSoftwareControllerTest {
             .perform(
                   delete("/v1/sddc/" + sddc.getId()))
             .andExpect(status().isOk());
-      
+
       Optional<SDDCSoftwareConfig> sddcOptional = sddcRepository.findById(sddc.getId());
       TestCase.assertEquals(false, sddcOptional.isPresent());
    }
-   
+
    @Test
    public void sDDCSoftwareDeleteExceptionExample() throws Exception {
 
@@ -580,7 +585,7 @@ public class SDDCSoftwareControllerTest {
             .andExpect(status().isNotFound()).andReturn();
 	   TestCase.assertEquals("Failed to find sddc with field: id  and value: 10", result.getResolvedException().getMessage());
    }
-   
+
    ServerMapping createServerMapping(SoftwareType type, String sddcId){
 	   ServerMapping serverMapping = new ServerMapping();
 	   switch(type) {
@@ -598,7 +603,7 @@ public class SDDCSoftwareControllerTest {
 	   }
 	   return serverMapping;
    }
-   
+
    SDDCSoftwareConfig createSDDCSoftwareConfig(SoftwareType type) {
       SDDCSoftwareConfig example = new SDDCSoftwareConfig();
       example.setId(UUID.randomUUID().toString());
