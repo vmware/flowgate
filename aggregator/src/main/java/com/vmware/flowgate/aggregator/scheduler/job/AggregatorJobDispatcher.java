@@ -77,7 +77,7 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
          }catch(IOException e) {
             logger.error("Failed to Send sync summary data command", e);
          }
-      }else if(execount % 1 == 0){
+      }else if(execount % 288 == 0){
           try {
               EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.Aggregator,
                     EventMessageUtil.SYNC_FITTING, "");

@@ -105,7 +105,7 @@ public class AggregatorService implements AsyncService {
             cleanRealtimeData();
             break;
          case EventMessageUtil.SYNC_FITTING:
-        	List<List<Double>> results = syncFitting(true);
+        	List<List<Double>> results = syncFitting(false);
 	         for (int i = 0; i < results.size(); i++)
 	         {	        	 
 	         	String res = "Syncfitting results-" + String.valueOf(i) + " :";
@@ -218,97 +218,96 @@ public class AggregatorService implements AsyncService {
    public List<Double> doFitting(List<MetricData> MetricDatas) {
 	   
 	   List<Double> CPU = new ArrayList<>();
-	      List<Double> power = new ArrayList<>();
-	      List<Pair<Long, Double>> raw_CPU_list = new ArrayList<>();
-	      List<Pair<Long, Double>> raw_power_list = new ArrayList<>();
-	      
-		  for (int i = 0; i < MetricDatas.size(); i++) {
-			  if (MetricDatas.get(i).getMetricName() == "CpuUsage") {
-				  raw_CPU_list.add(new Pair<Long, Double> (MetricDatas.get(i).getTimeStamp(), MetricDatas.get(i).getValueNum()));
-			  }
-			  else if (MetricDatas.get(i).getMetricName() == "Power") {
-				  raw_power_list.add(new Pair<Long, Double> (MetricDatas.get(i).getTimeStamp(), MetricDatas.get(i).getValueNum()));
-			  }
+      List<Double> power = new ArrayList<>();
+      List<Pair<Long, Double>> raw_CPU_list = new ArrayList<>();
+      List<Pair<Long, Double>> raw_power_list = new ArrayList<>();
+      
+	  for (int i = 0; i < MetricDatas.size(); i++) {
+		  if (MetricDatas.get(i).getMetricName() == "CpuUsage") {
+			  raw_CPU_list.add(new Pair<Long, Double> (MetricDatas.get(i).getTimeStamp(), MetricDatas.get(i).getValueNum()));
 		  }
-	      Pair<Long, Double>[] raw_CPU = new Pair[raw_CPU_list.size()];
-	      Pair<Long, Double>[] raw_power =  new Pair[raw_power_list.size()];
-	      for (int i = 0; i < raw_CPU_list.size(); i++) {
-	    	  raw_CPU[i] = raw_CPU_list.get(i);
-	      }
-	      for (int i = 0; i < raw_power_list.size(); i++) {
-	    	  raw_power[i] = raw_power_list.get(i);
-	      }
-
-	      //Sort the pair list according the time in reverse order.
-		  Arrays.sort(raw_CPU, new Comparator<Pair<Long, Double>>()  {
-	    	  @Override
-	          public int compare(Pair<Long, Double> o1, Pair<Long, Double> o2) {
-	              if(o1.getFirst()==o2.getFirst()){
-	                  return 0;
-	              }else if (o1.getFirst() > o2.getFirst()){
-	                  return -1;
-	              }
-	              else return 1;
-	          }
-	      });
-	      Arrays.sort(raw_power, new Comparator<Pair<Long, Double>>()  {
-	    	  @Override
-	          public int compare(Pair<Long, Double> o1, Pair<Long, Double> o2) {
-	              if(o1.getFirst()==o2.getFirst()){
-	                  return 0;
-	              }else if (o1.getFirst() > o2.getFirst()){
-	                  return -1;
-	              }
-	              else return 1;
-	          }
-	      });
-	      
-		  int idx_CPU = 0, idx_power = 0;
-	      List<Pair<Double, Double>> raw_data = new ArrayList<>();
-		  while (idx_CPU < raw_CPU.length && idx_power < raw_power.length) {
-			  if (raw_CPU[idx_CPU].getFirst().compareTo(raw_power[idx_power].getFirst()) == 0) {
-			      raw_data.add(new Pair<Double, Double>(raw_CPU[idx_CPU].getSecond(), raw_power[idx_power].getSecond()));
-				  idx_CPU +=1;
-				  idx_power +=1;
-			  }  
-			  else if (raw_CPU[idx_CPU].getFirst().compareTo(raw_power[idx_power].getFirst()) == 1) {
-				  idx_CPU += 1;
-			  }
-			  else if (raw_CPU[idx_CPU].getFirst().compareTo(raw_power[idx_power].getFirst()) == -1) {
-				  idx_power += 1;
-			  }
+		  else if (MetricDatas.get(i).getMetricName() == "Power") {
+			  raw_power_list.add(new Pair<Long, Double> (MetricDatas.get(i).getTimeStamp(), MetricDatas.get(i).getValueNum()));
 		  }
+	  }
+      Pair<Long, Double>[] raw_CPU = new Pair[raw_CPU_list.size()];
+      Pair<Long, Double>[] raw_power =  new Pair[raw_power_list.size()];
+      for (int i = 0; i < raw_CPU_list.size(); i++) {
+    	  raw_CPU[i] = raw_CPU_list.get(i);
+      }
+      for (int i = 0; i < raw_power_list.size(); i++) {
+    	  raw_power[i] = raw_power_list.get(i);
+      }
+
+      //Sort the pair list according the time in reverse order.
+	  Arrays.sort(raw_CPU, new Comparator<Pair<Long, Double>>()  {
+    	  @Override
+          public int compare(Pair<Long, Double> o1, Pair<Long, Double> o2) {
+              if(o1.getFirst()==o2.getFirst()){
+                  return 0;
+              }else if (o1.getFirst() > o2.getFirst()){
+                  return -1;
+              }
+              else return 1;
+          }
+      });
+      Arrays.sort(raw_power, new Comparator<Pair<Long, Double>>()  {
+    	  @Override
+          public int compare(Pair<Long, Double> o1, Pair<Long, Double> o2) {
+              if(o1.getFirst()==o2.getFirst()){
+                  return 0;
+              }else if (o1.getFirst() > o2.getFirst()){
+                  return -1;
+              }
+              else return 1;
+          }
+      });
+      
+	  int idx_CPU = 0, idx_power = 0;
+      List<Pair<Double, Double>> raw_data = new ArrayList<>();
+	  while (idx_CPU < raw_CPU.length && idx_power < raw_power.length) {
+		  if (raw_CPU[idx_CPU].getFirst().compareTo(raw_power[idx_power].getFirst()) == 0) {
+		      raw_data.add(new Pair<Double, Double>(raw_CPU[idx_CPU].getSecond(), raw_power[idx_power].getSecond()));
+			  idx_CPU +=1;
+			  idx_power +=1;
+		  }  
+		  else if (raw_CPU[idx_CPU].getFirst().compareTo(raw_power[idx_power].getFirst()) == 1) {
+			  idx_CPU += 1;
+		  }
+		  else if (raw_CPU[idx_CPU].getFirst().compareTo(raw_power[idx_power].getFirst()) == -1) {
+			  idx_power += 1;
+		  }
+	  }
 
 
-	      List<Pair<Double, Double>> new_data = new ArrayList<>();
-	      WeightedObservedPoints points = new WeightedObservedPoints();
-	      while (raw_data.size() != 0) {
-	         int count = 0;
-	         for (int i = 1; i < raw_data.size(); i++) {
+      List<Pair<Double, Double>> new_data = new ArrayList<>();
+      WeightedObservedPoints points = new WeightedObservedPoints();
+      while (raw_data.size() != 0) {
+         int count = 0;
+         for (int i = 1; i < raw_data.size(); i++) {
 
-	            if (raw_data.get(i).getSecond() >= raw_data.get(i-1).getSecond() + 1)
-	               break;
-	            count += 1;
-	            if (count > 0) {
-	               List<Pair<Double, Double>> tmp = raw_data.subList(0, count + 1);
-	               new_data.addAll(MAD(tmp, 1.5));
-	            }
-	           raw_data = raw_data.subList(count + 1, raw_data.size());
-	         }
-	      }
-	      for(int i = 0; i < new_data.size(); i++)
-	      {
-	    	  points.add(new_data.get(i).getFirst(), new_data.get(i).getSecond());
-	      }
-	      //logger.info(String.valueOf(raw_CPU_list.size()) + " " + String.valueOf(raw_power_list.size()) + " " + String.valueOf(CPU.size()) + " " + String.valueOf(power.size()));
-	      int degree = 4;
-	      PolynomialCurveFitter fitter = PolynomialCurveFitter.create(degree); 
-	      double[] result = fitter.fit(points.toList());
-	      List<Double> fitting_result = doubleToList(result);
-	      
-	      
-	     
-	      return fitting_result;
+            if (raw_data.get(i).getSecond() >= raw_data.get(i-1).getSecond() + 1)
+               break;
+            count += 1;
+            if (count > 0) {
+               List<Pair<Double, Double>> tmp = raw_data.subList(0, count + 1);
+               new_data.addAll(MAD(tmp, 1.5));
+            }
+           raw_data = raw_data.subList(count + 1, raw_data.size());
+         }
+      }
+      for(int i = 0; i < new_data.size(); i++)
+      {
+    	  points.add(new_data.get(i).getFirst(), new_data.get(i).getSecond());
+      }
+      int degree = 4;
+      PolynomialCurveFitter fitter = PolynomialCurveFitter.create(degree); 
+      double[] result = fitter.fit(points.toList());
+      List<Double> fitting_result = doubleToList(result);
+      
+      
+     
+      return fitting_result;
    }
    
    public List<List<Double>> syncFitting(boolean ifTest)  {
