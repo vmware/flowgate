@@ -9,19 +9,18 @@ Flowgate can be installed by either of the follow approaches:
 This guide describes the steps to install and configure Flowgate by using the Binary installer.
 
 ## Prerequisites for the target host
-Flowgate is deployed as several Docker containers, and can be deployed on any Linux distribution that supports Docker. The target host requires Git, Docker, and Docker Compose to be installed.  
+Flowgate is deployed as several Docker containers, and can be deployed on any Linux distribution that supports Docker. The target host requires Docker, and Docker Compose to be installed.  
 ### Hardware
 |Resource|Capacity|Description|
 |---|---|---|
 |CPU|minimal 2 CPU|4 CPU is preferred|
 |Mem|minimal 8GB|16GB is preferred|
-|Disk|minimal 80GB|160GB is preferred|
+|Storerage|minimal 80GB|160GB is preferred|
 ### Software
 |Software|Version|Description|
 |---|---|---|
 |Docker engine|version 1.10 or higher|For installation instructions, please refer to: https://docs.docker.com/engine/installation/|
 |Docker Compose|version 1.6.0 or higher|For installation instructions, please refer to: https://docs.docker.com/compose/install/|
-|Git|latest is preferred|For installation instructions, please refer to: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git|
 ### Network ports 
 |Port|Protocol|Description|
 |---|---|---|
@@ -40,6 +39,7 @@ Flowgate is deployed as several Docker containers, and can be deployed on any Li
 3. Initialize Flowgate
 
 ```
+    $ cd flowgate
     $ sudo bash flowgate_init.sh
     ...
     conf/management/
