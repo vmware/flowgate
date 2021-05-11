@@ -552,6 +552,52 @@ public class VCDataServiceTest {
    }
 
    @Test
+   public void testFeedHostUsageDataNotAvailableMetricId() {
+      PerformanceManager performanceManager = Mockito.mock(PerformanceManager.class);
+      when(vsphereClient.getPerformanceManager()).thenReturn(performanceManager);
+
+      CounterInfo[] counterInfos = new CounterInfo[4];
+      counterInfos[0] = Mockito.mock(CounterInfo.class);
+      when(counterInfos[0].getKey()).thenReturn(1);
+      ElementDescription edGroup = Mockito.mock(ElementDescription.class);
+      when(counterInfos[0].getGroupInfo()).thenReturn(edGroup);
+      when(edGroup.getKey()).thenReturn(VCConstants.HOST_CPU_GROUP);
+      ElementDescription edName = Mockito.mock(ElementDescription.class);
+      when(counterInfos[0].getNameInfo()).thenReturn(edName);
+      when(edName.getKey()).thenReturn(VCConstants.HOST_METRIC_USAGE);
+      counterInfos[1] = Mockito.mock(CounterInfo.class);
+      when(counterInfos[1].getKey()).thenReturn(2);
+      ElementDescription edGroup1 = Mockito.mock(ElementDescription.class);
+      when(counterInfos[1].getGroupInfo()).thenReturn(edGroup1);
+      when(edGroup1.getKey()).thenReturn(VCConstants.HOST_MEMORY_GROUP);
+      ElementDescription edName1 = Mockito.mock(ElementDescription.class);
+      when(counterInfos[1].getNameInfo()).thenReturn(edName1);
+      when(edName1.getKey()).thenReturn(VCConstants.HOST_METRIC_USAGE);
+      counterInfos[2] = Mockito.mock(CounterInfo.class);
+      when(counterInfos[2].getKey()).thenReturn(3);
+      ElementDescription edGroup2 = Mockito.mock(ElementDescription.class);
+      when(counterInfos[2].getGroupInfo()).thenReturn(edGroup2);
+      when(edGroup2.getKey()).thenReturn(VCConstants.HOST_POWER_GROUP);
+      ElementDescription edName2 = Mockito.mock(ElementDescription.class);
+      when(counterInfos[2].getNameInfo()).thenReturn(edName2);
+      when(edName2.getKey()).thenReturn(VCConstants.HOST_METRIC_POWER_ENERGY);
+      counterInfos[3] = Mockito.mock(CounterInfo.class);
+      when(counterInfos[3].getKey()).thenReturn(4);
+      ElementDescription edGroup3 = Mockito.mock(ElementDescription.class);
+      when(counterInfos[3].getGroupInfo()).thenReturn(edGroup3);
+      when(edGroup3.getKey()).thenReturn(VCConstants.HOST_POWER_GROUP);
+      ElementDescription edName3 = Mockito.mock(ElementDescription.class);
+      when(counterInfos[3].getNameInfo()).thenReturn(edName3);
+      when(edName3.getKey()).thenReturn(VCConstants.HOST_METRIC_POWER_POWER);
+
+      when(performanceManager.getPerfCounter()).thenReturn(counterInfos);
+      HostSystem host = Mockito.mock(HostSystem.class);
+      ManagedObjectReference managedObjectReference = host._getRef();
+      when(performanceManager.queryAvailableMetric(managedObjectReference, null, null, new Integer(20))).thenReturn(null);
+      service.feedHostUsageData(vsphereClient, "avbaebhqw9", managedObjectReference);
+   }
+
+   @Test
    public void testQueryHostMetrics() throws Exception {
 
       SDDCSoftwareConfig vc = Mockito.mock(SDDCSoftwareConfig.class);

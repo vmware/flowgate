@@ -490,9 +490,8 @@ public class VCDataService implements AsyncService {
             performanceManager.queryAvailableMetric(hostRef, null, null, new Integer(20));
 
       List<MetricId> metricIdList = new ArrayList<MetricId>();
-      if (queryAvailableMetric.length > 0) {
-         for (int i = 0; i < queryAvailableMetric.length; i++) {
-            MetricId metricId = queryAvailableMetric[i];
+      if (queryAvailableMetric != null && queryAvailableMetric.length > 0) {
+         for (MetricId metricId : queryAvailableMetric) {
             int counterId = metricId.getCounterId();
             String instanceId = metricId.getInstance();
             if (counters.containsKey(new Integer(counterId)) && (instanceId == null || instanceId.isEmpty())) {
