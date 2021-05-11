@@ -27,11 +27,11 @@ public class DeviceTemperature {
    @JsonProperty(value="avgTemperatureTimeStamp")
    private String avgTemperatureTimeStamp;
    @JsonProperty(value="avgTemperature")
-   private int avgTemperature;
+   private String avgTemperature;
    @JsonProperty(value="instantaneousTemperature")
-   private int instantaneousTemperature;
+   private String instantaneousTemperature;
    @JsonProperty(value="peakTemperature")
-   private int peakTemperature;
+   private String peakTemperature;
    @JsonProperty(value="peakTemperatureTimeStamp")
    private String peakTemperatureTimeStamp;
    public String getOdataContext() {
@@ -88,22 +88,22 @@ public class DeviceTemperature {
    public void setAvgTemperatureTimeStamp(String avgTemperatureTimeStamp) {
       this.avgTemperatureTimeStamp = avgTemperatureTimeStamp;
    }
-   public int getAvgTemperature() {
+   public String getAvgTemperature() {
       return avgTemperature;
    }
-   public void setAvgTemperature(int avgTemperature) {
+   public void setAvgTemperature(String avgTemperature) {
       this.avgTemperature = avgTemperature;
    }
-   public int getInstantaneousTemperature() {
+   public String getInstantaneousTemperature() {
       return instantaneousTemperature;
    }
-   public void setInstantaneousTemperature(int instantaneousTemperature) {
+   public void setInstantaneousTemperature(String instantaneousTemperature) {
       this.instantaneousTemperature = instantaneousTemperature;
    }
-   public int getPeakTemperature() {
+   public String getPeakTemperature() {
       return peakTemperature;
    }
-   public void setPeakTemperature(int peakTemperature) {
+   public void setPeakTemperature(String peakTemperature) {
       this.peakTemperature = peakTemperature;
    }
    public String getPeakTemperatureTimeStamp() {
