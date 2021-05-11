@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -16,6 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.flowgate.common.model.redis.message.EventMessage;
+import com.vmware.flowgate.common.model.redis.message.EventType;
+import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +28,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -102,6 +108,9 @@ public class VCDataServiceTest {
 
    @Mock
    private VsphereClient vsphereClient;
+
+   @Mock
+   private StringRedisTemplate template;
 
    private ObjectMapper mapper = new ObjectMapper();
 
@@ -904,6 +913,58 @@ public class VCDataServiceTest {
             TestCase.assertEquals("1615563920000", valueUnit.getExtraidentifier());
          }
       }
+   }
+
+   @Test
+   public void testSyncCustomerAttrsData() throws Exception {
+      String assetId = "QONVN1098G1NVN01NG01";
+      String vcMobID = "host-11";
+
+      SDDCSoftwareConfig sddcSoftwareConfig = new SDDCSoftwareConfig();
+      sddcSoftwareConfig.setType(SDDCSoftwareConfig.SoftwareType.VCENTER);
+      sddcSoftwareConfig.setServerURL("https://1.1.1.1");
+      sddcSoftwareConfig.setPassword("ASDFGAGAHAHwegqhwrjw");
+      sddcSoftwareConfig.setVerifyCert(false);
+      EventMessage eventMessage = EventMessageUtil.createEventMessage(EventType.VCenter, EventMessageUtil.VCENTER_SyncCustomerAttrsData, mapper.writeValueAsString(sddcSoftwareConfig));
+
+      ListOperations<String, String> listOperations = Mockito.mock(ListOperations.class);
+      doReturn(listOperations).when(template).opsForList();
+      doReturn(mapper.writeValueAsString(eventMessage), null).when(listOperations).rightPop(EventMessageUtil.vcJobList);
+      doReturn(vsphereClient).when(service).connectVsphere(any());
+
+      ServerMapping serverMapping = new ServerMapping();
+      serverMapping.setVcMobID(vcMobID);
+      serverMapping.setVcHostName("server-1");
+      serverMapping.setAsset(assetId);
+      ServerMapping[] serverMappings = { serverMapping };
+      doReturn(new ResponseEntity<>(serverMappings, HttpStatus.OK)).when(restClient).getServerMappingsByVC(any());
+
+      Collection<HostSystem> hostSystems = new ArrayList<>();
+      HostSystem hostSystem = mock(HostSystem.class);
+      ManagedObjectReference managedObjectReference = mock(ManagedObjectReference.class);
+      hostSystems.add(hostSystem);
+      doReturn(managedObjectReference).when(hostSystem)._getRef();
+      doReturn("server-1").when(hostSystem).getName();
+      doReturn(vcMobID).when(managedObjectReference).getValue();
+      doReturn(hostSystems).when(vsphereClient).getAllHost();
+      Asset asset = new Asset();
+      asset.setId(assetId);
+      Map<String, String> metricsFormulas = new HashMap<>();
+      Map<String, String> hostMetricsFormula = new HashMap<>();
+      hostMetricsFormula.put(MetricName.SERVER_TEMPERATURE, asset.getId());
+      hostMetricsFormula.put(MetricName.SERVER_PEAK_TEMPERATURE, asset.getId());
+      hostMetricsFormula.put(MetricName.SERVER_AVERAGE_TEMPERATURE, asset.getId());
+      hostMetricsFormula.put(MetricName.SERVER_ENERGY_CONSUMPTION, asset.getId());
+      hostMetricsFormula.put(MetricName.SERVER_POWER, asset.getId());
+      hostMetricsFormula.put(MetricName.SERVER_AVERAGE_USED_POWER, asset.getId());
+      hostMetricsFormula.put(MetricName.SERVER_PEAK_USED_POWER, asset.getId());
+      hostMetricsFormula.put(MetricName.SERVER_MINIMUM_USED_POWER, asset.getId());
+      metricsFormulas.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(hostMetricsFormula));
+      asset.setMetricsformulars(metricsFormulas);
+      Asset[] assets = { asset };
+      doReturn(new ResponseEntity<>(assets, HttpStatus.OK)).when(restClient).getAssetsByVCID(any());
+      doReturn(new ResponseEntity<Void>(HttpStatus.OK)).when(restClient).saveAssets(any(Asset.class));
+      service.executeAsync(EventMessageUtil.createEventMessage(EventType.VCenter, EventMessageUtil.VCENTER_SyncData, null));
    }
 
 }

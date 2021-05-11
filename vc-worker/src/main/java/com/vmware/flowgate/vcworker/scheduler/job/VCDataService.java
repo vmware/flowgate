@@ -386,39 +386,43 @@ public class VCDataService implements AsyncService {
    }
 
    private void feedAssetMetricsFormulars(Asset asset) {
-
       String assetId = asset.getId();
+      List<String> vcHostMetricsFormulaKeyList = new ArrayList<>(16);
+      // cpu
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_CPUUSAGE);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_CPUUSEDINMHZ);
+      // memory
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_ACTIVEMEMORY);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_BALLOONMEMORY);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_CONSUMEDMEMORY);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_SHAREDMEMORY);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_SWAPMEMORY);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_MEMORYUSAGE);
+      // storage
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_STORAGEIORATEUSAGE);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_STORAGEUSED);
+      // power
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_POWER);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_MINIMUM_USED_POWER);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_PEAK_USED_POWER);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_AVERAGE_USED_POWER);
+      vcHostMetricsFormulaKeyList.add(MetricName.SERVER_ENERGY_CONSUMPTION);
+
       Map<String, String> metricsFormulas = asset.getMetricsformulars();
-      Map<String, String> metrics = null;
+      Map<String, String> hostMetricsFormula = new HashMap<>();
       if (StringUtils.isNotBlank(metricsFormulas.get(FlowgateConstant.HOST_METRICS))) {
-         metrics = asset.metricsFormulaToMap(metricsFormulas.get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
+         hostMetricsFormula = asset.metricsFormulaToMap(metricsFormulas.get(FlowgateConstant.HOST_METRICS), new TypeReference<Map<String, String>>() {});
       }
-      if (metrics == null || metrics.isEmpty()) {
-         metrics = new HashMap<>();
-         // cpu
-         metrics.put(MetricName.SERVER_CPUUSAGE, assetId);
-         metrics.put(MetricName.SERVER_CPUUSEDINMHZ, assetId);
-
-         // memory
-         metrics.put(MetricName.SERVER_ACTIVEMEMORY, assetId);
-         metrics.put(MetricName.SERVER_BALLOONMEMORY, assetId);
-         metrics.put(MetricName.SERVER_CONSUMEDMEMORY, assetId);
-         metrics.put(MetricName.SERVER_SHAREDMEMORY, assetId);
-         metrics.put(MetricName.SERVER_SWAPMEMORY, assetId);
-         metrics.put(MetricName.SERVER_MEMORYUSAGE, assetId);
-
-         // storage
-         metrics.put(MetricName.SERVER_STORAGEIORATEUSAGE, assetId);
-         metrics.put(MetricName.SERVER_STORAGEUSAGE, assetId);
-         metrics.put(MetricName.SERVER_STORAGEUSED, assetId);
-
-         // power
-         metrics.put(MetricName.SERVER_POWER, assetId);
-         metrics.put(MetricName.SERVER_MINIMUM_USED_POWER, assetId);
-         metrics.put(MetricName.SERVER_PEAK_USED_POWER, assetId);
-         metrics.put(MetricName.SERVER_AVERAGE_USED_POWER, assetId);
-         metrics.put(MetricName.SERVER_ENERGY_CONSUMPTION, assetId);
-         metricsFormulas.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(metrics));
+      boolean isUpdated = false;
+      for (String vcHostMetricsFormulaKey : vcHostMetricsFormulaKeyList) {
+         if (!hostMetricsFormula.containsKey(vcHostMetricsFormulaKey)) {
+            hostMetricsFormula.put(vcHostMetricsFormulaKey, assetId);
+            isUpdated = true;
+         }
+      }
+      if (isUpdated) {
+         metricsFormulas.put(FlowgateConstant.HOST_METRICS, asset.metricsFormulaToString(hostMetricsFormula));
+         asset.setMetricsformulars(metricsFormulas);
          restClient.saveAssets(asset);
       }
    }
@@ -1125,9 +1129,7 @@ public class VCDataService implements AsyncService {
    private void syncCustomAttributes(SDDCSoftwareConfig vc) {
       // TODO need to allow only update 1 vcenter instead of all the vcenter.
 
-      try (VsphereClient vsphereClient =
-            VsphereClient.connect(String.format(VCConstants.SDKURL, vc.getServerURL()),
-                  vc.getUserName(), vc.getPassword(), !vc.isVerifyCert());) {
+      try (VsphereClient vsphereClient = connectVsphere(vc)) {
          for (String key : VCConstants.hostCustomAttrMapping.values()) {
             vsphereClient.createCustomAttribute(key, VCConstants.HOSTSYSTEM);
          }
@@ -1179,9 +1181,7 @@ public class VCDataService implements AsyncService {
    private void syncCustomerAttrsData(SDDCSoftwareConfig vcInfo) {
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
 
-      try (VsphereClient vsphereClient =
-            VsphereClient.connect(String.format(VCConstants.SDKURL, vcInfo.getServerURL()),
-                  vcInfo.getUserName(), vcInfo.getPassword(), !vcInfo.isVerifyCert());) {
+      try (VsphereClient vsphereClient = connectVsphere(vcInfo)) {
          ServerMapping[] mappings = null;
          try {
             mappings = restClient.getServerMappingsByVC(vcInfo.getId()).getBody();
@@ -1296,10 +1296,7 @@ public class VCDataService implements AsyncService {
       for (ServerMapping validServer : validMapping) {
          HostSystem host = hostDictionary.get(validServer.getVcMobID());
          Asset asset = assetDictionary.get(validServer.getAsset());
-         String hostMetricsMap = asset.getMetricsformulars().get(FlowgateConstant.HOST_METRICS);
-         if (hostMetricsMap == null || hostMetricsMap.isEmpty()) {
-            feedAssetMetricsFormulars(asset);
-         }
+         feedAssetMetricsFormulars(asset);
          BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(asset);
          for (String key : VCConstants.hostCustomAttrMapping.keySet()) {
             host.setCustomValue(VCConstants.hostCustomAttrMapping.get(key),
