@@ -39,6 +39,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -47,6 +48,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -162,10 +164,6 @@ public class FacilitySoftwareControllerTest {
    @Test
    public void createOpenManageThrowConnectException() throws JsonProcessingException, Exception {
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
-      ListOperations<String, String> listOperations = Mockito.mock(ListOperations.class);
-      Mockito.doReturn(0L).when(listOperations).leftPush(Mockito.anyString(), Mockito.anyString());
-      Mockito.doReturn(listOperations).when(template).opsForList();
-      Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("Connect failed.");
       FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
@@ -190,10 +188,6 @@ public class FacilitySoftwareControllerTest {
       Mockito.doReturn(false).when(openmanageAuth).auth(Mockito.any(FacilitySoftwareConfig.class));
       Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
       Mockito.doReturn(openmanageAuth).when(serverValidationService).createOpenManageAuth();
-      ListOperations<String, String> listOperations = Mockito.mock(ListOperations.class);
-      Mockito.doReturn(0L).when(listOperations).leftPush(Mockito.anyString(), Mockito.anyString());
-      Mockito.doReturn(listOperations).when(template).opsForList();
-      Mockito.doNothing().when(publisher).publish(Mockito.anyString(), Mockito.anyString());
       expectedEx.expect(WormholeRequestException.class);
       expectedEx.expectMessage("Invalid user name or password");
       FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
@@ -210,6 +204,29 @@ public class FacilitySoftwareControllerTest {
          TestCase.fail();
       }
 
+   }
+
+   @Test
+   public void createOpenManageThrowNotFoundException() throws JsonProcessingException, Exception {
+      OpenManageAuth openmanageAuth = Mockito.mock(OpenManageAuth.class);
+      Mockito.doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND,"Not Found")).when(openmanageAuth).auth(Mockito.any(FacilitySoftwareConfig.class));
+      Mockito.doReturn(createuser()).when(tokenService).getCurrentUser(any());
+      Mockito.doReturn(openmanageAuth).when(serverValidationService).createOpenManageAuth();
+      expectedEx.expect(WormholeRequestException.class);
+      expectedEx.expectMessage("Unknown Host.Please check your server IP.");
+      FacilitySoftwareConfig facilitySoftware = createFacilitySoftware();
+      facilitySoftware.setType(SoftwareType.OpenManage);
+      facilitySoftware.setName("myOpenManage");
+      MvcResult result = this.mockMvc
+            .perform(post("/v1/facilitysoftware").contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(facilitySoftware)))
+            .andExpect(status().is4xxClientError())
+            .andReturn();
+      if (result.getResolvedException() != null) {
+         throw result.getResolvedException();
+      } else {
+         TestCase.fail();
+      }
    }
 
    @Test
