@@ -54,7 +54,7 @@ public class VCenterJobDispatcher extends BaseJob implements Job {
       //every 10 days we will trigger a sync CustomAttributes job.
 
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      SDDCSoftwareConfig[] vcServers = restClient.getVCServers().getBody();
+      SDDCSoftwareConfig[] vcServers = restClient.getInternalSDDCSoftwareConfigByType(SDDCSoftwareConfig.SoftwareType.VCENTER).getBody();
       if (vcServers == null || vcServers.length == 0) {
          logger.info("No vcenter server find");
          return;

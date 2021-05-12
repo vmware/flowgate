@@ -54,7 +54,7 @@ public class VROJobDispatcher extends BaseJob implements Job {
       }catch(Exception e) {
          logger.error("Failed to set execount", e);
       }
-      SDDCSoftwareConfig[] vroServers = restClient.getVROServers().getBody();
+      SDDCSoftwareConfig[] vroServers = restClient.getInternalSDDCSoftwareConfigByType(SDDCSoftwareConfig.SoftwareType.VRO).getBody();
       if(vroServers == null || vroServers.length==0) {
          logger.info("No VROps server find");
          return;

@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,6 +172,13 @@ public class SDDCSoftwareController {
          throw WormholeRequestException.NotFound("SDDCSoftwareConfig", "id", server.getId());
       }
       SDDCSoftwareConfig old = oldSddcOptional.get();
+      server.setServerURL(old.getServerURL());
+      server.setType(old.getType());
+      server.setUserId(old.getUserId());
+      if (StringUtils.isBlank(server.getPassword())) {
+         decryptServerPassword(old);
+         server.setPassword(old.getPassword());
+      }
       switch (server.getType()) {
       case VRO:
          serverValidationService.validateVROServer(server);
@@ -183,9 +191,6 @@ public class SDDCSoftwareController {
       }
       encryptServerPassword(server);
       try {
-         server.setServerURL(old.getServerURL());
-         server.setType(old.getType());
-         server.setUserId(old.getUserId());
          BaseDocumentUtil.applyChanges(old, server);
       } catch (Exception e) {
          throw new WormholeRequestException("Faild to update the SDDCSoftware", e);
@@ -197,11 +202,11 @@ public class SDDCSoftwareController {
    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
    public SDDCSoftwareConfig getServerConfig(@PathVariable String id) {
       Optional<SDDCSoftwareConfig> sddcOptional = sddcRepository.findById(id);
-      SDDCSoftwareConfig server = sddcOptional.get();
-      if (server == null) {
-         return null;
+      SDDCSoftwareConfig server = null;
+      if (sddcOptional.isPresent()) {
+         server = sddcOptional.get();
+         server.setPassword(null);
       }
-      decryptServerPassword(server);
       return server;
    }
 
@@ -210,7 +215,9 @@ public class SDDCSoftwareController {
    public List<SDDCSoftwareConfig> getVROServerConfigs() {
       List<SDDCSoftwareConfig> result = sddcRepository.findAllByType(SoftwareType.VRO.name());
       if (result != null) {
-         decryptServerListPassword(result);
+         for (SDDCSoftwareConfig sddcSoftwareConfig : result) {
+            sddcSoftwareConfig.setPassword(null);
+         }
       }
       return result;
    }
@@ -219,7 +226,9 @@ public class SDDCSoftwareController {
    public List<SDDCSoftwareConfig> getVCServerConfigs() {
       List<SDDCSoftwareConfig> result = sddcRepository.findAllByType(SoftwareType.VCENTER.name());
       if (result != null) {
-         decryptServerListPassword(result);
+         for (SDDCSoftwareConfig sddcSoftwareConfig : result) {
+            sddcSoftwareConfig.setPassword(null);
+         }
       }
       return result;
    }
@@ -237,9 +246,10 @@ public class SDDCSoftwareController {
       PageRequest pageRequest = PageRequest.of(currentPage - 1, pageSize);
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       try {
-         Page<SDDCSoftwareConfig> result =
-               sddcRepository.findAllByUserId(user.getUserId(), pageRequest);
-         decryptServerListPassword(result.getContent());
+         Page<SDDCSoftwareConfig> result = sddcRepository.findAllByUserId(user.getUserId(), pageRequest);
+         for (SDDCSoftwareConfig sddcSoftwareConfig : result.getContent()) {
+            sddcSoftwareConfig.setPassword(null);
+         }
          return result;
       } catch (Exception e) {
          throw new WormholeRequestException(e.getMessage());
@@ -268,8 +278,17 @@ public class SDDCSoftwareController {
       WormholeUserDetails user = accessTokenService.getCurrentUser(request);
       List<SDDCSoftwareConfig> datas =
             sddcRepository.findAllByUserIdAndType(user.getUserId(), type.name());
-      decryptServerListPassword(datas);
+      for (SDDCSoftwareConfig sddcSoftwareConfig : datas) {
+         sddcSoftwareConfig.setPassword(null);
+      }
       return datas;
+   }
+
+   @RequestMapping(value = "/internal/type/{type}", method = RequestMethod.GET)
+   public List<SDDCSoftwareConfig> getInternalServerConfigsByUser(@PathVariable("type") SoftwareType type) {
+      List<SDDCSoftwareConfig> result = sddcRepository.findAllByType(type.name());
+      decryptServerListPassword(result);
+      return result;
    }
 
    @ResponseStatus(HttpStatus.CREATED)

@@ -17,10 +17,10 @@ export class VmwareConfigEditComponent implements OnInit {
   editSDDCForm:FormGroup;
   constructor(private service:VmwareService,private router:Router,private activedRoute:ActivatedRoute,private fb: FormBuilder) {
     this.editSDDCForm = this.fb.group({
-      type: ['', [
+      type: [{value:'',disabled: true}, [
         Validators.required
       ]],
-      serverURL: ['', [
+      serverURL: [{value:'',disabled: true}, [
         Validators.required
       ]],
       name: ['', [
@@ -40,7 +40,6 @@ export class VmwareConfigEditComponent implements OnInit {
         Validators.required
       ]],
       password: ['', [
-        Validators.required
       ]],
       verifyCert: ['', [
         Validators.required
@@ -51,7 +50,7 @@ export class VmwareConfigEditComponent implements OnInit {
   operatingModals:boolean = false;
   ignoreCertificatesModals:boolean = false;
   tip:string = "";
- 
+
   checked:boolean;
   read = "";
   vmwareConfig:SddcsoftwareModule = new SddcsoftwareModule();
@@ -78,7 +77,7 @@ export class VmwareConfigEditComponent implements OnInit {
           }
         }
       )
-  
+
   }
   Yes(){
     this.operatingModals = false;
