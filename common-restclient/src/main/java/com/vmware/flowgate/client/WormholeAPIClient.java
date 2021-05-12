@@ -49,6 +49,7 @@ public class WormholeAPIClient extends RestClientBase {
    private static final String ServerMappingByVCURL = "/v1/assets/mapping/vc/%s";
    private static final String GetVCServersURL = "/v1/sddc/vc";
    private static final String GetAssetByVCURL = "/v1/assets/vc/%s";
+   private static final String GetInternalSDDCSoftwareConfigByType = "/v1/sddc/internal/type/%s";
 
    private static final String ServerMappingByVROURL = "/v1/assets/mapping/vrops/%s";
    private static final String GetVROServersURL = "/v1/sddc/vrops";
@@ -186,6 +187,11 @@ public class WormholeAPIClient extends RestClientBase {
    public ResponseEntity<SDDCSoftwareConfig[]> getVCServers() {
       return this.restTemplate.exchange(getAPIServiceEndpoint() + GetVCServersURL, HttpMethod.GET,
             getDefaultEntity(), SDDCSoftwareConfig[].class);
+   }
+
+   public ResponseEntity<SDDCSoftwareConfig[]> getInternalSDDCSoftwareConfigByType(SDDCSoftwareConfig.SoftwareType softwareType) {
+      return this.restTemplate.exchange(getAPIServiceEndpoint() + String.format(GetInternalSDDCSoftwareConfigByType, softwareType), HttpMethod.GET,
+               getDefaultEntity(), SDDCSoftwareConfig[].class);
    }
 
    public ResponseEntity<SystemSummary> getSystemSummary(boolean usecache) {
