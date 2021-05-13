@@ -1093,8 +1093,10 @@ public class AssetService {
          assetAndValueUnitsMap = getServerRawMetrics(asset, starttime, duration);
          //2. Remove or filter
          List<ValueUnit> serverHostUsageValueUnits = assetAndValueUnitsMap.get(assetID);
-         removeServerUnusedMetrics(serverHostUsageValueUnits);
-         filterServerEneryConsumptionMetrics(serverHostUsageValueUnits, starttime);
+         if(serverHostUsageValueUnits != null) {
+            removeServerUnusedMetrics(serverHostUsageValueUnits);
+            filterServerEneryConsumptionMetrics(serverHostUsageValueUnits, starttime);
+         }
          //3. Translate
          return translateToMetricDataForServer(assetAndValueUnitsMap, asset);
       default:
@@ -1202,6 +1204,7 @@ public class AssetService {
                            valueUnits.add(valueUnit);
                         }
                      }
+                     break;
                   default:
                      valueUnits.add(valueUnit);
                      break;
@@ -1578,10 +1581,9 @@ public class AssetService {
          Map<String,String> justficationfileds = server.getJustificationfields();
          String allPduPortInfo = justficationfileds.get(FlowgateConstant.PDU_PORT_FOR_SERVER);
          List<String> pduPorts = null;
-         Map<String, List<String>> pduAssetIdAndUsedOutletMap = null;
+         Map<String, List<String>> pduAssetIdAndUsedOutletMap = new HashMap<String, List<String>>();;
          if (!StringUtils.isEmpty(allPduPortInfo)) {
             pduPorts = Arrays.asList(allPduPortInfo.split(FlowgateConstant.SPILIT_FLAG));
-            pduAssetIdAndUsedOutletMap = new HashMap<String, List<String>>();
             for (String pduPortInfo : pduPorts) {
                // startport_FIELDSPLIT_endDeviceName_FIELDSPLIT_endport_FIELDSPLIT_endDeviceAssetID
                // item[0] start port
