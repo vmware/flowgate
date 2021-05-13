@@ -92,6 +92,7 @@ public class OpenManageJobService implements AsyncService{
    private ObjectMapper mapper = new ObjectMapper();
    private static Map<Integer,String> powerStateMap = new HashMap<Integer,String>();
    private static Map<String, MetricUnit> metricUnitMap = new HashMap<String, MetricUnit>();
+   private static String NULLVALUE = "N/A";
    static {
       powerStateMap.put(PowerState.OFF.getValue(), FlowgatePowerState.OFFHARD.name());
       powerStateMap.put(PowerState.ON.getValue(), FlowgatePowerState.ON.name());
@@ -536,89 +537,113 @@ public class OpenManageJobService implements AsyncService{
       Map<String, ValueUnit> metricNameAndValueUnitMap = new HashMap<String, ValueUnit>();
       //Power metrics data from the Openmanage base API
       if(powerMetricsData != null && CIM.equals(powerMetricsData.getDateFormat())) {
-         ValueUnit instantPower = new ValueUnit();
-         currentTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getInstantaneousHeadroomTimeStamp());
-         instantPower.setKey(MetricName.SERVER_POWER);
-         instantPower.setTime(currentTime);
-         instantPower.setUnit(MetricUnit.kW.name());
-         instantPower.setValueNum(instantPower.translateUnit(powerMetricsData.getPower(),
-                        metricUnitMap.get(powerMetricsData.getPowerUnit()), MetricUnit.kW));
-         metricNameAndValueUnitMap.put(MetricName.SERVER_POWER, instantPower);
+         String power = powerMetricsData.getPower();
+         if(!NULLVALUE.equals(power)) {
+            ValueUnit instantPower = new ValueUnit();
+            currentTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getInstantaneousHeadroomTimeStamp());
+            instantPower.setKey(MetricName.SERVER_POWER);
+            instantPower.setTime(currentTime);
+            instantPower.setUnit(MetricUnit.kW.name());
+            instantPower.setValueNum(instantPower.translateUnit(Double.valueOf(power),
+                           metricUnitMap.get(powerMetricsData.getPowerUnit()), MetricUnit.kW));
+            metricNameAndValueUnitMap.put(MetricName.SERVER_POWER, instantPower);
+         }
 
          long sinceTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getSince());
-         long systemEnergyConsumptionTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getSystemEnergyConsumptionTimeStamp());
-         ValueUnit systemEnergyConsumption = new ValueUnit();
-         systemEnergyConsumption.setTime(systemEnergyConsumptionTime);
-         systemEnergyConsumption.setExtraidentifier(String.valueOf(sinceTime));
-         systemEnergyConsumption.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
-         systemEnergyConsumption.setUnit(MetricUnit.kWh.name());
-         systemEnergyConsumption.setValueNum(systemEnergyConsumption.translateUnit(powerMetricsData.getSystemEnergyConsumption(),
-               metricUnitMap.get(powerMetricsData.getSystemEnergyConsumptionUnit()), MetricUnit.kWh));
-         metricNameAndValueUnitMap.put(MetricName.SERVER_ENERGY_CONSUMPTION, systemEnergyConsumption);
+         String energyConsumption = powerMetricsData.getSystemEnergyConsumption();
+         if(!NULLVALUE.equals(energyConsumption)) {
+            long systemEnergyConsumptionTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getSystemEnergyConsumptionTimeStamp());
+            ValueUnit systemEnergyConsumption = new ValueUnit();
+            systemEnergyConsumption.setTime(systemEnergyConsumptionTime);
+            systemEnergyConsumption.setExtraidentifier(String.valueOf(sinceTime));
+            systemEnergyConsumption.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
+            systemEnergyConsumption.setUnit(MetricUnit.kWh.name());
+            systemEnergyConsumption.setValueNum(systemEnergyConsumption.translateUnit(Double.valueOf(energyConsumption),
+                  metricUnitMap.get(powerMetricsData.getSystemEnergyConsumptionUnit()), MetricUnit.kWh));
+            metricNameAndValueUnitMap.put(MetricName.SERVER_ENERGY_CONSUMPTION, systemEnergyConsumption);
+         }
 
-         ValueUnit avgPower = new ValueUnit();
-         avgPower.setTime(currentTime);
-         avgPower.setExtraidentifier(String.valueOf(sinceTime));
-         avgPower.setKey(MetricName.SERVER_AVERAGE_USED_POWER);
-         avgPower.setUnit(MetricUnit.kW.name());
-         avgPower.setValueNum(avgPower.translateUnit(powerMetricsData.getAvgPower(),
-               metricUnitMap.get(powerMetricsData.getAvgPowerUnit()), MetricUnit.kW));
-         metricNameAndValueUnitMap.put(MetricName.SERVER_AVERAGE_USED_POWER, avgPower);
+         String avgValue = powerMetricsData.getAvgPower();
+         if(!NULLVALUE.equals(avgValue)) {
+            ValueUnit avgPower = new ValueUnit();
+            avgPower.setTime(currentTime);
+            avgPower.setExtraidentifier(String.valueOf(sinceTime));
+            avgPower.setKey(MetricName.SERVER_AVERAGE_USED_POWER);
+            avgPower.setUnit(MetricUnit.kW.name());
+            avgPower.setValueNum(avgPower.translateUnit(Double.valueOf(avgValue),
+                  metricUnitMap.get(powerMetricsData.getAvgPowerUnit()), MetricUnit.kW));
+            metricNameAndValueUnitMap.put(MetricName.SERVER_AVERAGE_USED_POWER, avgPower);
+         }
 
-         ValueUnit peakPower = new ValueUnit();
-         peakPower.setTime(currentTime);
-         long peakPowerTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getPeakPowerTimeStamp());
-         String sinceAndPeakTime = String.valueOf(sinceTime) + FlowgateConstant.SEPARATOR + String.valueOf(peakPowerTime);
-         //Record the since time and peak power time, for example  1612417403074_FIELDSPLIT_1612415606985
-         peakPower.setExtraidentifier(sinceAndPeakTime);
-         peakPower.setKey(MetricName.SERVER_PEAK_USED_POWER);
-         peakPower.setUnit(MetricUnit.kW.name());
-         peakPower.setValueNum(peakPower.translateUnit(powerMetricsData.getPeakPower(),
-               metricUnitMap.get(powerMetricsData.getPeakPowerUnit()), MetricUnit.kW));
-         metricNameAndValueUnitMap.put(MetricName.SERVER_PEAK_USED_POWER, peakPower);
+         String peakValue = powerMetricsData.getPeakPower();
+         if(!NULLVALUE.equals(peakValue)) {
+            ValueUnit peakPower = new ValueUnit();
+            peakPower.setTime(currentTime);
+            long peakPowerTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getPeakPowerTimeStamp());
+            String sinceAndPeakTime = String.valueOf(sinceTime) + FlowgateConstant.SEPARATOR + String.valueOf(peakPowerTime);
+            //Record the since time and peak power time, for example  1612417403074_FIELDSPLIT_1612415606985
+            peakPower.setExtraidentifier(sinceAndPeakTime);
+            peakPower.setKey(MetricName.SERVER_PEAK_USED_POWER);
+            peakPower.setUnit(MetricUnit.kW.name());
+            peakPower.setValueNum(peakPower.translateUnit(Double.valueOf(peakValue),
+                  metricUnitMap.get(powerMetricsData.getPeakPowerUnit()), MetricUnit.kW));
+            metricNameAndValueUnitMap.put(MetricName.SERVER_PEAK_USED_POWER, peakPower);
+         }
 
-         ValueUnit minimumPower = new ValueUnit();
-         minimumPower.setTime(currentTime);
-         long minimumTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getMinimumPowerTimeStamp());
-         String sinceAndMinimum = String.valueOf(sinceTime) + FlowgateConstant.SEPARATOR + String.valueOf(minimumTime);
-         minimumPower.setExtraidentifier(sinceAndMinimum);
-         minimumPower.setKey(MetricName.SERVER_MINIMUM_USED_POWER);
-         minimumPower.setUnit(MetricUnit.kW.name());
-         minimumPower.setValueNum(minimumPower.translateUnit(powerMetricsData.getMinimumPower(),
-               metricUnitMap.get(powerMetricsData.getPeakPowerUnit()), MetricUnit.kW));
-         metricNameAndValueUnitMap.put(MetricName.SERVER_MINIMUM_USED_POWER, minimumPower);
+         String minimumValue = powerMetricsData.getMinimumPower();
+         if(!NULLVALUE.equals(minimumValue)) {
+            ValueUnit minimumPower = new ValueUnit();
+            minimumPower.setTime(currentTime);
+            long minimumTime = WormholeDateFormat.cimDateToMilliseconds(powerMetricsData.getMinimumPowerTimeStamp());
+            String sinceAndMinimum = String.valueOf(sinceTime) + FlowgateConstant.SEPARATOR + String.valueOf(minimumTime);
+            minimumPower.setExtraidentifier(sinceAndMinimum);
+            minimumPower.setKey(MetricName.SERVER_MINIMUM_USED_POWER);
+            minimumPower.setUnit(MetricUnit.kW.name());
+            minimumPower.setValueNum(minimumPower.translateUnit(Double.valueOf(minimumValue),
+                  metricUnitMap.get(powerMetricsData.getPeakPowerUnit()), MetricUnit.kW));
+            metricNameAndValueUnitMap.put(MetricName.SERVER_MINIMUM_USED_POWER, minimumPower);
+         }
       }
       //Temperature metrics data from the Openmanage base API
       DeviceTemperature temperatureMetrics = client.getDeviceTemperatureMetrics(deviceId);
       if(temperatureMetrics != null && CIM.equals(temperatureMetrics.getDateFormat())) {
-         ValueUnit temperature = new ValueUnit();
-         temperature.setKey(MetricName.SERVER_TEMPERATURE);
-         temperature.setTime(currentTime);
-         temperature.setUnit(MetricUnit.C.name());
-         temperature.setValueNum(temperature.translateUnit(temperatureMetrics.getInstantaneousTemperature(),
-               metricUnitMap.get(temperatureMetrics.getInstantaneousTemperatureUnit()), MetricUnit.C));
-         metricNameAndValueUnitMap.put(MetricName.SERVER_TEMPERATURE, temperature);
+         String temperatureValue = temperatureMetrics.getInstantaneousTemperature();
+         if(!NULLVALUE.equals(temperatureValue)) {
+            ValueUnit temperature = new ValueUnit();
+            temperature.setKey(MetricName.SERVER_TEMPERATURE);
+            temperature.setTime(currentTime);
+            temperature.setUnit(MetricUnit.C.name());
+            temperature.setValueNum(temperature.translateUnit(Double.valueOf(temperatureValue),
+                  metricUnitMap.get(temperatureMetrics.getInstantaneousTemperatureUnit()), MetricUnit.C));
+            metricNameAndValueUnitMap.put(MetricName.SERVER_TEMPERATURE, temperature);
+         }
 
          long startTime = WormholeDateFormat.cimDateToMilliseconds(temperatureMetrics.getStartTime());
-         ValueUnit avgTemperature = new ValueUnit();
-         avgTemperature.setKey(MetricName.SERVER_AVERAGE_TEMPERATURE);
-         avgTemperature.setExtraidentifier(String.valueOf(startTime));
-         avgTemperature.setTime(currentTime);
-         avgTemperature.setUnit(MetricUnit.C.name());
-         avgTemperature.setValueNum(avgTemperature.translateUnit(temperatureMetrics.getAvgTemperature(),
-               metricUnitMap.get(temperatureMetrics.getAvgTemperatureUnit()), MetricUnit.C));
-         metricNameAndValueUnitMap.put(MetricName.SERVER_AVERAGE_TEMPERATURE, avgTemperature);
+         String avgValue = temperatureMetrics.getAvgTemperature();
+         if(!NULLVALUE.equals(avgValue)) {
+            ValueUnit avgTemperature = new ValueUnit();
+            avgTemperature.setKey(MetricName.SERVER_AVERAGE_TEMPERATURE);
+            avgTemperature.setExtraidentifier(String.valueOf(startTime));
+            avgTemperature.setTime(currentTime);
+            avgTemperature.setUnit(MetricUnit.C.name());
+            avgTemperature.setValueNum(avgTemperature.translateUnit(Double.valueOf(avgValue),
+                  metricUnitMap.get(temperatureMetrics.getAvgTemperatureUnit()), MetricUnit.C));
+            metricNameAndValueUnitMap.put(MetricName.SERVER_AVERAGE_TEMPERATURE, avgTemperature);
+         }
 
-         ValueUnit peakTemperature = new ValueUnit();
-         peakTemperature.setKey(MetricName.SERVER_PEAK_TEMPERATURE);
-         long peakTime = WormholeDateFormat.cimDateToMilliseconds(temperatureMetrics.getPeakTemperatureTimeStamp());
-         String startAndPeakTime = String.valueOf(startTime) + FlowgateConstant.SEPARATOR + String.valueOf(peakTime);
-         peakTemperature.setExtraidentifier(startAndPeakTime);
-         peakTemperature.setTime(currentTime);
-         peakTemperature.setUnit(MetricUnit.C.name());
-         peakTemperature.setValueNum(peakTemperature.translateUnit(temperatureMetrics.getPeakTemperature(),
-               metricUnitMap.get(temperatureMetrics.getPeakTemperatureUnit()), MetricUnit.C));
-         metricNameAndValueUnitMap.put(MetricName.SERVER_PEAK_TEMPERATURE, peakTemperature);
+         String peakValue = temperatureMetrics.getPeakTemperature();
+         if(!NULLVALUE.equals(peakValue)) {
+            ValueUnit peakTemperature = new ValueUnit();
+            peakTemperature.setKey(MetricName.SERVER_PEAK_TEMPERATURE);
+            long peakTime = WormholeDateFormat.cimDateToMilliseconds(temperatureMetrics.getPeakTemperatureTimeStamp());
+            String startAndPeakTime = String.valueOf(startTime) + FlowgateConstant.SEPARATOR + String.valueOf(peakTime);
+            peakTemperature.setExtraidentifier(startAndPeakTime);
+            peakTemperature.setTime(currentTime);
+            peakTemperature.setUnit(MetricUnit.C.name());
+            peakTemperature.setValueNum(peakTemperature.translateUnit(Double.valueOf(peakValue),
+                  metricUnitMap.get(temperatureMetrics.getPeakTemperatureUnit()), MetricUnit.C));
+            metricNameAndValueUnitMap.put(MetricName.SERVER_PEAK_TEMPERATURE, peakTemperature);
+         }
       }
       //get metrics form power Manage plugin
       if(powerManage != null && powerManagerEnable) {

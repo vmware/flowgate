@@ -325,6 +325,63 @@ public class OpenManageJobTest {
       }
    }
 
+   @Test
+   public void getMetricDatasTestNA() {
+      Mockito.when(this.openManageAPIClient.getCommonResult(Plugin.class)).thenReturn(getCommonResult());
+      DevicePower powerMetrics = getPowerMetricsData();
+      powerMetrics.setMinimumPower("N/A");
+      Mockito.when(this.openManageAPIClient.getDevicePowerMetrics("10074")).thenReturn(powerMetrics);
+      Mockito.when(this.openManageAPIClient.getDeviceTemperatureMetrics("10074")).thenReturn(getDeviceTemperature());
+      Mockito.when(this.openManageAPIClient.getMetricsFromPowerManage(any(PowerManageMetricsRequestBody.class))).thenReturn(getDeviceMetricsResult());
+      Mockito.when(this.openManageAPIClient.getCommonResult(PowerSetting.class)).thenReturn(getPowerSettings());
+      FacilitySoftwareConfig config = new FacilitySoftwareConfig();
+      config.setId(createAsset().getAssetSource());
+      List<RealTimeData> metricDatas = openmanageJobService.getMetricDatas(config, openManageAPIClient);
+      for(RealTimeData data : metricDatas) {
+         if("assetid1611766210404".equals(data.getId())) {
+            //power metrics
+            List<ValueUnit> values = data.getValues();
+            for(ValueUnit value : values) {
+               switch (value.getKey()) {
+               case MetricName.SERVER_AVERAGE_USED_POWER:
+                  TestCase.assertEquals(0.074, value.getValueNum());
+                  break;
+               //use powerManager value to override it
+               case MetricName.SERVER_POWER:
+                  TestCase.assertEquals(0.072, value.getValueNum());
+                  break;
+               case MetricName.SERVER_MINIMUM_USED_POWER:
+                  TestCase.fail("Should not contain the "+MetricName.SERVER_MINIMUM_USED_POWER);
+                  break;
+               case MetricName.SERVER_PEAK_USED_POWER:
+                  TestCase.assertEquals(0.08, value.getValueNum());
+                  break;
+               case MetricName.SERVER_ENERGY_CONSUMPTION:
+                  TestCase.assertEquals(800.0, value.getValueNum());
+                  break;
+               case MetricName.SERVER_AVERAGE_TEMPERATURE:
+                  TestCase.assertEquals(22.0, value.getValueNum());
+                  break;
+               case MetricName.SERVER_TEMPERATURE:
+                  TestCase.assertEquals(24.0, value.getValueNum());
+                  break;
+               case MetricName.SERVER_PEAK_TEMPERATURE:
+                  TestCase.assertEquals(30.0, value.getValueNum());
+                  break;
+               case MetricName.SERVER_FRONT_TEMPERATURE:
+                  TestCase.assertEquals(24.0, value.getValueNum());
+                  break;
+               default:
+                  TestCase.fail();
+                  break;
+               }
+            }
+         }else {
+            TestCase.fail();
+         }
+      }
+   }
+
    public ResponseEntity<Asset[]> getMappedAsset(){
       Asset[] assets = new Asset[2];
       assets[0] = createAsset();
@@ -400,11 +457,11 @@ public class OpenManageJobTest {
    private DevicePower getPowerMetricsData() {
       DevicePower devicePower = new DevicePower();
       devicePower.setDateFormat("CIM");
-      devicePower.setAvgPower(74);
-      devicePower.setPower(72);
-      devicePower.setPeakPower(80);
-      devicePower.setMinimumPower(70);
-      devicePower.setSystemEnergyConsumption(800);
+      devicePower.setAvgPower("74");
+      devicePower.setPower("72");
+      devicePower.setPeakPower("80");
+      devicePower.setMinimumPower("70");
+      devicePower.setSystemEnergyConsumption("800");
       devicePower.setAvgPowerUnit(OpenManageJobService.OpenmanagePowerUnit);
       devicePower.setPeakPowerUnit(OpenManageJobService.OpenmanagePowerUnit);
       devicePower.setPowerUnit(OpenManageJobService.OpenmanagePowerUnit);
@@ -420,12 +477,12 @@ public class OpenManageJobTest {
 
    private DeviceTemperature getDeviceTemperature() {
       DeviceTemperature temperature = new DeviceTemperature();
-      temperature.setAvgTemperature(22);
+      temperature.setAvgTemperature("22");
       temperature.setAvgTemperatureUnit(OpenManageJobService.temperatureUnit);
       temperature.setAvgTemperatureTimeStamp("20210122105010.404804-360");
-      temperature.setInstantaneousTemperature(24);
+      temperature.setInstantaneousTemperature("24");
       temperature.setInstantaneousTemperatureUnit(OpenManageJobService.temperatureUnit);
-      temperature.setPeakTemperature(30);
+      temperature.setPeakTemperature("30");
       temperature.setPeakTemperatureTimeStamp("20210107105010.404804-360");
       temperature.setPeakTemperatureUnit(OpenManageJobService.temperatureUnit);
       temperature.setStartTime("20210101105010.404804-360");

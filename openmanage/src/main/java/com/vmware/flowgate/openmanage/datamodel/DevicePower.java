@@ -15,7 +15,7 @@ public class DevicePower {
    @JsonProperty(value="@odata.id")
    private String odataId;
    @JsonProperty(value="avgPower")
-   private int avgPower;
+   private String avgPower;
    @JsonProperty(value="peakHeadroomUnit")
    private String peakHeadroomUnit;
    @JsonProperty(value="systemEnergyConsumptionUnit")
@@ -37,19 +37,19 @@ public class DevicePower {
    @JsonProperty(value="instantaneousHeadroomUnit")
    private String instantaneousHeadroomUnit;
    @JsonProperty(value="minimumPower")
-   private int minimumPower;
+   private String minimumPower;
    @JsonProperty(value="peakPower")
-   private int peakPower;
+   private String peakPower;
    @JsonProperty(value="DateFormat")
    private String dateFormat;
    @JsonProperty(value="systemEnergyConsumption")
-   private double systemEnergyConsumption;
+   private String systemEnergyConsumption;
    @JsonProperty(value="Since")
    private String since;
    @JsonProperty(value="peakPowerTimeStamp")
    private String peakPowerTimeStamp;
    @JsonProperty(value="power")
-   private int power;
+   private String power;
    @JsonProperty(value="peakPowerUnit")
    private String peakPowerUnit;
    @JsonProperty(value="instantaneousHeadroom")
@@ -76,10 +76,10 @@ public class DevicePower {
    public void setOdataId(String odataId) {
       this.odataId = odataId;
    }
-   public int getAvgPower() {
+   public String getAvgPower() {
       return avgPower;
    }
-   public void setAvgPower(int avgPower) {
+   public void setAvgPower(String avgPower) {
       this.avgPower = avgPower;
    }
    public String getPeakHeadroomUnit() {
@@ -142,16 +142,16 @@ public class DevicePower {
    public void setInstantaneousHeadroomUnit(String instantaneousHeadroomUnit) {
       this.instantaneousHeadroomUnit = instantaneousHeadroomUnit;
    }
-   public int getMinimumPower() {
+   public String getMinimumPower() {
       return minimumPower;
    }
-   public void setMinimumPower(int minimumPower) {
+   public void setMinimumPower(String minimumPower) {
       this.minimumPower = minimumPower;
    }
-   public int getPeakPower() {
+   public String getPeakPower() {
       return peakPower;
    }
-   public void setPeakPower(int peakPower) {
+   public void setPeakPower(String peakPower) {
       this.peakPower = peakPower;
    }
    public String getDateFormat() {
@@ -160,10 +160,10 @@ public class DevicePower {
    public void setDateFormat(String dateFormat) {
       this.dateFormat = dateFormat;
    }
-   public double getSystemEnergyConsumption() {
+   public String getSystemEnergyConsumption() {
       return systemEnergyConsumption;
    }
-   public void setSystemEnergyConsumption(double systemEnergyConsumption) {
+   public void setSystemEnergyConsumption(String systemEnergyConsumption) {
       this.systemEnergyConsumption = systemEnergyConsumption;
    }
    public String getSince() {
@@ -178,10 +178,10 @@ public class DevicePower {
    public void setPeakPowerTimeStamp(String peakPowerTimeStamp) {
       this.peakPowerTimeStamp = peakPowerTimeStamp;
    }
-   public int getPower() {
+   public String getPower() {
       return power;
    }
-   public void setPower(int power) {
+   public void setPower(String power) {
       this.power = power;
    }
    public String getPeakPowerUnit() {
