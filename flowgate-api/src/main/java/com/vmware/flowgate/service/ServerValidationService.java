@@ -151,7 +151,11 @@ public class ServerValidationService {
                   "Invalid user name or password.", e.getCause());
          } else if (HttpStatus.FORBIDDEN.equals(e.getStatusCode())) {
             throw new WormholeRequestException(HttpStatus.FORBIDDEN, "403 Forbidden", e.getCause());
+         } else if(HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
+            throw new WormholeRequestException(HttpStatus.BAD_REQUEST, "Unknown Host.Please check your server IP.", e.getCause(),
+                  WormholeRequestException.UnknownHostCode);
          }
+         throw new WormholeRequestException(HttpStatus.BAD_REQUEST, e.getMessage(), e.getCause());
       }
    }
 
