@@ -247,8 +247,8 @@ public class NlyteDataService implements AsyncService {
       }
 
       //get all serverMapping
-      SDDCSoftwareConfig vcs[] = restClient.getVCServers().getBody();
-      SDDCSoftwareConfig vros[] = restClient.getVROServers().getBody();
+      SDDCSoftwareConfig vcs[] = restClient.getInternalSDDCSoftwareConfigByType(SDDCSoftwareConfig.SoftwareType.VCENTER).getBody();
+      SDDCSoftwareConfig vros[] = restClient.getInternalSDDCSoftwareConfigByType(SDDCSoftwareConfig.SoftwareType.VRO).getBody();
       List<ServerMapping> mappings = new ArrayList<ServerMapping>();
       for(SDDCSoftwareConfig vc : vcs) {
          mappings.addAll(new ArrayList<>(Arrays.asList(restClient.getServerMappingsByVC(vc.getId()).getBody())));
