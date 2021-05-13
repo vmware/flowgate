@@ -3149,6 +3149,45 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void testGetServerMetricsOutLetisNull() {
+      Asset asset = createAsset();
+      List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
+      long time = System.currentTimeMillis();
+      int duration = 30*60*1000;
+      long startTime = time - duration;
+      RealTimeData pduUsageMetricData = createPduAllRealTimeData(startTime);
+      pduUsageMetricData.setAssetID("0001bdc8b25d4c2badfd045ab61aabfa");
+      realTimeDatas.add(pduUsageMetricData);
+      realtimeDataRepository.saveAll(realTimeDatas);
+
+      asset = fillingMetricsformula(asset);
+      asset = assetRepository.save(asset);
+
+      List<MetricData> metricDatas =
+            assetService.getMetricsByID(asset.getId(), startTime, duration);
+      for(MetricData serverdata : metricDatas) {
+         String metricName = serverdata.getMetricName();
+         if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_POWER_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.05, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_CURRENT_LOAD, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.05, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_CURRENT, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(1.455, serverdata.getValueNum());
+         }else if(String.format(MetricKeyName.SERVER_CONNECTED_PDUX_TOTAL_POWER, "0001bdc8b25d4c2badfd045ab61aabfa").
+                  equals(metricName)) {
+            TestCase.assertEquals(0.322, serverdata.getValueNum());
+         }else {
+            TestCase.fail("Unkown metric: "+metricName);
+         }
+      }
+      assetRepository.deleteById(asset.getId());
+      realtimeDataRepository.deleteById(pduUsageMetricData.getId());
+   }
+
+   @Test
    public void testGetMetricsDurationAPI() throws Exception {
       FieldDescriptor[] fieldpath = new FieldDescriptor[] {
             fieldWithPath("metricName").description("metric name").type(JsonFieldType.STRING),
