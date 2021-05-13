@@ -169,6 +169,7 @@ export class ServermappingComponent implements OnInit {
       (data:AssetModule)=>{
         this.mappedServerAsset= data;
         this.mappedServerAsset.enable = true;
+        this.selectedServerAsset = this.mappedServerAsset;
       }
     )
     return asset;
