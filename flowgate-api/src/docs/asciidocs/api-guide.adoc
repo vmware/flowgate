@@ -67,34 +67,44 @@ The Asset provides the entry point into the service.
 
 A `GET` request is used to access the Asset read by ID.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getByID-example/path-parameters.adoc[]
+
 ==== Request structure
 
-include::{snippets}/assets-get-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-get-example/http-response.adoc[]
+include::{snippets}/assets-getByID-example/http-request.adoc[]
 
 ==== CURL request
 
-include::{snippets}/assets-get-example/curl-request.adoc[]
+include::{snippets}/assets-getByID-example/curl-request.adoc[]
 
 ==== Response Fields
 
-include::{snippets}/assets-get-example/response-fields.adoc[]
+include::{snippets}/assets-getByID-example/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getByID-example/http-response.adoc[]
 
 [[resources-assets-getAssetByName]]
 === getAssetByName
 
 A `GET` request is used to access the Asset read by name.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getAssetByName-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getAssetByName-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getAssetByName-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -104,18 +114,25 @@ include::{snippets}/assets-getAssetByName-example/curl-request.adoc[]
 
 include::{snippets}/assets-getAssetByName-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getAssetByName-example/http-response.adoc[]
+
 [[resources-assets-getAssetByAssetNumberAndName]]
 === getAssetByAssetNumberAndName
 
 A `GET` request is used to access the Asset read by assetNumber and assetName.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getAssetByAssetNumberAndName-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getAssetByAssetNumberAndName-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getAssetByAssetNumberAndName-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -125,18 +142,29 @@ include::{snippets}/assets-getAssetByAssetNumberAndName-example/curl-request.ado
 
 include::{snippets}/assets-getAssetByAssetNumberAndName-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getAssetByAssetNumberAndName-example/http-response.adoc[]
+
 [[resources-assets-getBySourceAndType]]
 === getAssetsBySourceAndType
 
 A `GET` request is used to access the Asset read by source and type.Support fuzzy search based on source.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getBySourceAndType-example/path-parameters.adoc[]
+
+==== Request parameters
+
+include::{snippets}/assets-getBySourceAndType-example/request-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getBySourceAndType-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getBySourceAndType-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -146,18 +174,29 @@ include::{snippets}/assets-getBySourceAndType-example/curl-request.adoc[]
 
 include::{snippets}/assets-getBySourceAndType-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getBySourceAndType-example/http-response.adoc[]
+
 [[resources-assets-getBySource]]
 === getAssetsBySource
 
 (Deprecated)A `GET` request is used to access the assets read by source.No Support fuzzy search based on source.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getBySource-example/path-parameters.adoc[]
+
+==== Request parameters
+
+include::{snippets}/assets-getBySource-example/request-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getBySource-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getBySource-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -167,18 +206,29 @@ include::{snippets}/assets-getBySource-example/curl-request.adoc[]
 
 include::{snippets}/assets-getBySource-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getBySource-example/http-response.adoc[]
+
 [[resources-assets-getByType]]
 === getAssetsByType
 
-A `GET` request is used to access the Asset read by type.
+A `GET` request is used to access Asset by type.
+
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getByType-example/path-parameters.adoc[]
+
+==== Request parameters
+
+include::{snippets}/assets-getByType-example/request-parameters.adoc[]
 
 ==== Request structure
 
 include::{snippets}/assets-getByType-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getByType-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -188,18 +238,25 @@ include::{snippets}/assets-getByType-example/curl-request.adoc[]
 
 include::{snippets}/assets-getByType-example/response-fields.adoc[]
 
-[[resources-assets-getMapped]]
-=== getAssetsMapped
+==== Example response
 
-A `GET` request is used to access the Asset read mapped.
+include::{snippets}/assets-getByType-example/http-response.adoc[]
+
+[[resources-assets-getMapped]]
+=== getMappedAssets
+
+A `GET` request is used to access the mapped Assets by category.
+
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getMapped-example/path-parameters.adoc[]
 
 ==== Request structure
 
 include::{snippets}/assets-getMapped-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getMapped-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -208,6 +265,10 @@ include::{snippets}/assets-getMapped-example/curl-request.adoc[]
 ==== Response Fields
 
 include::{snippets}/assets-getMapped-example/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getMapped-example/http-response.adoc[]
 
 [[resources-assets-findServersWithoutPDUInfo]]
 === findAssetsWithoutPDUInformation
@@ -218,10 +279,6 @@ A `GET` request is used to get Assets List without PDU Information.
 
 include::{snippets}/assets-findServersWithoutPDUInfo-example/http-request.adoc[]
 
-==== Example response
-
-include::{snippets}/assets-findServersWithoutPDUInfo-example/http-response.adoc[]
-
 ==== CURL request
 
 include::{snippets}/assets-findServersWithoutPDUInfo-example/curl-request.adoc[]
@@ -230,39 +287,46 @@ include::{snippets}/assets-findServersWithoutPDUInfo-example/curl-request.adoc[]
 
 include::{snippets}/assets-findServersWithoutPDUInfo-example/response-fields.adoc[]
 
-[[resources-assets-getByAssetNameAndTagLik]]
-=== getAssetByAssetNameAndTagLik
+==== Example response
 
-A `GET` request is used to access the Asset read by assetName and tagLik.
+include::{snippets}/assets-findServersWithoutPDUInfo-example/http-response.adoc[]
+
+[[resources-assets-getAssetsByPage]]
+=== getAssetsByPage
+
+A `GET` request is used to access the Asset by page.
 
 ==== Request structure
 
-include::{snippets}/assets-getByAssetNameAndTagLik-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getByAssetNameAndTagLik-example/http-response.adoc[]
+include::{snippets}/assets-getAssetsByPage-example/http-request.adoc[]
 
 ==== CURL request
 
-include::{snippets}/assets-getByAssetNameAndTagLik-example/curl-request.adoc[]
+include::{snippets}/assets-getAssetsByPage-example/curl-request.adoc[]
 
 ==== Response Fields
 
-include::{snippets}/assets-getByAssetNameAndTagLik-example/response-fields.adoc[]
+include::{snippets}/assets-getAssetsByPage-example/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getAssetsByPage-example/http-response.adoc[]
 
 [[resources-assets-getByAssetNameAndTagLikAndKeywords]]
 === getAssetByAssetNameAndTagLikAndKeywords
 
 A `GET` request is used to access the Asset read by assetName and tagLik and keywords.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getByAssetNameAndTagLikAndKeywords-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getByAssetNameAndTagLikAndKeywords-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getByAssetNameAndTagLikAndKeywords-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -272,18 +336,25 @@ include::{snippets}/assets-getByAssetNameAndTagLikAndKeywords-example/curl-reque
 
 include::{snippets}/assets-getByAssetNameAndTagLikAndKeywords-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getByAssetNameAndTagLikAndKeywords-example/http-response.adoc[]
+
 [[resources-assets-getPageMappingsByVROPSId]]
 === getServerMappingByVROpsIDwithPagenation
 
 A `GET` request is used to access the ServerMapping read Page by VropsID.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getPageMappingsByVROPSId-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getPageMappingsByVROPSId-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getPageMappingsByVROPSId-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -293,18 +364,25 @@ include::{snippets}/assets-getPageMappingsByVROPSId-example/curl-request.adoc[]
 
 include::{snippets}/assets-getPageMappingsByVROPSId-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getPageMappingsByVROPSId-example/http-response.adoc[]
+
 [[resources-assets-getPageMappingsByVCId]]
 === getServerMapingByvCenterIDWithPagenation
 
 A `GET` request is used to access the ServerMapping read Page by VCID.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getPageMappingsByVCId-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getPageMappingsByVCId-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getPageMappingsByVCId-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -313,6 +391,10 @@ include::{snippets}/assets-getPageMappingsByVCId-example/curl-request.adoc[]
 ==== Response Fields
 
 include::{snippets}/assets-getPageMappingsByVCId-example/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getPageMappingsByVCId-example/http-response.adoc[]
 
 [[resources-assets-createHostNameIPMapping]]
 === createHostNameIPMapping
@@ -349,34 +431,45 @@ include::{snippets}/assets-updateHostNameIPMapping-example/http-response.adoc[]
 include::{snippets}/assets-updateHostNameIPMapping-example/curl-request.adoc[]
 
 [[resources-assets-deleteAssetIPAndNameMapping]]
-=== updateHostNameIPMapping
+=== deleteHostNameIPMapping
 
 A `DELETE` request is used to delete an assetIPMapping by Id.
+
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-deleteAssetIPAndNameMapping-example/path-parameters.adoc[]
 
 ==== Request structure
 
 include::{snippets}/assets-deleteAssetIPAndNameMapping-example/http-request.adoc[]
 
-==== Example response
-
-include::{snippets}/assets-deleteAssetIPAndNameMapping-example/http-response.adoc[]
-
 ==== CURL request
 
 include::{snippets}/assets-deleteAssetIPAndNameMapping-example/curl-request.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-deleteAssetIPAndNameMapping-example/http-response.adoc[]
 
 [[resources-assets-getHostNameIPMappingByPage]]
 === getHostNameIPMappingByPage
 
 A `GET` request is used to access the assetIPMapping by IP.
 
+==== Request parameters
+
+Path: 
+
+/v1/assets/mapping/hostnameip
+
+include::{snippets}/assets-getHostNameIPMappingByPage-example/request-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getHostNameIPMappingByPage-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getHostNameIPMappingByPage-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -386,18 +479,25 @@ include::{snippets}/assets-getHostNameIPMappingByPage-example/curl-request.adoc[
 
 include::{snippets}/assets-getHostNameIPMappingByPage-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getHostNameIPMappingByPage-example/http-response.adoc[]
+
 [[resources-assets-getHostNameByIP]]
 === getAssetNameIPMappingByIP
 
 A `GET` request is used to access the assetIPMapping By IP.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getHostNameByIP-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getHostNameByIP-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getHostNameByIP-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -407,18 +507,26 @@ include::{snippets}/assets-getHostNameByIP-example/curl-request.adoc[]
 
 include::{snippets}/assets-getHostNameByIP-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getHostNameByIP-example/http-response.adoc[]
+
 [[resources-assets-fuzzyQueryServerAssetNames]]
 === fuzzyQueryServerAssetNames
 
 A `GET` request is used to fuzzy query server names.
 
+==== Request parameters
+
+Path:
+
+/v1/assets/names
+
+include::{snippets}/assets-fuzzyQueryServerAssetNames-example/request-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-fuzzyQueryServerAssetNames-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-fuzzyQueryServerAssetNames-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -427,6 +535,10 @@ include::{snippets}/assets-fuzzyQueryServerAssetNames-example/curl-request.adoc[
 ==== Response Fields
 
 include::{snippets}/assets-fuzzyQueryServerAssetNames-example/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-fuzzyQueryServerAssetNames-example/http-response.adoc[]
 
 [[resources-assets-getUnmappedServers]]
 === getUnmappedServers
@@ -437,10 +549,6 @@ A `GET` request is used to access the ServerMapping GET Unmapped Servers.
 
 include::{snippets}/assets-getUnmappedServers-example/http-request.adoc[]
 
-==== Example response
-
-include::{snippets}/assets-getUnmappedServers-example/http-response.adoc[]
-
 ==== CURL request
 
 include::{snippets}/assets-getUnmappedServers-example/curl-request.adoc[]
@@ -449,60 +557,77 @@ include::{snippets}/assets-getUnmappedServers-example/curl-request.adoc[]
 
 include::{snippets}/assets-getUnmappedServers-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getUnmappedServers-example/http-response.adoc[]
+
 [[resources-assets-getAssetsByVcId]]
 === getMappedAssetsByvCenterID
 
 A `GET` request is used to access the asset read by VCId.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getAssetsByVcId-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getAssetsByVcId-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getAssetsByVcId-example/http-response.adoc[]
 
 ==== CURL request
 
 include::{snippets}/assets-getAssetsByVcId-example/curl-request.adoc[]
 
-==== Request Fields
+==== Example response
 
-include::{snippets}/assets-getAssetsByVCId-example/request-fields.adoc[]
+include::{snippets}/assets-getAssetsByVcId-example/http-response.adoc[]
 
 [[resources-assets-getAssetsByVroId]]
 === getMappedAssetsByvroID
 
 A `GET` request is used to access the asset read by VroId.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getAssetsByVroId-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getAssetsByVroId-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getAssetsByVroId-example/http-response.adoc[]
 
 ==== CURL request
 
 include::{snippets}/assets-getAssetsByVroId-example/curl-request.adoc[]
 
-==== Request Fields
+==== Example response
 
-include::{snippets}/assets-getAssetsByVroId-example/request-fields.adoc[]
+include::{snippets}/assets-getAssetsByVroId-example/http-response.adoc[]
 
 [[resources-assets-getServerMetricsData]]
 === getServerMetricsData
 
 (Deprecated)A `GET` request is used to get server's metrics Data.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getServerMetricsData-example/path-parameters.adoc[]
+
+==== Request parameters
+
+include::{snippets}/assets-getServerMetricsData-example/request-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getServerMetricsData-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getServerMetricsData-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -512,18 +637,29 @@ include::{snippets}/assets-getServerMetricsData-example/curl-request.adoc[]
 
 include::{snippets}/assets-getServerMetricsData-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getServerMetricsData-example/http-response.adoc[]
+
 [[resources-assets-getPduMetricsData]]
 === getPduMetricsData
 
 (Deprecated)A `GET` request is used to get PDU metrics Data.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getPduMetricsData-example/path-parameters.adoc[]
+
+==== Request parameters
+
+include::{snippets}/assets-getPduMetricsData-example/request-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getPduMetricsData-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getPduMetricsData-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -533,18 +669,29 @@ include::{snippets}/assets-getPduMetricsData-example/curl-request.adoc[]
 
 include::{snippets}/assets-getPduMetricsData-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getPduMetricsData-example/http-response.adoc[]
+
 [[resources-assets-getLatestAssetMetricsData]]
 === getLatestAssetMetricsData
 
 A `GET` request is used to obtain the latest indicator data within the current time through AssetId.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getLatestAssetMetricsData-Server-example/path-parameters.adoc[]
+
+==== Request parameters
+
+include::{snippets}/assets-getLatestAssetMetricsData-Server-example/request-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getLatestAssetMetricsData-Server-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getLatestAssetMetricsData-Server-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -553,6 +700,10 @@ include::{snippets}/assets-getLatestAssetMetricsData-Server-example/curl-request
 ==== Response Fields
 
 include::{snippets}/assets-getLatestAssetMetricsData-Server-example/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getLatestAssetMetricsData-Server-example/http-response.adoc[]
 
 [[resources-assets-getAllMetricsDataInDuration]]
 === getAssetMetricsData
@@ -564,13 +715,20 @@ Currently we only support obtaining data within one hour.
 For example startTime is 1302663085000l, duration is 300000, you will get all metrics data 
 which are created between 1302663085000l and 1302663085000l+300000.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/path-parameters.adoc[]
+
+==== Request parameters
+
+include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/request-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -579,6 +737,10 @@ include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/curl-reque
 ==== Response Fields
 
 include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/assets-getAllMetricsDataInDuration-Server-example/http-response.adoc[]
 
 [[resources-assets-removeRealTimeData]]
 === removeRealTimeData
@@ -771,13 +933,16 @@ include::{snippets}/assets-updateServerMapping-example/request-fields.adoc[]
 
 A `GET` request is used to access the ServerMApping read by ID.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-getServerMappingByID-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-getServerMappingByID-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-getServerMappingByID-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -787,44 +952,57 @@ include::{snippets}/assets-getServerMappingByID-example/curl-request.adoc[]
 
 include::{snippets}/assets-getServerMappingByID-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-getServerMappingByID-example/http-response.adoc[]
+
 [[resources-asset-deleteServerMapping]]
 === deleteAssetServerMapping
 
 A `DELETE` request is used to access the ServerMapping delete.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-deleteServerMapping-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-deleteServerMapping-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-deleteServerMapping-example/http-response.adoc[]
 
 ==== CURL request
 
 include::{snippets}/assets-deleteServerMapping-example/curl-request.adoc[]
 
+==== Example response
+
+include::{snippets}/assets-deleteServerMapping-example/http-response.adoc[]
 
 [[resources-asset-mergeServerMapping]]
 === mergeAssetServerMappingByMappingID
 
 A `PUT` request is used to access the merge two ServerMapping.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-mergeServerMapping-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-mergeServerMapping-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-mergeServerMapping-example/http-response.adoc[]
 
 ==== CURL request
 
 include::{snippets}/assets-mergeServerMapping-example/curl-request.adoc[]
 
-==== Request Fields
+==== Example response
 
-include::{snippets}/assets-mergeServerMapping-example/request-fields.adoc[]
+include::{snippets}/assets-mergeServerMapping-example/http-response.adoc[]
 
 
 [[resources-asset-delete]]
@@ -832,61 +1010,97 @@ include::{snippets}/assets-mergeServerMapping-example/request-fields.adoc[]
 
 A `DELETE` request is used to access the Asset delete.
 
+==== Path parameters
+
+Path: 
+[caption=]
+
+include::{snippets}/assets-delete-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/assets-delete-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/assets-delete-example/http-response.adoc[]
 
 ==== CURL request
 
 include::{snippets}/assets-delete-example/curl-request.adoc[]
 
-==== Request Fields
+==== Example response
 
-include::{snippets}/assets-delete-example/request-fields.adoc[]
-
+include::{snippets}/assets-delete-example/http-response.adoc[]
 
 [[resources-facilitySoftware]]
 == /v1/facilitysoftware
 
 The facilitySoftware provides the entry point into the service.
 
-[[resources-facilitySoftware-get]]
+[[resources-facilitySoftware-getByPage]]
 === getFacilitySoftwaresWithPagenation
 
-A `GET` request is used to access the facilitySoftware read.
+A `GET` request is used to get facilitySoftware by page.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/facilitySoftware-queryByPage-example/path-parameters.adoc[]
 
 ==== Request structure
 
-include::{snippets}/facilitySoftware-query-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/facilitySoftware-query-example/http-response.adoc[]
+include::{snippets}/facilitySoftware-queryByPage-example/http-request.adoc[]
 
 ==== CURL request
 
-include::{snippets}/facilitySoftware-query-example/curl-request.adoc[]
+include::{snippets}/facilitySoftware-queryByPage-example/curl-request.adoc[]
 
-==== Response Fields
+==== Example response
 
-include::{snippets}/facilitySoftware-query-example/request-fields.adoc[]
+include::{snippets}/facilitySoftware-queryByPage-example/http-response.adoc[]
+
+[[resources-facilitySoftware-getByTypeAndPage]]
+=== getFacilitySoftwaresByTypeAndPage
+
+A `GET` request is used to get facilitySoftware by type and page.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/facilitySoftware-queryByTypeAndPage-example/path-parameters.adoc[]
+
+==== Request parameters
+
+include::{snippets}/facilitySoftware-queryByTypeAndPage-example/request-parameters.adoc[]
+
+==== Request structure
+
+include::{snippets}/facilitySoftware-queryByTypeAndPage-example/http-request.adoc[]
+
+==== CURL request
+
+include::{snippets}/facilitySoftware-queryByTypeAndPage-example/curl-request.adoc[]
+
+==== Example response
+
+include::{snippets}/facilitySoftware-queryByTypeAndPage-example/http-response.adoc[]
 
 [[resources-facilitySoftware-getFacilitySoftwareConfigByType]]
 === getFacilitySoftwaresByType
 
-A `GET` request is used to access the facilitySoftware read By Type.
+A `GET` request is used to get facilitySoftware By Type.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/facilitySoftware-getFacilitySoftwareConfigByType-example/path-parameters.adoc[]
 
 ==== Request structure
 
 include::{snippets}/facilitySoftware-getFacilitySoftwareConfigByType-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/facilitySoftware-getFacilitySoftwareConfigByType-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -895,6 +1109,10 @@ include::{snippets}/facilitySoftware-getFacilitySoftwareConfigByType-example/cur
 ==== Response Fields
 
 include::{snippets}/facilitySoftware-getFacilitySoftwareConfigByType-example/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/facilitySoftware-getFacilitySoftwareConfigByType-example/http-response.adoc[]
 
 [[resources-facilitySoftware-post]]
 === createFacilitySoftware
@@ -959,7 +1177,14 @@ include::{snippets}/facilitySoftware-update-example/request-fields.adoc[]
 [[resources-facilitySoftware-delete]]
 === deleteFacilitySoftwareByID
 
-A `DELETE` request is used to access the facilitySoftware delete.
+A `DELETE` request is used to delete a facilitySoftware by ID.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/facilitySoftware-delete-example/path-parameters.adoc[]
 
 ==== Request structure
 
@@ -973,11 +1198,6 @@ include::{snippets}/facilitySoftware-delete-example/http-response.adoc[]
 
 include::{snippets}/facilitySoftware-delete-example/curl-request.adoc[]
 
-==== Request Fields
-
-include::{snippets}/facilitySoftware-delete-example/request-fields.adoc[]
-
-
 [[resources-SDDCSoftware]]
 == /v1/sddc
 
@@ -988,13 +1208,16 @@ The SDDCSoftware provides the entry point into the service.
 
 A `GET` request is used to access the SDDCSoftware read.
 
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/SDDCSoftware-query-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/SDDCSoftware-query-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/SDDCSoftware-query-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -1004,18 +1227,25 @@ include::{snippets}/SDDCSoftware-query-example/curl-request.adoc[]
 
 include::{snippets}/SDDCSoftware-query-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/SDDCSoftware-query-example/http-response.adoc[]
+
 [[resources-SDDCSoftware-getByType]]
 === getSDDCSoftwareByType
 
-A `GET` request is used to access the SDDCSoftware by type.
+A `GET` request is used to get SDDCSoftware by type.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/SDDCSoftware-queryByType-example/path-parameters.adoc[]
 
 ==== Request structure
 
 include::{snippets}/SDDCSoftware-queryByType-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/SDDCSoftware-queryByType-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -1024,6 +1254,10 @@ include::{snippets}/SDDCSoftware-queryByType-example/curl-request.adoc[]
 ==== Response Fields
 
 include::{snippets}/SDDCSoftware-queryByType-example/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/SDDCSoftware-queryByType-example/http-response.adoc[]
 
 [[resources-SDDCSoftware-getVROServerConfigs]]
 === getVROpsServers
@@ -1151,7 +1385,14 @@ include::{snippets}/SDDCSoftware-update-example/request-fields.adoc[]
 [[resources-SDDCSoftware-delete]]
 === deleteSDDCServerByID
 
-A `DELETE` request is used to access the SDDCSoftware delete.
+A `DELETE` request is used to delete a SDDCSoftwareConfig.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/SDDCSoftware-delete-example/path-parameters.adoc[]
 
 ==== Request structure
 
@@ -1259,7 +1500,14 @@ include::{snippets}/sensorSetting-update-example/request-fields.adoc[]
 [[resources-sensorSetting-delete]]
 === deleteSensorSettingByID
 
-A `DELETE` request is used to access the sensorSetting delete.
+A `DELETE` request is used to delete a sensorSetting.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/sensorSetting-delete-example/path-parameters.adoc[]
 
 ==== Request structure
 
@@ -1272,11 +1520,6 @@ include::{snippets}/sensorSetting-delete-example/http-response.adoc[]
 ==== CURL request
 
 include::{snippets}/sensorSetting-delete-example/curl-request.adoc[]
-
-==== Request Fields
-
-include::{snippets}/sensorSetting-delete-example/request-fields.adoc[]
-
 
 == /v1/jobs
 
@@ -1448,7 +1691,14 @@ include::{snippets}/AuthController-updateRole-example/request-fields.adoc[]
 [[resources-AuthController-deleteRole]]
 === deleteRoleById
 
-A `DELETE` request is used to access the AuthController delete Role.
+A `DELETE` request is used to delete a role.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/AuthController-deleteRole-example/path-parameters.adoc[]
 
 ==== Request structure
 
@@ -1462,14 +1712,18 @@ include::{snippets}/AuthController-deleteRole-example/http-response.adoc[]
 
 include::{snippets}/AuthController-deleteRole-example/curl-request.adoc[]
 
-==== Request Fields
-
-include::{snippets}/AuthController-deleteRole-example/request-fields.adoc[]
-
 [[resources-AuthController-readRoleByPage]]
 === getRolesWithPagenation
 
 A `GET` request is used to access the AuthController GET Roles By Page.
+
+Path:
+
+/v1/auth/role
+
+==== Request parameters
+
+include::{snippets}/AuthController-readRoleByPage-example/request-parameters.adoc[]
 
 ==== Request structure
 
@@ -1483,15 +1737,17 @@ include::{snippets}/AuthController-readRoleByPage-example/http-response.adoc[]
 
 include::{snippets}/AuthController-readRoleByPage-example/curl-request.adoc[]
 
-==== Request Fields
-
-include::{snippets}/AuthController-readRoleByPage-example/request-fields.adoc[]
-
-
 [[resources-AuthController-readOneRoleById]]
 === getRoleById
 
-A `GET` request is used to access the AuthController GET One Role By Id.
+A `GET` request is used to GET a Role By Id.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/AuthController-readOneRoleById-example/path-parameters.adoc[]
 
 ==== Request structure
 
@@ -1533,23 +1789,26 @@ include::{snippets}/AuthController-createUser-example/request-fields.adoc[]
 [[resources-AuthController-deleteUser]]
 === deleteUser
 
-A `DELETE` request is used to access the AuthController delete User.
+A `DELETE` request is used to delete a User.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/AuthController-deleteUser-example/path-parameters.adoc[]
 
 ==== Request structure
 
 include::{snippets}/AuthController-deleteUser-example/http-request.adoc[]
 
-==== Example response
-
-include::{snippets}/AuthController-deleteUser-example/http-response.adoc[]
-
 ==== CURL request
 
 include::{snippets}/AuthController-deleteUser-example/curl-request.adoc[]
 
-==== Request Fields
+==== Example response
 
-include::{snippets}/AuthController-deleteUser-example/request-fields.adoc[]
+include::{snippets}/AuthController-deleteUser-example/http-response.adoc[]
 
 [[resources-AuthController-updateUser]]
 === updateUser
@@ -1575,15 +1834,18 @@ include::{snippets}/AuthController-updateUser-example/request-fields.adoc[]
 [[resources-AuthController-readOneUserById]]
 === getUserById
 
-A `GET` request is used to access the AuthController GET One User By Id.
+A `GET` request is used to get a User By Id.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/AuthController-readOneUserById-example/path-parameters.adoc[]
 
 ==== Request structure
 
 include::{snippets}/AuthController-readOneUserById-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/AuthController-readOneUserById-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -1593,18 +1855,25 @@ include::{snippets}/AuthController-readOneUserById-example/curl-request.adoc[]
 
 include::{snippets}/AuthController-readOneUserById-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/AuthController-readOneUserById-example/http-response.adoc[]
+
 [[resources-AuthController-readOneUserByUserName]]
 === getUserByUserName
 
 A `GET` request is used to access the AuthController GET One User By User Name.
 
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/AuthController-readOneUserByUserName-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/AuthController-readOneUserByUserName-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/AuthController-readOneUserByUserName-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -1614,27 +1883,34 @@ include::{snippets}/AuthController-readOneUserByUserName-example/curl-request.ad
 
 include::{snippets}/AuthController-readOneUserByUserName-example/response-fields.adoc[]
 
+==== Example response
+
+include::{snippets}/AuthController-readOneUserByUserName-example/http-response.adoc[]
+
 [[resources-AuthController-readUsersByPage]]
 === getUsersWithPagenation
 
 A `GET` request is used to access the AuthController GET Users By Page.
 
+Path:
+
+/v1/auth/user
+
+==== Request parameters
+
+include::{snippets}/AuthController-readUsersByPage-example/request-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/AuthController-readUsersByPage-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/AuthController-readUsersByPage-example/http-response.adoc[]
 
 ==== CURL request
 
 include::{snippets}/AuthController-readUsersByPage-example/curl-request.adoc[]
 
-==== Request Fields
+==== Example response
 
-include::{snippets}/AuthController-readUsersByPage-example/request-fields.adoc[]
-
+include::{snippets}/AuthController-readUsersByPage-example/http-response.adoc[]
 
 [[resources-AuthController-CreateAccessToken]]
 === createAccessToken
@@ -1785,34 +2061,40 @@ include::{snippets}/facilityadapter-update-example/request-fields.adoc[]
 
 A `DELETE` request is used to access the FacilityAdapter delete.
 
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/facilityadapter-deleteById-example/path-parameters.adoc[]
+
 ==== Request structure
 
 include::{snippets}/facilityadapter-deleteById-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/facilityadapter-deleteById-example/http-response.adoc[]
 
 ==== CURL request
 
 include::{snippets}/facilityadapter-deleteById-example/curl-request.adoc[]
 
-==== Request Fields
+==== Example response
 
-include::{snippets}/facilityadapter-deleteById-example/request-fields.adoc[]
+include::{snippets}/facilityadapter-deleteById-example/http-response.adoc[]
 
 [[resources-facilityadapter-queryByPage]]
 === getFacilityadapterWithPagenation
 
-A `GET` request is used to access the facilityadapter read by Page.
+A `GET` request is used to read facilityadapter by Page.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/facilityadapter-findByPage-example/path-parameters.adoc[]
 
 ==== Request structure
 
 include::{snippets}/facilityadapter-findByPage-example/http-request.adoc[]
-
-==== Example response
-
-include::{snippets}/facilityadapter-findByPage-example/http-response.adoc[]
 
 ==== CURL request
 
@@ -1820,25 +2102,29 @@ include::{snippets}/facilityadapter-findByPage-example/curl-request.adoc[]
 
 ==== Response Fields
 
-include::{snippets}/facilityadapter-findByPage-example/request-fields.adoc[]
+include::{snippets}/facilityadapter-findByPage-example/response-fields.adoc[]
+
+==== Example response
+
+include::{snippets}/facilityadapter-findByPage-example/http-response.adoc[]
 
 [[resources-facilityadapter-queryById]]
 === getFacilityadapterById
 
-A `GET` request is used to access the facilityadapter by ID.
+A `GET` request is used to get a facilityadapter by ID.
+
+==== Path parameters
+
+Path:
+[caption=]
+
+include::{snippets}/facilityadapter-findOneById-example/path-parameters.adoc[]
 
 ==== Request structure
 
 include::{snippets}/facilityadapter-findOneById-example/http-request.adoc[]
 
-==== Example response
-
-include::{snippets}/facilityadapter-findOneById-example/http-response.adoc[]
-
 ==== CURL request
 
 include::{snippets}/facilityadapter-findOneById-example/curl-request.adoc[]
 
-==== Response Fields
-
-include::{snippets}/facilityadapter-findOneById-example/response-fields.adoc[]
