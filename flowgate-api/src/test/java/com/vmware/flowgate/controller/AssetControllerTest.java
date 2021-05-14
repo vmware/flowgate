@@ -3008,6 +3008,22 @@ public class AssetControllerTest {
    }
 
    @Test
+   public void testGetServerMetricsByIDFormulaIsEmpty() {
+      Asset asset = createAsset();
+      long time = System.currentTimeMillis();
+      int duration = 30*60*1000;
+      long startTime = time - duration;
+      Map<String, String> formulars = new HashMap<String, String>();
+      asset.setMetricsformulars(formulars);
+      asset = assetRepository.save(asset);
+
+      List<MetricData> metricDatas =
+            assetService.getMetricsByID(asset.getId(), startTime, duration);
+      TestCase.assertEquals(0, metricDatas.size());
+      assetRepository.deleteById(asset.getId());
+   }
+
+   @Test
    public void testGetServerMetricsByID() {
       Asset asset = createAsset();
       List<RealTimeData> realTimeDatas = new ArrayList<RealTimeData>();
@@ -3393,6 +3409,13 @@ public class AssetControllerTest {
       assetRepository.deleteById(sensorId);
       realtimeDataRepository.deleteById(tempRealTimeData.getId());
       realtimeDataRepository.deleteById(realTimeData.getId());
+   }
+
+   @Test
+   public void testMetricFormulaStringIsNull() {
+      Asset asset = createAsset();
+      Map<String,String> formulaInfo = asset.metricsFormulaToMap(null, new TypeReference<Map<String, String>>(){});
+      TestCase.assertEquals(null, formulaInfo);
    }
 
    RealTimeData createPduRealTimeData(Long time) {
