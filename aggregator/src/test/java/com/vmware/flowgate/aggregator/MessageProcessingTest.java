@@ -431,7 +431,7 @@ public class MessageProcessingTest {
       when(serviceKeyConfig.getServiceKey()).thenReturn("");
       doNothing().when(valueOp).set(anyString(), anyString());
 
-      when(restClient.getVCServers()).thenReturn(resp);
+      when(restClient.getInternalSDDCSoftwareConfigByType(SoftwareType.VCENTER)).thenReturn(resp);
       when(resp.getBody()).thenReturn(sDDCSoftwareConfigs);
 
       when(sDDCSoftwareConfigs[0].checkIsActive()).thenReturn(true);

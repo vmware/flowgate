@@ -128,8 +128,8 @@ public class AggregatorService implements AsyncService {
       // merge the data
       //TODO improve the efficiency of compare?
       restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-      SDDCSoftwareConfig[] vcs = restClient.getVCServers().getBody();
-      SDDCSoftwareConfig[] vrops = restClient.getVROServers().getBody();
+      SDDCSoftwareConfig[] vcs = restClient.getInternalSDDCSoftwareConfigByType(SDDCSoftwareConfig.SoftwareType.VCENTER).getBody();
+      SDDCSoftwareConfig[] vrops = restClient.getInternalSDDCSoftwareConfigByType(SDDCSoftwareConfig.SoftwareType.VRO).getBody();
 
       Map<String, ServerMapping> vroMapping = new HashMap<String, ServerMapping>();
       for (SDDCSoftwareConfig vro : vrops) {

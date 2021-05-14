@@ -520,6 +520,34 @@ public class SDDCSoftwareControllerTest {
    }
 
    @Test
+   public void testGetInternalServerConfigsByType() throws Exception {
+      SDDCSoftwareConfig sddc1Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
+      sddc1Create.setType(SoftwareType.VCENTER);
+      sddc1Create.setName("flowgate");
+      sddc1Create.setDescription("flowgate cluster");
+      SDDCSoftwareConfig sddc2Create = createSDDCSoftwareConfig(SoftwareType.VCENTER);
+      sddc2Create.setType(SoftwareType.VCENTER);
+      sddc1Create.setPassword(EncryptionGuard.encode(sddc1Create.getPassword()));
+      sddc2Create.setPassword(EncryptionGuard.encode(sddc2Create.getPassword()));
+      sddcRepository.save(sddc1Create);
+      sddcRepository.save(sddc2Create);
+
+      MvcResult result = this.mockMvc.perform(get("/v1/sddc/internal/type/" + SoftwareType.VCENTER))
+               .andExpect(status().isOk()).andReturn();
+      String res = result.getResponse().getContentAsString();
+
+      ObjectMapper mapper = new ObjectMapper();
+      SDDCSoftwareConfig [] sddcs = mapper.readValue(res, SDDCSoftwareConfig[].class);
+      for(SDDCSoftwareConfig sddc:sddcs) {
+         if(sddc.getName().equals("flowgate")) {
+            TestCase.assertEquals("flowgate cluster", sddc.getDescription());
+         }
+      }
+      sddcRepository.deleteById(sddc1Create.getId());
+      sddcRepository.deleteById(sddc2Create.getId());
+   }
+
+   @Test
    public void sDDCSoftwareDeleteVcenterExample() throws Exception {
       SDDCSoftwareConfig sddc = createSDDCSoftwareConfig(SoftwareType.VCENTER);
       sddcRepository.save(sddc);
