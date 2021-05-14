@@ -134,7 +134,7 @@ export class DcimEditComponent implements OnInit {
   seclectAdapter:FacilityAdapterModule = new FacilityAdapterModule();
   dcimAdapters:FacilityAdapterModule[] = [];
   adapterMap:Map<String,FacilityAdapterModule> = new Map<String,FacilityAdapterModule>();
-  predefinedType:string[] = ['Nlyte','PowerIQ'];
+  predefinedType:string[] = ['Nlyte','PowerIQ','OpenManage'];
   findAllAdapters(){
     this.service.findAllFacilityAdapters().subscribe(
       (data:FacilityAdapterModule[])=>{
