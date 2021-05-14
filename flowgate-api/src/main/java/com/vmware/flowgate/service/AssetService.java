@@ -1518,6 +1518,9 @@ public class AssetService {
       Map<String, List<ValueUnit>> assetAndValueUnitsMap = new HashMap<String, List<ValueUnit>>();
       Map<String, String> hostMetricsFormula =
             getFormula(server, FlowgateConstant.HOST_METRICS, server.getMetricsformulars(), new TypeReference<Map<String, String>>() {});
+      if(hostMetricsFormula == null) {
+         return assetAndValueUnitsMap;
+      }
       Map<String, List<String>> assetIdAndMetricsNameList = Maps.newHashMap();
       for (Map.Entry<String, String> itemEntry : hostMetricsFormula.entrySet()) {
          List<String> metricsNameList = assetIdAndMetricsNameList.computeIfAbsent(itemEntry.getValue(), k -> Lists.newArrayList());
@@ -1776,6 +1779,7 @@ public class AssetService {
          Map<String, String> formulas, TypeReference<T> type){
       String formulasInfo = formulas.get(formulaType);
       if (StringUtils.isBlank(formulasInfo)) {
+         logger.warn("{} formula is empty,asset id: {}", formulaType, asset.getId());
          return null;
       }
       return asset.metricsFormulaToMap(formulasInfo, type);
