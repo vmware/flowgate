@@ -1810,9 +1810,12 @@ public class AssetService {
     */
    public List<ValueUnit> filterServerEnergyConsumption(List<ValueUnit> valueUnits, long startTime){
       if(valueUnits == null || valueUnits.isEmpty()) {
-         return null;
+         return valueUnits;
       }
       filterServerEnergyConsumptionBySinceTime(valueUnits, startTime);
+      if(valueUnits.isEmpty()) {
+         return valueUnits;
+      }
       Collections.sort(valueUnits, new CompareValueUnit());
       Map<Integer, Map<Long, List<ValueUnit>>> maxValueMap = new HashMap<>();
       Map<Long, List<ValueUnit>> maxvalue = new HashMap<>();

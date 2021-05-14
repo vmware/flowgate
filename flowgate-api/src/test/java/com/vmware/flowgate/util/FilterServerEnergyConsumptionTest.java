@@ -133,6 +133,22 @@ public class FilterServerEnergyConsumptionTest {
       TestCase.assertEquals(40.0 ,results.get(0).getValueNum());
    }
 
+   @Test
+   public void testFilterServerEnergyConsumption4() {
+      long time = System.currentTimeMillis();
+      //Sample value of Openmanage SERVER_ENERGY_CONSUMPTION metric
+      ValueUnit valueUnit = new ValueUnit();
+      valueUnit.setTime(time);
+      valueUnit.setKey(MetricName.SERVER_ENERGY_CONSUMPTION);
+      valueUnit.setExtraidentifier(String.valueOf(1302663085000l));
+      valueUnit.setUnit(MetricUnit.kWh.name());
+      valueUnit.setValueNum(65633);
+      List<ValueUnit> valueUnits = new ArrayList<ValueUnit>();
+      valueUnits.add(valueUnit);
+      List<ValueUnit> results =  assetService.filterServerEnergyConsumption(valueUnits, time);
+      TestCase.assertEquals(0, results.size());
+   }
+
    List<ValueUnit> getValueUnitsFromVC(long time, int duration){
       List<ValueUnit> valueUnits = new ArrayList<>();
       ValueUnit valueUnit;
