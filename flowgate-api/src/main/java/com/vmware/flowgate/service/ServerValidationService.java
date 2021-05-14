@@ -4,7 +4,6 @@
 */
 package com.vmware.flowgate.service;
 
-import java.lang.reflect.UndeclaredThrowableException;
 import java.net.ConnectException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -64,15 +63,12 @@ public class ServerValidationService {
          throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
                "Invalid user name or password.", authException.getCause());
       } catch (Exception exception) {
-         if(exception.getCause() instanceof UndeclaredThrowableException) {
-            UndeclaredThrowableException undeclaredThrowableException = (UndeclaredThrowableException)exception.getCause();
-            if (undeclaredThrowableException.getUndeclaredThrowable().getCause() instanceof ConnectException) {
-               throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                     "Failed to connect to server", undeclaredThrowableException.getCause());
-            }else if(undeclaredThrowableException.getUndeclaredThrowable() instanceof SSLException) {
-               throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
-                     "Certificate verification error", undeclaredThrowableException.getCause());
-            }
+         if (exception.getCause() instanceof ConnectException) {
+            throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                  "Failed to connect to server: " + server.getServerURL(), exception.getCause());
+         } else if (exception.getCause() instanceof SSLException) {
+            throw new WormholeRequestException(HttpStatus.BAD_REQUEST,
+                  "Certificate verification error", exception.getCause());
          }
          throw new WormholeRequestException("Internal error",exception.getCause());
       }
