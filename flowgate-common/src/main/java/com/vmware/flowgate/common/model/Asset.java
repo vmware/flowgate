@@ -484,6 +484,9 @@ public class Asset implements Serializable, BaseDocument {
 
    public <T> T metricsFormulaToMap(String formulasInfo, TypeReference<T> type){
       ObjectMapper mapper = new ObjectMapper();
+      if(formulasInfo == null) {
+         return null;
+      }
       try {
          return mapper.readValue(formulasInfo, type);
       }  catch (IOException e) {
