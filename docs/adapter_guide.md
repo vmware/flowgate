@@ -128,15 +128,15 @@ Your Adapter will read data from your system, and read data from Flowgate, then 
 
     **For example:**
 
-    >#> `cd ../flowgate/flowgate-api`
+    >#> `cd flowgate/flowgate-api`
 
     >#> `mvn initialize`
 
-    >#> `cd ../flowgate/vc-worker`
+    >#> `cd ../vc-worker`
 
     >#> `mvn initialize`
 
-    >#> `cd ../flowgate/vro-worker`
+    >#> `cd ../vro-worker`
 
     >#> `mvn initialize`
 
