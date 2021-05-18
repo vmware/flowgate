@@ -233,7 +233,7 @@ The adapter-sample is depends on the package of flowgate-common and common-restc
 
     **For example:**
 
-    >#> `cd ../flowgate/flowgate-common`
+    >#> `cd flowgate-common`
 
     >#> `mvn install`
 
@@ -243,7 +243,7 @@ The adapter-sample is depends on the package of flowgate-common and common-restc
 
     **For example:**
 
-    >#> `cd ../flowgate/common-restclient`
+    >#> `cd ../common-restclient`
 
     >#> `mvn install`
 
@@ -255,7 +255,7 @@ The adapter-sample is depends on the package of flowgate-common and common-restc
 
     **For example:**
 
-    >#> `cd ../flowgate/adapter-sample`
+    >#> `cd ../adapter-sample`
 
     >#> `mvn package`
 
@@ -265,7 +265,7 @@ The adapter-sample is depends on the package of flowgate-common and common-restc
 
     **For example:**
 
-    >#> `cd ../flowgate/adapter-sample/target/`
+    >#> `cd adapter-sample/target/`
 
   <img alt="adapter_sample_jar" src="images/adapter/adapter_sample_jar.png">
 
@@ -281,7 +281,7 @@ docker                | 18.09.1 +
   * Create a new directory
 
      For example:
-    >#> `mkdik adapter`
+    >#> `mkdir adapter`
 
 * Create a file named Dockerfile and paste the following content into it
   
@@ -390,7 +390,7 @@ Now we have adapter-sample.jar and docker image, we have two ways to deploy it, 
       
       <img alt="mkdir_conf" src="images/adapter/mkdir_conf.png">
 
-      >`mkdir  log/adapter-sample`
+      >#> `mkdir  log/adapter-sample`
 
       >#> `ls`
 
