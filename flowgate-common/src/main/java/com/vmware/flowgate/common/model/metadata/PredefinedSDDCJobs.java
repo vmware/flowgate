@@ -13,13 +13,17 @@ import com.vmware.flowgate.common.model.JobConfig.JobType;
 public class PredefinedSDDCJobs {
    public static final List<JobConfig> ALLJobs = Arrays.asList(
          new JobConfig("AGGREGATOR-PREDEFINED-AGGREGATOR-JOB-DISPATCHER", "AggregateJobDispatcher", "AggregateJobs",
-               "FiveMinutes", "AggregatorJob", "", "0 0/5 * * * ?",
+        	   "Hourly", "AggregatorJob", "", "0 23 * * * ?",
                "com.vmware.flowgate.aggregator.scheduler.job.AggregatorJobDispatcher",
                JobType.AGGREGATOR),
          new JobConfig("AGGREGATOR-PREDEFINED-SYNC-VC-DATA", "SyncVCData", "AggregateJobs",
                "Hourly", "SyncVCAll", "", "0 0/5 * * * ? *",
                "com.vmware.flowgate.aggregator.scheduler.job.VCenterJobDispatcher",
                JobType.AGGREGATOR),
+         /*new JobConfig("AGGREGATOR-PREDEFINED-Fitting-VC-DATA", "FittingVCData", "AggregateJobs",
+               "FiveMinutes", "FittingVCAll", "", "0 0/5 * * * ? *",
+               "com.vmware.flowgate.aggregator.scheduler.job.AggregatorJobDispatcher",
+               JobType.AGGREGATOR),*/
          new JobConfig("AGGREGATOR-PREDEFINED-SYNC-VRO-DATA", "SyncVROData", "AggregateJobs",
                "FiveMinutes", "SyncVROAll", "", "1 0/5 * * * ?",
                "com.vmware.flowgate.aggregator.scheduler.job.VROJobDispatcher",

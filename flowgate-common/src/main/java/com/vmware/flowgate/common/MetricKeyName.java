@@ -6,14 +6,6 @@ package com.vmware.flowgate.common;
 
 public class MetricKeyName {
 
-   public static final String PDU_XLET_ACTIVE_POWER = "%s|ActivePower";
-   public static final String PDU_XLET_APPARENT_POWER = "%s|ApparentPower";
-   public static final String PDU_XLET_CURRENT = "%s|Current";
-   public static final String PDU_XLET_VOLTAGE = "%s|Voltage";
-   public static final String PDU_XLET_FREE_CAPACITY = "%s|FreeCapacity";
-   public static final String PDU_INLET_POLE_CURRENT = "%s|%s|Current";
-   public static final String PDU_INLET_POLE_VOLTAGE = "%s|%s|Voltage";
-   public static final String PDU_INLET_POLE_FREE_CAPACITY = "%s|%s|FreeCapacity";
    public static final String PDU_TEMPERATURE_LOCATIONX = "Temperature|:%s";
    public static final String PDU_HUMIDITY_LOCATIONX = "Humidity|:%s";
 

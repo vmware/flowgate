@@ -9,6 +9,7 @@ public class MetricData {
    private double valueNum;
    private String value;
    private long timeStamp;
+   private String unit;
 
    public String getMetricName() {
       return metricName;
@@ -38,6 +39,14 @@ public class MetricData {
       return timeStamp;
    }
 
+   public String getUnit() {
+	      return unit;
+   }
+
+   public void setUnit(String unit) {
+	      this.unit = unit;
+   }
+   
    public void setTimeStamp(long timeStamp) {
       this.timeStamp = timeStamp;
    }

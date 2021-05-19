@@ -30,8 +30,9 @@
 		<jwt.version>3.3.0</jwt.version>
 		<commons-io.version>2.4</commons-io.version>
 		<jackson.version>2.10.0</jackson.version>
-		<tomcat.version>9.0.37</tomcat.version>
+		<tomcat.version>9.0.41</tomcat.version>
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
+		<guava.version>30.0-jre</guava.version>
 	</properties>
 
 	<dependencies>
@@ -111,7 +112,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>28.0-jre</version>
+			<version>${guava.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -181,6 +182,11 @@
 			<groupId>com.fasterxml.woodstox</groupId>
 			<artifactId>woodstox-core</artifactId>
 			<version>5.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-jexl3</artifactId>
+			<version>3.1</version>
 		</dependency>
 	</dependencies>
 

@@ -496,6 +496,26 @@ public class MessageProcessingTest {
       openmanageJob.execute(null);
    }
 
+   /**
+    * SERVER_VOLTAGE = "Voltage";
+     SERVER_CONNECTED_PDU_CURRENT = "Current";
+     SERVER_CONNECTED_PDU_POWER = "Power";
+     SERVER_CONNECTED_PDU_CURRENT_LOAD = "CurrentLoad";
+     SERVER_CONNECTED_PDU_POWER_LOAD = "PowerLoad";
+     SERVER_USED_PDU_OUTLET_CURRENT = "%s|Current";
+     SERVER_USED_PDU_OUTLET_POWER = "%s|Power";
+     SERVER_USED_PDU_OUTLET_VOLTAGE = "%s|Voltage";
+    */
+   @Test
+   public void testGeneratePduformulaForServer() {
+      List<String> pduIds = new ArrayList<String>();
+      pduIds.add("12pimppoqwemasdqweggrwq");
+      pduIds.add("123456");
+      Map<String,Map<String,String>> pduFormula = aggregatorService.generatePduformulaForServer(pduIds);
+      TestCase.assertEquals(pduIds.size(), pduFormula.size());
+      TestCase.assertEquals(8, pduFormula.get(pduIds.get(0)).size());
+   }
+   
    FacilitySoftwareConfig createFacilitySoftware() {
       FacilitySoftwareConfig example = new FacilitySoftwareConfig();
       example.setId(UUID.randomUUID().toString());

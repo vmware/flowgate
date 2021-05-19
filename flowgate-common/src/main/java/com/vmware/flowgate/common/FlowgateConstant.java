@@ -12,7 +12,7 @@ public class FlowgateConstant {
 
    public static int defaultPageNumber = 1;
 
-   public static String serviceKey = "serviceKey";//"FLOWGATESERVICEKEY";
+   public static String serviceKey = "FLOWGATESERVICEKEY";
 
    public static String systemUser = "systemUser";
 

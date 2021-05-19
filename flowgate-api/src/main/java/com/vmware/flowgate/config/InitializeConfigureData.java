@@ -60,8 +60,7 @@ public class InitializeConfigureData {
       if(!isInitialized) {
          InitializeConfigureData.roleNameAndPrivilegeMap = roleNameAndPrivilegeMap;
          InitializeConfigureData.privilegeResourceMap = privilegeResourceMap;
-         serviceKey = "loul"; 
-         //System.getenv(FlowgateConstant.serviceKey);
+         serviceKey = System.getenv(FlowgateConstant.serviceKey);
          privilegeNames = Collections.unmodifiableList(privileges);
          isInitialized = true;
       }

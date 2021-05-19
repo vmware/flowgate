@@ -22,17 +22,30 @@ public class MetricName {
    public static final String PDU_TEMPERATURE = "Temperature";
    public static final String PDU_HUMIDITY = "Humidity";
 
+   //Formula key for pdu asset
+   public static final String PDU_XLET_ACTIVE_POWER = "%s|ActivePower";
+   public static final String PDU_XLET_APPARENT_POWER = "%s|ApparentPower";
+   public static final String PDU_XLET_FREE_CAPACITY = "%s|FreeCapacity";
+   public static final String PDU_XLET_CURRENT = "%s|Current";
+   public static final String PDU_XLET_VOLTAGE = "%s|Voltage";
+   public static final String PDU_INLET_XPOLE_CURRENT = "%s|%s|Current";
+   public static final String PDU_INLET_XPOLE_FREE_CAPACITY = "%s|%s|FreeCapacity";
+   public static final String PDU_INLET_XPOLE_VOLTAGE = "%s|%s|Voltage";
+   
    public static final String SERVER_FRONT_TEMPERATURE = "FrontTemperature";
    public static final String SERVER_BACK_TEMPREATURE = "BackTemperature";
    public static final String SERVER_FRONT_HUMIDITY = "FrontHumidity";
    public static final String SERVER_BACK_HUMIDITY = "BackHumidity";
    public static final String SERVER_TOTAL_CURRENT = "TotalCurrent";
    public static final String SERVER_TOTAL_POWER = "TotalPower";
-   public static final String SERVER_VOLTAGE = "Voltage";
-   public static final String SERVER_CONNECTED_PDU_CURRENT = "PduCurrent";
-   public static final String SERVER_CONNECTED_PDU_POWER = "PduPower";
-   public static final String SERVER_USED_PDU_OUTLET_CURRENT = "ConnectedPDUOutletCurrent";
-   public static final String SERVER_USED_PDU_OUTLET_POWER = "ConnectedPDUOutletPower";
+   public static final String SERVER_VOLTAGE = "Voltage";   
+   public static final String SERVER_CONNECTED_PDU_CURRENT = "Current";
+   public static final String SERVER_CONNECTED_PDU_POWER = "Power";
+   public static final String SERVER_CONNECTED_PDU_CURRENT_LOAD = "CurrentLoad";
+   public static final String SERVER_CONNECTED_PDU_POWER_LOAD = "PowerLoad";
+   public static final String SERVER_USED_PDU_OUTLET_CURRENT = "%s|Current";
+   public static final String SERVER_USED_PDU_OUTLET_POWER = "%s|Power";
+   public static final String SERVER_USED_PDU_OUTLET_VOLTAGE = "%s|Voltage";
    public static final String SERVER_ENERGY_CONSUMPTION = "EnergyConsumption";//(KWH)
    public static final String SERVER_AVERAGE_USED_POWER = "AveragePower";//(KW)
    public static final String SERVER_PEAK_USED_POWER = "PeakPower";//(KW)
