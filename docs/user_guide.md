@@ -5,6 +5,7 @@
   - [Datacenter Facility System Integration](#datacenter-facility-system-integration)
     - [Integrate with Nlyte](#integrate-with-nlyte)
     - [Integrate with PowerIQ](#integrate-with-poweriq)
+    - [Integrate with Openmanage](#integrate-with-openmanage)
     - [Integrate with Infoblox](#integrate-with-infoblox)
     - [Data Center Facility Systems management](#data-center-facility-systems-management)
     - [Edit](#edit)
@@ -28,6 +29,7 @@
       - [Add Asset](#add-asset)
       - [Edit Asset](#edit-asset)
       - [Delete Asset](#delete-asset)
+    - [Custom Facility Adapter Management](#custom-facility-adapter-management)
   - [IT System Integration Management](#it-system-integration-management)
     - [IT system integration](#it-system-integration)
     - [Integrate with vROPs](#integrate-with-vrops)
@@ -119,7 +121,7 @@ If the metric unit in your Nlyte is different with the default ones. Please modi
 #### Integrate with PowerIQ
 
 1. Navigate to “Data Center Facility->DCIM” click the “ADD NEW INTEGRATION” button.
-2. Select Type as “PowerIQ”
+2. Select Type as "PowerIQ"
 3. Input Server IP (Or FQDN), Name, Username, Password and other fields.
 4. For the VerifyCert option. If your PowerIQ use a self-signed certificate, you should choose “no” which means not verify the certificate, otherwise Flowgate will not be able to connect to the server.
 5. Click “SUBMIT” to save the setting. If any error happens, please update the related fields according to the error message.
@@ -131,6 +133,18 @@ If you have multiple PowerIQ servers, repeat step 1-5.
 Click the “Advance Setting” to check the default metric unit for your PowerIQ server. Please contact to your PowerIQ administrator to get the correct unit. 
 
 <img alt="addPowerIq" src="images/user guide/addPowerIQ1.png">
+
+#### Integrate with Openmanage
+
+1. Navigate to “Data Center Facility->DCIM” click the “ADD NEW INTEGRATION” button.
+2. Select Type as "Openmanage"
+3. Input Server IP (Or FQDN), Name, Username, Password and other fields.
+4. For the VerifyCert option. If your Openmanage use a self-signed certificate, you should choose “no” which means not verify the certificate, otherwise Flowgate will not be able to connect to the server.
+5. Click “SUBMIT” to save the setting. If any error happens, please update the related fields according to the error message.
+
+If you have multiple Openmanage servers, repeat step 1-5.
+
+<img alt="openmanage" src="images/user guide/openmanage.png">
 
 #### Integrate with Infoblox
 
@@ -337,6 +351,9 @@ User can manage the assets created through the UI here. Other assets feed by DCI
 2. Click "OK" to delete asset
 <img alt="asset_management" src="images/user guide/asset_management_delete_tips.png">
 
+#### Custom Facility Adapter Management
+
+1. Please refer to **[Custom Adapter Guide](adapter_guide.md)**.
 
 ### IT System Integration Management
 
