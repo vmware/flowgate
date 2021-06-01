@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.csvreader.CsvReader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +47,7 @@ import com.vmware.flowgate.aggregator.scheduler.job.AggregatorService;
 import com.vmware.flowgate.aggregator.scheduler.job.CustomerAdapterJobDispatcher;
 import com.vmware.flowgate.aggregator.scheduler.job.OpenmanageJobDispatcher;
 import com.vmware.flowgate.aggregator.scheduler.job.VCenterJobDispatcher;
+import com.vmware.flowgate.aggregator.tool.SyncFittingTool;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.FlowgateConstant;
 import com.vmware.flowgate.common.MetricName;
@@ -54,6 +57,7 @@ import com.vmware.flowgate.common.model.FacilityAdapter;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.AdvanceSettingType;
 import com.vmware.flowgate.common.model.IntegrationStatus;
+import com.vmware.flowgate.common.model.MetricData;
 import com.vmware.flowgate.common.model.IntegrationStatus.Status;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig;
 import com.vmware.flowgate.common.model.SDDCSoftwareConfig.SoftwareType;
@@ -536,27 +540,8 @@ public class MessageProcessingTest {
       example.setIntegrationStatus(integrationStatus);
       return example;
    }
-   @Test
-   public void testSyncFitting() {
-	  try { 
-		  List<List<Double>> results = aggregatorService.syncFitting(true);
-         for (int i = 0; i < results.size(); i++)
-         {	        	 
-			  double [] arr_result = new double[results.get(i).size()];
-			  for (int j = 0; j < results.get(i).size(); j++) {
-				  arr_result[j] = results.get(i).get(j);
-				  //System.out.println(result.get(i));
-			  }  
-			  double[] testAnswer = {67.61123636351215, 2.0250676734875026, -0.04034063855153128, 3.8173496754197417E-4, -1.2569420548906328E-6};
-			  Assert.assertArrayEquals(arr_result, testAnswer, 0.5);
-         } 	
-		 
-		  
-	 } catch(Exception e) {
-		  Assert.fail();
-	  }
+  
 	  
-   }
    public ResponseEntity<FacilitySoftwareConfig[]> getFacilitySoftwareByType(FacilitySoftwareConfig intergration) {
       FacilitySoftwareConfig[] configs = new FacilitySoftwareConfig[1];
       configs[0] = intergration;

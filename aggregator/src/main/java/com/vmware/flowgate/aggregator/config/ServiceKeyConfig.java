@@ -18,7 +18,6 @@ public class ServiceKeyConfig {
    }
 
    public String getServiceKey() {
-
-      return serviceKey;
+	  return serviceKey;
    }
 }

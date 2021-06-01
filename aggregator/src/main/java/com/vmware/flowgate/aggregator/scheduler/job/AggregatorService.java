@@ -81,7 +81,6 @@ public class AggregatorService implements AsyncService {
       logger.info("message: " + message.getContent());
       Set<EventUser> users = message.getTarget().getUsers();
       for (EventUser command : users) {
-         //logger.info(command.getId());
          switch (command.getId()) {
          case EventMessageUtil.FullMappingCommand:
             mergeServerMapping();
@@ -106,7 +105,7 @@ public class AggregatorService implements AsyncService {
             cleanRealtimeData();
             break;
          case EventMessageUtil.SYNC_FITTING:
-        	syncFitting(true);
+        	syncFitting();
             break;
          case EventMessageUtil.AggregateAndCleanPowerIQPDU:
             aggregateAndCleanPDUFromPowerIQ();
@@ -120,76 +119,96 @@ public class AggregatorService implements AsyncService {
       }
    }
    
+   public List<MetricData> collectData(int saperate_num, long StartTime, String assetId) {
+	  long Two_Hours = 305000 * 24;
+	  List<MetricData> ret = new ArrayList<>(0);
+	  long duration = Two_Hours * 60 / saperate_num;
+	  logger.info("StartTime: " + String.valueOf(StartTime / Two_Hours * 2));
+	  long duration_right = StartTime;
+	  long duration_left = StartTime - Two_Hours * 24;
+	  long duration_start;
+	  for (int i = 0; i < saperate_num - 1; i++) {
+		  duration_start = StartTime - duration * (i + 1);
+		  if (i == 0) 
+			  duration_right = StartTime;
+		  else 
+			  duration_right = duration_left;
+		  if (i == saperate_num - 2) 
+			  duration_left = StartTime - Two_Hours * 60;
+		  else 
+			  duration_left = duration_start - duration/2;
+		  
+		  long cursor = duration_start;
+		  MetricData[] metric_datas = null;
+		  
+		  while (cursor < duration_right) {
+			  if (cursor + Two_Hours > duration_right)
+			  {
+				  try {
+					  metric_datas = restClient.getServerRealtimeDataByServerID(assetId, duration_right, Two_Hours).getBody();
+				  } catch (Exception e) {
+					  metric_datas = null;
+				  }
+			  }
+			  else {
+				  try {
+					  metric_datas = restClient.getServerRealtimeDataByServerID(assetId, cursor + Two_Hours, Two_Hours).getBody();
+				  } catch (Exception e) {
+					  metric_datas = null;
+				  }
+			  }
+			  if (metric_datas == null) 
+				  break;
+			  else {
+	 			  ret.addAll(Arrays.asList(metric_datas));
+	 			  cursor += Two_Hours;
+			  }
+		  }
+		  cursor = duration_start;
+		  long loc = duration_left;
+		  while (cursor - Two_Hours>= duration_left) {
+			  try {
+				  metric_datas = restClient.getServerRealtimeDataByServerID(assetId, cursor, Two_Hours).getBody();
+			  } catch (Exception e) {
+				  metric_datas = null;
+			  }
+			  if (metric_datas == null) {
+				  loc = duration_left;
+				  break;
+			  }
+			  else {
+	 			  ret.addAll(Arrays.asList(metric_datas));
+	 			  cursor -= Two_Hours;
+	 			  loc = cursor;
+			  }
+		  }
+		  duration_left = loc;
+	  }
+	  return ret;
+   }
    
-   public List<List<Double>> syncFitting(boolean ifTest)  {
+   public void syncFitting()  {
 	  
 	  //
 	  List<MetricData> MetricDatas;
 	  List<List<Double>> results = new ArrayList<>();
 	  SyncFittingTool tool = new SyncFittingTool();
-	  if (ifTest) {
-		  try {
-			  	 MetricDatas = new ArrayList<>();
-	
-		         CsvReader csvReader = new CsvReader("testData.csv");
-		         boolean re = csvReader.readHeaders();
-		         int n = 0;
-		         while (csvReader.readRecord()) {
-		             String rawRecord = csvReader.getRawRecord();
-		             String[] line = rawRecord.split(",");
-		             MetricData cpu = new MetricData();
-		       	     cpu.setMetricName("CpuUsage");
-		       	     cpu.setValueNum(Double.valueOf(line[0]));
-		       	     cpu.setTimeStamp(n);
-		       	     MetricDatas.add(cpu);
-		             MetricData power = new MetricData();
-		             power.setMetricName("Power");
-		             power.setValueNum(Double.valueOf(line[1]));
-		             power.setTimeStamp(n);
-		             MetricDatas.add(power);
-		             n+=1;
-		         }
-		         
-		         List<Double> fitting_result =  tool.doFitting(MetricDatas);
-		         
-		         results.add(fitting_result);
-		         
-		      }  catch (FileNotFoundException e) {
-		         throw new RuntimeException("file not found");
-		      }  catch (IOException e) {
-		         throw new RuntimeException(e.getMessage());
-		      }
+	  
+	  long Five_Miniutes = 305000;
+      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
+	  MetricData[] raw_MetricDatas = null;
+	  Asset[] servers = restClient.getMappedAsset(AssetCategory.Server).getBody();
+	  for (int i = 0; i < servers.length; i++)
+	  {
+		  String assetId = servers[i].getId();
+		  MetricDatas = collectData(10, System.currentTimeMillis(), assetId);
+		  List<Double> fitting_result = tool.doFitting(MetricDatas);
+	      results.add(fitting_result);
+		  Asset asset = new Asset();
+	      asset.setFittingResults(fitting_result);
+	      restClient.saveAssets(asset);	
 	  }
-	  else {
-		  long One_day = 86405000;
-	      restClient.setServiceKey(serviceKeyConfig.getServiceKey());
-		  MetricData[] raw_MetricDatas = null;
-		  Asset[] servers = restClient.getMappedAsset(AssetCategory.Server).getBody();
-		  for (int i = 0; i < servers.length; i++)
-		  {
-			  String assetId = servers[i].getId();
-			  raw_MetricDatas = restClient.getServerRealtimeDataByServerID(assetId, System.currentTimeMillis(), One_day).getBody();
-			  MetricDatas = Arrays.asList(raw_MetricDatas);
-			  List<Double> fitting_result = tool.doFitting(MetricDatas);
-		      results.add(fitting_result);
-			  Asset asset = new Asset();
-		      asset.setFittingResults(fitting_result);
-		      restClient.saveAssets(asset);
-		      
-		  }
-		   
-	  }
-      /*for (int i = 0; i < results.size(); i++)
-      {	        	 
-      	String res = "Syncfitting results-" + String.valueOf(i) + " :";
-     	 for (Double param : (List<Double>)results.get(i))
-     	 {
-     		 res += " ";
-     		 res += String.valueOf(param);
-     	 }
-	         logger.info(res);
-      }*/ 	
-	  return results;
+
    }
    
    public void syncSummaryData() {

@@ -7,7 +7,7 @@
     <include resource="org/springframework/boot/logging/logback/base.xml" />  
  	<appender name="fileInfoLog"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>/log/aggregator-info.log</File>
+		<File>aggregator-info.log</File>
 		<!-- TimeBasedRollingPolicy -->
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<FileNamePattern>/log/aggregator-info.%d{yyyy-MM-dd}.gz</FileNamePattern>
@@ -43,7 +43,7 @@
     
     <root level="INFO">  
         <appender-ref ref="CONSOLE" />  
-        <appender-ref ref="fileInfoLog"/>
-        <appender-ref ref="fileErrorLog"/>
+        <appender-ref ref="fileInfoLog"></appender-ref>
+        <appender-ref ref="fileErrorLog"></appender-ref>
     </root>
 </configuration>  

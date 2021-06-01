@@ -4,7 +4,7 @@
 	<include resource="org/springframework/boot/logging/logback/base.xml" />
 	<appender name="fileInfoLog"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<File>/log/flowgate-api-info.log</File>
+		<File>flowgate-api-info.log</File>
 		<!-- TimeBasedRollingPolicy -->
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<FileNamePattern>flowgate-api-info.%d{yyyy-MM-dd}.gz</FileNamePattern>
@@ -28,8 +28,7 @@
 		</filter>
 		<!-- TimeBasedRollingPolicy -->
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<FileNamePattern>/log/flowgate-api-error.%d{yyyy-MM-dd}.gz
-			</FileNamePattern>
+			<FileNamePattern>/log/flowgate-api-error.%d{yyyy-MM-dd}.gz</FileNamePattern>
 			<!-- <maxFileSize>1kb</maxFileSize> -->
 			<maxHistory>30</maxHistory>
 			<totalSizeCap>3GB</totalSizeCap>

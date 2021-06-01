@@ -84,7 +84,6 @@ public class AggregatorJobDispatcher extends BaseJob implements Job {
               String jobmessage = EventMessageUtil.convertEventMessageAsString(eventMessage);
               publisher.publish(EventMessageUtil.AggregatorTopic, jobmessage);
               logger.info("Send sync fitting command");
-              // System.out.println("Send sync fitting command");
            }catch(IOException e) {
               logger.error("Failed to Send sync fitting command", e);
            }
