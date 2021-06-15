@@ -1,0 +1,16 @@
+{
+  "images" : [
+    {
+      "filename" : "Scan Nov 11, 2020 at 15.03.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "unit" : "centimeters",
+    "width" : 7
+  }
+}
