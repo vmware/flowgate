@@ -23,7 +23,7 @@ export class NavComponent implements OnInit {
   "readSddcSoftwareConfigByID","readSddcSoftwareConfigByVRO","readSddcSoftwareConfigByVC","readSddcSoftwareConfigByUserAndPage","readVROsSddcSoftwareConfigByUser","readSddcSoftwareConfigByTypeAndUser"];
   servermapping:string []= ["updateServerMapping","readMappingsByVROIDAndPage","readMappingsByVCIDAndPage","readSddcSoftwareConfigByTypeAndUser"];
   facility:string[] = ["createFacilitySoftwareConfig","readFacilityByType","readFacilityByPage"];
-  
+
   setting:string[] = ["createSensorSetting","readSensorSettingsByPage","updateSensorSetting","deleteSensorSetting","startFullMappingAggregation","generateServerPDUMapping","readUnMappedServers"];
   sensorsetting:string[] = ["createSensorSetting","readSensorSettingsByPage","updateSensorSetting","deleteSensorSetting"];
   systemSetting:string[] = ["startFullMappingAggregation","generateServerPDUMapping","readUnMappedServers"];
@@ -31,13 +31,13 @@ export class NavComponent implements OnInit {
   adaptermanagement:string [] = ["createFacilityAdapter","updateFacilityAdapter","readAnFacilityAdapterById","deleteAnFacilityAdapterById","readFacilityAdaptersByPage"];
   constructor(private activedRoute:ActivatedRoute,private router: Router,private auth:AuthenticationService) { }
   logout(){
+    localStorage.clear()
     this.auth.logout();
-    
   }
   userprofile(){
     this.router.navigate(["/ui/nav/user/user-profile"]);
   }
-  
+
   ngOnInit() {
       this.username = this.auth.getUsername();
   }

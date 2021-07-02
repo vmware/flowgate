@@ -19,21 +19,24 @@ export class UserLoginComponent implements OnInit {
     tips:boolean = false;
     textContent = "";
     user ={
-    id:"",
-    username:"",
-    password:"",
+        id:"",
+        username:"",
+        password:"",
+        rememberMe:false
     }
     constructor(private router: Router,private data:AuthenticationService,private ls:LocalStorage) {
     }
     userName:string
-    password:string 
+    password:string
+    rememberMe:boolean
     toLogin(){
         this.userName = this.user.username;
         this.password = this.user.password;
+        this.rememberMe = this.user.rememberMe;
+
         if(this.userName == ""){
             this.tips = true;
             this.textContent = "please input a userName";
-            
         }else if(this.password == ""){
             this.tips = true;
             this.textContent = "please input a password";
@@ -41,7 +44,7 @@ export class UserLoginComponent implements OnInit {
             this.login(this.userName,this.password);
         }
     }
-  
+
     login(userName,password){
         let userInfoBase64:string = "";
         let user:string = "";
@@ -55,6 +58,10 @@ export class UserLoginComponent implements OnInit {
                         privilegeName = priData;
                         let currentUser = btoa(JSON.stringify({username: JSON.parse(user).sub, token: res['access_token'], authorities:privilegeName,expires_in:res['expires_in']}));
                         sessionStorage.setItem('currentUser', currentUser);
+                        if (this.rememberMe) {
+                            localStorage.setItem("username", btoa(userName));
+                            localStorage.setItem("password", btoa(password));
+                        }
                         this.tips = false;
                         this.router.navigate(["ui/nav"]);
                     }
@@ -67,11 +74,16 @@ export class UserLoginComponent implements OnInit {
                 this.tips = true;
                 this.textContent = "Internal error";
             }
-            
-        })      
+        })
     }
-  ngOnInit() {
-    
-  }
+
+    ngOnInit() {
+        let username = localStorage.getItem("username");
+        let password = localStorage.getItem("password");
+        if (username == null || password == null) {
+            return
+        }
+        this.login(atob(username), atob(password));
+    }
 
 }
