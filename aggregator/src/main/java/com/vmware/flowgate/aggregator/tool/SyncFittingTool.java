@@ -101,7 +101,7 @@ public class SyncFittingTool {
 
 	   public List<Double> doFitting(List<MetricData> MetricDatas) {
 		   
-		   List<Double> CPU = new ArrayList<>();
+		  List<Double> CPU = new ArrayList<>();
 	      List<Double> power = new ArrayList<>();
 	      List<Pair<Long, Double>> raw_CPU_list = new ArrayList<>();
 	      List<Pair<Long, Double>> raw_power_list = new ArrayList<>();

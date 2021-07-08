@@ -5,6 +5,8 @@
 package com.vmware.flowgate.aggregator.scheduler.job;
 
 import java.io.FileNotFoundException;
+import com.vmware.flowgate.aggregator.tool.*;
+import com.vmware.flowgate.aggregator.tool.basic.*;
 import java.io.IOException;
 import com.csvreader.CsvReader;
 
@@ -48,7 +50,6 @@ import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.EventUser;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
-import com.vmware.flowgate.aggregator.tool.SyncFittingTool;
 
 import io.netty.handler.codec.string.StringDecoder;
 
@@ -106,6 +107,7 @@ public class AggregatorService implements AsyncService {
             break;
          case EventMessageUtil.SYNC_FITTING:
         	syncFitting();
+        	recommend();
             break;
          case EventMessageUtil.AggregateAndCleanPowerIQPDU:
             aggregateAndCleanPDUFromPowerIQ();
@@ -189,7 +191,6 @@ public class AggregatorService implements AsyncService {
    
    public void syncFitting()  {
 	  
-	  //
 	  List<MetricData> MetricDatas;
 	  List<List<Double>> results = new ArrayList<>();
 	  SyncFittingTool tool = new SyncFittingTool();
@@ -204,11 +205,76 @@ public class AggregatorService implements AsyncService {
 		  MetricDatas = collectData(10, System.currentTimeMillis(), assetId);
 		  List<Double> fitting_result = tool.doFitting(MetricDatas);
 	      results.add(fitting_result);
+	      servers[i].setFittingResults(fitting_result);
 		  Asset asset = new Asset();
 	      asset.setFittingResults(fitting_result);
+	      //asset.setAssetName("fitting_results");
 	      restClient.saveAssets(asset);	
 	  }
 
+   }
+   
+   public void recommend() {
+
+	   Asset[] servers = restClient.getMappedAsset(AssetCategory.Server).getBody();
+	   
+	   //TODO: use vc api to create bags.
+	   Bag[] bags = new Bag[];
+	   bags[i] = new Bag(memory, cpu, fitting_result, i);
+	   //
+	   
+	   long Two_Hours = 305000 * 24;
+	   long now_time = System.currentTimeMillis();
+	   ArrayList<Item> items = new ArrayList<>();
+	   for (int i = 0; i < servers.length; i++) {
+		   List<Double> fitting_result = servers[i].getFittingResults();
+		   String assetId = servers[i].getId();
+		   MetricData[] metric_datas = null;
+		   long start = now_time;
+		   while (metric_datas == null && start > now_time - Two_Hours * 60) {
+			   metric_datas = restClient.getServerRealtimeDataByServerID(assetId, start, Two_Hours).getBody();
+			   start = start - Two_Hours;
+		   }
+		   if (metric_datas == null)
+			   continue;
+		      List< Double> raw_CPU_list = new ArrayList<>();
+		      List<Double> raw_cpuMhz_list = new ArrayList<>();
+		      List< Double> raw_memory_list = new ArrayList<>();
+		      List<Double> raw_memoryKb_list = new ArrayList<>();
+		      Double cpu_sum = 0.0;
+		      Double cpu_mhz_sum = 0.0;
+		      Double memory_sum = 0.0;
+		      Double memory_kb_sum = 0.0;
+		      
+			  for (int j = 0; j < metric_datas.length; j++) {
+				  if (metric_datas[j].getMetricName() == "CpuUsage") {
+					  raw_CPU_list.add(metric_datas[j].getValueNum());
+					  cpu_sum += metric_datas[j].getValueNum();
+				  }
+				  else if (metric_datas[j].getMetricName() == "CpuUsedInMhz") {
+					  raw_cpuMhz_list.add(metric_datas[j].getValueNum());
+					  cpu_mhz_sum += metric_datas[j].getValueNum();
+				  }
+				  else if (metric_datas[j].getMetricName() == "MemoryUsage") {
+					  raw_memory_list.add(metric_datas[j].getValueNum());
+					  memory_sum += metric_datas[j].getValueNum();
+				  }
+				  else if (metric_datas[j].getMetricName() == "ActiveMemory") {
+					  raw_memoryKb_list.add(metric_datas[j].getValueNum());
+					  memory_kb_sum += metric_datas[j].getValueNum();
+				  }
+				  
+			  }
+			  Double avg_cpu = cpu_sum / raw_CPU_list.size();
+			  Double avg_cpu_mhz = cpu_mhz_sum / raw_cpuMhz_list.size();
+			  Double avg_memory = memory_sum / raw_memory_list.size();
+			  Double avg_memory_kb = memory_kb_sum / raw_memoryKb_list.size();
+			  items.add(new Item(assetId, avg_memory_kb/avg_memory, avg_cpu_mhz, avg_cpu_mhz/avg_cpu));
+			  
+		   
+	   }
+       NeighborhoodSearch ns = new NeighborhoodSearch(bags,  items);
+       ns.search();
    }
    
    public void syncSummaryData() {
