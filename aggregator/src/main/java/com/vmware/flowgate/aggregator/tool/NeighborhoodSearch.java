@@ -34,12 +34,12 @@ public class NeighborhoodSearch {
         greedy.solve();                           //Starting solution solved using greedy algorithm
 
         Neighborhood initial = new Neighborhood(greedy.getUnusedItems(), bags); //Starting point
-        //Neighborhood initial = new Neighborhood(items, bags); //Starting point
+
 
         globalOptima = initial;                    //First solution has to be the best one so far
         items = greedy.getUnusedItems();
         
-        Neighborhood highestNeighbour = null;
+        Neighborhood lowestNeighbour = null;
         Neighborhood temp;
 
         //Amount of searches, outer loop
@@ -71,27 +71,25 @@ public class NeighborhoodSearch {
             closestNeighbours.add(temp);
 
 
-            highestNeighbour = closestNeighbours.get(0);      //initial neighbour to compare to
+            lowestNeighbour = closestNeighbours.get(0);      //initial neighbour to compare to
 
-            for (int j = 0; j < closestNeighbours.size(); j++) {    //After generating neighborhood, compare which has highest value
+            for (int j = 0; j < closestNeighbours.size(); j++) {    //After generating neighborhood, compare which has lowest value
 
 
-                if (closestNeighbours.get(j).getTotalPower() <= highestNeighbour.getTotalPower()  && closestNeighbours.get(j).getBagsItemsNumber() == this.totalItemNumber) {
+                if (closestNeighbours.get(j).getTotalPower() <= lowestNeighbour.getTotalPower()  && closestNeighbours.get(j).getBagsItemsNumber() == this.totalItemNumber) {
 
-                    highestNeighbour = closestNeighbours.get(j);
+                	lowestNeighbour = closestNeighbours.get(j);
 
-                    bags = highestNeighbour.getBags();
-                    items = highestNeighbour.getUnusedItems();
+                    bags = lowestNeighbour.getBags();
+                    items = lowestNeighbour.getUnusedItems();
 
 
 
                 }
             }
 
-            if (highestNeighbour.getTotalPower() < globalOptima.getTotalPower()) {
-                globalOptima = highestNeighbour;                      //set new global optima if the local optima is > than previous global
-                bags = globalOptima.getBags();
-                items = globalOptima.getUnusedItems();
+            if (lowestNeighbour.getTotalPower() < globalOptima.getTotalPower()) {
+                globalOptima = lowestNeighbour;                      //set new global optima if the local optima is < than previous global
             }
 
             closestNeighbours.clear();
@@ -238,7 +236,7 @@ public class NeighborhoodSearch {
 
 
     //For testing purposes
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         Samples sample = new Samples();
         int nbrOfItems = 5;
         int nbrOfBags = 2;
@@ -264,5 +262,5 @@ public class NeighborhoodSearch {
         bags[1] = new Bag(50, 10, params1, 1);
         NeighborhoodSearch ns = new NeighborhoodSearch(bags,  new ArrayList<>(Arrays.asList(items)));
         ns.search();
-    }
+    }*/
 }

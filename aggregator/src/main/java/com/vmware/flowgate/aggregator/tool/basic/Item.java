@@ -5,18 +5,15 @@ import java.util.*;
 public class Item {
 	 double memory;//Memory
 	    double CPU;//CPUUsage
-	    double benefit;
 	    double CPU_capacity;
 	    Pair<Double, Integer>[] power;
 	    String id;
-	    //Pair<Double, Integer>[] benefitInBag;
 
 	    public Item(String id, double memory, double cpu, double cpu_capacity) {
 	    	this.id = id;
 	        this.memory = memory;
 	        this.CPU = cpu;
 	        this.CPU_capacity  = cpu_capacity;
-	        benefit = -1 * (double) cpu / (double) memory;
 	    }
 
 	    public double getMemory() {
@@ -62,12 +59,7 @@ public class Item {
 	                else return 1;
 	            }
 	        });
-	        /*this.benefitInBag = new Pair[bags.length];
-	        for (int i = 0; i < bags.length; i++)
-	        {
-	            this.benefitInBag[i] = new Pair<Double, Integer>(this.power[i].getFirst() / this.memory, this.power[i].getSecond());
-	        }
-*/
+
 	    }
 
 	    public double getCPU() {
