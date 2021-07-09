@@ -43,12 +43,13 @@ public class Bag {
         for (int i = 0; i < params.length; i++) {
             res += params[i] * Math.pow(value, i);
         }
-        return res;
+        return  res;
     }
 
     public double getCurrentMemory() {
         return currentMemory;
     }
+    
 
 
     public double getTotalPower() {

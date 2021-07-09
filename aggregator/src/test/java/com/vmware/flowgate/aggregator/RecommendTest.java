@@ -89,9 +89,9 @@ public class RecommendTest {
 		        ns.search();
 		        Bag[] bag_result = ns.getBags();
 			    double[] bag0_result = {bag_result[0].getCurrentMemory(), bag_result[0].getCurrentCPU(), bag_result[0].getTotalPower()};
-			    double[] bag0_answer = {40.0, 9.0, 44.6};
+			    double[] bag0_answer = {38.0, 7.0, 48.6};
 			    double[] bag1_result = {bag_result[1].getCurrentMemory(), bag_result[1].getCurrentCPU(), bag_result[1].getTotalPower()};
-			    double[] bag1_answer = {45.0, 8.0, 251.8};
+			    double[] bag1_answer = {47.0, 10.0, 219.2};
 			    ArrayList<Item> bag0_items = bag_result[0].getItems();
 			    ArrayList<Item> bag1_items = bag_result[1].getItems();
 			    HashSet<String> bag0items_answer = new HashSet<>(); 
@@ -105,11 +105,11 @@ public class RecommendTest {
 			    for (int i = 0; i < bag1_items.size(); i++) {
 			    	bag1items_result.add(bag1_items.get(i).getId());
 			    }
+			    bag0items_answer.add("2");
 			    bag0items_answer.add("3");
-			    bag0items_answer.add("5");
 			    bag1items_answer.add("1");
 			    bag1items_answer.add("4");
-			    bag1items_answer.add("2");
+			    bag1items_answer.add("5");
 
 				Assert.assertArrayEquals(bag0_result, bag0_answer, 0.5);	 
 				Assert.assertArrayEquals(bag1_result, bag1_answer, 0.5);

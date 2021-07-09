@@ -22,6 +22,14 @@ public class Neighborhood {
 	    public Bag[] getBags() {
 	        return bags;
 	    }
+	    
+	    public int getBagsItemsNumber () {
+	    	int ret = 0;
+	    	for (int i = 0; i < bags.length; i++) {
+	    		ret += bags[i].getItems().size();
+	    	}
+	    	return ret;
+	    }
 
 	    public int getTotalPower(){
 	        int res = 0;

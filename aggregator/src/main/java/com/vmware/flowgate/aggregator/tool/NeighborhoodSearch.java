@@ -9,15 +9,17 @@ public class NeighborhoodSearch {
     ArrayList<Neighborhood> closestNeighbours;
     static final int SEARCHES = 100;                  //amount of searches to perform before termination
     Greedy greedy;
-
+    int totalItemNumber = 0;
+    
     public NeighborhoodSearch(Bag[] bags, ArrayList<Item> items) {
         
         this.bags = bags;
         this.items =items;
+        this.totalItemNumber = this.items.size();
     }
 
     public Bag[] getBags() {
-    	return this.bags;
+    	return this.globalOptima.getBags();
     }
     
     public ArrayList<Item> getItems() {
@@ -73,23 +75,26 @@ public class NeighborhoodSearch {
 
             for (int j = 0; j < closestNeighbours.size(); j++) {    //After generating neighborhood, compare which has highest value
 
-                if (closestNeighbours.get(j).getTotalPower() >= highestNeighbour.getTotalPower()) {
+
+                if (closestNeighbours.get(j).getTotalPower() <= highestNeighbour.getTotalPower()  && closestNeighbours.get(j).getBagsItemsNumber() == this.totalItemNumber) {
+
                     highestNeighbour = closestNeighbours.get(j);
 
                     bags = highestNeighbour.getBags();
                     items = highestNeighbour.getUnusedItems();
 
 
+
                 }
             }
 
-            if (highestNeighbour.getTotalPower() > globalOptima.getTotalPower()) {
+            if (highestNeighbour.getTotalPower() < globalOptima.getTotalPower()) {
                 globalOptima = highestNeighbour;                      //set new global optima if the local optima is > than previous global
-
+                bags = globalOptima.getBags();
+                items = globalOptima.getUnusedItems();
             }
 
             closestNeighbours.clear();
-
 
         }
         System.out.println("\n\n\n----------------------------------------------------------");
@@ -233,7 +238,7 @@ public class NeighborhoodSearch {
 
 
     //For testing purposes
-   /* public static void main(String[] args) {
+    public static void main(String[] args) {
         Samples sample = new Samples();
         int nbrOfItems = 5;
         int nbrOfBags = 2;
@@ -259,5 +264,5 @@ public class NeighborhoodSearch {
         bags[1] = new Bag(50, 10, params1, 1);
         NeighborhoodSearch ns = new NeighborhoodSearch(bags,  new ArrayList<>(Arrays.asList(items)));
         ns.search();
-    }*/
+    }
 }
