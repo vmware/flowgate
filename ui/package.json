@@ -65,7 +65,7 @@
     "lodash.mergewith": "4.6.2",
     "lodash.template": "4.5.0",
     "mixin-deep": "2.0.1",
-    "node-forge": "^0.10.0",
+    "node-forge": "^1.0.0",
     "node-sass": "4.14.1",
     "protractor": "~7.0.0",
     "querystringify": "2.0.0",
