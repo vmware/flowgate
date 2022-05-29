@@ -3,7 +3,7 @@
 <img alt="Flowgate" src="docs/images/Flowgatelogo.png">
 
 # 
-Project FlowGate is an open source vendor-neutral project helps enterprises integrate facility systems data and IT data to form a single holistic view of their operations. By combining these two disparate data sets into one view, data center managers are better equipped to optimize operations and make smarter choices about workload placement.
+Project FlowGate is an open source vendor-neutral project that helps enterprises integrate facility systems data and IT data to form a single holistic view of their operations. By combining these two disparate data sets into one view, data center managers are better equipped to optimize operations and make smarter choices about workload placement.
 With Project Flowgate, we can fetch metadata and runtime metrics from various facility systems like DCIM and CMDB (Configuration Management Database), process the data from IT systems, correlate both together, and then push the results to IT infrastructure management and operation management systems. In that way, IT administrators can see updated data from facilities for IT assets in one single pane of glass. They can also view and analyze additional resources such as: power supply, cooling capacity, temperature/moisture situation for every specific server, and conduct many “facility-awared” operations, which were previously impossible.
 <img alt="FlowGate" src="docs/images/FlowGate.png">
 # Why
