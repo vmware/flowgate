@@ -5,7 +5,7 @@
 
 	<groupId>com.vmware.flowgate</groupId>
 	<artifactId>infoblox-worker</artifactId>
-	<version>${flowgate.version}</version>
+	<version>1.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>infoblox-worker</name>
@@ -84,7 +84,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.9</version>
+				<version>0.8.8</version>
 				<executions>
 					<execution>
 						<goals>

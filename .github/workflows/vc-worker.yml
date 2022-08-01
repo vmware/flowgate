@@ -13,6 +13,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+        java-package: jdk
     - name: test vc-worker
       run: |
         export FLOWGATEPWD=$PWD
@@ -48,7 +49,7 @@ jobs:
         sudo mvn initialize
         sudo mvn test
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
       with:
           flags: vc
           name: codecov-vc-worker
