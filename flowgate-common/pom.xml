@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vmware.flowgate</groupId>
 	<artifactId>flowgate-common</artifactId>
-	<version>${flowgate.version}</version>
+	<version>1.2.0</version>
 	<name>flowgate common data model</name>
 	<description>flowgate common data model</description>
 	<properties>

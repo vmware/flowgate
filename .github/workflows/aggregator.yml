@@ -26,7 +26,7 @@ jobs:
         cd $FLOWGATEPWD/aggregator
         sudo mvn clean test
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
       with:
           flags: aggregator #Flag the upload to group coverage metrics (unittests, uitests, etc.). Multiple flags are separated by a comma (ui,chrome)
           name: codecov-aggregator #Custom defined name for the upload

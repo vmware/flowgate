@@ -5,7 +5,7 @@
 
 	<groupId>com.vmware.flowgate</groupId>
 	<artifactId>flowgate-worker</artifactId>
-	<version>${flowgate.version}</version>
+	<version>1.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>flowgate-worker</name>
