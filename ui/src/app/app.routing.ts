@@ -11,4 +11,4 @@ export const ROUTES: Routes = [
     {path:'ui/nav', loadChildren: () => import('app/pages/nav/nav.module').then(m => m.NavModule),canActivate: [CanActivateAuthGuard]}
 ];
 
-export const ROUTING: ModuleWithProviders<RouterModule> = RouterModule.forRoot(ROUTES,{ useHash: false });
+export const ROUTING: ModuleWithProviders<RouterModule> = RouterModule.forRoot(ROUTES,{ useHash: false, relativeLinkResolution: 'legacy' });
