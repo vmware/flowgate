@@ -27,6 +27,7 @@ nbdist/
 coverage/
 html-report/
 node_modules/
+/ui/.angular/cache/
 typings/
 **/*npm-debug.log.*
 **/*yarn-error.log.*
