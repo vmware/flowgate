@@ -12,15 +12,15 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "~11.2.14",
-    "@angular/common": "~11.2.14",
-    "@angular/compiler": "~11.2.14",
-    "@angular/compiler-cli": "^11.2.14",
-    "@angular/core": "^11.2.14",
-    "@angular/forms": "~11.2.14",
-    "@angular/platform-browser": "~11.2.14",
-    "@angular/platform-browser-dynamic": "~11.2.14",
-    "@angular/router": "^11.2.14",
+    "@angular/animations": "~12.2.16",
+    "@angular/common": "~12.2.16",
+    "@angular/compiler": "~12.2.16",
+    "@angular/compiler-cli": "^12.2.16",
+    "@angular/core": "^12.2.16",
+    "@angular/forms": "~12.2.16",
+    "@angular/platform-browser": "~12.2.16",
+    "@angular/platform-browser-dynamic": "~12.2.16",
+    "@angular/router": "^12.2.16",
     "@clr/angular": "^4.0.5",
     "@clr/core": "^4.0.5",
     "@clr/icons": "^4.0.5",
@@ -35,11 +35,11 @@
     "ts-helpers": "^1.1.1",
     "tslib": "^2.0.0",
     "web-animations-js": "^2.3.2",
-    "zone.js": "~0.10.2"
+    "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.1102.19",
-    "@angular/cli": "^11.2.19",
+    "@angular-devkit/build-angular": "~12.2.18",
+    "@angular/cli": "^12.2.18",
     "@types/core-js": "~0.9.42",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "^2.0.2",
@@ -74,7 +74,7 @@
     "stringstream": "0.0.6",
     "ts-node": "^3.0.4",
     "tslint": "~6.1.0",
-    "typescript": "^4.0.5",
+    "typescript": "^4.3.5",
     "url-parse": "^1.5.2",
     "y18n": "^4.0.1"
   }
