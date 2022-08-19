@@ -23,3 +23,4 @@
 
 
 import 'zone.js';
+import 'web-animations-js';  // Run `npm install --save web-animations-js`.
