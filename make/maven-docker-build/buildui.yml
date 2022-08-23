@@ -4,7 +4,7 @@ services:
     build:
       context: $PWD/maven-docker-build
       dockerfile: $PWD/maven-docker-build/DockerfileUI
-    image: nodebuild:11.2.0
+    image: nodebuild:14.15
     volumes:
       - $PWD/../:/flowgate-build
       - $PWD/log:/log
