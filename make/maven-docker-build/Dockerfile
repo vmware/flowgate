@@ -1,4 +1,4 @@
-FROM maven:3.3.9-jdk-8
+FROM maven:3.8.6-openjdk-11
 
 RUN mkdir /flowgate-build \
   && mkdir /log
