@@ -9,6 +9,7 @@ import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -799,7 +800,9 @@ public class NlyteDataService implements AsyncService {
          String valueDateTime = value.getRecordedDateTime();
          long recordedTime = WormholeDateFormat.getLongTime(valueDateTime, dateFormat, timezone);
          if (recordedTime > currenttime || recordedTime == -1) {
-            logger.error("Failed to translate the time string: " + valueDateTime);
+            logger.error(
+                  String.format("Failed to translate the time string: %s, current time is: %s",
+                        valueDateTime, new Date()));
             continue;
          }
          if (sensorValueTypeMap.containsKey(value.getName())) {
