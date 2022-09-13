@@ -62,7 +62,6 @@ public class ServerAuth {
       } else {
          restTemplate = new RestTemplate();
       }
-      restTemplate.getForEntity(softwareConfig.getServerURL(), String.class);
       return restTemplate;
    }
 }
