@@ -11,14 +11,13 @@ module.exports = function (config) {
         plugins: [
             require('karma-jasmine'),
             require('karma-chrome-launcher'),
-            require('karma-mocha-reporter'),
-            require('karma-remap-istanbul')
+            require('karma-mocha-reporter')
         ],
         files: [
             {pattern: './src/test.ts', watched: false}
         ],
         preprocessors: {
-            
+
         },
         mime: {
             'text/x-typescript': ['ts', 'tsx']
@@ -33,9 +32,9 @@ module.exports = function (config) {
             reports: [ 'html', 'lcovonly', 'text-summary' ],
             fixWebpackSourcePaths: true
         },
-        
+
         reporters: config.angularCli && config.angularCli.codeCoverage
-            ? ['mocha', 'karma-remap-istanbul']
+            ? ['mocha']
             : ['mocha'],
         port: 9876,
         colors: true,

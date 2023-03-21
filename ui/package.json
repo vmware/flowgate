@@ -60,7 +60,6 @@
     "karma-cli": "^1.0.1",
     "karma-jasmine": "~4.0.0",
     "karma-mocha-reporter": "~2.2.1",
-    "karma-remap-istanbul": "~0.6.0",
     "lodash": "^4.17.21",
     "lodash.mergewith": "4.6.2",
     "lodash.template": "4.5.0",
