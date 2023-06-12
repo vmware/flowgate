@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -25,7 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -64,8 +64,8 @@ import com.vmware.flowgate.openmanage.job.OpenManageJobService;
 
 import junit.framework.TestCase;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = {OpenManageJobTest.class})
 @ActiveProfiles("test")
 public class OpenManageJobTest {
 
@@ -79,7 +79,7 @@ public class OpenManageJobTest {
    private WormholeAPIClient wormholeAPIClient;
    @Mock
    private ServiceKeyConfig serviceKeyConfig;
-   @Before
+   @BeforeEach
    public void before() {
       MockitoAnnotations.initMocks(this);
       Mockito.when(this.wormholeAPIClient.getMappedAsset(AssetCategory.Server)).thenReturn(getMappedAsset());
@@ -105,6 +105,7 @@ public class OpenManageJobTest {
       Mockito.when(this.openManageAPIClient.getDevices(any(Integer.class),any(Integer.class),
             ArgumentMatchers.eq(Chassis.class))).thenReturn(new CommonResult<Chassis>());
       openmanageJobService.executeJob(EventMessageUtil.OpenManage_SyncAssetsMetaData, config);
+      openmanageJobService.executeJob(EventMessageUtil.OpenManage_SyncRealtimeData, config);
    }
 
    @Test
@@ -549,6 +550,7 @@ public class OpenManageJobTest {
       specificData2.setManufacturer("Dell");
       server2.setDeviceSpecificData(specificData2);
       servers.add(server2);
+      serversResult.setCount(1);
       serversResult.setValue(servers);
 
       return serversResult;
