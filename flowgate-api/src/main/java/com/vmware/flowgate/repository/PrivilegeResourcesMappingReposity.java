@@ -5,11 +5,11 @@
 package com.vmware.flowgate.repository;
 
 import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
-import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
+import org.springframework.data.couchbase.repository.CouchbaseRepository;
 
 import com.vmware.flowgate.common.model.PrivilegeResourceMapping;
 
 @N1qlPrimaryIndexed
 public interface PrivilegeResourcesMappingReposity
-      extends CouchbasePagingAndSortingRepository<PrivilegeResourceMapping, String> {
+      extends CouchbaseRepository<PrivilegeResourceMapping, String> {
 }

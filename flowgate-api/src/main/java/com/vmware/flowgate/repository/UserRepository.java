@@ -4,10 +4,10 @@
 */
 package com.vmware.flowgate.repository;
 
-import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
-
+import org.springframework.data.couchbase.repository.CouchbaseRepository;
 import com.vmware.flowgate.common.model.WormholeUser;
 
-public interface UserRepository extends CouchbasePagingAndSortingRepository<WormholeUser, String> {
+public interface UserRepository extends
+            CouchbaseRepository<WormholeUser, String> {
    WormholeUser findOneByUserName(String userName);
 }

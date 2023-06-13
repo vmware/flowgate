@@ -7,15 +7,15 @@ package com.vmware.flowgate.repository;
 import java.util.HashMap;
 import java.util.List;
 
-import org.springframework.data.couchbase.core.query.Query;
-import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
+import org.springframework.data.couchbase.repository.Query;
+import org.springframework.data.couchbase.repository.CouchbaseRepository;
 
 /**
  * @author haoyul
  *
  */
 public interface SystemSummaryRepository
-      extends CouchbasePagingAndSortingRepository<HashMap<String,Object>, String>{
+      extends CouchbaseRepository<HashMap<String,Object>, String> {
    public static final String hackid = "hid";
    public static final int cas = 89657;
 

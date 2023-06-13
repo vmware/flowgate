@@ -26,7 +26,7 @@ public class CrossoOriginConfig {
        final CorsConfiguration corsConfiguration = new CorsConfiguration();
        corsConfiguration.setAllowCredentials(true);
        for(int i =0;i<allowedOrigin.length;i++) {
-          corsConfiguration.addAllowedOrigin(allowedOrigin[i]);
+          corsConfiguration.addAllowedOriginPattern(allowedOrigin[i]);
        }
        for(int i =0;i<allowedHeaders.length;i++) {
           corsConfiguration.addAllowedHeader(allowedHeaders[i]);
