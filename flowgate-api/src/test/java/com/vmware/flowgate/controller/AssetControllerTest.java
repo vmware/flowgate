@@ -90,6 +90,8 @@ import com.vmware.flowgate.repository.ServerMappingRepository;
 import com.vmware.flowgate.service.AssetService;
 import com.vmware.flowgate.util.BaseDocumentUtil;
 
+
+
 import junit.framework.TestCase;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -226,6 +228,11 @@ public class AssetControllerTest {
       List<RealTimeData> res1 = realtimeDataRepository.getRealTimeDatabtTimeRange(time-FlowgateConstant.DEFAULTEXPIREDTIMERANGE);
       TestCase.assertEquals(0, res1.size());
 
+   }
+
+   @Test
+   public void aTest(){
+      System.out.println("123");
    }
 
    @Test
