@@ -18,7 +18,7 @@ public class CouchbaseConfig extends AbstractCouchbaseConfiguration {
 
     @Override
     public String getConnectionString() {
-        return "couchbase://" + hosts;
+        return hosts;
     }
 
     @Override
