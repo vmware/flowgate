@@ -11,10 +11,18 @@ public class CouchbaseConfig extends AbstractCouchbaseConfiguration {
 
     @Value("${spring.couchbase.bootstrap-hosts}")
     protected String hosts;
+
     @Value("${spring.couchbase.bucket.name}")
     protected String bucket;
+
+    @Value("${spring.couchbase.bucket.username:flowgate}")
+    protected String username;
+
     @Value("${spring.couchbase.bucket.password}")
     protected String password;
+
+    @Value("${spring.data.couchbase.auto-index}")
+    protected boolean autoindex;
 
     @Override
     public String getConnectionString() {
@@ -23,7 +31,7 @@ public class CouchbaseConfig extends AbstractCouchbaseConfiguration {
 
     @Override
     public String getUserName() {
-        return "Administrator";
+        return username;
     }
 
     @Override
@@ -34,5 +42,10 @@ public class CouchbaseConfig extends AbstractCouchbaseConfiguration {
     @Override
     public String getBucketName() {
         return bucket;
+    }
+
+    @Override
+    protected boolean autoIndexCreation() {
+        return autoindex;
     }
 }
