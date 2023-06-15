@@ -18,8 +18,8 @@ jobs:
     - name: test flowgate-api
       run: |
         export FLOWGATEPWD=$PWD
-        docker pull alberthaoyu/flowgate-couchbase:v1.0
-        docker run -itd -p 8091-8096:8091-8096 -p 18091-18096:18091-18096 -p 11210-11211:11210-11211 -p 11207:11207 alberthaoyu/flowgate-couchbase:v1.0
+        docker pull changxiaohui/flowgate-couchbase:v1.2
+        docker run -itd -p 8091-8096:8091-8096 -p 18091-18096:18091-18096 -p 11210-11211:11210-11211 -p 11207:11207 changxiaohui/flowgate-couchbase:v1.2
         cd $FLOWGATEPWD/flowgate-common
         sudo mvn clean install
         cd $FLOWGATEPWD/common-restclient
