@@ -33,6 +33,7 @@
 		<tomcat.version>9.0.41</tomcat.version>
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
 		<guava.version>30.0-jre</guava.version>
+		<snakeyaml.version>2.0</snakeyaml.version>
 		<junit5.vintage.version>5.9.3</junit5.vintage.version>
 	</properties>
 

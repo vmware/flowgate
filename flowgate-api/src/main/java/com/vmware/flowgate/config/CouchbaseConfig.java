@@ -15,7 +15,7 @@ public class CouchbaseConfig extends AbstractCouchbaseConfiguration {
     @Value("${spring.couchbase.bucket.name}")
     protected String bucket;
 
-    @Value("${spring.couchbase.bucket.username:flowgate}")
+    @Value("${spring.couchbase.username:flowgate}")
     protected String username;
 
     @Value("${spring.couchbase.bucket.password}")

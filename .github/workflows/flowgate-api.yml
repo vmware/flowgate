@@ -18,8 +18,9 @@ jobs:
     - name: test flowgate-api
       run: |
         export FLOWGATEPWD=$PWD
-        docker pull changxiaohui/flowgate-couchbase:v1.2.4
-        docker run -itd -p 8091-8096:8091-8096 -p 18091-18096:18091-18096 -p 11210-11211:11210-11211 -p 11207:11207 changxiaohui/flowgate-couchbase:v1.2.4
+        docker pull changxiaohui/flowgate-couchbase:v1.2
+        docker run -itd -p 8091-8096:8091-8096 -p 18091-18096:18091-18096 -p 11210-11211:11210-11211 -p 11207:11207 changxiaohui/flowgate-couchbase:v1.2
+        sleep 120s
         cd $FLOWGATEPWD/flowgate-common
         sudo mvn clean install
         cd $FLOWGATEPWD/common-restclient
@@ -35,7 +36,6 @@ jobs:
         sudo mvn install:install-file -Dfile=./libs/vlsi-core-6.5.0-4258493.jar -DgroupId=com.vmware.vlsi -DartifactId=vlsi-core -Dversion=6.5.0-4258493 -Dpackaging=jar -DgeneratePom=true
         sudo mvn install:install-file -Dfile=./libs/vlsi-client-6.5.0-4258493.jar -DgroupId=com.vmware.vlsi -DartifactId=vlsi-client -Dversion=6.5.0-4258493 -Dpackaging=jar -DgeneratePom=true
         sudo mvn clean initialize
-        sleep 60s
         sudo mvn clean test
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
