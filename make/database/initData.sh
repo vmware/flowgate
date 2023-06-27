@@ -17,6 +17,7 @@ CREATE INDEX `facilityType_index` ON `flowgate`(`type`) WHERE `_class` = "com.vm
 CREATE INDEX `jobconfig_index` ON `flowgate`(`jobType`) WHERE `_class` = "com.vmware.flowgate.common.model.JobConfig";
 CREATE INDEX `queryByAssetName_index` ON `flowgate`(`assetName`) WHERE `_class` = "com.vmware.flowgate.common.model.Asset";
 CREATE INDEX `class_index` ON `flowgate`(`_class`);
+CREATE PRIMARY INDEX `primary` ON `flowgate`;
 
 ###create data###
 INSERT INTO flowgate (KEY, VALUE) VALUES ("cleanRealTimeDataByTimeRange", {"_class":"com.vmware.flowgate.common.model.PrivilegeResourceMapping","privilegeName":"cleanRealTimeDataByTimeRange","resource":[{"pattern":"/v1/assets/realtimedata/**","httpMethod":"DELETE","sortWeight":"2"}]});

@@ -6,18 +6,18 @@ package com.vmware.flowgate.repository;
 
 import java.util.List;
 
-import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
-import org.springframework.data.couchbase.core.query.Query;
-import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
+import org.springframework.data.couchbase.repository.Query;
+import org.springframework.data.couchbase.repository.CouchbaseRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.couchbase.client.java.document.json.JsonArray;
+import com.couchbase.client.java.json.JsonArray;
 import com.vmware.flowgate.common.model.Asset;
+import org.springframework.stereotype.Repository;
 
-@N1qlPrimaryIndexed
+@Repository
 public interface AssetRepository
-      extends CouchbasePagingAndSortingRepository<Asset, String> {
+      extends CouchbaseRepository<Asset, String> {
    public Asset findOneByAssetNumber(long assetNumber);
 
    public List<Asset> findByPdusIsNull();
