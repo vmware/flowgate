@@ -7,7 +7,7 @@ package com.vmware.flowgate.common.model;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import com.couchbase.client.java.repository.annotation.Id;
+import org.springframework.data.annotation.Id;
 
 public class FacilitySoftwareConfig implements Serializable, BaseDocument {
 

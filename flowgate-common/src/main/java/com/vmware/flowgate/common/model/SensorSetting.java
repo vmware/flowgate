@@ -4,7 +4,7 @@
 */
 package com.vmware.flowgate.common.model;
 
-import com.couchbase.client.java.repository.annotation.Id;
+import org.springframework.data.annotation.Id;
 
 public class SensorSetting implements BaseDocument {
 

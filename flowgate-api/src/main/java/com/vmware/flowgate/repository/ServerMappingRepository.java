@@ -6,17 +6,17 @@ package com.vmware.flowgate.repository;
 
 import java.util.List;
 
-import org.springframework.data.couchbase.core.query.N1qlPrimaryIndexed;
-import org.springframework.data.couchbase.core.query.Query;
-import org.springframework.data.couchbase.repository.CouchbasePagingAndSortingRepository;
+import org.springframework.data.couchbase.repository.Query;
+import org.springframework.data.couchbase.repository.CouchbaseRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.vmware.flowgate.common.model.ServerMapping;
+import org.springframework.stereotype.Repository;
 
-@N1qlPrimaryIndexed
+@Repository
 public interface ServerMappingRepository
-      extends CouchbasePagingAndSortingRepository<ServerMapping, String> {
+      extends CouchbaseRepository<ServerMapping, String> {
    List<ServerMapping> findByAssetNotNull();
 
    Page<ServerMapping> findAllByVroID(String vroID, Pageable pageable);

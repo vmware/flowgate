@@ -6,7 +6,7 @@ package com.vmware.flowgate.common.model;
 
 import java.util.List;
 
-import com.couchbase.client.java.repository.annotation.Id;
+import org.springframework.data.annotation.Id;
 import com.vmware.flowgate.common.model.FacilitySoftwareConfig.SoftwareType;
 
 public class FacilityAdapter implements BaseDocument {

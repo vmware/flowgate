@@ -12,7 +12,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>11</java.version>
 		<jackson.version>2.12.7.1</jackson.version>
-		<couchbase.version>2.2.8</couchbase.version>
+		<couchbase.version>3.3.4</couchbase.version>
 		<flowgate.version>1.2.0</flowgate.version>
 	</properties>
 	<dependencies>
@@ -35,6 +35,11 @@
 					<artifactId>core-io</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+			<version>2.7.12</version>
 		</dependency>
 	</dependencies>
 	<build>

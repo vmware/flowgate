@@ -6,7 +6,7 @@ package com.vmware.flowgate.common.model;
 
 import java.io.Serializable;
 
-import com.couchbase.client.java.repository.annotation.Id;
+import org.springframework.data.annotation.Id;
 
 public class SDDCSoftwareConfig implements Serializable, BaseDocument {
 
