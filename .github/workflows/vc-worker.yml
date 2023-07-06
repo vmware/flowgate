@@ -26,9 +26,9 @@ jobs:
         sudo mvn clean install
         cd $FLOWGATEPWD/vc-worker
         sudo mvn install:install-file -Dfile=./libs/vim25.jar -DgroupId=com.vmware.vim -DartifactId=vim25 -Dversion=6.0.0-2561048 -Dpackaging=jar -DgeneratePom=true
-        sudo mvn install:install-file -Dfile=./libs/bcprov-ext-jdk15on-1.65.jar -DgroupId=org.bouncycastle -DartifactId=bcprov-ext-jdk15on -Dversion=1.65 -Dpackaging=jar -DgeneratePom=true
-        sudo mvn install:install-file -Dfile=./libs/bcpkix-jdk15on-150.jar -DgroupId=org.bouncycastle -DartifactId=bcpkix-jdk15on -Dversion=1.50 -Dpackaging=jar -DgeneratePom=true
-        sudo mvn install:install-file -Dfile=./libs/bcprov-jdk15on-1.65.01.jar -DgroupId=org.bouncycastle -DartifactId=bcprov-jdk15on -Dversion=1.65.01 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/bcprov-ext-jdk15on-1.70.jar -DgroupId=org.bouncycastle -DartifactId=bcprov-ext-jdk15on -Dversion=1.70 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/bcpkix-jdk15on-1.70.jar -DgroupId=org.bouncycastle -DartifactId=bcpkix-jdk15on -Dversion=1.70 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/bcprov-jdk15on-1.70.jar -DgroupId=org.bouncycastle -DartifactId=bcprov-jdk15on -Dversion=1.70 -Dpackaging=jar -DgeneratePom=true
         sudo mvn install:install-file -Dfile=./libs/query-vmodl.jar -DgroupId=com.vmware.vlsi -DartifactId=query-vmodl -Dversion=6.5.0-4258493 -Dpackaging=jar -DgeneratePom=true
         sudo mvn install:install-file -Dfile=./libs/reflect-vmodl.jar -DgroupId=com.vmware.vlsi -DartifactId=reflect-vmodl -Dversion=6.5.0-4258493 -Dpackaging=jar -DgeneratePom=true
         sudo mvn install:install-file -Dfile=./libs/samples-annotations-1.0.0.jar -DgroupId=com.vmware.vsphere.samples.annotations -DartifactId=vsphere-samples-annotations -Dversion=1.0.0 -Dpackaging=jar -DgeneratePom=true

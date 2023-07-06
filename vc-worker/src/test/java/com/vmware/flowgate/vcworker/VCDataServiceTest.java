@@ -20,6 +20,7 @@ import java.util.Map;
 import com.vmware.flowgate.common.model.redis.message.EventMessage;
 import com.vmware.flowgate.common.model.redis.message.EventType;
 import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
+import com.vmware.flowgate.vcworker.model.VCServerInfo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -178,6 +179,17 @@ public class VCDataServiceTest {
       Map<String, ServerMapping> mobIdDictionary = service.getVaildServerMapping(vc);
       TestCase.assertEquals(mapping1, mobIdDictionary.get(mapping1.getVcMobID()));
       TestCase.assertEquals(mapping2, mobIdDictionary.get(mapping2.getVcMobID()));
+   }
+
+   @Test
+   public void testVCServerInfo() {
+      SDDCSoftwareConfig vc = Mockito.mock(SDDCSoftwareConfig.class);
+      when(vc.getServerURL()).thenReturn("vc_server");
+      when(vc.getUserName()).thenReturn("vc_user");
+      when(vc.getPassword()).thenReturn("vc_pwd");
+      when(vc.isVerifyCert()).thenReturn(false);
+      VCServerInfo info = new VCServerInfo(vc);
+      TestCase.assertEquals(info.getUserName(), "vc_user");
    }
 
    @Test
@@ -965,6 +977,8 @@ public class VCDataServiceTest {
       doReturn(new ResponseEntity<>(assets, HttpStatus.OK)).when(restClient).getAssetsByVCID(any());
       doReturn(new ResponseEntity<Void>(HttpStatus.OK)).when(restClient).saveAssets(any(Asset.class));
       service.executeAsync(EventMessageUtil.createEventMessage(EventType.VCenter, EventMessageUtil.VCENTER_SyncData, null));
+      service.executeAsync(EventMessageUtil.createEventMessage(EventType.VCenter, EventMessageUtil.VCENTER_SyncCustomerAttrsData, null));
+      service.executeAsync(EventMessageUtil.createEventMessage(EventType.VCenter, EventMessageUtil.VCENTER_SyncCustomerAttrs, null));
    }
 
 }

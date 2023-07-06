@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.flowgate.poweriqworker.config.ServiceKeyConfig;
 import com.vmware.flowgate.poweriqworker.model.Inlet;
 import com.vmware.flowgate.poweriqworker.model.InletPoleReading;
 import com.vmware.flowgate.poweriqworker.model.InletReading;
@@ -59,6 +60,9 @@ public class SyncPduAssetJobTest {
 
    @Mock
    private PowerIQAPIClient powerIQAPIClient;
+
+   @Mock
+   private ServiceKeyConfig serviceKeyConfig;
 
    @Spy
    @InjectMocks
@@ -288,6 +292,13 @@ public class SyncPduAssetJobTest {
 
       boolean triggerPDUAggregation = powerIQService.savePduAssetsToFlowgate(existedPduAssets, assetSource, powerIQAPIClient, location);
       TestCase.assertTrue(triggerPDUAggregation);
+   }
+
+   @Test
+   public void testCheckAndUpdateIntegrationStatus(){
+      FacilitySoftwareConfig config = new FacilitySoftwareConfig();
+      powerIQService.checkAndUpdateIntegrationStatus(config,"message");
+      TestCase.assertNotNull(config.getIntegrationStatus());
    }
 
    Pdu createPdu() {

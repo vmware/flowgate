@@ -28,8 +28,8 @@ jobs:
         cd $FLOWGATEPWD/worker-jobs
         sudo mvn clean install
         cd $FLOWGATEPWD/flowgate-api
-        sudo mvn install:install-file -Dfile=./libs/platform-api-model-1.6.jar -DgroupId=com.vmware -DartifactId=platform-api-model -Dversion=1.6 -Dpackaging=jar -DgeneratePom=true
-        sudo mvn install:install-file -Dfile=./libs/vcops-suiteapi-client-1.6.jar -DgroupId=com.vmware -DartifactId=vcops-suiteapi-client -Dversion=1.6 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/platform-api-model-1.35.jar -DgroupId=com.vmware -DartifactId=platform-api-model -Dversion=1.35 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./libs/vcops-suiteapi-client-1.35.jar -DgroupId=com.vmware -DartifactId=vcops-suiteapi-client -Dversion=1.35 -Dpackaging=jar -DgeneratePom=true
         sudo mvn install:install-file -Dfile=./libs/query-vmodl-6.5.0-4258493.jar -DgroupId=com.vmware.vlsi -DartifactId=query-vmodl -Dversion=6.5.0-4258493 -Dpackaging=jar -DgeneratePom=true
         sudo mvn install:install-file -Dfile=./libs/reflect-vmodl-6.5.0-4258493.jar -DgroupId=com.vmware.vlsi -DartifactId=reflect-vmodl -Dversion=6.5.0-4258493 -Dpackaging=jar -DgeneratePom=true
         sudo mvn install:install-file -Dfile=./libs/vimVmodl-5.1.0-753389.jar -DgroupId=com.vmware.vimclients -DartifactId=vimVmodl -Dversion=5.1.0-753389 -Dpackaging=jar -DgeneratePom=true
