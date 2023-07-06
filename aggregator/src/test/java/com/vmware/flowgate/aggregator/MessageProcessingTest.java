@@ -514,6 +514,13 @@ public class MessageProcessingTest {
       TestCase.assertEquals(8, pduFormula.get(pduIds.get(0)).size());
    }
 
+   @Test
+   public void test(){
+      HashMap<String,Map<String,String>> metricsNameAndSensorsMap = new HashMap<>();
+      aggregatorService.fillingData(metricsNameAndSensorsMap,"metricName","positionInfo","sensorAssetId");
+      TestCase.assertNotNull(metricsNameAndSensorsMap.get("metricName"));
+   }
+
    FacilitySoftwareConfig createFacilitySoftware() {
       FacilitySoftwareConfig example = new FacilitySoftwareConfig();
       example.setId(UUID.randomUUID().toString());

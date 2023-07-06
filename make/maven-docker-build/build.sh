@@ -62,13 +62,13 @@ for k in "${specialproject[@]}"
 do
 	cd $SOURCEDIR/$k
 	mvn clean initialize  >> $BUILDLOG
-	mvn package  >> $BUILDLOG
+	mvn package -Dmaven.test.skip  >> $BUILDLOG
 	if ls target/$k$OUTPUTJARNAME 1> /dev/null 2>&1;then
 		cp target/*.jar $OUTPUTJARPATH/
 	else
 		echo "build $k$OUTPUTJARNAME failure" >> $BUILDERRORLOG
 		mvn clean initialize  >> $BUILDERRORLOG
-		mvn package  >> $BUILDERRORLOG
+		mvn package -Dmaven.test.skip >> $BUILDERRORLOG
 		continue
 	fi
 done

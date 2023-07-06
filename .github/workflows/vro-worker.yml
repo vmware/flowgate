@@ -25,8 +25,8 @@ jobs:
         cd $FLOWGATEPWD/worker-jobs
         sudo mvn clean install
         cd $FLOWGATEPWD/vro-worker
-        sudo mvn install:install-file -Dfile=./src/libs/platform-api-model-1.6.jar -DgroupId=com.vmware -DartifactId=platform-api-model -Dversion=1.6 -Dpackaging=jar -DgeneratePom=true
-        sudo mvn install:install-file -Dfile=./src/libs/vcops-suiteapi-client-1.6.jar -DgroupId=com.vmware -DartifactId=vcops-suiteapi-client -Dversion=1.6 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./src/libs/platform-api-model-1.35.jar -DgroupId=com.vmware -DartifactId=platform-api-model -Dversion=1.35 -Dpackaging=jar -DgeneratePom=true
+        sudo mvn install:install-file -Dfile=./src/libs/vcops-suiteapi-client-1.35.jar -DgroupId=com.vmware -DartifactId=vcops-suiteapi-client -Dversion=1.35 -Dpackaging=jar -DgeneratePom=true
         sudo mvn clean initialize
         sudo mvn clean test
     - name: Upload coverage to Codecov

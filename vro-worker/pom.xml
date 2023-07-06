@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.7.RELEASE</version>
+		<version>2.7.12</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
@@ -27,6 +27,8 @@
 		<jackson.version>2.10.0</jackson.version>
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
 		<guava.version>32.0.0-jre</guava.version>
+		<junit5.vintage.version>5.9.3</junit5.vintage.version>
+		<snakeyaml.version>2.0</snakeyaml.version>
 	</properties>
 
 	<dependencies>
@@ -98,12 +100,12 @@
 		<dependency>
 			<groupId>com.vmware</groupId>
 			<artifactId>platform-api-model</artifactId>
-			<version>1.6</version>
+			<version>1.35</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vmware</groupId>
 			<artifactId>vcops-suiteapi-client</artifactId>
-			<version>1.6</version>
+			<version>1.35</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
@@ -156,6 +158,12 @@
 			<artifactId>spring-restdocs-mockmvc</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>${junit5.vintage.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
@@ -200,10 +208,10 @@
 							<goal>install-file</goal>
 						</goals>
 						<configuration>
-							<file>./src/libs/platform-api-model-1.6.jar</file>
+							<file>./src/libs/platform-api-model-1.35.jar</file>
 							<groupId>com.vmware</groupId>
 							<artifactId>platform-api-model</artifactId>
-							<version>1.6</version>
+							<version>1.35</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>
@@ -215,10 +223,10 @@
 							<goal>install-file</goal>
 						</goals>
 						<configuration>
-							<file>./src/libs/vcops-suiteapi-client-1.6.jar</file>
+							<file>./src/libs/vcops-suiteapi-client-1.35.jar</file>
 							<groupId>com.vmware</groupId>
 							<artifactId>vcops-suiteapi-client</artifactId>
-							<version>1.6</version>
+							<version>1.35</version>
 							<packaging>jar</packaging>
 							<generatePom>true</generatePom>
 						</configuration>

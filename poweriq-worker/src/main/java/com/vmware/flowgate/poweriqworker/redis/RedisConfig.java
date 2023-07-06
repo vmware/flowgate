@@ -6,6 +6,7 @@ package com.vmware.flowgate.poweriqworker.redis;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -19,6 +20,7 @@ import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 public class RedisConfig {
 
    @Bean
+   @Profile("!test")
    RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
          MessageListenerAdapter listenerAdapter) {
       RedisMessageListenerContainer container = new RedisMessageListenerContainer();
@@ -29,6 +31,7 @@ public class RedisConfig {
    }
 
    @Bean
+   @Profile("!test")
    MessageListenerAdapter listenerAdapter(MessageReceiver receiver) {
       return new MessageListenerAdapter(receiver, "receiveMessage");
    }
