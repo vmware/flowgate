@@ -22,8 +22,8 @@ public class RedisConfig {
    @Value("${redis.topic:aggregator}")
    private String commandTopic;
 
-   @Profile("!test")
    @Bean
+   @Profile("!test")
    RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
          MessageListenerAdapter listenerAdapter) {
       RedisMessageListenerContainer container = new RedisMessageListenerContainer();
@@ -32,8 +32,8 @@ public class RedisConfig {
       return container;
    }
 
-   @Profile("!test")
    @Bean
+   @Profile("!test")
    MessageListenerAdapter listenerAdapter(MessageReceiver receiver) {
       return new MessageListenerAdapter(receiver, "receiveMessage");
    }

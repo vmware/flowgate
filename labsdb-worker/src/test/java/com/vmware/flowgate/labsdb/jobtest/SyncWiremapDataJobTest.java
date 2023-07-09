@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
+import com.vmware.flowgate.common.model.FacilitySoftwareConfig;
+import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,6 +79,12 @@ public class SyncWiremapDataJobTest {
          }
       }
 
+   }
+
+   @Test
+   public void testExcuteJob(){
+      FacilitySoftwareConfig config = new FacilitySoftwareConfig();
+      labsdbService.excuteJob(EventMessageUtil.Labsdb_SyncAllWireMapData,config);
    }
 
    @Test

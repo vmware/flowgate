@@ -1081,6 +1081,13 @@ public class SycnRealTimeDataJobTest {
 
       nlyteDataService.savePduAssetAndUpdatePduUsageFormula(assets);
    }
+
+   @Test
+   public void testCheckAndUpdateIntegrationStatus(){
+      FacilitySoftwareConfig config = getFacilitySoftwareByType().getBody()[0];
+      nlyteDataService.checkAndUpdateIntegrationStatus(config,"message");
+      TestCase.assertNotNull(config.getIntegrationStatus());
+   }
    
    public FlowgateChassisSlot createFlowgateChassisSlot() {
       FlowgateChassisSlot slot = new FlowgateChassisSlot();
