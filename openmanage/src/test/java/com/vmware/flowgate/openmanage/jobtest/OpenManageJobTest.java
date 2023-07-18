@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.flowgate.openmanage.redis.TestRedisConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +66,7 @@ import com.vmware.flowgate.openmanage.job.OpenManageJobService;
 import junit.framework.TestCase;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {OpenManageJobTest.class})
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 public class OpenManageJobTest {
 

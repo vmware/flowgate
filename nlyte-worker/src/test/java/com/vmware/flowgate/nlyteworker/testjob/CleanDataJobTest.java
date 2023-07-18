@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vmware.flowgate.nlyteworker.redis.TestRedisConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +35,7 @@ import com.vmware.flowgate.nlyteworker.scheduler.job.NlyteDataService;
 import junit.framework.TestCase;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 public class CleanDataJobTest {
    @Mock

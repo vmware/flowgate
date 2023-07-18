@@ -11,6 +11,7 @@ import com.vmware.flowgate.common.model.IntegrationStatus;
 import com.vmware.flowgate.infobloxworker.model.InfoBloxIPInfoResult;
 import com.vmware.flowgate.infobloxworker.model.JsonResultForQueryHostNames;
 import com.vmware.flowgate.infobloxworker.model.JsonResultForQueryHostRecord;
+import com.vmware.flowgate.infobloxworker.redis.TestRedisConfiguration;
 import com.vmware.flowgate.infobloxworker.service.InfobloxClient;
 import junit.framework.TestCase;
 import org.junit.Test;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 public class InfobloxClientTest {
 

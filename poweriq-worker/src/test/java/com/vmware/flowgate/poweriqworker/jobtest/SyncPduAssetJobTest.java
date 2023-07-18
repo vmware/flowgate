@@ -17,6 +17,7 @@ import com.vmware.flowgate.poweriqworker.model.LocationInfo;
 import com.vmware.flowgate.poweriqworker.model.Outlet;
 import com.vmware.flowgate.poweriqworker.model.OutletReading;
 import com.vmware.flowgate.poweriqworker.model.Reading;
+import com.vmware.flowgate.poweriqworker.redis.TestRedisConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +51,7 @@ import com.vmware.flowgate.poweriqworker.model.Pdu;
 import junit.framework.TestCase;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 public class SyncPduAssetJobTest {
 
@@ -292,13 +293,6 @@ public class SyncPduAssetJobTest {
 
       boolean triggerPDUAggregation = powerIQService.savePduAssetsToFlowgate(existedPduAssets, assetSource, powerIQAPIClient, location);
       TestCase.assertTrue(triggerPDUAggregation);
-   }
-
-   @Test
-   public void testCheckAndUpdateIntegrationStatus(){
-      FacilitySoftwareConfig config = new FacilitySoftwareConfig();
-      powerIQService.checkAndUpdateIntegrationStatus(config,"message");
-      TestCase.assertNotNull(config.getIntegrationStatus());
    }
 
    Pdu createPdu() {

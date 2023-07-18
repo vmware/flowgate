@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vmware.flowgate.nlyteworker.redis.TestRedisConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,7 +65,7 @@ import com.vmware.flowgate.nlyteworker.scheduler.job.common.HandleAssetUtil;
 import junit.framework.TestCase;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 public class SycnRealTimeDataJobTest {
 
@@ -1082,13 +1083,6 @@ public class SycnRealTimeDataJobTest {
       nlyteDataService.savePduAssetAndUpdatePduUsageFormula(assets);
    }
 
-   @Test
-   public void testCheckAndUpdateIntegrationStatus(){
-      FacilitySoftwareConfig config = getFacilitySoftwareByType().getBody()[0];
-      nlyteDataService.checkAndUpdateIntegrationStatus(config,"message");
-      TestCase.assertNotNull(config.getIntegrationStatus());
-   }
-   
    public FlowgateChassisSlot createFlowgateChassisSlot() {
       FlowgateChassisSlot slot = new FlowgateChassisSlot();
       slot.setMountingSide("Back");

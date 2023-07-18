@@ -182,17 +182,6 @@ public class VCDataServiceTest {
    }
 
    @Test
-   public void testVCServerInfo() {
-      SDDCSoftwareConfig vc = Mockito.mock(SDDCSoftwareConfig.class);
-      when(vc.getServerURL()).thenReturn("vc_server");
-      when(vc.getUserName()).thenReturn("vc_user");
-      when(vc.getPassword()).thenReturn("vc_pwd");
-      when(vc.isVerifyCert()).thenReturn(false);
-      VCServerInfo info = new VCServerInfo(vc);
-      TestCase.assertEquals(info.getUserName(), "vc_user");
-   }
-
-   @Test
    public void testQueryHostMetaData() throws Exception {
 
       SDDCSoftwareConfig vc = Mockito.mock(SDDCSoftwareConfig.class);

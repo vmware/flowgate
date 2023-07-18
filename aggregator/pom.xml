@@ -110,6 +110,12 @@
 			<artifactId>netty-buffer</artifactId>
 			<version>4.1.94.Final</version>
 		</dependency>
+		<dependency>
+			<groupId>it.ozimov</groupId>
+			<artifactId>embedded-redis</artifactId>
+			<version>0.7.3</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

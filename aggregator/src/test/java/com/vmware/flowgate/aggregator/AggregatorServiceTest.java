@@ -5,6 +5,7 @@
 package com.vmware.flowgate.aggregator;
 
 import com.vmware.flowgate.aggregator.config.ServiceKeyConfig;
+import com.vmware.flowgate.aggregator.redis.TestRedisConfiguration;
 import com.vmware.flowgate.aggregator.scheduler.job.AggregatorService;
 import com.vmware.flowgate.client.WormholeAPIClient;
 import com.vmware.flowgate.common.AssetCategory;
@@ -33,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 public class AggregatorServiceTest {
 
