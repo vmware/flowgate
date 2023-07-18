@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.vmware.flowgate.poweriqworker.model.LocationInfo;
+import com.vmware.flowgate.poweriqworker.redis.TestRedisConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +59,7 @@ import com.vmware.flowgate.poweriqworker.model.SensorReading;
 import junit.framework.TestCase;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 public class SyncSensorMetaDataJobTest {
 

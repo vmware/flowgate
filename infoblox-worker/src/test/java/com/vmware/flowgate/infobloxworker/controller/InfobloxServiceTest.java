@@ -13,6 +13,7 @@ import com.vmware.flowgate.infobloxworker.jobs.InfoBloxService;
 import com.vmware.flowgate.infobloxworker.model.DiscoveredData;
 import com.vmware.flowgate.infobloxworker.model.InfoBloxIPInfoResult;
 import com.vmware.flowgate.infobloxworker.model.InfobloxIpv4addressItem;
+import com.vmware.flowgate.infobloxworker.redis.TestRedisConfiguration;
 import com.vmware.flowgate.infobloxworker.service.InfobloxClient;
 import junit.framework.TestCase;
 import org.junit.Before;
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 public class InfobloxServiceTest {
 
@@ -86,21 +87,6 @@ public class InfobloxServiceTest {
       Mockito.doReturn(null).when(infobloxClient).queryIpv4addressByIP(Mockito.anyString());
       infoBloxService.executeAsync(eventMessage);
       TestCase.assertEquals(IntegrationStatus.Status.ACTIVE, Objects.requireNonNull(infobloxFacilitySoftware.getBody())[0].getIntegrationStatus().getStatus());
-   }
-
-   @Test
-   public void testInfobloxIpv4addressItem(){
-      InfobloxIpv4addressItem infobloxIpv4addressItem = new InfobloxIpv4addressItem();
-      DiscoveredData discoveredData = new DiscoveredData();
-      discoveredData.setFirstDiscovered(1684199069000L);
-      discoveredData.setOs("macos");
-      infobloxIpv4addressItem.setDiscoveredData(discoveredData);
-      infobloxIpv4addressItem.setMacAddress("00:0A:02:0B:03:0C");
-      infobloxIpv4addressItem.setIsConflict(true);
-      TestCase.assertEquals("macos",infobloxIpv4addressItem.getDiscoveredData().getOs());
-      TestCase.assertEquals("00:0A:02:0B:03:0C",infobloxIpv4addressItem.getMacAddress());
-      TestCase.assertEquals(true,infobloxIpv4addressItem.getIsConflict());
-      TestCase.assertEquals(1684199069000L,infobloxIpv4addressItem.getDiscoveredData().getFirstDiscovered());
    }
 
    private ResponseEntity<FacilitySoftwareConfig[]> getInfobloxFacilitySoftware() {

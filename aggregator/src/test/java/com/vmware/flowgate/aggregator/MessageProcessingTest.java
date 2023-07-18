@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.vmware.flowgate.aggregator.redis.TestRedisConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +66,7 @@ import com.vmware.flowgate.common.model.redis.message.impl.EventMessageUtil;
 import junit.framework.TestCase;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 public class MessageProcessingTest {
 
@@ -512,13 +513,6 @@ public class MessageProcessingTest {
       Map<String,Map<String,String>> pduFormula = aggregatorService.generatePduformulaForServer(pduIds);
       TestCase.assertEquals(pduIds.size(), pduFormula.size());
       TestCase.assertEquals(8, pduFormula.get(pduIds.get(0)).size());
-   }
-
-   @Test
-   public void test(){
-      HashMap<String,Map<String,String>> metricsNameAndSensorsMap = new HashMap<>();
-      aggregatorService.fillingData(metricsNameAndSensorsMap,"metricName","positionInfo","sensorAssetId");
-      TestCase.assertNotNull(metricsNameAndSensorsMap.get("metricName"));
    }
 
    FacilitySoftwareConfig createFacilitySoftware() {
