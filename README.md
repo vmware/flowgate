@@ -21,8 +21,8 @@ With Project Flowgate, we can fetch metadata and runtime metrics from various fa
   - Open for other facility system integration.
 * **Built-in adapter for multiple IT stack systems**
   - vCenter Server
-  - vRealize Operation Manager
-  - Management Pack for vRealize Operation Manager Pack  ( Totally Free, [Download Here](https://marketplace.cloud.vmware.com/services/details/aaa?slug=true)) 
+  - Aria Operation Manager
+  - Management Pack for Aria Operation Manager Pack  ( Totally Free, [Download Here](https://marketplace.cloud.vmware.com/services/details/aaa?slug=true)) 
   - Open for other IT stack integration. More systems will coming soon.
 * **UI based Integration proccess**  One click integration. 
 * **Role based access control** API level access control support. 
@@ -30,7 +30,7 @@ With Project Flowgate, we can fetch metadata and runtime metrics from various fa
 ## Get Start
 **DEMO**
 
-[Flowgate Management Pack for vROPs Demo](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate_and_vROPs_Management_Pack_Demo.mp4)
+[Flowgate Management Pack for Aria Operations Demo](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate_and_vROPs_Management_Pack_Demo.mp4)
 
 [Demo Flowgate v1.1.2](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate1.1.2Update.mp4) or [https://youtu.be/REbDV4Pu_-c](https://youtu.be/REbDV4Pu_-c)
 

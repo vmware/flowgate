@@ -403,7 +403,7 @@ public class SDDCSoftwareControllerTest {
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/vrops"))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-getVROServerConfigs-example", responseFields(
-                    fieldWithPath("[]").description("An array of VROPs server configs"))
+                    fieldWithPath("[]").description("An array of Aria Operations server configs"))
                     .andWithPrefix("[].", fieldpath)))
             .andReturn();
       ObjectMapper mapper = new ObjectMapper();
@@ -454,7 +454,7 @@ public class SDDCSoftwareControllerTest {
       MvcResult result = this.mockMvc.perform(get("/v1/sddc/user/vrops"))
             .andExpect(status().isOk())
             .andDo(document("SDDCSoftware-getVROServerConfigsByUser-example", responseFields(
-                    fieldWithPath("[]").description("An array of VROPS server configs"))
+                    fieldWithPath("[]").description("An array of Aria Operations server configs"))
                     .andWithPrefix("[].", fieldpath)))
             .andReturn();
       String res = result.getResponse().getContentAsString();

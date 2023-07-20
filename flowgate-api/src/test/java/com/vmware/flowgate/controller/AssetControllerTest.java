@@ -327,13 +327,13 @@ public class AssetControllerTest {
                         fieldWithPath("vcMobID").description("EXSI server's management object ID."),
                         fieldWithPath("vcClusterMobID").description("MobID of Vcenter Cluster."),
                         fieldWithPath("vcInstanceUUID").description("Vcenter's UUID."),
-                        fieldWithPath("vroID").description("ID of VROps."),
+                        fieldWithPath("vroID").description("ID of Aria Operations."),
                         fieldWithPath("vroResourceName")
-                              .description("Resource Name in VROps for this server."),
+                              .description("Resource Name in Aria Operations for this server."),
                         fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
-                        fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
-                        fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
-                        fieldWithPath("vroResourceID").description("VROps Resource ID."))));
+                        fieldWithPath("vroVMEntityObjectID").description("Aria Operations Entity Object ID."),
+                        fieldWithPath("vroVMEntityVCID").description("Aria Operations Entity's Vcenter ID."),
+                        fieldWithPath("vroResourceID").description("Aria Operations Resource ID."))));
       serverMappingRepository.deleteById(mapping.getId());
    }
 
@@ -726,7 +726,7 @@ public class AssetControllerTest {
 
          this.mockMvc.perform(get("/v1/assets/mapping/unmappedservers")).andExpect(status().isOk())
                .andDo(document("assets-getUnmappedServers-example",
-                     responseFields(fieldWithPath("[]").description("An array of host name,the host name is from IT system for example : vCenter or vrops"))
+                     responseFields(fieldWithPath("[]").description("An array of host name,the host name is from IT system for example : vCenter or Aria Operations"))
                            .andWithPrefix("[].", fieldpath)));
       } finally {
          serverMappingRepository.deleteById(mapping1.getId());
@@ -1328,13 +1328,13 @@ public class AssetControllerTest {
                               fieldWithPath("vcMobID").description("EXSI server's management object ID."),
                               fieldWithPath("vcClusterMobID").description("MobID of Vcenter Cluster."),
                               fieldWithPath("vcInstanceUUID").description("Vcenter's UUID."),
-                              fieldWithPath("vroID").description("ID of VROps."),
+                              fieldWithPath("vroID").description("ID of Aria Operations."),
                               fieldWithPath("vroResourceName")
-                                    .description("Resource Name in VROps for this server."),
+                                    .description("Resource Name in Aria Operations for this server."),
                               fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
-                              fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
-                              fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
-                              fieldWithPath("vroResourceID").description("VROps Resource ID."))));
+                              fieldWithPath("vroVMEntityObjectID").description("Aria Operations Entity Object ID."),
+                              fieldWithPath("vroVMEntityVCID").description("Aria Operations Entity's Vcenter ID."),
+                              fieldWithPath("vroResourceID").description("Aria Operations Resource ID."))));
       serverMappingRepository.deleteById(mapping.getId());
    }
 
@@ -1640,13 +1640,13 @@ public class AssetControllerTest {
                      fieldWithPath("vcMobID").description("EXSI server's management object ID."),
                      fieldWithPath("vcClusterMobID").description("MobID of Vcenter Cluster."),
                      fieldWithPath("vcInstanceUUID").description("Vcenter's UUID."),
-                     fieldWithPath("vroID").description("ID of VROps."),
+                     fieldWithPath("vroID").description("ID of Aria Operations."),
                      fieldWithPath("vroResourceName")
-                           .description("Resource Name in VROps for this server."),
+                           .description("Resource Name in Aria Operations for this server."),
                      fieldWithPath("vroVMEntityName").description("EntityName of Resource."),
-                     fieldWithPath("vroVMEntityObjectID").description("VROps Entity Object ID."),
-                     fieldWithPath("vroVMEntityVCID").description("VROps Entity's Vcenter ID."),
-                     fieldWithPath("vroResourceID").description("VROps Resource ID."))));
+                     fieldWithPath("vroVMEntityObjectID").description("Aria Operations Entity Object ID."),
+                     fieldWithPath("vroVMEntityVCID").description("Aria Operations Entity's Vcenter ID."),
+                     fieldWithPath("vroResourceID").description("Aria Operations Resource ID."))));
 
       }finally {
          serverMappingRepository.deleteById(mapping.getId());

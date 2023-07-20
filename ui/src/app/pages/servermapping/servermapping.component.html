@@ -9,9 +9,9 @@ SPDX-License-Identifier: BSD-2-Clause -->
                                 <label>Integration Type:</label>
                                 <select clrSelect name="typeoptions" [ngModelOptions]="{standalone: true}" [(ngModel)]="serverconfig.type" on-change="changeType()">
                                         <option value="">Please Select</option>
-                                        <option value="VRO" >vRealize Operations Manager</option>
+                                        <option value="VRO" >Aria Operations Manager</option>
                                         <option value="VCENTER">VMware vCenter</option>
-                                        <option value="VROPSMP">vRealize Operations Management Pack</option>
+                                        <option value="VROPSMP">Aria Operations Management Pack</option>
                                 </select>
                         </clr-select-container>
                 </div>
@@ -33,13 +33,13 @@ SPDX-License-Identifier: BSD-2-Clause -->
 
         <clr-dg-column [clrDgField]="'vroResourceName'">
                 <ng-container *clrDgHideableColumn="{hidden: vrohid}">
-                        vRealize Operations Manager Host Name
+                        Aria Operations Manager Host Name
                 </ng-container>
         </clr-dg-column>
        
         <clr-dg-column [clrDgField]="'vroVMEntityObjectID'">
                 <ng-container *clrDgHideableColumn="{hidden: vrohid}">
-                        vRealize Operations Manager VM Entity Object ID
+                        Aria Operations Manager VM Entity Object ID
                 </ng-container>
         </clr-dg-column>
         
