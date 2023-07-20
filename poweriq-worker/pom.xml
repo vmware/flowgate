@@ -5,7 +5,7 @@
 
 	<groupId>com.vmware.flowgate</groupId>
 	<artifactId>poweriq-worker</artifactId>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 	<packaging>jar</packaging>
 
 	<name>poweriq-worker</name>
@@ -22,7 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>11</java.version>
-		<flowgate.version>1.2.0</flowgate.version>
+		<flowgate.version>1.2.1</flowgate.version>
 		<jackson.version>2.10.0</jackson.version>
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
 		<junit5.vintage.version>5.9.3</junit5.vintage.version>
