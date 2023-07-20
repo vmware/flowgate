@@ -32,7 +32,7 @@
     - [Custom Facility Adapter Management](#custom-facility-adapter-management)
   - [IT System Integration Management](#it-system-integration-management)
     - [IT system integration](#it-system-integration)
-    - [Integrate with vROPs](#integrate-with-vrops)
+    - [Integrate with Aria Operations](#integrate-with-aria-operations)
     - [Integrate with vCenter](#integrate-with-vcenter)
     - [Edit](#edit-1)
     - [Delete](#delete-1)
@@ -40,7 +40,7 @@
     - [Re-Active an Integration.](#re-active-an-integration)
     - [Validate data](#validate-data)
       - [vCenter](#vcenter)
-      - [vRealize Operation Manager](#vrealize-operation-manager)
+      - [Aria Operation Manager](#aria-operation-manager)
   - [View/Manage Server Mapping](#viewmanage-server-mapping)
     - [Create Mapping](#create-mapping-1)
     - [Mapping Server Asset](#mapping-server-asset)
@@ -232,7 +232,7 @@ Servers, PDU and switch connection information. Take host 10.192.76.21 for examp
 
 * This job will automatically be executed weekly. Administrator can trigger it manually anytime when required.
 
-* For example, if an ESXi host is managing by vCenter A and vROPs B. Both vCenter A and vROPs B registered to Flowgate. Flowgate will create two mapping items for the same ESXi host.  When the job runs it will merge the two items into one.
+* For example, if an ESXi host is managing by vCenter A and Aria Operations B. Both vCenter A and Aria Operations B registered to Flowgate. Flowgate will create two mapping items for the same ESXi host.  When the job runs it will merge the two items into one.
 
 ##### Aggregate PDUs and Server Mapping job
 
@@ -363,17 +363,17 @@ IT System admin can integrate their IT systems to Flowgate, after that Flowgate 
 
 <img alt="sddc_list" src="images/user guide/sddc_list.png">
 
-#### Integrate with vROPs 
+#### Integrate with Aria Operations
 
 1.	Navigate to IT Management -> VMware and click the “ADD NEW INTEGRATION” button
-2.	Select the server Type: vRealize Operation Manager.
+2.	Select the server Type: Aria Operation Manager.
 3.	Input the server IP (or FQDN)
 4.	Give a name for this Integration
 5.	Input server username and password.
-6.	For the VerifyCert option. If your vRealize Operation Manager use a self-signed certificate, you should choose “no” which means not verify the certificate. Otherwise Flowgate will not be able to connect to the server.
+6.	For the VerifyCert option. If your Aria Operation Manager use a self-signed certificate, you should choose “no” which means not verify the certificate. Otherwise Flowgate will not be able to connect to the server.
 7.	Click “SBUMIT” to finish the integration. 
 
-Repeat step 1-7 if you have more than one vRealize Operation Manager servers. 
+Repeat step 1-7 if you have more than one Aria Operation Manager servers. 
  
 <img alt="sddc_add" src="images/user guide/sddc_add.png">
 
@@ -421,7 +421,7 @@ After create an integration you can view host’s metadata in the Customer attri
  
  <img alt="vcenter" src="images/user guide/vcenter2.png">
 
-##### vRealize Operation Manager
+##### Aria Operation Manager
 User can view the environment metrics in the metric section. You can also view the host’s metadata in the property section. User can create alert base on the new metrics feed by Flowgate. 
  
 <img alt="vrops" src="images/user guide/vrop.png">
