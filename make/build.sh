@@ -127,13 +127,13 @@ saveDockerImages(){
 	mkdir flowgate
 	mkdir -p flowgate/docker-images-output
 	mkdir -p flowgate/maven-docker-build
-	mkdir -p flowgate/script/1.2.0
+	mkdir -p flowgate/script/1.2.1
 	cp flowgate_run.sh flowgate_init.sh conf.tar.gz flowgate
 	cp maven-docker-build/docker-compose.run.images.yml flowgate/maven-docker-build
 	cp docker-images-output/flowgate.tar flowgate/docker-images-output
 	chmod +x upgrade.sh
-	cp upgrade.sh flowgate/script/1.2.0
-	cp database/upgradeFrom1.1.2To1.2.sql flowgate/script/1.2.0
+	cp upgrade.sh flowgate/script/1.2.1
+	cp database/upgradeFrom1.1.2To1.2.sql flowgate/script/1.2.1
 	tar -cvzf $RELEASES_VERSION flowgate
 	rm flowgate -rf
 }
