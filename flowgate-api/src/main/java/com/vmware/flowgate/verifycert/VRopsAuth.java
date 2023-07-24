@@ -19,7 +19,7 @@ public class VRopsAuth {
    public VRopsAuth(SDDCSoftwareConfig config) {
       String url = String.format("https://%s/suite-api", config.getServerURL());
       this.client = ClientConfig.builder()
-            .useJson().serverUrl(url).verify(String.valueOf(config.isVerifyCert()))
+            .useJson().serverUrl(url).verify(String.valueOf(config.isVerifyCert())).useClusterTruststore(true)
             .ignoreHostName(!config.isVerifyCert()).useInternalApis(false).build().newClient();
       UsernamePassword up = new UsernamePassword(config.getUserName(), config.getPassword());
       AuthToken token = client.userAndAuthManagementClient().acquireToken(up);
