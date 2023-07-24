@@ -30,7 +30,7 @@ With Project Flowgate, we can fetch metadata and runtime metrics from various fa
 ## Get Start
 **DEMO**
 
-[Flowgate Management Pack for Aria Operations Demo](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate_and_vROPs_Management_Pack_Demo.mp4)
+[Flowgate Management Pack Demo](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate_and_vROPs_Management_Pack_Demo.mp4)
 
 [Demo Flowgate v1.1.2](https://github.com/yixingjia/wormhole/releases/download/1.0/Flowgate1.1.2Update.mp4) or [https://youtu.be/REbDV4Pu_-c](https://youtu.be/REbDV4Pu_-c)
 
