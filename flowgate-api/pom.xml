@@ -35,7 +35,7 @@
 		<guava.version>32.0.0-jre</guava.version>
 		<snakeyaml.version>2.0</snakeyaml.version>
 		<junit5.vintage.version>5.9.3</junit5.vintage.version>
-		<tomcat-embed-core.version>9.0.80</tomcat-embed-core.version>
+		<tomcat-embed-core.version>9.0.83</tomcat-embed-core.version>
 	</properties>
 
 	<dependencies>
