@@ -1,0 +1,631 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		292F8B75253F2CE2004DEE4A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292F8B74253F2CE2004DEE4A /* AppDelegate.swift */; };
+		292F8B77253F2CE2004DEE4A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292F8B76253F2CE2004DEE4A /* ViewController.swift */; };
+		292F8B7C253F2CE2004DEE4A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 292F8B7A253F2CE2004DEE4A /* Main.storyboard */; };
+		292F8B7E253F2CE7004DEE4A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 292F8B7D253F2CE7004DEE4A /* Assets.xcassets */; };
+		292F8B81253F2CE7004DEE4A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 292F8B7F253F2CE7004DEE4A /* LaunchScreen.storyboard */; };
+		292F8B8C253F2CE8004DEE4A /* FlowARTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292F8B8B253F2CE8004DEE4A /* FlowARTests.swift */; };
+		292F8B97253F2CE8004DEE4A /* FlowARUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 292F8B96253F2CE8004DEE4A /* FlowARUITests.swift */; };
+		2933C311255BA2E00040847E /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2933C310255BA2E00040847E /* StatusViewController.swift */; };
+		2933C316255BA4590040847E /* ViewController+ARSessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2933C315255BA4590040847E /* ViewController+ARSessionDelegate.swift */; };
+		2933C34F255BD8C40040847E /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 2933C34E255BD8C40040847E /* art.scnassets */; };
+		2962552D255C2E0D00D57CF8 /* RoundedButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2962552C255C2E0D00D57CF8 /* RoundedButton.swift */; };
+		29625532255C2F8800D57CF8 /* StartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29625531255C2F8800D57CF8 /* StartViewController.swift */; };
+		29E1906825581B16005D9D0C /* FlowgateClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E1906725581B16005D9D0C /* FlowgateClient.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		292F8B88253F2CE8004DEE4A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 292F8B69253F2CE2004DEE4A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 292F8B70253F2CE2004DEE4A;
+			remoteInfo = FlowAR;
+		};
+		292F8B93253F2CE8004DEE4A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 292F8B69253F2CE2004DEE4A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 292F8B70253F2CE2004DEE4A;
+			remoteInfo = FlowAR;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		292F8B71253F2CE2004DEE4A /* FlowAR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlowAR.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		292F8B74253F2CE2004DEE4A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		292F8B76253F2CE2004DEE4A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		292F8B7B253F2CE2004DEE4A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		292F8B7D253F2CE7004DEE4A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		292F8B80253F2CE7004DEE4A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		292F8B82253F2CE7004DEE4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		292F8B87253F2CE8004DEE4A /* FlowARTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlowARTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		292F8B8B253F2CE8004DEE4A /* FlowARTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowARTests.swift; sourceTree = "<group>"; };
+		292F8B8D253F2CE8004DEE4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		292F8B92253F2CE8004DEE4A /* FlowARUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlowARUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		292F8B96253F2CE8004DEE4A /* FlowARUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowARUITests.swift; sourceTree = "<group>"; };
+		292F8B98253F2CE8004DEE4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2933C310255BA2E00040847E /* StatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewController.swift; sourceTree = "<group>"; };
+		2933C315255BA4590040847E /* ViewController+ARSessionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+ARSessionDelegate.swift"; sourceTree = "<group>"; };
+		2933C34E255BD8C40040847E /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
+		2962552C255C2E0D00D57CF8 /* RoundedButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundedButton.swift; sourceTree = "<group>"; };
+		29625531255C2F8800D57CF8 /* StartViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartViewController.swift; sourceTree = "<group>"; };
+		29E1906725581B16005D9D0C /* FlowgateClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowgateClient.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		292F8B6E253F2CE2004DEE4A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		292F8B84253F2CE8004DEE4A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		292F8B8F253F2CE8004DEE4A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		292F8B68253F2CE2004DEE4A = {
+			isa = PBXGroup;
+			children = (
+				292F8B73253F2CE2004DEE4A /* FlowAR */,
+				292F8B8A253F2CE8004DEE4A /* FlowARTests */,
+				292F8B95253F2CE8004DEE4A /* FlowARUITests */,
+				292F8B72253F2CE2004DEE4A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		292F8B72253F2CE2004DEE4A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				292F8B71253F2CE2004DEE4A /* FlowAR.app */,
+				292F8B87253F2CE8004DEE4A /* FlowARTests.xctest */,
+				292F8B92253F2CE8004DEE4A /* FlowARUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		292F8B73253F2CE2004DEE4A /* FlowAR */ = {
+			isa = PBXGroup;
+			children = (
+				2933C34E255BD8C40040847E /* art.scnassets */,
+				2933C30F255BA2AC0040847E /* Additional View Controllers */,
+				292F8B74253F2CE2004DEE4A /* AppDelegate.swift */,
+				292F8B76253F2CE2004DEE4A /* ViewController.swift */,
+				292F8B7A253F2CE2004DEE4A /* Main.storyboard */,
+				2962552C255C2E0D00D57CF8 /* RoundedButton.swift */,
+				292F8B7D253F2CE7004DEE4A /* Assets.xcassets */,
+				292F8B7F253F2CE7004DEE4A /* LaunchScreen.storyboard */,
+				292F8B82253F2CE7004DEE4A /* Info.plist */,
+				29E1906725581B16005D9D0C /* FlowgateClient.swift */,
+				2933C315255BA4590040847E /* ViewController+ARSessionDelegate.swift */,
+				29625531255C2F8800D57CF8 /* StartViewController.swift */,
+			);
+			path = FlowAR;
+			sourceTree = "<group>";
+		};
+		292F8B8A253F2CE8004DEE4A /* FlowARTests */ = {
+			isa = PBXGroup;
+			children = (
+				292F8B8B253F2CE8004DEE4A /* FlowARTests.swift */,
+				292F8B8D253F2CE8004DEE4A /* Info.plist */,
+			);
+			path = FlowARTests;
+			sourceTree = "<group>";
+		};
+		292F8B95253F2CE8004DEE4A /* FlowARUITests */ = {
+			isa = PBXGroup;
+			children = (
+				292F8B96253F2CE8004DEE4A /* FlowARUITests.swift */,
+				292F8B98253F2CE8004DEE4A /* Info.plist */,
+			);
+			path = FlowARUITests;
+			sourceTree = "<group>";
+		};
+		2933C30F255BA2AC0040847E /* Additional View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				2933C310255BA2E00040847E /* StatusViewController.swift */,
+			);
+			path = "Additional View Controllers";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		292F8B70253F2CE2004DEE4A /* FlowAR */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 292F8B9B253F2CE8004DEE4A /* Build configuration list for PBXNativeTarget "FlowAR" */;
+			buildPhases = (
+				292F8B6D253F2CE2004DEE4A /* Sources */,
+				292F8B6E253F2CE2004DEE4A /* Frameworks */,
+				292F8B6F253F2CE2004DEE4A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FlowAR;
+			productName = FlowAR;
+			productReference = 292F8B71253F2CE2004DEE4A /* FlowAR.app */;
+			productType = "com.apple.product-type.application";
+		};
+		292F8B86253F2CE8004DEE4A /* FlowARTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 292F8B9E253F2CE8004DEE4A /* Build configuration list for PBXNativeTarget "FlowARTests" */;
+			buildPhases = (
+				292F8B83253F2CE8004DEE4A /* Sources */,
+				292F8B84253F2CE8004DEE4A /* Frameworks */,
+				292F8B85253F2CE8004DEE4A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				292F8B89253F2CE8004DEE4A /* PBXTargetDependency */,
+			);
+			name = FlowARTests;
+			productName = FlowARTests;
+			productReference = 292F8B87253F2CE8004DEE4A /* FlowARTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		292F8B91253F2CE8004DEE4A /* FlowARUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 292F8BA1253F2CE8004DEE4A /* Build configuration list for PBXNativeTarget "FlowARUITests" */;
+			buildPhases = (
+				292F8B8E253F2CE8004DEE4A /* Sources */,
+				292F8B8F253F2CE8004DEE4A /* Frameworks */,
+				292F8B90253F2CE8004DEE4A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				292F8B94253F2CE8004DEE4A /* PBXTargetDependency */,
+			);
+			name = FlowARUITests;
+			productName = FlowARUITests;
+			productReference = 292F8B92253F2CE8004DEE4A /* FlowARUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		292F8B69253F2CE2004DEE4A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1120;
+				LastUpgradeCheck = 1220;
+				ORGANIZATIONNAME = "周舒意";
+				TargetAttributes = {
+					292F8B70253F2CE2004DEE4A = {
+						CreatedOnToolsVersion = 11.2.1;
+					};
+					292F8B86253F2CE8004DEE4A = {
+						CreatedOnToolsVersion = 11.2.1;
+						TestTargetID = 292F8B70253F2CE2004DEE4A;
+					};
+					292F8B91253F2CE8004DEE4A = {
+						CreatedOnToolsVersion = 11.2.1;
+						TestTargetID = 292F8B70253F2CE2004DEE4A;
+					};
+				};
+			};
+			buildConfigurationList = 292F8B6C253F2CE2004DEE4A /* Build configuration list for PBXProject "FlowAR" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 292F8B68253F2CE2004DEE4A;
+			productRefGroup = 292F8B72253F2CE2004DEE4A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				292F8B70253F2CE2004DEE4A /* FlowAR */,
+				292F8B86253F2CE8004DEE4A /* FlowARTests */,
+				292F8B91253F2CE8004DEE4A /* FlowARUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		292F8B6F253F2CE2004DEE4A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				292F8B81253F2CE7004DEE4A /* LaunchScreen.storyboard in Resources */,
+				2933C34F255BD8C40040847E /* art.scnassets in Resources */,
+				292F8B7E253F2CE7004DEE4A /* Assets.xcassets in Resources */,
+				292F8B7C253F2CE2004DEE4A /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		292F8B85253F2CE8004DEE4A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		292F8B90253F2CE8004DEE4A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		292F8B6D253F2CE2004DEE4A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				292F8B77253F2CE2004DEE4A /* ViewController.swift in Sources */,
+				29625532255C2F8800D57CF8 /* StartViewController.swift in Sources */,
+				2962552D255C2E0D00D57CF8 /* RoundedButton.swift in Sources */,
+				292F8B75253F2CE2004DEE4A /* AppDelegate.swift in Sources */,
+				2933C316255BA4590040847E /* ViewController+ARSessionDelegate.swift in Sources */,
+				29E1906825581B16005D9D0C /* FlowgateClient.swift in Sources */,
+				2933C311255BA2E00040847E /* StatusViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		292F8B83253F2CE8004DEE4A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				292F8B8C253F2CE8004DEE4A /* FlowARTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		292F8B8E253F2CE8004DEE4A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				292F8B97253F2CE8004DEE4A /* FlowARUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		292F8B89253F2CE8004DEE4A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 292F8B70253F2CE2004DEE4A /* FlowAR */;
+			targetProxy = 292F8B88253F2CE8004DEE4A /* PBXContainerItemProxy */;
+		};
+		292F8B94253F2CE8004DEE4A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 292F8B70253F2CE2004DEE4A /* FlowAR */;
+			targetProxy = 292F8B93253F2CE8004DEE4A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		292F8B7A253F2CE2004DEE4A /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				292F8B7B253F2CE2004DEE4A /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		292F8B7F253F2CE7004DEE4A /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				292F8B80253F2CE7004DEE4A /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		292F8B99253F2CE8004DEE4A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		292F8B9A253F2CE8004DEE4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		292F8B9C253F2CE8004DEE4A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = G4NT6KNP66;
+				INFOPLIST_FILE = FlowAR/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.icode.FlowARLiying;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		292F8B9D253F2CE8004DEE4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = G4NT6KNP66;
+				INFOPLIST_FILE = FlowAR/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.icode.FlowARLiying;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		292F8B9F253F2CE8004DEE4A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2MW7AVXSBR;
+				INFOPLIST_FILE = FlowARTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.icode.FlowARTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FlowAR.app/FlowAR";
+			};
+			name = Debug;
+		};
+		292F8BA0253F2CE8004DEE4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2MW7AVXSBR;
+				INFOPLIST_FILE = FlowARTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.icode.FlowARTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FlowAR.app/FlowAR";
+			};
+			name = Release;
+		};
+		292F8BA2253F2CE8004DEE4A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2MW7AVXSBR;
+				INFOPLIST_FILE = FlowARUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.icode.FlowARUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = FlowAR;
+			};
+			name = Debug;
+		};
+		292F8BA3253F2CE8004DEE4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2MW7AVXSBR;
+				INFOPLIST_FILE = FlowARUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.icode.FlowARUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = FlowAR;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		292F8B6C253F2CE2004DEE4A /* Build configuration list for PBXProject "FlowAR" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				292F8B99253F2CE8004DEE4A /* Debug */,
+				292F8B9A253F2CE8004DEE4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		292F8B9B253F2CE8004DEE4A /* Build configuration list for PBXNativeTarget "FlowAR" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				292F8B9C253F2CE8004DEE4A /* Debug */,
+				292F8B9D253F2CE8004DEE4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		292F8B9E253F2CE8004DEE4A /* Build configuration list for PBXNativeTarget "FlowARTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				292F8B9F253F2CE8004DEE4A /* Debug */,
+				292F8BA0253F2CE8004DEE4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		292F8BA1253F2CE8004DEE4A /* Build configuration list for PBXNativeTarget "FlowARUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				292F8BA2253F2CE8004DEE4A /* Debug */,
+				292F8BA3253F2CE8004DEE4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 292F8B69253F2CE2004DEE4A /* Project object */;
+}
