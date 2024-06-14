@@ -18,6 +18,7 @@ public class SystemSummary implements Serializable {
    private int cabinetNum = 0;
    private int switchNum = 0;
    private int sensorNum = 0;
+   private int chassisNum;
 
    private int humiditySensorNum = 0;
    private int temperatureSensorNum = 0;
@@ -201,6 +202,14 @@ public class SystemSummary implements Serializable {
 
    public void setVroSummary(List<VroSummary> vroSummary) {
       this.vroSummary = vroSummary;
+   }
+
+   public int getChassisNum() {
+      return chassisNum;
+   }
+
+   public void setChassisNum(int chassisNum) {
+      this.chassisNum = chassisNum;
    }
 
 
